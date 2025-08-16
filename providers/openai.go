@@ -11,8 +11,6 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/crush/internal/ai"
-	"github.com/charmbracelet/crush/internal/config"
-	"github.com/charmbracelet/crush/internal/env"
 	"github.com/google/uuid"
 	"github.com/openai/openai-go/v2"
 	"github.com/openai/openai-go/v2/option"
@@ -59,7 +57,6 @@ type openAIProviderOptions struct {
 	name         string
 	headers      map[string]string
 	client       option.HTTPClient
-	resolver     config.VariableResolver
 }
 
 type OpenAIOption = func(*openAIProviderOptions)
@@ -72,31 +69,18 @@ func NewOpenAIProvider(opts ...OpenAIOption) ai.Provider {
 		o(&options)
 	}
 
-	if options.resolver == nil {
-		// use the default resolver
-		options.resolver = config.NewShellVariableResolver(env.New())
-	}
-	options.apiKey, _ = options.resolver.ResolveValue(options.apiKey)
-	options.baseURL, _ = options.resolver.ResolveValue(options.baseURL)
 	if options.baseURL == "" {
 		options.baseURL = "https://api.openai.com/v1"
 	}
 
-	options.name, _ = options.resolver.ResolveValue(options.name)
 	if options.name == "" {
 		options.name = "openai"
 	}
 
-	for k, v := range options.headers {
-		options.headers[k], _ = options.resolver.ResolveValue(v)
-	}
-
-	options.organization, _ = options.resolver.ResolveValue(options.organization)
 	if options.organization != "" {
 		options.headers["OpenAI-Organization"] = options.organization
 	}
 
-	options.project, _ = options.resolver.ResolveValue(options.project)
 	if options.project != "" {
 		options.headers["OpenAI-Project"] = options.project
 	}
@@ -145,12 +129,6 @@ func WithOpenAIHeaders(headers map[string]string) OpenAIOption {
 func WithOpenAIHttpClient(client option.HTTPClient) OpenAIOption {
 	return func(o *openAIProviderOptions) {
 		o.client = client
-	}
-}
-
-func WithOpenAIVariableResolver(resolver config.VariableResolver) OpenAIOption {
-	return func(o *openAIProviderOptions) {
-		o.resolver = resolver
 	}
 }
 

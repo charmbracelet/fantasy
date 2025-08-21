@@ -394,6 +394,30 @@ func (o openAILanguageModel) prepareParams(call ai.Call) (*openai.ChatCompletion
 	return params, warnings, nil
 }
 
+func (o openAILanguageModel) handleError(err error) error {
+	var apiErr *openai.Error
+	if errors.As(err, &apiErr) {
+		requestDump := apiErr.DumpRequest(true)
+		responseDump := apiErr.DumpResponse(true)
+		headers := map[string]string{}
+		for k, h := range apiErr.Response.Header {
+			v := h[len(h)-1]
+			headers[strings.ToLower(k)] = v
+		}
+		return ai.NewAPICallError(
+			apiErr.Message,
+			apiErr.Request.URL.String(),
+			string(requestDump),
+			apiErr.StatusCode,
+			headers,
+			string(responseDump),
+			apiErr,
+			false,
+		)
+	}
+	return err
+}
+
 // Generate implements ai.LanguageModel.
 func (o openAILanguageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response, error) {
 	params, warnings, err := o.prepareParams(call)
@@ -402,7 +426,7 @@ func (o openAILanguageModel) Generate(ctx context.Context, call ai.Call) (*ai.Re
 	}
 	response, err := o.client.Chat.Completions.New(ctx, *params)
 	if err != nil {
-		return nil, err
+		return nil, o.handleError(err)
 	}
 
 	if len(response.Choices) == 0 {
@@ -626,7 +650,7 @@ func (o openAILanguageModel) Stream(ctx context.Context, call ai.Call) (ai.Strea
 							if err != nil {
 								yield(ai.StreamPart{
 									Type:  ai.StreamPartTypeError,
-									Error: stream.Err(),
+									Error: o.handleError(stream.Err()),
 								})
 								return
 							}
@@ -1097,7 +1121,7 @@ func toOpenAIPrompt(prompt ai.Prompt) ([]openai.ChatCompletionMessageParamUnion,
 						})
 						continue
 					}
-					messages = append(messages, openai.ToolMessage(output.Error, toolResultPart.ToolCallID))
+					messages = append(messages, openai.ToolMessage(output.Error.Error(), toolResultPart.ToolCallID))
 				}
 			}
 		}

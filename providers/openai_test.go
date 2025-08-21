@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -496,7 +497,7 @@ func TestToOpenAIPrompt_ToolCalls(t *testing.T) {
 					ai.ToolResultPart{
 						ToolCallID: "error-tool",
 						Output: ai.ToolResultOutputContentError{
-							Error: "Something went wrong",
+							Error: errors.New("Something went wrong"),
 						},
 					},
 				},

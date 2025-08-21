@@ -46,30 +46,28 @@ func IsAIError(err error) bool {
 // APICallError represents an error from an API call.
 type APICallError struct {
 	*AIError
-	URL               string
-	RequestBodyValues any
-	StatusCode        int
-	ResponseHeaders   map[string]string
-	ResponseBody      string
-	IsRetryable       bool
-	Data              any
+	URL             string
+	RequestDump     string
+	StatusCode      int
+	ResponseHeaders map[string]string
+	ResponseDump    string
+	IsRetryable     bool
 }
 
 // NewAPICallError creates a new API call error.
-func NewAPICallError(message, url string, requestBodyValues any, statusCode int, responseHeaders map[string]string, responseBody string, cause error, isRetryable bool, data any) *APICallError {
+func NewAPICallError(message, url string, requestDump string, statusCode int, responseHeaders map[string]string, responseDump string, cause error, isRetryable bool) *APICallError {
 	if !isRetryable && statusCode != 0 {
 		isRetryable = statusCode == 408 || statusCode == 409 || statusCode == 429 || statusCode >= 500
 	}
 
 	return &APICallError{
-		AIError:           NewAIError("AI_APICallError", message, cause),
-		URL:               url,
-		RequestBodyValues: requestBodyValues,
-		StatusCode:        statusCode,
-		ResponseHeaders:   responseHeaders,
-		ResponseBody:      responseBody,
-		IsRetryable:       isRetryable,
-		Data:              data,
+		AIError:         NewAIError("AI_APICallError", message, cause),
+		URL:             url,
+		RequestDump:     requestDump,
+		StatusCode:      statusCode,
+		ResponseHeaders: responseHeaders,
+		ResponseDump:    responseDump,
+		IsRetryable:     isRetryable,
 	}
 }
 

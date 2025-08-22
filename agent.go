@@ -245,7 +245,13 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 		responseMessages = append(responseMessages, currentStepMessages...)
 
 		stepResult := StepResult{
-			Response: *result,
+			Response: Response{
+				Content:          stepContent,
+				FinishReason:     result.FinishReason,
+				Usage:            result.Usage,
+				Warnings:         result.Warnings,
+				ProviderMetadata: result.ProviderMetadata,
+			},
 			Messages: currentStepMessages,
 		}
 		steps = append(steps, stepResult)
@@ -255,7 +261,7 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 
 		shouldStop := isStopConditionMet(opts.StopWhen, steps)
 
-		if shouldStop || err != nil || len(stepToolCalls) == 0 {
+		if shouldStop || err != nil || len(stepToolCalls) == 0 || result.FinishReason != FinishReasonToolCalls {
 			break
 		}
 	}
@@ -269,7 +275,7 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 		totalUsage.ReasoningTokens += usage.ReasoningTokens
 		totalUsage.CacheCreationTokens += usage.CacheCreationTokens
 		totalUsage.CacheReadTokens += usage.CacheReadTokens
-		totalUsage.TotalTokens += totalUsage.TotalTokens
+		totalUsage.TotalTokens += usage.TotalTokens
 	}
 
 	agentResult := &AgentResult{

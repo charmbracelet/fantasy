@@ -8,86 +8,7 @@ import (
 
 	"github.com/charmbracelet/crush/internal/ai"
 	"github.com/charmbracelet/crush/internal/ai/providers"
-	"github.com/charmbracelet/crush/internal/llm/tools"
 )
-
-// WeatherTool is a simple tool that simulates weather lookup
-type WeatherTool struct{}
-
-func (w *WeatherTool) Info() tools.ToolInfo {
-	return tools.ToolInfo{
-		Name:        "get_weather",
-		Description: "Get the current weather for a specific location",
-		Parameters: map[string]any{
-			"location": map[string]any{
-				"type":        "string",
-				"description": "The city and country, e.g. 'London, UK'",
-			},
-			"unit": map[string]any{
-				"type":        "string",
-				"description": "Temperature unit (celsius or fahrenheit)",
-				"enum":        []string{"celsius", "fahrenheit"},
-				"default":     "celsius",
-			},
-		},
-		Required: []string{"location"},
-	}
-}
-
-func (w *WeatherTool) Run(ctx context.Context, params tools.ToolCall) (tools.ToolResponse, error) {
-	// Simulate weather lookup with some fake data
-	location := "Unknown"
-	if strings.Contains(params.Input, "pristina") || strings.Contains(params.Input, "Pristina") {
-		location = "Pristina, Kosovo"
-	} else if strings.Contains(params.Input, "london") || strings.Contains(params.Input, "London") {
-		location = "London, UK"
-	} else if strings.Contains(params.Input, "new york") || strings.Contains(params.Input, "New York") {
-		location = "New York, USA"
-	}
-
-	unit := "celsius"
-	if strings.Contains(params.Input, "fahrenheit") {
-		unit = "fahrenheit"
-	}
-
-	var temp string
-	if unit == "fahrenheit" {
-		temp = "72°F"
-	} else {
-		temp = "22°C"
-	}
-
-	weather := fmt.Sprintf("The current weather in %s is %s with partly cloudy skies and light winds.", location, temp)
-	return tools.NewTextResponse(weather), nil
-}
-
-// CalculatorTool demonstrates a second tool for multi-tool scenarios
-type CalculatorTool struct{}
-
-func (c *CalculatorTool) Info() tools.ToolInfo {
-	return tools.ToolInfo{
-		Name:        "calculate",
-		Description: "Perform basic mathematical calculations",
-		Parameters: map[string]any{
-			"expression": map[string]any{
-				"type":        "string",
-				"description": "Mathematical expression to evaluate (e.g., '2 + 2', '10 * 5')",
-			},
-		},
-		Required: []string{"expression"},
-	}
-}
-
-func (c *CalculatorTool) Run(ctx context.Context, params tools.ToolCall) (tools.ToolResponse, error) {
-	// Simple calculator simulation
-	expr := strings.ReplaceAll(params.Input, "\"", "")
-	if strings.Contains(expr, "2 + 2") || strings.Contains(expr, "2+2") {
-		return tools.NewTextResponse("2 + 2 = 4"), nil
-	} else if strings.Contains(expr, "10 * 5") || strings.Contains(expr, "10*5") {
-		return tools.NewTextResponse("10 * 5 = 50"), nil
-	}
-	return tools.NewTextResponse("I can calculate simple expressions like '2 + 2' or '10 * 5'"), nil
-}
 
 func main() {
 	// Check for API key
@@ -108,11 +29,80 @@ func main() {
 	)
 	model := provider.LanguageModel("gpt-4o-mini") // Using mini for faster/cheaper responses
 
+	// Define input types for type-safe tools
+	type WeatherInput struct {
+		Location string `json:"location" description:"The city and country, e.g. 'London, UK'"`
+		Unit     string `json:"unit,omitempty" enum:"celsius,fahrenheit" description:"Temperature unit (celsius or fahrenheit)"`
+	}
+
+	type CalculatorInput struct {
+		Expression string `json:"expression" description:"Mathematical expression to evaluate (e.g., '2 + 2', '10 * 5')"`
+	}
+
+	// Create weather tool using the new type-safe API
+	weatherTool := ai.NewTypedToolFunc(
+		"get_weather",
+		"Get the current weather for a specific location",
+		func(ctx context.Context, input WeatherInput, _ ai.ToolCall) (ai.ToolResponse, error) {
+			// Simulate weather lookup with some fake data
+			location := input.Location
+			if location == "" {
+				location = "Unknown"
+			}
+
+			// Default to celsius if not specified
+			unit := input.Unit
+			if unit == "" {
+				unit = "celsius"
+			}
+
+			// Simulate different temperatures for different cities
+			var temp string
+			if strings.Contains(strings.ToLower(location), "pristina") {
+				temp = "15°C"
+				if unit == "fahrenheit" {
+					temp = "59°F"
+				}
+			} else if strings.Contains(strings.ToLower(location), "london") {
+				temp = "12°C"
+				if unit == "fahrenheit" {
+					temp = "54°F"
+				}
+			} else {
+				temp = "22°C"
+				if unit == "fahrenheit" {
+					temp = "72°F"
+				}
+			}
+
+			weather := fmt.Sprintf("The current weather in %s is %s with partly cloudy skies and light winds.", location, temp)
+			return ai.NewTextResponse(weather), nil
+		},
+	)
+
+	// Create calculator tool using the new type-safe API
+	calculatorTool := ai.NewTypedToolFunc(
+		"calculate",
+		"Perform basic mathematical calculations",
+		func(ctx context.Context, input CalculatorInput, _ ai.ToolCall) (ai.ToolResponse, error) {
+			// Simple calculator simulation
+			expr := strings.TrimSpace(input.Expression)
+			if strings.Contains(expr, "2 + 2") || strings.Contains(expr, "2+2") {
+				return ai.NewTextResponse("2 + 2 = 4"), nil
+			} else if strings.Contains(expr, "10 * 5") || strings.Contains(expr, "10*5") {
+				return ai.NewTextResponse("10 * 5 = 50"), nil
+			} else if strings.Contains(expr, "15 + 27") || strings.Contains(expr, "15+27") {
+				return ai.NewTextResponse("15 + 27 = 42"), nil
+			}
+			return ai.NewTextResponse("I can calculate simple expressions like '2 + 2', '10 * 5', or '15 + 27'"), nil
+		},
+	)
+
 	// Create agent with tools
 	agent := ai.NewAgent(
 		model,
 		ai.WithSystemPrompt("You are a helpful assistant that can check weather and do calculations. Be concise and friendly."),
-		ai.WithTools(&WeatherTool{}, &CalculatorTool{}),
+		ai.WithTools(weatherTool, calculatorTool),
 	)
 
 	ctx := context.Background()
@@ -224,11 +214,11 @@ func main() {
 	fmt.Println("📋 Final Summary")
 	fmt.Println("================")
 	fmt.Printf("Steps executed: %d\n", len(result.Steps))
-	fmt.Printf("Total tokens used: %d (input: %d, output: %d)\n", 
-		result.TotalUsage.TotalTokens, 
-		result.TotalUsage.InputTokens, 
+	fmt.Printf("Total tokens used: %d (input: %d, output: %d)\n",
+		result.TotalUsage.TotalTokens,
+		result.TotalUsage.InputTokens,
 		result.TotalUsage.OutputTokens)
-	
+
 	if result.TotalUsage.ReasoningTokens > 0 {
 		fmt.Printf("Reasoning tokens: %d\n", result.TotalUsage.ReasoningTokens)
 	}
@@ -243,13 +233,13 @@ func main() {
 		fmt.Printf("Step %d:\n", i+1)
 		fmt.Printf("  Finish reason: %s\n", step.FinishReason)
 		fmt.Printf("  Content types: ")
-		
+
 		var contentTypes []string
 		for _, content := range step.Content {
 			contentTypes = append(contentTypes, string(content.GetType()))
 		}
 		fmt.Printf("%s\n", strings.Join(contentTypes, ", "))
-		
+
 		// Show tool calls and results
 		toolCalls := step.Content.ToolCalls()
 		if len(toolCalls) > 0 {
@@ -260,15 +250,16 @@ func main() {
 			}
 			fmt.Printf("%s\n", strings.Join(toolNames, ", "))
 		}
-		
+
 		toolResults := step.Content.ToolResults()
 		if len(toolResults) > 0 {
 			fmt.Printf("  Tool results: %d\n", len(toolResults))
 		}
-		
+
 		fmt.Printf("  Tokens: %d\n", step.Usage.TotalTokens)
 		fmt.Println()
 	}
 
 	fmt.Println("✨ Example completed successfully!")
 }
+

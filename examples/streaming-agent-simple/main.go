@@ -7,29 +7,7 @@ import (
 
 	"github.com/charmbracelet/crush/internal/ai"
 	"github.com/charmbracelet/crush/internal/ai/providers"
-	"github.com/charmbracelet/crush/internal/llm/tools"
 )
-
-// Simple echo tool for demonstration
-type EchoTool struct{}
-
-func (e *EchoTool) Info() tools.ToolInfo {
-	return tools.ToolInfo{
-		Name:        "echo",
-		Description: "Echo back the provided message",
-		Parameters: map[string]any{
-			"message": map[string]any{
-				"type":        "string",
-				"description": "The message to echo back",
-			},
-		},
-		Required: []string{"message"},
-	}
-}
-
-func (e *EchoTool) Run(ctx context.Context, params tools.ToolCall) (tools.ToolResponse, error) {
-	return tools.NewTextResponse("Echo: " + params.Input), nil
-}
 
 func main() {
 	// Check for API key
@@ -45,11 +23,24 @@ func main() {
 	)
 	model := provider.LanguageModel("gpt-4o-mini")
 
+	// Create echo tool using the new type-safe API
+	type EchoInput struct {
+		Message string `json:"message" description:"The message to echo back"`
+	}
+
+	echoTool := ai.NewTypedToolFunc(
+		"echo",
+		"Echo back the provided message",
+		func(ctx context.Context, input EchoInput, _ ai.ToolCall) (ai.ToolResponse, error) {
+			return ai.NewTextResponse("Echo: " + input.Message), nil
+		},
+	)
+
 	// Create streaming agent
 	agent := ai.NewAgent(
 		model,
 		ai.WithSystemPrompt("You are a helpful assistant."),
-		ai.WithTools(&EchoTool{}),
+		ai.WithTools(echoTool),
 	)
 
 	ctx := context.Background()
@@ -61,22 +52,22 @@ func main() {
 	// Basic streaming with key callbacks
 	streamCall := ai.AgentStreamCall{
 		Prompt: "Please echo back 'Hello, streaming world!'",
-		
+
 		// Show real-time text as it streams
 		OnTextDelta: func(id, text string) {
 			fmt.Print(text)
 		},
-		
+
 		// Show when tools are called
 		OnToolCall: func(toolCall ai.ToolCallContent) {
 			fmt.Printf("\n[Tool: %s called]\n", toolCall.ToolName)
 		},
-		
+
 		// Show tool results
 		OnToolResult: func(result ai.ToolResultContent) {
 			fmt.Printf("[Tool result received]\n")
 		},
-		
+
 		// Show when each step completes
 		OnStepFinish: func(step ai.StepResult) {
 			fmt.Printf("\n[Step completed: %s]\n", step.FinishReason)
@@ -93,3 +84,4 @@ func main() {
 	fmt.Printf("\n\nFinal result: %s\n", result.Response.Content.Text())
 	fmt.Printf("Steps: %d, Total tokens: %d\n", len(result.Steps), result.TotalUsage.TotalTokens)
 }
+

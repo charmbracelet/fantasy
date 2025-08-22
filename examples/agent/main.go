@@ -7,38 +7,7 @@ import (
 
 	"github.com/charmbracelet/crush/internal/ai"
 	"github.com/charmbracelet/crush/internal/ai/providers"
-	"github.com/charmbracelet/crush/internal/llm/tools"
 )
-
-type weatherTool struct{}
-
-// Info implements tools.BaseTool.
-func (w *weatherTool) Info() tools.ToolInfo {
-	return tools.ToolInfo{
-		Name: "weather",
-		Parameters: map[string]any{
-			"location": map[string]string{
-				"type":        "string",
-				"description": "the city",
-			},
-		},
-		Required: []string{"location"},
-	}
-}
-
-// Name implements tools.BaseTool.
-func (w *weatherTool) Name() string {
-	return "weather"
-}
-
-// Run implements tools.BaseTool.
-func (w *weatherTool) Run(ctx context.Context, params tools.ToolCall) (tools.ToolResponse, error) {
-	return tools.NewTextResponse("40 C"), nil
-}
-
-func newWeatherTool() tools.BaseTool {
-	return &weatherTool{}
-}
 
 func main() {
 	provider := providers.NewOpenAIProvider(
@@ -46,10 +15,23 @@ func main() {
 	)
 	model := provider.LanguageModel("gpt-4o")
 
+	// Create weather tool using the new type-safe API
+	type WeatherInput struct {
+		Location string `json:"location" description:"the city"`
+	}
+
+	weatherTool := ai.NewTypedToolFunc(
+		"weather",
+		"Get weather information for a location",
+		func(ctx context.Context, input WeatherInput, _ ai.ToolCall) (ai.ToolResponse, error) {
+			return ai.NewTextResponse("40 C"), nil
+		},
+	)
+
 	agent := ai.NewAgent(
 		model,
 		ai.WithSystemPrompt("You are a helpful assistant"),
-		ai.WithTools(newWeatherTool()),
+		ai.WithTools(weatherTool),
 	)
 
 	result, _ := agent.Generate(context.Background(), ai.AgentCall{

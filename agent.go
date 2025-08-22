@@ -157,6 +157,53 @@ type AgentCall struct {
 	OnStepFinished OnStepFinishedFunction
 }
 
+type AgentStreamCall struct {
+	Prompt           string     `json:"prompt"`
+	Files            []FilePart `json:"files"`
+	Messages         []Message  `json:"messages"`
+	MaxOutputTokens  *int64
+	Temperature      *float64 `json:"temperature"`
+	TopP             *float64 `json:"top_p"`
+	TopK             *int64   `json:"top_k"`
+	PresencePenalty  *float64 `json:"presence_penalty"`
+	FrequencyPenalty *float64 `json:"frequency_penalty"`
+	ActiveTools      []string `json:"active_tools"`
+	Headers          map[string]string
+	ProviderOptions  ProviderOptions
+	OnRetry          OnRetryCallback
+	MaxRetries       *int
+
+	StopWhen       []StopCondition
+	PrepareStep    PrepareStepFunction
+	RepairToolCall RepairToolCallFunction
+
+	// Agent-level callbacks
+	OnAgentStart  func()                      // Called when agent starts
+	OnAgentFinish func(result *AgentResult)   // Called when agent finishes
+	OnStepStart   func(stepNumber int)        // Called when a step starts
+	OnStepFinish  func(stepResult StepResult) // Called when a step finishes
+	OnFinish      func(result *AgentResult)   // Called when entire agent completes
+	OnError       func(error)                 // Called when an error occurs
+
+	// Stream part callbacks - called for each corresponding stream part type
+	OnChunk          func(StreamPart)                                                               // Called for each stream part (catch-all)
+	OnWarnings       func(warnings []CallWarning)                                                   // Called for warnings
+	OnTextStart      func(id string)                                                                // Called when text starts
+	OnTextDelta      func(id, text string)                                                          // Called for text deltas
+	OnTextEnd        func(id string)                                                                // Called when text ends
+	OnReasoningStart func(id string)                                                                // Called when reasoning starts
+	OnReasoningDelta func(id, text string)                                                          // Called for reasoning deltas
+	OnReasoningEnd   func(id string)                                                                // Called when reasoning ends
+	OnToolInputStart func(id, toolName string)                                                      // Called when tool input starts
+	OnToolInputDelta func(id, delta string)                                                         // Called for tool input deltas
+	OnToolInputEnd   func(id string)                                                                // Called when tool input ends
+	OnToolCall       func(toolCall ToolCallContent)                                                 // Called when tool call is complete
+	OnToolResult     func(result ToolResultContent)                                                 // Called when tool execution completes
+	OnSource         func(source SourceContent)                                                     // Called for source references
+	OnStreamFinish   func(usage Usage, finishReason FinishReason, providerMetadata ProviderOptions) // Called when stream finishes
+	OnStreamError    func(error)                                                                    // Called when stream error occurs
+}
+
 type AgentResult struct {
 	Steps []StepResult
 	// Final response
@@ -166,7 +213,7 @@ type AgentResult struct {
 
 type Agent interface {
 	Generate(context.Context, AgentCall) (*AgentResult, error)
-	Stream(context.Context, AgentCall) (StreamResponse, error)
+	Stream(context.Context, AgentStreamCall) (*AgentResult, error)
 }
 
 type agentOption = func(*AgentSettings)
@@ -343,7 +390,7 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 			}
 		}
 
-		toolResults, err := a.executeTools(ctx, a.settings.tools, stepToolCalls)
+		toolResults, err := a.executeTools(ctx, a.settings.tools, stepToolCalls, nil)
 
 		// Build step content with validated tool calls and tool results
 		stepContent := []Content{}
@@ -501,7 +548,7 @@ func toResponseMessages(content []Content) []Message {
 	return messages
 }
 
-func (a *agent) executeTools(ctx context.Context, allTools []tools.BaseTool, toolCalls []ToolCallContent) ([]ToolResultContent, error) {
+func (a *agent) executeTools(ctx context.Context, allTools []tools.BaseTool, toolCalls []ToolCallContent, toolResultCallback func(result ToolResultContent)) ([]ToolResultContent, error) {
 	if len(toolCalls) == 0 {
 		return nil, nil
 	}
@@ -532,6 +579,10 @@ func (a *agent) executeTools(ctx context.Context, allTools []tools.BaseTool, too
 					},
 					ProviderExecuted: false,
 				}
+				if toolResultCallback != nil {
+					toolResultCallback(results[index])
+				}
+
 				return
 			}
 
@@ -544,6 +595,10 @@ func (a *agent) executeTools(ctx context.Context, allTools []tools.BaseTool, too
 						Error: errors.New("Error: Tool not found: " + call.ToolName),
 					},
 					ProviderExecuted: false,
+				}
+
+				if toolResultCallback != nil {
+					toolResultCallback(results[index])
 				}
 				return
 			}
@@ -563,6 +618,9 @@ func (a *agent) executeTools(ctx context.Context, allTools []tools.BaseTool, too
 					},
 					ProviderExecuted: false,
 				}
+				if toolResultCallback != nil {
+					toolResultCallback(results[index])
+				}
 				toolExecutionError = err
 				return
 			}
@@ -576,6 +634,10 @@ func (a *agent) executeTools(ctx context.Context, allTools []tools.BaseTool, too
 					},
 					ProviderExecuted: false,
 				}
+
+				if toolResultCallback != nil {
+					toolResultCallback(results[index])
+				}
 			} else {
 				results[index] = ToolResultContent{
 					ToolCallID: call.ToolCallID,
@@ -584,6 +646,9 @@ func (a *agent) executeTools(ctx context.Context, allTools []tools.BaseTool, too
 						Text: result.Content,
 					},
 					ProviderExecuted: false,
+				}
+				if toolResultCallback != nil {
+					toolResultCallback(results[index])
 				}
 			}
 		}(i, toolCall)
@@ -596,9 +661,164 @@ func (a *agent) executeTools(ctx context.Context, allTools []tools.BaseTool, too
 }
 
 // Stream implements Agent.
-func (a *agent) Stream(ctx context.Context, opts AgentCall) (StreamResponse, error) {
-	// TODO: implement the agentic stuff
-	panic("not implemented")
+func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult, error) {
+	// Convert AgentStreamCall to AgentCall for preparation
+	call := AgentCall{
+		Prompt:           opts.Prompt,
+		Files:            opts.Files,
+		Messages:         opts.Messages,
+		MaxOutputTokens:  opts.MaxOutputTokens,
+		Temperature:      opts.Temperature,
+		TopP:             opts.TopP,
+		TopK:             opts.TopK,
+		PresencePenalty:  opts.PresencePenalty,
+		FrequencyPenalty: opts.FrequencyPenalty,
+		ActiveTools:      opts.ActiveTools,
+		Headers:          opts.Headers,
+		ProviderOptions:  opts.ProviderOptions,
+		MaxRetries:       opts.MaxRetries,
+		StopWhen:         opts.StopWhen,
+		PrepareStep:      opts.PrepareStep,
+		RepairToolCall:   opts.RepairToolCall,
+	}
+
+	call = a.prepareCall(call)
+
+	initialPrompt, err := a.createPrompt(a.settings.systemPrompt, call.Prompt, call.Messages, call.Files...)
+	if err != nil {
+		return nil, err
+	}
+
+	var responseMessages []Message
+	var steps []StepResult
+	var totalUsage Usage
+
+	// Start agent stream
+	if opts.OnAgentStart != nil {
+		opts.OnAgentStart()
+	}
+
+	for stepNumber := 0; ; stepNumber++ {
+		stepInputMessages := append(initialPrompt, responseMessages...)
+		stepModel := a.settings.model
+		stepSystemPrompt := a.settings.systemPrompt
+		stepActiveTools := call.ActiveTools
+		stepToolChoice := ToolChoiceAuto
+		disableAllTools := false
+
+		// Apply step preparation if provided
+		if call.PrepareStep != nil {
+			prepared := call.PrepareStep(PrepareStepFunctionOptions{
+				Model:      stepModel,
+				Steps:      steps,
+				StepNumber: stepNumber,
+				Messages:   stepInputMessages,
+			})
+
+			if prepared.Messages != nil {
+				stepInputMessages = prepared.Messages
+			}
+			if prepared.Model != nil {
+				stepModel = prepared.Model
+			}
+			if prepared.System != nil {
+				stepSystemPrompt = *prepared.System
+			}
+			if prepared.ToolChoice != nil {
+				stepToolChoice = *prepared.ToolChoice
+			}
+			if len(prepared.ActiveTools) > 0 {
+				stepActiveTools = prepared.ActiveTools
+			}
+			disableAllTools = prepared.DisableAllTools
+		}
+
+		// Recreate prompt with potentially modified system prompt
+		if stepSystemPrompt != a.settings.systemPrompt {
+			stepPrompt, err := a.createPrompt(stepSystemPrompt, call.Prompt, call.Messages, call.Files...)
+			if err != nil {
+				return nil, err
+			}
+			if len(stepInputMessages) > 0 && len(stepPrompt) > 0 {
+				stepInputMessages[0] = stepPrompt[0]
+			}
+		}
+
+		preparedTools := a.prepareTools(a.settings.tools, stepActiveTools, disableAllTools)
+
+		// Start step stream
+		if opts.OnStepStart != nil {
+			opts.OnStepStart(stepNumber)
+		}
+
+		// Create streaming call
+		streamCall := Call{
+			Prompt:           stepInputMessages,
+			MaxOutputTokens:  call.MaxOutputTokens,
+			Temperature:      call.Temperature,
+			TopP:             call.TopP,
+			TopK:             call.TopK,
+			PresencePenalty:  call.PresencePenalty,
+			FrequencyPenalty: call.FrequencyPenalty,
+			Tools:            preparedTools,
+			ToolChoice:       &stepToolChoice,
+			Headers:          call.Headers,
+			ProviderOptions:  call.ProviderOptions,
+		}
+
+		// Get streaming response
+		stream, err := stepModel.Stream(ctx, streamCall)
+		if err != nil {
+			if opts.OnError != nil {
+				opts.OnError(err)
+			}
+			return nil, err
+		}
+
+		// Process stream with tool execution
+		stepResult, shouldContinue, err := a.processStepStream(ctx, stream, opts, steps)
+		if err != nil {
+			if opts.OnError != nil {
+				opts.OnError(err)
+			}
+			return nil, err
+		}
+
+		steps = append(steps, stepResult)
+		totalUsage = addUsage(totalUsage, stepResult.Usage)
+
+		// Call step finished callback
+		if opts.OnStepFinish != nil {
+			opts.OnStepFinish(stepResult)
+		}
+
+		// Add step messages to response messages
+		stepMessages := toResponseMessages(stepResult.Content)
+		responseMessages = append(responseMessages, stepMessages...)
+
+		// Check stop conditions
+		shouldStop := isStopConditionMet(call.StopWhen, steps)
+		if shouldStop || !shouldContinue {
+			break
+		}
+	}
+
+	// Finish agent stream
+	agentResult := &AgentResult{
+		Steps:      steps,
+		Response:   steps[len(steps)-1].Response,
+		TotalUsage: totalUsage,
+	}
+
+	if opts.OnFinish != nil {
+		opts.OnFinish(agentResult)
+	}
+
+	if opts.OnAgentFinish != nil {
+		opts.OnAgentFinish(agentResult)
+	}
+
+	return agentResult, nil
 }
 
 func (a *agent) prepareTools(tools []tools.BaseTool, activeTools []string, disableAllTools bool) []Tool {
@@ -773,6 +993,203 @@ func WithRepairToolCall(fn RepairToolCallFunction) agentOption {
 func WithOnStepFinished(fn OnStepFinishedFunction) agentOption {
 	return func(s *AgentSettings) {
 		s.onStepFinished = fn
+	}
+}
+
+// processStepStream processes a single step's stream and returns the step result
+func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, opts AgentStreamCall, _ []StepResult) (StepResult, bool, error) {
+	var stepContent []Content
+	var stepToolCalls []ToolCallContent
+	var stepUsage Usage
+	var stepFinishReason FinishReason = FinishReasonUnknown
+	var stepWarnings []CallWarning
+	var stepProviderMetadata ProviderMetadata
+
+	activeToolCalls := make(map[string]*ToolCallContent)
+	activeTextContent := make(map[string]string)
+
+	// Process stream parts
+	for part := range stream {
+		// Forward all parts to chunk callback
+		if opts.OnChunk != nil {
+			opts.OnChunk(part)
+		}
+
+		switch part.Type {
+		case StreamPartTypeWarnings:
+			stepWarnings = part.Warnings
+			if opts.OnWarnings != nil {
+				opts.OnWarnings(part.Warnings)
+			}
+
+		case StreamPartTypeTextStart:
+			activeTextContent[part.ID] = ""
+			if opts.OnTextStart != nil {
+				opts.OnTextStart(part.ID)
+			}
+
+		case StreamPartTypeTextDelta:
+			if _, exists := activeTextContent[part.ID]; exists {
+				activeTextContent[part.ID] += part.Delta
+			}
+			if opts.OnTextDelta != nil {
+				opts.OnTextDelta(part.ID, part.Delta)
+			}
+
+		case StreamPartTypeTextEnd:
+			if text, exists := activeTextContent[part.ID]; exists {
+				stepContent = append(stepContent, TextContent{
+					Text:             text,
+					ProviderMetadata: ProviderMetadata(part.ProviderMetadata),
+				})
+				delete(activeTextContent, part.ID)
+			}
+			if opts.OnTextEnd != nil {
+				opts.OnTextEnd(part.ID)
+			}
+
+		case StreamPartTypeReasoningStart:
+			activeTextContent[part.ID] = ""
+			if opts.OnReasoningStart != nil {
+				opts.OnReasoningStart(part.ID)
+			}
+
+		case StreamPartTypeReasoningDelta:
+			if _, exists := activeTextContent[part.ID]; exists {
+				activeTextContent[part.ID] += part.Delta
+			}
+			if opts.OnReasoningDelta != nil {
+				opts.OnReasoningDelta(part.ID, part.Delta)
+			}
+
+		case StreamPartTypeReasoningEnd:
+			if text, exists := activeTextContent[part.ID]; exists {
+				stepContent = append(stepContent, ReasoningContent{
+					Text:             text,
+					ProviderMetadata: ProviderMetadata(part.ProviderMetadata),
+				})
+				delete(activeTextContent, part.ID)
+			}
+			if opts.OnReasoningEnd != nil {
+				opts.OnReasoningEnd(part.ID)
+			}
+
+		case StreamPartTypeToolInputStart:
+			activeToolCalls[part.ID] = &ToolCallContent{
+				ToolCallID:       part.ID,
+				ToolName:         part.ToolCallName,
+				Input:            "",
+				ProviderExecuted: part.ProviderExecuted,
+			}
+			if opts.OnToolInputStart != nil {
+				opts.OnToolInputStart(part.ID, part.ToolCallName)
+			}
+
+		case StreamPartTypeToolInputDelta:
+			if toolCall, exists := activeToolCalls[part.ID]; exists {
+				toolCall.Input += part.Delta
+			}
+			if opts.OnToolInputDelta != nil {
+				opts.OnToolInputDelta(part.ID, part.Delta)
+			}
+
+		case StreamPartTypeToolInputEnd:
+			if opts.OnToolInputEnd != nil {
+				opts.OnToolInputEnd(part.ID)
+			}
+
+		case StreamPartTypeToolCall:
+			toolCall := ToolCallContent{
+				ToolCallID:       part.ID,
+				ToolName:         part.ToolCallName,
+				Input:            part.ToolCallInput,
+				ProviderExecuted: part.ProviderExecuted,
+				ProviderMetadata: ProviderMetadata(part.ProviderMetadata),
+			}
+
+			// Validate and potentially repair the tool call
+			validatedToolCall := a.validateAndRepairToolCall(ctx, toolCall, a.settings.tools, a.settings.systemPrompt, nil, opts.RepairToolCall)
+			stepToolCalls = append(stepToolCalls, validatedToolCall)
+			stepContent = append(stepContent, validatedToolCall)
+
+			if opts.OnToolCall != nil {
+				opts.OnToolCall(validatedToolCall)
+			}
+
+			// Clean up active tool call
+			delete(activeToolCalls, part.ID)
+
+		case StreamPartTypeSource:
+			sourceContent := SourceContent{
+				SourceType:       part.SourceType,
+				ID:               part.ID,
+				URL:              part.URL,
+				Title:            part.Title,
+				ProviderMetadata: ProviderMetadata(part.ProviderMetadata),
+			}
+			stepContent = append(stepContent, sourceContent)
+			if opts.OnSource != nil {
+				opts.OnSource(sourceContent)
+			}
+
+		case StreamPartTypeFinish:
+			stepUsage = part.Usage
+			stepFinishReason = part.FinishReason
+			stepProviderMetadata = ProviderMetadata(part.ProviderMetadata)
+			if opts.OnStreamFinish != nil {
+				opts.OnStreamFinish(part.Usage, part.FinishReason, part.ProviderMetadata)
+			}
+
+		case StreamPartTypeError:
+			if opts.OnStreamError != nil {
+				opts.OnStreamError(part.Error)
+			}
+			if opts.OnError != nil {
+				opts.OnError(part.Error)
+			}
+			return StepResult{}, false, part.Error
+		}
+	}
+
+	// Execute tools if any
+	var toolResults []ToolResultContent
+	if len(stepToolCalls) > 0 {
+		var err error
+		toolResults, err = a.executeTools(ctx, a.settings.tools, stepToolCalls, opts.OnToolResult)
+		if err != nil {
+			return StepResult{}, false, err
+		}
+		// Add tool results to content
+		for _, result := range toolResults {
+			stepContent = append(stepContent, result)
+		}
+	}
+
+	stepResult := StepResult{
+		Response: Response{
+			Content:          stepContent,
+			FinishReason:     stepFinishReason,
+			Usage:            stepUsage,
+			Warnings:         stepWarnings,
+			ProviderMetadata: stepProviderMetadata,
+		},
+		Messages: toResponseMessages(stepContent),
+	}
+
+	// Determine if we should continue (has tool calls and not stopped)
+	shouldContinue := len(stepToolCalls) > 0 && stepFinishReason == FinishReasonToolCalls
+
+	return stepResult, shouldContinue, nil
+}
+
+func addUsage(a, b Usage) Usage {
+	return Usage{
+		InputTokens:         a.InputTokens + b.InputTokens,
+		OutputTokens:        a.OutputTokens + b.OutputTokens,
+		TotalTokens:         a.TotalTokens + b.TotalTokens,
+		ReasoningTokens:     a.ReasoningTokens + b.ReasoningTokens,
+		CacheCreationTokens: a.CacheCreationTokens + b.CacheCreationTokens,
+		CacheReadTokens:     a.CacheReadTokens + b.CacheReadTokens,
 	}
 }
 

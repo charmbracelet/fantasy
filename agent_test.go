@@ -39,6 +39,7 @@ func (m *mockTool) Run(ctx context.Context, call tools.ToolCall) (tools.ToolResp
 // Mock language model for testing
 type mockLanguageModel struct {
 	generateFunc func(ctx context.Context, call Call) (*Response, error)
+	streamFunc   func(ctx context.Context, call Call) (StreamResponse, error)
 }
 
 func (m *mockLanguageModel) Generate(ctx context.Context, call Call) (*Response, error) {
@@ -59,7 +60,10 @@ func (m *mockLanguageModel) Generate(ctx context.Context, call Call) (*Response,
 }
 
 func (m *mockLanguageModel) Stream(ctx context.Context, call Call) (StreamResponse, error) {
-	panic("not implemented")
+	if m.streamFunc != nil {
+		return m.streamFunc(ctx, call)
+	}
+	return nil, fmt.Errorf("mock stream not implemented")
 }
 
 func (m *mockLanguageModel) Provider() string {

@@ -1134,17 +1134,17 @@ func parseAnnotationsFromDelta(delta openai.ChatCompletionChunkChoiceDelta) []op
 	var annotations []openai.ChatCompletionMessageAnnotation
 
 	// Parse the raw JSON to extract annotations
-	var deltaData map[string]interface{}
+	var deltaData map[string]any
 	if err := json.Unmarshal([]byte(delta.RawJSON()), &deltaData); err != nil {
 		return annotations
 	}
 
 	// Check if annotations exist in the delta
-	if annotationsData, ok := deltaData["annotations"].([]interface{}); ok {
+	if annotationsData, ok := deltaData["annotations"].([]any); ok {
 		for _, annotationData := range annotationsData {
-			if annotationMap, ok := annotationData.(map[string]interface{}); ok {
+			if annotationMap, ok := annotationData.(map[string]any); ok {
 				if annotationType, ok := annotationMap["type"].(string); ok && annotationType == "url_citation" {
-					if urlCitationData, ok := annotationMap["url_citation"].(map[string]interface{}); ok {
+					if urlCitationData, ok := annotationMap["url_citation"].(map[string]any); ok {
 						annotation := openai.ChatCompletionMessageAnnotation{
 							Type: "url_citation",
 							URLCitation: openai.ChatCompletionMessageAnnotationURLCitation{

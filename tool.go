@@ -1,19 +1,12 @@
-// WIP NEED TO REVISIT
 package ai
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"reflect"
+	"strings"
 )
-
-// AgentTool represents a function that can be called by a language model.
-type AgentTool interface {
-	Name() string
-	Description() string
-	InputSchema() Schema
-	Execute(ctx context.Context, input json.RawMessage) (json.RawMessage, error)
-}
 
 // Schema represents a JSON schema for tool input validation.
 type Schema struct {
@@ -30,205 +23,284 @@ type Schema struct {
 	MaxLength   *int               `json:"maxLength,omitempty"`
 }
 
-// BasicTool provides a basic implementation of the Tool interface
-//
-// Example usage:
-//
-//	calculator := &tools.BasicTool{
-//	    ToolName:        "calculate",
-//	    ToolDescription: "Evaluates mathematical expressions",
-//	    ToolInputSchema: tools.Schema{
-//	        Type: "object",
-//	        Properties: map[string]*tools.Schema{
-//	            "expression": {
-//	                Type:        "string",
-//	                Description: "Mathematical expression to evaluate",
-//	            },
-//	        },
-//	        Required: []string{"expression"},
-//	    },
-//	    ExecuteFunc: func(ctx context.Context, input json.RawMessage) (json.RawMessage, error) {
-//	        var req struct {
-//	            Expression string `json:"expression"`
-//	        }
-//	        if err := json.Unmarshal(input, &req); err != nil {
-//	            return nil, err
-//	        }
-//	        result := evaluateExpression(req.Expression)
-//	        return json.Marshal(map[string]any{"result": result})
-//	    },
-//	}
-type BasicTool struct {
-	ToolName        string
-	ToolDescription string
-	ToolInputSchema Schema
-	ExecuteFunc     func(context.Context, json.RawMessage) (json.RawMessage, error)
+// ToolInfo represents tool metadata, matching the existing pattern.
+type ToolInfo struct {
+	Name        string
+	Description string
+	Parameters  map[string]any
+	Required    []string
 }
 
-// Name returns the tool name.
-func (t *BasicTool) Name() string {
-	return t.ToolName
+// ToolCall represents a tool invocation, matching the existing pattern.
+type ToolCall struct {
+	ID    string `json:"id"`
+	Name  string `json:"name"`
+	Input string `json:"input"`
 }
 
-// Description returns the tool description.
-func (t *BasicTool) Description() string {
-	return t.ToolDescription
+// ToolResponse represents the response from a tool execution, matching the existing pattern.
+type ToolResponse struct {
+	Type     string `json:"type"`
+	Content  string `json:"content"`
+	Metadata string `json:"metadata,omitempty"`
+	IsError  bool   `json:"is_error"`
 }
 
-// InputSchema returns the tool input schema.
-func (t *BasicTool) InputSchema() Schema {
-	return t.ToolInputSchema
-}
-
-// Execute executes the tool with the given input.
-func (t *BasicTool) Execute(ctx context.Context, input json.RawMessage) (json.RawMessage, error) {
-	if t.ExecuteFunc == nil {
-		return nil, fmt.Errorf("tool %s has no execute function", t.ToolName)
-	}
-	return t.ExecuteFunc(ctx, input)
-}
-
-// ToolBuilder provides a fluent interface for building tools.
-type ToolBuilder struct {
-	tool *BasicTool
-}
-
-// NewTool creates a new tool builder.
-func NewTool(name string) *ToolBuilder {
-	return &ToolBuilder{
-		tool: &BasicTool{
-			ToolName: name,
-		},
+// NewTextResponse creates a text response.
+func NewTextResponse(content string) ToolResponse {
+	return ToolResponse{
+		Type:    "text",
+		Content: content,
 	}
 }
 
-// Description sets the tool description.
-func (b *ToolBuilder) Description(desc string) *ToolBuilder {
-	b.tool.ToolDescription = desc
-	return b
-}
-
-// InputSchema sets the tool input schema.
-func (b *ToolBuilder) InputSchema(schema Schema) *ToolBuilder {
-	b.tool.ToolInputSchema = schema
-	return b
-}
-
-// Execute sets the tool execution function.
-func (b *ToolBuilder) Execute(fn func(context.Context, json.RawMessage) (json.RawMessage, error)) *ToolBuilder {
-	b.tool.ExecuteFunc = fn
-	return b
-}
-
-// Build creates the final tool.
-func (b *ToolBuilder) Build() AgentTool {
-	return b.tool
-}
-
-// SchemaBuilder provides a fluent interface for building JSON schemas.
-type SchemaBuilder struct {
-	schema Schema
-}
-
-// NewSchema creates a new schema builder.
-func NewSchema(schemaType string) *SchemaBuilder {
-	return &SchemaBuilder{
-		schema: Schema{
-			Type: schemaType,
-		},
+// NewTextErrorResponse creates an error response.
+func NewTextErrorResponse(content string) ToolResponse {
+	return ToolResponse{
+		Type:    "text",
+		Content: content,
+		IsError: true,
 	}
 }
 
-// Object creates a schema builder for an object type.
-func Object() *SchemaBuilder {
-	return NewSchema("object")
-}
-
-// String creates a schema builder for a string type.
-func String() *SchemaBuilder {
-	return NewSchema("string")
-}
-
-// Number creates a schema builder for a number type.
-func Number() *SchemaBuilder {
-	return NewSchema("number")
-}
-
-// Array creates a schema builder for an array type.
-func Array() *SchemaBuilder {
-	return NewSchema("array")
-}
-
-// Description sets the schema description.
-func (b *SchemaBuilder) Description(desc string) *SchemaBuilder {
-	b.schema.Description = desc
-	return b
-}
-
-// Properties sets the schema properties.
-func (b *SchemaBuilder) Properties(props map[string]*Schema) *SchemaBuilder {
-	b.schema.Properties = props
-	return b
-}
-
-// Property adds a property to the schema.
-func (b *SchemaBuilder) Property(name string, schema *Schema) *SchemaBuilder {
-	if b.schema.Properties == nil {
-		b.schema.Properties = make(map[string]*Schema)
+// WithResponseMetadata adds metadata to a response.
+func WithResponseMetadata(response ToolResponse, metadata any) ToolResponse {
+	if metadata != nil {
+		metadataBytes, err := json.Marshal(metadata)
+		if err != nil {
+			return response
+		}
+		response.Metadata = string(metadataBytes)
 	}
-	b.schema.Properties[name] = schema
-	return b
+	return response
 }
 
-// Required marks fields as required.
-func (b *SchemaBuilder) Required(fields ...string) *SchemaBuilder {
-	b.schema.Required = append(b.schema.Required, fields...)
-	return b
+// AgentTool represents a tool that can be called by a language model.
+// This matches the existing BaseTool interface pattern.
+type AgentTool interface {
+	Info() ToolInfo
+	Run(ctx context.Context, params ToolCall) (ToolResponse, error)
 }
 
-// Items sets the schema for array items.
-func (b *SchemaBuilder) Items(schema *Schema) *SchemaBuilder {
-	b.schema.Items = schema
-	return b
+// NewTypedToolFunc creates a typed tool from a function with automatic schema generation.
+// This is the recommended way to create tools.
+func NewTypedToolFunc[TInput any](
+	name string,
+	description string,
+	fn func(ctx context.Context, input TInput, call ToolCall) (ToolResponse, error),
+) AgentTool {
+	var input TInput
+	schema := generateSchema(reflect.TypeOf(input))
+
+	return &funcToolWrapper[TInput]{
+		name:        name,
+		description: description,
+		fn:          fn,
+		schema:      schema,
+	}
 }
 
-// Enum sets allowed values for the schema.
-func (b *SchemaBuilder) Enum(values ...any) *SchemaBuilder {
-	b.schema.Enum = values
-	return b
+// funcToolWrapper wraps a function to implement the AgentTool interface.
+type funcToolWrapper[TInput any] struct {
+	name        string
+	description string
+	fn          func(ctx context.Context, input TInput, call ToolCall) (ToolResponse, error)
+	schema      Schema
 }
 
-// Format sets the string format.
-func (b *SchemaBuilder) Format(format string) *SchemaBuilder {
-	b.schema.Format = format
-	return b
+func (w *funcToolWrapper[TInput]) Info() ToolInfo {
+	return ToolInfo{
+		Name:        w.name,
+		Description: w.description,
+		Parameters:  schemaToParameters(w.schema),
+		Required:    w.schema.Required,
+	}
 }
 
-// Min sets the minimum value.
-func (b *SchemaBuilder) Min(minimum float64) *SchemaBuilder {
-	b.schema.Minimum = &minimum
-	return b
+func (w *funcToolWrapper[TInput]) Run(ctx context.Context, params ToolCall) (ToolResponse, error) {
+	var input TInput
+	if err := json.Unmarshal([]byte(params.Input), &input); err != nil {
+		return NewTextErrorResponse(fmt.Sprintf("invalid parameters: %s", err)), nil
+	}
+
+	return w.fn(ctx, input, params)
 }
 
-// Max sets the maximum value.
-func (b *SchemaBuilder) Max(maximum float64) *SchemaBuilder {
-	b.schema.Maximum = &maximum
-	return b
+// schemaToParameters converts a Schema to the parameters map format expected by ToolInfo.
+func schemaToParameters(schema Schema) map[string]any {
+	if schema.Type != "object" || schema.Properties == nil {
+		return map[string]any{}
+	}
+
+	params := make(map[string]any)
+	for name, propSchema := range schema.Properties {
+		param := map[string]any{
+			"type": propSchema.Type,
+		}
+
+		if propSchema.Description != "" {
+			param["description"] = propSchema.Description
+		}
+
+		if len(propSchema.Enum) > 0 {
+			param["enum"] = propSchema.Enum
+		}
+
+		if propSchema.Format != "" {
+			param["format"] = propSchema.Format
+		}
+
+		if propSchema.Minimum != nil {
+			param["minimum"] = *propSchema.Minimum
+		}
+
+		if propSchema.Maximum != nil {
+			param["maximum"] = *propSchema.Maximum
+		}
+
+		if propSchema.MinLength != nil {
+			param["minLength"] = *propSchema.MinLength
+		}
+
+		if propSchema.MaxLength != nil {
+			param["maxLength"] = *propSchema.MaxLength
+		}
+
+		if propSchema.Items != nil {
+			param["items"] = schemaToParameters(*propSchema.Items)
+		}
+
+		params[name] = param
+	}
+
+	return params
 }
 
-// MinLength sets the minimum string length.
-func (b *SchemaBuilder) MinLength(minimum int) *SchemaBuilder {
-	b.schema.MinLength = &minimum
-	return b
+// generateSchema automatically generates a JSON schema from a Go type.
+func generateSchema(t reflect.Type) Schema {
+	return generateSchemaRecursive(t, make(map[reflect.Type]bool))
 }
 
-// MaxLength sets the maximum string length.
-func (b *SchemaBuilder) MaxLength(maximum int) *SchemaBuilder {
-	b.schema.MaxLength = &maximum
-	return b
+func generateSchemaRecursive(t reflect.Type, visited map[reflect.Type]bool) Schema {
+	// Handle pointers
+	if t.Kind() == reflect.Pointer {
+		t = t.Elem()
+	}
+
+	// Prevent infinite recursion
+	if visited[t] {
+		return Schema{Type: "object"}
+	}
+	visited[t] = true
+	defer delete(visited, t)
+
+	switch t.Kind() {
+	case reflect.String:
+		return Schema{Type: "string"}
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return Schema{Type: "integer"}
+	case reflect.Float32, reflect.Float64:
+		return Schema{Type: "number"}
+	case reflect.Bool:
+		return Schema{Type: "boolean"}
+	case reflect.Slice, reflect.Array:
+		itemSchema := generateSchemaRecursive(t.Elem(), visited)
+		return Schema{
+			Type:  "array",
+			Items: &itemSchema,
+		}
+	case reflect.Map:
+		if t.Key().Kind() == reflect.String {
+			valueSchema := generateSchemaRecursive(t.Elem(), visited)
+			return Schema{
+				Type: "object",
+				Properties: map[string]*Schema{
+					"*": &valueSchema,
+				},
+			}
+		}
+		return Schema{Type: "object"}
+	case reflect.Struct:
+		schema := Schema{
+			Type:       "object",
+			Properties: make(map[string]*Schema),
+		}
+
+		for i := range t.NumField() {
+			field := t.Field(i)
+
+			// Skip unexported fields
+			if !field.IsExported() {
+				continue
+			}
+
+			jsonTag := field.Tag.Get("json")
+			if jsonTag == "-" {
+				continue
+			}
+
+			fieldName := field.Name
+			required := true
+
+			// Parse JSON tag
+			if jsonTag != "" {
+				parts := strings.Split(jsonTag, ",")
+				if parts[0] != "" {
+					fieldName = parts[0]
+				}
+
+				// Check for omitempty
+				for _, part := range parts[1:] {
+					if part == "omitempty" {
+						required = false
+						break
+					}
+				}
+			} else {
+				// Convert field name to snake_case for JSON
+				fieldName = toSnakeCase(fieldName)
+			}
+
+			fieldSchema := generateSchemaRecursive(field.Type, visited)
+
+			// Add description from struct tag if available
+			if desc := field.Tag.Get("description"); desc != "" {
+				fieldSchema.Description = desc
+			}
+
+			// Add enum values from struct tag if available
+			if enumTag := field.Tag.Get("enum"); enumTag != "" {
+				enumValues := strings.Split(enumTag, ",")
+				fieldSchema.Enum = make([]any, len(enumValues))
+				for i, v := range enumValues {
+					fieldSchema.Enum[i] = strings.TrimSpace(v)
+				}
+			}
+
+			schema.Properties[fieldName] = &fieldSchema
+
+			if required {
+				schema.Required = append(schema.Required, fieldName)
+			}
+		}
+
+		return schema
+	case reflect.Interface:
+		return Schema{Type: "object"}
+	default:
+		return Schema{Type: "object"}
+	}
 }
 
-// Build creates the final schema.
-func (b *SchemaBuilder) Build() *Schema {
-	return &b.schema
+// toSnakeCase converts PascalCase to snake_case.
+func toSnakeCase(s string) string {
+	var result strings.Builder
+	for i, r := range s {
+		if i > 0 && r >= 'A' && r <= 'Z' {
+			result.WriteByte('_')
+		}
+		result.WriteRune(r)
+	}
+	return strings.ToLower(result.String())
 }

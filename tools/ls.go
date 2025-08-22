@@ -1,0 +1,258 @@
+package tools
+
+import (
+	"context"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+
+	"github.com/charmbracelet/crush/internal/ai"
+	"github.com/charmbracelet/crush/internal/fsext"
+)
+
+const (
+	MaxLSFiles = 1000
+	LSToolName = "ls"
+)
+
+type LSParams struct {
+	Path   string   `json:"path" description:"The path to the directory to list (defaults to current working directory)"`
+	Ignore []string `json:"ignore,omitempty" description:"List of glob patterns to ignore"`
+}
+
+type LSPermissionsParams struct {
+	Path   string   `json:"path"`
+	Ignore []string `json:"ignore"`
+}
+
+type TreeNode struct {
+	Name     string      `json:"name"`
+	Path     string      `json:"path"`
+	Type     string      `json:"type"`
+	Children []*TreeNode `json:"children,omitempty"`
+}
+
+type LSResponseMetadata struct {
+	NumberOfFiles int  `json:"number_of_files"`
+	Truncated     bool `json:"truncated"`
+}
+
+func NewLSTool(permissionAsk PermissionAsk, workingDir string) ai.AgentTool {
+	return ai.NewTypedToolFunc(
+		LSToolName,
+		`Directory listing tool that shows files and subdirectories in a tree structure, helping you explore and understand the project organization.
+
+WHEN TO USE THIS TOOL:
+- Use when you need to explore the structure of a directory
+- Helpful for understanding the organization of a project
+- Good first step when getting familiar with a new codebase
+
+HOW TO USE:
+- Provide a path to list (defaults to current working directory)
+- Optionally specify glob patterns to ignore
+- Results are displayed in a tree structure
+
+FEATURES:
+- Displays a hierarchical view of files and directories
+- Automatically skips hidden files/directories (starting with '.')
+- Skips common system directories like __pycache__
+- Can filter out files matching specific patterns
+
+LIMITATIONS:
+- Results are limited to 1000 files
+- Very large directories will be truncated
+- Does not show file sizes or permissions
+- Cannot recursively list all directories in a large project
+
+WINDOWS NOTES:
+- Hidden file detection uses Unix convention (files starting with '.')
+- Windows-specific hidden files (with hidden attribute) are not automatically skipped
+- Common Windows directories like System32, Program Files are not in default ignore list
+- Path separators are handled automatically (both / and \ work)
+
+TIPS:
+- Use Glob tool for finding files by name patterns instead of browsing
+- Use Grep tool for searching file contents
+- Combine with other tools for more effective exploration`,
+		func(ctx context.Context, params LSParams, call ai.ToolCall) (ai.ToolResponse, error) {
+			searchPath := params.Path
+			if searchPath == "" {
+				searchPath = workingDir
+			}
+
+			var err error
+			searchPath, err = fsext.Expand(searchPath)
+			if err != nil {
+				return ai.ToolResponse{}, fmt.Errorf("error expanding path: %w", err)
+			}
+
+			if !filepath.IsAbs(searchPath) {
+				searchPath = filepath.Join(workingDir, searchPath)
+			}
+
+			// Check if directory is outside working directory and request permission if needed
+			absWorkingDir, err := filepath.Abs(workingDir)
+			if err != nil {
+				return ai.ToolResponse{}, fmt.Errorf("error resolving working directory: %w", err)
+			}
+
+			absSearchPath, err := filepath.Abs(searchPath)
+			if err != nil {
+				return ai.ToolResponse{}, fmt.Errorf("error resolving search path: %w", err)
+			}
+
+			relPath, err := filepath.Rel(absWorkingDir, absSearchPath)
+			if err != nil || strings.HasPrefix(relPath, "..") {
+				granted := permissionAsk(Permission{
+					ToolCallID:  call.ID,
+					ToolName:    LSToolName,
+					Path:        absSearchPath,
+					Action:      "list",
+					Description: fmt.Sprintf("List directory outside working directory: %s", absSearchPath),
+					Params:      LSPermissionsParams(params),
+				})
+
+				if !granted {
+					return ai.ToolResponse{}, ErrorPermissionDenied
+				}
+			}
+			output, err := ListDirectoryTree(searchPath, params.Ignore)
+			if err != nil {
+				return ai.ToolResponse{}, err
+			}
+
+			// Get file count for metadata
+			files, truncated, err := fsext.ListDirectory(searchPath, params.Ignore, MaxLSFiles)
+			if err != nil {
+				return ai.ToolResponse{}, fmt.Errorf("error listing directory for metadata: %w", err)
+			}
+
+			return ai.WithResponseMetadata(
+				ai.NewTextResponse(output),
+				LSResponseMetadata{
+					NumberOfFiles: len(files),
+					Truncated:     truncated,
+				},
+			), nil
+		},
+	)
+}
+
+func ListDirectoryTree(searchPath string, ignore []string) (string, error) {
+	if _, err := os.Stat(searchPath); os.IsNotExist(err) {
+		return "", fmt.Errorf("path does not exist: %s", searchPath)
+	}
+
+	files, truncated, err := fsext.ListDirectory(searchPath, ignore, MaxLSFiles)
+	if err != nil {
+		return "", fmt.Errorf("error listing directory: %w", err)
+	}
+
+	tree := createFileTree(files, searchPath)
+	output := printTree(tree, searchPath)
+
+	if truncated {
+		output = fmt.Sprintf("There are more than %d files in the directory. Use a more specific path or use the Glob tool to find specific files. The first %d files and directories are included below:\n\n%s", MaxLSFiles, MaxLSFiles, output)
+	}
+
+	return output, nil
+}
+
+func createFileTree(sortedPaths []string, rootPath string) []*TreeNode {
+	root := []*TreeNode{}
+	pathMap := make(map[string]*TreeNode)
+
+	for _, path := range sortedPaths {
+		relativePath := strings.TrimPrefix(path, rootPath)
+		parts := strings.Split(relativePath, string(filepath.Separator))
+		currentPath := ""
+		var parentPath string
+
+		var cleanParts []string
+		for _, part := range parts {
+			if part != "" {
+				cleanParts = append(cleanParts, part)
+			}
+		}
+		parts = cleanParts
+
+		if len(parts) == 0 {
+			continue
+		}
+
+		for i, part := range parts {
+			if currentPath == "" {
+				currentPath = part
+			} else {
+				currentPath = filepath.Join(currentPath, part)
+			}
+
+			if _, exists := pathMap[currentPath]; exists {
+				parentPath = currentPath
+				continue
+			}
+
+			isLastPart := i == len(parts)-1
+			isDir := !isLastPart || strings.HasSuffix(relativePath, string(filepath.Separator))
+			nodeType := "file"
+			if isDir {
+				nodeType = "directory"
+			}
+			newNode := &TreeNode{
+				Name:     part,
+				Path:     currentPath,
+				Type:     nodeType,
+				Children: []*TreeNode{},
+			}
+
+			pathMap[currentPath] = newNode
+
+			if i > 0 && parentPath != "" {
+				if parent, ok := pathMap[parentPath]; ok {
+					parent.Children = append(parent.Children, newNode)
+				}
+			} else {
+				root = append(root, newNode)
+			}
+
+			parentPath = currentPath
+		}
+	}
+
+	return root
+}
+
+func printTree(tree []*TreeNode, rootPath string) string {
+	var result strings.Builder
+
+	result.WriteString("- ")
+	result.WriteString(rootPath)
+	if rootPath[len(rootPath)-1] != '/' {
+		result.WriteByte(filepath.Separator)
+	}
+	result.WriteByte('\n')
+
+	for _, node := range tree {
+		printNode(&result, node, 1)
+	}
+
+	return result.String()
+}
+
+func printNode(builder *strings.Builder, node *TreeNode, level int) {
+	indent := strings.Repeat("  ", level)
+
+	nodeName := node.Name
+	if node.Type == "directory" {
+		nodeName = nodeName + string(filepath.Separator)
+	}
+
+	fmt.Fprintf(builder, "%s- %s\n", indent, nodeName)
+
+	if node.Type == "directory" && len(node.Children) > 0 {
+		for _, child := range node.Children {
+			printNode(builder, child, level+1)
+		}
+	}
+}

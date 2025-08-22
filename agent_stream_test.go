@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/charmbracelet/crush/internal/llm/tools"
 	"github.com/stretchr/testify/require"
 )
 
@@ -14,8 +13,8 @@ import (
 type EchoTool struct{}
 
 // Info returns the tool information
-func (e *EchoTool) Info() tools.ToolInfo {
-	return tools.ToolInfo{
+func (e *EchoTool) Info() ToolInfo {
+	return ToolInfo{
 		Name:        "echo",
 		Description: "Echo back the provided message",
 		Parameters: map[string]any{
@@ -29,20 +28,20 @@ func (e *EchoTool) Info() tools.ToolInfo {
 }
 
 // Run executes the echo tool
-func (e *EchoTool) Run(ctx context.Context, params tools.ToolCall) (tools.ToolResponse, error) {
+func (e *EchoTool) Run(ctx context.Context, params ToolCall) (ToolResponse, error) {
 	var input struct {
 		Message string `json:"message"`
 	}
 
 	if err := json.Unmarshal([]byte(params.Input), &input); err != nil {
-		return tools.NewTextErrorResponse("Invalid input: " + err.Error()), nil
+		return NewTextErrorResponse("Invalid input: " + err.Error()), nil
 	}
 
 	if input.Message == "" {
-		return tools.NewTextErrorResponse("Message cannot be empty"), nil
+		return NewTextErrorResponse("Message cannot be empty"), nil
 	}
 
-	return tools.NewTextResponse("Echo: " + input.Message), nil
+	return NewTextResponse("Echo: " + input.Message), nil
 }
 
 // TestStreamingAgentCallbacks tests that all streaming callbacks are called correctly

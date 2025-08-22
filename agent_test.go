@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/charmbracelet/crush/internal/llm/tools"
 	"github.com/stretchr/testify/require"
 )
 
@@ -17,11 +16,11 @@ type mockTool struct {
 	description string
 	parameters  map[string]any
 	required    []string
-	executeFunc func(ctx context.Context, call tools.ToolCall) (tools.ToolResponse, error)
+	executeFunc func(ctx context.Context, call ToolCall) (ToolResponse, error)
 }
 
-func (m *mockTool) Info() tools.ToolInfo {
-	return tools.ToolInfo{
+func (m *mockTool) Info() ToolInfo {
+	return ToolInfo{
 		Name:        m.name,
 		Description: m.description,
 		Parameters:  m.parameters,
@@ -29,11 +28,11 @@ func (m *mockTool) Info() tools.ToolInfo {
 	}
 }
 
-func (m *mockTool) Run(ctx context.Context, call tools.ToolCall) (tools.ToolResponse, error) {
+func (m *mockTool) Run(ctx context.Context, call ToolCall) (ToolResponse, error) {
 	if m.executeFunc != nil {
 		return m.executeFunc(ctx, call)
 	}
-	return tools.ToolResponse{Content: "mock result", IsError: false}, nil
+	return ToolResponse{Content: "mock result", IsError: false}, nil
 }
 
 // Mock language model for testing
@@ -78,21 +77,19 @@ func (m *mockLanguageModel) Model() string {
 func TestAgent_Generate_ResultContent_AllTypes(t *testing.T) {
 	t.Parallel()
 
-	tool1 := &mockTool{
-		name:        "tool1",
-		description: "Test tool",
-		parameters: map[string]any{
-			"value": map[string]any{"type": "string"},
-		},
-		required: []string{"value"},
-		executeFunc: func(ctx context.Context, call tools.ToolCall) (tools.ToolResponse, error) {
-			var input map[string]any
-			err := json.Unmarshal([]byte(call.Input), &input)
-			require.NoError(t, err)
-			require.Equal(t, "value", input["value"])
-			return tools.ToolResponse{Content: "result1", IsError: false}, nil
-		},
+	// Create a type-safe tool using the new API
+	type TestInput struct {
+		Value string `json:"value" description:"Test value"`
 	}
+
+	tool1 := NewTypedToolFunc(
+		"tool1",
+		"Test tool",
+		func(ctx context.Context, input TestInput, _ ToolCall) (ToolResponse, error) {
+			require.Equal(t, "value", input.Value)
+			return ToolResponse{Content: "result1", IsError: false}, nil
+		},
+	)
 
 	model := &mockLanguageModel{
 		generateFunc: func(ctx context.Context, call Call) (*Response, error) {
@@ -213,23 +210,30 @@ func TestAgent_Generate_ResultText(t *testing.T) {
 func TestAgent_Generate_ResultToolCalls(t *testing.T) {
 	t.Parallel()
 
-	tool1 := &mockTool{
-		name:        "tool1",
-		description: "Test tool 1",
-		parameters: map[string]any{
-			"value": map[string]any{"type": "string"},
-		},
-		required: []string{"value"},
+	// Create type-safe tools using the new API
+	type Tool1Input struct {
+		Value string `json:"value" description:"Test value"`
 	}
 
-	tool2 := &mockTool{
-		name:        "tool2",
-		description: "Test tool 2",
-		parameters: map[string]any{
-			"somethingElse": map[string]any{"type": "string"},
-		},
-		required: []string{"somethingElse"},
+	type Tool2Input struct {
+		SomethingElse string `json:"somethingElse" description:"Another test value"`
 	}
+
+	tool1 := NewTypedToolFunc(
+		"tool1",
+		"Test tool 1",
+		func(ctx context.Context, input Tool1Input, _ ToolCall) (ToolResponse, error) {
+			return ToolResponse{Content: "result1", IsError: false}, nil
+		},
+	)
+
+	tool2 := NewTypedToolFunc(
+		"tool2",
+		"Test tool 2",
+		func(ctx context.Context, input Tool2Input, _ ToolCall) (ToolResponse, error) {
+			return ToolResponse{Content: "result2", IsError: false}, nil
+		},
+	)
 
 	model := &mockLanguageModel{
 		generateFunc: func(ctx context.Context, call Call) (*Response, error) {
@@ -291,21 +295,19 @@ func TestAgent_Generate_ResultToolCalls(t *testing.T) {
 func TestAgent_Generate_ResultToolResults(t *testing.T) {
 	t.Parallel()
 
-	tool1 := &mockTool{
-		name:        "tool1",
-		description: "Test tool",
-		parameters: map[string]any{
-			"value": map[string]any{"type": "string"},
-		},
-		required: []string{"value"},
-		executeFunc: func(ctx context.Context, call tools.ToolCall) (tools.ToolResponse, error) {
-			var input map[string]any
-			err := json.Unmarshal([]byte(call.Input), &input)
-			require.NoError(t, err)
-			require.Equal(t, "value", input["value"])
-			return tools.ToolResponse{Content: "result1", IsError: false}, nil
-		},
+	// Create type-safe tool using the new API
+	type TestInput struct {
+		Value string `json:"value" description:"Test value"`
 	}
+
+	tool1 := NewTypedToolFunc(
+		"tool1",
+		"Test tool",
+		func(ctx context.Context, input TestInput, _ ToolCall) (ToolResponse, error) {
+			require.Equal(t, "value", input.Value)
+			return ToolResponse{Content: "result1", IsError: false}, nil
+		},
+	)
 
 	model := &mockLanguageModel{
 		generateFunc: func(ctx context.Context, call Call) (*Response, error) {
@@ -366,21 +368,19 @@ func TestAgent_Generate_ResultToolResults(t *testing.T) {
 func TestAgent_Generate_MultipleSteps(t *testing.T) {
 	t.Parallel()
 
-	tool1 := &mockTool{
-		name:        "tool1",
-		description: "Test tool",
-		parameters: map[string]any{
-			"value": map[string]any{"type": "string"},
-		},
-		required: []string{"value"},
-		executeFunc: func(ctx context.Context, call tools.ToolCall) (tools.ToolResponse, error) {
-			var input map[string]any
-			err := json.Unmarshal([]byte(call.Input), &input)
-			require.NoError(t, err)
-			require.Equal(t, "value", input["value"])
-			return tools.ToolResponse{Content: "result1", IsError: false}, nil
-		},
+	// Create type-safe tool using the new API
+	type TestInput struct {
+		Value string `json:"value" description:"Test value"`
 	}
+
+	tool1 := NewTypedToolFunc(
+		"tool1",
+		"Test tool",
+		func(ctx context.Context, input TestInput, _ ToolCall) (ToolResponse, error) {
+			require.Equal(t, "value", input.Value)
+			return ToolResponse{Content: "result1", IsError: false}, nil
+		},
+	)
 
 	callCount := 0
 	model := &mockLanguageModel{
@@ -1289,8 +1289,8 @@ func TestToolCallRepair(t *testing.T) {
 				"value": map[string]any{"type": "string"},
 			},
 			required: []string{"value"},
-			executeFunc: func(ctx context.Context, call tools.ToolCall) (tools.ToolResponse, error) {
-				return tools.ToolResponse{Content: "success", IsError: false}, nil
+			executeFunc: func(ctx context.Context, call ToolCall) (ToolResponse, error) {
+				return ToolResponse{Content: "success", IsError: false}, nil
 			},
 		}
 
@@ -1379,8 +1379,8 @@ func TestToolCallRepair(t *testing.T) {
 				"value": map[string]any{"type": "string"},
 			},
 			required: []string{"value"},
-			executeFunc: func(ctx context.Context, call tools.ToolCall) (tools.ToolResponse, error) {
-				return tools.ToolResponse{Content: "repaired_success", IsError: false}, nil
+			executeFunc: func(ctx context.Context, call ToolCall) (ToolResponse, error) {
+				return ToolResponse{Content: "repaired_success", IsError: false}, nil
 			},
 		}
 

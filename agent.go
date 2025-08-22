@@ -8,8 +8,6 @@ import (
 	"maps"
 	"slices"
 	"sync"
-
-	"github.com/charmbracelet/crush/internal/llm/tools"
 )
 
 type StepResult struct {
@@ -100,7 +98,7 @@ type PrepareStepResult struct {
 type ToolCallRepairOptions struct {
 	OriginalToolCall ToolCallContent
 	ValidationError  error
-	AvailableTools   []tools.BaseTool
+	AvailableTools   []AgentTool
 	SystemPrompt     string
 	Messages         []Message
 }
@@ -123,7 +121,7 @@ type AgentSettings struct {
 	providerOptions  ProviderOptions
 
 	// TODO: add support for provider tools
-	tools      []tools.BaseTool
+	tools      []AgentTool
 	maxRetries *int
 
 	model LanguageModel
@@ -548,13 +546,13 @@ func toResponseMessages(content []Content) []Message {
 	return messages
 }
 
-func (a *agent) executeTools(ctx context.Context, allTools []tools.BaseTool, toolCalls []ToolCallContent, toolResultCallback func(result ToolResultContent)) ([]ToolResultContent, error) {
+func (a *agent) executeTools(ctx context.Context, allTools []AgentTool, toolCalls []ToolCallContent, toolResultCallback func(result ToolResultContent)) ([]ToolResultContent, error) {
 	if len(toolCalls) == 0 {
 		return nil, nil
 	}
 
 	// Create a map for quick tool lookup
-	toolMap := make(map[string]tools.BaseTool)
+	toolMap := make(map[string]AgentTool)
 	for _, tool := range allTools {
 		toolMap[tool.Info().Name] = tool
 	}
@@ -604,7 +602,7 @@ func (a *agent) executeTools(ctx context.Context, allTools []tools.BaseTool, too
 			}
 
 			// Execute the tool
-			result, err := tool.Run(ctx, tools.ToolCall{
+			result, err := tool.Run(ctx, ToolCall{
 				ID:    call.ToolCallID,
 				Name:  call.ToolName,
 				Input: call.Input,
@@ -616,6 +614,7 @@ func (a *agent) executeTools(ctx context.Context, allTools []tools.BaseTool, too
 					Result: ToolResultOutputContentError{
 						Error: err,
 					},
+					ClientMetadata:   result.Metadata,
 					ProviderExecuted: false,
 				}
 				if toolResultCallback != nil {
@@ -632,6 +631,7 @@ func (a *agent) executeTools(ctx context.Context, allTools []tools.BaseTool, too
 					Result: ToolResultOutputContentError{
 						Error: errors.New(result.Content),
 					},
+					ClientMetadata:   result.Metadata,
 					ProviderExecuted: false,
 				}
 
@@ -645,6 +645,7 @@ func (a *agent) executeTools(ctx context.Context, allTools []tools.BaseTool, too
 					Result: ToolResultOutputContentText{
 						Text: result.Content,
 					},
+					ClientMetadata:   result.Metadata,
 					ProviderExecuted: false,
 				}
 				if toolResultCallback != nil {
@@ -821,7 +822,7 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 	return agentResult, nil
 }
 
-func (a *agent) prepareTools(tools []tools.BaseTool, activeTools []string, disableAllTools bool) []Tool {
+func (a *agent) prepareTools(tools []AgentTool, activeTools []string, disableAllTools bool) []Tool {
 	var preparedTools []Tool
 
 	// If explicitly disabling all tools, return no tools
@@ -850,7 +851,7 @@ func (a *agent) prepareTools(tools []tools.BaseTool, activeTools []string, disab
 }
 
 // validateAndRepairToolCall validates a tool call and attempts repair if validation fails
-func (a *agent) validateAndRepairToolCall(ctx context.Context, toolCall ToolCallContent, availableTools []tools.BaseTool, systemPrompt string, messages []Message, repairFunc RepairToolCallFunction) ToolCallContent {
+func (a *agent) validateAndRepairToolCall(ctx context.Context, toolCall ToolCallContent, availableTools []AgentTool, systemPrompt string, messages []Message, repairFunc RepairToolCallFunction) ToolCallContent {
 	if err := a.validateToolCall(toolCall, availableTools); err == nil {
 		return toolCall
 	} else {
@@ -878,8 +879,8 @@ func (a *agent) validateAndRepairToolCall(ctx context.Context, toolCall ToolCall
 }
 
 // validateToolCall validates a tool call against available tools and their schemas
-func (a *agent) validateToolCall(toolCall ToolCallContent, availableTools []tools.BaseTool) error {
-	var tool tools.BaseTool
+func (a *agent) validateToolCall(toolCall ToolCallContent, availableTools []AgentTool) error {
+	var tool AgentTool
 	for _, t := range availableTools {
 		if t.Info().Name == toolCall.ToolName {
 			tool = t
@@ -966,7 +967,7 @@ func WithFrequencyPenalty(penalty float64) agentOption {
 	}
 }
 
-func WithTools(tools ...tools.BaseTool) agentOption {
+func WithTools(tools ...AgentTool) agentOption {
 	return func(s *AgentSettings) {
 		s.tools = append(s.tools, tools...)
 	}

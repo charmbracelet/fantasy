@@ -1002,7 +1002,7 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 	var stepContent []Content
 	var stepToolCalls []ToolCallContent
 	var stepUsage Usage
-	var stepFinishReason FinishReason = FinishReasonUnknown
+	stepFinishReason := FinishReasonUnknown
 	var stepWarnings []CallWarning
 	var stepProviderMetadata ProviderMetadata
 

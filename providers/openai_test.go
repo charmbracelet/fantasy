@@ -2247,7 +2247,7 @@ func TestDoStream(t *testing.T) {
 		require.True(t, len(parts) >= 4) // text-start, deltas, text-end, finish
 
 		// Find text parts
-		var textStart, textEnd, finish int = -1, -1, -1
+		textStart, textEnd, finish := -1, -1, -1
 		var deltas []string
 
 		for i, part := range parts {

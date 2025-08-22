@@ -786,6 +786,7 @@ func TestStopConditions(t *testing.T) {
 	}
 
 	t.Run("StepCountIs", func(t *testing.T) {
+		t.Parallel()
 		condition := StepCountIs(2)
 
 		// Should not stop with 1 step
@@ -802,6 +803,7 @@ func TestStopConditions(t *testing.T) {
 	})
 
 	t.Run("HasToolCall", func(t *testing.T) {
+		t.Parallel()
 		condition := HasToolCall("search")
 
 		// Should not stop when tool not called
@@ -822,6 +824,7 @@ func TestStopConditions(t *testing.T) {
 	})
 
 	t.Run("HasContent", func(t *testing.T) {
+		t.Parallel()
 		reasoningCondition := HasContent(ContentTypeReasoning)
 		fileCondition := HasContent(ContentTypeFile)
 
@@ -837,6 +840,7 @@ func TestStopConditions(t *testing.T) {
 	})
 
 	t.Run("FinishReasonIs", func(t *testing.T) {
+		t.Parallel()
 		stopCondition := FinishReasonIs(FinishReasonStop)
 		lengthCondition := FinishReasonIs(FinishReasonLength)
 
@@ -870,6 +874,7 @@ func TestStopConditions_Integration(t *testing.T) {
 	t.Parallel()
 
 	t.Run("StepCountIs integration", func(t *testing.T) {
+		t.Parallel()
 		model := &mockLanguageModel{
 			generateFunc: func(ctx context.Context, call Call) (*Response, error) {
 				return &Response{
@@ -898,6 +903,7 @@ func TestStopConditions_Integration(t *testing.T) {
 	})
 
 	t.Run("Multiple stop conditions", func(t *testing.T) {
+		t.Parallel()
 		model := &mockLanguageModel{
 			generateFunc: func(ctx context.Context, call Call) (*Response, error) {
 				return &Response{
@@ -934,6 +940,7 @@ func TestPrepareStep(t *testing.T) {
 	t.Parallel()
 
 	t.Run("System prompt modification", func(t *testing.T) {
+		t.Parallel()
 		var capturedSystemPrompt string
 		model := &mockLanguageModel{
 			generateFunc: func(ctx context.Context, call Call) (*Response, error) {
@@ -977,6 +984,7 @@ func TestPrepareStep(t *testing.T) {
 	})
 
 	t.Run("Tool choice modification", func(t *testing.T) {
+		t.Parallel()
 		var capturedToolChoice *ToolChoice
 		model := &mockLanguageModel{
 			generateFunc: func(ctx context.Context, call Call) (*Response, error) {
@@ -1014,6 +1022,7 @@ func TestPrepareStep(t *testing.T) {
 	})
 
 	t.Run("Active tools modification", func(t *testing.T) {
+		t.Parallel()
 		var capturedToolNames []string
 		model := &mockLanguageModel{
 			generateFunc: func(ctx context.Context, call Call) (*Response, error) {
@@ -1058,6 +1067,7 @@ func TestPrepareStep(t *testing.T) {
 	})
 
 	t.Run("No tools when DisableAllTools is true", func(t *testing.T) {
+		t.Parallel()
 		var capturedToolCount int
 		model := &mockLanguageModel{
 			generateFunc: func(ctx context.Context, call Call) (*Response, error) {
@@ -1095,6 +1105,7 @@ func TestPrepareStep(t *testing.T) {
 	})
 
 	t.Run("All fields modified together", func(t *testing.T) {
+		t.Parallel()
 		var capturedSystemPrompt string
 		var capturedToolChoice *ToolChoice
 		var capturedToolNames []string
@@ -1158,6 +1169,7 @@ func TestPrepareStep(t *testing.T) {
 	})
 
 	t.Run("Nil fields use parent values", func(t *testing.T) {
+		t.Parallel()
 		var capturedSystemPrompt string
 		var capturedToolChoice *ToolChoice
 		var capturedToolNames []string
@@ -1218,6 +1230,7 @@ func TestPrepareStep(t *testing.T) {
 	})
 
 	t.Run("Empty ActiveTools means all tools", func(t *testing.T) {
+		t.Parallel()
 		var capturedToolNames []string
 		model := &mockLanguageModel{
 			generateFunc: func(ctx context.Context, call Call) (*Response, error) {
@@ -1265,6 +1278,7 @@ func TestToolCallRepair(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Valid tool call passes validation", func(t *testing.T) {
+		t.Parallel()
 		model := &mockLanguageModel{
 			generateFunc: func(ctx context.Context, call Call) (*Response, error) {
 				return &Response{
@@ -1305,12 +1319,13 @@ func TestToolCallRepair(t *testing.T) {
 		require.Len(t, result.Steps, 1) // Only one step since FinishReason is stop
 
 		// Check that tool call was executed successfully
-		toolCalls := result.Steps[0].Response.Content.ToolCalls()
+		toolCalls := result.Steps[0].Content.ToolCalls()
 		require.Len(t, toolCalls, 1)
 		require.False(t, toolCalls[0].Invalid) // Should be valid
 	})
 
 	t.Run("Invalid tool call without repair function", func(t *testing.T) {
+		t.Parallel()
 		model := &mockLanguageModel{
 			generateFunc: func(ctx context.Context, call Call) (*Response, error) {
 				return &Response{
@@ -1348,13 +1363,14 @@ func TestToolCallRepair(t *testing.T) {
 		require.Len(t, result.Steps, 1) // Only one step
 
 		// Check that tool call was marked as invalid
-		toolCalls := result.Steps[0].Response.Content.ToolCalls()
+		toolCalls := result.Steps[0].Content.ToolCalls()
 		require.Len(t, toolCalls, 1)
 		require.True(t, toolCalls[0].Invalid) // Should be invalid
 		require.Contains(t, toolCalls[0].ValidationError.Error(), "missing required parameter: value")
 	})
 
 	t.Run("Invalid tool call with successful repair", func(t *testing.T) {
+		t.Parallel()
 		model := &mockLanguageModel{
 			generateFunc: func(ctx context.Context, call Call) (*Response, error) {
 				return &Response{
@@ -1402,13 +1418,14 @@ func TestToolCallRepair(t *testing.T) {
 		require.Len(t, result.Steps, 1) // Only one step
 
 		// Check that tool call was repaired and is now valid
-		toolCalls := result.Steps[0].Response.Content.ToolCalls()
+		toolCalls := result.Steps[0].Content.ToolCalls()
 		require.Len(t, toolCalls, 1)
 		require.False(t, toolCalls[0].Invalid)                        // Should be valid after repair
 		require.Equal(t, `{"value": "repaired"}`, toolCalls[0].Input) // Should have repaired input
 	})
 
 	t.Run("Invalid tool call with failed repair", func(t *testing.T) {
+		t.Parallel()
 		model := &mockLanguageModel{
 			generateFunc: func(ctx context.Context, call Call) (*Response, error) {
 				return &Response{
@@ -1451,13 +1468,14 @@ func TestToolCallRepair(t *testing.T) {
 		require.Len(t, result.Steps, 1) // Only one step
 
 		// Check that tool call was marked as invalid since repair failed
-		toolCalls := result.Steps[0].Response.Content.ToolCalls()
+		toolCalls := result.Steps[0].Content.ToolCalls()
 		require.Len(t, toolCalls, 1)
 		require.True(t, toolCalls[0].Invalid) // Should be invalid
 		require.Contains(t, toolCalls[0].ValidationError.Error(), "missing required parameter: value")
 	})
 
 	t.Run("Nonexistent tool call", func(t *testing.T) {
+		t.Parallel()
 		model := &mockLanguageModel{
 			generateFunc: func(ctx context.Context, call Call) (*Response, error) {
 				return &Response{
@@ -1488,13 +1506,14 @@ func TestToolCallRepair(t *testing.T) {
 		require.Len(t, result.Steps, 1) // Only one step
 
 		// Check that tool call was marked as invalid due to nonexistent tool
-		toolCalls := result.Steps[0].Response.Content.ToolCalls()
+		toolCalls := result.Steps[0].Content.ToolCalls()
 		require.Len(t, toolCalls, 1)
 		require.True(t, toolCalls[0].Invalid) // Should be invalid
 		require.Contains(t, toolCalls[0].ValidationError.Error(), "tool not found: nonexistent_tool")
 	})
 
 	t.Run("Invalid JSON in tool call", func(t *testing.T) {
+		t.Parallel()
 		model := &mockLanguageModel{
 			generateFunc: func(ctx context.Context, call Call) (*Response, error) {
 				return &Response{
@@ -1532,7 +1551,7 @@ func TestToolCallRepair(t *testing.T) {
 		require.Len(t, result.Steps, 1) // Only one step
 
 		// Check that tool call was marked as invalid due to invalid JSON
-		toolCalls := result.Steps[0].Response.Content.ToolCalls()
+		toolCalls := result.Steps[0].Content.ToolCalls()
 		require.Len(t, toolCalls, 1)
 		require.True(t, toolCalls[0].Invalid) // Should be invalid
 		require.Contains(t, toolCalls[0].ValidationError.Error(), "invalid JSON input")

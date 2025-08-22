@@ -44,7 +44,6 @@ func main() {
 			if c.GetType() == ai.ContentTypeToolCall {
 				tc, _ := ai.AsContentType[ai.ToolCallContent](c)
 				fmt.Println("ToolCall: ", tc.ToolName)
-
 			}
 		}
 	}

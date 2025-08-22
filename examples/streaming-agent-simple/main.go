@@ -84,4 +84,3 @@ func main() {
 	fmt.Printf("\n\nFinal result: %s\n", result.Response.Content.Text())
 	fmt.Printf("Steps: %d, Total tokens: %d\n", len(result.Steps), result.TotalUsage.TotalTokens)
 }
-

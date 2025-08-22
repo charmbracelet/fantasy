@@ -634,7 +634,6 @@ func (o openAILanguageModel) Stream(ctx context.Context, call ai.Call) (ai.Strea
 								existingToolCall.hasFinished = true
 								toolCalls[toolCallDelta.Index] = existingToolCall
 							}
-
 						} else {
 							// Does not exist
 							var err error
@@ -721,7 +720,6 @@ func (o openAILanguageModel) Stream(ctx context.Context, call ai.Call) (ai.Strea
 					}
 				}
 			}
-
 		}
 		err := stream.Err()
 		if err == nil || errors.Is(err, io.EOF) {
@@ -766,7 +764,6 @@ func (o openAILanguageModel) Stream(ctx context.Context, call ai.Call) (ai.Strea
 				ProviderMetadata: streamProviderMetadata,
 			})
 			return
-
 		} else {
 			yield(ai.StreamPart{
 				Type:  ai.StreamPartTypeError,

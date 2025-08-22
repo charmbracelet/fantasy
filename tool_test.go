@@ -208,4 +208,3 @@ func TestSchemaToParameters(t *testing.T) {
 		t.Errorf("Expected 3 enum values, got %v", enumValues)
 	}
 }
-

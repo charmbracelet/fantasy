@@ -316,6 +316,10 @@ type ToolCallContent struct {
 	ProviderExecuted bool `json:"provider_executed"`
 	// Additional provider-specific metadata for the tool call.
 	ProviderMetadata ProviderMetadata `json:"provider_metadata"`
+	// Whether this tool call is invalid (failed validation/parsing)
+	Invalid bool `json:"invalid,omitempty"`
+	// Error that occurred during validation/parsing (only set if Invalid is true)
+	ValidationError error `json:"validation_error,omitempty"`
 }
 
 // GetType returns the type of the tool call content.

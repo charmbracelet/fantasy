@@ -2,7 +2,9 @@ package ai
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"maps"
 	"slices"
 	"sync"
@@ -12,11 +14,72 @@ import (
 
 type StepResult struct {
 	Response
-	// Messages generated during this step
 	Messages []Message
 }
 
 type StopCondition = func(steps []StepResult) bool
+
+// StepCountIs returns a stop condition that stops after the specified number of steps.
+func StepCountIs(stepCount int) StopCondition {
+	return func(steps []StepResult) bool {
+		return len(steps) >= stepCount
+	}
+}
+
+// HasToolCall returns a stop condition that stops when the specified tool is called in the last step.
+func HasToolCall(toolName string) StopCondition {
+	return func(steps []StepResult) bool {
+		if len(steps) == 0 {
+			return false
+		}
+		lastStep := steps[len(steps)-1]
+		toolCalls := lastStep.Content.ToolCalls()
+		for _, toolCall := range toolCalls {
+			if toolCall.ToolName == toolName {
+				return true
+			}
+		}
+		return false
+	}
+}
+
+// HasContent returns a stop condition that stops when the specified content type appears in the last step.
+func HasContent(contentType ContentType) StopCondition {
+	return func(steps []StepResult) bool {
+		if len(steps) == 0 {
+			return false
+		}
+		lastStep := steps[len(steps)-1]
+		for _, content := range lastStep.Content {
+			if content.GetType() == contentType {
+				return true
+			}
+		}
+		return false
+	}
+}
+
+// FinishReasonIs returns a stop condition that stops when the specified finish reason occurs.
+func FinishReasonIs(reason FinishReason) StopCondition {
+	return func(steps []StepResult) bool {
+		if len(steps) == 0 {
+			return false
+		}
+		lastStep := steps[len(steps)-1]
+		return lastStep.FinishReason == reason
+	}
+}
+
+// MaxTokensUsed returns a stop condition that stops when total token usage exceeds the specified limit.
+func MaxTokensUsed(maxTokens int64) StopCondition {
+	return func(steps []StepResult) bool {
+		var totalTokens int64
+		for _, step := range steps {
+			totalTokens += step.Usage.TotalTokens
+		}
+		return totalTokens >= maxTokens
+	}
+}
 
 type PrepareStepFunctionOptions struct {
 	Steps      []StepResult
@@ -26,14 +89,26 @@ type PrepareStepFunctionOptions struct {
 }
 
 type PrepareStepResult struct {
-	Model    LanguageModel
-	Messages []Message
+	Model           LanguageModel
+	Messages        []Message
+	System          *string
+	ToolChoice      *ToolChoice
+	ActiveTools     []string
+	DisableAllTools bool
+}
+
+type ToolCallRepairOptions struct {
+	OriginalToolCall ToolCallContent
+	ValidationError  error
+	AvailableTools   []tools.BaseTool
+	SystemPrompt     string
+	Messages         []Message
 }
 
 type (
 	PrepareStepFunction    = func(options PrepareStepFunctionOptions) PrepareStepResult
 	OnStepFinishedFunction = func(step StepResult)
-	RepairToolCall         = func(ToolCallContent) ToolCallContent
+	RepairToolCallFunction = func(ctx context.Context, options ToolCallRepairOptions) (*ToolCallContent, error)
 )
 
 type AgentSettings struct {
@@ -55,7 +130,7 @@ type AgentSettings struct {
 
 	stopWhen       []StopCondition
 	prepareStep    PrepareStepFunction
-	repairToolCall RepairToolCall
+	repairToolCall RepairToolCallFunction
 	onStepFinished OnStepFinishedFunction
 	onRetry        OnRetryCallback
 }
@@ -78,7 +153,7 @@ type AgentCall struct {
 
 	StopWhen       []StopCondition
 	PrepareStep    PrepareStepFunction
-	RepairToolCall RepairToolCall
+	RepairToolCall RepairToolCallFunction
 	OnStepFinished OnStepFinishedFunction
 }
 
@@ -185,6 +260,11 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 	for {
 		stepInputMessages := append(initialPrompt, responseMessages...)
 		stepModel := a.settings.model
+		stepSystemPrompt := a.settings.systemPrompt
+		stepActiveTools := opts.ActiveTools
+		stepToolChoice := ToolChoiceAuto
+		disableAllTools := false
+
 		if opts.PrepareStep != nil {
 			prepared := opts.PrepareStep(PrepareStepFunctionOptions{
 				Model:      stepModel,
@@ -192,15 +272,40 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 				StepNumber: len(steps),
 				Messages:   stepInputMessages,
 			})
-			stepInputMessages = prepared.Messages
+
+			// Apply prepared step modifications
+			if prepared.Messages != nil {
+				stepInputMessages = prepared.Messages
+			}
 			if prepared.Model != nil {
 				stepModel = prepared.Model
 			}
+			if prepared.System != nil {
+				stepSystemPrompt = *prepared.System
+			}
+			if prepared.ToolChoice != nil {
+				stepToolChoice = *prepared.ToolChoice
+			}
+			if len(prepared.ActiveTools) > 0 {
+				stepActiveTools = prepared.ActiveTools
+			}
+			disableAllTools = prepared.DisableAllTools
 		}
 
-		preparedTools := a.prepareTools(a.settings.tools, opts.ActiveTools)
+		// Recreate prompt with potentially modified system prompt
+		if stepSystemPrompt != a.settings.systemPrompt {
+			stepPrompt, err := a.createPrompt(stepSystemPrompt, opts.Prompt, opts.Messages, opts.Files...)
+			if err != nil {
+				return nil, err
+			}
+			// Replace system message part, keep the rest
+			if len(stepInputMessages) > 0 && len(stepPrompt) > 0 {
+				stepInputMessages[0] = stepPrompt[0] // Replace system message
+			}
+		}
 
-		toolChoice := ToolChoiceAuto
+		preparedTools := a.prepareTools(a.settings.tools, stepActiveTools, disableAllTools)
+
 		retryOptions := DefaultRetryOptions()
 		retryOptions.OnRetry = opts.OnRetry
 		retry := RetryWithExponentialBackoffRespectingRetryHeaders[*Response](retryOptions)
@@ -215,7 +320,7 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 				PresencePenalty:  opts.PresencePenalty,
 				FrequencyPenalty: opts.FrequencyPenalty,
 				Tools:            preparedTools,
-				ToolChoice:       &toolChoice,
+				ToolChoice:       &stepToolChoice,
 				Headers:          opts.Headers,
 				ProviderOptions:  opts.ProviderOptions,
 			})
@@ -231,13 +336,31 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 				if !ok {
 					continue
 				}
-				stepToolCalls = append(stepToolCalls, toolCall)
+
+				// Validate and potentially repair the tool call
+				validatedToolCall := a.validateAndRepairToolCall(ctx, toolCall, a.settings.tools, stepSystemPrompt, stepInputMessages, a.settings.repairToolCall)
+				stepToolCalls = append(stepToolCalls, validatedToolCall)
 			}
 		}
 
 		toolResults, err := a.executeTools(ctx, a.settings.tools, stepToolCalls)
 
-		stepContent := result.Content
+		// Build step content with validated tool calls and tool results
+		stepContent := []Content{}
+		toolCallIndex := 0
+		for _, content := range result.Content {
+			if content.GetType() == ContentTypeToolCall {
+				// Replace with validated tool call
+				if toolCallIndex < len(stepToolCalls) {
+					stepContent = append(stepContent, stepToolCalls[toolCallIndex])
+					toolCallIndex++
+				}
+			} else {
+				// Keep other content as-is
+				stepContent = append(stepContent, content)
+			}
+		}
+		// Add tool results
 		for _, result := range toolResults {
 			stepContent = append(stepContent, result)
 		}
@@ -345,6 +468,10 @@ func toResponseMessages(content []Content) []Message {
 				MediaType:       file.MediaType,
 				ProviderOptions: ProviderOptions(file.ProviderMetadata),
 			})
+		case ContentTypeSource:
+			// Sources are metadata about references used to generate the response.
+			// They don't need to be included in the conversation messages.
+			continue
 		case ContentTypeToolResult:
 			result, ok := AsContentType[ToolResultContent](c)
 			if !ok {
@@ -394,6 +521,19 @@ func (a *agent) executeTools(ctx context.Context, allTools []tools.BaseTool, too
 		wg.Add(1)
 		go func(index int, call ToolCallContent) {
 			defer wg.Done()
+
+			// Skip invalid tool calls - create error result
+			if call.Invalid {
+				results[index] = ToolResultContent{
+					ToolCallID: call.ToolCallID,
+					ToolName:   call.ToolName,
+					Result: ToolResultOutputContentError{
+						Error: call.ValidationError,
+					},
+					ProviderExecuted: false,
+				}
+				return
+			}
 
 			tool, exists := toolMap[call.ToolName]
 			if !exists {
@@ -461,9 +601,17 @@ func (a *agent) Stream(ctx context.Context, opts AgentCall) (StreamResponse, err
 	panic("not implemented")
 }
 
-func (a *agent) prepareTools(tools []tools.BaseTool, activeTools []string) []Tool {
+func (a *agent) prepareTools(tools []tools.BaseTool, activeTools []string, disableAllTools bool) []Tool {
 	var preparedTools []Tool
+
+	// If explicitly disabling all tools, return no tools
+	if disableAllTools {
+		return preparedTools
+	}
+
 	for _, tool := range tools {
+		// If activeTools has items, only include tools in the list
+		// If activeTools is empty, include all tools
 		if len(activeTools) > 0 && !slices.Contains(activeTools, tool.Info().Name) {
 			continue
 		}
@@ -479,6 +627,65 @@ func (a *agent) prepareTools(tools []tools.BaseTool, activeTools []string) []Too
 		})
 	}
 	return preparedTools
+}
+
+// validateAndRepairToolCall validates a tool call and attempts repair if validation fails
+func (a *agent) validateAndRepairToolCall(ctx context.Context, toolCall ToolCallContent, availableTools []tools.BaseTool, systemPrompt string, messages []Message, repairFunc RepairToolCallFunction) ToolCallContent {
+	if err := a.validateToolCall(toolCall, availableTools); err == nil {
+		return toolCall
+	} else {
+		if repairFunc != nil {
+			repairOptions := ToolCallRepairOptions{
+				OriginalToolCall: toolCall,
+				ValidationError:  err,
+				AvailableTools:   availableTools,
+				SystemPrompt:     systemPrompt,
+				Messages:         messages,
+			}
+
+			if repairedToolCall, repairErr := repairFunc(ctx, repairOptions); repairErr == nil && repairedToolCall != nil {
+				if validateErr := a.validateToolCall(*repairedToolCall, availableTools); validateErr == nil {
+					return *repairedToolCall
+				}
+			}
+		}
+
+		invalidToolCall := toolCall
+		invalidToolCall.Invalid = true
+		invalidToolCall.ValidationError = err
+		return invalidToolCall
+	}
+}
+
+// validateToolCall validates a tool call against available tools and their schemas
+func (a *agent) validateToolCall(toolCall ToolCallContent, availableTools []tools.BaseTool) error {
+	var tool tools.BaseTool
+	for _, t := range availableTools {
+		if t.Info().Name == toolCall.ToolName {
+			tool = t
+			break
+		}
+	}
+
+	if tool == nil {
+		return fmt.Errorf("tool not found: %s", toolCall.ToolName)
+	}
+
+	// Validate JSON parsing
+	var input map[string]any
+	if err := json.Unmarshal([]byte(toolCall.Input), &input); err != nil {
+		return fmt.Errorf("invalid JSON input: %w", err)
+	}
+
+	// Basic schema validation (check required fields)
+	// TODO: more robust schema validation using JSON Schema or similar
+	toolInfo := tool.Info()
+	for _, required := range toolInfo.Required {
+		if _, exists := input[required]; !exists {
+			return fmt.Errorf("missing required parameter: %s", required)
+		}
+	}
+	return nil
 }
 
 func (a *agent) createPrompt(system, prompt string, messages []Message, files ...FilePart) (Prompt, error) {
@@ -557,7 +764,7 @@ func WithPrepareStep(fn PrepareStepFunction) agentOption {
 	}
 }
 
-func WithRepairToolCall(fn RepairToolCall) agentOption {
+func WithRepairToolCall(fn RepairToolCallFunction) agentOption {
 	return func(s *AgentSettings) {
 		s.repairToolCall = fn
 	}

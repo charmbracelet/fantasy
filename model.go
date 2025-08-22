@@ -37,6 +37,80 @@ func (r ResponseContent) Text() string {
 	return ""
 }
 
+// Reasoning returns all reasoning content parts.
+func (r ResponseContent) Reasoning() []ReasoningContent {
+	var reasoning []ReasoningContent
+	for _, c := range r {
+		if c.GetType() == ContentTypeReasoning {
+			if reasoningContent, ok := AsContentType[ReasoningContent](c); ok {
+				reasoning = append(reasoning, reasoningContent)
+			}
+		}
+	}
+	return reasoning
+}
+
+// ReasoningText returns all reasoning content as a concatenated string.
+func (r ResponseContent) ReasoningText() string {
+	var text string
+	for _, reasoning := range r.Reasoning() {
+		text += reasoning.Text
+	}
+	return text
+}
+
+// Files returns all file content parts.
+func (r ResponseContent) Files() []FileContent {
+	var files []FileContent
+	for _, c := range r {
+		if c.GetType() == ContentTypeFile {
+			if fileContent, ok := AsContentType[FileContent](c); ok {
+				files = append(files, fileContent)
+			}
+		}
+	}
+	return files
+}
+
+// Sources returns all source content parts.
+func (r ResponseContent) Sources() []SourceContent {
+	var sources []SourceContent
+	for _, c := range r {
+		if c.GetType() == ContentTypeSource {
+			if sourceContent, ok := AsContentType[SourceContent](c); ok {
+				sources = append(sources, sourceContent)
+			}
+		}
+	}
+	return sources
+}
+
+// ToolCalls returns all tool call content parts.
+func (r ResponseContent) ToolCalls() []ToolCallContent {
+	var toolCalls []ToolCallContent
+	for _, c := range r {
+		if c.GetType() == ContentTypeToolCall {
+			if toolCallContent, ok := AsContentType[ToolCallContent](c); ok {
+				toolCalls = append(toolCalls, toolCallContent)
+			}
+		}
+	}
+	return toolCalls
+}
+
+// ToolResults returns all tool result content parts.
+func (r ResponseContent) ToolResults() []ToolResultContent {
+	var toolResults []ToolResultContent
+	for _, c := range r {
+		if c.GetType() == ContentTypeToolResult {
+			if toolResultContent, ok := AsContentType[ToolResultContent](c); ok {
+				toolResults = append(toolResults, toolResultContent)
+			}
+		}
+	}
+	return toolResults
+}
+
 type Response struct {
 	Content      ResponseContent `json:"content"`
 	FinishReason FinishReason    `json:"finish_reason"`

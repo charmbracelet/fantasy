@@ -39,7 +39,7 @@ func NewDownloadTool(permissions permission.Service, workingDir string) ai.Agent
 			IdleConnTimeout:     90 * time.Second,
 		},
 	}
-	return ai.NewTypedToolFunc(
+	return ai.NewAgentTool(
 		DownloadToolName,
 		`Downloads binary data from a URL and saves it to a local file.
 

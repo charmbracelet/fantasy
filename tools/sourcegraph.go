@@ -38,7 +38,7 @@ func NewSourcegraphTool() ai.AgentTool {
 			IdleConnTimeout:     90 * time.Second,
 		},
 	}
-	return ai.NewTypedToolFunc(
+	return ai.NewAgentTool(
 		SourcegraphToolName,
 		`Search code across public repositories using Sourcegraph's GraphQL API.
 

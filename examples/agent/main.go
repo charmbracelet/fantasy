@@ -20,7 +20,7 @@ func main() {
 		Location string `json:"location" description:"the city"`
 	}
 
-	weatherTool := ai.NewTypedToolFunc(
+	weatherTool := ai.NewAgentTool(
 		"weather",
 		"Get weather information for a location",
 		func(ctx context.Context, input WeatherInput, _ ai.ToolCall) (ai.ToolResponse, error) {

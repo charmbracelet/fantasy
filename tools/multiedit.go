@@ -47,7 +47,7 @@ const (
 )
 
 func NewMultiEditTool(lspClients map[string]*lsp.Client, permissions permission.Service, files history.Service, workingDir string) ai.AgentTool {
-	return ai.NewTypedToolFunc(
+	return ai.NewAgentTool(
 		MultiEditToolName,
 		`This is a tool for making multiple edits to a single file in one operation. It is built on top of the Edit tool and allows you to perform multiple find-and-replace operations efficiently. Prefer this tool over the Edit tool when you need to make multiple edits to the same file.
 

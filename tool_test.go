@@ -15,7 +15,7 @@ type CalculatorInput struct {
 
 func TestTypedToolFuncExample(t *testing.T) {
 	// Create a typed tool using the function API
-	tool := NewTypedToolFunc(
+	tool := NewAgentTool(
 		"calculator",
 		"Evaluates simple mathematical expressions",
 		func(ctx context.Context, input CalculatorInput, _ ToolCall) (ToolResponse, error) {
@@ -61,7 +61,7 @@ func TestEnumToolExample(t *testing.T) {
 	}
 
 	// Create a weather tool with enum support
-	tool := NewTypedToolFunc(
+	tool := NewAgentTool(
 		"weather",
 		"Gets current weather for a location",
 		func(ctx context.Context, input WeatherInput, _ ToolCall) (ToolResponse, error) {

@@ -28,7 +28,7 @@ func main() {
 		Message string `json:"message" description:"The message to echo back"`
 	}
 
-	echoTool := ai.NewTypedToolFunc(
+	echoTool := ai.NewAgentTool(
 		"echo",
 		"Echo back the provided message",
 		func(ctx context.Context, input EchoInput, _ ai.ToolCall) (ai.ToolResponse, error) {

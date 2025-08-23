@@ -40,7 +40,7 @@ type LSResponseMetadata struct {
 }
 
 func NewLSTool(permissions permission.Service, workingDir string) ai.AgentTool {
-	return ai.NewTypedToolFunc(
+	return ai.NewAgentTool(
 		LSToolName,
 		`Directory listing tool that shows files and subdirectories in a tree structure, helping you explore and understand the project organization.
 

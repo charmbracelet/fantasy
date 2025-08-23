@@ -83,9 +83,9 @@ type AgentTool interface {
 	Run(ctx context.Context, params ToolCall) (ToolResponse, error)
 }
 
-// NewTypedToolFunc creates a typed tool from a function with automatic schema generation.
+// NewAgentTool creates a typed tool from a function with automatic schema generation.
 // This is the recommended way to create tools.
-func NewTypedToolFunc[TInput any](
+func NewAgentTool[TInput any](
 	name string,
 	description string,
 	fn func(ctx context.Context, input TInput, call ToolCall) (ToolResponse, error),

@@ -37,7 +37,7 @@ const (
 )
 
 func NewViewTool(lspClients map[string]*lsp.Client, permissions permission.Service, workingDir string) ai.AgentTool {
-	return ai.NewTypedToolFunc(
+	return ai.NewAgentTool(
 		ViewToolName,
 		`File viewing tool that reads and displays the contents of files with line numbers, allowing you to examine code, logs, or text data.
 

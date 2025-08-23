@@ -82,7 +82,7 @@ func TestAgent_Generate_ResultContent_AllTypes(t *testing.T) {
 		Value string `json:"value" description:"Test value"`
 	}
 
-	tool1 := NewTypedToolFunc(
+	tool1 := NewAgentTool(
 		"tool1",
 		"Test tool",
 		func(ctx context.Context, input TestInput, _ ToolCall) (ToolResponse, error) {
@@ -219,7 +219,7 @@ func TestAgent_Generate_ResultToolCalls(t *testing.T) {
 		SomethingElse string `json:"somethingElse" description:"Another test value"`
 	}
 
-	tool1 := NewTypedToolFunc(
+	tool1 := NewAgentTool(
 		"tool1",
 		"Test tool 1",
 		func(ctx context.Context, input Tool1Input, _ ToolCall) (ToolResponse, error) {
@@ -227,7 +227,7 @@ func TestAgent_Generate_ResultToolCalls(t *testing.T) {
 		},
 	)
 
-	tool2 := NewTypedToolFunc(
+	tool2 := NewAgentTool(
 		"tool2",
 		"Test tool 2",
 		func(ctx context.Context, input Tool2Input, _ ToolCall) (ToolResponse, error) {
@@ -300,7 +300,7 @@ func TestAgent_Generate_ResultToolResults(t *testing.T) {
 		Value string `json:"value" description:"Test value"`
 	}
 
-	tool1 := NewTypedToolFunc(
+	tool1 := NewAgentTool(
 		"tool1",
 		"Test tool",
 		func(ctx context.Context, input TestInput, _ ToolCall) (ToolResponse, error) {
@@ -373,7 +373,7 @@ func TestAgent_Generate_MultipleSteps(t *testing.T) {
 		Value string `json:"value" description:"Test value"`
 	}
 
-	tool1 := NewTypedToolFunc(
+	tool1 := NewAgentTool(
 		"tool1",
 		"Test tool",
 		func(ctx context.Context, input TestInput, _ ToolCall) (ToolResponse, error) {

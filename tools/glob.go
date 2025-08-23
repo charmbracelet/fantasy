@@ -29,7 +29,7 @@ const (
 )
 
 func NewGlobTool(workingDir string) ai.AgentTool {
-	return ai.NewTypedToolFunc(
+	return ai.NewAgentTool(
 		GlobToolName,
 		`Fast file pattern matching tool that finds files by name and pattern, returning matching paths sorted by modification time (newest first).
 

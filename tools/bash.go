@@ -39,7 +39,7 @@ func NewBashTool(permissions permission.Service, workingDir string) ai.AgentTool
 	// Set up command blocking on the persistent shell
 	persistentShell := shell.GetPersistentShell(workingDir)
 	persistentShell.SetBlockFuncs(blockFuncs())
-	return ai.NewTypedToolFunc(
+	return ai.NewAgentTool(
 		BashToolName,
 		bashDescription(),
 		func(ctx context.Context, params BashParams, call ai.ToolCall) (ai.ToolResponse, error) {

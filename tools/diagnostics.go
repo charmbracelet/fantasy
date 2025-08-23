@@ -23,7 +23,7 @@ const (
 )
 
 func NewDiagnosticsTool(lsps map[string]*lsp.Client) ai.AgentTool {
-	return ai.NewTypedToolFunc(
+	return ai.NewAgentTool(
 		DiagnosticsToolName,
 		`Get diagnostics for a file and/or project.
 WHEN TO USE THIS TOOL:

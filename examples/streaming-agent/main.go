@@ -40,7 +40,7 @@ func main() {
 	}
 
 	// Create weather tool using the new type-safe API
-	weatherTool := ai.NewTypedToolFunc(
+	weatherTool := ai.NewAgentTool(
 		"get_weather",
 		"Get the current weather for a specific location",
 		func(ctx context.Context, input WeatherInput, _ ai.ToolCall) (ai.ToolResponse, error) {
@@ -81,7 +81,7 @@ func main() {
 	)
 
 	// Create calculator tool using the new type-safe API
-	calculatorTool := ai.NewTypedToolFunc(
+	calculatorTool := ai.NewAgentTool(
 		"calculate",
 		"Perform basic mathematical calculations",
 		func(ctx context.Context, input CalculatorInput, _ ai.ToolCall) (ai.ToolResponse, error) {

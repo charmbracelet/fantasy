@@ -39,7 +39,7 @@ const (
 )
 
 func NewWriteTool(lspClients map[string]*lsp.Client, permissions permission.Service, files history.Service, workingDir string) ai.AgentTool {
-	return ai.NewTypedToolFunc(
+	return ai.NewAgentTool(
 		WriteToolName,
 		`File writing tool that creates or updates files in the filesystem, allowing you to save or modify text content.
 

@@ -93,7 +93,7 @@ const (
 )
 
 func NewGrepTool(workingDir string) ai.AgentTool {
-	return ai.NewTypedToolFunc(
+	return ai.NewAgentTool(
 		GrepToolName,
 		`Fast content search tool that finds files containing specific text or patterns, returning matching file paths sorted by modification time (newest first).
 

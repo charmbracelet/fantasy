@@ -40,7 +40,7 @@ func NewFetchTool(permissions permission.Service, workingDir string) ai.AgentToo
 			IdleConnTimeout:     90 * time.Second,
 		},
 	}
-	return ai.NewTypedToolFunc(
+	return ai.NewAgentTool(
 		FetchToolName,
 		`Fetches content from a URL and returns it in the specified format.
 

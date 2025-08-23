@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"slices"
 	"strings"
 )
 
@@ -251,11 +252,8 @@ func generateSchemaRecursive(t reflect.Type, visited map[reflect.Type]bool) Sche
 				}
 
 				// Check for omitempty
-				for _, part := range parts[1:] {
-					if part == "omitempty" {
-						required = false
-						break
-					}
+				if slices.Contains(parts[1:], "omitempty") {
+					required = false
 				}
 			} else {
 				// Convert field name to snake_case for JSON

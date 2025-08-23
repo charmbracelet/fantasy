@@ -9,6 +9,7 @@ import (
 
 	"github.com/charmbracelet/crush/internal/ai"
 	"github.com/charmbracelet/crush/internal/fsext"
+	"github.com/charmbracelet/crush/internal/permission"
 )
 
 const (
@@ -38,7 +39,7 @@ type LSResponseMetadata struct {
 	Truncated     bool `json:"truncated"`
 }
 
-func NewLSTool(permissionAsk PermissionAsk, workingDir string) ai.AgentTool {
+func NewLSTool(permissions permission.Service, workingDir string) ai.AgentTool {
 	return ai.NewTypedToolFunc(
 		LSToolName,
 		`Directory listing tool that shows files and subdirectories in a tree structure, helping you explore and understand the project organization.
@@ -104,17 +105,24 @@ TIPS:
 
 			relPath, err := filepath.Rel(absWorkingDir, absSearchPath)
 			if err != nil || strings.HasPrefix(relPath, "..") {
-				granted := permissionAsk(Permission{
-					ToolCallID:  call.ID,
-					ToolName:    LSToolName,
-					Path:        absSearchPath,
-					Action:      "list",
-					Description: fmt.Sprintf("List directory outside working directory: %s", absSearchPath),
-					Params:      LSPermissionsParams(params),
-				})
+
+				sessionID, messageID := GetContextValues(ctx)
+				if sessionID == "" || messageID == "" {
+					return ai.ToolResponse{}, fmt.Errorf("session ID and message ID are required for the ls tool")
+				}
+				granted := permissions.Request(
+					permission.CreatePermissionRequest{
+						SessionID:   sessionID,
+						ToolCallID:  call.ID,
+						ToolName:    LSToolName,
+						Path:        absSearchPath,
+						Action:      "list",
+						Description: fmt.Sprintf("List directory outside working directory: %s", absSearchPath),
+						Params:      LSPermissionsParams(params),
+					})
 
 				if !granted {
-					return ai.ToolResponse{}, ErrorPermissionDenied
+					return ai.ToolResponse{}, permission.ErrorPermissionDenied
 				}
 			}
 			output, err := ListDirectoryTree(searchPath, params.Ignore)

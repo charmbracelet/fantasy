@@ -300,45 +300,48 @@ func (o openAILanguageModel) prepareParams(call ai.Call) (*openai.ChatCompletion
 			params.TopP = param.Opt[float64]{}
 			warnings = append(warnings, ai.CallWarning{
 				Type:    ai.CallWarningTypeUnsupportedSetting,
-				Setting: "top_p",
-				Details: "topP is not supported for reasoning models",
+				Setting: "TopP",
+				Details: "TopP is not supported for reasoning models",
 			})
 		}
 		if call.FrequencyPenalty != nil {
 			params.FrequencyPenalty = param.Opt[float64]{}
 			warnings = append(warnings, ai.CallWarning{
 				Type:    ai.CallWarningTypeUnsupportedSetting,
-				Setting: "frequency_penalty",
-				Details: "frequencyPenalty is not supported for reasoning models",
+				Setting: "FrequencyPenalty",
+				Details: "FrequencyPenalty is not supported for reasoning models",
 			})
 		}
 		if call.PresencePenalty != nil {
 			params.PresencePenalty = param.Opt[float64]{}
 			warnings = append(warnings, ai.CallWarning{
 				Type:    ai.CallWarningTypeUnsupportedSetting,
-				Setting: "presence_penalty",
-				Details: "presencePenalty is not supported for reasoning models",
+				Setting: "PresencePenalty",
+				Details: "PresencePenalty is not supported for reasoning models",
 			})
 		}
 		if providerOptions.LogitBias != nil {
 			params.LogitBias = nil
 			warnings = append(warnings, ai.CallWarning{
-				Type:    ai.CallWarningTypeOther,
-				Message: "logitBias is not supported for reasoning models",
+				Type:    ai.CallWarningTypeUnsupportedSetting,
+				Setting: "LogitBias",
+				Message: "LogitBias is not supported for reasoning models",
 			})
 		}
 		if providerOptions.LogProbs != nil {
 			params.Logprobs = param.Opt[bool]{}
 			warnings = append(warnings, ai.CallWarning{
-				Type:    ai.CallWarningTypeOther,
-				Message: "logprobs is not supported for reasoning models",
+				Type:    ai.CallWarningTypeUnsupportedSetting,
+				Setting: "Logprobs",
+				Message: "Logprobs is not supported for reasoning models",
 			})
 		}
 		if providerOptions.TopLogProbs != nil {
 			params.TopLogprobs = param.Opt[int64]{}
 			warnings = append(warnings, ai.CallWarning{
-				Type:    ai.CallWarningTypeOther,
-				Message: "topLogprobs is not supported for reasoning models",
+				Type:    ai.CallWarningTypeUnsupportedSetting,
+				Setting: "TopLogprobs",
+				Message: "TopLogprobs is not supported for reasoning models",
 			})
 		}
 
@@ -370,14 +373,14 @@ func (o openAILanguageModel) prepareParams(call ai.Call) (*openai.ChatCompletion
 			params.ServiceTier = ""
 			warnings = append(warnings, ai.CallWarning{
 				Type:    ai.CallWarningTypeUnsupportedSetting,
-				Setting: "serviceTier",
+				Setting: "ServiceTier",
 				Details: "flex processing is only available for o3, o4-mini, and gpt-5 models",
 			})
 		} else if serviceTier == "priority" && !supportsPriorityProcessing(o.modelID) {
 			params.ServiceTier = ""
 			warnings = append(warnings, ai.CallWarning{
 				Type:    ai.CallWarningTypeUnsupportedSetting,
-				Setting: "serviceTier",
+				Setting: "ServiceTier",
 				Details: "priority processing is only available for supported models (gpt-4, gpt-5, gpt-5-mini, o3, o4-mini) and requires Enterprise access. gpt-5-nano is not supported",
 			})
 		}
@@ -526,7 +529,7 @@ func (o openAILanguageModel) Stream(ctx context.Context, call ai.Call) (ai.Strea
 	toolCalls := make(map[int64]toolCall)
 
 	// Build provider metadata for streaming
-	streamProviderMetadata := ai.ProviderOptions{
+	streamProviderMetadata := ai.ProviderMetadata{
 		"openai": make(map[string]any),
 	}
 
@@ -745,7 +748,7 @@ func (o openAILanguageModel) Stream(ctx context.Context, call ai.Call) (ai.Strea
 					if annotation.Type == "url_citation" {
 						if !yield(ai.StreamPart{
 							Type:       ai.StreamPartTypeSource,
-							ID:         uuid.NewString(),
+							ID:         acc.ID,
 							SourceType: ai.SourceTypeURL,
 							URL:        annotation.URLCitation.URL,
 							Title:      annotation.URLCitation.Title,
@@ -767,7 +770,7 @@ func (o openAILanguageModel) Stream(ctx context.Context, call ai.Call) (ai.Strea
 		} else {
 			yield(ai.StreamPart{
 				Type:  ai.StreamPartTypeError,
-				Error: stream.Err(),
+				Error: o.handleError(err),
 			})
 			return
 		}

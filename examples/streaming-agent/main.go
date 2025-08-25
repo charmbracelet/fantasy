@@ -163,7 +163,7 @@ func main() {
 		OnReasoningDelta: func(id, text string) {
 			reasoningBuffer.WriteString(text)
 		},
-		OnReasoningEnd: func(id string) {
+		OnReasoningEnd: func(id string, content ai.ReasoningContent) {
 			if reasoningBuffer.Len() > 0 {
 				fmt.Printf("%s\n", reasoningBuffer.String())
 				reasoningBuffer.Reset()

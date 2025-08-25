@@ -159,15 +159,16 @@ type StreamPart struct {
 	URL        string     `json:"url"`
 	Title      string     `json:"title"`
 
-	ProviderMetadata ProviderOptions `json:"provider_metadata"`
+	ProviderMetadata ProviderMetadata `json:"provider_metadata"`
 }
 type StreamResponse = iter.Seq[StreamPart]
 
 type ToolChoice string
 
 const (
-	ToolChoiceNone ToolChoice = "none"
-	ToolChoiceAuto ToolChoice = "auto"
+	ToolChoiceNone     ToolChoice = "none"
+	ToolChoiceAuto     ToolChoice = "auto"
+	ToolChoiceRequired ToolChoice = "required"
 )
 
 func SpecificToolChoice(name string) ToolChoice {

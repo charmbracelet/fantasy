@@ -78,7 +78,22 @@ type Message struct {
 	ProviderOptions ProviderOptions `json:"provider_options"`
 }
 
-func AsContentType[T MessagePart](content MessagePart) (T, bool) {
+func AsContentType[T Content](content Content) (T, bool) {
+	var zero T
+	if content == nil {
+		return zero, false
+	}
+	switch v := any(content).(type) {
+	case T:
+		return v, true
+	case *T:
+		return *v, true
+	default:
+		return zero, false
+	}
+}
+
+func AsMessagePart[T MessagePart](content MessagePart) (T, bool) {
 	var zero T
 	if content == nil {
 		return zero, false
@@ -96,6 +111,7 @@ func AsContentType[T MessagePart](content MessagePart) (T, bool) {
 // MessagePart represents a part of a message content.
 type MessagePart interface {
 	GetType() ContentType
+	Options() ProviderOptions
 }
 
 // TextPart represents text content in a message.
@@ -109,6 +125,10 @@ func (t TextPart) GetType() ContentType {
 	return ContentTypeText
 }
 
+func (t TextPart) Options() ProviderOptions {
+	return t.ProviderOptions
+}
+
 // ReasoningPart represents reasoning content in a message.
 type ReasoningPart struct {
 	Text            string          `json:"text"`
@@ -118,6 +138,10 @@ type ReasoningPart struct {
 // GetType returns the type of the reasoning part.
 func (r ReasoningPart) GetType() ContentType {
 	return ContentTypeReasoning
+}
+
+func (r ReasoningPart) Options() ProviderOptions {
+	return r.ProviderOptions
 }
 
 // FilePart represents file content in a message.
@@ -131,6 +155,10 @@ type FilePart struct {
 // GetType returns the type of the file part.
 func (f FilePart) GetType() ContentType {
 	return ContentTypeFile
+}
+
+func (f FilePart) Options() ProviderOptions {
+	return f.ProviderOptions
 }
 
 // ToolCallPart represents a tool call in a message.
@@ -147,6 +175,10 @@ func (t ToolCallPart) GetType() ContentType {
 	return ContentTypeToolCall
 }
 
+func (t ToolCallPart) Options() ProviderOptions {
+	return t.ProviderOptions
+}
+
 // ToolResultPart represents a tool result in a message.
 type ToolResultPart struct {
 	ToolCallID      string                  `json:"tool_call_id"`
@@ -157,6 +189,10 @@ type ToolResultPart struct {
 // GetType returns the type of the tool result part.
 func (t ToolResultPart) GetType() ContentType {
 	return ContentTypeToolResult
+}
+
+func (t ToolResultPart) Options() ProviderOptions {
+	return t.ProviderOptions
 }
 
 // ToolResultContentType represents the type of tool result output.

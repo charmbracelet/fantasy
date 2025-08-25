@@ -962,13 +962,13 @@ func TestPrepareStep(t *testing.T) {
 			},
 		}
 
-		prepareStepFunc := func(options PrepareStepFunctionOptions) PrepareStepResult {
+		prepareStepFunc := func(options PrepareStepFunctionOptions) (PrepareStepResult, error) {
 			newSystem := "Modified system prompt for step " + fmt.Sprintf("%d", options.StepNumber)
 			return PrepareStepResult{
 				Model:    options.Model,
 				Messages: options.Messages,
 				System:   &newSystem,
-			}
+			}, nil
 		}
 
 		agent := NewAgent(model, WithSystemPrompt("Original system prompt"))
@@ -999,13 +999,13 @@ func TestPrepareStep(t *testing.T) {
 			},
 		}
 
-		prepareStepFunc := func(options PrepareStepFunctionOptions) PrepareStepResult {
+		prepareStepFunc := func(options PrepareStepFunctionOptions) (PrepareStepResult, error) {
 			toolChoice := ToolChoiceNone
 			return PrepareStepResult{
 				Model:      options.Model,
 				Messages:   options.Messages,
 				ToolChoice: &toolChoice,
-			}
+			}, nil
 		}
 
 		agent := NewAgent(model)
@@ -1044,13 +1044,13 @@ func TestPrepareStep(t *testing.T) {
 		tool2 := &mockTool{name: "tool2", description: "Tool 2"}
 		tool3 := &mockTool{name: "tool3", description: "Tool 3"}
 
-		prepareStepFunc := func(options PrepareStepFunctionOptions) PrepareStepResult {
+		prepareStepFunc := func(options PrepareStepFunctionOptions) (PrepareStepResult, error) {
 			activeTools := []string{"tool2"} // Only tool2 should be active
 			return PrepareStepResult{
 				Model:       options.Model,
 				Messages:    options.Messages,
 				ActiveTools: activeTools,
-			}
+			}, nil
 		}
 
 		agent := NewAgent(model, WithTools(tool1, tool2, tool3))
@@ -1084,12 +1084,12 @@ func TestPrepareStep(t *testing.T) {
 
 		tool1 := &mockTool{name: "tool1", description: "Tool 1"}
 
-		prepareStepFunc := func(options PrepareStepFunctionOptions) PrepareStepResult {
+		prepareStepFunc := func(options PrepareStepFunctionOptions) (PrepareStepResult, error) {
 			return PrepareStepResult{
 				Model:           options.Model,
 				Messages:        options.Messages,
 				DisableAllTools: true, // Disable all tools for this step
-			}
+			}, nil
 		}
 
 		agent := NewAgent(model, WithTools(tool1))
@@ -1139,7 +1139,7 @@ func TestPrepareStep(t *testing.T) {
 		tool1 := &mockTool{name: "tool1", description: "Tool 1"}
 		tool2 := &mockTool{name: "tool2", description: "Tool 2"}
 
-		prepareStepFunc := func(options PrepareStepFunctionOptions) PrepareStepResult {
+		prepareStepFunc := func(options PrepareStepFunctionOptions) (PrepareStepResult, error) {
 			newSystem := "Step-specific system"
 			toolChoice := SpecificToolChoice("tool1")
 			activeTools := []string{"tool1"}
@@ -1149,7 +1149,7 @@ func TestPrepareStep(t *testing.T) {
 				System:      &newSystem,
 				ToolChoice:  &toolChoice,
 				ActiveTools: activeTools,
-			}
+			}, nil
 		}
 
 		agent := NewAgent(model, WithSystemPrompt("Original system"), WithTools(tool1, tool2))
@@ -1202,7 +1202,7 @@ func TestPrepareStep(t *testing.T) {
 
 		tool1 := &mockTool{name: "tool1", description: "Tool 1"}
 
-		prepareStepFunc := func(options PrepareStepFunctionOptions) PrepareStepResult {
+		prepareStepFunc := func(options PrepareStepFunctionOptions) (PrepareStepResult, error) {
 			// All optional fields are nil, should use parent values
 			return PrepareStepResult{
 				Model:       options.Model,
@@ -1210,7 +1210,7 @@ func TestPrepareStep(t *testing.T) {
 				System:      nil, // Use parent
 				ToolChoice:  nil, // Use parent (auto)
 				ActiveTools: nil, // Use parent (all tools)
-			}
+			}, nil
 		}
 
 		agent := NewAgent(model, WithSystemPrompt("Parent system"), WithTools(tool1))
@@ -1251,12 +1251,12 @@ func TestPrepareStep(t *testing.T) {
 		tool1 := &mockTool{name: "tool1", description: "Tool 1"}
 		tool2 := &mockTool{name: "tool2", description: "Tool 2"}
 
-		prepareStepFunc := func(options PrepareStepFunctionOptions) PrepareStepResult {
+		prepareStepFunc := func(options PrepareStepFunctionOptions) (PrepareStepResult, error) {
 			return PrepareStepResult{
 				Model:       options.Model,
 				Messages:    options.Messages,
 				ActiveTools: []string{}, // Empty slice means all tools
-			}
+			}, nil
 		}
 
 		agent := NewAgent(model, WithTools(tool1, tool2))

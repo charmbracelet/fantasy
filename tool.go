@@ -110,6 +110,9 @@ type funcToolWrapper[TInput any] struct {
 }
 
 func (w *funcToolWrapper[TInput]) Info() ToolInfo {
+	if w.schema.Required == nil {
+		w.schema.Required = []string{}
+	}
 	return ToolInfo{
 		Name:        w.name,
 		Description: w.description,

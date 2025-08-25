@@ -145,7 +145,7 @@ func TestStreamingAgentCallbacks(t *testing.T) {
 		OnReasoningDelta: func(id, text string) {
 			callbacks["OnReasoningDelta"] = true
 		},
-		OnReasoningEnd: func(id string) {
+		OnReasoningEnd: func(id string, content ReasoningContent) {
 			callbacks["OnReasoningEnd"] = true
 		},
 		OnToolInputStart: func(id, toolName string) {
@@ -166,7 +166,7 @@ func TestStreamingAgentCallbacks(t *testing.T) {
 		OnSource: func(source SourceContent) {
 			callbacks["OnSource"] = true
 		},
-		OnStreamFinish: func(usage Usage, finishReason FinishReason, providerMetadata ProviderOptions) {
+		OnStreamFinish: func(usage Usage, finishReason FinishReason, providerMetadata ProviderMetadata) {
 			callbacks["OnStreamFinish"] = true
 		},
 		OnStreamError: func(err error) {

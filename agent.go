@@ -104,12 +104,12 @@ type ToolCallRepairOptions struct {
 }
 
 type (
-	PrepareStepFunction    = func(options PrepareStepFunctionOptions) PrepareStepResult
+	PrepareStepFunction    = func(options PrepareStepFunctionOptions) (PrepareStepResult, error)
 	OnStepFinishedFunction = func(step StepResult)
 	RepairToolCallFunction = func(ctx context.Context, options ToolCallRepairOptions) (*ToolCallContent, error)
 )
 
-type AgentSettings struct {
+type agentSettings struct {
 	systemPrompt     string
 	maxOutputTokens  *int64
 	temperature      *float64
@@ -129,7 +129,6 @@ type AgentSettings struct {
 	stopWhen       []StopCondition
 	prepareStep    PrepareStepFunction
 	repairToolCall RepairToolCallFunction
-	onStepFinished OnStepFinishedFunction
 	onRetry        OnRetryCallback
 }
 
@@ -152,7 +151,6 @@ type AgentCall struct {
 	StopWhen       []StopCondition
 	PrepareStep    PrepareStepFunction
 	RepairToolCall RepairToolCallFunction
-	OnStepFinished OnStepFinishedFunction
 }
 
 type AgentStreamCall struct {
@@ -184,22 +182,22 @@ type AgentStreamCall struct {
 	OnError       func(error)                 // Called when an error occurs
 
 	// Stream part callbacks - called for each corresponding stream part type
-	OnChunk          func(StreamPart)                                                               // Called for each stream part (catch-all)
-	OnWarnings       func(warnings []CallWarning)                                                   // Called for warnings
-	OnTextStart      func(id string)                                                                // Called when text starts
-	OnTextDelta      func(id, text string)                                                          // Called for text deltas
-	OnTextEnd        func(id string)                                                                // Called when text ends
-	OnReasoningStart func(id string)                                                                // Called when reasoning starts
-	OnReasoningDelta func(id, text string)                                                          // Called for reasoning deltas
-	OnReasoningEnd   func(id string)                                                                // Called when reasoning ends
-	OnToolInputStart func(id, toolName string)                                                      // Called when tool input starts
-	OnToolInputDelta func(id, delta string)                                                         // Called for tool input deltas
-	OnToolInputEnd   func(id string)                                                                // Called when tool input ends
-	OnToolCall       func(toolCall ToolCallContent)                                                 // Called when tool call is complete
-	OnToolResult     func(result ToolResultContent)                                                 // Called when tool execution completes
-	OnSource         func(source SourceContent)                                                     // Called for source references
-	OnStreamFinish   func(usage Usage, finishReason FinishReason, providerMetadata ProviderOptions) // Called when stream finishes
-	OnStreamError    func(error)                                                                    // Called when stream error occurs
+	OnChunk          func(StreamPart)                                                                // Called for each stream part (catch-all)
+	OnWarnings       func(warnings []CallWarning)                                                    // Called for warnings
+	OnTextStart      func(id string)                                                                 // Called when text starts
+	OnTextDelta      func(id, text string)                                                           // Called for text deltas
+	OnTextEnd        func(id string)                                                                 // Called when text ends
+	OnReasoningStart func(id string)                                                                 // Called when reasoning starts
+	OnReasoningDelta func(id, text string)                                                           // Called for reasoning deltas
+	OnReasoningEnd   func(id string, reasoning ReasoningContent)                                     // Called when reasoning ends
+	OnToolInputStart func(id, toolName string)                                                       // Called when tool input starts
+	OnToolInputDelta func(id, delta string)                                                          // Called for tool input deltas
+	OnToolInputEnd   func(id string)                                                                 // Called when tool input ends
+	OnToolCall       func(toolCall ToolCallContent)                                                  // Called when tool call is complete
+	OnToolResult     func(result ToolResultContent)                                                  // Called when tool execution completes
+	OnSource         func(source SourceContent)                                                      // Called for source references
+	OnStreamFinish   func(usage Usage, finishReason FinishReason, providerMetadata ProviderMetadata) // Called when stream finishes
+	OnStreamError    func(error)                                                                     // Called when stream error occurs
 }
 
 type AgentResult struct {
@@ -214,14 +212,14 @@ type Agent interface {
 	Stream(context.Context, AgentStreamCall) (*AgentResult, error)
 }
 
-type agentOption = func(*AgentSettings)
+type AgentOption = func(*agentSettings)
 
 type agent struct {
-	settings AgentSettings
+	settings agentSettings
 }
 
-func NewAgent(model LanguageModel, opts ...agentOption) Agent {
-	settings := AgentSettings{
+func NewAgent(model LanguageModel, opts ...AgentOption) Agent {
+	settings := agentSettings{
 		model: model,
 	}
 	for _, o := range opts {
@@ -259,9 +257,6 @@ func (a *agent) prepareCall(call AgentCall) AgentCall {
 	}
 	if call.RepairToolCall == nil && a.settings.repairToolCall != nil {
 		call.RepairToolCall = a.settings.repairToolCall
-	}
-	if call.OnStepFinished == nil && a.settings.onStepFinished != nil {
-		call.OnStepFinished = a.settings.onStepFinished
 	}
 	if call.OnRetry == nil && a.settings.onRetry != nil {
 		call.OnRetry = a.settings.onRetry
@@ -311,12 +306,15 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 		disableAllTools := false
 
 		if opts.PrepareStep != nil {
-			prepared := opts.PrepareStep(PrepareStepFunctionOptions{
+			prepared, err := opts.PrepareStep(PrepareStepFunctionOptions{
 				Model:      stepModel,
 				Steps:      steps,
 				StepNumber: len(steps),
 				Messages:   stepInputMessages,
 			})
+			if err != nil {
+				return nil, err
+			}
 
 			// Apply prepared step modifications
 			if prepared.Messages != nil {
@@ -423,10 +421,6 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 			Messages: currentStepMessages,
 		}
 		steps = append(steps, stepResult)
-		if opts.OnStepFinished != nil {
-			opts.OnStepFinished(stepResult)
-		}
-
 		shouldStop := isStopConditionMet(opts.StopWhen, steps)
 
 		if shouldStop || err != nil || len(stepToolCalls) == 0 || result.FinishReason != FinishReasonToolCalls {
@@ -709,12 +703,15 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 
 		// Apply step preparation if provided
 		if call.PrepareStep != nil {
-			prepared := call.PrepareStep(PrepareStepFunctionOptions{
+			prepared, err := call.PrepareStep(PrepareStepFunctionOptions{
 				Model:      stepModel,
 				Steps:      steps,
 				StepNumber: stepNumber,
 				Messages:   stepInputMessages,
 			})
+			if err != nil {
+				return nil, err
+			}
 
 			if prepared.Messages != nil {
 				stepInputMessages = prepared.Messages
@@ -925,75 +922,69 @@ func (a *agent) createPrompt(system, prompt string, messages []Message, files ..
 	return preparedPrompt, nil
 }
 
-func WithSystemPrompt(prompt string) agentOption {
-	return func(s *AgentSettings) {
+func WithSystemPrompt(prompt string) AgentOption {
+	return func(s *agentSettings) {
 		s.systemPrompt = prompt
 	}
 }
 
-func WithMaxOutputTokens(tokens int64) agentOption {
-	return func(s *AgentSettings) {
+func WithMaxOutputTokens(tokens int64) AgentOption {
+	return func(s *agentSettings) {
 		s.maxOutputTokens = &tokens
 	}
 }
 
-func WithTemperature(temp float64) agentOption {
-	return func(s *AgentSettings) {
+func WithTemperature(temp float64) AgentOption {
+	return func(s *agentSettings) {
 		s.temperature = &temp
 	}
 }
 
-func WithTopP(topP float64) agentOption {
-	return func(s *AgentSettings) {
+func WithTopP(topP float64) AgentOption {
+	return func(s *agentSettings) {
 		s.topP = &topP
 	}
 }
 
-func WithTopK(topK int64) agentOption {
-	return func(s *AgentSettings) {
+func WithTopK(topK int64) AgentOption {
+	return func(s *agentSettings) {
 		s.topK = &topK
 	}
 }
 
-func WithPresencePenalty(penalty float64) agentOption {
-	return func(s *AgentSettings) {
+func WithPresencePenalty(penalty float64) AgentOption {
+	return func(s *agentSettings) {
 		s.presencePenalty = &penalty
 	}
 }
 
-func WithFrequencyPenalty(penalty float64) agentOption {
-	return func(s *AgentSettings) {
+func WithFrequencyPenalty(penalty float64) AgentOption {
+	return func(s *agentSettings) {
 		s.frequencyPenalty = &penalty
 	}
 }
 
-func WithTools(tools ...AgentTool) agentOption {
-	return func(s *AgentSettings) {
+func WithTools(tools ...AgentTool) AgentOption {
+	return func(s *agentSettings) {
 		s.tools = append(s.tools, tools...)
 	}
 }
 
-func WithStopConditions(conditions ...StopCondition) agentOption {
-	return func(s *AgentSettings) {
+func WithStopConditions(conditions ...StopCondition) AgentOption {
+	return func(s *agentSettings) {
 		s.stopWhen = append(s.stopWhen, conditions...)
 	}
 }
 
-func WithPrepareStep(fn PrepareStepFunction) agentOption {
-	return func(s *AgentSettings) {
+func WithPrepareStep(fn PrepareStepFunction) AgentOption {
+	return func(s *agentSettings) {
 		s.prepareStep = fn
 	}
 }
 
-func WithRepairToolCall(fn RepairToolCallFunction) agentOption {
-	return func(s *AgentSettings) {
+func WithRepairToolCall(fn RepairToolCallFunction) AgentOption {
+	return func(s *agentSettings) {
 		s.repairToolCall = fn
-	}
-}
-
-func WithOnStepFinished(fn OnStepFinishedFunction) agentOption {
-	return func(s *AgentSettings) {
-		s.onStepFinished = fn
 	}
 }
 
@@ -1069,10 +1060,13 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 					Text:             text,
 					ProviderMetadata: ProviderMetadata(part.ProviderMetadata),
 				})
+				if opts.OnReasoningEnd != nil {
+					opts.OnReasoningEnd(part.ID, ReasoningContent{
+						Text:             text,
+						ProviderMetadata: ProviderMetadata(part.ProviderMetadata),
+					})
+				}
 				delete(activeTextContent, part.ID)
-			}
-			if opts.OnReasoningEnd != nil {
-				opts.OnReasoningEnd(part.ID)
 			}
 
 		case StreamPartTypeToolInputStart:
@@ -1194,14 +1188,14 @@ func addUsage(a, b Usage) Usage {
 	}
 }
 
-func WithHeaders(headers map[string]string) agentOption {
-	return func(s *AgentSettings) {
+func WithHeaders(headers map[string]string) AgentOption {
+	return func(s *agentSettings) {
 		s.headers = headers
 	}
 }
 
-func WithProviderOptions(providerOptions ProviderOptions) agentOption {
-	return func(s *AgentSettings) {
+func WithProviderOptions(providerOptions ProviderOptions) AgentOption {
+	return func(s *agentSettings) {
 		s.providerOptions = providerOptions
 	}
 }

@@ -15,7 +15,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestToOpenAIPrompt_SystemMessages(t *testing.T) {
+func TestToOpenAiPrompt_SystemMessages(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should forward system messages", func(t *testing.T) {
@@ -30,7 +30,7 @@ func TestToOpenAIPrompt_SystemMessages(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toOpenAIPrompt(prompt)
+		messages, warnings := toOpenAiPrompt(prompt)
 
 		require.Empty(t, warnings)
 		require.Len(t, messages, 1)
@@ -50,7 +50,7 @@ func TestToOpenAIPrompt_SystemMessages(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toOpenAIPrompt(prompt)
+		messages, warnings := toOpenAiPrompt(prompt)
 
 		require.Len(t, warnings, 1)
 		require.Contains(t, warnings[0].Message, "system prompt has no text parts")
@@ -70,7 +70,7 @@ func TestToOpenAIPrompt_SystemMessages(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toOpenAIPrompt(prompt)
+		messages, warnings := toOpenAiPrompt(prompt)
 
 		require.Empty(t, warnings)
 		require.Len(t, messages, 1)
@@ -81,7 +81,7 @@ func TestToOpenAIPrompt_SystemMessages(t *testing.T) {
 	})
 }
 
-func TestToOpenAIPrompt_UserMessages(t *testing.T) {
+func TestToOpenAiPrompt_UserMessages(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should convert messages with only a text part to a string content", func(t *testing.T) {
@@ -96,7 +96,7 @@ func TestToOpenAIPrompt_UserMessages(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toOpenAIPrompt(prompt)
+		messages, warnings := toOpenAiPrompt(prompt)
 
 		require.Empty(t, warnings)
 		require.Len(t, messages, 1)
@@ -123,7 +123,7 @@ func TestToOpenAIPrompt_UserMessages(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toOpenAIPrompt(prompt)
+		messages, warnings := toOpenAiPrompt(prompt)
 
 		require.Empty(t, warnings)
 		require.Len(t, messages, 1)
@@ -167,7 +167,7 @@ func TestToOpenAIPrompt_UserMessages(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toOpenAIPrompt(prompt)
+		messages, warnings := toOpenAiPrompt(prompt)
 
 		require.Empty(t, warnings)
 		require.Len(t, messages, 1)
@@ -184,7 +184,7 @@ func TestToOpenAIPrompt_UserMessages(t *testing.T) {
 	})
 }
 
-func TestToOpenAIPrompt_FileParts(t *testing.T) {
+func TestToOpenAiPrompt_FileParts(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should throw for unsupported mime types", func(t *testing.T) {
@@ -202,7 +202,7 @@ func TestToOpenAIPrompt_FileParts(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toOpenAIPrompt(prompt)
+		messages, warnings := toOpenAiPrompt(prompt)
 
 		require.Len(t, warnings, 1)
 		require.Contains(t, warnings[0].Message, "file part media type application/something not supported")
@@ -225,7 +225,7 @@ func TestToOpenAIPrompt_FileParts(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toOpenAIPrompt(prompt)
+		messages, warnings := toOpenAiPrompt(prompt)
 
 		require.Empty(t, warnings)
 		require.Len(t, messages, 1)
@@ -258,7 +258,7 @@ func TestToOpenAIPrompt_FileParts(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toOpenAIPrompt(prompt)
+		messages, warnings := toOpenAiPrompt(prompt)
 
 		require.Empty(t, warnings)
 		require.Len(t, messages, 1)
@@ -286,7 +286,7 @@ func TestToOpenAIPrompt_FileParts(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toOpenAIPrompt(prompt)
+		messages, warnings := toOpenAiPrompt(prompt)
 
 		require.Empty(t, warnings)
 		require.Len(t, messages, 1)
@@ -315,7 +315,7 @@ func TestToOpenAIPrompt_FileParts(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toOpenAIPrompt(prompt)
+		messages, warnings := toOpenAiPrompt(prompt)
 
 		require.Empty(t, warnings)
 		require.Len(t, messages, 1)
@@ -349,7 +349,7 @@ func TestToOpenAIPrompt_FileParts(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toOpenAIPrompt(prompt)
+		messages, warnings := toOpenAiPrompt(prompt)
 
 		require.Empty(t, warnings)
 		require.Len(t, messages, 1)
@@ -378,7 +378,7 @@ func TestToOpenAIPrompt_FileParts(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toOpenAIPrompt(prompt)
+		messages, warnings := toOpenAiPrompt(prompt)
 
 		require.Empty(t, warnings)
 		require.Len(t, messages, 1)
@@ -408,7 +408,7 @@ func TestToOpenAIPrompt_FileParts(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toOpenAIPrompt(prompt)
+		messages, warnings := toOpenAiPrompt(prompt)
 
 		require.Empty(t, warnings)
 		require.Len(t, messages, 1)
@@ -421,7 +421,7 @@ func TestToOpenAIPrompt_FileParts(t *testing.T) {
 	})
 }
 
-func TestToOpenAIPrompt_ToolCalls(t *testing.T) {
+func TestToOpenAiPrompt_ToolCalls(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should stringify arguments to tool calls", func(t *testing.T) {
@@ -457,7 +457,7 @@ func TestToOpenAIPrompt_ToolCalls(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toOpenAIPrompt(prompt)
+		messages, warnings := toOpenAiPrompt(prompt)
 
 		require.Empty(t, warnings)
 		require.Len(t, messages, 2)
@@ -504,7 +504,7 @@ func TestToOpenAIPrompt_ToolCalls(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toOpenAIPrompt(prompt)
+		messages, warnings := toOpenAiPrompt(prompt)
 
 		require.Empty(t, warnings)
 		require.Len(t, messages, 2)
@@ -523,7 +523,7 @@ func TestToOpenAIPrompt_ToolCalls(t *testing.T) {
 	})
 }
 
-func TestToOpenAIPrompt_AssistantMessages(t *testing.T) {
+func TestToOpenAiPrompt_AssistantMessages(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should handle simple text assistant messages", func(t *testing.T) {
@@ -538,7 +538,7 @@ func TestToOpenAIPrompt_AssistantMessages(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toOpenAIPrompt(prompt)
+		messages, warnings := toOpenAiPrompt(prompt)
 
 		require.Empty(t, warnings)
 		require.Len(t, messages, 1)
@@ -568,7 +568,7 @@ func TestToOpenAIPrompt_AssistantMessages(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toOpenAIPrompt(prompt)
+		messages, warnings := toOpenAiPrompt(prompt)
 
 		require.Empty(t, warnings)
 		require.Len(t, messages, 1)
@@ -811,9 +811,9 @@ func TestDoGenerate(t *testing.T) {
 			"content": "Hello, World!",
 		})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
@@ -843,9 +843,9 @@ func TestDoGenerate(t *testing.T) {
 			},
 		})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
@@ -867,9 +867,9 @@ func TestDoGenerate(t *testing.T) {
 
 		server.prepareJSONResponse(map[string]any{})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
@@ -907,9 +907,9 @@ func TestDoGenerate(t *testing.T) {
 			},
 		})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
@@ -933,9 +933,9 @@ func TestDoGenerate(t *testing.T) {
 			"logprobs": testLogprobs,
 		})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
@@ -969,9 +969,9 @@ func TestDoGenerate(t *testing.T) {
 			"finish_reason": "stop",
 		})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
@@ -993,9 +993,9 @@ func TestDoGenerate(t *testing.T) {
 			"finish_reason": "eos",
 		})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
@@ -1017,9 +1017,9 @@ func TestDoGenerate(t *testing.T) {
 			"content": "",
 		})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
@@ -1049,9 +1049,9 @@ func TestDoGenerate(t *testing.T) {
 
 		server.prepareJSONResponse(map[string]any{})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
@@ -1093,9 +1093,9 @@ func TestDoGenerate(t *testing.T) {
 			"content": "",
 		})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("o1-mini")
 
@@ -1133,9 +1133,9 @@ func TestDoGenerate(t *testing.T) {
 			"content": "",
 		})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("gpt-4o")
 
@@ -1173,9 +1173,9 @@ func TestDoGenerate(t *testing.T) {
 			"content": "",
 		})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
@@ -1245,9 +1245,9 @@ func TestDoGenerate(t *testing.T) {
 			},
 		})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
@@ -1303,9 +1303,9 @@ func TestDoGenerate(t *testing.T) {
 			},
 		})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
@@ -1345,9 +1345,9 @@ func TestDoGenerate(t *testing.T) {
 			},
 		})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("gpt-4o-mini")
 
@@ -1380,9 +1380,9 @@ func TestDoGenerate(t *testing.T) {
 			},
 		})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("gpt-4o-mini")
 
@@ -1407,9 +1407,9 @@ func TestDoGenerate(t *testing.T) {
 
 		server.prepareJSONResponse(map[string]any{})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("o1-preview")
 
@@ -1455,9 +1455,9 @@ func TestDoGenerate(t *testing.T) {
 
 		server.prepareJSONResponse(map[string]any{})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("o1-preview")
 
@@ -1499,9 +1499,9 @@ func TestDoGenerate(t *testing.T) {
 			},
 		})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("o1-preview")
 
@@ -1526,9 +1526,9 @@ func TestDoGenerate(t *testing.T) {
 			"model": "o1-preview",
 		})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("o1-preview")
 
@@ -1566,9 +1566,9 @@ func TestDoGenerate(t *testing.T) {
 			"content": "",
 		})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
@@ -1612,9 +1612,9 @@ func TestDoGenerate(t *testing.T) {
 			"content": "",
 		})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
@@ -1652,9 +1652,9 @@ func TestDoGenerate(t *testing.T) {
 			"content": "",
 		})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
@@ -1696,9 +1696,9 @@ func TestDoGenerate(t *testing.T) {
 			"content": "",
 		})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
@@ -1736,9 +1736,9 @@ func TestDoGenerate(t *testing.T) {
 			"content": "",
 		})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
@@ -1774,9 +1774,9 @@ func TestDoGenerate(t *testing.T) {
 
 		server.prepareJSONResponse(map[string]any{})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("gpt-4o-search-preview")
 
@@ -1808,9 +1808,9 @@ func TestDoGenerate(t *testing.T) {
 			"content": "",
 		})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("o3-mini")
 
@@ -1846,9 +1846,9 @@ func TestDoGenerate(t *testing.T) {
 
 		server.prepareJSONResponse(map[string]any{})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("gpt-4o-mini")
 
@@ -1881,9 +1881,9 @@ func TestDoGenerate(t *testing.T) {
 
 		server.prepareJSONResponse(map[string]any{})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("gpt-4o-mini")
 
@@ -1919,9 +1919,9 @@ func TestDoGenerate(t *testing.T) {
 
 		server.prepareJSONResponse(map[string]any{})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
@@ -2228,9 +2228,9 @@ func TestDoStream(t *testing.T) {
 			"logprobs": testLogprobs,
 		})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
@@ -2284,9 +2284,9 @@ func TestDoStream(t *testing.T) {
 
 		server.prepareToolStreamResponse()
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
@@ -2370,9 +2370,9 @@ func TestDoStream(t *testing.T) {
 			},
 		})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
@@ -2409,9 +2409,9 @@ func TestDoStream(t *testing.T) {
 
 		server.prepareErrorStreamResponse()
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
@@ -2450,9 +2450,9 @@ func TestDoStream(t *testing.T) {
 			"content": []string{},
 		})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
@@ -2498,9 +2498,9 @@ func TestDoStream(t *testing.T) {
 			},
 		})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
@@ -2548,9 +2548,9 @@ func TestDoStream(t *testing.T) {
 			},
 		})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
@@ -2591,9 +2591,9 @@ func TestDoStream(t *testing.T) {
 			"content": []string{},
 		})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
@@ -2635,9 +2635,9 @@ func TestDoStream(t *testing.T) {
 			"content": []string{},
 		})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
@@ -2683,9 +2683,9 @@ func TestDoStream(t *testing.T) {
 			"content": []string{},
 		})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("o3-mini")
 
@@ -2727,9 +2727,9 @@ func TestDoStream(t *testing.T) {
 			"content": []string{},
 		})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("gpt-4o-mini")
 
@@ -2772,9 +2772,9 @@ func TestDoStream(t *testing.T) {
 			"model":   "o1-preview",
 		})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("o1-preview")
 
@@ -2818,9 +2818,9 @@ func TestDoStream(t *testing.T) {
 			},
 		})
 
-		provider := NewOpenAIProvider(
-			WithOpenAIApiKey("test-api-key"),
-			WithOpenAIBaseURL(server.server.URL),
+		provider := NewOpenAiProvider(
+			WithOpenAiAPIKey("test-api-key"),
+			WithOpenAiBaseURL(server.server.URL),
 		)
 		model, _ := provider.LanguageModel("o1-preview")
 

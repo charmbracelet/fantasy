@@ -27,7 +27,7 @@ const (
 	ReasoningEffortHigh    ReasoningEffort = "high"
 )
 
-type OpenAIProviderOptions struct {
+type OpenAiProviderOptions struct {
 	LogitBias           map[string]int64 `json:"logit_bias"`
 	LogProbs            *bool            `json:"log_probes"`
 	TopLogProbs         *int64           `json:"top_log_probs"`
@@ -45,11 +45,11 @@ type OpenAIProviderOptions struct {
 	StructuredOutputs   *bool            `json:"structured_outputs"`
 }
 
-type openAIProvider struct {
-	options openAIProviderOptions
+type openAiProvider struct {
+	options openAiProviderOptions
 }
 
-type openAIProviderOptions struct {
+type openAiProviderOptions struct {
 	baseURL      string
 	apiKey       string
 	organization string
@@ -59,10 +59,10 @@ type openAIProviderOptions struct {
 	client       option.HTTPClient
 }
 
-type OpenAIOption = func(*openAIProviderOptions)
+type OpenAiOption = func(*openAiProviderOptions)
 
-func NewOpenAIProvider(opts ...OpenAIOption) ai.Provider {
-	options := openAIProviderOptions{
+func NewOpenAiProvider(opts ...OpenAiOption) ai.Provider {
+	options := openAiProviderOptions{
 		headers: map[string]string{},
 	}
 	for _, o := range opts {
@@ -78,62 +78,62 @@ func NewOpenAIProvider(opts ...OpenAIOption) ai.Provider {
 	}
 
 	if options.organization != "" {
-		options.headers["OpenAI-Organization"] = options.organization
+		options.headers["OpenAi-Organization"] = options.organization
 	}
 
 	if options.project != "" {
-		options.headers["OpenAI-Project"] = options.project
+		options.headers["OpenAi-Project"] = options.project
 	}
 
-	return &openAIProvider{
+	return &openAiProvider{
 		options: options,
 	}
 }
 
-func WithOpenAIBaseURL(baseURL string) OpenAIOption {
-	return func(o *openAIProviderOptions) {
+func WithOpenAiBaseURL(baseURL string) OpenAiOption {
+	return func(o *openAiProviderOptions) {
 		o.baseURL = baseURL
 	}
 }
 
-func WithOpenAIApiKey(apiKey string) OpenAIOption {
-	return func(o *openAIProviderOptions) {
+func WithOpenAiAPIKey(apiKey string) OpenAiOption {
+	return func(o *openAiProviderOptions) {
 		o.apiKey = apiKey
 	}
 }
 
-func WithOpenAIOrganization(organization string) OpenAIOption {
-	return func(o *openAIProviderOptions) {
+func WithOpenAiOrganization(organization string) OpenAiOption {
+	return func(o *openAiProviderOptions) {
 		o.organization = organization
 	}
 }
 
-func WithOpenAIProject(project string) OpenAIOption {
-	return func(o *openAIProviderOptions) {
+func WithOpenAiProject(project string) OpenAiOption {
+	return func(o *openAiProviderOptions) {
 		o.project = project
 	}
 }
 
-func WithOpenAIName(name string) OpenAIOption {
-	return func(o *openAIProviderOptions) {
+func WithOpenAiName(name string) OpenAiOption {
+	return func(o *openAiProviderOptions) {
 		o.name = name
 	}
 }
 
-func WithOpenAIHeaders(headers map[string]string) OpenAIOption {
-	return func(o *openAIProviderOptions) {
+func WithOpenAiHeaders(headers map[string]string) OpenAiOption {
+	return func(o *openAiProviderOptions) {
 		maps.Copy(o.headers, headers)
 	}
 }
 
-func WithOpenAIHttpClient(client option.HTTPClient) OpenAIOption {
-	return func(o *openAIProviderOptions) {
+func WithOpenAiHTTPClient(client option.HTTPClient) OpenAiOption {
+	return func(o *openAiProviderOptions) {
 		o.client = client
 	}
 }
 
 // LanguageModel implements ai.Provider.
-func (o *openAIProvider) LanguageModel(modelID string) (ai.LanguageModel, error) {
+func (o *openAiProvider) LanguageModel(modelID string) (ai.LanguageModel, error) {
 	openaiClientOptions := []option.RequestOption{}
 	if o.options.apiKey != "" {
 		openaiClientOptions = append(openaiClientOptions, option.WithAPIKey(o.options.apiKey))
@@ -150,7 +150,7 @@ func (o *openAIProvider) LanguageModel(modelID string) (ai.LanguageModel, error)
 		openaiClientOptions = append(openaiClientOptions, option.WithHTTPClient(o.options.client))
 	}
 
-	return openAILanguageModel{
+	return openAiLanguageModel{
 		modelID:         modelID,
 		provider:        fmt.Sprintf("%s.chat", o.options.name),
 		providerOptions: o.options,
@@ -158,27 +158,27 @@ func (o *openAIProvider) LanguageModel(modelID string) (ai.LanguageModel, error)
 	}, nil
 }
 
-type openAILanguageModel struct {
+type openAiLanguageModel struct {
 	provider        string
 	modelID         string
 	client          openai.Client
-	providerOptions openAIProviderOptions
+	providerOptions openAiProviderOptions
 }
 
 // Model implements ai.LanguageModel.
-func (o openAILanguageModel) Model() string {
+func (o openAiLanguageModel) Model() string {
 	return o.modelID
 }
 
 // Provider implements ai.LanguageModel.
-func (o openAILanguageModel) Provider() string {
+func (o openAiLanguageModel) Provider() string {
 	return o.provider
 }
 
-func (o openAILanguageModel) prepareParams(call ai.Call) (*openai.ChatCompletionNewParams, []ai.CallWarning, error) {
+func (o openAiLanguageModel) prepareParams(call ai.Call) (*openai.ChatCompletionNewParams, []ai.CallWarning, error) {
 	params := &openai.ChatCompletionNewParams{}
-	messages, warnings := toOpenAIPrompt(call.Prompt)
-	providerOptions := &OpenAIProviderOptions{}
+	messages, warnings := toOpenAiPrompt(call.Prompt)
+	providerOptions := &OpenAiProviderOptions{}
 	if v, ok := call.ProviderOptions["openai"]; ok {
 		err := ai.ParseOptions(v, providerOptions)
 		if err != nil {
@@ -387,7 +387,7 @@ func (o openAILanguageModel) prepareParams(call ai.Call) (*openai.ChatCompletion
 	}
 
 	if len(call.Tools) > 0 {
-		tools, toolChoice, toolWarnings := toOpenAITools(call.Tools, call.ToolChoice)
+		tools, toolChoice, toolWarnings := toOpenAiTools(call.Tools, call.ToolChoice)
 		params.Tools = tools
 		if toolChoice != nil {
 			params.ToolChoice = *toolChoice
@@ -397,7 +397,7 @@ func (o openAILanguageModel) prepareParams(call ai.Call) (*openai.ChatCompletion
 	return params, warnings, nil
 }
 
-func (o openAILanguageModel) handleError(err error) error {
+func (o openAiLanguageModel) handleError(err error) error {
 	var apiErr *openai.Error
 	if errors.As(err, &apiErr) {
 		requestDump := apiErr.DumpRequest(true)
@@ -422,7 +422,7 @@ func (o openAILanguageModel) handleError(err error) error {
 }
 
 // Generate implements ai.LanguageModel.
-func (o openAILanguageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response, error) {
+func (o openAiLanguageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response, error) {
 	params, warnings, err := o.prepareParams(call)
 	if err != nil {
 		return nil, err
@@ -500,7 +500,7 @@ func (o openAILanguageModel) Generate(ctx context.Context, call ai.Call) (*ai.Re
 			ReasoningTokens: completionTokenDetails.ReasoningTokens,
 			CacheReadTokens: promptTokenDetails.CachedTokens,
 		},
-		FinishReason:     mapOpenAIFinishReason(choice.FinishReason),
+		FinishReason:     mapOpenAiFinishReason(choice.FinishReason),
 		ProviderMetadata: providerMetadata,
 		Warnings:         warnings,
 	}, nil
@@ -514,7 +514,7 @@ type toolCall struct {
 }
 
 // Stream implements ai.LanguageModel.
-func (o openAILanguageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamResponse, error) {
+func (o openAiLanguageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamResponse, error) {
 	params, warnings, err := o.prepareParams(call)
 	if err != nil {
 		return nil, err
@@ -759,7 +759,7 @@ func (o openAILanguageModel) Stream(ctx context.Context, call ai.Call) (ai.Strea
 				}
 			}
 
-			finishReason := mapOpenAIFinishReason(acc.Choices[0].FinishReason)
+			finishReason := mapOpenAiFinishReason(acc.Choices[0].FinishReason)
 			yield(ai.StreamPart{
 				Type:             ai.StreamPartTypeFinish,
 				Usage:            usage,
@@ -777,7 +777,7 @@ func (o openAILanguageModel) Stream(ctx context.Context, call ai.Call) (ai.Strea
 	}, nil
 }
 
-func mapOpenAIFinishReason(finishReason string) ai.FinishReason {
+func mapOpenAiFinishReason(finishReason string) ai.FinishReason {
 	switch finishReason {
 	case "stop":
 		return ai.FinishReasonStop
@@ -810,14 +810,14 @@ func supportsPriorityProcessing(modelID string) bool {
 		strings.HasPrefix(modelID, "o4-mini")
 }
 
-func toOpenAITools(tools []ai.Tool, toolChoice *ai.ToolChoice) (openAITools []openai.ChatCompletionToolUnionParam, openAIToolChoice *openai.ChatCompletionToolChoiceOptionUnionParam, warnings []ai.CallWarning) {
+func toOpenAiTools(tools []ai.Tool, toolChoice *ai.ToolChoice) (openAiTools []openai.ChatCompletionToolUnionParam, openAiToolChoice *openai.ChatCompletionToolChoiceOptionUnionParam, warnings []ai.CallWarning) {
 	for _, tool := range tools {
 		if tool.GetType() == ai.ToolTypeFunction {
 			ft, ok := tool.(ai.FunctionTool)
 			if !ok {
 				continue
 			}
-			openAITools = append(openAITools, openai.ChatCompletionToolUnionParam{
+			openAiTools = append(openAiTools, openai.ChatCompletionToolUnionParam{
 				OfFunction: &openai.ChatCompletionFunctionToolParam{
 					Function: shared.FunctionDefinitionParam{
 						Name:        ft.Name,
@@ -844,15 +844,15 @@ func toOpenAITools(tools []ai.Tool, toolChoice *ai.ToolChoice) (openAITools []op
 
 	switch *toolChoice {
 	case ai.ToolChoiceAuto:
-		openAIToolChoice = &openai.ChatCompletionToolChoiceOptionUnionParam{
+		openAiToolChoice = &openai.ChatCompletionToolChoiceOptionUnionParam{
 			OfAuto: param.NewOpt("auto"),
 		}
 	case ai.ToolChoiceNone:
-		openAIToolChoice = &openai.ChatCompletionToolChoiceOptionUnionParam{
+		openAiToolChoice = &openai.ChatCompletionToolChoiceOptionUnionParam{
 			OfAuto: param.NewOpt("none"),
 		}
 	default:
-		openAIToolChoice = &openai.ChatCompletionToolChoiceOptionUnionParam{
+		openAiToolChoice = &openai.ChatCompletionToolChoiceOptionUnionParam{
 			OfFunctionToolChoice: &openai.ChatCompletionNamedToolChoiceParam{
 				Type: "function",
 				Function: openai.ChatCompletionNamedToolChoiceFunctionParam{
@@ -864,7 +864,7 @@ func toOpenAITools(tools []ai.Tool, toolChoice *ai.ToolChoice) (openAITools []op
 	return
 }
 
-func toOpenAIPrompt(prompt ai.Prompt) ([]openai.ChatCompletionMessageParamUnion, []ai.CallWarning) {
+func toOpenAiPrompt(prompt ai.Prompt) ([]openai.ChatCompletionMessageParamUnion, []ai.CallWarning) {
 	var messages []openai.ChatCompletionMessageParamUnion
 	var warnings []ai.CallWarning
 	for _, msg := range prompt {

@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	provider := providers.NewOpenAIProvider(providers.WithOpenAIApiKey(os.Getenv("OPENAI_API_KEY")))
+	provider := providers.NewOpenAiProvider(providers.WithOpenAiAPIKey(os.Getenv("OPENAI_API_KEY")))
 	model, err := provider.LanguageModel("gpt-4o")
 	if err != nil {
 		fmt.Println(err)

@@ -18,8 +18,8 @@ func main() {
 	}
 
 	// Create provider and model
-	provider := providers.NewOpenAIProvider(
-		providers.WithOpenAIApiKey(apiKey),
+	provider := providers.NewOpenAiProvider(
+		providers.WithOpenAiAPIKey(apiKey),
 	)
 	model, err := provider.LanguageModel("gpt-4o-mini")
 	if err != nil {

@@ -235,7 +235,7 @@ func (a anthropicLanguageModel) prepareParams(call ai.Call) (*anthropic.MessageN
 		if providerOptions.DisableParallelToolUse != nil {
 			disableParallelToolUse = *providerOptions.DisableParallelToolUse
 		}
-		tools, toolChoice, toolWarnings := toAnthropicTools(call.Tools, call.ToolChoice, *&disableParallelToolUse)
+		tools, toolChoice, toolWarnings := toAnthropicTools(call.Tools, call.ToolChoice, disableParallelToolUse)
 		params.Tools = tools
 		if toolChoice != nil {
 			params.ToolChoice = *toolChoice
@@ -335,7 +335,6 @@ func groupIntoBlocks(prompt ai.Prompt) []*messageBlock {
 
 func toAnthropicTools(tools []ai.Tool, toolChoice *ai.ToolChoice, disableParallelToolCalls bool) (anthropicTools []anthropic.ToolUnionParam, anthropicToolChoice *anthropic.ToolChoiceUnionParam, warnings []ai.CallWarning) {
 	for _, tool := range tools {
-
 		if tool.GetType() == ai.ToolTypeFunction {
 			ft, ok := tool.(ai.FunctionTool)
 			if !ok {
@@ -621,7 +620,6 @@ func toAnthropicPrompt(prompt ai.Prompt, sendReasoningData bool) ([]anthropic.Te
 					case ai.ContentTypeToolResult:
 						// TODO: implement provider executed tool result
 					}
-
 				}
 			}
 			messages = append(messages, anthropic.NewAssistantMessage(anthropicContent...))
@@ -843,7 +841,6 @@ func (a anthropicLanguageModel) Stream(ctx context.Context, call ai.Call) (ai.St
 					}) {
 						return
 					}
-
 				}
 			case "content_block_delta":
 				switch chunk.Delta.Type {
@@ -887,7 +884,6 @@ func (a anthropicLanguageModel) Stream(ctx context.Context, call ai.Call) (ai.St
 					}) {
 						return
 					}
-
 				}
 			case "message_stop":
 			}

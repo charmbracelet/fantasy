@@ -16,14 +16,14 @@ import (
 	"github.com/charmbracelet/crush/internal/ai"
 )
 
-type AnthropicThinking struct {
-	BudgetTokens int64 `json:"budget_tokens"`
+type AnthropicProviderOptions struct {
+	SendReasoning          *bool                            `json:"send_reasoning,omitempty"`
+	Thinking               *AnthropicThinkingProviderOption `json:"thinking,omitempty"`
+	DisableParallelToolUse *bool                            `json:"disable_parallel_tool_use,omitempty"`
 }
 
-type AnthropicProviderOptions struct {
-	SendReasoning          *bool              `json:"send_reasoning,omitempty"`
-	Thinking               *AnthropicThinking `json:"thinking,omitempty"`
-	DisableParallelToolUse *bool              `json:"disable_parallel_tool_use,omitempty"`
+type AnthropicThinkingProviderOption struct {
+	BudgetTokens int64 `json:"budget_tokens"`
 }
 
 type AnthropicReasoningMetadata struct {
@@ -62,7 +62,7 @@ func NewAnthropicProvider(opts ...AnthropicOption) ai.Provider {
 		o(&options)
 	}
 	if options.baseURL == "" {
-		options.baseURL = "https://api.anthropic.com/v1"
+		options.baseURL = "https://api.anthropic.com"
 	}
 
 	if options.name == "" {
@@ -104,7 +104,7 @@ func WithAnthropicHTTPClient(client option.HTTPClient) AnthropicOption {
 	}
 }
 
-func (a *anthropicProvider) LanguageModel(modelID string) ai.LanguageModel {
+func (a *anthropicProvider) LanguageModel(modelID string) (ai.LanguageModel, error) {
 	anthropicClientOptions := []option.RequestOption{}
 	if a.options.apiKey != "" {
 		anthropicClientOptions = append(anthropicClientOptions, option.WithAPIKey(a.options.apiKey))
@@ -125,7 +125,7 @@ func (a *anthropicProvider) LanguageModel(modelID string) ai.LanguageModel {
 		provider:        fmt.Sprintf("%s.messages", a.options.name),
 		providerOptions: a.options,
 		client:          anthropic.NewClient(anthropicClientOptions...),
-	}
+	}, nil
 }
 
 type anthropicLanguageModel struct {
@@ -176,6 +176,7 @@ func (a anthropicLanguageModel) prepareParams(call ai.Call) (*anthropic.MessageN
 	params.System = systemBlocks
 	params.Messages = messages
 	params.Model = anthropic.Model(a.modelID)
+	params.MaxTokens = 4096
 
 	if call.MaxOutputTokens != nil {
 		params.MaxTokens = *call.MaxOutputTokens
@@ -364,7 +365,7 @@ func toAnthropicTools(tools []ai.Tool, toolChoice *ai.ToolChoice, disableParalle
 				anthropicTool.CacheControl = anthropic.NewCacheControlEphemeralParam()
 			}
 			anthropicTools = append(anthropicTools, anthropic.ToolUnionParam{OfTool: &anthropicTool})
-
+			continue
 		}
 		// TODO: handle provider tool calls
 		warnings = append(warnings, ai.CallWarning{

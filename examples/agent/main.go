@@ -13,7 +13,11 @@ func main() {
 	provider := providers.NewOpenAIProvider(
 		providers.WithOpenAIApiKey(os.Getenv("OPENAI_API_KEY")),
 	)
-	model := provider.LanguageModel("gpt-4o")
+	model, err := provider.LanguageModel("gpt-4o")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	// Create weather tool using the new type-safe API
 	type WeatherInput struct {

@@ -12,10 +12,10 @@ import (
 
 func main() {
 	// Check for API key
-	apiKey := os.Getenv("OPENAI_API_KEY")
+	apiKey := os.Getenv("ANTHROPIC_API_KEY")
 	if apiKey == "" {
-		fmt.Println("❌ Please set OPENAI_API_KEY environment variable")
-		fmt.Println("   export OPENAI_API_KEY=your_api_key_here")
+		fmt.Println("❌ Please set ANTHROPIC_API_KEY environment variable")
+		fmt.Println("   export ANTHROPIC_API_KEY=your_api_key_here")
 		os.Exit(1)
 	}
 
@@ -24,10 +24,12 @@ func main() {
 	fmt.Println()
 
 	// Create OpenAI provider and model
-	provider := providers.NewOpenAIProvider(
-		providers.WithOpenAIApiKey(apiKey),
-	)
-	model := provider.LanguageModel("gpt-4o-mini") // Using mini for faster/cheaper responses
+	provider := providers.NewAnthropicProvider(providers.WithAnthropicAPIKey(os.Getenv("ANTHROPIC_API_KEY")))
+	model, err := provider.LanguageModel("claude-sonnet-4-20250514")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	// Define input types for type-safe tools
 	type WeatherInput struct {
@@ -194,7 +196,7 @@ func main() {
 		OnSource: func(source ai.SourceContent) {
 			fmt.Printf("📚 Source: %s (%s)\n", source.Title, source.URL)
 		},
-		OnStreamFinish: func(usage ai.Usage, finishReason ai.FinishReason, providerMetadata ai.ProviderOptions) {
+		OnStreamFinish: func(usage ai.Usage, finishReason ai.FinishReason, providerMetadata ai.ProviderMetadata) {
 			fmt.Printf("📊 Stream finished (reason: %s, tokens: %d)\n", finishReason, usage.TotalTokens)
 		},
 		OnStreamError: func(err error) {

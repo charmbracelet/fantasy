@@ -12,7 +12,11 @@ import (
 
 func main() {
 	provider := providers.NewOpenAIProvider(providers.WithOpenAIApiKey(os.Getenv("OPENAI_API_KEY")))
-	model := provider.LanguageModel("gpt-4o")
+	model, err := provider.LanguageModel("gpt-4o")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	stream, err := model.Stream(context.Background(), ai.Call{
 		Prompt: ai.Prompt{

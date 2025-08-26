@@ -10,8 +10,12 @@ import (
 )
 
 func main() {
-	provider := providers.NewOpenAIProvider(providers.WithOpenAIApiKey(os.Getenv("OPENAI_API_KEY")))
-	model := provider.LanguageModel("gpt-4o")
+	provider := providers.NewAnthropicProvider(providers.WithAnthropicAPIKey(os.Getenv("ANTHROPIC_API_KEY")))
+	model, err := provider.LanguageModel("claude-sonnet-4-20250514")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	response, err := model.Generate(context.Background(), ai.Call{
 		Prompt: ai.Prompt{

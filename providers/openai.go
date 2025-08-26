@@ -133,7 +133,7 @@ func WithOpenAIHttpClient(client option.HTTPClient) OpenAIOption {
 }
 
 // LanguageModel implements ai.Provider.
-func (o *openAIProvider) LanguageModel(modelID string) ai.LanguageModel {
+func (o *openAIProvider) LanguageModel(modelID string) (ai.LanguageModel, error) {
 	openaiClientOptions := []option.RequestOption{}
 	if o.options.apiKey != "" {
 		openaiClientOptions = append(openaiClientOptions, option.WithAPIKey(o.options.apiKey))
@@ -155,7 +155,7 @@ func (o *openAIProvider) LanguageModel(modelID string) ai.LanguageModel {
 		provider:        fmt.Sprintf("%s.chat", o.options.name),
 		providerOptions: o.options,
 		client:          openai.NewClient(openaiClientOptions...),
-	}
+	}, nil
 }
 
 type openAILanguageModel struct {

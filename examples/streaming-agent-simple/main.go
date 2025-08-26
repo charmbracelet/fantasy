@@ -21,7 +21,11 @@ func main() {
 	provider := providers.NewOpenAIProvider(
 		providers.WithOpenAIApiKey(apiKey),
 	)
-	model := provider.LanguageModel("gpt-4o-mini")
+	model, err := provider.LanguageModel("gpt-4o-mini")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	// Create echo tool using the new type-safe API
 	type EchoInput struct {

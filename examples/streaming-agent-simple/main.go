@@ -58,18 +58,21 @@ func main() {
 		Prompt: "Please echo back 'Hello, streaming world!'",
 
 		// Show real-time text as it streams
-		OnTextDelta: func(id, text string) {
+		OnTextDelta: func(id, text string) error {
 			fmt.Print(text)
+			return nil
 		},
 
 		// Show when tools are called
-		OnToolCall: func(toolCall ai.ToolCallContent) {
+		OnToolCall: func(toolCall ai.ToolCallContent) error {
 			fmt.Printf("\n[Tool: %s called]\n", toolCall.ToolName)
+			return nil
 		},
 
 		// Show tool results
-		OnToolResult: func(result ai.ToolResultContent) {
+		OnToolResult: func(result ai.ToolResultContent) error {
 			fmt.Printf("[Tool result received]\n")
+			return nil
 		},
 
 		// Show when each step completes

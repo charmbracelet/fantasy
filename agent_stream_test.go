@@ -124,53 +124,65 @@ func TestStreamingAgentCallbacks(t *testing.T) {
 		OnError: func(err error) {
 			callbacks["OnError"] = true
 		},
-		OnChunk: func(part StreamPart) {
+		OnChunk: func(part StreamPart) error {
 			callbacks["OnChunk"] = true
+			return nil
 		},
-		OnWarnings: func(warnings []CallWarning) {
+		OnWarnings: func(warnings []CallWarning) error {
 			callbacks["OnWarnings"] = true
+			return nil
 		},
-		OnTextStart: func(id string) {
+		OnTextStart: func(id string) error {
 			callbacks["OnTextStart"] = true
+			return nil
 		},
-		OnTextDelta: func(id, text string) {
+		OnTextDelta: func(id, text string) error {
 			callbacks["OnTextDelta"] = true
+			return nil
 		},
-		OnTextEnd: func(id string) {
+		OnTextEnd: func(id string) error {
 			callbacks["OnTextEnd"] = true
+			return nil
 		},
-		OnReasoningStart: func(id string) {
+		OnReasoningStart: func(id string) error {
 			callbacks["OnReasoningStart"] = true
+			return nil
 		},
-		OnReasoningDelta: func(id, text string) {
+		OnReasoningDelta: func(id, text string) error {
 			callbacks["OnReasoningDelta"] = true
+			return nil
 		},
-		OnReasoningEnd: func(id string, content ReasoningContent) {
+		OnReasoningEnd: func(id string, content ReasoningContent) error {
 			callbacks["OnReasoningEnd"] = true
+			return nil
 		},
-		OnToolInputStart: func(id, toolName string) {
+		OnToolInputStart: func(id, toolName string) error {
 			callbacks["OnToolInputStart"] = true
+			return nil
 		},
-		OnToolInputDelta: func(id, delta string) {
+		OnToolInputDelta: func(id, delta string) error {
 			callbacks["OnToolInputDelta"] = true
+			return nil
 		},
-		OnToolInputEnd: func(id string) {
+		OnToolInputEnd: func(id string) error {
 			callbacks["OnToolInputEnd"] = true
+			return nil
 		},
-		OnToolCall: func(toolCall ToolCallContent) {
+		OnToolCall: func(toolCall ToolCallContent) error {
 			callbacks["OnToolCall"] = true
+			return nil
 		},
-		OnToolResult: func(result ToolResultContent) {
+		OnToolResult: func(result ToolResultContent) error {
 			callbacks["OnToolResult"] = true
+			return nil
 		},
-		OnSource: func(source SourceContent) {
+		OnSource: func(source SourceContent) error {
 			callbacks["OnSource"] = true
+			return nil
 		},
-		OnStreamFinish: func(usage Usage, finishReason FinishReason, providerMetadata ProviderMetadata) {
+		OnStreamFinish: func(usage Usage, finishReason FinishReason, providerMetadata ProviderMetadata) error {
 			callbacks["OnStreamFinish"] = true
-		},
-		OnStreamError: func(err error) {
-			callbacks["OnStreamError"] = true
+			return nil
 		},
 	}
 
@@ -207,7 +219,6 @@ func TestStreamingAgentCallbacks(t *testing.T) {
 
 	// Verify that error callbacks were not called
 	require.False(t, callbacks["OnError"], "OnError should not be called in successful case")
-	require.False(t, callbacks["OnStreamError"], "OnStreamError should not be called in successful case")
 	require.False(t, callbacks["OnToolCall"], "OnToolCall should not be called without actual tool calls")
 	require.False(t, callbacks["OnToolResult"], "OnToolResult should not be called without actual tool results")
 }
@@ -289,28 +300,33 @@ func TestStreamingAgentWithTools(t *testing.T) {
 	// Create streaming call with callbacks
 	streamCall := AgentStreamCall{
 		Prompt: "Echo 'test'",
-		OnToolInputStart: func(id, toolName string) {
+		OnToolInputStart: func(id, toolName string) error {
 			toolInputStartCalled = true
 			require.Equal(t, "tool-1", id)
 			require.Equal(t, "echo", toolName)
+			return nil
 		},
-		OnToolInputDelta: func(id, delta string) {
+		OnToolInputDelta: func(id, delta string) error {
 			toolInputDeltaCalled = true
 			require.Equal(t, "tool-1", id)
 			require.Contains(t, []string{`{"message"`, `: "test"}`}, delta)
+			return nil
 		},
-		OnToolInputEnd: func(id string) {
+		OnToolInputEnd: func(id string) error {
 			toolInputEndCalled = true
 			require.Equal(t, "tool-1", id)
+			return nil
 		},
-		OnToolCall: func(toolCall ToolCallContent) {
+		OnToolCall: func(toolCall ToolCallContent) error {
 			toolCallCalled = true
 			require.Equal(t, "echo", toolCall.ToolName)
 			require.Equal(t, `{"message": "test"}`, toolCall.Input)
+			return nil
 		},
-		OnToolResult: func(result ToolResultContent) {
+		OnToolResult: func(result ToolResultContent) error {
 			toolResultCalled = true
 			require.Equal(t, "echo", result.ToolName)
+			return nil
 		},
 	}
 
@@ -377,10 +393,11 @@ func TestStreamingAgentTextDeltas(t *testing.T) {
 
 	streamCall := AgentStreamCall{
 		Prompt: "Say hello",
-		OnTextDelta: func(id, text string) {
+		OnTextDelta: func(id, text string) error {
 			if text != "" {
 				textDeltas = append(textDeltas, text)
 			}
+			return nil
 		},
 	}
 
@@ -438,11 +455,13 @@ func TestStreamingAgentReasoning(t *testing.T) {
 
 	streamCall := AgentStreamCall{
 		Prompt: "Think and respond",
-		OnReasoningDelta: func(id, text string) {
+		OnReasoningDelta: func(id, text string) error {
 			reasoningDeltas = append(reasoningDeltas, text)
+			return nil
 		},
-		OnTextDelta: func(id, text string) {
+		OnTextDelta: func(id, text string) error {
 			textDeltas = append(textDeltas, text)
+			return nil
 		},
 	}
 
@@ -473,15 +492,12 @@ func TestStreamingAgentError(t *testing.T) {
 	ctx := context.Background()
 
 	// Track error callbacks
-	var streamErrorOccurred bool
 	var errorOccurred bool
 	var errorMessage string
 
 	streamCall := AgentStreamCall{
 		Prompt: "This will fail",
-		OnStreamError: func(err error) {
-			streamErrorOccurred = true
-		},
+
 		OnError: func(err error) {
 			errorOccurred = true
 			errorMessage = err.Error()
@@ -492,7 +508,6 @@ func TestStreamingAgentError(t *testing.T) {
 	result, err := agent.Stream(ctx, streamCall)
 	require.Error(t, err)
 	require.Nil(t, result)
-	require.True(t, streamErrorOccurred, "OnStreamError should have been called")
 	require.True(t, errorOccurred, "OnError should have been called")
 	require.Contains(t, errorMessage, "mock stream error")
 }
@@ -546,8 +561,9 @@ func TestStreamingAgentSources(t *testing.T) {
 
 	streamCall := AgentStreamCall{
 		Prompt: "Search and respond",
-		OnSource: func(source SourceContent) {
+		OnSource: func(source SourceContent) error {
 			sources = append(sources, source)
+			return nil
 		},
 	}
 

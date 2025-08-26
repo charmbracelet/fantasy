@@ -182,22 +182,21 @@ type AgentStreamCall struct {
 	OnError       func(error)                 // Called when an error occurs
 
 	// Stream part callbacks - called for each corresponding stream part type
-	OnChunk          func(StreamPart)                                                                // Called for each stream part (catch-all)
-	OnWarnings       func(warnings []CallWarning)                                                    // Called for warnings
-	OnTextStart      func(id string)                                                                 // Called when text starts
-	OnTextDelta      func(id, text string)                                                           // Called for text deltas
-	OnTextEnd        func(id string)                                                                 // Called when text ends
-	OnReasoningStart func(id string)                                                                 // Called when reasoning starts
-	OnReasoningDelta func(id, text string)                                                           // Called for reasoning deltas
-	OnReasoningEnd   func(id string, reasoning ReasoningContent)                                     // Called when reasoning ends
-	OnToolInputStart func(id, toolName string)                                                       // Called when tool input starts
-	OnToolInputDelta func(id, delta string)                                                          // Called for tool input deltas
-	OnToolInputEnd   func(id string)                                                                 // Called when tool input ends
-	OnToolCall       func(toolCall ToolCallContent)                                                  // Called when tool call is complete
-	OnToolResult     func(result ToolResultContent)                                                  // Called when tool execution completes
-	OnSource         func(source SourceContent)                                                      // Called for source references
-	OnStreamFinish   func(usage Usage, finishReason FinishReason, providerMetadata ProviderMetadata) // Called when stream finishes
-	OnStreamError    func(error)                                                                     // Called when stream error occurs
+	OnChunk          func(StreamPart) error                                                                // Called for each stream part (catch-all)
+	OnWarnings       func(warnings []CallWarning) error                                                    // Called for warnings
+	OnTextStart      func(id string) error                                                                 // Called when text starts
+	OnTextDelta      func(id, text string) error                                                           // Called for text deltas
+	OnTextEnd        func(id string) error                                                                 // Called when text ends
+	OnReasoningStart func(id string) error                                                                 // Called when reasoning starts
+	OnReasoningDelta func(id, text string) error                                                           // Called for reasoning deltas
+	OnReasoningEnd   func(id string, reasoning ReasoningContent) error                                     // Called when reasoning ends
+	OnToolInputStart func(id, toolName string) error                                                       // Called when tool input starts
+	OnToolInputDelta func(id, delta string) error                                                          // Called for tool input deltas
+	OnToolInputEnd   func(id string) error                                                                 // Called when tool input ends
+	OnToolCall       func(toolCall ToolCallContent) error                                                  // Called when tool call is complete
+	OnToolResult     func(result ToolResultContent) error                                                  // Called when tool execution completes
+	OnSource         func(source SourceContent) error                                                      // Called for source references
+	OnStreamFinish   func(usage Usage, finishReason FinishReason, providerMetadata ProviderMetadata) error // Called when stream finishes
 }
 
 type AgentResult struct {
@@ -540,7 +539,7 @@ func toResponseMessages(content []Content) []Message {
 	return messages
 }
 
-func (a *agent) executeTools(ctx context.Context, allTools []AgentTool, toolCalls []ToolCallContent, toolResultCallback func(result ToolResultContent)) ([]ToolResultContent, error) {
+func (a *agent) executeTools(ctx context.Context, allTools []AgentTool, toolCalls []ToolCallContent, toolResultCallback func(result ToolResultContent) error) ([]ToolResultContent, error) {
 	if len(toolCalls) == 0 {
 		return nil, nil
 	}
@@ -553,7 +552,8 @@ func (a *agent) executeTools(ctx context.Context, allTools []AgentTool, toolCall
 
 	// Execute all tool calls in parallel
 	results := make([]ToolResultContent, len(toolCalls))
-	var toolExecutionError error
+	executeErrors := make([]error, len(toolCalls))
+
 	var wg sync.WaitGroup
 
 	for i, toolCall := range toolCalls {
@@ -572,7 +572,10 @@ func (a *agent) executeTools(ctx context.Context, allTools []AgentTool, toolCall
 					ProviderExecuted: false,
 				}
 				if toolResultCallback != nil {
-					toolResultCallback(results[index])
+					err := toolResultCallback(results[index])
+					if err != nil {
+						executeErrors[index] = err
+					}
 				}
 
 				return
@@ -590,7 +593,10 @@ func (a *agent) executeTools(ctx context.Context, allTools []AgentTool, toolCall
 				}
 
 				if toolResultCallback != nil {
-					toolResultCallback(results[index])
+					err := toolResultCallback(results[index])
+					if err != nil {
+						executeErrors[index] = err
+					}
 				}
 				return
 			}
@@ -612,9 +618,12 @@ func (a *agent) executeTools(ctx context.Context, allTools []AgentTool, toolCall
 					ProviderExecuted: false,
 				}
 				if toolResultCallback != nil {
-					toolResultCallback(results[index])
+					cbErr := toolResultCallback(results[index])
+					if cbErr != nil {
+						executeErrors[index] = cbErr
+					}
 				}
-				toolExecutionError = err
+				executeErrors[index] = err
 				return
 			}
 
@@ -630,7 +639,10 @@ func (a *agent) executeTools(ctx context.Context, allTools []AgentTool, toolCall
 				}
 
 				if toolResultCallback != nil {
-					toolResultCallback(results[index])
+					err := toolResultCallback(results[index])
+					if err != nil {
+						executeErrors[index] = err
+					}
 				}
 			} else {
 				results[index] = ToolResultContent{
@@ -643,7 +655,10 @@ func (a *agent) executeTools(ctx context.Context, allTools []AgentTool, toolCall
 					ProviderExecuted: false,
 				}
 				if toolResultCallback != nil {
-					toolResultCallback(results[index])
+					err := toolResultCallback(results[index])
+					if err != nil {
+						executeErrors[index] = err
+					}
 				}
 			}
 		}(i, toolCall)
@@ -652,7 +667,13 @@ func (a *agent) executeTools(ctx context.Context, allTools []AgentTool, toolCall
 	// Wait for all tool executions to complete
 	wg.Wait()
 
-	return results, toolExecutionError
+	for _, err := range executeErrors {
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return results, nil
 }
 
 // Stream implements Agent.
@@ -1004,20 +1025,29 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 	for part := range stream {
 		// Forward all parts to chunk callback
 		if opts.OnChunk != nil {
-			opts.OnChunk(part)
+			err := opts.OnChunk(part)
+			if err != nil {
+				return StepResult{}, false, err
+			}
 		}
 
 		switch part.Type {
 		case StreamPartTypeWarnings:
 			stepWarnings = part.Warnings
 			if opts.OnWarnings != nil {
-				opts.OnWarnings(part.Warnings)
+				err := opts.OnWarnings(part.Warnings)
+				if err != nil {
+					return StepResult{}, false, err
+				}
 			}
 
 		case StreamPartTypeTextStart:
 			activeTextContent[part.ID] = ""
 			if opts.OnTextStart != nil {
-				opts.OnTextStart(part.ID)
+				err := opts.OnTextStart(part.ID)
+				if err != nil {
+					return StepResult{}, false, err
+				}
 			}
 
 		case StreamPartTypeTextDelta:
@@ -1025,7 +1055,10 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 				activeTextContent[part.ID] += part.Delta
 			}
 			if opts.OnTextDelta != nil {
-				opts.OnTextDelta(part.ID, part.Delta)
+				err := opts.OnTextDelta(part.ID, part.Delta)
+				if err != nil {
+					return StepResult{}, false, err
+				}
 			}
 
 		case StreamPartTypeTextEnd:
@@ -1037,13 +1070,19 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 				delete(activeTextContent, part.ID)
 			}
 			if opts.OnTextEnd != nil {
-				opts.OnTextEnd(part.ID)
+				err := opts.OnTextEnd(part.ID)
+				if err != nil {
+					return StepResult{}, false, err
+				}
 			}
 
 		case StreamPartTypeReasoningStart:
 			activeTextContent[part.ID] = ""
 			if opts.OnReasoningStart != nil {
-				opts.OnReasoningStart(part.ID)
+				err := opts.OnReasoningStart(part.ID)
+				if err != nil {
+					return StepResult{}, false, err
+				}
 			}
 
 		case StreamPartTypeReasoningDelta:
@@ -1051,7 +1090,10 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 				activeTextContent[part.ID] += part.Delta
 			}
 			if opts.OnReasoningDelta != nil {
-				opts.OnReasoningDelta(part.ID, part.Delta)
+				err := opts.OnReasoningDelta(part.ID, part.Delta)
+				if err != nil {
+					return StepResult{}, false, err
+				}
 			}
 
 		case StreamPartTypeReasoningEnd:
@@ -1061,10 +1103,13 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 					ProviderMetadata: ProviderMetadata(part.ProviderMetadata),
 				})
 				if opts.OnReasoningEnd != nil {
-					opts.OnReasoningEnd(part.ID, ReasoningContent{
+					err := opts.OnReasoningEnd(part.ID, ReasoningContent{
 						Text:             text,
 						ProviderMetadata: ProviderMetadata(part.ProviderMetadata),
 					})
+					if err != nil {
+						return StepResult{}, false, err
+					}
 				}
 				delete(activeTextContent, part.ID)
 			}
@@ -1077,7 +1122,10 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 				ProviderExecuted: part.ProviderExecuted,
 			}
 			if opts.OnToolInputStart != nil {
-				opts.OnToolInputStart(part.ID, part.ToolCallName)
+				err := opts.OnToolInputStart(part.ID, part.ToolCallName)
+				if err != nil {
+					return StepResult{}, false, err
+				}
 			}
 
 		case StreamPartTypeToolInputDelta:
@@ -1085,12 +1133,18 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 				toolCall.Input += part.Delta
 			}
 			if opts.OnToolInputDelta != nil {
-				opts.OnToolInputDelta(part.ID, part.Delta)
+				err := opts.OnToolInputDelta(part.ID, part.Delta)
+				if err != nil {
+					return StepResult{}, false, err
+				}
 			}
 
 		case StreamPartTypeToolInputEnd:
 			if opts.OnToolInputEnd != nil {
-				opts.OnToolInputEnd(part.ID)
+				err := opts.OnToolInputEnd(part.ID)
+				if err != nil {
+					return StepResult{}, false, err
+				}
 			}
 
 		case StreamPartTypeToolCall:
@@ -1108,7 +1162,10 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 			stepContent = append(stepContent, validatedToolCall)
 
 			if opts.OnToolCall != nil {
-				opts.OnToolCall(validatedToolCall)
+				err := opts.OnToolCall(validatedToolCall)
+				if err != nil {
+					return StepResult{}, false, err
+				}
 			}
 
 			// Clean up active tool call
@@ -1124,7 +1181,10 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 			}
 			stepContent = append(stepContent, sourceContent)
 			if opts.OnSource != nil {
-				opts.OnSource(sourceContent)
+				err := opts.OnSource(sourceContent)
+				if err != nil {
+					return StepResult{}, false, err
+				}
 			}
 
 		case StreamPartTypeFinish:
@@ -1132,13 +1192,13 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 			stepFinishReason = part.FinishReason
 			stepProviderMetadata = ProviderMetadata(part.ProviderMetadata)
 			if opts.OnStreamFinish != nil {
-				opts.OnStreamFinish(part.Usage, part.FinishReason, part.ProviderMetadata)
+				err := opts.OnStreamFinish(part.Usage, part.FinishReason, part.ProviderMetadata)
+				if err != nil {
+					return StepResult{}, false, err
+				}
 			}
 
 		case StreamPartTypeError:
-			if opts.OnStreamError != nil {
-				opts.OnStreamError(part.Error)
-			}
 			if opts.OnError != nil {
 				opts.OnError(part.Error)
 			}

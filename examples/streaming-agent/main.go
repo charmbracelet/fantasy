@@ -144,47 +144,58 @@ func main() {
 		},
 
 		// Stream part callbacks
-		OnWarnings: func(warnings []ai.CallWarning) {
+		OnWarnings: func(warnings []ai.CallWarning) error {
 			for _, warning := range warnings {
 				fmt.Printf("⚠️  Warning: %s\n", warning.Message)
 			}
+			return nil
 		},
-		OnTextStart: func(id string) {
+		OnTextStart: func(id string) error {
 			fmt.Print("💭 Assistant: ")
+			return nil
 		},
-		OnTextDelta: func(id, text string) {
+		OnTextDelta: func(id, text string) error {
 			fmt.Print(text)
 			textBuffer.WriteString(text)
+			return nil
 		},
-		OnTextEnd: func(id string) {
+		OnTextEnd: func(id string) error {
 			fmt.Println()
+			return nil
 		},
-		OnReasoningStart: func(id string) {
+		OnReasoningStart: func(id string) error {
 			fmt.Print("🤔 Thinking: ")
+			return nil
 		},
-		OnReasoningDelta: func(id, text string) {
+		OnReasoningDelta: func(id, text string) error {
 			reasoningBuffer.WriteString(text)
+			return nil
 		},
-		OnReasoningEnd: func(id string, content ai.ReasoningContent) {
+		OnReasoningEnd: func(id string, content ai.ReasoningContent) error {
 			if reasoningBuffer.Len() > 0 {
 				fmt.Printf("%s\n", reasoningBuffer.String())
 				reasoningBuffer.Reset()
 			}
+			return nil
 		},
-		OnToolInputStart: func(id, toolName string) {
+		OnToolInputStart: func(id, toolName string) error {
 			fmt.Printf("🔧 Calling tool: %s\n", toolName)
+			return nil
 		},
-		OnToolInputDelta: func(id, delta string) {
+		OnToolInputDelta: func(id, delta string) error {
 			// Could show tool input being built, but it's often noisy
+			return nil
 		},
-		OnToolInputEnd: func(id string) {
+		OnToolInputEnd: func(id string) error {
 			// Tool input complete
+			return nil
 		},
-		OnToolCall: func(toolCall ai.ToolCallContent) {
+		OnToolCall: func(toolCall ai.ToolCallContent) error {
 			fmt.Printf("🛠️  Tool call: %s\n", toolCall.ToolName)
 			fmt.Printf("   Input: %s\n", toolCall.Input)
+			return nil
 		},
-		OnToolResult: func(result ai.ToolResultContent) {
+		OnToolResult: func(result ai.ToolResultContent) error {
 			fmt.Printf("🎯 Tool result from %s:\n", result.ToolName)
 			switch output := result.Result.(type) {
 			case ai.ToolResultOutputContentText:
@@ -192,15 +203,15 @@ func main() {
 			case ai.ToolResultOutputContentError:
 				fmt.Printf("   Error: %s\n", output.Error.Error())
 			}
+			return nil
 		},
-		OnSource: func(source ai.SourceContent) {
+		OnSource: func(source ai.SourceContent) error {
 			fmt.Printf("📚 Source: %s (%s)\n", source.Title, source.URL)
+			return nil
 		},
-		OnStreamFinish: func(usage ai.Usage, finishReason ai.FinishReason, providerMetadata ai.ProviderMetadata) {
+		OnStreamFinish: func(usage ai.Usage, finishReason ai.FinishReason, providerMetadata ai.ProviderMetadata) error {
 			fmt.Printf("📊 Stream finished (reason: %s, tokens: %d)\n", finishReason, usage.TotalTokens)
-		},
-		OnStreamError: func(err error) {
-			fmt.Printf("💥 Stream error: %v\n", err)
+			return nil
 		},
 	}
 

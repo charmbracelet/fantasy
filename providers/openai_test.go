@@ -1798,7 +1798,7 @@ func TestDoGenerate(t *testing.T) {
 		require.Contains(t, result.Warnings[0].Details, "search preview models")
 	})
 
-	t.Run("should send serviceTier flex processing setting", func(t *testing.T) {
+	t.Run("should send ServiceTier flex processing setting", func(t *testing.T) {
 		t.Parallel()
 
 		server := newMockServer()
@@ -1869,7 +1869,7 @@ func TestDoGenerate(t *testing.T) {
 
 		require.Len(t, result.Warnings, 1)
 		require.Equal(t, ai.CallWarningTypeUnsupportedSetting, result.Warnings[0].Type)
-		require.Equal(t, "serviceTier", result.Warnings[0].Setting)
+		require.Equal(t, "ServiceTier", result.Warnings[0].Setting)
 		require.Contains(t, result.Warnings[0].Details, "flex processing is only available")
 	})
 
@@ -1942,7 +1942,7 @@ func TestDoGenerate(t *testing.T) {
 
 		require.Len(t, result.Warnings, 1)
 		require.Equal(t, ai.CallWarningTypeUnsupportedSetting, result.Warnings[0].Type)
-		require.Equal(t, "serviceTier", result.Warnings[0].Setting)
+		require.Equal(t, "ServiceTier", result.Warnings[0].Setting)
 		require.Contains(t, result.Warnings[0].Details, "priority processing is only available")
 	})
 }

@@ -109,14 +109,17 @@ func TestStreamingAgentCallbacks(t *testing.T) {
 		OnAgentStart: func() {
 			callbacks["OnAgentStart"] = true
 		},
-		OnAgentFinish: func(result *AgentResult) {
+		OnAgentFinish: func(result *AgentResult) error {
 			callbacks["OnAgentFinish"] = true
+			return nil
 		},
-		OnStepStart: func(stepNumber int) {
+		OnStepStart: func(stepNumber int) error {
 			callbacks["OnStepStart"] = true
+			return nil
 		},
-		OnStepFinish: func(stepResult StepResult) {
+		OnStepFinish: func(stepResult StepResult) error {
 			callbacks["OnStepFinish"] = true
+			return nil
 		},
 		OnFinish: func(result *AgentResult) {
 			callbacks["OnFinish"] = true

@@ -76,8 +76,9 @@ func main() {
 		},
 
 		// Show when each step completes
-		OnStepFinish: func(step ai.StepResult) {
+		OnStepFinish: func(step ai.StepResult) error {
 			fmt.Printf("\n[Step completed: %s]\n", step.FinishReason)
+			return nil
 		},
 	}
 

@@ -174,12 +174,12 @@ type AgentStreamCall struct {
 	RepairToolCall RepairToolCallFunction
 
 	// Agent-level callbacks
-	OnAgentStart  func()                      // Called when agent starts
-	OnAgentFinish func(result *AgentResult)   // Called when agent finishes
-	OnStepStart   func(stepNumber int)        // Called when a step starts
-	OnStepFinish  func(stepResult StepResult) // Called when a step finishes
-	OnFinish      func(result *AgentResult)   // Called when entire agent completes
-	OnError       func(error)                 // Called when an error occurs
+	OnAgentStart  func()                            // Called when agent starts
+	OnAgentFinish func(result *AgentResult) error   // Called when agent finishes
+	OnStepStart   func(stepNumber int) error        // Called when a step starts
+	OnStepFinish  func(stepResult StepResult) error // Called when a step finishes
+	OnFinish      func(result *AgentResult)         // Called when entire agent completes
+	OnError       func(error)                       // Called when an error occurs
 
 	// Stream part callbacks - called for each corresponding stream part type
 	OnChunk          func(StreamPart) error                                                                // Called for each stream part (catch-all)

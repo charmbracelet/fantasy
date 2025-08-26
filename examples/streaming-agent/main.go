@@ -126,15 +126,18 @@ func main() {
 		OnAgentStart: func() {
 			fmt.Println("🎬 Agent started")
 		},
-		OnAgentFinish: func(result *ai.AgentResult) {
+		OnAgentFinish: func(result *ai.AgentResult) error {
 			fmt.Printf("🏁 Agent finished with %d steps, total tokens: %d\n", len(result.Steps), result.TotalUsage.TotalTokens)
+			return nil
 		},
-		OnStepStart: func(stepNumber int) {
+		OnStepStart: func(stepNumber int) error {
 			stepCount++
 			fmt.Printf("📝 Step %d started\n", stepNumber+1)
+			return nil
 		},
-		OnStepFinish: func(stepResult ai.StepResult) {
+		OnStepFinish: func(stepResult ai.StepResult) error {
 			fmt.Printf("✅ Step completed (reason: %s, tokens: %d)\n", stepResult.FinishReason, stepResult.Usage.TotalTokens)
+			return nil
 		},
 		OnFinish: func(result *ai.AgentResult) {
 			fmt.Printf("🎯 Final result ready with %d steps\n", len(result.Steps))

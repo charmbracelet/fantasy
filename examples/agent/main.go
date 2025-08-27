@@ -16,7 +16,7 @@ func main() {
 	model, err := provider.LanguageModel("gpt-4o")
 	if err != nil {
 		fmt.Println(err)
-		return
+		os.Exit(1)
 	}
 
 	// Create weather tool using the new type-safe API
@@ -38,9 +38,13 @@ func main() {
 		ai.WithTools(weatherTool),
 	)
 
-	result, _ := agent.Generate(context.Background(), ai.AgentCall{
+	result, err := agent.Generate(context.Background(), ai.AgentCall{
 		Prompt: "What's the weather in pristina",
 	})
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 
 	fmt.Println("Steps: ", len(result.Steps))
 	for _, s := range result.Steps {

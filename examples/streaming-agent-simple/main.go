@@ -24,7 +24,7 @@ func main() {
 	model, err := provider.LanguageModel("gpt-4o-mini")
 	if err != nil {
 		fmt.Println(err)
-		return
+		os.Exit(1)
 	}
 
 	// Create echo tool using the new type-safe API

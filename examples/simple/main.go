@@ -14,7 +14,7 @@ func main() {
 	model, err := provider.LanguageModel("claude-sonnet-4-20250514")
 	if err != nil {
 		fmt.Println(err)
-		return
+		os.Exit(1)
 	}
 
 	response, err := model.Generate(context.Background(), ai.Call{
@@ -25,7 +25,7 @@ func main() {
 	})
 	if err != nil {
 		fmt.Println(err)
-		return
+		os.Exit(1)
 	}
 
 	fmt.Println("Assistant: ", response.Content.Text())

@@ -374,6 +374,14 @@ func toAnthropicTools(tools []ai.Tool, toolChoice *ai.ToolChoice, disableParalle
 		})
 	}
 	if toolChoice == nil {
+		if disableParallelToolCalls {
+			anthropicToolChoice = &anthropic.ToolChoiceUnionParam{
+				OfAuto: &anthropic.ToolChoiceAutoParam{
+					Type:                   "auto",
+					DisableParallelToolUse: param.NewOpt(disableParallelToolCalls),
+				},
+			}
+		}
 		return
 	}
 
@@ -392,6 +400,8 @@ func toAnthropicTools(tools []ai.Tool, toolChoice *ai.ToolChoice, disableParalle
 				DisableParallelToolUse: param.NewOpt(disableParallelToolCalls),
 			},
 		}
+	case ai.ToolChoiceNone:
+		return
 	default:
 		anthropicToolChoice = &anthropic.ToolChoiceUnionParam{
 			OfTool: &anthropic.ToolChoiceToolParam{

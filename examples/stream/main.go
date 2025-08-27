@@ -15,7 +15,7 @@ func main() {
 	model, err := provider.LanguageModel("gpt-4o")
 	if err != nil {
 		fmt.Println(err)
-		return
+		os.Exit(1)
 	}
 
 	stream, err := model.Stream(context.Background(), ai.Call{
@@ -44,11 +44,15 @@ func main() {
 	})
 	if err != nil {
 		fmt.Println(err)
-		return
+		os.Exit(1)
 	}
 
 	for chunk := range stream {
-		data, _ := json.Marshal(chunk)
+		data, err := json.Marshal(chunk)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
 		fmt.Println(string(data))
 	}
 }

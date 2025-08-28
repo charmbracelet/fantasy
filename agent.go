@@ -1,6 +1,7 @@
 package ai
 
 import (
+	"cmp"
 	"context"
 	"encoding/json"
 	"errors"
@@ -230,24 +231,14 @@ func NewAgent(model LanguageModel, opts ...AgentOption) Agent {
 }
 
 func (a *agent) prepareCall(call AgentCall) AgentCall {
-	if call.MaxOutputTokens == nil && a.settings.maxOutputTokens != nil {
-		call.MaxOutputTokens = a.settings.maxOutputTokens
-	}
-	if call.Temperature == nil && a.settings.temperature != nil {
-		call.Temperature = a.settings.temperature
-	}
-	if call.TopP == nil && a.settings.topP != nil {
-		call.TopP = a.settings.topP
-	}
-	if call.TopK == nil && a.settings.topK != nil {
-		call.TopK = a.settings.topK
-	}
-	if call.PresencePenalty == nil && a.settings.presencePenalty != nil {
-		call.PresencePenalty = a.settings.presencePenalty
-	}
-	if call.FrequencyPenalty == nil && a.settings.frequencyPenalty != nil {
-		call.FrequencyPenalty = a.settings.frequencyPenalty
-	}
+	call.MaxOutputTokens = cmp.Or(call.MaxOutputTokens, a.settings.maxOutputTokens)
+	call.Temperature = cmp.Or(call.Temperature, a.settings.temperature)
+	call.TopP = cmp.Or(call.TopP, a.settings.topP)
+	call.TopK = cmp.Or(call.TopK, a.settings.topK)
+	call.PresencePenalty = cmp.Or(call.PresencePenalty, a.settings.presencePenalty)
+	call.FrequencyPenalty = cmp.Or(call.FrequencyPenalty, a.settings.frequencyPenalty)
+	call.MaxRetries = cmp.Or(call.MaxRetries, a.settings.maxRetries)
+
 	if len(call.StopWhen) == 0 && len(a.settings.stopWhen) > 0 {
 		call.StopWhen = a.settings.stopWhen
 	}
@@ -259,9 +250,6 @@ func (a *agent) prepareCall(call AgentCall) AgentCall {
 	}
 	if call.OnRetry == nil && a.settings.onRetry != nil {
 		call.OnRetry = a.settings.onRetry
-	}
-	if call.MaxRetries == nil && a.settings.maxRetries != nil {
-		call.MaxRetries = a.settings.maxRetries
 	}
 
 	providerOptions := ProviderOptions{}

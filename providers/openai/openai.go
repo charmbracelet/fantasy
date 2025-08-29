@@ -1,4 +1,4 @@
-package providers
+package openai
 
 import (
 	"context"
@@ -28,7 +28,7 @@ const (
 	ReasoningEffortHigh    ReasoningEffort = "high"
 )
 
-type OpenAiProviderOptions struct {
+type ProviderOptions struct {
 	LogitBias           map[string]int64 `json:"logit_bias"`
 	LogProbs            *bool            `json:"log_probes"`
 	TopLogProbs         *int64           `json:"top_log_probs"`
@@ -46,11 +46,11 @@ type OpenAiProviderOptions struct {
 	StructuredOutputs   *bool            `json:"structured_outputs"`
 }
 
-type openAiProvider struct {
-	options openAiProviderOptions
+type provider struct {
+	options options
 }
 
-type openAiProviderOptions struct {
+type options struct {
 	baseURL      string
 	apiKey       string
 	organization string
@@ -60,10 +60,10 @@ type openAiProviderOptions struct {
 	client       option.HTTPClient
 }
 
-type OpenAiOption = func(*openAiProviderOptions)
+type Option = func(*options)
 
-func NewOpenAiProvider(opts ...OpenAiOption) ai.Provider {
-	options := openAiProviderOptions{
+func New(opts ...Option) ai.Provider {
+	options := options{
 		headers: map[string]string{},
 	}
 	for _, o := range opts {
@@ -86,55 +86,55 @@ func NewOpenAiProvider(opts ...OpenAiOption) ai.Provider {
 		options.headers["OpenAi-Project"] = options.project
 	}
 
-	return &openAiProvider{
+	return &provider{
 		options: options,
 	}
 }
 
-func WithOpenAiBaseURL(baseURL string) OpenAiOption {
-	return func(o *openAiProviderOptions) {
+func WithBaseURL(baseURL string) Option {
+	return func(o *options) {
 		o.baseURL = baseURL
 	}
 }
 
-func WithOpenAiAPIKey(apiKey string) OpenAiOption {
-	return func(o *openAiProviderOptions) {
+func WithAPIKey(apiKey string) Option {
+	return func(o *options) {
 		o.apiKey = apiKey
 	}
 }
 
-func WithOpenAiOrganization(organization string) OpenAiOption {
-	return func(o *openAiProviderOptions) {
+func WithOrganization(organization string) Option {
+	return func(o *options) {
 		o.organization = organization
 	}
 }
 
-func WithOpenAiProject(project string) OpenAiOption {
-	return func(o *openAiProviderOptions) {
+func WithProject(project string) Option {
+	return func(o *options) {
 		o.project = project
 	}
 }
 
-func WithOpenAiName(name string) OpenAiOption {
-	return func(o *openAiProviderOptions) {
+func WithName(name string) Option {
+	return func(o *options) {
 		o.name = name
 	}
 }
 
-func WithOpenAiHeaders(headers map[string]string) OpenAiOption {
-	return func(o *openAiProviderOptions) {
+func WithHeaders(headers map[string]string) Option {
+	return func(o *options) {
 		maps.Copy(o.headers, headers)
 	}
 }
 
-func WithOpenAiHTTPClient(client option.HTTPClient) OpenAiOption {
-	return func(o *openAiProviderOptions) {
+func WithHTTPClient(client option.HTTPClient) Option {
+	return func(o *options) {
 		o.client = client
 	}
 }
 
 // LanguageModel implements ai.Provider.
-func (o *openAiProvider) LanguageModel(modelID string) (ai.LanguageModel, error) {
+func (o *provider) LanguageModel(modelID string) (ai.LanguageModel, error) {
 	openaiClientOptions := []option.RequestOption{}
 	if o.options.apiKey != "" {
 		openaiClientOptions = append(openaiClientOptions, option.WithAPIKey(o.options.apiKey))
@@ -151,35 +151,35 @@ func (o *openAiProvider) LanguageModel(modelID string) (ai.LanguageModel, error)
 		openaiClientOptions = append(openaiClientOptions, option.WithHTTPClient(o.options.client))
 	}
 
-	return openAiLanguageModel{
-		modelID:         modelID,
-		provider:        fmt.Sprintf("%s.chat", o.options.name),
-		providerOptions: o.options,
-		client:          openai.NewClient(openaiClientOptions...),
+	return languageModel{
+		modelID:  modelID,
+		provider: fmt.Sprintf("%s.chat", o.options.name),
+		options:  o.options,
+		client:   openai.NewClient(openaiClientOptions...),
 	}, nil
 }
 
-type openAiLanguageModel struct {
-	provider        string
-	modelID         string
-	client          openai.Client
-	providerOptions openAiProviderOptions
+type languageModel struct {
+	provider string
+	modelID  string
+	client   openai.Client
+	options  options
 }
 
 // Model implements ai.LanguageModel.
-func (o openAiLanguageModel) Model() string {
+func (o languageModel) Model() string {
 	return o.modelID
 }
 
 // Provider implements ai.LanguageModel.
-func (o openAiLanguageModel) Provider() string {
+func (o languageModel) Provider() string {
 	return o.provider
 }
 
-func (o openAiLanguageModel) prepareParams(call ai.Call) (*openai.ChatCompletionNewParams, []ai.CallWarning, error) {
+func (o languageModel) prepareParams(call ai.Call) (*openai.ChatCompletionNewParams, []ai.CallWarning, error) {
 	params := &openai.ChatCompletionNewParams{}
-	messages, warnings := toOpenAiPrompt(call.Prompt)
-	providerOptions := &OpenAiProviderOptions{}
+	messages, warnings := toPrompt(call.Prompt)
+	providerOptions := &ProviderOptions{}
 	if v, ok := call.ProviderOptions["openai"]; ok {
 		err := ai.ParseOptions(v, providerOptions)
 		if err != nil {
@@ -398,7 +398,7 @@ func (o openAiLanguageModel) prepareParams(call ai.Call) (*openai.ChatCompletion
 	return params, warnings, nil
 }
 
-func (o openAiLanguageModel) handleError(err error) error {
+func (o languageModel) handleError(err error) error {
 	var apiErr *openai.Error
 	if errors.As(err, &apiErr) {
 		requestDump := apiErr.DumpRequest(true)
@@ -423,7 +423,7 @@ func (o openAiLanguageModel) handleError(err error) error {
 }
 
 // Generate implements ai.LanguageModel.
-func (o openAiLanguageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response, error) {
+func (o languageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response, error) {
 	params, warnings, err := o.prepareParams(call)
 	if err != nil {
 		return nil, err
@@ -515,7 +515,7 @@ type toolCall struct {
 }
 
 // Stream implements ai.LanguageModel.
-func (o openAiLanguageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamResponse, error) {
+func (o languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamResponse, error) {
 	params, warnings, err := o.prepareParams(call)
 	if err != nil {
 		return nil, err
@@ -865,7 +865,7 @@ func toOpenAiTools(tools []ai.Tool, toolChoice *ai.ToolChoice) (openAiTools []op
 	return openAiTools, openAiToolChoice, warnings
 }
 
-func toOpenAiPrompt(prompt ai.Prompt) ([]openai.ChatCompletionMessageParamUnion, []ai.CallWarning) {
+func toPrompt(prompt ai.Prompt) ([]openai.ChatCompletionMessageParamUnion, []ai.CallWarning) {
 	var messages []openai.ChatCompletionMessageParamUnion
 	var warnings []ai.CallWarning
 	for _, msg := range prompt {

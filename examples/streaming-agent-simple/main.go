@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/charmbracelet/ai"
-	"github.com/charmbracelet/ai/providers"
+	"github.com/charmbracelet/ai/providers/openai"
 )
 
 func main() {
@@ -18,8 +18,8 @@ func main() {
 	}
 
 	// Create provider and model
-	provider := providers.NewOpenAiProvider(
-		providers.WithOpenAiAPIKey(apiKey),
+	provider := openai.New(
+		openai.WithAPIKey(apiKey),
 	)
 	model, err := provider.LanguageModel("gpt-4o-mini")
 	if err != nil {

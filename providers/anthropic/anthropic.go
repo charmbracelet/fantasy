@@ -1,4 +1,4 @@
-package providers
+package anthropic
 
 import (
 	"context"
@@ -16,31 +16,31 @@ import (
 	"github.com/charmbracelet/ai"
 )
 
-type AnthropicProviderOptions struct {
-	SendReasoning          *bool                            `json:"send_reasoning,omitempty"`
-	Thinking               *AnthropicThinkingProviderOption `json:"thinking,omitempty"`
-	DisableParallelToolUse *bool                            `json:"disable_parallel_tool_use,omitempty"`
+type ProviderOptions struct {
+	SendReasoning          *bool                   `json:"send_reasoning,omitempty"`
+	Thinking               *ThinkingProviderOption `json:"thinking,omitempty"`
+	DisableParallelToolUse *bool                   `json:"disable_parallel_tool_use,omitempty"`
 }
 
-type AnthropicThinkingProviderOption struct {
+type ThinkingProviderOption struct {
 	BudgetTokens int64 `json:"budget_tokens"`
 }
 
-type AnthropicReasoningMetadata struct {
+type ReasoningMetadata struct {
 	Signature    string `json:"signature"`
 	RedactedData string `json:"redacted_data"`
 }
 
-type AnthropicCacheControlProviderOptions struct {
+type CacheControlProviderOptions struct {
 	Type string `json:"type"`
 }
-type AnthropicFilePartProviderOptions struct {
+type FilePartProviderOptions struct {
 	EnableCitations bool   `json:"enable_citations"`
 	Title           string `json:"title"`
 	Context         string `json:"context"`
 }
 
-type anthropicProviderOptions struct {
+type options struct {
 	baseURL string
 	apiKey  string
 	name    string
@@ -48,14 +48,14 @@ type anthropicProviderOptions struct {
 	client  option.HTTPClient
 }
 
-type anthropicProvider struct {
-	options anthropicProviderOptions
+type provider struct {
+	options options
 }
 
-type AnthropicOption = func(*anthropicProviderOptions)
+type Option = func(*options)
 
-func NewAnthropicProvider(opts ...AnthropicOption) ai.Provider {
-	options := anthropicProviderOptions{
+func New(opts ...Option) ai.Provider {
+	options := options{
 		headers: map[string]string{},
 	}
 	for _, o := range opts {
@@ -69,42 +69,42 @@ func NewAnthropicProvider(opts ...AnthropicOption) ai.Provider {
 		options.name = "anthropic"
 	}
 
-	return &anthropicProvider{
+	return &provider{
 		options: options,
 	}
 }
 
-func WithAnthropicBaseURL(baseURL string) AnthropicOption {
-	return func(o *anthropicProviderOptions) {
+func WithBaseURL(baseURL string) Option {
+	return func(o *options) {
 		o.baseURL = baseURL
 	}
 }
 
-func WithAnthropicAPIKey(apiKey string) AnthropicOption {
-	return func(o *anthropicProviderOptions) {
+func WithAPIKey(apiKey string) Option {
+	return func(o *options) {
 		o.apiKey = apiKey
 	}
 }
 
-func WithAnthropicName(name string) AnthropicOption {
-	return func(o *anthropicProviderOptions) {
+func WithName(name string) Option {
+	return func(o *options) {
 		o.name = name
 	}
 }
 
-func WithAnthropicHeaders(headers map[string]string) AnthropicOption {
-	return func(o *anthropicProviderOptions) {
+func WithHeaders(headers map[string]string) Option {
+	return func(o *options) {
 		maps.Copy(o.headers, headers)
 	}
 }
 
-func WithAnthropicHTTPClient(client option.HTTPClient) AnthropicOption {
-	return func(o *anthropicProviderOptions) {
+func WithHTTPClient(client option.HTTPClient) Option {
+	return func(o *options) {
 		o.client = client
 	}
 }
 
-func (a *anthropicProvider) LanguageModel(modelID string) (ai.LanguageModel, error) {
+func (a *provider) LanguageModel(modelID string) (ai.LanguageModel, error) {
 	anthropicClientOptions := []option.RequestOption{}
 	if a.options.apiKey != "" {
 		anthropicClientOptions = append(anthropicClientOptions, option.WithAPIKey(a.options.apiKey))
@@ -120,34 +120,34 @@ func (a *anthropicProvider) LanguageModel(modelID string) (ai.LanguageModel, err
 	if a.options.client != nil {
 		anthropicClientOptions = append(anthropicClientOptions, option.WithHTTPClient(a.options.client))
 	}
-	return anthropicLanguageModel{
-		modelID:         modelID,
-		provider:        fmt.Sprintf("%s.messages", a.options.name),
-		providerOptions: a.options,
-		client:          anthropic.NewClient(anthropicClientOptions...),
+	return languageModel{
+		modelID:  modelID,
+		provider: fmt.Sprintf("%s.messages", a.options.name),
+		options:  a.options,
+		client:   anthropic.NewClient(anthropicClientOptions...),
 	}, nil
 }
 
-type anthropicLanguageModel struct {
-	provider        string
-	modelID         string
-	client          anthropic.Client
-	providerOptions anthropicProviderOptions
+type languageModel struct {
+	provider string
+	modelID  string
+	client   anthropic.Client
+	options  options
 }
 
 // Model implements ai.LanguageModel.
-func (a anthropicLanguageModel) Model() string {
+func (a languageModel) Model() string {
 	return a.modelID
 }
 
 // Provider implements ai.LanguageModel.
-func (a anthropicLanguageModel) Provider() string {
+func (a languageModel) Provider() string {
 	return a.provider
 }
 
-func (a anthropicLanguageModel) prepareParams(call ai.Call) (*anthropic.MessageNewParams, []ai.CallWarning, error) {
+func (a languageModel) prepareParams(call ai.Call) (*anthropic.MessageNewParams, []ai.CallWarning, error) {
 	params := &anthropic.MessageNewParams{}
-	providerOptions := &AnthropicProviderOptions{}
+	providerOptions := &ProviderOptions{}
 	if v, ok := call.ProviderOptions["anthropic"]; ok {
 		err := ai.ParseOptions(v, providerOptions)
 		if err != nil {
@@ -158,7 +158,7 @@ func (a anthropicLanguageModel) prepareParams(call ai.Call) (*anthropic.MessageN
 	if providerOptions.SendReasoning != nil {
 		sendReasoning = *providerOptions.SendReasoning
 	}
-	systemBlocks, messages, warnings := toAnthropicPrompt(call.Prompt, sendReasoning)
+	systemBlocks, messages, warnings := toPrompt(call.Prompt, sendReasoning)
 
 	if call.FrequencyPenalty != nil {
 		warnings = append(warnings, ai.CallWarning{
@@ -235,7 +235,7 @@ func (a anthropicLanguageModel) prepareParams(call ai.Call) (*anthropic.MessageN
 		if providerOptions.DisableParallelToolUse != nil {
 			disableParallelToolUse = *providerOptions.DisableParallelToolUse
 		}
-		tools, toolChoice, toolWarnings := toAnthropicTools(call.Tools, call.ToolChoice, disableParallelToolUse)
+		tools, toolChoice, toolWarnings := toTools(call.Tools, call.ToolChoice, disableParallelToolUse)
 		params.Tools = tools
 		if toolChoice != nil {
 			params.ToolChoice = *toolChoice
@@ -246,11 +246,11 @@ func (a anthropicLanguageModel) prepareParams(call ai.Call) (*anthropic.MessageN
 	return params, warnings, nil
 }
 
-func getCacheControl(providerOptions ai.ProviderOptions) *AnthropicCacheControlProviderOptions {
+func getCacheControl(providerOptions ai.ProviderOptions) *CacheControlProviderOptions {
 	if anthropicOptions, ok := providerOptions["anthropic"]; ok {
 		if cacheControl, ok := anthropicOptions["cache_control"]; ok {
 			if cc, ok := cacheControl.(map[string]any); ok {
-				cacheControlOption := &AnthropicCacheControlProviderOptions{}
+				cacheControlOption := &CacheControlProviderOptions{}
 				err := ai.ParseOptions(cc, cacheControlOption)
 				if err != nil {
 					return cacheControlOption
@@ -258,7 +258,7 @@ func getCacheControl(providerOptions ai.ProviderOptions) *AnthropicCacheControlP
 			}
 		} else if cacheControl, ok := anthropicOptions["cacheControl"]; ok {
 			if cc, ok := cacheControl.(map[string]any); ok {
-				cacheControlOption := &AnthropicCacheControlProviderOptions{}
+				cacheControlOption := &CacheControlProviderOptions{}
 				err := ai.ParseOptions(cc, cacheControlOption)
 				if err != nil {
 					return cacheControlOption
@@ -269,9 +269,9 @@ func getCacheControl(providerOptions ai.ProviderOptions) *AnthropicCacheControlP
 	return nil
 }
 
-func getReasoningMetadata(providerOptions ai.ProviderOptions) *AnthropicReasoningMetadata {
+func getReasoningMetadata(providerOptions ai.ProviderOptions) *ReasoningMetadata {
 	if anthropicOptions, ok := providerOptions["anthropic"]; ok {
-		reasoningMetadata := &AnthropicReasoningMetadata{}
+		reasoningMetadata := &ReasoningMetadata{}
 		err := ai.ParseOptions(anthropicOptions, reasoningMetadata)
 		if err != nil {
 			return reasoningMetadata
@@ -333,7 +333,7 @@ func groupIntoBlocks(prompt ai.Prompt) []*messageBlock {
 	return blocks
 }
 
-func toAnthropicTools(tools []ai.Tool, toolChoice *ai.ToolChoice, disableParallelToolCalls bool) (anthropicTools []anthropic.ToolUnionParam, anthropicToolChoice *anthropic.ToolChoiceUnionParam, warnings []ai.CallWarning) {
+func toTools(tools []ai.Tool, toolChoice *ai.ToolChoice, disableParallelToolCalls bool) (anthropicTools []anthropic.ToolUnionParam, anthropicToolChoice *anthropic.ToolChoiceUnionParam, warnings []ai.CallWarning) {
 	for _, tool := range tools {
 		if tool.GetType() == ai.ToolTypeFunction {
 			ft, ok := tool.(ai.FunctionTool)
@@ -414,7 +414,7 @@ func toAnthropicTools(tools []ai.Tool, toolChoice *ai.ToolChoice, disableParalle
 	return anthropicTools, anthropicToolChoice, warnings
 }
 
-func toAnthropicPrompt(prompt ai.Prompt, sendReasoningData bool) ([]anthropic.TextBlockParam, []anthropic.MessageParam, []ai.CallWarning) {
+func toPrompt(prompt ai.Prompt, sendReasoningData bool) ([]anthropic.TextBlockParam, []anthropic.MessageParam, []ai.CallWarning) {
 	var systemBlocks []anthropic.TextBlockParam
 	var messages []anthropic.MessageParam
 	var warnings []ai.CallWarning
@@ -638,7 +638,7 @@ func toAnthropicPrompt(prompt ai.Prompt, sendReasoningData bool) ([]anthropic.Te
 	return systemBlocks, messages, warnings
 }
 
-func (o anthropicLanguageModel) handleError(err error) error {
+func (o languageModel) handleError(err error) error {
 	var apiErr *anthropic.Error
 	if errors.As(err, &apiErr) {
 		requestDump := apiErr.DumpRequest(true)
@@ -662,7 +662,7 @@ func (o anthropicLanguageModel) handleError(err error) error {
 	return err
 }
 
-func mapAnthropicFinishReason(finishReason string) ai.FinishReason {
+func mapFinishReason(finishReason string) ai.FinishReason {
 	switch finishReason {
 	case "end", "stop_sequence":
 		return ai.FinishReasonStop
@@ -676,7 +676,7 @@ func mapAnthropicFinishReason(finishReason string) ai.FinishReason {
 }
 
 // Generate implements ai.LanguageModel.
-func (a anthropicLanguageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response, error) {
+func (a languageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response, error) {
 	params, warnings, err := a.prepareParams(call)
 	if err != nil {
 		return nil, err
@@ -746,7 +746,7 @@ func (a anthropicLanguageModel) Generate(ctx context.Context, call ai.Call) (*ai
 			CacheCreationTokens: response.Usage.CacheCreationInputTokens,
 			CacheReadTokens:     response.Usage.CacheReadInputTokens,
 		},
-		FinishReason: mapAnthropicFinishReason(string(response.StopReason)),
+		FinishReason: mapFinishReason(string(response.StopReason)),
 		ProviderMetadata: ai.ProviderMetadata{
 			"anthropic": make(map[string]any),
 		},
@@ -755,7 +755,7 @@ func (a anthropicLanguageModel) Generate(ctx context.Context, call ai.Call) (*ai
 }
 
 // Stream implements ai.LanguageModel.
-func (a anthropicLanguageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamResponse, error) {
+func (a languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamResponse, error) {
 	params, warnings, err := a.prepareParams(call)
 	if err != nil {
 		return nil, err
@@ -904,7 +904,7 @@ func (a anthropicLanguageModel) Stream(ctx context.Context, call ai.Call) (ai.St
 			yield(ai.StreamPart{
 				Type:         ai.StreamPartTypeFinish,
 				ID:           acc.ID,
-				FinishReason: mapAnthropicFinishReason(string(acc.StopReason)),
+				FinishReason: mapFinishReason(string(acc.StopReason)),
 				Usage: ai.Usage{
 					InputTokens:         acc.Usage.InputTokens,
 					OutputTokens:        acc.Usage.OutputTokens,

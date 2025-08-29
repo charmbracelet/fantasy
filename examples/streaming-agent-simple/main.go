@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/charmbracelet/crush/internal/ai"
-	"github.com/charmbracelet/crush/internal/ai/providers"
+	"github.com/charmbracelet/ai"
+	"github.com/charmbracelet/ai/providers"
 )
 
 func main() {

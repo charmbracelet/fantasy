@@ -10,7 +10,7 @@ import (
 	"maps"
 	"strings"
 
-	"github.com/charmbracelet/crush/internal/ai"
+	"github.com/charmbracelet/ai"
 	"github.com/google/uuid"
 	"github.com/openai/openai-go/v2"
 	"github.com/openai/openai-go/v2/option"

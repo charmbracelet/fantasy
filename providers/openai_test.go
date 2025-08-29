@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/charmbracelet/crush/internal/ai"
+	"github.com/charmbracelet/ai"
 	"github.com/openai/openai-go/v2/packages/param"
 	"github.com/stretchr/testify/require"
 )

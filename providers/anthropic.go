@@ -13,7 +13,7 @@ import (
 	"github.com/anthropics/anthropic-sdk-go"
 	"github.com/anthropics/anthropic-sdk-go/option"
 	"github.com/anthropics/anthropic-sdk-go/packages/param"
-	"github.com/charmbracelet/crush/internal/ai"
+	"github.com/charmbracelet/ai"
 )
 
 type AnthropicProviderOptions struct {

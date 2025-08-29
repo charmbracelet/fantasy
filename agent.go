@@ -1065,7 +1065,7 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 			if text, exists := activeTextContent[part.ID]; exists {
 				stepContent = append(stepContent, TextContent{
 					Text:             text,
-					ProviderMetadata: ProviderMetadata(part.ProviderMetadata),
+					ProviderMetadata: part.ProviderMetadata,
 				})
 				delete(activeTextContent, part.ID)
 			}
@@ -1100,12 +1100,12 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 			if text, exists := activeTextContent[part.ID]; exists {
 				stepContent = append(stepContent, ReasoningContent{
 					Text:             text,
-					ProviderMetadata: ProviderMetadata(part.ProviderMetadata),
+					ProviderMetadata: part.ProviderMetadata,
 				})
 				if opts.OnReasoningEnd != nil {
 					err := opts.OnReasoningEnd(part.ID, ReasoningContent{
 						Text:             text,
-						ProviderMetadata: ProviderMetadata(part.ProviderMetadata),
+						ProviderMetadata: part.ProviderMetadata,
 					})
 					if err != nil {
 						return StepResult{}, false, err
@@ -1153,7 +1153,7 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 				ToolName:         part.ToolCallName,
 				Input:            part.ToolCallInput,
 				ProviderExecuted: part.ProviderExecuted,
-				ProviderMetadata: ProviderMetadata(part.ProviderMetadata),
+				ProviderMetadata: part.ProviderMetadata,
 			}
 
 			// Validate and potentially repair the tool call
@@ -1177,7 +1177,7 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 				ID:               part.ID,
 				URL:              part.URL,
 				Title:            part.Title,
-				ProviderMetadata: ProviderMetadata(part.ProviderMetadata),
+				ProviderMetadata: part.ProviderMetadata,
 			}
 			stepContent = append(stepContent, sourceContent)
 			if opts.OnSource != nil {
@@ -1190,7 +1190,7 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 		case StreamPartTypeFinish:
 			stepUsage = part.Usage
 			stepFinishReason = part.FinishReason
-			stepProviderMetadata = ProviderMetadata(part.ProviderMetadata)
+			stepProviderMetadata = part.ProviderMetadata
 			if opts.OnStreamFinish != nil {
 				err := opts.OnStreamFinish(part.Usage, part.FinishReason, part.ProviderMetadata)
 				if err != nil {

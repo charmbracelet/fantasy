@@ -154,6 +154,75 @@ type AgentCall struct {
 	RepairToolCall RepairToolCallFunction
 }
 
+// Agent-level callbacks.
+type (
+	// OnAgentStartFunc is called when agent starts.
+	OnAgentStartFunc func()
+
+	// OnAgentFinishFunc is called when agent finishes.
+	OnAgentFinishFunc func(result *AgentResult) error
+
+	// OnStepStartFunc is called when a step starts.
+	OnStepStartFunc func(stepNumber int) error
+
+	// OnStepFinishFunc is called when a step finishes.
+	OnStepFinishFunc func(stepResult StepResult) error
+
+	// OnFinishFunc is called when entire agent completes.
+	OnFinishFunc func(result *AgentResult)
+
+	// OnErrorFunc is called when an error occurs.
+	OnErrorFunc func(error)
+)
+
+// Stream part callbacks - called for each corresponding stream part type.
+type (
+	// OnChunkFunc is called for each stream part (catch-all).
+	OnChunkFunc func(StreamPart) error
+
+	// OnWarningsFunc is called for warnings.
+	OnWarningsFunc func(warnings []CallWarning) error
+
+	// OnTextStartFunc is called when text starts.
+	OnTextStartFunc func(id string) error
+
+	// OnTextDeltaFunc is called for text deltas.
+	OnTextDeltaFunc func(id, text string) error
+
+	// OnTextEndFunc is called when text ends.
+	OnTextEndFunc func(id string) error
+
+	// OnReasoningStartFunc is called when reasoning starts.
+	OnReasoningStartFunc func(id string) error
+
+	// OnReasoningDeltaFunc is called for reasoning deltas.
+	OnReasoningDeltaFunc func(id, text string) error
+
+	// OnReasoningEndFunc is called when reasoning ends.
+	OnReasoningEndFunc func(id string, reasoning ReasoningContent) error
+
+	// OnToolInputStartFunc is called when tool input starts.
+	OnToolInputStartFunc func(id, toolName string) error
+
+	// OnToolInputDeltaFunc is called for tool input deltas.
+	OnToolInputDeltaFunc func(id, delta string) error
+
+	// OnToolInputEndFunc is called when tool input ends.
+	OnToolInputEndFunc func(id string) error
+
+	// OnToolCallFunc is called when tool call is complete.
+	OnToolCallFunc func(toolCall ToolCallContent) error
+
+	// OnToolResultFunc is called when tool execution completes.
+	OnToolResultFunc func(result ToolResultContent) error
+
+	// OnSourceFunc is called for source references.
+	OnSourceFunc func(source SourceContent) error
+
+	// OnStreamFinishFunc is called when stream finishes.
+	OnStreamFinishFunc func(usage Usage, finishReason FinishReason, providerMetadata ProviderMetadata) error
+)
+
 type AgentStreamCall struct {
 	Prompt           string     `json:"prompt"`
 	Files            []FilePart `json:"files"`
@@ -175,29 +244,29 @@ type AgentStreamCall struct {
 	RepairToolCall RepairToolCallFunction
 
 	// Agent-level callbacks
-	OnAgentStart  func()                            // Called when agent starts
-	OnAgentFinish func(result *AgentResult) error   // Called when agent finishes
-	OnStepStart   func(stepNumber int) error        // Called when a step starts
-	OnStepFinish  func(stepResult StepResult) error // Called when a step finishes
-	OnFinish      func(result *AgentResult)         // Called when entire agent completes
-	OnError       func(error)                       // Called when an error occurs
+	OnAgentStart  OnAgentStartFunc  // Called when agent starts
+	OnAgentFinish OnAgentFinishFunc // Called when agent finishes
+	OnStepStart   OnStepStartFunc   // Called when a step starts
+	OnStepFinish  OnStepFinishFunc  // Called when a step finishes
+	OnFinish      OnFinishFunc      // Called when entire agent completes
+	OnError       OnErrorFunc       // Called when an error occurs
 
 	// Stream part callbacks - called for each corresponding stream part type
-	OnChunk          func(StreamPart) error                                                                // Called for each stream part (catch-all)
-	OnWarnings       func(warnings []CallWarning) error                                                    // Called for warnings
-	OnTextStart      func(id string) error                                                                 // Called when text starts
-	OnTextDelta      func(id, text string) error                                                           // Called for text deltas
-	OnTextEnd        func(id string) error                                                                 // Called when text ends
-	OnReasoningStart func(id string) error                                                                 // Called when reasoning starts
-	OnReasoningDelta func(id, text string) error                                                           // Called for reasoning deltas
-	OnReasoningEnd   func(id string, reasoning ReasoningContent) error                                     // Called when reasoning ends
-	OnToolInputStart func(id, toolName string) error                                                       // Called when tool input starts
-	OnToolInputDelta func(id, delta string) error                                                          // Called for tool input deltas
-	OnToolInputEnd   func(id string) error                                                                 // Called when tool input ends
-	OnToolCall       func(toolCall ToolCallContent) error                                                  // Called when tool call is complete
-	OnToolResult     func(result ToolResultContent) error                                                  // Called when tool execution completes
-	OnSource         func(source SourceContent) error                                                      // Called for source references
-	OnStreamFinish   func(usage Usage, finishReason FinishReason, providerMetadata ProviderMetadata) error // Called when stream finishes
+	OnChunk          OnChunkFunc          // Called for each stream part (catch-all)
+	OnWarnings       OnWarningsFunc       // Called for warnings
+	OnTextStart      OnTextStartFunc      // Called when text starts
+	OnTextDelta      OnTextDeltaFunc      // Called for text deltas
+	OnTextEnd        OnTextEndFunc        // Called when text ends
+	OnReasoningStart OnReasoningStartFunc // Called when reasoning starts
+	OnReasoningDelta OnReasoningDeltaFunc // Called for reasoning deltas
+	OnReasoningEnd   OnReasoningEndFunc   // Called when reasoning ends
+	OnToolInputStart OnToolInputStartFunc // Called when tool input starts
+	OnToolInputDelta OnToolInputDeltaFunc // Called for tool input deltas
+	OnToolInputEnd   OnToolInputEndFunc   // Called when tool input ends
+	OnToolCall       OnToolCallFunc       // Called when tool call is complete
+	OnToolResult     OnToolResultFunc     // Called when tool execution completes
+	OnSource         OnSourceFunc         // Called for source references
+	OnStreamFinish   OnStreamFinishFunc   // Called when stream finishes
 }
 
 type AgentResult struct {

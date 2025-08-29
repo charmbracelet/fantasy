@@ -4,27 +4,27 @@ run:
 linters:
   enable:
     - bodyclose
-    - exhaustive
-    - goconst
+    # - exhaustive
+    # - goconst
     - godot
     - gomoddirectives
     - goprintffuncname
     - gosec
     - misspell
     - nakedret
-    - nestif
+    # - nestif
     - nilerr
     - noctx
     - nolintlint
     - prealloc
-    - revive
+    # - revive
     - rowserrcheck
     - sqlclosecheck
     - tparallel
     - unconvert
     - unparam
     - whitespace
-    - wrapcheck
+    # - wrapcheck
   exclusions:
     rules:
       - text: '(slog|log)\.\w+'

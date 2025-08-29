@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/ai"
+	"github.com/charmbracelet/ai/internal/jsonext"
 	"github.com/google/uuid"
 	"github.com/openai/openai-go/v2"
 	"github.com/openai/openai-go/v2/option"
@@ -618,7 +619,7 @@ func (o openAiLanguageModel) Stream(ctx context.Context, call ai.Call) (ai.Strea
 								return
 							}
 							toolCalls[toolCallDelta.Index] = existingToolCall
-							if existingToolCall.arguments != "" && ai.IsParsableJSON(existingToolCall.arguments) {
+							if jsonext.IsValidJSON(existingToolCall.arguments) {
 								if !yield(ai.StreamPart{
 									Type: ai.StreamPartTypeToolInputEnd,
 									ID:   existingToolCall.id,
@@ -679,7 +680,7 @@ func (o openAiLanguageModel) Stream(ctx context.Context, call ai.Call) (ai.Strea
 								}) {
 									return
 								}
-								if ai.IsParsableJSON(toolCalls[toolCallDelta.Index].arguments) {
+								if jsonext.IsValidJSON(toolCalls[toolCallDelta.Index].arguments) {
 									if !yield(ai.StreamPart{
 										Type: ai.StreamPartTypeToolInputEnd,
 										ID:   toolCallDelta.ID,

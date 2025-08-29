@@ -775,7 +775,7 @@ func (a anthropicLanguageModel) Stream(ctx context.Context, call ai.Call) (ai.St
 
 		for stream.Next() {
 			chunk := stream.Current()
-			acc.Accumulate(chunk)
+			_ = acc.Accumulate(chunk)
 			switch chunk.Type {
 			case "content_block_start":
 				contentBlockType := chunk.ContentBlock.Type

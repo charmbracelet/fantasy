@@ -841,7 +841,7 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 }
 
 func (a *agent) prepareTools(tools []AgentTool, activeTools []string, disableAllTools bool) []Tool {
-	var preparedTools []Tool
+	preparedTools := make([]Tool, 0, len(tools))
 
 	// If explicitly disabling all tools, return no tools
 	if disableAllTools {

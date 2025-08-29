@@ -469,7 +469,7 @@ func NewUserMessage(prompt string, files ...FilePart) Message {
 }
 
 func NewSystemMessage(prompt ...string) Message {
-	var content []MessagePart
+	content := make([]MessagePart, 0, len(prompt))
 	for _, p := range prompt {
 		content = append(content, TextPart{Text: p})
 	}

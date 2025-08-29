@@ -436,7 +436,7 @@ func (o openAiLanguageModel) Generate(ctx context.Context, call ai.Call) (*ai.Re
 		return nil, errors.New("no response generated")
 	}
 	choice := response.Choices[0]
-	var content []ai.Content
+	content := make([]ai.Content, 0, 1+len(choice.Message.ToolCalls)+len(choice.Message.Annotations))
 	text := choice.Message.Content
 	if text != "" {
 		content = append(content, ai.TextContent{

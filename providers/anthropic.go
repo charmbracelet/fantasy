@@ -382,7 +382,7 @@ func toAnthropicTools(tools []ai.Tool, toolChoice *ai.ToolChoice, disableParalle
 				},
 			}
 		}
-		return
+		return anthropicTools, anthropicToolChoice, warnings
 	}
 
 	switch *toolChoice {
@@ -401,7 +401,7 @@ func toAnthropicTools(tools []ai.Tool, toolChoice *ai.ToolChoice, disableParalle
 			},
 		}
 	case ai.ToolChoiceNone:
-		return
+		return anthropicTools, anthropicToolChoice, warnings
 	default:
 		anthropicToolChoice = &anthropic.ToolChoiceUnionParam{
 			OfTool: &anthropic.ToolChoiceToolParam{
@@ -411,7 +411,7 @@ func toAnthropicTools(tools []ai.Tool, toolChoice *ai.ToolChoice, disableParalle
 			},
 		}
 	}
-	return
+	return anthropicTools, anthropicToolChoice, warnings
 }
 
 func toAnthropicPrompt(prompt ai.Prompt, sendReasoningData bool) ([]anthropic.TextBlockParam, []anthropic.MessageParam, []ai.CallWarning) {

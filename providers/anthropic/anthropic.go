@@ -1,6 +1,7 @@
 package anthropic
 
 import (
+	"cmp"
 	"context"
 	"encoding/base64"
 	"encoding/json"
@@ -37,17 +38,11 @@ func New(opts ...Option) ai.Provider {
 	for _, o := range opts {
 		o(&options)
 	}
-	if options.baseURL == "" {
-		options.baseURL = "https://api.anthropic.com"
-	}
 
-	if options.name == "" {
-		options.name = "anthropic"
-	}
+	options.baseURL = cmp.Or(options.baseURL, "https://api.anthropic.com")
+	options.name = cmp.Or(options.name, "anthropic")
 
-	return &provider{
-		options: options,
-	}
+	return &provider{options: options}
 }
 
 func WithBaseURL(baseURL string) Option {

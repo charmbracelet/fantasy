@@ -1,6 +1,7 @@
 package openai
 
 import (
+	"cmp"
 	"context"
 	"encoding/base64"
 	"encoding/json"
@@ -43,25 +44,17 @@ func New(opts ...Option) ai.Provider {
 		o(&options)
 	}
 
-	if options.baseURL == "" {
-		options.baseURL = "https://api.openai.com/v1"
-	}
-
-	if options.name == "" {
-		options.name = "openai"
-	}
+	options.baseURL = cmp.Or(options.baseURL, "https://api.openai.com/v1")
+	options.name = cmp.Or(options.name, "openai")
 
 	if options.organization != "" {
 		options.headers["OpenAi-Organization"] = options.organization
 	}
-
 	if options.project != "" {
 		options.headers["OpenAi-Project"] = options.project
 	}
 
-	return &provider{
-		options: options,
-	}
+	return &provider{options: options}
 }
 
 func WithBaseURL(baseURL string) Option {

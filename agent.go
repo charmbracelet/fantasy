@@ -767,7 +767,7 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 
 		// Start step stream
 		if opts.OnStepStart != nil {
-			opts.OnStepStart(stepNumber)
+			_ = opts.OnStepStart(stepNumber)
 		}
 
 		// Create streaming call
@@ -808,7 +808,7 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 
 		// Call step finished callback
 		if opts.OnStepFinish != nil {
-			opts.OnStepFinish(stepResult)
+			_ = opts.OnStepFinish(stepResult)
 		}
 
 		// Add step messages to response messages
@@ -834,7 +834,7 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 	}
 
 	if opts.OnAgentFinish != nil {
-		opts.OnAgentFinish(agentResult)
+		_ = opts.OnAgentFinish(agentResult)
 	}
 
 	return agentResult, nil

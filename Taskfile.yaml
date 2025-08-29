@@ -1,0 +1,23 @@
+version: '3'
+
+
+tasks:
+  test:
+    desc: Run tests
+    cmds:
+      - go test ./...
+
+  lint:
+    desc: Run linters
+    cmds:
+      - golangci-lint run --config .golangci.yml --timeout 10m
+
+  lint:fix:
+    desc: Fix lint issues
+    cmds:
+      - golangci-lint run --config .golangci.yml --fix
+
+  fmt:
+    desc: Format code
+    cmds:
+      - gofumpt -w .

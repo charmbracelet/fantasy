@@ -7,11 +7,11 @@ import (
 	"os"
 
 	"github.com/charmbracelet/ai"
-	"github.com/charmbracelet/ai/providers"
+	"github.com/charmbracelet/ai/providers/openai"
 )
 
 func main() {
-	provider := providers.NewOpenAiProvider(providers.WithOpenAiAPIKey(os.Getenv("OPENAI_API_KEY")))
+	provider := openai.New(openai.WithAPIKey(os.Getenv("OPENAI_API_KEY")))
 	model, err := provider.LanguageModel("gpt-4o")
 	if err != nil {
 		fmt.Println(err)

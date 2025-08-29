@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/ai"
-	"github.com/charmbracelet/ai/providers"
+	"github.com/charmbracelet/ai/providers/anthropic"
 )
 
 func main() {
@@ -24,7 +24,7 @@ func main() {
 	fmt.Println()
 
 	// Create OpenAI provider and model
-	provider := providers.NewAnthropicProvider(providers.WithAnthropicAPIKey(os.Getenv("ANTHROPIC_API_KEY")))
+	provider := anthropic.New(anthropic.WithAPIKey(os.Getenv("ANTHROPIC_API_KEY")))
 	model, err := provider.LanguageModel("claude-sonnet-4-20250514")
 	if err != nil {
 		fmt.Println(err)

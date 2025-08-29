@@ -868,7 +868,7 @@ func (a *agent) prepareTools(tools []AgentTool, activeTools []string, disableAll
 	return preparedTools
 }
 
-// validateAndRepairToolCall validates a tool call and attempts repair if validation fails
+// validateAndRepairToolCall validates a tool call and attempts repair if validation fails.
 func (a *agent) validateAndRepairToolCall(ctx context.Context, toolCall ToolCallContent, availableTools []AgentTool, systemPrompt string, messages []Message, repairFunc RepairToolCallFunction) ToolCallContent {
 	if err := a.validateToolCall(toolCall, availableTools); err == nil {
 		return toolCall
@@ -896,7 +896,7 @@ func (a *agent) validateAndRepairToolCall(ctx context.Context, toolCall ToolCall
 	}
 }
 
-// validateToolCall validates a tool call against available tools and their schemas
+// validateToolCall validates a tool call against available tools and their schemas.
 func (a *agent) validateToolCall(toolCall ToolCallContent, availableTools []AgentTool) error {
 	var tool AgentTool
 	for _, t := range availableTools {
@@ -1009,7 +1009,7 @@ func WithRepairToolCall(fn RepairToolCallFunction) AgentOption {
 	}
 }
 
-// processStepStream processes a single step's stream and returns the step result
+// processStepStream processes a single step's stream and returns the step result.
 func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, opts AgentStreamCall, _ []StepResult) (StepResult, bool, error) {
 	var stepContent []Content
 	var stepToolCalls []ToolCallContent

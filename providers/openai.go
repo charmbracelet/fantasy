@@ -839,7 +839,7 @@ func toOpenAiTools(tools []ai.Tool, toolChoice *ai.ToolChoice) (openAiTools []op
 		})
 	}
 	if toolChoice == nil {
-		return
+		return openAiTools, openAiToolChoice, warnings
 	}
 
 	switch *toolChoice {
@@ -861,7 +861,7 @@ func toOpenAiTools(tools []ai.Tool, toolChoice *ai.ToolChoice) (openAiTools []op
 			},
 		}
 	}
-	return
+	return openAiTools, openAiToolChoice, warnings
 }
 
 func toOpenAiPrompt(prompt ai.Prompt) ([]openai.ChatCompletionMessageParamUnion, []ai.CallWarning) {
@@ -1129,7 +1129,7 @@ func toOpenAiPrompt(prompt ai.Prompt) ([]openai.ChatCompletionMessageParamUnion,
 	return messages, warnings
 }
 
-// parseAnnotationsFromDelta parses annotations from the raw JSON of a delta
+// parseAnnotationsFromDelta parses annotations from the raw JSON of a delta.
 func parseAnnotationsFromDelta(delta openai.ChatCompletionChunkChoiceDelta) []openai.ChatCompletionMessageAnnotation {
 	var annotations []openai.ChatCompletionMessageAnnotation
 

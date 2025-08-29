@@ -45,7 +45,7 @@ type ProviderOptions map[string]map[string]any
 // - `tool-calls`: model triggered tool calls
 // - `error`: model stopped because of an error
 // - `other`: model stopped for other reasons
-// - `unknown`: the model has not transmitted a finish reason
+// - `unknown`: the model has not transmitted a finish reason.
 type FinishReason string
 
 const (
@@ -450,7 +450,7 @@ func (p ProviderDefinedTool) GetName() string {
 	return p.Name
 }
 
-// Helpers
+// Helpers.
 func NewUserMessage(prompt string, files ...FilePart) Message {
 	content := []MessagePart{
 		TextPart{

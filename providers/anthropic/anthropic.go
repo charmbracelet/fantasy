@@ -16,30 +16,6 @@ import (
 	"github.com/charmbracelet/ai"
 )
 
-type ProviderOptions struct {
-	SendReasoning          *bool                   `json:"send_reasoning,omitempty"`
-	Thinking               *ThinkingProviderOption `json:"thinking,omitempty"`
-	DisableParallelToolUse *bool                   `json:"disable_parallel_tool_use,omitempty"`
-}
-
-type ThinkingProviderOption struct {
-	BudgetTokens int64 `json:"budget_tokens"`
-}
-
-type ReasoningMetadata struct {
-	Signature    string `json:"signature"`
-	RedactedData string `json:"redacted_data"`
-}
-
-type CacheControlProviderOptions struct {
-	Type string `json:"type"`
-}
-type FilePartProviderOptions struct {
-	EnableCitations bool   `json:"enable_citations"`
-	Title           string `json:"title"`
-	Context         string `json:"context"`
-}
-
 type options struct {
 	baseURL string
 	apiKey  string
@@ -147,7 +123,7 @@ func (a languageModel) Provider() string {
 
 func (a languageModel) prepareParams(call ai.Call) (*anthropic.MessageNewParams, []ai.CallWarning, error) {
 	params := &anthropic.MessageNewParams{}
-	providerOptions := &ProviderOptions{}
+	providerOptions := &providerOptions{}
 	if v, ok := call.ProviderOptions["anthropic"]; ok {
 		err := ai.ParseOptions(v, providerOptions)
 		if err != nil {
@@ -246,11 +222,11 @@ func (a languageModel) prepareParams(call ai.Call) (*anthropic.MessageNewParams,
 	return params, warnings, nil
 }
 
-func getCacheControl(providerOptions ai.ProviderOptions) *CacheControlProviderOptions {
+func getCacheControl(providerOptions ai.ProviderOptions) *cacheControlProviderOptions {
 	if anthropicOptions, ok := providerOptions["anthropic"]; ok {
 		if cacheControl, ok := anthropicOptions["cache_control"]; ok {
 			if cc, ok := cacheControl.(map[string]any); ok {
-				cacheControlOption := &CacheControlProviderOptions{}
+				cacheControlOption := &cacheControlProviderOptions{}
 				err := ai.ParseOptions(cc, cacheControlOption)
 				if err != nil {
 					return cacheControlOption
@@ -258,7 +234,7 @@ func getCacheControl(providerOptions ai.ProviderOptions) *CacheControlProviderOp
 			}
 		} else if cacheControl, ok := anthropicOptions["cacheControl"]; ok {
 			if cc, ok := cacheControl.(map[string]any); ok {
-				cacheControlOption := &CacheControlProviderOptions{}
+				cacheControlOption := &cacheControlProviderOptions{}
 				err := ai.ParseOptions(cc, cacheControlOption)
 				if err != nil {
 					return cacheControlOption
@@ -269,9 +245,9 @@ func getCacheControl(providerOptions ai.ProviderOptions) *CacheControlProviderOp
 	return nil
 }
 
-func getReasoningMetadata(providerOptions ai.ProviderOptions) *ReasoningMetadata {
+func getReasoningMetadata(providerOptions ai.ProviderOptions) *reasoningMetadata {
 	if anthropicOptions, ok := providerOptions["anthropic"]; ok {
-		reasoningMetadata := &ReasoningMetadata{}
+		reasoningMetadata := &reasoningMetadata{}
 		err := ai.ParseOptions(anthropicOptions, reasoningMetadata)
 		if err != nil {
 			return reasoningMetadata

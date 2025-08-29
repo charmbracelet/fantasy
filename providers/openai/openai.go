@@ -19,33 +19,6 @@ import (
 	"github.com/openai/openai-go/v2/shared"
 )
 
-type ReasoningEffort string
-
-const (
-	ReasoningEffortMinimal ReasoningEffort = "minimal"
-	ReasoningEffortLow     ReasoningEffort = "low"
-	ReasoningEffortMedium  ReasoningEffort = "medium"
-	ReasoningEffortHigh    ReasoningEffort = "high"
-)
-
-type ProviderOptions struct {
-	LogitBias           map[string]int64 `json:"logit_bias"`
-	LogProbs            *bool            `json:"log_probes"`
-	TopLogProbs         *int64           `json:"top_log_probs"`
-	ParallelToolCalls   *bool            `json:"parallel_tool_calls"`
-	User                *string          `json:"user"`
-	ReasoningEffort     *ReasoningEffort `json:"reasoning_effort"`
-	MaxCompletionTokens *int64           `json:"max_completion_tokens"`
-	TextVerbosity       *string          `json:"text_verbosity"`
-	Prediction          map[string]any   `json:"prediction"`
-	Store               *bool            `json:"store"`
-	Metadata            map[string]any   `json:"metadata"`
-	PromptCacheKey      *string          `json:"prompt_cache_key"`
-	SafetyIdentifier    *string          `json:"safety_identifier"`
-	ServiceTier         *string          `json:"service_tier"`
-	StructuredOutputs   *bool            `json:"structured_outputs"`
-}
-
 type provider struct {
 	options options
 }
@@ -179,7 +152,7 @@ func (o languageModel) Provider() string {
 func (o languageModel) prepareParams(call ai.Call) (*openai.ChatCompletionNewParams, []ai.CallWarning, error) {
 	params := &openai.ChatCompletionNewParams{}
 	messages, warnings := toPrompt(call.Prompt)
-	providerOptions := &ProviderOptions{}
+	providerOptions := &providerOptions{}
 	if v, ok := call.ProviderOptions["openai"]; ok {
 		err := ai.ParseOptions(v, providerOptions)
 		if err != nil {
@@ -273,13 +246,13 @@ func (o languageModel) prepareParams(call ai.Call) (*openai.ChatCompletionNewPar
 
 	if providerOptions.ReasoningEffort != nil {
 		switch *providerOptions.ReasoningEffort {
-		case ReasoningEffortMinimal:
+		case reasoningEffortMinimal:
 			params.ReasoningEffort = shared.ReasoningEffortMinimal
-		case ReasoningEffortLow:
+		case reasoningEffortLow:
 			params.ReasoningEffort = shared.ReasoningEffortLow
-		case ReasoningEffortMedium:
+		case reasoningEffortMedium:
 			params.ReasoningEffort = shared.ReasoningEffortMedium
-		case ReasoningEffortHigh:
+		case reasoningEffortHigh:
 			params.ReasoningEffort = shared.ReasoningEffortHigh
 		default:
 			return nil, nil, fmt.Errorf("reasoning model `%s` not supported", *providerOptions.ReasoningEffort)

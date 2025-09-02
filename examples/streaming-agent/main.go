@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/charmbracelet/ai"
+	"github.com/charmbracelet/ai/ai"
 	"github.com/charmbracelet/ai/providers/anthropic"
 )
 

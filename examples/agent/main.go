@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/charmbracelet/ai"
+	"github.com/charmbracelet/ai/ai"
 	"github.com/charmbracelet/ai/providers/openai"
 )
 

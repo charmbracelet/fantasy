@@ -1,10 +1,10 @@
-package jsonext
+package openai
 
 import (
 	"encoding/json"
 )
 
-func IsValidJSON[T string | []byte](data T) bool {
+func isValidJSON[T string | []byte](data T) bool {
 	if len(data) == 0 { // hot path
 		return false
 	}

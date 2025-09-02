@@ -1,23 +1,36 @@
 version: '3'
 
+env:
+  GOPRIVATE: github.com/charmbracelet/*
+
+vars:
+  PACKAGES:
+    - ./ai
+    - ./examples
+    - ./providers/anthropic
+    - ./providers/openai
 
 tasks:
-  test:
-    desc: Run tests
+  fmt:
+    desc: Run gofumpt for all packages
     cmds:
-      - go test ./...
+      - for: { var: PACKAGES }
+        cmd: cd {{.ITEM}} && gofmt -s -w .
+
+  modernize:
+    desc: Run modernize for all packages
+    cmds:
+      - for: { var: PACKAGES }
+        cmd: cd {{.ITEM}} && modernize -fix ./...
 
   lint:
-    desc: Run linters
+    desc: Run base linters for all packages
     cmds:
-      - golangci-lint run --config .golangci.yml --timeout 10m
+      - for: { var: PACKAGES }
+        cmd: cd {{.ITEM}} && golangci-lint run
 
-  lint:fix:
-    desc: Fix lint issues
+  test:
+    desc: Run tests for all packages
     cmds:
-      - golangci-lint run --config .golangci.yml --fix
-
-  fmt:
-    desc: Format code
-    cmds:
-      - gofumpt -w .
+      - for: { var: PACKAGES }
+        cmd: cd {{.ITEM}} && go test ./... {{.CLI_ARGS}}

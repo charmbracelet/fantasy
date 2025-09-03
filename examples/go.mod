@@ -4,8 +4,8 @@ go 1.24.5
 
 require (
 	github.com/charmbracelet/ai/ai v0.0.0-00010101000000-000000000000
-	github.com/charmbracelet/ai/providers/anthropic v0.0.0-00010101000000-000000000000
-	github.com/charmbracelet/ai/providers/openai v0.0.0-00010101000000-000000000000
+	github.com/charmbracelet/ai/anthropic v0.0.0-00010101000000-000000000000
+	github.com/charmbracelet/ai/openai v0.0.0-00010101000000-000000000000
 )
 
 require (
@@ -21,6 +21,6 @@ require (
 
 replace github.com/charmbracelet/ai/ai => ../ai
 
-replace github.com/charmbracelet/ai/providers/anthropic => ../providers/anthropic
+replace github.com/charmbracelet/ai/anthropic => ../anthropic
 
-replace github.com/charmbracelet/ai/providers/openai => ../providers/openai
+replace github.com/charmbracelet/ai/openai => ../openai

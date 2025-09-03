@@ -7,7 +7,7 @@ on:
       - main
   pull_request:
     paths:
-      - providers/anthropic/**
+      - anthropic/**
       - .github/workflows/anthropic.yml
 
 jobs:
@@ -18,14 +18,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     defaults:
       run:
-        working-directory: ./providers/anthropic
+        working-directory: ./anthropic
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version-file: ./providers/anthropic/go.mod
+          go-version-file: ./anthropic/go.mod
           cache: true
-          cache-dependency-path: ./providers/anthropic/go.sum
+          cache-dependency-path: ./anthropic/go.sum
       - run: go build -v ./...
       - run: go test -race -v ./...
 
@@ -51,6 +51,6 @@ jobs:
   lint:
     uses: charmbracelet/meta/.github/workflows/lint.yml@main
     with:
-      directory: ./providers/anthropic/...
+      directory: ./anthropic/...
       golangci_path: .golangci.yml
 

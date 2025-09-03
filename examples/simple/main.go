@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/charmbracelet/ai/ai"
-	"github.com/charmbracelet/ai/providers/anthropic"
+	"github.com/charmbracelet/ai/anthropic"
 )
 
 func main() {

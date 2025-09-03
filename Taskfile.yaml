@@ -1,36 +1,22 @@
 version: '3'
 
-env:
-  GOPRIVATE: github.com/charmbracelet/*
-
-vars:
-  PACKAGES:
-    - ./ai
-    - ./anthropic
-    - ./examples
-    - ./openai
-
 tasks:
   fmt:
     desc: Run gofumpt for all packages
     cmds:
-      - for: { var: PACKAGES }
-        cmd: cd {{.ITEM}} && gofmt -s -w .
+      - gofmt -s -w .
 
   modernize:
     desc: Run modernize for all packages
     cmds:
-      - for: { var: PACKAGES }
-        cmd: cd {{.ITEM}} && modernize -fix ./...
+      - modernize -fix ./...
 
   lint:
     desc: Run base linters for all packages
     cmds:
-      - for: { var: PACKAGES }
-        cmd: cd {{.ITEM}} && golangci-lint run
+      - golangci-lint run
 
   test:
     desc: Run tests for all packages
     cmds:
-      - for: { var: PACKAGES }
-        cmd: cd {{.ITEM}} && go test ./... {{.CLI_ARGS}}
+      - go test ./... {{.CLI_ARGS}}

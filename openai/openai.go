@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/ai/ai"
+	xjson "github.com/charmbracelet/x/json"
 	"github.com/google/uuid"
 	"github.com/openai/openai-go/v2"
 	"github.com/openai/openai-go/v2/option"
@@ -584,7 +585,7 @@ func (o languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 								return
 							}
 							toolCalls[toolCallDelta.Index] = existingToolCall
-							if isValidJSON(existingToolCall.arguments) {
+							if xjson.IsValid(existingToolCall.arguments) {
 								if !yield(ai.StreamPart{
 									Type: ai.StreamPartTypeToolInputEnd,
 									ID:   existingToolCall.id,
@@ -645,7 +646,7 @@ func (o languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 								}) {
 									return
 								}
-								if isValidJSON(toolCalls[toolCallDelta.Index].arguments) {
+								if xjson.IsValid(toolCalls[toolCallDelta.Index].arguments) {
 									if !yield(ai.StreamPart{
 										Type: ai.StreamPartTypeToolInputEnd,
 										ID:   toolCallDelta.ID,

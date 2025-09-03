@@ -7,7 +7,7 @@ on:
       - main
   pull_request:
     paths:
-      - providers/openai/**
+      - openai/**
       - .github/workflows/openai.yml
 
 jobs:
@@ -18,14 +18,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     defaults:
       run:
-        working-directory: ./providers/openai
+        working-directory: ./openai
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version-file: ./providers/openai/go.mod
+          go-version-file: ./openai/go.mod
           cache: true
-          cache-dependency-path: ./providers/openai/go.sum
+          cache-dependency-path: ./openai/go.sum
       - run: go build -v ./...
       - run: go test -race -v ./...
 
@@ -51,6 +51,6 @@ jobs:
   lint:
     uses: charmbracelet/meta/.github/workflows/lint.yml@main
     with:
-      directory: ./providers/openai/...
+      directory: ./openai/...
       golangci_path: .golangci.yml
 

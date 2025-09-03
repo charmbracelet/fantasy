@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/charmbracelet/ai/ai"
-	"github.com/charmbracelet/ai/providers/openai"
+	"github.com/charmbracelet/ai/openai"
 )
 
 func main() {

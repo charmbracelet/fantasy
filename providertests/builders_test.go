@@ -6,6 +6,7 @@ import (
 
 	"github.com/charmbracelet/fantasy/ai"
 	"github.com/charmbracelet/fantasy/anthropic"
+	"github.com/charmbracelet/fantasy/google"
 	"github.com/charmbracelet/fantasy/openai"
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )
@@ -21,6 +22,8 @@ var languageModelBuilders = []builderPair{
 	{"openai-gpt-4o", builderOpenaiGpt4o},
 	{"openai-gpt-4o-mini", builderOpenaiGpt4oMini},
 	{"anthropic-claude-sonnet", builderAnthropicClaudeSonnet4},
+	{"google-gemini-2.5-flash", builderGoogleGemini25Flash},
+	{"google-gemini-2.5-pro", builderGoogleGemini25Pro},
 }
 
 func builderOpenaiGpt4o(r *recorder.Recorder) (ai.LanguageModel, error) {
@@ -45,4 +48,20 @@ func builderAnthropicClaudeSonnet4(r *recorder.Recorder) (ai.LanguageModel, erro
 		anthropic.WithHTTPClient(&http.Client{Transport: r}),
 	)
 	return provider.LanguageModel("claude-sonnet-4-20250514")
+}
+
+func builderGoogleGemini25Flash(r *recorder.Recorder) (ai.LanguageModel, error) {
+	provider := google.New(
+		google.WithAPIKey(os.Getenv("GEMINI_API_KEY")),
+		google.WithHTTPClient(&http.Client{Transport: r}),
+	)
+	return provider.LanguageModel("gemini-2.5-flash")
+}
+
+func builderGoogleGemini25Pro(r *recorder.Recorder) (ai.LanguageModel, error) {
+	provider := google.New(
+		google.WithAPIKey(os.Getenv("GEMINI_API_KEY")),
+		google.WithHTTPClient(&http.Client{Transport: r}),
+	)
+	return provider.LanguageModel("gemini-2.5-flash")
 }

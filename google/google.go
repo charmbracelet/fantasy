@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"maps"
 	"net/http"
@@ -370,7 +371,7 @@ func (g *languageModel) Generate(ctx context.Context, call ai.Call) (*ai.Respons
 	// if err != nil {
 	// 	return nil, err
 	// }
-	panic("unimplemented")
+	return nil, errors.New("unimplemented")
 }
 
 // Model implements ai.LanguageModel.
@@ -385,7 +386,7 @@ func (g *languageModel) Provider() string {
 
 // Stream implements ai.LanguageModel.
 func (g *languageModel) Stream(context.Context, ai.Call) (ai.StreamResponse, error) {
-	panic("unimplemented")
+	return nil, errors.New("unimplemented")
 }
 
 func toGoogleTools(tools []ai.Tool, toolChoice *ai.ToolChoice) (googleTools []*genai.FunctionDeclaration, googleToolChoice *genai.ToolConfig, warnings []ai.CallWarning) {

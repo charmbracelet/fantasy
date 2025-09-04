@@ -34,7 +34,7 @@ func New(opts ...Option) ai.Provider {
 	}
 
 	if options.name == "" {
-		options.name = "anthropic"
+		options.name = "google"
 	}
 
 	return &provider{

@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/charmbracelet/ai/ai"
+	"github.com/charmbracelet/fantasy/ai"
 	"google.golang.org/genai"
 )
 

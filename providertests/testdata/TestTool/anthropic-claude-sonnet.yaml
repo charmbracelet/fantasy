@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 490
+    host: ""
+    body: "{\"max_tokens\":4096,\"messages\":[{\"content\":[{\"text\":\"What's the weather in Florence?\",\"type\":\"text\"}],\"role\":\"user\"}],\"model\":\"claude-sonnet-4-20250514\",\"system\":[{\"text\":\"You are a helpful assistant\",\"type\":\"text\"}],\"tool_choice\":{\"disable_parallel_tool_use\":false,\"type\":\"auto\"},\"tools\":[{\"input_schema\":{\"properties\":{\"location\":{\"description\":\"the city\",\"type\":\"string\"}},\"required\":[\"location\"],\"type\":\"object\"},\"name\":\"weather\",\"description\":\"Get weather information for a location\"}]}"
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Anthropic/Go 1.10.0
+    url: https://api.anthropic.com/v1/messages
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "{\"id\":\"msg_01EnEXYvvJsZqCkmy6JSJbmZ\",\"type\":\"message\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-20250514\",\"content\":[{\"type\":\"text\",\"text\":\"I'll get the weather information for Florence for you.\"},{\"type\":\"tool_use\",\"id\":\"toolu_01DuHpbePNYnbErjgBf5iHsF\",\"name\":\"weather\",\"input\":{\"location\":\"Florence\"}}],\"stop_reason\":\"tool_use\",\"stop_sequence\":null,\"usage\":{\"input_tokens\":392,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":63,\"service_tier\":\"standard\"}}"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 2.213104625s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 850
+    host: ""
+    body: "{\"max_tokens\":4096,\"messages\":[{\"content\":[{\"text\":\"What's the weather in Florence?\",\"type\":\"text\"}],\"role\":\"user\"},{\"content\":[{\"text\":\"I'll get the weather information for Florence for you.\",\"type\":\"text\"},{\"id\":\"toolu_01DuHpbePNYnbErjgBf5iHsF\",\"input\":{\"location\":\"Florence\"},\"name\":\"weather\",\"type\":\"tool_use\"}],\"role\":\"assistant\"},{\"content\":[{\"tool_use_id\":\"toolu_01DuHpbePNYnbErjgBf5iHsF\",\"content\":[{\"text\":\"40 C\",\"type\":\"text\"}],\"type\":\"tool_result\"}],\"role\":\"user\"}],\"model\":\"claude-sonnet-4-20250514\",\"system\":[{\"text\":\"You are a helpful assistant\",\"type\":\"text\"}],\"tool_choice\":{\"disable_parallel_tool_use\":false,\"type\":\"auto\"},\"tools\":[{\"input_schema\":{\"properties\":{\"location\":{\"description\":\"the city\",\"type\":\"string\"}},\"required\":[\"location\"],\"type\":\"object\"},\"name\":\"weather\",\"description\":\"Get weather information for a location\"}]}"
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Anthropic/Go 1.10.0
+    url: https://api.anthropic.com/v1/messages
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "{\"id\":\"msg_01HyNDRGB4Vs42jfUPPcBaak\",\"type\":\"message\",\"role\":\"assistant\",\"model\":\"claude-sonnet-4-20250514\",\"content\":[{\"type\":\"text\",\"text\":\"The current temperature in Florence is 40°C (104°F). That's quite hot! Make sure to stay hydrated and seek shade or air conditioning if you're in the area.\"}],\"stop_reason\":\"end_turn\",\"stop_sequence\":null,\"usage\":{\"input_tokens\":470,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":42,\"service_tier\":\"standard\"}}"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 2.306400542s

@@ -19,6 +19,7 @@ func newRecorder(t *testing.T) *recorder.Recorder {
 		cassetteName,
 		recorder.WithMode(recorder.ModeRecordOnce),
 		recorder.WithMatcher(customMatcher(t)),
+		recorder.WithSkipRequestLatency(true), // disable sleep to simulate response time, makes tests faster
 		recorder.WithHook(hookRemoveHeaders, recorder.AfterCaptureHook),
 	)
 	if err != nil {

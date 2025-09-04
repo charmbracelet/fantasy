@@ -28,11 +28,7 @@ func builderOpenaiGpt4o(r *recorder.Recorder) (ai.LanguageModel, error) {
 		openai.WithAPIKey(os.Getenv("OPENAI_API_KEY")),
 		openai.WithHTTPClient(&http.Client{Transport: r}),
 	)
-	model, err := provider.LanguageModel("gpt-4o")
-	if err != nil {
-		return nil, err
-	}
-	return model, nil
+	return provider.LanguageModel("gpt-4o")
 }
 
 func builderOpenaiGpt4oMini(r *recorder.Recorder) (ai.LanguageModel, error) {
@@ -40,11 +36,7 @@ func builderOpenaiGpt4oMini(r *recorder.Recorder) (ai.LanguageModel, error) {
 		openai.WithAPIKey(os.Getenv("OPENAI_API_KEY")),
 		openai.WithHTTPClient(&http.Client{Transport: r}),
 	)
-	model, err := provider.LanguageModel("gpt-4o-mini")
-	if err != nil {
-		return nil, err
-	}
-	return model, nil
+	return provider.LanguageModel("gpt-4o-mini")
 }
 
 func builderAnthropicClaudeSonnet4(r *recorder.Recorder) (ai.LanguageModel, error) {
@@ -52,9 +44,5 @@ func builderAnthropicClaudeSonnet4(r *recorder.Recorder) (ai.LanguageModel, erro
 		anthropic.WithAPIKey(os.Getenv("ANTHROPIC_API_KEY")),
 		anthropic.WithHTTPClient(&http.Client{Transport: r}),
 	)
-	model, err := provider.LanguageModel("claude-sonnet-4-20250514")
-	if err != nil {
-		return nil, err
-	}
-	return model, nil
+	return provider.LanguageModel("claude-sonnet-4-20250514")
 }

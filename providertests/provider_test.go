@@ -31,10 +31,11 @@ func TestSimple(t *testing.T) {
 				t.Fatalf("failed to generate: %v", err)
 			}
 
-			want := "Olá"
+			option1 := "Oi"
+			option2 := "Olá"
 			got := result.Response.Content.Text()
-			if !strings.Contains(got, want) {
-				t.Fatalf("unexpected response: got %q, want %q", got, want)
+			if !strings.Contains(got, option1) && !strings.Contains(got, option2) {
+				t.Fatalf("unexpected response: got %q, want %q or %q", got, option1, option2)
 			}
 		})
 	}

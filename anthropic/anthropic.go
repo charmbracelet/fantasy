@@ -223,7 +223,7 @@ func getCacheControl(providerOptions ai.ProviderOptions) *CacheControlProviderOp
 			if cc, ok := cacheControl.(map[string]any); ok {
 				cacheControlOption := &CacheControlProviderOptions{}
 				err := ai.ParseOptions(cc, cacheControlOption)
-				if err != nil {
+				if err == nil {
 					return cacheControlOption
 				}
 			}
@@ -231,7 +231,7 @@ func getCacheControl(providerOptions ai.ProviderOptions) *CacheControlProviderOp
 			if cc, ok := cacheControl.(map[string]any); ok {
 				cacheControlOption := &CacheControlProviderOptions{}
 				err := ai.ParseOptions(cc, cacheControlOption)
-				if err != nil {
+				if err == nil {
 					return cacheControlOption
 				}
 			}
@@ -244,7 +244,7 @@ func getReasoningMetadata(providerOptions ai.ProviderOptions) *ReasoningMetadata
 	if anthropicOptions, ok := providerOptions["anthropic"]; ok {
 		reasoningMetadata := &ReasoningMetadata{}
 		err := ai.ParseOptions(anthropicOptions, reasoningMetadata)
-		if err != nil {
+		if err == nil {
 			return reasoningMetadata
 		}
 	}

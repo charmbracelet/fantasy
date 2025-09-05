@@ -1068,6 +1068,11 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 
 	activeToolCalls := make(map[string]*ToolCallContent)
 	activeTextContent := make(map[string]string)
+	type reasoningContent struct {
+		content string
+		options ProviderMetadata
+	}
+	activeReasoningContent := make(map[string]reasoningContent)
 
 	// Process stream parts
 	for part := range stream {
@@ -1125,7 +1130,7 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 			}
 
 		case StreamPartTypeReasoningStart:
-			activeTextContent[part.ID] = ""
+			activeReasoningContent[part.ID] = reasoningContent{content: ""}
 			if opts.OnReasoningStart != nil {
 				err := opts.OnReasoningStart(part.ID)
 				if err != nil {
@@ -1134,8 +1139,10 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 			}
 
 		case StreamPartTypeReasoningDelta:
-			if _, exists := activeTextContent[part.ID]; exists {
-				activeTextContent[part.ID] += part.Delta
+			if active, exists := activeReasoningContent[part.ID]; exists {
+				active.content += part.Delta
+				active.options = part.ProviderMetadata
+				activeReasoningContent[part.ID] = active
 			}
 			if opts.OnReasoningDelta != nil {
 				err := opts.OnReasoningDelta(part.ID, part.Delta)
@@ -1145,21 +1152,19 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 			}
 
 		case StreamPartTypeReasoningEnd:
-			if text, exists := activeTextContent[part.ID]; exists {
-				stepContent = append(stepContent, ReasoningContent{
-					Text:             text,
-					ProviderMetadata: part.ProviderMetadata,
-				})
+			if active, exists := activeReasoningContent[part.ID]; exists {
+				content := ReasoningContent{
+					Text:             active.content,
+					ProviderMetadata: active.options,
+				}
+				stepContent = append(stepContent, content)
 				if opts.OnReasoningEnd != nil {
-					err := opts.OnReasoningEnd(part.ID, ReasoningContent{
-						Text:             text,
-						ProviderMetadata: part.ProviderMetadata,
-					})
+					err := opts.OnReasoningEnd(part.ID, content)
 					if err != nil {
 						return StepResult{}, false, err
 					}
 				}
-				delete(activeTextContent, part.ID)
+				delete(activeReasoningContent, part.ID)
 			}
 
 		case StreamPartTypeToolInputStart:

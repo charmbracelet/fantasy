@@ -986,9 +986,8 @@ func (a *agent) createPrompt(system, prompt string, messages []Message, files ..
 	if system != "" {
 		preparedPrompt = append(preparedPrompt, NewSystemMessage(system))
 	}
-
-	preparedPrompt = append(preparedPrompt, NewUserMessage(prompt, files...))
 	preparedPrompt = append(preparedPrompt, messages...)
+	preparedPrompt = append(preparedPrompt, NewUserMessage(prompt, files...))
 	return preparedPrompt, nil
 }
 

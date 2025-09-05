@@ -4,6 +4,7 @@ go 1.24.5
 
 require (
 	github.com/anthropics/anthropic-sdk-go v1.10.0
+	github.com/charmbracelet/x/exp/slice v0.0.0-20250904123553-b4e2667e5ad5
 	github.com/charmbracelet/x/json v0.2.0
 	github.com/go-viper/mapstructure/v2 v2.4.0
 	github.com/google/uuid v1.6.0

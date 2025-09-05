@@ -635,7 +635,7 @@ func (o languageModel) handleError(err error) error {
 
 func mapFinishReason(finishReason string) ai.FinishReason {
 	switch finishReason {
-	case "end", "stop_sequence":
+	case "end_turn", "pause_turn", "stop_sequence":
 		return ai.FinishReasonStop
 	case "max_tokens":
 		return ai.FinishReasonLength

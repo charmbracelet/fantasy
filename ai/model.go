@@ -176,16 +176,15 @@ func SpecificToolChoice(name string) ToolChoice {
 }
 
 type Call struct {
-	Prompt           Prompt            `json:"prompt"`
-	MaxOutputTokens  *int64            `json:"max_output_tokens"`
-	Temperature      *float64          `json:"temperature"`
-	TopP             *float64          `json:"top_p"`
-	TopK             *int64            `json:"top_k"`
-	PresencePenalty  *float64          `json:"presence_penalty"`
-	FrequencyPenalty *float64          `json:"frequency_penalty"`
-	Tools            []Tool            `json:"tools"`
-	ToolChoice       *ToolChoice       `json:"tool_choice"`
-	Headers          map[string]string `json:"headers"`
+	Prompt           Prompt      `json:"prompt"`
+	MaxOutputTokens  *int64      `json:"max_output_tokens"`
+	Temperature      *float64    `json:"temperature"`
+	TopP             *float64    `json:"top_p"`
+	TopK             *int64      `json:"top_k"`
+	PresencePenalty  *float64    `json:"presence_penalty"`
+	FrequencyPenalty *float64    `json:"frequency_penalty"`
+	Tools            []Tool      `json:"tools"`
+	ToolChoice       *ToolChoice `json:"tool_choice"`
 
 	// for provider specific options, the key is the provider id
 	ProviderOptions ProviderOptions `json:"provider_options"`

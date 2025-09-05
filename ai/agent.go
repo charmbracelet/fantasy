@@ -144,7 +144,6 @@ type AgentCall struct {
 	PresencePenalty  *float64 `json:"presence_penalty"`
 	FrequencyPenalty *float64 `json:"frequency_penalty"`
 	ActiveTools      []string `json:"active_tools"`
-	Headers          map[string]string
 	ProviderOptions  ProviderOptions
 	OnRetry          OnRetryCallback
 	MaxRetries       *int
@@ -336,10 +335,6 @@ func (a *agent) prepareCall(call AgentCall) AgentCall {
 		maps.Copy(headers, a.settings.headers)
 	}
 
-	if call.Headers != nil {
-		maps.Copy(headers, call.Headers)
-	}
-	call.Headers = headers
 	return call
 }
 
@@ -420,7 +415,6 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 				FrequencyPenalty: opts.FrequencyPenalty,
 				Tools:            preparedTools,
 				ToolChoice:       &stepToolChoice,
-				Headers:          opts.Headers,
 				ProviderOptions:  opts.ProviderOptions,
 			})
 		})
@@ -747,7 +741,6 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 		PresencePenalty:  opts.PresencePenalty,
 		FrequencyPenalty: opts.FrequencyPenalty,
 		ActiveTools:      opts.ActiveTools,
-		Headers:          opts.Headers,
 		ProviderOptions:  opts.ProviderOptions,
 		MaxRetries:       opts.MaxRetries,
 		StopWhen:         opts.StopWhen,
@@ -838,7 +831,6 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 			FrequencyPenalty: call.FrequencyPenalty,
 			Tools:            preparedTools,
 			ToolChoice:       &stepToolChoice,
-			Headers:          call.Headers,
 			ProviderOptions:  call.ProviderOptions,
 		}
 

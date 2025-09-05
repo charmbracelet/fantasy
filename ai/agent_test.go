@@ -563,42 +563,6 @@ func TestAgent_Generate_WithSystemPrompt(t *testing.T) {
 	require.NotNil(t, result)
 }
 
-// Test options.headers
-func TestAgent_Generate_OptionsHeaders(t *testing.T) {
-	t.Parallel()
-
-	model := &mockLanguageModel{
-		generateFunc: func(ctx context.Context, call Call) (*Response, error) {
-			// Verify headers are passed
-			require.Equal(t, map[string]string{
-				"custom-request-header": "request-header-value",
-			}, call.Headers)
-
-			return &Response{
-				Content: []Content{
-					TextContent{Text: "Hello, world!"},
-				},
-				Usage: Usage{
-					InputTokens:  3,
-					OutputTokens: 10,
-					TotalTokens:  13,
-				},
-				FinishReason: FinishReasonStop,
-			}, nil
-		},
-	}
-
-	agent := NewAgent(model)
-	result, err := agent.Generate(context.Background(), AgentCall{
-		Prompt:  "test-input",
-		Headers: map[string]string{"custom-request-header": "request-header-value"},
-	})
-
-	require.NoError(t, err)
-	require.NotNil(t, result)
-	require.Equal(t, "Hello, world!", result.Response.Content.Text())
-}
-
 // Test options.activeTools filtering
 func TestAgent_Generate_OptionsActiveTools(t *testing.T) {
 	t.Parallel()

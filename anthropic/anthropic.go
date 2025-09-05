@@ -837,7 +837,7 @@ func (a languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 					if !yield(ai.StreamPart{
 						Type:  ai.StreamPartTypeReasoningDelta,
 						ID:    fmt.Sprintf("%d", chunk.Index),
-						Delta: chunk.Delta.Text,
+						Delta: chunk.Delta.Thinking,
 					}) {
 						return
 					}

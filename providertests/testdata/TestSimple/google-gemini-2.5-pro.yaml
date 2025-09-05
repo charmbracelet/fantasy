@@ -1,0 +1,31 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 180
+    host: generativelanguage.googleapis.com
+    body: "{\"contents\":[{\"parts\":[{\"text\":\"Say hi in Portuguese\"}],\"role\":\"user\"}],\"generationConfig\":{},\"systemInstruction\":{\"parts\":[{\"text\":\"You are a helpful assistant\"}],\"role\":\"user\"}}\n"
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - google-genai-sdk/1.23.0 gl-go/go1.24.5
+    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "{\n  \"candidates\": [\n    {\n      \"content\": {\n        \"parts\": [\n          {\n            \"text\": \"Olá!\\n\\nIn Portuguese, \\\"hi\\\" can be translated as:\\n\\n*   **Oi** (very common and informal)\\n*   **Olá** (a bit more formal, but also widely used)\"\n          }\n        ],\n        \"role\": \"model\"\n      },\n      \"finishReason\": \"STOP\",\n      \"index\": 0\n    }\n  ],\n  \"usageMetadata\": {\n    \"promptTokenCount\": 11,\n    \"candidatesTokenCount\": 43,\n    \"totalTokenCount\": 77,\n    \"promptTokensDetails\": [\n      {\n        \"modality\": \"TEXT\",\n        \"tokenCount\": 11\n      }\n    ],\n    \"thoughtsTokenCount\": 23\n  },\n  \"modelVersion\": \"gemini-2.5-flash\",\n  \"responseId\": \"_Ui7aL_qEoCsz7IPmMvIqQ4\"\n}\n"
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+    status: 200 OK
+    code: 200
+    duration: 870.503208ms

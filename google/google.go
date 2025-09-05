@@ -11,12 +11,14 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/fantasy/ai"
+	"github.com/charmbracelet/x/exp/slice"
 	"google.golang.org/genai"
 )
 
 type provider struct {
 	options options
 }
+
 type options struct {
 	apiKey  string
 	name    string
@@ -367,11 +369,27 @@ func toGooglePrompt(prompt ai.Prompt) (*genai.Content, []*genai.Content, []ai.Ca
 
 // Generate implements ai.LanguageModel.
 func (g *languageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response, error) {
-	// params, err := g.prepareParams(call)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	return nil, errors.New("unimplemented")
+	config, contents, warnings, err := g.prepareParams(call)
+	if err != nil {
+		return nil, err
+	}
+
+	lastMessage, history, ok := slice.Pop(contents)
+	if !ok {
+		return nil, errors.New("no messages to send")
+	}
+
+	chat, err := g.client.Chats.Create(ctx, g.modelID, config, history)
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := chat.SendMessage(ctx, depointerSlice(lastMessage.Parts)...)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapResponse(response, warnings)
 }
 
 // Model implements ai.LanguageModel.
@@ -532,5 +550,86 @@ func mapJSONTypeToGoogle(jsonType string) genai.Type {
 		return genai.TypeObject
 	default:
 		return genai.TypeString // Default to string for unknown types
+	}
+}
+
+func mapResponse(response *genai.GenerateContentResponse, warnings []ai.CallWarning) (*ai.Response, error) {
+	if len(response.Candidates) == 0 || response.Candidates[0].Content == nil {
+		return nil, errors.New("no response from model")
+	}
+
+	var (
+		content      []ai.Content
+		finishReason ai.FinishReason
+		hasToolCalls bool
+		candidate    = response.Candidates[0]
+	)
+
+	for _, part := range candidate.Content.Parts {
+		switch {
+		case part.Text != "":
+			content = append(content, ai.TextContent{Text: part.Text})
+		case part.FunctionCall != nil:
+			input, err := json.Marshal(part.FunctionCall.Args)
+			if err != nil {
+				return nil, err
+			}
+			content = append(content, ai.ToolCallContent{
+				ToolCallID:       part.FunctionCall.ID,
+				ToolName:         part.FunctionCall.Name,
+				Input:            string(input),
+				ProviderExecuted: false,
+			})
+			hasToolCalls = true
+		default:
+			return nil, fmt.Errorf("not implemented part type")
+		}
+	}
+
+	if hasToolCalls {
+		finishReason = ai.FinishReasonToolCalls
+	} else {
+		finishReason = mapFinishReason(candidate.FinishReason)
+	}
+
+	return &ai.Response{
+		Content:      content,
+		Usage:        mapUsage(response.UsageMetadata),
+		FinishReason: finishReason,
+		Warnings:     warnings,
+	}, nil
+}
+
+func mapFinishReason(reason genai.FinishReason) ai.FinishReason {
+	switch reason {
+	case genai.FinishReasonStop:
+		return ai.FinishReasonStop
+	case genai.FinishReasonMaxTokens:
+		return ai.FinishReasonLength
+	case genai.FinishReasonSafety,
+		genai.FinishReasonBlocklist,
+		genai.FinishReasonProhibitedContent,
+		genai.FinishReasonSPII,
+		genai.FinishReasonImageSafety:
+		return ai.FinishReasonContentFilter
+	case genai.FinishReasonRecitation,
+		genai.FinishReasonLanguage,
+		genai.FinishReasonMalformedFunctionCall:
+		return ai.FinishReasonError
+	case genai.FinishReasonOther:
+		return ai.FinishReasonOther
+	default:
+		return ai.FinishReasonUnknown
+	}
+}
+
+func mapUsage(usage *genai.GenerateContentResponseUsageMetadata) ai.Usage {
+	return ai.Usage{
+		InputTokens:         int64(usage.ToolUsePromptTokenCount),
+		OutputTokens:        int64(usage.CandidatesTokenCount),
+		TotalTokens:         int64(usage.TotalTokenCount),
+		ReasoningTokens:     int64(usage.ThoughtsTokenCount),
+		CacheCreationTokens: int64(usage.CachedContentTokenCount),
+		CacheReadTokens:     0,
 	}
 }

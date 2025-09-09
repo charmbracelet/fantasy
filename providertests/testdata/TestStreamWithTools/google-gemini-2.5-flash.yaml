@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 530
+    host: generativelanguage.googleapis.com
+    body: "{\"contents\":[{\"parts\":[{\"text\":\"What is 15 + 27?\"}],\"role\":\"user\"}],\"generationConfig\":{},\"systemInstruction\":{\"parts\":[{\"text\":\"You are a helpful assistant. Use the add tool to perform calculations.\"}],\"role\":\"user\"},\"toolConfig\":{\"functionCallingConfig\":{\"mode\":\"AUTO\"}},\"tools\":[{\"functionDeclarations\":[{\"description\":\"Add two numbers\",\"name\":\"add\",\"parameters\":{\"properties\":{\"a\":{\"description\":\"first number\",\"type\":\"INTEGER\"},\"b\":{\"description\":\"second number\",\"type\":\"INTEGER\"}},\"required\":[\"a\",\"b\"],\"type\":\"OBJECT\"}}]}]}\n"
+    form:
+      alt:
+      - sse
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - google-genai-sdk/1.23.0 gl-go/go1.24.5
+    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"functionCall\": {\"name\": \"add\",\"args\": {\"b\": 27,\"a\": 15}},\"thoughtSignature\": \"CikB0e2Kb8U5/pBCljebIcg2A6YS6hrbbpSZxkBqwLEtMeXSp3VgqzxFfwpSAdHtim/J3oxEa23pl45S6ILKbIk8mrvafueiUni658C3m0AydKXx96v4XZMyCKZXtlRlKF2b5cIVRXnd5FU269+k3aYUodfw4KEyM1/6k2JtywrUAQHR7YpvMSRAu6uOizYwxCivae6QRftgUArCIIrKg4//i8/rqvyXf+H6lchZbWgHqsWqUqeP83Xbr/Wn9ycSg9E3ql5I+fg02wzdoi8l1rizh0G9TB2Y6L9u7LCmNCHljEqtbyEeK6z/E0DGUOPxzg6a4F+DZgy4+CgJcv78/YDXz89snc3BfWqrtfjdOWRkF7aBzRgrjTPYPy9PlRuN0IpCcRuEVj2Z545JFd86y3fEAlNyPquEdYTZPNCRNyvfzfxe/akFsKVwoxT9n3bn042w7b9FCioB0e2Kb7hPtS/ZpcnnCkWr8yuufP007PLPpxftDTxftQLQ+8stieRLhPk=\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 72,\"candidatesTokenCount\": 20,\"totalTokenCount\": 168,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 72}],\"thoughtsTokenCount\": 76},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"kF3AaKvWLqqvqtsPqK2DkAM\"}\r\n\r\n"
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 1.43092075s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 723
+    host: generativelanguage.googleapis.com
+    body: "{\"contents\":[{\"parts\":[{\"text\":\"What is 15 + 27?\"}],\"role\":\"user\"},{\"parts\":[{\"functionCall\":{\"args\":{\"a\":15,\"b\":27},\"id\":\"add\",\"name\":\"add\"}}],\"role\":\"model\"},{\"parts\":[{\"functionResponse\":{\"id\":\"add\",\"name\":\"add\",\"response\":{\"result\":\"42\"}}}],\"role\":\"user\"}],\"generationConfig\":{},\"systemInstruction\":{\"parts\":[{\"text\":\"You are a helpful assistant. Use the add tool to perform calculations.\"}],\"role\":\"user\"},\"toolConfig\":{\"functionCallingConfig\":{\"mode\":\"AUTO\"}},\"tools\":[{\"functionDeclarations\":[{\"description\":\"Add two numbers\",\"name\":\"add\",\"parameters\":{\"properties\":{\"a\":{\"description\":\"first number\",\"type\":\"INTEGER\"},\"b\":{\"description\":\"second number\",\"type\":\"INTEGER\"}},\"required\":[\"a\",\"b\"],\"type\":\"OBJECT\"}}]}]}\n"
+    form:
+      alt:
+      - sse
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - google-genai-sdk/1.23.0 gl-go/go1.24.5
+    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"1\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 106,\"candidatesTokenCount\": 1,\"totalTokenCount\": 107,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 106}]},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"kV3AaLLYMq-9qtsPp7ytgAM\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"5 + 27 = 42.\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 106,\"candidatesTokenCount\": 11,\"totalTokenCount\": 117,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 106}]},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"kV3AaLLYMq-9qtsPp7ytgAM\"}\r\n\r\n"
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 509.578042ms

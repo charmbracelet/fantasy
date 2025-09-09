@@ -1,6 +1,7 @@
 package google
 
 import (
+	"cmp"
 	"context"
 	"encoding/base64"
 	"encoding/json"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/charmbracelet/fantasy/ai"
 	"github.com/charmbracelet/x/exp/slice"
+	"github.com/google/uuid"
 	"google.golang.org/genai"
 )
 
@@ -403,8 +405,161 @@ func (g *languageModel) Provider() string {
 }
 
 // Stream implements ai.LanguageModel.
-func (g *languageModel) Stream(context.Context, ai.Call) (ai.StreamResponse, error) {
-	return nil, errors.New("unimplemented")
+func (g *languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamResponse, error) {
+	config, contents, warnings, err := g.prepareParams(call)
+	if err != nil {
+		return nil, err
+	}
+
+	lastMessage, history, ok := slice.Pop(contents)
+	if !ok {
+		return nil, errors.New("no messages to send")
+	}
+
+	chat, err := g.client.Chats.Create(ctx, g.modelID, config, history)
+	if err != nil {
+		return nil, err
+	}
+
+	return func(yield func(ai.StreamPart) bool) {
+		if len(warnings) > 0 {
+			if !yield(ai.StreamPart{
+				Type:     ai.StreamPartTypeWarnings,
+				Warnings: warnings,
+			}) {
+				return
+			}
+		}
+
+		var currentContent string
+		var toolCalls []ai.ToolCallContent
+		var isActiveText bool
+		var usage ai.Usage
+
+		// Stream the response
+		for resp, err := range chat.SendMessageStream(ctx, depointerSlice(lastMessage.Parts)...) {
+			if err != nil {
+				yield(ai.StreamPart{
+					Type:  ai.StreamPartTypeError,
+					Error: err,
+				})
+				return
+			}
+
+			if len(resp.Candidates) > 0 && resp.Candidates[0].Content != nil {
+				for _, part := range resp.Candidates[0].Content.Parts {
+					switch {
+					case part.Text != "":
+						delta := part.Text
+						if delta != "" {
+							if !isActiveText {
+								isActiveText = true
+								if !yield(ai.StreamPart{
+									Type: ai.StreamPartTypeTextStart,
+									ID:   "0",
+								}) {
+									return
+								}
+							}
+							if !yield(ai.StreamPart{
+								Type:  ai.StreamPartTypeTextDelta,
+								ID:    "0",
+								Delta: delta,
+							}) {
+								return
+							}
+							currentContent += delta
+						}
+					case part.FunctionCall != nil:
+						if isActiveText {
+							isActiveText = false
+							if !yield(ai.StreamPart{
+								Type: ai.StreamPartTypeTextEnd,
+								ID:   "0",
+							}) {
+								return
+							}
+						}
+
+						toolCallID := cmp.Or(part.FunctionCall.ID, part.FunctionCall.Name, uuid.NewString())
+
+						args, err := json.Marshal(part.FunctionCall.Args)
+						if err != nil {
+							yield(ai.StreamPart{
+								Type:  ai.StreamPartTypeError,
+								Error: err,
+							})
+							return
+						}
+
+						if !yield(ai.StreamPart{
+							Type:         ai.StreamPartTypeToolInputStart,
+							ID:           toolCallID,
+							ToolCallName: part.FunctionCall.Name,
+						}) {
+							return
+						}
+
+						if !yield(ai.StreamPart{
+							Type:  ai.StreamPartTypeToolInputDelta,
+							ID:    toolCallID,
+							Delta: string(args),
+						}) {
+							return
+						}
+
+						if !yield(ai.StreamPart{
+							Type: ai.StreamPartTypeToolInputEnd,
+							ID:   toolCallID,
+						}) {
+							return
+						}
+
+						if !yield(ai.StreamPart{
+							Type:             ai.StreamPartTypeToolCall,
+							ID:               toolCallID,
+							ToolCallName:     part.FunctionCall.Name,
+							ToolCallInput:    string(args),
+							ProviderExecuted: false,
+						}) {
+							return
+						}
+
+						toolCalls = append(toolCalls, ai.ToolCallContent{
+							ToolCallID:       toolCallID,
+							ToolName:         part.FunctionCall.Name,
+							Input:            string(args),
+							ProviderExecuted: false,
+						})
+					}
+				}
+			}
+
+			if resp.UsageMetadata != nil {
+				usage = mapUsage(resp.UsageMetadata)
+			}
+		}
+
+		if isActiveText {
+			if !yield(ai.StreamPart{
+				Type: ai.StreamPartTypeTextEnd,
+				ID:   "0",
+			}) {
+				return
+			}
+		}
+
+		finishReason := ai.FinishReasonStop
+		if len(toolCalls) > 0 {
+			finishReason = ai.FinishReasonToolCalls
+		}
+
+		yield(ai.StreamPart{
+			Type:         ai.StreamPartTypeFinish,
+			Usage:        usage,
+			FinishReason: finishReason,
+		})
+	}, nil
 }
 
 func toGoogleTools(tools []ai.Tool, toolChoice *ai.ToolChoice) (googleTools []*genai.FunctionDeclaration, googleToolChoice *genai.ToolConfig, warnings []ai.CallWarning) {

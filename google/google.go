@@ -142,7 +142,7 @@ func (a languageModel) prepareParams(call ai.Call) (*genai.GenerateContentConfig
 	config.SystemInstruction = systemInstructions
 
 	if call.MaxOutputTokens != nil {
-		config.MaxOutputTokens = int32(*call.MaxOutputTokens)
+		config.MaxOutputTokens = int32(*call.MaxOutputTokens) //nolint: gosec
 	}
 
 	if call.Temperature != nil {
@@ -172,7 +172,7 @@ func (a languageModel) prepareParams(call ai.Call) (*genai.GenerateContentConfig
 			config.ThinkingConfig.IncludeThoughts = *providerOptions.ThinkingConfig.IncludeThoughts
 		}
 		if providerOptions.ThinkingConfig.ThinkingBudget != nil {
-			tmp := int32(*providerOptions.ThinkingConfig.ThinkingBudget)
+			tmp := int32(*providerOptions.ThinkingConfig.ThinkingBudget) //nolint: gosec
 			config.ThinkingConfig.ThinkingBudget = &tmp
 		}
 	}
@@ -198,7 +198,7 @@ func (a languageModel) prepareParams(call ai.Call) (*genai.GenerateContentConfig
 	return config, content, warnings, nil
 }
 
-func toGooglePrompt(prompt ai.Prompt) (*genai.Content, []*genai.Content, []ai.CallWarning) {
+func toGooglePrompt(prompt ai.Prompt) (*genai.Content, []*genai.Content, []ai.CallWarning) { //nolint: unparam
 	var systemInstructions *genai.Content
 	var content []*genai.Content
 	var warnings []ai.CallWarning
@@ -354,7 +354,6 @@ func toGooglePrompt(prompt ai.Prompt) (*genai.Content, []*genai.Content, []ai.Ca
 								Name:     toolCall.ToolName,
 							},
 						})
-
 					}
 				}
 			}
@@ -600,7 +599,7 @@ func toGoogleTools(tools []ai.Tool, toolChoice *ai.ToolChoice) (googleTools []*g
 		})
 	}
 	if toolChoice == nil {
-		return
+		return //nolint: nakedret
 	}
 	switch *toolChoice {
 	case ai.ToolChoiceAuto:
@@ -631,7 +630,7 @@ func toGoogleTools(tools []ai.Tool, toolChoice *ai.ToolChoice) (googleTools []*g
 			},
 		}
 	}
-	return
+	return //nolint: nakedret
 }
 
 func convertSchemaProperties(parameters map[string]any) map[string]*genai.Schema {

@@ -1,0 +1,59 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 481
+    host: generativelanguage.googleapis.com
+    body: "{\"contents\":[{\"parts\":[{\"text\":\"What's the weather in Florence?\"}],\"role\":\"user\"}],\"generationConfig\":{},\"systemInstruction\":{\"parts\":[{\"text\":\"You are a helpful assistant\"}],\"role\":\"user\"},\"toolConfig\":{\"functionCallingConfig\":{\"mode\":\"AUTO\"}},\"tools\":[{\"functionDeclarations\":[{\"description\":\"Get weather information for a location\",\"name\":\"weather\",\"parameters\":{\"properties\":{\"location\":{\"description\":\"the city\",\"type\":\"STRING\"}},\"required\":[\"location\"],\"type\":\"OBJECT\"}}]}]}\n"
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - google-genai-sdk/1.23.0 gl-go/go1.24.5
+    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "{\n  \"candidates\": [\n    {\n      \"content\": {\n        \"parts\": [\n          {\n            \"functionCall\": {\n              \"name\": \"weather\",\n              \"args\": {\n                \"location\": \"Florence\"\n              }\n            },\n            \"thoughtSignature\": \"CtwBAdHtim+LzmvI8rtsj5p2RhFdBKtg0CShperfeu8CtOIU63TuPtAOTwedY7xzLHw+8Xn9y3Hk5vE8O42WBkS9f61smbc+VIp/Qj3JZ+3xdW1C54gb47V2IxNqDyKuDGuU+HpLq3++ad1mq8lAHWrjWZj5oOGdH75T4hHv+XsZPuYKRPjg2tklhcsG7uaM8GZbXwdG8V6Vhc1YFo3opHxXywhoZl4Tg7ddMmfVQJD6SkVQRuTr1p/r/mtEYL5aDUmgIX0aLgje9u6qEhOEf53ibwcDhI9/aHgVCIYv0A==\"\n          }\n        ],\n        \"role\": \"model\"\n      },\n      \"finishReason\": \"STOP\",\n      \"index\": 0\n    }\n  ],\n  \"usageMetadata\": {\n    \"promptTokenCount\": 52,\n    \"candidatesTokenCount\": 13,\n    \"totalTokenCount\": 108,\n    \"promptTokensDetails\": [\n      {\n        \"modality\": \"TEXT\",\n        \"tokenCount\": 52\n      }\n    ],\n    \"thoughtsTokenCount\": 43\n  },\n  \"modelVersion\": \"gemini-2.5-flash\",\n  \"responseId\": \"05TAaOnfH-fzqtsP1KeSqAM\"\n}\n"
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+    status: 200 OK
+    code: 200
+    duration: 1.623831958s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 700
+    host: generativelanguage.googleapis.com
+    body: "{\"contents\":[{\"parts\":[{\"text\":\"What's the weather in Florence?\"}],\"role\":\"user\"},{\"parts\":[{\"functionCall\":{\"args\":{\"location\":\"Florence\"},\"id\":\"weather\",\"name\":\"weather\"}}],\"role\":\"model\"},{\"parts\":[{\"functionResponse\":{\"id\":\"weather\",\"name\":\"weather\",\"response\":{\"result\":\"40 C\"}}}],\"role\":\"user\"}],\"generationConfig\":{},\"systemInstruction\":{\"parts\":[{\"text\":\"You are a helpful assistant\"}],\"role\":\"user\"},\"toolConfig\":{\"functionCallingConfig\":{\"mode\":\"AUTO\"}},\"tools\":[{\"functionDeclarations\":[{\"description\":\"Get weather information for a location\",\"name\":\"weather\",\"parameters\":{\"properties\":{\"location\":{\"description\":\"the city\",\"type\":\"STRING\"}},\"required\":[\"location\"],\"type\":\"OBJECT\"}}]}]}\n"
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - google-genai-sdk/1.23.0 gl-go/go1.24.5
+    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "{\n  \"candidates\": [\n    {\n      \"content\": {\n        \"parts\": [\n          {\n            \"text\": \"It is 40 C in Florence.\"\n          }\n        ],\n        \"role\": \"model\"\n      },\n      \"finishReason\": \"STOP\",\n      \"index\": 0\n    }\n  ],\n  \"usageMetadata\": {\n    \"promptTokenCount\": 80,\n    \"candidatesTokenCount\": 9,\n    \"totalTokenCount\": 89,\n    \"promptTokensDetails\": [\n      {\n        \"modality\": \"TEXT\",\n        \"tokenCount\": 80\n      }\n    ]\n  },\n  \"modelVersion\": \"gemini-2.5-flash\",\n  \"responseId\": \"1JTAaOnKNczUz7IPns3_-Aw\"\n}\n"
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+    status: 200 OK
+    code: 200
+    duration: 1.352961042s

@@ -1,0 +1,59 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 481
+    host: generativelanguage.googleapis.com
+    body: "{\"contents\":[{\"parts\":[{\"text\":\"What's the weather in Florence?\"}],\"role\":\"user\"}],\"generationConfig\":{},\"systemInstruction\":{\"parts\":[{\"text\":\"You are a helpful assistant\"}],\"role\":\"user\"},\"toolConfig\":{\"functionCallingConfig\":{\"mode\":\"AUTO\"}},\"tools\":[{\"functionDeclarations\":[{\"description\":\"Get weather information for a location\",\"name\":\"weather\",\"parameters\":{\"properties\":{\"location\":{\"description\":\"the city\",\"type\":\"STRING\"}},\"required\":[\"location\"],\"type\":\"OBJECT\"}}]}]}\n"
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - google-genai-sdk/1.23.0 gl-go/go1.24.5
+    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "{\n  \"candidates\": [\n    {\n      \"content\": {\n        \"parts\": [\n          {\n            \"functionCall\": {\n              \"name\": \"weather\",\n              \"args\": {\n                \"location\": \"Florence\"\n              }\n            },\n            \"thoughtSignature\": \"CpcEAdHtim9KlLGBYSvtxGJRv/W4YaFoyub/zNb/YOxexIl3K3C7nKmcIRo/WbgAlzxj/eqhNnkoE+eRZxtzK+mArUcNxvCeufuvXQIj2hyrEDsXOp7vXN65Aum2KMzqcTw8kEKTdnvpfhNnzawa0kS2oLHG0TnGX7RTdz0k4pOLNGPhhV0dH8dbF9SU7OwQw8qoJEonIPuDR+lTUIJLLFbW/bA0CAQsN2+DrcjCfU494pWMaomZHZ6SlFH6i7vu4t+47VrGF1NuXxlxIvp8o7nQf2olUfgO1nNBDVRvjOeGCTHrjZnWDHv7XxKbXHOrEifTJJ2xp2M/R7oCCV+gHe4NK4vBPrwhDXS3vclMccq03u+b5xofW3yM/yE3aL1/xoJYoR87/MQn4WkyBi4EqdZZwysP7TYhFmNBi64bqyXUX89Gdo2+L7OweBPuM9fBG5CRq3HcdU2Doyg+Bv/5B0iwacxpETPtsNHD1pKBt/jWnfb2V+BcZKY3ipnuCcKt4cFO8u+KH/98WTN/o4u2gPtEoof3reflTuIT/MJYl+MPWsPuZAOB48jMBPy9KrFyzGUrF1gT0qjGIosa/XMNxXCJP50n2J25JmSgu1UwB8IwVXaRvgBDX6o/tf0qDtvoRC2uqUJqzRjqO+m6FNXL6vUAbFpfJnadUjllv+8ONPDJIrolTWyHu0JlVG+EY1ni3PJ5e+NUT2jZWg==\"\n          }\n        ],\n        \"role\": \"model\"\n      },\n      \"finishReason\": \"STOP\",\n      \"index\": 0\n    }\n  ],\n  \"usageMetadata\": {\n    \"promptTokenCount\": 52,\n    \"candidatesTokenCount\": 13,\n    \"totalTokenCount\": 184,\n    \"promptTokensDetails\": [\n      {\n        \"modality\": \"TEXT\",\n        \"tokenCount\": 52\n      }\n    ],\n    \"thoughtsTokenCount\": 119\n  },\n  \"modelVersion\": \"gemini-2.5-pro\",\n  \"responseId\": \"2JTAaODDDbGqmtkPzprG6AI\"\n}\n"
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+    status: 200 OK
+    code: 200
+    duration: 3.433144416s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 700
+    host: generativelanguage.googleapis.com
+    body: "{\"contents\":[{\"parts\":[{\"text\":\"What's the weather in Florence?\"}],\"role\":\"user\"},{\"parts\":[{\"functionCall\":{\"args\":{\"location\":\"Florence\"},\"id\":\"weather\",\"name\":\"weather\"}}],\"role\":\"model\"},{\"parts\":[{\"functionResponse\":{\"id\":\"weather\",\"name\":\"weather\",\"response\":{\"result\":\"40 C\"}}}],\"role\":\"user\"}],\"generationConfig\":{},\"systemInstruction\":{\"parts\":[{\"text\":\"You are a helpful assistant\"}],\"role\":\"user\"},\"toolConfig\":{\"functionCallingConfig\":{\"mode\":\"AUTO\"}},\"tools\":[{\"functionDeclarations\":[{\"description\":\"Get weather information for a location\",\"name\":\"weather\",\"parameters\":{\"properties\":{\"location\":{\"description\":\"the city\",\"type\":\"STRING\"}},\"required\":[\"location\"],\"type\":\"OBJECT\"}}]}]}\n"
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - google-genai-sdk/1.23.0 gl-go/go1.24.5
+    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "{\n  \"candidates\": [\n    {\n      \"content\": {\n        \"parts\": [\n          {\n            \"text\": \"I'm not sure which Florence you are referring to. Can you please clarify?\"\n          }\n        ],\n        \"role\": \"model\"\n      },\n      \"finishReason\": \"STOP\",\n      \"index\": 0\n    }\n  ],\n  \"usageMetadata\": {\n    \"promptTokenCount\": 80,\n    \"candidatesTokenCount\": 17,\n    \"totalTokenCount\": 97,\n    \"promptTokensDetails\": [\n      {\n        \"modality\": \"TEXT\",\n        \"tokenCount\": 80\n      }\n    ]\n  },\n  \"modelVersion\": \"gemini-2.5-pro\",\n  \"responseId\": \"2ZTAaNaCGtHRz7IPtKmAgAo\"\n}\n"
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+    status: 200 OK
+    code: 200
+    duration: 1.229572208s

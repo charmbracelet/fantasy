@@ -14,7 +14,7 @@ interactions:
       - application/json
       User-Agent:
       - google-genai-sdk/1.23.0 gl-go/go1.24.5
-    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent
     method: POST
   response:
     proto: HTTP/2.0
@@ -22,13 +22,13 @@ interactions:
     proto_minor: 0
     content_length: -1
     uncompressed: true
-    body: "{\n  \"candidates\": [\n    {\n      \"content\": {\n        \"parts\": [\n          {\n            \"functionCall\": {\n              \"name\": \"weather\",\n              \"args\": {\n                \"location\": \"Florence\"\n              }\n            },\n            \"thoughtSignature\": \"CuoBAVSoXO61VKMhhJ8LyVTCpi9Wo5Mak4xOizBZB9m9DlJngMKxObtT2VSXeZoBWIjXv7MfNZy0wldQImsslSMFK7HGKWc84fxnvkzNydv9MJSXSD+PcNKDSgPbthGCY4nt5PVxkM4DKYvW+k3YC+yTOHzKwr30SMig0YXpYQ7RUHOk5Saz8hwegYyWR/nVoGpkDq+1vQRB5vaU2RZbTlW77yFalUgAPv6uKgGArCKNbSCdhA+bOXRhAlsc8FwRF5iEzwYQSlkaACtp3MntyPr5AWHJageAtUjujoku9ZiObIX7hJ17gnaCY3NA\"\n          }\n        ],\n        \"role\": \"model\"\n      },\n      \"finishReason\": \"STOP\",\n      \"index\": 0\n    }\n  ],\n  \"usageMetadata\": {\n    \"promptTokenCount\": 52,\n    \"candidatesTokenCount\": 13,\n    \"totalTokenCount\": 111,\n    \"promptTokensDetails\": [\n      {\n        \"modality\": \"TEXT\",\n        \"tokenCount\": 52\n      }\n    ],\n    \"thoughtsTokenCount\": 46\n  },\n  \"modelVersion\": \"gemini-2.5-flash\",\n  \"responseId\": \"_0i7aODLOP7gz7IPpObKgAc\"\n}\n"
+    body: "{\n  \"candidates\": [\n    {\n      \"content\": {\n        \"parts\": [\n          {\n            \"functionCall\": {\n              \"name\": \"weather\",\n              \"args\": {\n                \"location\": \"Florence\"\n              }\n            },\n            \"thoughtSignature\": \"CqQEAdHtim+OnMkt9f1IrDaI9fiX/zDMQre89tEPHMT7hUY8LCgMhigmIoih3mEKqTCnk7F2prHKcg6UnerobTbNBTy4r6nFCvwRAs2DZkeZ9uK+xGqYRPGTEZaFS5oUlHoANUH+bSHA1kmwgjxy3c8VrZTwnLWyQAZw6pabJqrRJe/G5ADjNX/lMCDqM/rNRiqRaZqstv0K8QjwD4pz9rAgwP7BeTu9moPXzUwv9lY+7RP1J39DQnPjlRA++5h2F3yjIgO7NKiJp+aXCKPlCYb+o6uPskH1tlahXQdnNydrFhtHXMe7+5G76fXuR+vAxz9McjLbploeLqFZgPekHWOcY6EU0lcrm/39YILOy3iyAiu42ZbTfoOVdCsyttcfJPjyZ8U75fyIX/Z+45ky8sE1Nw7+cv4Frm7sOH63lSu3uA0ml3xkZSkJ3nZKtMSRCUBJOLfndMy2gAzeo2QNeLuUPksvg318ehZP48oTnDipo+Zr5575ycekNDLueQn3a7tPUw+uckudUzQFLzJiqs01qq0+1hhxGeHUHe19UcWBTZ/AbrJKNOhUA7TSU2tbza/bf7xGBvDpwxmlDPzvkiYH83nBPUUZUo+jf3FOn+lwI2PzOlJjN0GaGyIp/GY2tPrToElqZnfzsgxp/cBb7ZlbZIwP5Sw3uepfu3Y3RhFaZk4n9yotZWWITfyQFHRQT/fmkPyuYi2zPn3R+EEf9DL5J5oHCeE=\"\n          }\n        ],\n        \"role\": \"model\"\n      },\n      \"finishReason\": \"STOP\",\n      \"index\": 0\n    }\n  ],\n  \"usageMetadata\": {\n    \"promptTokenCount\": 52,\n    \"candidatesTokenCount\": 13,\n    \"totalTokenCount\": 186,\n    \"promptTokensDetails\": [\n      {\n        \"modality\": \"TEXT\",\n        \"tokenCount\": 52\n      }\n    ],\n    \"thoughtsTokenCount\": 121\n  },\n  \"modelVersion\": \"gemini-2.5-pro\",\n  \"responseId\": \"aIvAaM70OfuNmtkPjZGvoAM\"\n}\n"
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 866.858875ms
+    duration: 2.122576125s
 - id: 1
   request:
     proto: HTTP/1.1
@@ -42,7 +42,7 @@ interactions:
       - application/json
       User-Agent:
       - google-genai-sdk/1.23.0 gl-go/go1.24.5
-    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent
     method: POST
   response:
     proto: HTTP/2.0
@@ -50,10 +50,10 @@ interactions:
     proto_minor: 0
     content_length: -1
     uncompressed: true
-    body: "{\n  \"candidates\": [\n    {\n      \"content\": {\n        \"parts\": [\n          {\n            \"text\": \"The weather in Florence is 40 C.\"\n          }\n        ],\n        \"role\": \"model\"\n      },\n      \"finishReason\": \"STOP\",\n      \"index\": 0\n    }\n  ],\n  \"usageMetadata\": {\n    \"promptTokenCount\": 80,\n    \"candidatesTokenCount\": 10,\n    \"totalTokenCount\": 90,\n    \"promptTokensDetails\": [\n      {\n        \"modality\": \"TEXT\",\n        \"tokenCount\": 80\n      }\n    ]\n  },\n  \"modelVersion\": \"gemini-2.5-flash\",\n  \"responseId\": \"AEm7aKbpJdDVz7IPlO776Ak\"\n}\n"
+    body: "{\n  \"candidates\": [\n    {\n      \"content\": {\n        \"parts\": [\n          {\n            \"text\": \"The weather in Florence is 40 C. \\n\"\n          }\n        ],\n        \"role\": \"model\"\n      },\n      \"finishReason\": \"STOP\",\n      \"index\": 0\n    }\n  ],\n  \"usageMetadata\": {\n    \"promptTokenCount\": 80,\n    \"candidatesTokenCount\": 10,\n    \"totalTokenCount\": 90,\n    \"promptTokensDetails\": [\n      {\n        \"modality\": \"TEXT\",\n        \"tokenCount\": 80\n      }\n    ]\n  },\n  \"modelVersion\": \"gemini-2.5-pro\",\n  \"responseId\": \"aovAaM-PLLT4qtsPs9jkuQQ\"\n}\n"
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 688.650291ms
+    duration: 1.854787917s

@@ -38,9 +38,7 @@ func New(opts ...Option) ai.Provider {
 		o(&options)
 	}
 
-	if options.name == "" {
-		options.name = "google"
-	}
+	options.name = cmp.Or(options.name, "google")
 
 	return &provider{
 		options: options,

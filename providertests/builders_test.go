@@ -1,6 +1,7 @@
 package providertests
 
 import (
+	"cmp"
 	"net/http"
 	"os"
 
@@ -52,7 +53,7 @@ func builderAnthropicClaudeSonnet4(r *recorder.Recorder) (ai.LanguageModel, erro
 
 func builderGoogleGemini25Flash(r *recorder.Recorder) (ai.LanguageModel, error) {
 	provider := google.New(
-		google.WithAPIKey(os.Getenv("GEMINI_API_KEY")),
+		google.WithAPIKey(cmp.Or(os.Getenv("GEMINI_API_KEY"), "(missing)")),
 		google.WithHTTPClient(&http.Client{Transport: r}),
 	)
 	return provider.LanguageModel("gemini-2.5-flash")
@@ -60,7 +61,7 @@ func builderGoogleGemini25Flash(r *recorder.Recorder) (ai.LanguageModel, error) 
 
 func builderGoogleGemini25Pro(r *recorder.Recorder) (ai.LanguageModel, error) {
 	provider := google.New(
-		google.WithAPIKey(os.Getenv("GEMINI_API_KEY")),
+		google.WithAPIKey(cmp.Or(os.Getenv("GEMINI_API_KEY"), "(missing)")),
 		google.WithHTTPClient(&http.Client{Transport: r}),
 	)
 	return provider.LanguageModel("gemini-2.5-flash")

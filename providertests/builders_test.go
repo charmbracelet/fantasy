@@ -64,5 +64,5 @@ func builderGoogleGemini25Pro(r *recorder.Recorder) (ai.LanguageModel, error) {
 		google.WithAPIKey(cmp.Or(os.Getenv("GEMINI_API_KEY"), "(missing)")),
 		google.WithHTTPClient(&http.Client{Transport: r}),
 	)
-	return provider.LanguageModel("gemini-2.5-flash")
+	return provider.LanguageModel("gemini-2.5-pro")
 }

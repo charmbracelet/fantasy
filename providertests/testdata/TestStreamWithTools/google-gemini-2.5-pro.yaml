@@ -17,20 +17,20 @@ interactions:
       - application/json
       User-Agent:
       - google-genai-sdk/1.23.0 gl-go/go1.24.5
-    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse
+    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:streamGenerateContent?alt=sse
     method: POST
   response:
     proto: HTTP/2.0
     proto_major: 2
     proto_minor: 0
     content_length: -1
-    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"functionCall\": {\"name\": \"add\",\"args\": {\"b\": 27,\"a\": 15}},\"thoughtSignature\": \"CiQB0e2Kb2msJaUJQD/ryh2cHxovqVsdNAi70C56akmtxGkHt6gKTgHR7Ypv5epJU/RMVeBdHVar6Hdi2Vu9XsjQXYE5ARa7Oa0KJJ3T05dS9wFHmvtNunRmMMFDd66JrL1YdDm8jb+/UtYT8lKvI3Edn2zgXQroAQHR7YpvVJArRl+sKCbpq+eYmufcPWNqP8yj7ur46fqm4fyQqs7cRtB9PoydN2i54A8Hp5T/xVZWHdb2XSVSzlR8huRTgyoF7/1xtCKLnHdx+J4TtzayU/Niwngm7cvV2Qxy5G4KyBDrWk4zG/7laQ6iNLjvieMuMyfXvZ+7QBCW4Yqnnp4EVtuvnHK97JYVGJ3D+gzUcCgZB0RlYaXjkMHRBRJmA4iu2YZUXsYoghGLsK6Gipy0ImnNnbCHDghyS2aYBdiuMnIXA4V08ique5D81pdRkNKXUSIrfIsIpaiOrLfwcyLdqKoKMwHR7YpvFbVQa/Sg4nXKQ3YLBd3WcT0SGEiCdhPS9r0l5i3jmnwtRBeHlQUmYW3J0TfABg==\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 72,\"candidatesTokenCount\": 20,\"totalTokenCount\": 165,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 72}],\"thoughtsTokenCount\": 73},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"kl3AaMrLIMiBmtkPlZiKgAM\"}\r\n\r\n"
+    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"functionCall\": {\"name\": \"add\",\"args\": {\"a\": 15,\"b\": 27}},\"thoughtSignature\": \"CiIB0e2Kb2WCop+Zqu2/Wo6HbI76LR2pExrZuWdDHWN79KUACnQB0e2Kb9aqRpL5wNsl3ORu+0vFV3BP9ABBM4oraVuU8vqS3k62JhArdaJRm8wDAAkRx0bvWiIEWlNz0hfm0sjhAi4V79Hi3m7kJWdPcKyO6vZCwO1Xw6P+NemV2a1ls5VhlprKhvZX+ZP2S3aGtdPV7sHEuAqCAQHR7YpvR7B6hLN+zKGJOCnZ6dSa4hYHPte45veVPuY4IruZswvSNohlrDVfe8pzyiGX4RuxG3OKCTUA9lkC/t12BftGbu8eaJP9vLDvuQzBs4NODZ7QsC+zyR9+NQkM73KoV+SUqMj4W7O0Og9o+rJH/MbTGPOOBgAzOZ7eLOJjrlUKbAHR7YpvwQRxZmUkUOfB0S+vaBHLZdLLjqkCwdKdpVB0WHuFbStrkzKCnpb98vsNkEi6PIE0dAHCURCnnvGYujsMGu+3RbcbdkNbiAgf6dvILgMwwv6gr1hA7bVISzmrLucP8g+I+1iPrxaJCApmAdHtim/+e4pHd8x0iWDawyOG+CHaAZXHTGnXFC0i/q/Gq2yPcQ1zTAWHlZks+VsvZQe6rJYmQF3avaPuHK5Hc96s1InPKAU6e6w9Km7rfMuL0SWPIVw2jsmLTedRD+BB9IqJad48CmgB0e2Kb9jEN3H5P5ruCj87j9c7UJsYlYtHxCECPRL1DfUalIuhp0eER8ZhDUkuDk2Uwfm4p4kv8gUNfRUfyER3AsJQIZY3xJlhb+oQazH9BANZL+cvsQLKQekx40VCA7ZZa2oT/QYJbAqPAQHR7YpvIcbAWSIb6eUrAFH3Gu7tM/4AHJ25PmNRBPia7b4Z0vPJbEqiVhdbMDoFRqP39NT2iP14PprWBynH7Ql1+dPVAkeOI0BNvmz9A8Ssbvh23A0FLe1K09CXawDQaauP0uI87y28stJfDg/ae3JSTn06ckKpR8VPeEQa3WUMC2mai1QLGE9g1Dg98EY1CksB0e2KbzpvS3ZWRUkD7sQ5El/UIKfAPUc1e+loSXZfglBhMpJ7m4oglP9KX+X3jdtVMoSJJk2HmSBFEArERm1OUQWRB17yoXXWWrM=\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 72,\"candidatesTokenCount\": 20,\"totalTokenCount\": 247,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 72}],\"thoughtsTokenCount\": 155},\"modelVersion\": \"gemini-2.5-pro\",\"responseId\": \"J4vAaIuqI5yhqtsPrIq8qAM\"}\r\n\r\n"
     headers:
       Content-Type:
       - text/event-stream
     status: 200 OK
     code: 200
-    duration: 1.165652542s
+    duration: 3.417542166s
 - id: 1
   request:
     proto: HTTP/1.1
@@ -47,17 +47,17 @@ interactions:
       - application/json
       User-Agent:
       - google-genai-sdk/1.23.0 gl-go/go1.24.5
-    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse
+    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:streamGenerateContent?alt=sse
     method: POST
   response:
     proto: HTTP/2.0
     proto_major: 2
     proto_minor: 0
     content_length: -1
-    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"The sum of \"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 106,\"candidatesTokenCount\": 3,\"totalTokenCount\": 109,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 106}]},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"k13AaK7JJcTMqtsP5IG68QQ\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"15 and 27 is 42.\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 106,\"candidatesTokenCount\": 14,\"totalTokenCount\": 120,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 106}]},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"k13AaK7JJcTMqtsP5IG68QQ\"}\r\n\r\n"
+    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"OK\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 106,\"candidatesTokenCount\": 1,\"totalTokenCount\": 107,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 106}]},\"modelVersion\": \"gemini-2.5-pro\",\"responseId\": \"K4vAaLuEFdGuqtsPk7jA2QI\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \". 15 + 27 = 42.\\n\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 106,\"candidatesTokenCount\": 14,\"totalTokenCount\": 120,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 106}]},\"modelVersion\": \"gemini-2.5-pro\",\"responseId\": \"K4vAaLuEFdGuqtsPk7jA2QI\"}\r\n\r\n"
     headers:
       Content-Type:
       - text/event-stream
     status: 200 OK
     code: 200
-    duration: 612.576833ms
+    duration: 2.166403083s

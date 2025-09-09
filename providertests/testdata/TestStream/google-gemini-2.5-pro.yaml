@@ -17,17 +17,17 @@ interactions:
       - application/json
       User-Agent:
       - google-genai-sdk/1.23.0 gl-go/go1.24.5
-    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse
+    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:streamGenerateContent?alt=sse
     method: POST
   response:
     proto: HTTP/2.0
     proto_major: 2
     proto_minor: 0
     content_length: -1
-    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"Claro:\\n\\n1.  **Uno**\\n2.  **Dos**\\n3.  **Tres**\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 16,\"candidatesTokenCount\": 24,\"totalTokenCount\": 67,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 16}],\"thoughtsTokenCount\": 27},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"j13AaJWDJfeHqtsPv4Tk0QY\"}\r\n\r\n"
+    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"Of course! Here is how you count from 1 to 3 in Spanish:\\n\\n1.  **Uno**\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 16,\"candidatesTokenCount\": 24,\"totalTokenCount\": 717,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 16}],\"thoughtsTokenCount\": 677},\"modelVersion\": \"gemini-2.5-pro\",\"responseId\": \"IIvAaJnINPn6qtsPoq_lgQM\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"\\n2.  **Dos**\\n3.  **Tres**\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 16,\"candidatesTokenCount\": 37,\"totalTokenCount\": 730,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 16}],\"thoughtsTokenCount\": 677},\"modelVersion\": \"gemini-2.5-pro\",\"responseId\": \"IIvAaJnINPn6qtsPoq_lgQM\"}\r\n\r\n"
     headers:
       Content-Type:
       - text/event-stream
     status: 200 OK
     code: 200
-    duration: 1.10918025s
+    duration: 6.777174625s

@@ -19,4 +19,4 @@ tasks:
   test:
     desc: Run tests for all packages
     cmds:
-      - go test ./... {{.CLI_ARGS}}
+      - go test ./... -count=1 {{.CLI_ARGS}}

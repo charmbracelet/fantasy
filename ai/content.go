@@ -14,7 +14,7 @@ package ai
 //	    "cacheControl": { "type": "ephemeral" }
 //	  }
 //	}
-type ProviderMetadata map[string]map[string]any
+type ProviderMetadata map[string]any
 
 // ProviderOptions represents additional provider-specific options.
 // Options are additional input to the provider. They are passed through
@@ -34,7 +34,7 @@ type ProviderMetadata map[string]map[string]any
 //	    "cacheControl": { "type": "ephemeral" }
 //	  }
 //	}
-type ProviderOptions map[string]map[string]any
+type ProviderOptions map[string]any
 
 // FinishReason represents why a language model finished generating a response.
 //

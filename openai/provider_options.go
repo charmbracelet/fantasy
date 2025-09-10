@@ -1,5 +1,10 @@
 package openai
 
+import (
+	"github.com/charmbracelet/ai/ai"
+	"github.com/openai/openai-go/v2"
+)
+
 type ReasoningEffort string
 
 const (
@@ -9,20 +14,46 @@ const (
 	ReasoningEffortHigh    ReasoningEffort = "high"
 )
 
+type ProviderFileOptions struct {
+	ImageDetail string
+}
+
+type ProviderMetadata struct {
+	Logprobs                 []openai.ChatCompletionTokenLogprob
+	AcceptedPredictionTokens int64
+	RejectedPredictionTokens int64
+}
+
 type ProviderOptions struct {
-	LogitBias           map[string]int64 `mapstructure:"logit_bias"`
-	LogProbs            *bool            `mapstructure:"log_probes"`
-	TopLogProbs         *int64           `mapstructure:"top_log_probs"`
-	ParallelToolCalls   *bool            `mapstructure:"parallel_tool_calls"`
-	User                *string          `mapstructure:"user"`
-	ReasoningEffort     *ReasoningEffort `mapstructure:"reasoning_effort"`
-	MaxCompletionTokens *int64           `mapstructure:"max_completion_tokens"`
-	TextVerbosity       *string          `mapstructure:"text_verbosity"`
-	Prediction          map[string]any   `mapstructure:"prediction"`
-	Store               *bool            `mapstructure:"store"`
-	Metadata            map[string]any   `mapstructure:"metadata"`
-	PromptCacheKey      *string          `mapstructure:"prompt_cache_key"`
-	SafetyIdentifier    *string          `mapstructure:"safety_identifier"`
-	ServiceTier         *string          `mapstructure:"service_tier"`
-	StructuredOutputs   *bool            `mapstructure:"structured_outputs"`
+	LogitBias           map[string]int64
+	LogProbs            *bool
+	TopLogProbs         *int64
+	ParallelToolCalls   *bool
+	User                *string
+	ReasoningEffort     *ReasoningEffort
+	MaxCompletionTokens *int64
+	TextVerbosity       *string
+	Prediction          map[string]any
+	Store               *bool
+	Metadata            map[string]any
+	PromptCacheKey      *string
+	SafetyIdentifier    *string
+	ServiceTier         *string
+	StructuredOutputs   *bool
+}
+
+func ReasoningEffortOption(e ReasoningEffort) *ReasoningEffort {
+	return &e
+}
+
+func NewProviderOptions(opts *ProviderOptions) ai.ProviderOptions {
+	return ai.ProviderOptions{
+		"openai": opts,
+	}
+}
+
+func NewProviderFileOptions(opts *ProviderFileOptions) ai.ProviderOptions {
+	return ai.ProviderOptions{
+		"openai": opts,
+	}
 }

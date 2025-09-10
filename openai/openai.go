@@ -147,9 +147,9 @@ func (o languageModel) prepareParams(call ai.Call) (*openai.ChatCompletionNewPar
 	messages, warnings := toPrompt(call.Prompt)
 	providerOptions := &ProviderOptions{}
 	if v, ok := call.ProviderOptions["openai"]; ok {
-		err := ai.ParseOptions(v, providerOptions)
-		if err != nil {
-			return nil, nil, err
+		providerOptions, ok = v.(*ProviderOptions)
+		if !ok {
+			return nil, nil, ai.NewInvalidArgumentError("providerOptions", "openai provider options should be *openai.ProviderOptions", nil)
 		}
 	}
 	if call.TopK != nil {
@@ -439,22 +439,19 @@ func (o languageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response
 	promptTokenDetails := response.Usage.PromptTokensDetails
 
 	// Build provider metadata
-	providerMetadata := ai.ProviderMetadata{
-		"openai": make(map[string]any),
-	}
-
+	providerMetadata := &ProviderMetadata{}
 	// Add logprobs if available
 	if len(choice.Logprobs.Content) > 0 {
-		providerMetadata["openai"]["logprobs"] = choice.Logprobs.Content
+		providerMetadata.Logprobs = choice.Logprobs.Content
 	}
 
 	// Add prediction tokens if available
 	if completionTokenDetails.AcceptedPredictionTokens > 0 || completionTokenDetails.RejectedPredictionTokens > 0 {
 		if completionTokenDetails.AcceptedPredictionTokens > 0 {
-			providerMetadata["openai"]["acceptedPredictionTokens"] = completionTokenDetails.AcceptedPredictionTokens
+			providerMetadata.AcceptedPredictionTokens = completionTokenDetails.AcceptedPredictionTokens
 		}
 		if completionTokenDetails.RejectedPredictionTokens > 0 {
-			providerMetadata["openai"]["rejectedPredictionTokens"] = completionTokenDetails.RejectedPredictionTokens
+			providerMetadata.RejectedPredictionTokens = completionTokenDetails.RejectedPredictionTokens
 		}
 	}
 
@@ -467,9 +464,11 @@ func (o languageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response
 			ReasoningTokens: completionTokenDetails.ReasoningTokens,
 			CacheReadTokens: promptTokenDetails.CachedTokens,
 		},
-		FinishReason:     mapOpenAiFinishReason(choice.FinishReason),
-		ProviderMetadata: providerMetadata,
-		Warnings:         warnings,
+		FinishReason: mapOpenAiFinishReason(choice.FinishReason),
+		ProviderMetadata: ai.ProviderMetadata{
+			"openai": providerMetadata,
+		},
+		Warnings: warnings,
 	}, nil
 }
 
@@ -496,10 +495,7 @@ func (o languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 	toolCalls := make(map[int64]toolCall)
 
 	// Build provider metadata for streaming
-	streamProviderMetadata := ai.ProviderMetadata{
-		"openai": make(map[string]any),
-	}
-
+	streamProviderMetadata := &ProviderMetadata{}
 	acc := openai.ChatCompletionAccumulator{}
 	var usage ai.Usage
 	return func(yield func(ai.StreamPart) bool) {
@@ -529,10 +525,10 @@ func (o languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 				// Add prediction tokens if available
 				if completionTokenDetails.AcceptedPredictionTokens > 0 || completionTokenDetails.RejectedPredictionTokens > 0 {
 					if completionTokenDetails.AcceptedPredictionTokens > 0 {
-						streamProviderMetadata["openai"]["acceptedPredictionTokens"] = completionTokenDetails.AcceptedPredictionTokens
+						streamProviderMetadata.AcceptedPredictionTokens = completionTokenDetails.AcceptedPredictionTokens
 					}
 					if completionTokenDetails.RejectedPredictionTokens > 0 {
-						streamProviderMetadata["openai"]["rejectedPredictionTokens"] = completionTokenDetails.RejectedPredictionTokens
+						streamProviderMetadata.RejectedPredictionTokens = completionTokenDetails.RejectedPredictionTokens
 					}
 				}
 			}
@@ -706,7 +702,7 @@ func (o languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 
 			// Add logprobs if available
 			if len(acc.Choices) > 0 && len(acc.Choices[0].Logprobs.Content) > 0 {
-				streamProviderMetadata["openai"]["logprobs"] = acc.Choices[0].Logprobs.Content
+				streamProviderMetadata.Logprobs = acc.Choices[0].Logprobs.Content
 			}
 
 			// Handle annotations/citations from accumulated response
@@ -728,10 +724,12 @@ func (o languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 
 			finishReason := mapOpenAiFinishReason(acc.Choices[0].FinishReason)
 			yield(ai.StreamPart{
-				Type:             ai.StreamPartTypeFinish,
-				Usage:            usage,
-				FinishReason:     finishReason,
-				ProviderMetadata: streamProviderMetadata,
+				Type:         ai.StreamPartTypeFinish,
+				Usage:        usage,
+				FinishReason: finishReason,
+				ProviderMetadata: ai.ProviderMetadata{
+					"openai": streamProviderMetadata,
+				},
 			})
 			return
 		} else {
@@ -921,8 +919,8 @@ func toPrompt(prompt ai.Prompt) ([]openai.ChatCompletionMessageParamUnion, []ai.
 
 						// Check for provider-specific options like image detail
 						if providerOptions, ok := filePart.ProviderOptions["openai"]; ok {
-							if detail, ok := providerOptions["imageDetail"].(string); ok {
-								imageURL.Detail = detail
+							if detail, ok := providerOptions.(*ProviderFileOptions); ok {
+								imageURL.Detail = detail.ImageDetail
 							}
 						}
 

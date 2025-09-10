@@ -120,9 +120,9 @@ func (a languageModel) prepareParams(call ai.Call) (*anthropic.MessageNewParams,
 	params := &anthropic.MessageNewParams{}
 	providerOptions := &ProviderOptions{}
 	if v, ok := call.ProviderOptions["anthropic"]; ok {
-		err := ai.ParseOptions(v, providerOptions)
-		if err != nil {
-			return nil, nil, err
+		providerOptions, ok = v.(*ProviderOptions)
+		if !ok {
+			return nil, nil, ai.NewInvalidArgumentError("providerOptions", "anthropic provider options should be *anthropic.ProviderOptions", nil)
 		}
 	}
 	sendReasoning := true
@@ -217,24 +217,10 @@ func (a languageModel) prepareParams(call ai.Call) (*anthropic.MessageNewParams,
 	return params, warnings, nil
 }
 
-func getCacheControl(providerOptions ai.ProviderOptions) *CacheControlProviderOptions {
+func getCacheControl(providerOptions ai.ProviderOptions) *CacheControl {
 	if anthropicOptions, ok := providerOptions["anthropic"]; ok {
-		if cacheControl, ok := anthropicOptions["cache_control"]; ok {
-			if cc, ok := cacheControl.(map[string]any); ok {
-				cacheControlOption := &CacheControlProviderOptions{}
-				err := ai.ParseOptions(cc, cacheControlOption)
-				if err == nil {
-					return cacheControlOption
-				}
-			}
-		} else if cacheControl, ok := anthropicOptions["cacheControl"]; ok {
-			if cc, ok := cacheControl.(map[string]any); ok {
-				cacheControlOption := &CacheControlProviderOptions{}
-				err := ai.ParseOptions(cc, cacheControlOption)
-				if err == nil {
-					return cacheControlOption
-				}
-			}
+		if options, ok := anthropicOptions.(*CacheControl); ok {
+			return options
 		}
 	}
 	return nil
@@ -242,10 +228,8 @@ func getCacheControl(providerOptions ai.ProviderOptions) *CacheControlProviderOp
 
 func getReasoningMetadata(providerOptions ai.ProviderOptions) *ReasoningMetadata {
 	if anthropicOptions, ok := providerOptions["anthropic"]; ok {
-		reasoningMetadata := &ReasoningMetadata{}
-		err := ai.ParseOptions(anthropicOptions, reasoningMetadata)
-		if err == nil {
-			return reasoningMetadata
+		if reasoning, ok := anthropicOptions.(*ReasoningMetadata); ok {
+			return reasoning
 		}
 	}
 	return nil
@@ -675,9 +659,9 @@ func (a languageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response
 			}
 			content = append(content, ai.ReasoningContent{
 				Text: reasoning.Thinking,
-				ProviderMetadata: map[string]map[string]any{
-					"anthropic": {
-						"signature": reasoning.Signature,
+				ProviderMetadata: map[string]any{
+					"anthropic": &ReasoningMetadata{
+						Signature: reasoning.Signature,
 					},
 				},
 			})
@@ -688,9 +672,9 @@ func (a languageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response
 			}
 			content = append(content, ai.ReasoningContent{
 				Text: "",
-				ProviderMetadata: map[string]map[string]any{
-					"anthropic": {
-						"redacted_data": reasoning.Data,
+				ProviderMetadata: map[string]any{
+					"anthropic": &ReasoningMetadata{
+						RedactedData: reasoning.Data,
 					},
 				},
 			})
@@ -717,11 +701,9 @@ func (a languageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response
 			CacheCreationTokens: response.Usage.CacheCreationInputTokens,
 			CacheReadTokens:     response.Usage.CacheReadInputTokens,
 		},
-		FinishReason: mapFinishReason(string(response.StopReason)),
-		ProviderMetadata: ai.ProviderMetadata{
-			"anthropic": make(map[string]any),
-		},
-		Warnings: warnings,
+		FinishReason:     mapFinishReason(string(response.StopReason)),
+		ProviderMetadata: ai.ProviderMetadata{},
+		Warnings:         warnings,
 	}, nil
 }
 
@@ -770,8 +752,8 @@ func (a languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 						Type: ai.StreamPartTypeReasoningStart,
 						ID:   fmt.Sprintf("%d", chunk.Index),
 						ProviderMetadata: ai.ProviderMetadata{
-							"anthropic": {
-								"redacted_data": chunk.ContentBlock.Data,
+							"anthropic": &ReasoningMetadata{
+								RedactedData: chunk.ContentBlock.Data,
 							},
 						},
 					}) {
@@ -846,8 +828,8 @@ func (a languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 						Type: ai.StreamPartTypeReasoningDelta,
 						ID:   fmt.Sprintf("%d", chunk.Index),
 						ProviderMetadata: ai.ProviderMetadata{
-							"anthropic": {
-								"signature": chunk.Delta.Signature,
+							"anthropic": &ReasoningMetadata{
+								Signature: chunk.Delta.Signature,
 							},
 						},
 					}) {

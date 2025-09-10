@@ -144,7 +144,6 @@ type AgentCall struct {
 	PresencePenalty  *float64 `json:"presence_penalty"`
 	FrequencyPenalty *float64 `json:"frequency_penalty"`
 	ActiveTools      []string `json:"active_tools"`
-	Headers          map[string]string
 	ProviderOptions  ProviderOptions
 	OnRetry          OnRetryCallback
 	MaxRetries       *int
@@ -336,10 +335,6 @@ func (a *agent) prepareCall(call AgentCall) AgentCall {
 		maps.Copy(headers, a.settings.headers)
 	}
 
-	if call.Headers != nil {
-		maps.Copy(headers, call.Headers)
-	}
-	call.Headers = headers
 	return call
 }
 
@@ -420,7 +415,6 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 				FrequencyPenalty: opts.FrequencyPenalty,
 				Tools:            preparedTools,
 				ToolChoice:       &stepToolChoice,
-				Headers:          opts.Headers,
 				ProviderOptions:  opts.ProviderOptions,
 			})
 		})
@@ -747,7 +741,6 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 		PresencePenalty:  opts.PresencePenalty,
 		FrequencyPenalty: opts.FrequencyPenalty,
 		ActiveTools:      opts.ActiveTools,
-		Headers:          opts.Headers,
 		ProviderOptions:  opts.ProviderOptions,
 		MaxRetries:       opts.MaxRetries,
 		StopWhen:         opts.StopWhen,
@@ -838,7 +831,6 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 			FrequencyPenalty: call.FrequencyPenalty,
 			Tools:            preparedTools,
 			ToolChoice:       &stepToolChoice,
-			Headers:          call.Headers,
 			ProviderOptions:  call.ProviderOptions,
 		}
 
@@ -994,9 +986,8 @@ func (a *agent) createPrompt(system, prompt string, messages []Message, files ..
 	if system != "" {
 		preparedPrompt = append(preparedPrompt, NewSystemMessage(system))
 	}
-
-	preparedPrompt = append(preparedPrompt, NewUserMessage(prompt, files...))
 	preparedPrompt = append(preparedPrompt, messages...)
+	preparedPrompt = append(preparedPrompt, NewUserMessage(prompt, files...))
 	return preparedPrompt, nil
 }
 
@@ -1077,6 +1068,11 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 
 	activeToolCalls := make(map[string]*ToolCallContent)
 	activeTextContent := make(map[string]string)
+	type reasoningContent struct {
+		content string
+		options ProviderMetadata
+	}
+	activeReasoningContent := make(map[string]reasoningContent)
 
 	// Process stream parts
 	for part := range stream {
@@ -1134,7 +1130,7 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 			}
 
 		case StreamPartTypeReasoningStart:
-			activeTextContent[part.ID] = ""
+			activeReasoningContent[part.ID] = reasoningContent{content: ""}
 			if opts.OnReasoningStart != nil {
 				err := opts.OnReasoningStart(part.ID)
 				if err != nil {
@@ -1143,8 +1139,10 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 			}
 
 		case StreamPartTypeReasoningDelta:
-			if _, exists := activeTextContent[part.ID]; exists {
-				activeTextContent[part.ID] += part.Delta
+			if active, exists := activeReasoningContent[part.ID]; exists {
+				active.content += part.Delta
+				active.options = part.ProviderMetadata
+				activeReasoningContent[part.ID] = active
 			}
 			if opts.OnReasoningDelta != nil {
 				err := opts.OnReasoningDelta(part.ID, part.Delta)
@@ -1154,21 +1152,19 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 			}
 
 		case StreamPartTypeReasoningEnd:
-			if text, exists := activeTextContent[part.ID]; exists {
-				stepContent = append(stepContent, ReasoningContent{
-					Text:             text,
-					ProviderMetadata: part.ProviderMetadata,
-				})
+			if active, exists := activeReasoningContent[part.ID]; exists {
+				content := ReasoningContent{
+					Text:             active.content,
+					ProviderMetadata: active.options,
+				}
+				stepContent = append(stepContent, content)
 				if opts.OnReasoningEnd != nil {
-					err := opts.OnReasoningEnd(part.ID, ReasoningContent{
-						Text:             text,
-						ProviderMetadata: part.ProviderMetadata,
-					})
+					err := opts.OnReasoningEnd(part.ID, content)
 					if err != nil {
 						return StepResult{}, false, err
 					}
 				}
-				delete(activeTextContent, part.ID)
+				delete(activeReasoningContent, part.ID)
 			}
 
 		case StreamPartTypeToolInputStart:

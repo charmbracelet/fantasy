@@ -1,28 +1,28 @@
 package openai
 
-type reasoningEffort string
+type ReasoningEffort string
 
 const (
-	reasoningEffortMinimal reasoningEffort = "minimal"
-	reasoningEffortLow     reasoningEffort = "low"
-	reasoningEffortMedium  reasoningEffort = "medium"
-	reasoningEffortHigh    reasoningEffort = "high"
+	ReasoningEffortMinimal ReasoningEffort = "minimal"
+	ReasoningEffortLow     ReasoningEffort = "low"
+	ReasoningEffortMedium  ReasoningEffort = "medium"
+	ReasoningEffortHigh    ReasoningEffort = "high"
 )
 
-type providerOptions struct {
-	LogitBias           map[string]int64 `json:"logit_bias"`
-	LogProbs            *bool            `json:"log_probes"`
-	TopLogProbs         *int64           `json:"top_log_probs"`
-	ParallelToolCalls   *bool            `json:"parallel_tool_calls"`
-	User                *string          `json:"user"`
-	ReasoningEffort     *reasoningEffort `json:"reasoning_effort"`
-	MaxCompletionTokens *int64           `json:"max_completion_tokens"`
-	TextVerbosity       *string          `json:"text_verbosity"`
-	Prediction          map[string]any   `json:"prediction"`
-	Store               *bool            `json:"store"`
-	Metadata            map[string]any   `json:"metadata"`
-	PromptCacheKey      *string          `json:"prompt_cache_key"`
-	SafetyIdentifier    *string          `json:"safety_identifier"`
-	ServiceTier         *string          `json:"service_tier"`
-	StructuredOutputs   *bool            `json:"structured_outputs"`
+type ProviderOptions struct {
+	LogitBias           map[string]int64 `mapstructure:"logit_bias"`
+	LogProbs            *bool            `mapstructure:"log_probes"`
+	TopLogProbs         *int64           `mapstructure:"top_log_probs"`
+	ParallelToolCalls   *bool            `mapstructure:"parallel_tool_calls"`
+	User                *string          `mapstructure:"user"`
+	ReasoningEffort     *ReasoningEffort `mapstructure:"reasoning_effort"`
+	MaxCompletionTokens *int64           `mapstructure:"max_completion_tokens"`
+	TextVerbosity       *string          `mapstructure:"text_verbosity"`
+	Prediction          map[string]any   `mapstructure:"prediction"`
+	Store               *bool            `mapstructure:"store"`
+	Metadata            map[string]any   `mapstructure:"metadata"`
+	PromptCacheKey      *string          `mapstructure:"prompt_cache_key"`
+	SafetyIdentifier    *string          `mapstructure:"safety_identifier"`
+	ServiceTier         *string          `mapstructure:"service_tier"`
+	StructuredOutputs   *bool            `mapstructure:"structured_outputs"`
 }

@@ -145,7 +145,7 @@ func (o languageModel) Provider() string {
 func (o languageModel) prepareParams(call ai.Call) (*openai.ChatCompletionNewParams, []ai.CallWarning, error) {
 	params := &openai.ChatCompletionNewParams{}
 	messages, warnings := toPrompt(call.Prompt)
-	providerOptions := &providerOptions{}
+	providerOptions := &ProviderOptions{}
 	if v, ok := call.ProviderOptions["openai"]; ok {
 		err := ai.ParseOptions(v, providerOptions)
 		if err != nil {
@@ -239,13 +239,13 @@ func (o languageModel) prepareParams(call ai.Call) (*openai.ChatCompletionNewPar
 
 	if providerOptions.ReasoningEffort != nil {
 		switch *providerOptions.ReasoningEffort {
-		case reasoningEffortMinimal:
+		case ReasoningEffortMinimal:
 			params.ReasoningEffort = shared.ReasoningEffortMinimal
-		case reasoningEffortLow:
+		case ReasoningEffortLow:
 			params.ReasoningEffort = shared.ReasoningEffortLow
-		case reasoningEffortMedium:
+		case ReasoningEffortMedium:
 			params.ReasoningEffort = shared.ReasoningEffortMedium
-		case reasoningEffortHigh:
+		case ReasoningEffortHigh:
 			params.ReasoningEffort = shared.ReasoningEffortHigh
 		default:
 			return nil, nil, fmt.Errorf("reasoning model `%s` not supported", *providerOptions.ReasoningEffort)

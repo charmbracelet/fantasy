@@ -118,7 +118,7 @@ func (a languageModel) Provider() string {
 
 func (a languageModel) prepareParams(call ai.Call) (*anthropic.MessageNewParams, []ai.CallWarning, error) {
 	params := &anthropic.MessageNewParams{}
-	providerOptions := &providerOptions{}
+	providerOptions := &ProviderOptions{}
 	if v, ok := call.ProviderOptions["anthropic"]; ok {
 		err := ai.ParseOptions(v, providerOptions)
 		if err != nil {
@@ -217,21 +217,21 @@ func (a languageModel) prepareParams(call ai.Call) (*anthropic.MessageNewParams,
 	return params, warnings, nil
 }
 
-func getCacheControl(providerOptions ai.ProviderOptions) *cacheControlProviderOptions {
+func getCacheControl(providerOptions ai.ProviderOptions) *CacheControlProviderOptions {
 	if anthropicOptions, ok := providerOptions["anthropic"]; ok {
 		if cacheControl, ok := anthropicOptions["cache_control"]; ok {
 			if cc, ok := cacheControl.(map[string]any); ok {
-				cacheControlOption := &cacheControlProviderOptions{}
+				cacheControlOption := &CacheControlProviderOptions{}
 				err := ai.ParseOptions(cc, cacheControlOption)
-				if err != nil {
+				if err == nil {
 					return cacheControlOption
 				}
 			}
 		} else if cacheControl, ok := anthropicOptions["cacheControl"]; ok {
 			if cc, ok := cacheControl.(map[string]any); ok {
-				cacheControlOption := &cacheControlProviderOptions{}
+				cacheControlOption := &CacheControlProviderOptions{}
 				err := ai.ParseOptions(cc, cacheControlOption)
-				if err != nil {
+				if err == nil {
 					return cacheControlOption
 				}
 			}
@@ -240,11 +240,11 @@ func getCacheControl(providerOptions ai.ProviderOptions) *cacheControlProviderOp
 	return nil
 }
 
-func getReasoningMetadata(providerOptions ai.ProviderOptions) *reasoningMetadata {
+func getReasoningMetadata(providerOptions ai.ProviderOptions) *ReasoningMetadata {
 	if anthropicOptions, ok := providerOptions["anthropic"]; ok {
-		reasoningMetadata := &reasoningMetadata{}
+		reasoningMetadata := &ReasoningMetadata{}
 		err := ai.ParseOptions(anthropicOptions, reasoningMetadata)
-		if err != nil {
+		if err == nil {
 			return reasoningMetadata
 		}
 	}
@@ -837,7 +837,7 @@ func (a languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 					if !yield(ai.StreamPart{
 						Type:  ai.StreamPartTypeReasoningDelta,
 						ID:    fmt.Sprintf("%d", chunk.Index),
-						Delta: chunk.Delta.Text,
+						Delta: chunk.Delta.Thinking,
 					}) {
 						return
 					}

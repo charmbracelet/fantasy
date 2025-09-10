@@ -1,20 +1,20 @@
 package anthropic
 
-type providerOptions struct {
-	SendReasoning          *bool                   `json:"send_reasoning,omitempty"`
-	Thinking               *thinkingProviderOption `json:"thinking,omitempty"`
-	DisableParallelToolUse *bool                   `json:"disable_parallel_tool_use,omitempty"`
+type ProviderOptions struct {
+	SendReasoning          *bool                   `mapstructure:"send_reasoning,omitempty"`
+	Thinking               *ThinkingProviderOption `mapstructure:"thinking,omitempty"`
+	DisableParallelToolUse *bool                   `mapstructure:"disable_parallel_tool_use,omitempty"`
 }
 
-type thinkingProviderOption struct {
-	BudgetTokens int64 `json:"budget_tokens"`
+type ThinkingProviderOption struct {
+	BudgetTokens int64 `mapstructure:"budget_tokens"`
 }
 
-type reasoningMetadata struct {
-	Signature    string `json:"signature"`
-	RedactedData string `json:"redacted_data"`
+type ReasoningMetadata struct {
+	Signature    string `mapstructure:"signature"`
+	RedactedData string `mapstructure:"redacted_data"`
 }
 
-type cacheControlProviderOptions struct {
-	Type string `json:"type"`
+type CacheControlProviderOptions struct {
+	Type string `mapstructure:"type"`
 }

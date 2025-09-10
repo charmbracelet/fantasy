@@ -1059,11 +1059,11 @@ func TestDoGenerate(t *testing.T) {
 			Prompt: testPrompt,
 			ProviderOptions: ai.ProviderOptions{
 				"openai": map[string]any{
-					"logitBias": map[string]int64{
+					"logit_bias": map[string]int64{
 						"50256": -100,
 					},
-					"parallelToolCalls": false,
-					"user":              "test-user-id",
+					"parallel_tool_calls": false,
+					"user":                "test-user-id",
 				},
 			},
 		})
@@ -1103,7 +1103,7 @@ func TestDoGenerate(t *testing.T) {
 			Prompt: testPrompt,
 			ProviderOptions: ai.ProviderOptions{
 				"openai": map[string]any{
-					"reasoningEffort": "low",
+					"reasoning_effort": "low",
 				},
 			},
 		})
@@ -1143,7 +1143,7 @@ func TestDoGenerate(t *testing.T) {
 			Prompt: testPrompt,
 			ProviderOptions: ai.ProviderOptions{
 				"openai": map[string]any{
-					"textVerbosity": "low",
+					"text_verbosity": "low",
 				},
 			},
 		})
@@ -1536,7 +1536,7 @@ func TestDoGenerate(t *testing.T) {
 			Prompt: testPrompt,
 			ProviderOptions: ai.ProviderOptions{
 				"openai": map[string]any{
-					"maxCompletionTokens": 255,
+					"max_completion_tokens": 255,
 				},
 			},
 		})
@@ -1706,7 +1706,7 @@ func TestDoGenerate(t *testing.T) {
 			Prompt: testPrompt,
 			ProviderOptions: ai.ProviderOptions{
 				"openai": map[string]any{
-					"promptCacheKey": "test-cache-key-123",
+					"prompt_cache_key": "test-cache-key-123",
 				},
 			},
 		})
@@ -1726,7 +1726,7 @@ func TestDoGenerate(t *testing.T) {
 		require.Equal(t, "Hello", message["content"])
 	})
 
-	t.Run("should send safetyIdentifier extension value", func(t *testing.T) {
+	t.Run("should send safety_identifier extension value", func(t *testing.T) {
 		t.Parallel()
 
 		server := newMockServer()
@@ -1746,7 +1746,7 @@ func TestDoGenerate(t *testing.T) {
 			Prompt: testPrompt,
 			ProviderOptions: ai.ProviderOptions{
 				"openai": map[string]any{
-					"safetyIdentifier": "test-safety-identifier-123",
+					"safety_identifier": "test-safety-identifier-123",
 				},
 			},
 		})
@@ -1818,7 +1818,7 @@ func TestDoGenerate(t *testing.T) {
 			Prompt: testPrompt,
 			ProviderOptions: ai.ProviderOptions{
 				"openai": map[string]any{
-					"serviceTier": "flex",
+					"service_tier": "flex",
 				},
 			},
 		})
@@ -1856,7 +1856,7 @@ func TestDoGenerate(t *testing.T) {
 			Prompt: testPrompt,
 			ProviderOptions: ai.ProviderOptions{
 				"openai": map[string]any{
-					"serviceTier": "flex",
+					"service_tier": "flex",
 				},
 			},
 		})
@@ -1891,7 +1891,7 @@ func TestDoGenerate(t *testing.T) {
 			Prompt: testPrompt,
 			ProviderOptions: ai.ProviderOptions{
 				"openai": map[string]any{
-					"serviceTier": "priority",
+					"service_tier": "priority",
 				},
 			},
 		})
@@ -1929,7 +1929,7 @@ func TestDoGenerate(t *testing.T) {
 			Prompt: testPrompt,
 			ProviderOptions: ai.ProviderOptions{
 				"openai": map[string]any{
-					"serviceTier": "priority",
+					"service_tier": "priority",
 				},
 			},
 		})
@@ -2693,7 +2693,7 @@ func TestDoStream(t *testing.T) {
 			Prompt: testPrompt,
 			ProviderOptions: ai.ProviderOptions{
 				"openai": map[string]any{
-					"serviceTier": "flex",
+					"service_tier": "flex",
 				},
 			},
 		})
@@ -2737,7 +2737,7 @@ func TestDoStream(t *testing.T) {
 			Prompt: testPrompt,
 			ProviderOptions: ai.ProviderOptions{
 				"openai": map[string]any{
-					"serviceTier": "priority",
+					"service_tier": "priority",
 				},
 			},
 		})

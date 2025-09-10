@@ -157,11 +157,9 @@ func TestToOpenAiPrompt_UserMessages(t *testing.T) {
 					ai.FilePart{
 						MediaType: "image/png",
 						Data:      imageData,
-						ProviderOptions: ai.ProviderOptions{
-							"openai": map[string]any{
-								"imageDetail": "low",
-							},
-						},
+						ProviderOptions: NewProviderFileOptions(&ProviderFileOptions{
+							ImageDetail: "low",
+						}),
 					},
 				},
 			},
@@ -941,20 +939,18 @@ func TestDoGenerate(t *testing.T) {
 
 		result, err := model.Generate(context.Background(), ai.Call{
 			Prompt: testPrompt,
-			ProviderOptions: ai.ProviderOptions{
-				"openai": map[string]any{
-					"logProbs": true,
-				},
-			},
+			ProviderOptions: NewProviderOptions(&ProviderOptions{
+				LogProbs: ai.BoolOption(true),
+			}),
 		})
 
 		require.NoError(t, err)
 		require.NotNil(t, result.ProviderMetadata)
 
-		openaiMeta, ok := result.ProviderMetadata["openai"]
+		openaiMeta, ok := result.ProviderMetadata["openai"].(*ProviderMetadata)
 		require.True(t, ok)
 
-		logprobs, ok := openaiMeta["logprobs"]
+		logprobs := openaiMeta.Logprobs
 		require.True(t, ok)
 		require.NotNil(t, logprobs)
 	})
@@ -1057,15 +1053,13 @@ func TestDoGenerate(t *testing.T) {
 
 		_, err := model.Generate(context.Background(), ai.Call{
 			Prompt: testPrompt,
-			ProviderOptions: ai.ProviderOptions{
-				"openai": map[string]any{
-					"logit_bias": map[string]int64{
-						"50256": -100,
-					},
-					"parallel_tool_calls": false,
-					"user":                "test-user-id",
+			ProviderOptions: NewProviderOptions(&ProviderOptions{
+				LogitBias: map[string]int64{
+					"50256": -100,
 				},
-			},
+				ParallelToolCalls: ai.BoolOption(false),
+				User:              ai.StringOption("test-user-id"),
+			}),
 		})
 
 		require.NoError(t, err)
@@ -1101,11 +1095,11 @@ func TestDoGenerate(t *testing.T) {
 
 		_, err := model.Generate(context.Background(), ai.Call{
 			Prompt: testPrompt,
-			ProviderOptions: ai.ProviderOptions{
-				"openai": map[string]any{
-					"reasoning_effort": "low",
+			ProviderOptions: NewProviderOptions(
+				&ProviderOptions{
+					ReasoningEffort: ReasoningEffortOption(ReasoningEffortLow),
 				},
-			},
+			),
 		})
 
 		require.NoError(t, err)
@@ -1141,11 +1135,9 @@ func TestDoGenerate(t *testing.T) {
 
 		_, err := model.Generate(context.Background(), ai.Call{
 			Prompt: testPrompt,
-			ProviderOptions: ai.ProviderOptions{
-				"openai": map[string]any{
-					"text_verbosity": "low",
-				},
-			},
+			ProviderOptions: NewProviderOptions(&ProviderOptions{
+				TextVerbosity: ai.StringOption("low"),
+			}),
 		})
 
 		require.NoError(t, err)
@@ -1393,10 +1385,11 @@ func TestDoGenerate(t *testing.T) {
 		require.NoError(t, err)
 		require.NotNil(t, result.ProviderMetadata)
 
-		openaiMeta, ok := result.ProviderMetadata["openai"]
+		openaiMeta, ok := result.ProviderMetadata["openai"].(*ProviderMetadata)
+
 		require.True(t, ok)
-		require.Equal(t, int64(123), openaiMeta["acceptedPredictionTokens"])
-		require.Equal(t, int64(456), openaiMeta["rejectedPredictionTokens"])
+		require.Equal(t, int64(123), openaiMeta.AcceptedPredictionTokens)
+		require.Equal(t, int64(456), openaiMeta.RejectedPredictionTokens)
 	})
 
 	t.Run("should clear out temperature, top_p, frequency_penalty, presence_penalty for reasoning models", func(t *testing.T) {
@@ -1534,11 +1527,9 @@ func TestDoGenerate(t *testing.T) {
 
 		_, err := model.Generate(context.Background(), ai.Call{
 			Prompt: testPrompt,
-			ProviderOptions: ai.ProviderOptions{
-				"openai": map[string]any{
-					"max_completion_tokens": 255,
-				},
-			},
+			ProviderOptions: NewProviderOptions(&ProviderOptions{
+				MaxCompletionTokens: ai.IntOption(255),
+			}),
 		})
 
 		require.NoError(t, err)
@@ -1574,14 +1565,12 @@ func TestDoGenerate(t *testing.T) {
 
 		_, err := model.Generate(context.Background(), ai.Call{
 			Prompt: testPrompt,
-			ProviderOptions: ai.ProviderOptions{
-				"openai": map[string]any{
-					"prediction": map[string]any{
-						"type":    "content",
-						"content": "Hello, World!",
-					},
+			ProviderOptions: NewProviderOptions(&ProviderOptions{
+				Prediction: map[string]any{
+					"type":    "content",
+					"content": "Hello, World!",
 				},
-			},
+			}),
 		})
 
 		require.NoError(t, err)
@@ -1620,11 +1609,9 @@ func TestDoGenerate(t *testing.T) {
 
 		_, err := model.Generate(context.Background(), ai.Call{
 			Prompt: testPrompt,
-			ProviderOptions: ai.ProviderOptions{
-				"openai": map[string]any{
-					"store": true,
-				},
-			},
+			ProviderOptions: NewProviderOptions(&ProviderOptions{
+				Store: ai.BoolOption(true),
+			}),
 		})
 
 		require.NoError(t, err)
@@ -1660,13 +1647,11 @@ func TestDoGenerate(t *testing.T) {
 
 		_, err := model.Generate(context.Background(), ai.Call{
 			Prompt: testPrompt,
-			ProviderOptions: ai.ProviderOptions{
-				"openai": map[string]any{
-					"metadata": map[string]any{
-						"custom": "value",
-					},
+			ProviderOptions: NewProviderOptions(&ProviderOptions{
+				Metadata: map[string]any{
+					"custom": "value",
 				},
-			},
+			}),
 		})
 
 		require.NoError(t, err)
@@ -1704,11 +1689,9 @@ func TestDoGenerate(t *testing.T) {
 
 		_, err := model.Generate(context.Background(), ai.Call{
 			Prompt: testPrompt,
-			ProviderOptions: ai.ProviderOptions{
-				"openai": map[string]any{
-					"prompt_cache_key": "test-cache-key-123",
-				},
-			},
+			ProviderOptions: NewProviderOptions(&ProviderOptions{
+				PromptCacheKey: ai.StringOption("test-cache-key-123"),
+			}),
 		})
 
 		require.NoError(t, err)
@@ -1744,11 +1727,9 @@ func TestDoGenerate(t *testing.T) {
 
 		_, err := model.Generate(context.Background(), ai.Call{
 			Prompt: testPrompt,
-			ProviderOptions: ai.ProviderOptions{
-				"openai": map[string]any{
-					"safety_identifier": "test-safety-identifier-123",
-				},
-			},
+			ProviderOptions: NewProviderOptions(&ProviderOptions{
+				SafetyIdentifier: ai.StringOption("test-safety-identifier-123"),
+			}),
 		})
 
 		require.NoError(t, err)
@@ -1816,11 +1797,9 @@ func TestDoGenerate(t *testing.T) {
 
 		_, err := model.Generate(context.Background(), ai.Call{
 			Prompt: testPrompt,
-			ProviderOptions: ai.ProviderOptions{
-				"openai": map[string]any{
-					"service_tier": "flex",
-				},
-			},
+			ProviderOptions: NewProviderOptions(&ProviderOptions{
+				ServiceTier: ai.StringOption("flex"),
+			}),
 		})
 
 		require.NoError(t, err)
@@ -1854,11 +1833,9 @@ func TestDoGenerate(t *testing.T) {
 
 		result, err := model.Generate(context.Background(), ai.Call{
 			Prompt: testPrompt,
-			ProviderOptions: ai.ProviderOptions{
-				"openai": map[string]any{
-					"service_tier": "flex",
-				},
-			},
+			ProviderOptions: NewProviderOptions(&ProviderOptions{
+				ServiceTier: ai.StringOption("flex"),
+			}),
 		})
 
 		require.NoError(t, err)
@@ -1889,11 +1866,9 @@ func TestDoGenerate(t *testing.T) {
 
 		_, err := model.Generate(context.Background(), ai.Call{
 			Prompt: testPrompt,
-			ProviderOptions: ai.ProviderOptions{
-				"openai": map[string]any{
-					"service_tier": "priority",
-				},
-			},
+			ProviderOptions: NewProviderOptions(&ProviderOptions{
+				ServiceTier: ai.StringOption("priority"),
+			}),
 		})
 
 		require.NoError(t, err)
@@ -1927,11 +1902,9 @@ func TestDoGenerate(t *testing.T) {
 
 		result, err := model.Generate(context.Background(), ai.Call{
 			Prompt: testPrompt,
-			ProviderOptions: ai.ProviderOptions{
-				"openai": map[string]any{
-					"service_tier": "priority",
-				},
-			},
+			ProviderOptions: NewProviderOptions(&ProviderOptions{
+				ServiceTier: ai.StringOption("priority"),
+			}),
 		})
 
 		require.NoError(t, err)
@@ -2575,10 +2548,10 @@ func TestDoStream(t *testing.T) {
 		require.NotNil(t, finishPart)
 		require.NotNil(t, finishPart.ProviderMetadata)
 
-		openaiMeta, ok := finishPart.ProviderMetadata["openai"]
+		openaiMeta, ok := finishPart.ProviderMetadata["openai"].(*ProviderMetadata)
 		require.True(t, ok)
-		require.Equal(t, int64(123), openaiMeta["acceptedPredictionTokens"])
-		require.Equal(t, int64(456), openaiMeta["rejectedPredictionTokens"])
+		require.Equal(t, int64(123), openaiMeta.AcceptedPredictionTokens)
+		require.Equal(t, int64(456), openaiMeta.RejectedPredictionTokens)
 	})
 
 	t.Run("should send store extension setting", func(t *testing.T) {
@@ -2599,11 +2572,9 @@ func TestDoStream(t *testing.T) {
 
 		_, err := model.Stream(context.Background(), ai.Call{
 			Prompt: testPrompt,
-			ProviderOptions: ai.ProviderOptions{
-				"openai": map[string]any{
-					"store": true,
-				},
-			},
+			ProviderOptions: NewProviderOptions(&ProviderOptions{
+				Store: ai.BoolOption(true),
+			}),
 		})
 
 		require.NoError(t, err)
@@ -2643,13 +2614,11 @@ func TestDoStream(t *testing.T) {
 
 		_, err := model.Stream(context.Background(), ai.Call{
 			Prompt: testPrompt,
-			ProviderOptions: ai.ProviderOptions{
-				"openai": map[string]any{
-					"metadata": map[string]any{
-						"custom": "value",
-					},
+			ProviderOptions: NewProviderOptions(&ProviderOptions{
+				Metadata: map[string]any{
+					"custom": "value",
 				},
-			},
+			}),
 		})
 
 		require.NoError(t, err)
@@ -2691,11 +2660,9 @@ func TestDoStream(t *testing.T) {
 
 		_, err := model.Stream(context.Background(), ai.Call{
 			Prompt: testPrompt,
-			ProviderOptions: ai.ProviderOptions{
-				"openai": map[string]any{
-					"service_tier": "flex",
-				},
-			},
+			ProviderOptions: NewProviderOptions(&ProviderOptions{
+				ServiceTier: ai.StringOption("flex"),
+			}),
 		})
 
 		require.NoError(t, err)
@@ -2735,11 +2702,9 @@ func TestDoStream(t *testing.T) {
 
 		_, err := model.Stream(context.Background(), ai.Call{
 			Prompt: testPrompt,
-			ProviderOptions: ai.ProviderOptions{
-				"openai": map[string]any{
-					"service_tier": "priority",
-				},
-			},
+			ProviderOptions: NewProviderOptions(&ProviderOptions{
+				ServiceTier: ai.StringOption("priority"),
+			}),
 		})
 
 		require.NoError(t, err)

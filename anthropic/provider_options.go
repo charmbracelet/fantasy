@@ -1,20 +1,38 @@
 package anthropic
 
+import "github.com/charmbracelet/ai/ai"
+
 type ProviderOptions struct {
-	SendReasoning          *bool                   `mapstructure:"send_reasoning,omitempty"`
-	Thinking               *ThinkingProviderOption `mapstructure:"thinking,omitempty"`
-	DisableParallelToolUse *bool                   `mapstructure:"disable_parallel_tool_use,omitempty"`
+	SendReasoning          *bool
+	Thinking               *ThinkingProviderOption
+	DisableParallelToolUse *bool
 }
 
 type ThinkingProviderOption struct {
-	BudgetTokens int64 `mapstructure:"budget_tokens"`
+	BudgetTokens int64
 }
 
 type ReasoningMetadata struct {
-	Signature    string `mapstructure:"signature"`
-	RedactedData string `mapstructure:"redacted_data"`
+	Signature    string
+	RedactedData string
 }
 
-type CacheControlProviderOptions struct {
-	Type string `mapstructure:"type"`
+type ProviderCacheControlOptions struct {
+	CacheControl CacheControl
+}
+
+type CacheControl struct {
+	Type string
+}
+
+func NewProviderOptions(opts *ProviderOptions) ai.ProviderOptions {
+	return ai.ProviderOptions{
+		"anthropic": opts,
+	}
+}
+
+func NewProviderCacheControlOptions(opts *ProviderCacheControlOptions) ai.ProviderOptions {
+	return ai.ProviderOptions{
+		"anthropic": opts,
+	}
 }

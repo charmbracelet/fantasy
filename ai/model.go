@@ -118,7 +118,7 @@ type Response struct {
 	Warnings     []CallWarning   `json:"warnings"`
 
 	// for provider specific response metadata, the key is the provider id
-	ProviderMetadata map[string]map[string]any `json:"provider_metadata"`
+	ProviderMetadata ProviderMetadata `json:"provider_metadata"`
 }
 
 type StreamPartType string

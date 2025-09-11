@@ -151,7 +151,7 @@ func (o languageModel) prepareParams(call ai.Call) (*openai.ChatCompletionNewPar
 	params := &openai.ChatCompletionNewParams{}
 	messages, warnings := toPrompt(call.Prompt)
 	providerOptions := &ProviderOptions{}
-	if v, ok := call.ProviderOptions[ProviderOptionsKey]; ok {
+	if v, ok := call.ProviderOptions[OptionsKey]; ok {
 		providerOptions, ok = v.(*ProviderOptions)
 		if !ok {
 			return nil, nil, ai.NewInvalidArgumentError("providerOptions", "openai provider options should be *openai.ProviderOptions", nil)
@@ -471,7 +471,7 @@ func (o languageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response
 		},
 		FinishReason: mapOpenAiFinishReason(choice.FinishReason),
 		ProviderMetadata: ai.ProviderMetadata{
-			ProviderOptionsKey: providerMetadata,
+			OptionsKey: providerMetadata,
 		},
 		Warnings: warnings,
 	}, nil
@@ -733,7 +733,7 @@ func (o languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 				Usage:        usage,
 				FinishReason: finishReason,
 				ProviderMetadata: ai.ProviderMetadata{
-					ProviderOptionsKey: streamProviderMetadata,
+					OptionsKey: streamProviderMetadata,
 				},
 			})
 			return
@@ -923,7 +923,7 @@ func toPrompt(prompt ai.Prompt) ([]openai.ChatCompletionMessageParamUnion, []ai.
 						imageURL := openai.ChatCompletionContentPartImageImageURLParam{URL: data}
 
 						// Check for provider-specific options like image detail
-						if providerOptions, ok := filePart.ProviderOptions[ProviderOptionsKey]; ok {
+						if providerOptions, ok := filePart.ProviderOptions[OptionsKey]; ok {
 							if detail, ok := providerOptions.(*ProviderFileOptions); ok {
 								imageURL.Detail = detail.ImageDetail
 							}

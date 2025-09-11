@@ -123,7 +123,7 @@ func (a languageModel) Provider() string {
 func (a languageModel) prepareParams(call ai.Call) (*anthropic.MessageNewParams, []ai.CallWarning, error) {
 	params := &anthropic.MessageNewParams{}
 	providerOptions := &ProviderOptions{}
-	if v, ok := call.ProviderOptions[ProviderOptionsKey]; ok {
+	if v, ok := call.ProviderOptions[OptionsKey]; ok {
 		providerOptions, ok = v.(*ProviderOptions)
 		if !ok {
 			return nil, nil, ai.NewInvalidArgumentError("providerOptions", "anthropic provider options should be *anthropic.ProviderOptions", nil)
@@ -222,7 +222,7 @@ func (a languageModel) prepareParams(call ai.Call) (*anthropic.MessageNewParams,
 }
 
 func getCacheControl(providerOptions ai.ProviderOptions) *CacheControl {
-	if anthropicOptions, ok := providerOptions[ProviderOptionsKey]; ok {
+	if anthropicOptions, ok := providerOptions[OptionsKey]; ok {
 		if options, ok := anthropicOptions.(*ProviderCacheControlOptions); ok {
 			return &options.CacheControl
 		}
@@ -231,7 +231,7 @@ func getCacheControl(providerOptions ai.ProviderOptions) *CacheControl {
 }
 
 func getReasoningMetadata(providerOptions ai.ProviderOptions) *ReasoningOptionMetadata {
-	if anthropicOptions, ok := providerOptions[ProviderOptionsKey]; ok {
+	if anthropicOptions, ok := providerOptions[OptionsKey]; ok {
 		if reasoning, ok := anthropicOptions.(*ReasoningOptionMetadata); ok {
 			return reasoning
 		}
@@ -664,7 +664,7 @@ func (a languageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response
 			content = append(content, ai.ReasoningContent{
 				Text: reasoning.Thinking,
 				ProviderMetadata: ai.ProviderMetadata{
-					ProviderOptionsKey: &ReasoningOptionMetadata{
+					OptionsKey: &ReasoningOptionMetadata{
 						Signature: reasoning.Signature,
 					},
 				},
@@ -677,7 +677,7 @@ func (a languageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response
 			content = append(content, ai.ReasoningContent{
 				Text: "",
 				ProviderMetadata: ai.ProviderMetadata{
-					ProviderOptionsKey: &ReasoningOptionMetadata{
+					OptionsKey: &ReasoningOptionMetadata{
 						RedactedData: reasoning.Data,
 					},
 				},
@@ -756,7 +756,7 @@ func (a languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 						Type: ai.StreamPartTypeReasoningStart,
 						ID:   fmt.Sprintf("%d", chunk.Index),
 						ProviderMetadata: ai.ProviderMetadata{
-							ProviderOptionsKey: &ReasoningOptionMetadata{
+							OptionsKey: &ReasoningOptionMetadata{
 								RedactedData: chunk.ContentBlock.Data,
 							},
 						},
@@ -832,7 +832,7 @@ func (a languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 						Type: ai.StreamPartTypeReasoningDelta,
 						ID:   fmt.Sprintf("%d", chunk.Index),
 						ProviderMetadata: ai.ProviderMetadata{
-							ProviderOptionsKey: &ReasoningOptionMetadata{
+							OptionsKey: &ReasoningOptionMetadata{
 								Signature: chunk.Delta.Signature,
 							},
 						},

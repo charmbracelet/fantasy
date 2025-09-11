@@ -5,7 +5,7 @@ import (
 	"github.com/openai/openai-go/v2"
 )
 
-const ProviderOptionsKey = "openai"
+const OptionsKey = "openai"
 
 type ReasoningEffort string
 
@@ -56,12 +56,12 @@ func ReasoningEffortOption(e ReasoningEffort) *ReasoningEffort {
 
 func NewProviderOptions(opts *ProviderOptions) ai.ProviderOptions {
 	return ai.ProviderOptions{
-		ProviderOptionsKey: opts,
+		OptionsKey: opts,
 	}
 }
 
 func NewProviderFileOptions(opts *ProviderFileOptions) ai.ProviderOptions {
 	return ai.ProviderOptions{
-		ProviderOptionsKey: opts,
+		OptionsKey: opts,
 	}
 }

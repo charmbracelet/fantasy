@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/charmbracelet/ai/ai"
+	"github.com/charmbracelet/fantasy/ai"
 	_ "github.com/joho/godotenv/autoload"
 )
 

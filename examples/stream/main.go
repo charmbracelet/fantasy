@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/charmbracelet/ai/ai"
-	"github.com/charmbracelet/ai/openai"
+	"github.com/charmbracelet/fantasy/ai"
+	"github.com/charmbracelet/fantasy/openai"
 )
 
 func main() {

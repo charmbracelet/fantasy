@@ -1,6 +1,6 @@
 package anthropic
 
-import "github.com/charmbracelet/ai/ai"
+import "github.com/charmbracelet/fantasy/ai"
 
 const OptionsKey = "anthropic"
 

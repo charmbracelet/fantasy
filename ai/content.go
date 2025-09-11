@@ -11,10 +11,10 @@ package ai
 //
 //	{
 //	  "anthropic": {
-//	    "cacheControl": { "type": "ephemeral" }
+//	    "signature": "sig....."
 //	  }
 //	}
-type ProviderMetadata map[string]any
+type ProviderMetadata map[string]interface{ Options() }
 
 // ProviderOptions represents additional provider-specific options.
 // Options are additional input to the provider. They are passed through
@@ -34,7 +34,7 @@ type ProviderMetadata map[string]any
 //	    "cacheControl": { "type": "ephemeral" }
 //	  }
 //	}
-type ProviderOptions map[string]any
+type ProviderOptions map[string]interface{ Options() }
 
 // FinishReason represents why a language model finished generating a response.
 //

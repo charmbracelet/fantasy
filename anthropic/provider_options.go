@@ -2,24 +2,32 @@ package anthropic
 
 import "github.com/charmbracelet/ai/ai"
 
+const ProviderOptionsKey = "anthropic"
+
 type ProviderOptions struct {
 	SendReasoning          *bool
 	Thinking               *ThinkingProviderOption
 	DisableParallelToolUse *bool
 }
 
+func (o *ProviderOptions) Options() {}
+
 type ThinkingProviderOption struct {
 	BudgetTokens int64
 }
 
-type ReasoningMetadata struct {
+type ReasoningOptionMetadata struct {
 	Signature    string
 	RedactedData string
 }
 
+func (*ReasoningOptionMetadata) Options() {}
+
 type ProviderCacheControlOptions struct {
 	CacheControl CacheControl
 }
+
+func (*ProviderCacheControlOptions) Options() {}
 
 type CacheControl struct {
 	Type string
@@ -27,12 +35,12 @@ type CacheControl struct {
 
 func NewProviderOptions(opts *ProviderOptions) ai.ProviderOptions {
 	return ai.ProviderOptions{
-		"anthropic": opts,
+		ProviderOptionsKey: opts,
 	}
 }
 
 func NewProviderCacheControlOptions(opts *ProviderCacheControlOptions) ai.ProviderOptions {
 	return ai.ProviderOptions{
-		"anthropic": opts,
+		ProviderOptionsKey: opts,
 	}
 }

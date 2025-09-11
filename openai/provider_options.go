@@ -5,6 +5,8 @@ import (
 	"github.com/openai/openai-go/v2"
 )
 
+const ProviderOptionsKey = "openai"
+
 type ReasoningEffort string
 
 const (
@@ -14,15 +16,13 @@ const (
 	ReasoningEffortHigh    ReasoningEffort = "high"
 )
 
-type ProviderFileOptions struct {
-	ImageDetail string
-}
-
 type ProviderMetadata struct {
 	Logprobs                 []openai.ChatCompletionTokenLogprob
 	AcceptedPredictionTokens int64
 	RejectedPredictionTokens int64
 }
+
+func (*ProviderMetadata) Options() {}
 
 type ProviderOptions struct {
 	LogitBias           map[string]int64
@@ -42,18 +42,26 @@ type ProviderOptions struct {
 	StructuredOutputs   *bool
 }
 
+func (*ProviderOptions) Options() {}
+
+type ProviderFileOptions struct {
+	ImageDetail string
+}
+
+func (*ProviderFileOptions) Options() {}
+
 func ReasoningEffortOption(e ReasoningEffort) *ReasoningEffort {
 	return &e
 }
 
 func NewProviderOptions(opts *ProviderOptions) ai.ProviderOptions {
 	return ai.ProviderOptions{
-		"openai": opts,
+		ProviderOptionsKey: opts,
 	}
 }
 
 func NewProviderFileOptions(opts *ProviderFileOptions) ai.ProviderOptions {
 	return ai.ProviderOptions{
-		"openai": opts,
+		ProviderOptionsKey: opts,
 	}
 }

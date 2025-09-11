@@ -17,6 +17,11 @@ import (
 	"github.com/charmbracelet/ai/ai"
 )
 
+const (
+	ProviderName = "anthropic"
+	DefaultURL   = "https://api.anthropic.com"
+)
+
 type options struct {
 	baseURL string
 	apiKey  string
@@ -32,17 +37,16 @@ type provider struct {
 type Option = func(*options)
 
 func New(opts ...Option) ai.Provider {
-	options := options{
+	providerOptions := options{
 		headers: map[string]string{},
 	}
 	for _, o := range opts {
-		o(&options)
+		o(&providerOptions)
 	}
 
-	options.baseURL = cmp.Or(options.baseURL, "https://api.anthropic.com")
-	options.name = cmp.Or(options.name, "anthropic")
-
-	return &provider{options: options}
+	providerOptions.baseURL = cmp.Or(providerOptions.baseURL, DefaultURL)
+	providerOptions.name = cmp.Or(providerOptions.name, ProviderName)
+	return &provider{options: providerOptions}
 }
 
 func WithBaseURL(baseURL string) Option {
@@ -119,7 +123,7 @@ func (a languageModel) Provider() string {
 func (a languageModel) prepareParams(call ai.Call) (*anthropic.MessageNewParams, []ai.CallWarning, error) {
 	params := &anthropic.MessageNewParams{}
 	providerOptions := &ProviderOptions{}
-	if v, ok := call.ProviderOptions["anthropic"]; ok {
+	if v, ok := call.ProviderOptions[ProviderOptionsKey]; ok {
 		providerOptions, ok = v.(*ProviderOptions)
 		if !ok {
 			return nil, nil, ai.NewInvalidArgumentError("providerOptions", "anthropic provider options should be *anthropic.ProviderOptions", nil)
@@ -218,17 +222,17 @@ func (a languageModel) prepareParams(call ai.Call) (*anthropic.MessageNewParams,
 }
 
 func getCacheControl(providerOptions ai.ProviderOptions) *CacheControl {
-	if anthropicOptions, ok := providerOptions["anthropic"]; ok {
-		if options, ok := anthropicOptions.(*CacheControl); ok {
-			return options
+	if anthropicOptions, ok := providerOptions[ProviderOptionsKey]; ok {
+		if options, ok := anthropicOptions.(*ProviderCacheControlOptions); ok {
+			return &options.CacheControl
 		}
 	}
 	return nil
 }
 
-func getReasoningMetadata(providerOptions ai.ProviderOptions) *ReasoningMetadata {
-	if anthropicOptions, ok := providerOptions["anthropic"]; ok {
-		if reasoning, ok := anthropicOptions.(*ReasoningMetadata); ok {
+func getReasoningMetadata(providerOptions ai.ProviderOptions) *ReasoningOptionMetadata {
+	if anthropicOptions, ok := providerOptions[ProviderOptionsKey]; ok {
+		if reasoning, ok := anthropicOptions.(*ReasoningOptionMetadata); ok {
 			return reasoning
 		}
 	}
@@ -659,8 +663,8 @@ func (a languageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response
 			}
 			content = append(content, ai.ReasoningContent{
 				Text: reasoning.Thinking,
-				ProviderMetadata: map[string]any{
-					"anthropic": &ReasoningMetadata{
+				ProviderMetadata: ai.ProviderMetadata{
+					ProviderOptionsKey: &ReasoningOptionMetadata{
 						Signature: reasoning.Signature,
 					},
 				},
@@ -672,8 +676,8 @@ func (a languageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response
 			}
 			content = append(content, ai.ReasoningContent{
 				Text: "",
-				ProviderMetadata: map[string]any{
-					"anthropic": &ReasoningMetadata{
+				ProviderMetadata: ai.ProviderMetadata{
+					ProviderOptionsKey: &ReasoningOptionMetadata{
 						RedactedData: reasoning.Data,
 					},
 				},
@@ -752,7 +756,7 @@ func (a languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 						Type: ai.StreamPartTypeReasoningStart,
 						ID:   fmt.Sprintf("%d", chunk.Index),
 						ProviderMetadata: ai.ProviderMetadata{
-							"anthropic": &ReasoningMetadata{
+							ProviderOptionsKey: &ReasoningOptionMetadata{
 								RedactedData: chunk.ContentBlock.Data,
 							},
 						},
@@ -828,7 +832,7 @@ func (a languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 						Type: ai.StreamPartTypeReasoningDelta,
 						ID:   fmt.Sprintf("%d", chunk.Index),
 						ProviderMetadata: ai.ProviderMetadata{
-							"anthropic": &ReasoningMetadata{
+							ProviderOptionsKey: &ReasoningOptionMetadata{
 								Signature: chunk.Delta.Signature,
 							},
 						},
@@ -865,9 +869,7 @@ func (a languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 					CacheCreationTokens: acc.Usage.CacheCreationInputTokens,
 					CacheReadTokens:     acc.Usage.CacheReadInputTokens,
 				},
-				ProviderMetadata: ai.ProviderMetadata{
-					"anthropic": make(map[string]any),
-				},
+				ProviderMetadata: ai.ProviderMetadata{},
 			})
 			return
 		} else {

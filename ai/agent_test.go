@@ -101,9 +101,6 @@ func TestAgent_Generate_ResultContent_AllTypes(t *testing.T) {
 						URL:        "https://example.com",
 						Title:      "Example",
 						SourceType: SourceTypeURL,
-						ProviderMetadata: ProviderMetadata{
-							"provider": map[string]any{"custom": "value"},
-						},
 					},
 					FileContent{
 						Data:      []byte{1, 2, 3},

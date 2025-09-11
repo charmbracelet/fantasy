@@ -20,6 +20,11 @@ import (
 	"github.com/openai/openai-go/v2/shared"
 )
 
+const (
+	ProviderName = "openai"
+	DefaultURL   = "https://api.openai.com/v1"
+)
+
 type provider struct {
 	options options
 }
@@ -37,24 +42,24 @@ type options struct {
 type Option = func(*options)
 
 func New(opts ...Option) ai.Provider {
-	options := options{
+	providerOptions := options{
 		headers: map[string]string{},
 	}
 	for _, o := range opts {
-		o(&options)
+		o(&providerOptions)
 	}
 
-	options.baseURL = cmp.Or(options.baseURL, "https://api.openai.com/v1")
-	options.name = cmp.Or(options.name, "openai")
+	providerOptions.baseURL = cmp.Or(providerOptions.baseURL, DefaultURL)
+	providerOptions.name = cmp.Or(providerOptions.name, ProviderName)
 
-	if options.organization != "" {
-		options.headers["OpenAi-Organization"] = options.organization
+	if providerOptions.organization != "" {
+		providerOptions.headers["OpenAi-Organization"] = providerOptions.organization
 	}
-	if options.project != "" {
-		options.headers["OpenAi-Project"] = options.project
+	if providerOptions.project != "" {
+		providerOptions.headers["OpenAi-Project"] = providerOptions.project
 	}
 
-	return &provider{options: options}
+	return &provider{options: providerOptions}
 }
 
 func WithBaseURL(baseURL string) Option {
@@ -146,7 +151,7 @@ func (o languageModel) prepareParams(call ai.Call) (*openai.ChatCompletionNewPar
 	params := &openai.ChatCompletionNewParams{}
 	messages, warnings := toPrompt(call.Prompt)
 	providerOptions := &ProviderOptions{}
-	if v, ok := call.ProviderOptions["openai"]; ok {
+	if v, ok := call.ProviderOptions[ProviderOptionsKey]; ok {
 		providerOptions, ok = v.(*ProviderOptions)
 		if !ok {
 			return nil, nil, ai.NewInvalidArgumentError("providerOptions", "openai provider options should be *openai.ProviderOptions", nil)
@@ -466,7 +471,7 @@ func (o languageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response
 		},
 		FinishReason: mapOpenAiFinishReason(choice.FinishReason),
 		ProviderMetadata: ai.ProviderMetadata{
-			"openai": providerMetadata,
+			ProviderOptionsKey: providerMetadata,
 		},
 		Warnings: warnings,
 	}, nil
@@ -728,7 +733,7 @@ func (o languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 				Usage:        usage,
 				FinishReason: finishReason,
 				ProviderMetadata: ai.ProviderMetadata{
-					"openai": streamProviderMetadata,
+					ProviderOptionsKey: streamProviderMetadata,
 				},
 			})
 			return
@@ -918,7 +923,7 @@ func toPrompt(prompt ai.Prompt) ([]openai.ChatCompletionMessageParamUnion, []ai.
 						imageURL := openai.ChatCompletionContentPartImageImageURLParam{URL: data}
 
 						// Check for provider-specific options like image detail
-						if providerOptions, ok := filePart.ProviderOptions["openai"]; ok {
+						if providerOptions, ok := filePart.ProviderOptions[ProviderOptionsKey]; ok {
 							if detail, ok := providerOptions.(*ProviderFileOptions); ok {
 								imageURL.Detail = detail.ImageDetail
 							}

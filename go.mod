@@ -1,4 +1,4 @@
-module github.com/charmbracelet/ai
+module github.com/charmbracelet/fantasy
 
 go 1.24.5
 

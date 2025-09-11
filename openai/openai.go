@@ -11,7 +11,7 @@ import (
 	"maps"
 	"strings"
 
-	"github.com/charmbracelet/ai/ai"
+	"github.com/charmbracelet/fantasy/ai"
 	xjson "github.com/charmbracelet/x/json"
 	"github.com/google/uuid"
 	"github.com/openai/openai-go/v2"

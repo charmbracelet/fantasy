@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/charmbracelet/ai/ai"
-	"github.com/charmbracelet/ai/anthropic"
-	"github.com/charmbracelet/ai/openai"
+	"github.com/charmbracelet/fantasy/ai"
+	"github.com/charmbracelet/fantasy/anthropic"
+	"github.com/charmbracelet/fantasy/openai"
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )
 

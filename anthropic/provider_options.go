@@ -2,7 +2,7 @@ package anthropic
 
 import "github.com/charmbracelet/ai/ai"
 
-const ProviderOptionsKey = "anthropic"
+const OptionsKey = "anthropic"
 
 type ProviderOptions struct {
 	SendReasoning          *bool
@@ -35,12 +35,12 @@ type CacheControl struct {
 
 func NewProviderOptions(opts *ProviderOptions) ai.ProviderOptions {
 	return ai.ProviderOptions{
-		ProviderOptionsKey: opts,
+		OptionsKey: opts,
 	}
 }
 
 func NewProviderCacheControlOptions(opts *ProviderCacheControlOptions) ai.ProviderOptions {
 	return ai.ProviderOptions{
-		ProviderOptionsKey: opts,
+		OptionsKey: opts,
 	}
 }

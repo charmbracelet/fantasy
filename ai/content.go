@@ -1,5 +1,10 @@
 package ai
 
+// ProviderOptionsData is an interface for provider-specific options data.
+type ProviderOptionsData interface {
+	Options()
+}
+
 // ProviderMetadata represents additional provider-specific metadata.
 // They are passed through from the provider to the AI SDK and enable
 // provider-specific results that can be fully encapsulated in the provider.
@@ -14,7 +19,7 @@ package ai
 //	    "signature": "sig....."
 //	  }
 //	}
-type ProviderMetadata map[string]interface{ Options() }
+type ProviderMetadata map[string]ProviderOptionsData
 
 // ProviderOptions represents additional provider-specific options.
 // Options are additional input to the provider. They are passed through
@@ -34,7 +39,7 @@ type ProviderMetadata map[string]interface{ Options() }
 //	    "cacheControl": { "type": "ephemeral" }
 //	  }
 //	}
-type ProviderOptions map[string]interface{ Options() }
+type ProviderOptions map[string]ProviderOptionsData
 
 // FinishReason represents why a language model finished generating a response.
 //

@@ -5,7 +5,6 @@ go 1.24.5
 require (
 	github.com/anthropics/anthropic-sdk-go v1.10.0
 	github.com/charmbracelet/x/json v0.2.0
-	github.com/go-viper/mapstructure/v2 v2.4.0
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/openai/openai-go/v2 v2.3.0

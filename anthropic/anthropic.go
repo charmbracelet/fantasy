@@ -221,7 +221,7 @@ func (a languageModel) prepareParams(call ai.Call) (*anthropic.MessageNewParams,
 	return params, warnings, nil
 }
 
-func (a *provider) OptionsFromMap(data map[string]any) (ai.ProviderOptionsData, error) {
+func (a *provider) ParseOptions(data map[string]any) (ai.ProviderOptionsData, error) {
 	options := &ProviderOptions{}
 	err := ai.ParseOptions(data, options)
 	if err != nil {

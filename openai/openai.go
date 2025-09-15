@@ -747,7 +747,7 @@ func (o languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 	}, nil
 }
 
-func (o *provider) OptionsFromMap(data map[string]any) (ai.ProviderOptionsData, error) {
+func (o *provider) ParseOptions(data map[string]any) (ai.ProviderOptionsData, error) {
 	options := &ProviderOptions{}
 	err := ai.ParseOptions(data, options)
 	if err != nil {

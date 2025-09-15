@@ -5,4 +5,5 @@ type Provider interface {
 	// TODO: add other model types when needed
 
 	OptionsFromMap(data map[string]any) (ProviderOptionsData, error)
+	OptionsKey() string
 }

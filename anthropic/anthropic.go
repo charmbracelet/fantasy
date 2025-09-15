@@ -230,6 +230,10 @@ func (a *provider) OptionsFromMap(data map[string]any) (ai.ProviderOptionsData, 
 	return options, nil
 }
 
+func (a *provider) OptionsKey() string {
+	return OptionsKey
+}
+
 func getCacheControl(providerOptions ai.ProviderOptions) *CacheControl {
 	if anthropicOptions, ok := providerOptions[OptionsKey]; ok {
 		if options, ok := anthropicOptions.(*ProviderCacheControlOptions); ok {

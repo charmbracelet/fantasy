@@ -756,6 +756,10 @@ func (o *provider) OptionsFromMap(data map[string]any) (ai.ProviderOptionsData, 
 	return options, nil
 }
 
+func (o *provider) OptionsKey() string {
+	return OptionsKey
+}
+
 func mapOpenAiFinishReason(finishReason string) ai.FinishReason {
 	switch finishReason {
 	case "stop":

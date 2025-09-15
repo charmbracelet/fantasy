@@ -2,7 +2,7 @@ package anthropic
 
 import "github.com/charmbracelet/fantasy/ai"
 
-const OptionsKey = "anthropic"
+const Name = "anthropic"
 
 type ProviderOptions struct {
 	SendReasoning          *bool                   `json:"send_reasoning"`
@@ -35,12 +35,12 @@ type CacheControl struct {
 
 func NewProviderOptions(opts *ProviderOptions) ai.ProviderOptions {
 	return ai.ProviderOptions{
-		OptionsKey: opts,
+		Name: opts,
 	}
 }
 
 func NewProviderCacheControlOptions(opts *ProviderCacheControlOptions) ai.ProviderOptions {
 	return ai.ProviderOptions{
-		OptionsKey: opts,
+		Name: opts,
 	}
 }

@@ -221,6 +221,15 @@ func (a languageModel) prepareParams(call ai.Call) (*anthropic.MessageNewParams,
 	return params, warnings, nil
 }
 
+func (a *provider) OptionsFromMap(data map[string]any) (ai.ProviderOptionsData, error) {
+	options := &ProviderOptions{}
+	err := ai.ParseOptions(data, options)
+	if err != nil {
+		return nil, err
+	}
+	return options, nil
+}
+
 func getCacheControl(providerOptions ai.ProviderOptions) *CacheControl {
 	if anthropicOptions, ok := providerOptions[OptionsKey]; ok {
 		if options, ok := anthropicOptions.(*ProviderCacheControlOptions); ok {

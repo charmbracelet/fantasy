@@ -747,6 +747,15 @@ func (o languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 	}, nil
 }
 
+func (o *provider) OptionsFromMap(data map[string]any) (ai.ProviderOptionsData, error) {
+	options := &ProviderOptions{}
+	err := ai.ParseOptions(data, options)
+	if err != nil {
+		return nil, err
+	}
+	return options, nil
+}
+
 func mapOpenAiFinishReason(finishReason string) ai.FinishReason {
 	switch finishReason {
 	case "stop":

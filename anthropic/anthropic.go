@@ -222,12 +222,11 @@ func (a languageModel) prepareParams(call ai.Call) (*anthropic.MessageNewParams,
 }
 
 func (a *provider) ParseOptions(data map[string]any) (ai.ProviderOptionsData, error) {
-	options := &ProviderOptions{}
-	err := ai.ParseOptions(data, options)
-	if err != nil {
+	var options ProviderOptions
+	if err := ai.ParseOptions(data, &options); err != nil {
 		return nil, err
 	}
-	return options, nil
+	return &options, nil
 }
 
 func (a *provider) Name() string {

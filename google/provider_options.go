@@ -1,11 +1,13 @@
 package google
 
-type thinkingConfig struct {
+const Name = "google"
+
+type ThinkingConfig struct {
 	ThinkingBudget  *int64 `json:"thinking_budget"`
 	IncludeThoughts *bool  `json:"include_thoughts"`
 }
 
-type safetySetting struct {
+type SafetySetting struct {
 	// 'HARM_CATEGORY_UNSPECIFIED',
 	// 'HARM_CATEGORY_HATE_SPEECH',
 	// 'HARM_CATEGORY_DANGEROUS_CONTENT',
@@ -22,8 +24,8 @@ type safetySetting struct {
 	// 'OFF',
 	Threshold string `json:"threshold"`
 }
-type providerOptions struct {
-	ThinkingConfig *thinkingConfig `json:"thinking_config"`
+type ProviderOptions struct {
+	ThinkingConfig *ThinkingConfig `json:"thinking_config"`
 
 	// Optional.
 	// The name of the cached content used as context to serve the prediction.
@@ -31,7 +33,7 @@ type providerOptions struct {
 	CachedContent string `json:"cached_content"`
 
 	// Optional. A list of unique safety settings for blocking unsafe content.
-	SafetySettings []safetySetting `json:"safety_settings"`
+	SafetySettings []SafetySetting `json:"safety_settings"`
 	// 'HARM_BLOCK_THRESHOLD_UNSPECIFIED',
 	// 'BLOCK_LOW_AND_ABOVE',
 	// 'BLOCK_MEDIUM_AND_ABOVE',
@@ -40,3 +42,5 @@ type providerOptions struct {
 	// 'OFF',
 	Threshold string `json:"threshold"`
 }
+
+func (o *ProviderOptions) Options() {}

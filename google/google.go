@@ -69,6 +69,18 @@ func WithHTTPClient(client *http.Client) Option {
 	}
 }
 
+func (*provider) Name() string {
+	return Name
+}
+
+func (a *provider) ParseOptions(data map[string]any) (ai.ProviderOptionsData, error) {
+	var options ProviderOptions
+	if err := ai.ParseOptions(data, &options); err != nil {
+		return nil, err
+	}
+	return &options, nil
+}
+
 type languageModel struct {
 	provider        string
 	modelID         string
@@ -97,11 +109,12 @@ func (g *provider) LanguageModel(modelID string) (ai.LanguageModel, error) {
 
 func (a languageModel) prepareParams(call ai.Call) (*genai.GenerateContentConfig, []*genai.Content, []ai.CallWarning, error) {
 	config := &genai.GenerateContentConfig{}
-	providerOptions := &providerOptions{}
-	if v, ok := call.ProviderOptions["google"]; ok {
-		err := ai.ParseOptions(v, providerOptions)
-		if err != nil {
-			return nil, nil, nil, err
+
+	providerOptions := &ProviderOptions{}
+	if v, ok := call.ProviderOptions[Name]; ok {
+		providerOptions, ok = v.(*ProviderOptions)
+		if !ok {
+			return nil, nil, nil, ai.NewInvalidArgumentError("providerOptions", "anthropic provider options should be *anthropic.ProviderOptions", nil)
 		}
 	}
 

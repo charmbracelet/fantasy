@@ -151,7 +151,7 @@ func (o languageModel) prepareParams(call ai.Call) (*openai.ChatCompletionNewPar
 	params := &openai.ChatCompletionNewParams{}
 	messages, warnings := toPrompt(call.Prompt)
 	providerOptions := &ProviderOptions{}
-	if v, ok := call.ProviderOptions[OptionsKey]; ok {
+	if v, ok := call.ProviderOptions[Name]; ok {
 		providerOptions, ok = v.(*ProviderOptions)
 		if !ok {
 			return nil, nil, ai.NewInvalidArgumentError("providerOptions", "openai provider options should be *openai.ProviderOptions", nil)
@@ -471,7 +471,7 @@ func (o languageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response
 		},
 		FinishReason: mapOpenAiFinishReason(choice.FinishReason),
 		ProviderMetadata: ai.ProviderMetadata{
-			OptionsKey: providerMetadata,
+			Name: providerMetadata,
 		},
 		Warnings: warnings,
 	}, nil
@@ -733,7 +733,7 @@ func (o languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 				Usage:        usage,
 				FinishReason: finishReason,
 				ProviderMetadata: ai.ProviderMetadata{
-					OptionsKey: streamProviderMetadata,
+					Name: streamProviderMetadata,
 				},
 			})
 			return
@@ -745,6 +745,18 @@ func (o languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 			return
 		}
 	}, nil
+}
+
+func (o *provider) ParseOptions(data map[string]any) (ai.ProviderOptionsData, error) {
+	var options ProviderOptions
+	if err := ai.ParseOptions(data, &options); err != nil {
+		return nil, err
+	}
+	return &options, nil
+}
+
+func (o *provider) Name() string {
+	return Name
 }
 
 func mapOpenAiFinishReason(finishReason string) ai.FinishReason {
@@ -923,7 +935,7 @@ func toPrompt(prompt ai.Prompt) ([]openai.ChatCompletionMessageParamUnion, []ai.
 						imageURL := openai.ChatCompletionContentPartImageImageURLParam{URL: data}
 
 						// Check for provider-specific options like image detail
-						if providerOptions, ok := filePart.ProviderOptions[OptionsKey]; ok {
+						if providerOptions, ok := filePart.ProviderOptions[Name]; ok {
 							if detail, ok := providerOptions.(*ProviderFileOptions); ok {
 								imageURL.Detail = detail.ImageDetail
 							}

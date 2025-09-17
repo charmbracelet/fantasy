@@ -2,6 +2,7 @@ package providertests
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 	"testing"
@@ -10,8 +11,8 @@ import (
 	"github.com/charmbracelet/fantasy/anthropic"
 	"github.com/charmbracelet/fantasy/google"
 	"github.com/charmbracelet/fantasy/openai"
-	"github.com/stretchr/testify/require"
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSimple(t *testing.T) {
@@ -127,6 +128,8 @@ func TestThinking(t *testing.T) {
 			want2 := "40"
 			got := result.Response.Content.Text()
 			require.True(t, strings.Contains(got, want1) && strings.Contains(got, want2), "unexpected response: got %q, want %q %q", got, want1, want2)
+
+			testThinkingSteps(t, languageModel.Provider(), result.Steps)
 		})
 	}
 }
@@ -181,7 +184,65 @@ func TestThinkingStreaming(t *testing.T) {
 			want2 := "40"
 			got := result.Response.Content.Text()
 			require.True(t, strings.Contains(got, want1) && strings.Contains(got, want2), "unexpected response: got %q, want %q %q", got, want1, want2)
+
+			testThinkingSteps(t, languageModel.Provider(), result.Steps)
 		})
+	}
+}
+
+func testThinkingSteps(t *testing.T, providerName string, steps []ai.StepResult) {
+	if providerName == anthropic.Name {
+		reasoningContentCount := 0
+		signaturesCount := 0
+		// Test if we got the signature
+		for _, step := range steps {
+			for _, msg := range step.Messages {
+				for _, content := range msg.Content {
+					if content.GetType() == ai.ContentTypeReasoning {
+						reasoningContentCount += 1
+						reasoningContent, ok := ai.AsContentType[ai.ReasoningPart](content)
+						if !ok {
+							continue
+						}
+						if len(reasoningContent.ProviderOptions) == 0 {
+							continue
+						}
+
+						anthropicReasoningMetadata, ok := reasoningContent.ProviderOptions[anthropic.Name]
+						if !ok {
+							continue
+						}
+						if reasoningContent.Text != "" {
+							if typed, ok := anthropicReasoningMetadata.(*anthropic.ReasoningOptionMetadata); ok {
+								require.NotEmpty(t, typed.Signature)
+								signaturesCount += 1
+							}
+						}
+					}
+				}
+			}
+		}
+		require.Greater(t, reasoningContentCount, 0)
+		require.Greater(t, signaturesCount, 0)
+		require.Equal(t, reasoningContentCount, signaturesCount)
+	} else if providerName == google.Name {
+		reasoningContentCount := 0
+		// Test if we got the signature
+		for _, step := range steps {
+			for _, msg := range step.Messages {
+				for _, content := range msg.Content {
+					if content.GetType() == ai.ContentTypeReasoning {
+						reasoningContentCount += 1
+						reasoningContent, ok := ai.AsContentType[ai.ReasoningContent](content)
+						if !ok {
+							continue
+						}
+						fmt.Println(reasoningContent.Text)
+					}
+				}
+			}
+		}
+		require.Greater(t, reasoningContentCount, 0)
 	}
 }
 

@@ -690,7 +690,7 @@ func toGoogleTools(tools []ai.Tool, toolChoice *ai.ToolChoice) (googleTools []*g
 		})
 	}
 	if toolChoice == nil {
-		return //nolint: nakedret
+		return googleTools, googleToolChoice, warnings
 	}
 	switch *toolChoice {
 	case ai.ToolChoiceAuto:
@@ -721,7 +721,7 @@ func toGoogleTools(tools []ai.Tool, toolChoice *ai.ToolChoice) (googleTools []*g
 			},
 		}
 	}
-	return //nolint: nakedret
+	return googleTools, googleToolChoice, warnings
 }
 
 func convertSchemaProperties(parameters map[string]any) map[string]*genai.Schema {

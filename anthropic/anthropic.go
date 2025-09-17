@@ -18,8 +18,8 @@ import (
 )
 
 const (
-	ProviderName = "anthropic"
-	DefaultURL   = "https://api.anthropic.com"
+	Name       = "anthropic"
+	DefaultURL = "https://api.anthropic.com"
 )
 
 type options struct {
@@ -45,7 +45,7 @@ func New(opts ...Option) ai.Provider {
 	}
 
 	providerOptions.baseURL = cmp.Or(providerOptions.baseURL, DefaultURL)
-	providerOptions.name = cmp.Or(providerOptions.name, ProviderName)
+	providerOptions.name = cmp.Or(providerOptions.name, Name)
 	return &provider{options: providerOptions}
 }
 
@@ -97,7 +97,7 @@ func (a *provider) LanguageModel(modelID string) (ai.LanguageModel, error) {
 	}
 	return languageModel{
 		modelID:  modelID,
-		provider: fmt.Sprintf("%s.messages", a.options.name),
+		provider: a.options.name,
 		options:  a.options,
 		client:   anthropic.NewClient(anthropicClientOptions...),
 	}, nil

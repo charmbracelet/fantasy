@@ -17,6 +17,8 @@ import (
 	"google.golang.org/genai"
 )
 
+const Name = "google"
+
 type provider struct {
 	options options
 }
@@ -38,7 +40,7 @@ func New(opts ...Option) ai.Provider {
 		o(&options)
 	}
 
-	options.name = cmp.Or(options.name, "google")
+	options.name = cmp.Or(options.name, Name)
 
 	return &provider{
 		options: options,
@@ -101,7 +103,7 @@ func (g *provider) LanguageModel(modelID string) (ai.LanguageModel, error) {
 	}
 	return &languageModel{
 		modelID:         modelID,
-		provider:        fmt.Sprintf("%s.generative-ai", g.options.name),
+		provider:        g.options.name,
 		providerOptions: g.options,
 		client:          client,
 	}, nil

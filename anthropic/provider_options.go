@@ -2,8 +2,6 @@ package anthropic
 
 import "github.com/charmbracelet/fantasy/ai"
 
-const Name = "anthropic"
-
 type ProviderOptions struct {
 	SendReasoning          *bool                   `json:"send_reasoning"`
 	Thinking               *ThinkingProviderOption `json:"thinking"`

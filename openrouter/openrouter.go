@@ -11,6 +11,10 @@ type options struct {
 	openaiOptions []openai.Option
 }
 
+const (
+	DefaultURL = "https://openrouter.ai/api/v1"
+)
+
 type Option = func(*options)
 
 func prepareCallWithOptions(model ai.LanguageModel, params *openaiSDK.ChatCompletionNewParams, call ai.Call) ([]ai.CallWarning, error) {
@@ -31,6 +35,7 @@ func prepareCallWithOptions(model ai.LanguageModel, params *openaiSDK.ChatComple
 func New(opts ...Option) ai.Provider {
 	providerOptions := options{
 		openaiOptions: []openai.Option{
+			openai.WithBaseURL(DefaultURL),
 			openai.WithHooks(openai.Hooks{
 				PrepareCallWithOptions: prepareCallWithOptions,
 			}),
@@ -40,12 +45,6 @@ func New(opts ...Option) ai.Provider {
 		o(&providerOptions)
 	}
 	return openai.New(providerOptions.openaiOptions...)
-}
-
-func WithBaseURL(baseURL string) Option {
-	return func(o *options) {
-		o.openaiOptions = append(o.openaiOptions, openai.WithBaseURL(baseURL))
-	}
 }
 
 func WithAPIKey(apiKey string) Option {

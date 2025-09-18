@@ -36,9 +36,9 @@ func New(opts ...Option) ai.Provider {
 	providerOptions := options{
 		openaiOptions: []openai.Option{
 			openai.WithBaseURL(DefaultURL),
-			openai.WithHooks(openai.Hooks{
-				PrepareCallWithOptions: prepareCallWithOptions,
-			}),
+			openai.WithLanguageModelOptions(
+				openai.WithPrepareLanguageModelCall(prepareCallWithOptions),
+			),
 		},
 	}
 	for _, o := range opts {

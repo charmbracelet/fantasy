@@ -274,14 +274,6 @@ func prepareCallWithOptions(model ai.LanguageModel, params *openai.ChatCompletio
 			})
 		}
 
-		// reasoning models use max_completion_tokens instead of max_tokens
-		if call.MaxOutputTokens != nil {
-			if providerOptions.MaxCompletionTokens == nil {
-				params.MaxCompletionTokens = param.NewOpt(*call.MaxOutputTokens)
-			}
-			params.MaxTokens = param.Opt[int64]{}
-		}
-
 	}
 
 	// Handle service tier validation
@@ -368,6 +360,14 @@ func (o languageModel) prepareParams(call ai.Call) (*openai.ChatCompletionNewPar
 				Setting: "PresencePenalty",
 				Details: "PresencePenalty is not supported for reasoning models",
 			})
+		}
+
+		// reasoning models use max_completion_tokens instead of max_tokens
+		if call.MaxOutputTokens != nil {
+			if !params.MaxCompletionTokens.Valid() {
+				params.MaxCompletionTokens = param.NewOpt(*call.MaxOutputTokens)
+			}
+			params.MaxTokens = param.Opt[int64]{}
 		}
 	}
 

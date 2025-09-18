@@ -29,12 +29,19 @@ type provider struct {
 	options options
 }
 
+type PrepareCallWithOptions = func(model ai.LanguageModel, params *openai.ChatCompletionNewParams, call ai.Call) ([]ai.CallWarning, error)
+
+type Hooks struct {
+	PrepareCallWithOptions PrepareCallWithOptions
+}
+
 type options struct {
 	baseURL      string
 	apiKey       string
 	organization string
 	project      string
 	name         string
+	hooks        Hooks
 	headers      map[string]string
 	client       option.HTTPClient
 }
@@ -104,6 +111,12 @@ func WithHTTPClient(client option.HTTPClient) Option {
 	}
 }
 
+func WithHooks(hooks Hooks) Option {
+	return func(o *options) {
+		o.hooks = hooks
+	}
+}
+
 // LanguageModel implements ai.Provider.
 func (o *provider) LanguageModel(modelID string) (ai.LanguageModel, error) {
 	openaiClientOptions := []option.RequestOption{}
@@ -147,24 +160,19 @@ func (o languageModel) Provider() string {
 	return o.provider
 }
 
-func (o languageModel) prepareParams(call ai.Call) (*openai.ChatCompletionNewParams, []ai.CallWarning, error) {
-	params := &openai.ChatCompletionNewParams{}
-	messages, warnings := toPrompt(call.Prompt)
+func prepareCallWithOptions(model ai.LanguageModel, params *openai.ChatCompletionNewParams, call ai.Call) ([]ai.CallWarning, error) {
+	if call.ProviderOptions == nil {
+		return nil, nil
+	}
+	var warnings []ai.CallWarning
 	providerOptions := &ProviderOptions{}
 	if v, ok := call.ProviderOptions[Name]; ok {
 		providerOptions, ok = v.(*ProviderOptions)
 		if !ok {
-			return nil, nil, ai.NewInvalidArgumentError("providerOptions", "openai provider options should be *openai.ProviderOptions", nil)
+			return nil, ai.NewInvalidArgumentError("providerOptions", "openai provider options should be *openai.ProviderOptions", nil)
 		}
 	}
-	if call.TopK != nil {
-		warnings = append(warnings, ai.CallWarning{
-			Type:    ai.CallWarningTypeUnsupportedSetting,
-			Setting: "top_k",
-		})
-	}
-	params.Messages = messages
-	params.Model = o.modelID
+
 	if providerOptions.LogitBias != nil {
 		params.LogitBias = providerOptions.LogitBias
 	}
@@ -183,23 +191,6 @@ func (o languageModel) prepareParams(call ai.Call) (*openai.ChatCompletionNewPar
 	if providerOptions.ParallelToolCalls != nil {
 		params.ParallelToolCalls = param.NewOpt(*providerOptions.ParallelToolCalls)
 	}
-
-	if call.MaxOutputTokens != nil {
-		params.MaxTokens = param.NewOpt(*call.MaxOutputTokens)
-	}
-	if call.Temperature != nil {
-		params.Temperature = param.NewOpt(*call.Temperature)
-	}
-	if call.TopP != nil {
-		params.TopP = param.NewOpt(*call.TopP)
-	}
-	if call.FrequencyPenalty != nil {
-		params.FrequencyPenalty = param.NewOpt(*call.FrequencyPenalty)
-	}
-	if call.PresencePenalty != nil {
-		params.PresencePenalty = param.NewOpt(*call.PresencePenalty)
-	}
-
 	if providerOptions.MaxCompletionTokens != nil {
 		params.MaxCompletionTokens = param.NewOpt(*providerOptions.MaxCompletionTokens)
 	}
@@ -253,8 +244,94 @@ func (o languageModel) prepareParams(call ai.Call) (*openai.ChatCompletionNewPar
 		case ReasoningEffortHigh:
 			params.ReasoningEffort = shared.ReasoningEffortHigh
 		default:
-			return nil, nil, fmt.Errorf("reasoning model `%s` not supported", *providerOptions.ReasoningEffort)
+			return nil, fmt.Errorf("reasoning model `%s` not supported", *providerOptions.ReasoningEffort)
 		}
+	}
+
+	if isReasoningModel(model.Model()) {
+		if providerOptions.LogitBias != nil {
+			params.LogitBias = nil
+			warnings = append(warnings, ai.CallWarning{
+				Type:    ai.CallWarningTypeUnsupportedSetting,
+				Setting: "LogitBias",
+				Message: "LogitBias is not supported for reasoning models",
+			})
+		}
+		if providerOptions.LogProbs != nil {
+			params.Logprobs = param.Opt[bool]{}
+			warnings = append(warnings, ai.CallWarning{
+				Type:    ai.CallWarningTypeUnsupportedSetting,
+				Setting: "Logprobs",
+				Message: "Logprobs is not supported for reasoning models",
+			})
+		}
+		if providerOptions.TopLogProbs != nil {
+			params.TopLogprobs = param.Opt[int64]{}
+			warnings = append(warnings, ai.CallWarning{
+				Type:    ai.CallWarningTypeUnsupportedSetting,
+				Setting: "TopLogprobs",
+				Message: "TopLogprobs is not supported for reasoning models",
+			})
+		}
+
+		// reasoning models use max_completion_tokens instead of max_tokens
+		if call.MaxOutputTokens != nil {
+			if providerOptions.MaxCompletionTokens == nil {
+				params.MaxCompletionTokens = param.NewOpt(*call.MaxOutputTokens)
+			}
+			params.MaxTokens = param.Opt[int64]{}
+		}
+
+	}
+
+	// Handle service tier validation
+	if providerOptions.ServiceTier != nil {
+		serviceTier := *providerOptions.ServiceTier
+		if serviceTier == "flex" && !supportsFlexProcessing(model.Model()) {
+			params.ServiceTier = ""
+			warnings = append(warnings, ai.CallWarning{
+				Type:    ai.CallWarningTypeUnsupportedSetting,
+				Setting: "ServiceTier",
+				Details: "flex processing is only available for o3, o4-mini, and gpt-5 models",
+			})
+		} else if serviceTier == "priority" && !supportsPriorityProcessing(model.Model()) {
+			params.ServiceTier = ""
+			warnings = append(warnings, ai.CallWarning{
+				Type:    ai.CallWarningTypeUnsupportedSetting,
+				Setting: "ServiceTier",
+				Details: "priority processing is only available for supported models (gpt-4, gpt-5, gpt-5-mini, o3, o4-mini) and requires Enterprise access. gpt-5-nano is not supported",
+			})
+		}
+	}
+	return warnings, nil
+}
+
+func (o languageModel) prepareParams(call ai.Call) (*openai.ChatCompletionNewParams, []ai.CallWarning, error) {
+	params := &openai.ChatCompletionNewParams{}
+	messages, warnings := toPrompt(call.Prompt)
+	if call.TopK != nil {
+		warnings = append(warnings, ai.CallWarning{
+			Type:    ai.CallWarningTypeUnsupportedSetting,
+			Setting: "top_k",
+		})
+	}
+	params.Messages = messages
+	params.Model = o.modelID
+
+	if call.MaxOutputTokens != nil {
+		params.MaxTokens = param.NewOpt(*call.MaxOutputTokens)
+	}
+	if call.Temperature != nil {
+		params.Temperature = param.NewOpt(*call.Temperature)
+	}
+	if call.TopP != nil {
+		params.TopP = param.NewOpt(*call.TopP)
+	}
+	if call.FrequencyPenalty != nil {
+		params.FrequencyPenalty = param.NewOpt(*call.FrequencyPenalty)
+	}
+	if call.PresencePenalty != nil {
+		params.PresencePenalty = param.NewOpt(*call.PresencePenalty)
 	}
 
 	if isReasoningModel(o.modelID) {
@@ -292,38 +369,6 @@ func (o languageModel) prepareParams(call ai.Call) (*openai.ChatCompletionNewPar
 				Details: "PresencePenalty is not supported for reasoning models",
 			})
 		}
-		if providerOptions.LogitBias != nil {
-			params.LogitBias = nil
-			warnings = append(warnings, ai.CallWarning{
-				Type:    ai.CallWarningTypeUnsupportedSetting,
-				Setting: "LogitBias",
-				Message: "LogitBias is not supported for reasoning models",
-			})
-		}
-		if providerOptions.LogProbs != nil {
-			params.Logprobs = param.Opt[bool]{}
-			warnings = append(warnings, ai.CallWarning{
-				Type:    ai.CallWarningTypeUnsupportedSetting,
-				Setting: "Logprobs",
-				Message: "Logprobs is not supported for reasoning models",
-			})
-		}
-		if providerOptions.TopLogProbs != nil {
-			params.TopLogprobs = param.Opt[int64]{}
-			warnings = append(warnings, ai.CallWarning{
-				Type:    ai.CallWarningTypeUnsupportedSetting,
-				Setting: "TopLogprobs",
-				Message: "TopLogprobs is not supported for reasoning models",
-			})
-		}
-
-		// reasoning models use max_completion_tokens instead of max_tokens
-		if call.MaxOutputTokens != nil {
-			if providerOptions.MaxCompletionTokens == nil {
-				params.MaxCompletionTokens = param.NewOpt(*call.MaxOutputTokens)
-			}
-			params.MaxTokens = param.Opt[int64]{}
-		}
 	}
 
 	// Handle search preview models
@@ -338,24 +383,18 @@ func (o languageModel) prepareParams(call ai.Call) (*openai.ChatCompletionNewPar
 		}
 	}
 
-	// Handle service tier validation
-	if providerOptions.ServiceTier != nil {
-		serviceTier := *providerOptions.ServiceTier
-		if serviceTier == "flex" && !supportsFlexProcessing(o.modelID) {
-			params.ServiceTier = ""
-			warnings = append(warnings, ai.CallWarning{
-				Type:    ai.CallWarningTypeUnsupportedSetting,
-				Setting: "ServiceTier",
-				Details: "flex processing is only available for o3, o4-mini, and gpt-5 models",
-			})
-		} else if serviceTier == "priority" && !supportsPriorityProcessing(o.modelID) {
-			params.ServiceTier = ""
-			warnings = append(warnings, ai.CallWarning{
-				Type:    ai.CallWarningTypeUnsupportedSetting,
-				Setting: "ServiceTier",
-				Details: "priority processing is only available for supported models (gpt-4, gpt-5, gpt-5-mini, o3, o4-mini) and requires Enterprise access. gpt-5-nano is not supported",
-			})
-		}
+	prepareOptions := prepareCallWithOptions
+	if o.options.hooks.PrepareCallWithOptions != nil {
+		prepareOptions = o.options.hooks.PrepareCallWithOptions
+	}
+
+	optionsWarnings, err := prepareOptions(o, params, call)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if len(optionsWarnings) > 0 {
+		warnings = append(warnings, optionsWarnings...)
 	}
 
 	if len(call.Tools) > 0 {

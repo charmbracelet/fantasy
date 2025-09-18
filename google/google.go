@@ -17,6 +17,8 @@ import (
 	"google.golang.org/genai"
 )
 
+const Name = "google"
+
 type provider struct {
 	options options
 }
@@ -38,7 +40,7 @@ func New(opts ...Option) ai.Provider {
 		o(&options)
 	}
 
-	options.name = cmp.Or(options.name, "google")
+	options.name = cmp.Or(options.name, Name)
 
 	return &provider{
 		options: options,
@@ -101,7 +103,7 @@ func (g *provider) LanguageModel(modelID string) (ai.LanguageModel, error) {
 	}
 	return &languageModel{
 		modelID:         modelID,
-		provider:        fmt.Sprintf("%s.generative-ai", g.options.name),
+		provider:        g.options.name,
 		providerOptions: g.options,
 		client:          client,
 	}, nil
@@ -120,16 +122,26 @@ func (a languageModel) prepareParams(call ai.Call) (*genai.GenerateContentConfig
 
 	systemInstructions, content, warnings := toGooglePrompt(call.Prompt)
 
-	if providerOptions.ThinkingConfig != nil &&
-		providerOptions.ThinkingConfig.IncludeThoughts != nil &&
-		*providerOptions.ThinkingConfig.IncludeThoughts &&
-		strings.HasPrefix(a.provider, "google.vertex.") {
-		warnings = append(warnings, ai.CallWarning{
-			Type: ai.CallWarningTypeOther,
-			Message: "The 'includeThoughts' option is only supported with the Google Vertex provider " +
-				"and might not be supported or could behave unexpectedly with the current Google provider " +
-				fmt.Sprintf("(%s)", a.provider),
-		})
+	if providerOptions.ThinkingConfig != nil {
+		if providerOptions.ThinkingConfig.IncludeThoughts != nil &&
+			*providerOptions.ThinkingConfig.IncludeThoughts &&
+			strings.HasPrefix(a.provider, "google.vertex.") {
+			warnings = append(warnings, ai.CallWarning{
+				Type: ai.CallWarningTypeOther,
+				Message: "The 'includeThoughts' option is only supported with the Google Vertex provider " +
+					"and might not be supported or could behave unexpectedly with the current Google provider " +
+					fmt.Sprintf("(%s)", a.provider),
+			})
+		}
+
+		if providerOptions.ThinkingConfig.ThinkingBudget != nil &&
+			*providerOptions.ThinkingConfig.ThinkingBudget < 128 {
+			warnings = append(warnings, ai.CallWarning{
+				Type:    ai.CallWarningTypeOther,
+				Message: "The 'thinking_budget' option can not be under 128 and will be set to 128 by default",
+			})
+			providerOptions.ThinkingConfig.ThinkingBudget = ai.IntOption(128)
+		}
 	}
 
 	isGemmaModel := strings.HasPrefix(strings.ToLower(a.modelID), "gemma-")

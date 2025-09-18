@@ -7,7 +7,11 @@ import (
 	"testing"
 
 	"github.com/charmbracelet/fantasy/ai"
+	"github.com/charmbracelet/fantasy/anthropic"
+	"github.com/charmbracelet/fantasy/google"
+	"github.com/charmbracelet/fantasy/openai"
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSimple(t *testing.T) {
@@ -16,9 +20,7 @@ func TestSimple(t *testing.T) {
 			r := newRecorder(t)
 
 			languageModel, err := pair.builder(r)
-			if err != nil {
-				t.Fatalf("failed to build language model: %v", err)
-			}
+			require.NoError(t, err, "failed to build language model")
 
 			agent := ai.NewAgent(
 				languageModel,
@@ -27,16 +29,12 @@ func TestSimple(t *testing.T) {
 			result, err := agent.Generate(t.Context(), ai.AgentCall{
 				Prompt: "Say hi in Portuguese",
 			})
-			if err != nil {
-				t.Fatalf("failed to generate: %v", err)
-			}
+			require.NoError(t, err, "failed to generate")
 
 			option1 := "Oi"
 			option2 := "Olá"
 			got := result.Response.Content.Text()
-			if !strings.Contains(got, option1) && !strings.Contains(got, option2) {
-				t.Fatalf("unexpected response: got %q, want %q or %q", got, option1, option2)
-			}
+			require.True(t, strings.Contains(got, option1) || strings.Contains(got, option2), "unexpected response: got %q, want %q or %q", got, option1, option2)
 		})
 	}
 }
@@ -47,9 +45,7 @@ func TestTool(t *testing.T) {
 			r := newRecorder(t)
 
 			languageModel, err := pair.builder(r)
-			if err != nil {
-				t.Fatalf("failed to build language model: %v", err)
-			}
+			require.NoError(t, err, "failed to build language model")
 
 			type WeatherInput struct {
 				Location string `json:"location" description:"the city"`
@@ -71,16 +67,124 @@ func TestTool(t *testing.T) {
 			result, err := agent.Generate(t.Context(), ai.AgentCall{
 				Prompt: "What's the weather in Florence?",
 			})
-			if err != nil {
-				t.Fatalf("failed to generate: %v", err)
-			}
+			require.NoError(t, err, "failed to generate")
 
 			want1 := "Florence"
 			want2 := "40"
 			got := result.Response.Content.Text()
-			if !strings.Contains(got, want1) || !strings.Contains(got, want2) {
-				t.Fatalf("unexpected response: got %q, want %q %q", got, want1, want2)
+			require.True(t, strings.Contains(got, want1) && strings.Contains(got, want2), "unexpected response: got %q, want %q %q", got, want1, want2)
+		})
+	}
+}
+
+func TestThinking(t *testing.T) {
+	for _, pair := range thinkingLanguageModelBuilders {
+		t.Run(pair.name, func(t *testing.T) {
+			r := newRecorder(t)
+
+			languageModel, err := pair.builder(r)
+			require.NoError(t, err, "failed to build language model")
+
+			type WeatherInput struct {
+				Location string `json:"location" description:"the city"`
 			}
+
+			weatherTool := ai.NewAgentTool(
+				"weather",
+				"Get weather information for a location",
+				func(ctx context.Context, input WeatherInput, _ ai.ToolCall) (ai.ToolResponse, error) {
+					return ai.NewTextResponse("40 C"), nil
+				},
+			)
+
+			agent := ai.NewAgent(
+				languageModel,
+				ai.WithSystemPrompt("You are a helpful assistant"),
+				ai.WithTools(weatherTool),
+			)
+			result, err := agent.Generate(t.Context(), ai.AgentCall{
+				Prompt: "What's the weather in Florence, Italy?",
+				ProviderOptions: ai.ProviderOptions{
+					"anthropic": &anthropic.ProviderOptions{
+						Thinking: &anthropic.ThinkingProviderOption{
+							BudgetTokens: 10_000,
+						},
+					},
+					"google": &google.ProviderOptions{
+						ThinkingConfig: &google.ThinkingConfig{
+							ThinkingBudget:  ai.IntOption(100),
+							IncludeThoughts: ai.BoolOption(true),
+						},
+					},
+					"openai": &openai.ProviderOptions{
+						ReasoningEffort: openai.ReasoningEffortOption(openai.ReasoningEffortMedium),
+					},
+				},
+			})
+			require.NoError(t, err, "failed to generate")
+
+			want1 := "Florence"
+			want2 := "40"
+			got := result.Response.Content.Text()
+			require.True(t, strings.Contains(got, want1) && strings.Contains(got, want2), "unexpected response: got %q, want %q %q", got, want1, want2)
+
+			testThinkingSteps(t, languageModel.Provider(), result.Steps)
+		})
+	}
+}
+
+func TestThinkingStreaming(t *testing.T) {
+	for _, pair := range thinkingLanguageModelBuilders {
+		t.Run(pair.name, func(t *testing.T) {
+			r := newRecorder(t)
+
+			languageModel, err := pair.builder(r)
+			require.NoError(t, err, "failed to build language model")
+
+			type WeatherInput struct {
+				Location string `json:"location" description:"the city"`
+			}
+
+			weatherTool := ai.NewAgentTool(
+				"weather",
+				"Get weather information for a location",
+				func(ctx context.Context, input WeatherInput, _ ai.ToolCall) (ai.ToolResponse, error) {
+					return ai.NewTextResponse("40 C"), nil
+				},
+			)
+
+			agent := ai.NewAgent(
+				languageModel,
+				ai.WithSystemPrompt("You are a helpful assistant"),
+				ai.WithTools(weatherTool),
+			)
+			result, err := agent.Stream(t.Context(), ai.AgentStreamCall{
+				Prompt: "What's the weather in Florence, Italy?",
+				ProviderOptions: ai.ProviderOptions{
+					"anthropic": &anthropic.ProviderOptions{
+						Thinking: &anthropic.ThinkingProviderOption{
+							BudgetTokens: 10_000,
+						},
+					},
+					"google": &google.ProviderOptions{
+						ThinkingConfig: &google.ThinkingConfig{
+							ThinkingBudget:  ai.IntOption(100),
+							IncludeThoughts: ai.BoolOption(true),
+						},
+					},
+					"openai": &openai.ProviderOptions{
+						ReasoningEffort: openai.ReasoningEffortOption(openai.ReasoningEffortMedium),
+					},
+				},
+			})
+			require.NoError(t, err, "failed to generate")
+
+			want1 := "Florence"
+			want2 := "40"
+			got := result.Response.Content.Text()
+			require.True(t, strings.Contains(got, want1) && strings.Contains(got, want2), "unexpected response: got %q, want %q %q", got, want1, want2)
+
+			testThinkingSteps(t, languageModel.Provider(), result.Steps)
 		})
 	}
 }
@@ -91,9 +195,7 @@ func TestStream(t *testing.T) {
 			r := newRecorder(t)
 
 			languageModel, err := pair.builder(r)
-			if err != nil {
-				t.Fatalf("failed to build language model: %v", err)
-			}
+			require.NoError(t, err, "failed to build language model")
 
 			agent := ai.NewAgent(
 				languageModel,
@@ -118,32 +220,20 @@ func TestStream(t *testing.T) {
 			}
 
 			result, err := agent.Stream(t.Context(), streamCall)
-			if err != nil {
-				t.Fatalf("failed to stream: %v", err)
-			}
+			require.NoError(t, err, "failed to stream")
 
 			finalText := result.Response.Content.Text()
-			if finalText == "" {
-				t.Fatal("expected non-empty response")
-			}
+			require.NotEmpty(t, finalText, "expected non-empty response")
 
-			if !strings.Contains(strings.ToLower(finalText), "uno") ||
-				!strings.Contains(strings.ToLower(finalText), "dos") ||
-				!strings.Contains(strings.ToLower(finalText), "tres") {
-				t.Fatalf("unexpected response: %q", finalText)
-			}
+			require.True(t, strings.Contains(strings.ToLower(finalText), "uno") &&
+				strings.Contains(strings.ToLower(finalText), "dos") &&
+				strings.Contains(strings.ToLower(finalText), "tres"), "unexpected response: %q", finalText)
 
-			if textDeltaCount == 0 {
-				t.Fatal("expected at least one text delta callback")
-			}
+			require.Greater(t, textDeltaCount, 0, "expected at least one text delta callback")
 
-			if stepCount == 0 {
-				t.Fatal("expected at least one step finish callback")
-			}
+			require.Greater(t, stepCount, 0, "expected at least one step finish callback")
 
-			if collectedText.String() == "" {
-				t.Fatal("expected collected text from deltas to be non-empty")
-			}
+			require.NotEmpty(t, collectedText.String(), "expected collected text from deltas to be non-empty")
 		})
 	}
 }
@@ -154,9 +244,7 @@ func TestStreamWithTools(t *testing.T) {
 			r := newRecorder(t)
 
 			languageModel, err := pair.builder(r)
-			if err != nil {
-				t.Fatalf("failed to build language model: %v", err)
-			}
+			require.NoError(t, err, "failed to build language model")
 
 			type CalculatorInput struct {
 				A int `json:"a" description:"first number"`
@@ -190,9 +278,7 @@ func TestStreamWithTools(t *testing.T) {
 				},
 				OnToolCall: func(toolCall ai.ToolCallContent) error {
 					toolCallCount++
-					if toolCall.ToolName != "add" {
-						t.Errorf("unexpected tool name: %s", toolCall.ToolName)
-					}
+					require.Equal(t, "add", toolCall.ToolName, "unexpected tool name")
 					return nil
 				},
 				OnToolResult: func(result ai.ToolResultContent) error {
@@ -202,22 +288,14 @@ func TestStreamWithTools(t *testing.T) {
 			}
 
 			result, err := agent.Stream(t.Context(), streamCall)
-			if err != nil {
-				t.Fatalf("failed to stream: %v", err)
-			}
+			require.NoError(t, err, "failed to stream")
 
 			finalText := result.Response.Content.Text()
-			if !strings.Contains(finalText, "42") {
-				t.Fatalf("expected response to contain '42', got: %q", finalText)
-			}
+			require.Contains(t, finalText, "42", "expected response to contain '42', got: %q", finalText)
 
-			if toolCallCount == 0 {
-				t.Fatal("expected at least one tool call")
-			}
+			require.Greater(t, toolCallCount, 0, "expected at least one tool call")
 
-			if toolResultCount == 0 {
-				t.Fatal("expected at least one tool result")
-			}
+			require.Greater(t, toolResultCount, 0, "expected at least one tool result")
 		})
 	}
 }

@@ -1,7 +1,5 @@
 package google
 
-const Name = "google"
-
 type ThinkingConfig struct {
 	ThinkingBudget  *int64 `json:"thinking_budget"`
 	IncludeThoughts *bool  `json:"include_thoughts"`

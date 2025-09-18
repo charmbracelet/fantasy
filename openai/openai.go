@@ -21,8 +21,8 @@ import (
 )
 
 const (
-	ProviderName = "openai"
-	DefaultURL   = "https://api.openai.com/v1"
+	Name       = "openai"
+	DefaultURL = "https://api.openai.com/v1"
 )
 
 type provider struct {
@@ -50,7 +50,7 @@ func New(opts ...Option) ai.Provider {
 	}
 
 	providerOptions.baseURL = cmp.Or(providerOptions.baseURL, DefaultURL)
-	providerOptions.name = cmp.Or(providerOptions.name, ProviderName)
+	providerOptions.name = cmp.Or(providerOptions.name, Name)
 
 	if providerOptions.organization != "" {
 		providerOptions.headers["OpenAi-Organization"] = providerOptions.organization
@@ -124,7 +124,7 @@ func (o *provider) LanguageModel(modelID string) (ai.LanguageModel, error) {
 
 	return languageModel{
 		modelID:  modelID,
-		provider: fmt.Sprintf("%s.chat", o.options.name),
+		provider: o.options.name,
 		options:  o.options,
 		client:   openai.NewClient(openaiClientOptions...),
 	}, nil

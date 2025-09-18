@@ -27,6 +27,12 @@ var languageModelBuilders = []builderPair{
 	{"google-gemini-2.5-pro", builderGoogleGemini25Pro},
 }
 
+var thinkingLanguageModelBuilders = []builderPair{
+	{"openai-gpt-5", builderOpenaiGpt5},
+	{"anthropic-claude-sonnet", builderAnthropicClaudeSonnet4},
+	{"google-gemini-2.5-pro", builderGoogleGemini25Pro},
+}
+
 func builderOpenaiGpt4o(r *recorder.Recorder) (ai.LanguageModel, error) {
 	provider := openai.New(
 		openai.WithAPIKey(os.Getenv("OPENAI_API_KEY")),
@@ -41,6 +47,14 @@ func builderOpenaiGpt4oMini(r *recorder.Recorder) (ai.LanguageModel, error) {
 		openai.WithHTTPClient(&http.Client{Transport: r}),
 	)
 	return provider.LanguageModel("gpt-4o-mini")
+}
+
+func builderOpenaiGpt5(r *recorder.Recorder) (ai.LanguageModel, error) {
+	provider := openai.New(
+		openai.WithAPIKey(os.Getenv("OPENAI_API_KEY")),
+		openai.WithHTTPClient(&http.Client{Transport: r}),
+	)
+	return provider.LanguageModel("gpt-5")
 }
 
 func builderAnthropicClaudeSonnet4(r *recorder.Recorder) (ai.LanguageModel, error) {

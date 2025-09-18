@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 458
+    host: ""
+    body: "{\"messages\":[{\"content\":\"You are a helpful assistant\",\"role\":\"system\"},{\"content\":\"What's the weather in Florence, Italy?\",\"role\":\"user\"}],\"model\":\"gpt-5\",\"reasoning_effort\":\"medium\",\"tool_choice\":\"auto\",\"tools\":[{\"function\":{\"name\":\"weather\",\"strict\":false,\"description\":\"Get weather information for a location\",\"parameters\":{\"properties\":{\"location\":{\"description\":\"the city\",\"type\":\"string\"}},\"required\":[\"location\"],\"type\":\"object\"}},\"type\":\"function\"}]}"
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.3.0
+    url: https://api.openai.com/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "{\n  \"id\": \"chatcmpl-CGjxZHxMSr7N8cRMctGQZk1GoGaeb\",\n  \"object\": \"chat.completion\",\n  \"created\": 1758105953,\n  \"model\": \"gpt-5-2025-08-07\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": null,\n        \"tool_calls\": [\n          {\n            \"id\": \"call_altLYQTktFAyPzFgFXA8no5D\",\n            \"type\": \"function\",\n            \"function\": {\n              \"name\": \"weather\",\n              \"arguments\": \"{\\\"location\\\":\\\"Florence, Italy\\\"}\"\n            }\n          }\n        ],\n        \"refusal\": null,\n        \"annotations\": []\n      },\n      \"finish_reason\": \"tool_calls\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 145,\n    \"completion_tokens\": 153,\n    \"total_tokens\": 298,\n    \"prompt_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"audio_tokens\": 0\n    },\n    \"completion_tokens_details\": {\n      \"reasoning_tokens\": 128,\n      \"audio_tokens\": 0,\n      \"accepted_prediction_tokens\": 0,\n      \"rejected_prediction_tokens\": 0\n    }\n  },\n  \"service_tier\": \"default\",\n  \"system_fingerprint\": null\n}\n"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 3.138198958s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 710
+    host: ""
+    body: "{\"messages\":[{\"content\":\"You are a helpful assistant\",\"role\":\"system\"},{\"content\":\"What's the weather in Florence, Italy?\",\"role\":\"user\"},{\"tool_calls\":[{\"id\":\"call_altLYQTktFAyPzFgFXA8no5D\",\"function\":{\"arguments\":\"{\\\"location\\\":\\\"Florence, Italy\\\"}\",\"name\":\"weather\"},\"type\":\"function\"}],\"role\":\"assistant\"},{\"content\":\"40 C\",\"tool_call_id\":\"call_altLYQTktFAyPzFgFXA8no5D\",\"role\":\"tool\"}],\"model\":\"gpt-5\",\"reasoning_effort\":\"medium\",\"tool_choice\":\"auto\",\"tools\":[{\"function\":{\"name\":\"weather\",\"strict\":false,\"description\":\"Get weather information for a location\",\"parameters\":{\"properties\":{\"location\":{\"description\":\"the city\",\"type\":\"string\"}},\"required\":[\"location\"],\"type\":\"object\"}},\"type\":\"function\"}]}"
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.3.0
+    url: https://api.openai.com/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "{\n  \"id\": \"chatcmpl-CGjxczIS9JrgSAuyFofVReqav7T93\",\n  \"object\": \"chat.completion\",\n  \"created\": 1758105956,\n  \"model\": \"gpt-5-2025-08-07\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"It’s currently about 40°C (104°F) in Florence, Italy.\\n\\nWant the forecast, humidity, or wind details as well?\",\n        \"refusal\": null,\n        \"annotations\": []\n      },\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 176,\n    \"completion_tokens\": 229,\n    \"total_tokens\": 405,\n    \"prompt_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"audio_tokens\": 0\n    },\n    \"completion_tokens_details\": {\n      \"reasoning_tokens\": 192,\n      \"audio_tokens\": 0,\n      \"accepted_prediction_tokens\": 0,\n      \"rejected_prediction_tokens\": 0\n    }\n  },\n  \"service_tier\": \"default\",\n  \"system_fingerprint\": null\n}\n"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 6.448143542s

@@ -5,8 +5,6 @@ import (
 	"github.com/openai/openai-go/v2"
 )
 
-const Name = "openai"
-
 type ReasoningEffort string
 
 const (

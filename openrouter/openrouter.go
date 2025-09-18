@@ -71,4 +71,3 @@ func WithHTTPClient(client option.HTTPClient) Option {
 		o.openaiOptions = append(o.openaiOptions, openai.WithHTTPClient(client))
 	}
 }
-

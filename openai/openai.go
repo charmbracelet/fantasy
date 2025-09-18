@@ -273,7 +273,6 @@ func prepareCallWithOptions(model ai.LanguageModel, params *openai.ChatCompletio
 				Message: "TopLogprobs is not supported for reasoning models",
 			})
 		}
-
 	}
 
 	// Handle service tier validation

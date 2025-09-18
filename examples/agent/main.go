@@ -6,14 +6,14 @@ import (
 	"os"
 
 	"github.com/charmbracelet/fantasy/ai"
-	"github.com/charmbracelet/fantasy/openai"
+	"github.com/charmbracelet/fantasy/openrouter"
 )
 
 func main() {
-	provider := openai.New(
-		openai.WithAPIKey(os.Getenv("OPENAI_API_KEY")),
+	provider := openrouter.New(
+		openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
 	)
-	model, err := provider.LanguageModel("gpt-4o")
+	model, err := provider.LanguageModel("moonshotai/kimi-k2-0905")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)

@@ -26,7 +26,7 @@ type languageModel struct {
 
 type LanguageModelOption = func(*languageModel)
 
-func WithPrepareLanguageModelCall(fn PrepareLanguageModelCallFunc) LanguageModelOption {
+func WithPrepareLanguageModelCallFunc(fn PrepareLanguageModelCallFunc) LanguageModelOption {
 	return func(l *languageModel) {
 		l.prepareCallFunc = fn
 	}

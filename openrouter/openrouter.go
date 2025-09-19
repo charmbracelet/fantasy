@@ -1,9 +1,10 @@
 package openrouter
 
 import (
+	"encoding/json"
+
 	"github.com/charmbracelet/fantasy/ai"
 	"github.com/charmbracelet/fantasy/openai"
-	openaisdk "github.com/openai/openai-go/v2"
 	"github.com/openai/openai-go/v2/option"
 )
 
@@ -17,27 +18,12 @@ const (
 
 type Option = func(*options)
 
-func prepareCallWithOptions(model ai.LanguageModel, params *openaisdk.ChatCompletionNewParams, call ai.Call) ([]ai.CallWarning, error) {
-	providerOptions := &ProviderOptions{}
-	if v, ok := call.ProviderOptions[Name]; ok {
-		providerOptions, ok = v.(*ProviderOptions)
-		if !ok {
-			return nil, ai.NewInvalidArgumentError("providerOptions", "openrouter provider options should be *openrouter.ProviderOptions", nil)
-		}
-	}
-	_ = providerOptions
-
-	// HANDLE OPENROUTER call modification here
-
-	return nil, nil
-}
-
 func New(opts ...Option) ai.Provider {
 	providerOptions := options{
 		openaiOptions: []openai.Option{
 			openai.WithBaseURL(DefaultURL),
 			openai.WithLanguageModelOptions(
-				openai.WithPrepareLanguageModelCallFunc(prepareCallWithOptions),
+				openai.WithPrepareLanguageModelCallFunc(prepareLanguageModelCall),
 			),
 		},
 	}
@@ -69,4 +55,17 @@ func WithHTTPClient(client option.HTTPClient) Option {
 	return func(o *options) {
 		o.openaiOptions = append(o.openaiOptions, openai.WithHTTPClient(client))
 	}
+}
+
+func structToMapJSON(s any) (map[string]any, error) {
+	var result map[string]any
+	jsonBytes, err := json.Marshal(s)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(jsonBytes, &result)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

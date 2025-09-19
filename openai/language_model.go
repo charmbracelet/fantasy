@@ -72,8 +72,6 @@ func (o languageModel) prepareParams(call ai.Call) (*openai.ChatCompletionNewPar
 			Setting: "top_k",
 		})
 	}
-	params.Messages = messages
-	params.Model = o.modelID
 
 	if call.MaxOutputTokens != nil {
 		params.MaxTokens = param.NewOpt(*call.MaxOutputTokens)
@@ -156,6 +154,9 @@ func (o languageModel) prepareParams(call ai.Call) (*openai.ChatCompletionNewPar
 	if len(optionsWarnings) > 0 {
 		warnings = append(warnings, optionsWarnings...)
 	}
+
+	params.Messages = messages
+	params.Model = o.modelID
 
 	if len(call.Tools) > 0 {
 		tools, toolChoice, toolWarnings := toOpenAiTools(call.Tools, call.ToolChoice)

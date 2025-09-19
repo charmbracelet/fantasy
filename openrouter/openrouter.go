@@ -3,7 +3,7 @@ package openrouter
 import (
 	"github.com/charmbracelet/fantasy/ai"
 	"github.com/charmbracelet/fantasy/openai"
-	openaiSDK "github.com/openai/openai-go/v2"
+	openaisdk "github.com/openai/openai-go/v2"
 	"github.com/openai/openai-go/v2/option"
 )
 
@@ -17,7 +17,7 @@ const (
 
 type Option = func(*options)
 
-func prepareCallWithOptions(model ai.LanguageModel, params *openaiSDK.ChatCompletionNewParams, call ai.Call) ([]ai.CallWarning, error) {
+func prepareCallWithOptions(model ai.LanguageModel, params *openaisdk.ChatCompletionNewParams, call ai.Call) ([]ai.CallWarning, error) {
 	providerOptions := &ProviderOptions{}
 	if v, ok := call.ProviderOptions[Name]; ok {
 		providerOptions, ok = v.(*ProviderOptions)
@@ -37,7 +37,7 @@ func New(opts ...Option) ai.Provider {
 		openaiOptions: []openai.Option{
 			openai.WithBaseURL(DefaultURL),
 			openai.WithLanguageModelOptions(
-				openai.WithPrepareLanguageModelCall(prepareCallWithOptions),
+				openai.WithPrepareLanguageModelCallFunc(prepareCallWithOptions),
 			),
 		},
 	}

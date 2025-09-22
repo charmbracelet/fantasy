@@ -10,6 +10,7 @@ import (
 	"github.com/charmbracelet/fantasy/anthropic"
 	"github.com/charmbracelet/fantasy/google"
 	"github.com/charmbracelet/fantasy/openai"
+	"github.com/charmbracelet/fantasy/openrouter"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/stretchr/testify/require"
 )
@@ -119,6 +120,11 @@ func TestThinking(t *testing.T) {
 					"openai": &openai.ProviderOptions{
 						ReasoningEffort: openai.ReasoningEffortOption(openai.ReasoningEffortMedium),
 					},
+					"openrouter": &openrouter.ProviderOptions{
+						Reasoning: &openrouter.ReasoningOptions{
+							Effort: openrouter.ReasoningEffortOption(openrouter.ReasoningEffortHigh),
+						},
+					},
 				},
 			})
 			require.NoError(t, err, "failed to generate")
@@ -128,7 +134,7 @@ func TestThinking(t *testing.T) {
 			got := result.Response.Content.Text()
 			require.True(t, strings.Contains(got, want1) && strings.Contains(got, want2), "unexpected response: got %q, want %q %q", got, want1, want2)
 
-			testThinkingSteps(t, languageModel.Provider(), result.Steps)
+			testThinking(t, languageModel.Provider(), result.Steps)
 		})
 	}
 }
@@ -184,7 +190,7 @@ func TestThinkingStreaming(t *testing.T) {
 			got := result.Response.Content.Text()
 			require.True(t, strings.Contains(got, want1) && strings.Contains(got, want2), "unexpected response: got %q, want %q %q", got, want1, want2)
 
-			testThinkingSteps(t, languageModel.Provider(), result.Steps)
+			testThinking(t, languageModel.Provider(), result.Steps)
 		})
 	}
 }
@@ -292,6 +298,77 @@ func TestStreamWithTools(t *testing.T) {
 
 			finalText := result.Response.Content.Text()
 			require.Contains(t, finalText, "42", "expected response to contain '42', got: %q", finalText)
+
+			require.Greater(t, toolCallCount, 0, "expected at least one tool call")
+
+			require.Greater(t, toolResultCount, 0, "expected at least one tool result")
+		})
+	}
+}
+
+func TestStreamWithMultipleTools(t *testing.T) {
+	for _, pair := range languageModelBuilders {
+		t.Run(pair.name, func(t *testing.T) {
+			r := newRecorder(t)
+
+			languageModel, err := pair.builder(r)
+			require.NoError(t, err, "failed to build language model")
+
+			type CalculatorInput struct {
+				A int `json:"a" description:"first number"`
+				B int `json:"b" description:"second number"`
+			}
+
+			addTool := ai.NewAgentTool(
+				"add",
+				"Add two numbers",
+				func(ctx context.Context, input CalculatorInput, _ ai.ToolCall) (ai.ToolResponse, error) {
+					result := input.A + input.B
+					return ai.NewTextResponse(strings.TrimSpace(strconv.Itoa(result))), nil
+				},
+			)
+			multiplyTool := ai.NewAgentTool(
+				"multiply",
+				"Multiply two numbers",
+				func(ctx context.Context, input CalculatorInput, _ ai.ToolCall) (ai.ToolResponse, error) {
+					result := input.A * input.B
+					return ai.NewTextResponse(strings.TrimSpace(strconv.Itoa(result))), nil
+				},
+			)
+
+			agent := ai.NewAgent(
+				languageModel,
+				ai.WithSystemPrompt("You are a helpful assistant. Always use both add and multiply at the same time."),
+				ai.WithTools(addTool),
+				ai.WithTools(multiplyTool),
+			)
+
+			toolCallCount := 0
+			toolResultCount := 0
+			var collectedText strings.Builder
+
+			streamCall := ai.AgentStreamCall{
+				Prompt: "Add and multiply the number 2 and 3",
+				OnTextDelta: func(id, text string) error {
+					collectedText.WriteString(text)
+					return nil
+				},
+				OnToolCall: func(toolCall ai.ToolCallContent) error {
+					toolCallCount++
+					return nil
+				},
+				OnToolResult: func(result ai.ToolResultContent) error {
+					toolResultCount++
+					return nil
+				},
+			}
+
+			result, err := agent.Stream(t.Context(), streamCall)
+			require.NoError(t, err, "failed to stream")
+			require.Equal(t, len(result.Steps), 2, "expected all tool calls in step 1")
+			finalText := result.Response.Content.Text()
+			require.Contains(t, finalText, "5", "expected response to contain '5', got: %q", finalText)
+			require.Contains(t, finalText, "6", "expected response to contain '5', got: %q", finalText)
 
 			require.Greater(t, toolCallCount, 0, "expected at least one tool call")
 

@@ -18,26 +18,66 @@ import (
 )
 
 type languageModel struct {
-	provider        string
-	modelID         string
-	client          openai.Client
-	prepareCallFunc PrepareLanguageModelCallFunc
+	provider                   string
+	modelID                    string
+	client                     openai.Client
+	prepareCallFunc            LanguageModelPrepareCallFunc
+	mapFinishReasonFunc        LanguageModelMapFinishReasonFunc
+	extraContentFunc           LanguageModelExtraContentFunc
+	usageFunc                  LanguageModelUsageFunc
+	streamUsageFunc            LanguageModelStreamUsageFunc
+	streamExtraFunc            LanguageModelStreamExtraFunc
+	streamProviderMetadataFunc LanguageModelStreamProviderMetadataFunc
 }
 
 type LanguageModelOption = func(*languageModel)
 
-func WithPrepareLanguageModelCallFunc(fn PrepareLanguageModelCallFunc) LanguageModelOption {
+func WithLanguageModelPrepareCallFunc(fn LanguageModelPrepareCallFunc) LanguageModelOption {
 	return func(l *languageModel) {
 		l.prepareCallFunc = fn
 	}
 }
 
+func WithLanguageModelMapFinishReasonFunc(fn LanguageModelMapFinishReasonFunc) LanguageModelOption {
+	return func(l *languageModel) {
+		l.mapFinishReasonFunc = fn
+	}
+}
+
+func WithLanguageModelExtraContentFunc(fn LanguageModelExtraContentFunc) LanguageModelOption {
+	return func(l *languageModel) {
+		l.extraContentFunc = fn
+	}
+}
+
+func WithLanguageModelStreamExtraFunc(fn LanguageModelStreamExtraFunc) LanguageModelOption {
+	return func(l *languageModel) {
+		l.streamExtraFunc = fn
+	}
+}
+
+func WithLanguageModelUsageFunc(fn LanguageModelUsageFunc) LanguageModelOption {
+	return func(l *languageModel) {
+		l.usageFunc = fn
+	}
+}
+
+func WithLanguageModelStreamUsageFunc(fn LanguageModelStreamUsageFunc) LanguageModelOption {
+	return func(l *languageModel) {
+		l.streamUsageFunc = fn
+	}
+}
+
 func newLanguageModel(modelID string, provider string, client openai.Client, opts ...LanguageModelOption) languageModel {
 	model := languageModel{
-		modelID:         modelID,
-		provider:        provider,
-		client:          client,
-		prepareCallFunc: defaultPrepareLanguageModelCall,
+		modelID:                    modelID,
+		provider:                   provider,
+		client:                     client,
+		prepareCallFunc:            defaultPrepareLanguageModelCall,
+		mapFinishReasonFunc:        defaultMapFinishReason,
+		usageFunc:                  defaultUsage,
+		streamUsageFunc:            defaultStreamUsage,
+		streamProviderMetadataFunc: defaultStreamProviderMetadataFunc,
 	}
 
 	for _, o := range opts {
@@ -215,7 +255,10 @@ func (o languageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response
 			Text: text,
 		})
 	}
-
+	if o.extraContentFunc != nil {
+		extraContent := o.extraContentFunc(choice)
+		content = append(content, extraContent...)
+	}
 	for _, tc := range choice.Message.ToolCalls {
 		toolCallID := tc.ID
 		if toolCallID == "" {
@@ -240,36 +283,12 @@ func (o languageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response
 		}
 	}
 
-	completionTokenDetails := response.Usage.CompletionTokensDetails
-	promptTokenDetails := response.Usage.PromptTokensDetails
-
-	// Build provider metadata
-	providerMetadata := &ProviderMetadata{}
-	// Add logprobs if available
-	if len(choice.Logprobs.Content) > 0 {
-		providerMetadata.Logprobs = choice.Logprobs.Content
-	}
-
-	// Add prediction tokens if available
-	if completionTokenDetails.AcceptedPredictionTokens > 0 || completionTokenDetails.RejectedPredictionTokens > 0 {
-		if completionTokenDetails.AcceptedPredictionTokens > 0 {
-			providerMetadata.AcceptedPredictionTokens = completionTokenDetails.AcceptedPredictionTokens
-		}
-		if completionTokenDetails.RejectedPredictionTokens > 0 {
-			providerMetadata.RejectedPredictionTokens = completionTokenDetails.RejectedPredictionTokens
-		}
-	}
+	usage, providerMetadata := o.usageFunc(*response)
 
 	return &ai.Response{
-		Content: content,
-		Usage: ai.Usage{
-			InputTokens:     response.Usage.PromptTokens,
-			OutputTokens:    response.Usage.CompletionTokens,
-			TotalTokens:     response.Usage.TotalTokens,
-			ReasoningTokens: completionTokenDetails.ReasoningTokens,
-			CacheReadTokens: promptTokenDetails.CachedTokens,
-		},
-		FinishReason: mapOpenAiFinishReason(choice.FinishReason),
+		Content:      content,
+		Usage:        usage,
+		FinishReason: defaultMapFinishReason(choice),
 		ProviderMetadata: ai.ProviderMetadata{
 			Name: providerMetadata,
 		},
@@ -293,8 +312,11 @@ func (o languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 	toolCalls := make(map[int64]streamToolCall)
 
 	// Build provider metadata for streaming
-	streamProviderMetadata := &ProviderMetadata{}
+	providerMetadata := ai.ProviderMetadata{
+		Name: &ProviderMetadata{},
+	}
 	acc := openai.ChatCompletionAccumulator{}
+	extraContext := make(map[string]any)
 	var usage ai.Usage
 	return func(yield func(ai.StreamPart) bool) {
 		if len(warnings) > 0 {
@@ -308,28 +330,7 @@ func (o languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 		for stream.Next() {
 			chunk := stream.Current()
 			acc.AddChunk(chunk)
-			if chunk.Usage.TotalTokens > 0 {
-				// we do this here because the acc does not add prompt details
-				completionTokenDetails := chunk.Usage.CompletionTokensDetails
-				promptTokenDetails := chunk.Usage.PromptTokensDetails
-				usage = ai.Usage{
-					InputTokens:     chunk.Usage.PromptTokens,
-					OutputTokens:    chunk.Usage.CompletionTokens,
-					TotalTokens:     chunk.Usage.TotalTokens,
-					ReasoningTokens: completionTokenDetails.ReasoningTokens,
-					CacheReadTokens: promptTokenDetails.CachedTokens,
-				}
-
-				// Add prediction tokens if available
-				if completionTokenDetails.AcceptedPredictionTokens > 0 || completionTokenDetails.RejectedPredictionTokens > 0 {
-					if completionTokenDetails.AcceptedPredictionTokens > 0 {
-						streamProviderMetadata.AcceptedPredictionTokens = completionTokenDetails.AcceptedPredictionTokens
-					}
-					if completionTokenDetails.RejectedPredictionTokens > 0 {
-						streamProviderMetadata.RejectedPredictionTokens = completionTokenDetails.RejectedPredictionTokens
-					}
-				}
-			}
+			usage, providerMetadata = o.streamUsageFunc(chunk, extraContext, providerMetadata)
 			if len(chunk.Choices) == 0 {
 				continue
 			}
@@ -464,6 +465,14 @@ func (o languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 						}
 					}
 				}
+
+				if o.streamExtraFunc != nil {
+					updatedContext, shouldContinue := o.streamExtraFunc(chunk, yield, extraContext)
+					if !shouldContinue {
+						return
+					}
+					extraContext = updatedContext
+				}
 			}
 
 			// Check for annotations in the delta's raw JSON
@@ -498,14 +507,13 @@ func (o languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 				}
 			}
 
-			// Add logprobs if available
-			if len(acc.Choices) > 0 && len(acc.Choices[0].Logprobs.Content) > 0 {
-				streamProviderMetadata.Logprobs = acc.Choices[0].Logprobs.Content
-			}
-
-			// Handle annotations/citations from accumulated response
 			if len(acc.Choices) > 0 {
-				for _, annotation := range acc.Choices[0].Message.Annotations {
+				choice := acc.Choices[0]
+				// Add logprobs if available
+				providerMetadata = o.streamProviderMetadataFunc(choice, providerMetadata)
+
+				// Handle annotations/citations from accumulated response
+				for _, annotation := range choice.Message.Annotations {
 					if annotation.Type == "url_citation" {
 						if !yield(ai.StreamPart{
 							Type:       ai.StreamPartTypeSource,
@@ -519,15 +527,15 @@ func (o languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 					}
 				}
 			}
-
-			finishReason := mapOpenAiFinishReason(acc.Choices[0].FinishReason)
+			finishReason := ai.FinishReasonUnknown
+			if len(acc.Choices) > 0 {
+				finishReason = o.mapFinishReasonFunc(acc.Choices[0])
+			}
 			yield(ai.StreamPart{
-				Type:         ai.StreamPartTypeFinish,
-				Usage:        usage,
-				FinishReason: finishReason,
-				ProviderMetadata: ai.ProviderMetadata{
-					Name: streamProviderMetadata,
-				},
+				Type:             ai.StreamPartTypeFinish,
+				Usage:            usage,
+				FinishReason:     finishReason,
+				ProviderMetadata: providerMetadata,
 			})
 			return
 		} else {
@@ -538,21 +546,6 @@ func (o languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 			return
 		}
 	}, nil
-}
-
-func mapOpenAiFinishReason(finishReason string) ai.FinishReason {
-	switch finishReason {
-	case "stop":
-		return ai.FinishReasonStop
-	case "length":
-		return ai.FinishReasonLength
-	case "content_filter":
-		return ai.FinishReasonContentFilter
-	case "function_call", "tool_calls":
-		return ai.FinishReasonToolCalls
-	default:
-		return ai.FinishReasonUnknown
-	}
 }
 
 func isReasoningModel(modelID string) bool {

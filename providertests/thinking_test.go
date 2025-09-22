@@ -1,20 +1,24 @@
 package providertests
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/charmbracelet/fantasy/ai"
 	"github.com/charmbracelet/fantasy/anthropic"
 	"github.com/charmbracelet/fantasy/google"
+	"github.com/charmbracelet/fantasy/openrouter"
 	"github.com/stretchr/testify/require"
 )
 
-func testThinkingSteps(t *testing.T, providerName string, steps []ai.StepResult) {
+func testThinking(t *testing.T, providerName string, steps []ai.StepResult) {
 	switch providerName {
 	case anthropic.Name:
 		testAnthropicThinking(t, steps)
 	case google.Name:
 		testGoogleThinking(t, steps)
+	case openrouter.Name:
+		testOpenrouterThinking(t, steps)
 	}
 }
 
@@ -30,6 +34,22 @@ func testGoogleThinking(t *testing.T, steps []ai.StepResult) {
 			}
 		}
 	}
+	require.Greater(t, reasoningContentCount, 0)
+}
+
+func testOpenrouterThinking(t *testing.T, steps []ai.StepResult) {
+	reasoningContentCount := 0
+	// Test if we got the signature
+	for _, step := range steps {
+		for _, msg := range step.Messages {
+			for _, content := range msg.Content {
+				if content.GetType() == ai.ContentTypeReasoning {
+					reasoningContentCount += 1
+				}
+			}
+		}
+	}
+	fmt.Println(reasoningContentCount)
 	require.Greater(t, reasoningContentCount, 0)
 }
 

@@ -1,6 +1,8 @@
 package openrouter
 
 import (
+	"encoding/json"
+	"fmt"
 	"maps"
 
 	"github.com/charmbracelet/fantasy/ai"
@@ -8,7 +10,9 @@ import (
 	"github.com/openai/openai-go/v2/packages/param"
 )
 
-func prepareLanguageModelCall(model ai.LanguageModel, params *openaisdk.ChatCompletionNewParams, call ai.Call) ([]ai.CallWarning, error) {
+const reasoningStartedCtx = "reasoning_started"
+
+func languagePrepareModelCall(model ai.LanguageModel, params *openaisdk.ChatCompletionNewParams, call ai.Call) ([]ai.CallWarning, error) {
 	providerOptions := &ProviderOptions{}
 	if v, ok := call.ProviderOptions[Name]; ok {
 		providerOptions, ok = v.(*ProviderOptions)
@@ -39,6 +43,10 @@ func prepareLanguageModelCall(model ai.LanguageModel, params *openaisdk.ChatComp
 		extraFields["usage"] = map[string]any{
 			"include": *providerOptions.IncludeUsage,
 		}
+	} else { // default include usage
+		extraFields["usage"] = map[string]any{
+			"include": true,
+		}
 	}
 	if providerOptions.LogitBias != nil {
 		params.LogitBias = providerOptions.LogitBias
@@ -56,4 +64,199 @@ func prepareLanguageModelCall(model ai.LanguageModel, params *openaisdk.ChatComp
 	maps.Copy(extraFields, providerOptions.ExtraBody)
 	params.SetExtraFields(extraFields)
 	return nil, nil
+}
+
+func languageModelMapFinishReason(choice openaisdk.ChatCompletionChoice) ai.FinishReason {
+	finishReason := choice.FinishReason
+	switch finishReason {
+	case "stop":
+		return ai.FinishReasonStop
+	case "length":
+		return ai.FinishReasonLength
+	case "content_filter":
+		return ai.FinishReasonContentFilter
+	case "function_call", "tool_calls":
+		return ai.FinishReasonToolCalls
+	default:
+		// for streaming responses the openai accumulator is not working as expected with some provider
+		// therefore it is sending no finish reason so we need to manually handle it
+		if len(choice.Message.ToolCalls) > 0 {
+			return ai.FinishReasonToolCalls
+		} else if finishReason == "" {
+			return ai.FinishReasonStop
+		}
+		return ai.FinishReasonUnknown
+	}
+}
+
+func languageModelExtraContent(choice openaisdk.ChatCompletionChoice) []ai.Content {
+	var content []ai.Content
+	reasoningData := ReasoningData{}
+	err := json.Unmarshal([]byte(choice.Message.RawJSON()), &reasoningData)
+	if err != nil {
+		return content
+	}
+	for _, detail := range reasoningData.ReasoningDetails {
+		switch detail.Type {
+		case "reasoning.text":
+			content = append(content, ai.ReasoningContent{
+				Text: detail.Text,
+			})
+		case "reasoning.summary":
+			content = append(content, ai.ReasoningContent{
+				Text: detail.Summary,
+			})
+		case "reasoning.encrypted":
+			content = append(content, ai.ReasoningContent{
+				Text: "[REDACTED]",
+			})
+		}
+	}
+	return content
+}
+
+func extractReasoningContext(ctx map[string]any) bool {
+	reasoningStarted, ok := ctx[reasoningStartedCtx]
+	if !ok {
+		return false
+	}
+	b, ok := reasoningStarted.(bool)
+	if !ok {
+		return false
+	}
+	return b
+}
+
+func languageModelStreamExtra(chunk openaisdk.ChatCompletionChunk, yield func(ai.StreamPart) bool, ctx map[string]any) (map[string]any, bool) {
+	if len(chunk.Choices) == 0 {
+		return ctx, true
+	}
+
+	reasoningStarted := extractReasoningContext(ctx)
+
+	for inx, choice := range chunk.Choices {
+		reasoningData := ReasoningData{}
+		err := json.Unmarshal([]byte(choice.Delta.RawJSON()), &reasoningData)
+		if err != nil {
+			yield(ai.StreamPart{
+				Type:  ai.StreamPartTypeError,
+				Error: ai.NewAIError("Unexpected", "error unmarshalling delta", err),
+			})
+			return ctx, false
+		}
+
+		emitEvent := func(reasoningContent string) bool {
+			if !reasoningStarted {
+				shouldContinue := yield(ai.StreamPart{
+					Type: ai.StreamPartTypeReasoningStart,
+					ID:   fmt.Sprintf("%d", inx),
+				})
+				if !shouldContinue {
+					return false
+				}
+			}
+
+			return yield(ai.StreamPart{
+				Type:  ai.StreamPartTypeReasoningDelta,
+				ID:    fmt.Sprintf("%d", inx),
+				Delta: reasoningContent,
+			})
+		}
+		if len(reasoningData.ReasoningDetails) > 0 {
+			for _, detail := range reasoningData.ReasoningDetails {
+				if !reasoningStarted {
+					ctx[reasoningStartedCtx] = true
+				}
+				switch detail.Type {
+				case "reasoning.text":
+					return ctx, emitEvent(detail.Text)
+				case "reasoning.summary":
+					return ctx, emitEvent(detail.Summary)
+				case "reasoning.encrypted":
+					return ctx, emitEvent("[REDACTED]")
+				}
+			}
+		} else if reasoningData.Reasoning != "" {
+			return ctx, emitEvent(reasoningData.Reasoning)
+		}
+		if reasoningStarted && (choice.Delta.Content != "" || len(choice.Delta.ToolCalls) > 0) {
+			ctx[reasoningStartedCtx] = false
+			return ctx, yield(ai.StreamPart{
+				Type: ai.StreamPartTypeReasoningEnd,
+				ID:   fmt.Sprintf("%d", inx),
+			})
+		}
+	}
+	return ctx, true
+}
+
+func languageModelUsage(response openaisdk.ChatCompletion) (ai.Usage, ai.ProviderOptionsData) {
+	if len(response.Choices) == 0 {
+		return ai.Usage{}, nil
+	}
+	openrouterUsage := UsageAccounting{}
+	usage := response.Usage
+
+	_ = json.Unmarshal([]byte(usage.RawJSON()), &openrouterUsage)
+
+	completionTokenDetails := usage.CompletionTokensDetails
+	promptTokenDetails := usage.PromptTokensDetails
+
+	var provider string
+	if p, ok := response.JSON.ExtraFields["provider"]; ok {
+		provider = p.Raw()
+	}
+
+	// Build provider metadata
+	providerMetadata := &ProviderMetadata{
+		Provider: provider,
+		Usage:    openrouterUsage,
+	}
+
+	return ai.Usage{
+		InputTokens:     usage.PromptTokens,
+		OutputTokens:    usage.CompletionTokens,
+		TotalTokens:     usage.TotalTokens,
+		ReasoningTokens: completionTokenDetails.ReasoningTokens,
+		CacheReadTokens: promptTokenDetails.CachedTokens,
+	}, providerMetadata
+}
+
+func languageModelStreamUsage(chunk openaisdk.ChatCompletionChunk, _ map[string]any, metadata ai.ProviderMetadata) (ai.Usage, ai.ProviderMetadata) {
+	usage := chunk.Usage
+	if usage.TotalTokens == 0 {
+		return ai.Usage{}, nil
+	}
+
+	streamProviderMetadata := &ProviderMetadata{}
+	if metadata != nil {
+		if providerMetadata, ok := metadata[Name]; ok {
+			converted, ok := providerMetadata.(*ProviderMetadata)
+			if ok {
+				streamProviderMetadata = converted
+			}
+		}
+	}
+	openrouterUsage := UsageAccounting{}
+	_ = json.Unmarshal([]byte(usage.RawJSON()), &openrouterUsage)
+	streamProviderMetadata.Usage = openrouterUsage
+
+	if p, ok := chunk.JSON.ExtraFields["provider"]; ok {
+		streamProviderMetadata.Provider = p.Raw()
+	}
+
+	// we do this here because the acc does not add prompt details
+	completionTokenDetails := usage.CompletionTokensDetails
+	promptTokenDetails := usage.PromptTokensDetails
+	aiUsage := ai.Usage{
+		InputTokens:     usage.PromptTokens,
+		OutputTokens:    usage.CompletionTokens,
+		TotalTokens:     usage.TotalTokens,
+		ReasoningTokens: completionTokenDetails.ReasoningTokens,
+		CacheReadTokens: promptTokenDetails.CachedTokens,
+	}
+
+	return aiUsage, ai.ProviderMetadata{
+		Name: streamProviderMetadata,
+	}
 }

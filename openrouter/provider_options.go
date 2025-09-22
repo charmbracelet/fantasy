@@ -4,8 +4,6 @@ import (
 	"github.com/charmbracelet/fantasy/ai"
 )
 
-const Name = "openrouter"
-
 type ReasoningEffort string
 
 const (
@@ -14,7 +12,34 @@ const (
 	ReasoningEffortHigh   ReasoningEffort = "high"
 )
 
-type ProviderMetadata struct{}
+type PromptTokensDetails struct {
+	CachedTokens int64
+}
+
+type CompletionTokensDetails struct {
+	ReasoningTokens int64
+}
+
+type CostDetails struct {
+	UpstreamInferenceCost            float64 `json:"upstream_inference_cost"`
+	UpstreamInferencePromptCost      float64 `json:"upstream_inference_prompt_cost"`
+	UpstreamInferenceCompletionsCost float64 `json:"upstream_inference_completions_cost"`
+}
+
+type UsageAccounting struct {
+	PromptTokens            int64                   `json:"prompt_tokens"`
+	PromptTokensDetails     PromptTokensDetails     `json:"prompt_tokens_details"`
+	CompletionTokens        int64                   `json:"completion_tokens"`
+	CompletionTokensDetails CompletionTokensDetails `json:"completion_tokens_details"`
+	TotalTokens             int64                   `json:"total_tokens"`
+	Cost                    float64                 `json:"cost"`
+	CostDetails             CostDetails             `json:"cost_details"`
+}
+
+type ProviderMetadata struct {
+	Provider string          `json:"provider"`
+	Usage    UsageAccounting `json:"usage"`
+}
 
 func (*ProviderMetadata) Options() {}
 
@@ -69,6 +94,16 @@ type ProviderOptions struct {
 }
 
 func (*ProviderOptions) Options() {}
+
+type ReasoningDetail struct {
+	Type    string `json:"type"`
+	Text    string `json:"text"`
+	Summary string `json:"summary"`
+}
+type ReasoningData struct {
+	Reasoning        string            `json:"reasoning"`
+	ReasoningDetails []ReasoningDetail `json:"reasoning_details"`
+}
 
 func ReasoningEffortOption(e ReasoningEffort) *ReasoningEffort {
 	return &e

@@ -15,10 +15,12 @@ tasks:
     desc: Run base linters for all packages
     cmds:
       - golangci-lint run
+
   lint:fix:
     desc: Run base linters for all packages and applies fixes if possible
     cmds:
       - golangci-lint run --fix
+
   test:
     desc: Run tests for all packages
     cmds:

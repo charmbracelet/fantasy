@@ -9,7 +9,15 @@ import (
 	"github.com/openai/openai-go/v2/shared"
 )
 
-type PrepareLanguageModelCallFunc = func(model ai.LanguageModel, params *openai.ChatCompletionNewParams, call ai.Call) ([]ai.CallWarning, error)
+type (
+	LanguageModelPrepareCallFunc            = func(model ai.LanguageModel, params *openai.ChatCompletionNewParams, call ai.Call) ([]ai.CallWarning, error)
+	LanguageModelMapFinishReasonFunc        = func(choice openai.ChatCompletionChoice) ai.FinishReason
+	LanguageModelUsageFunc                  = func(choice openai.ChatCompletion) (ai.Usage, ai.ProviderOptionsData)
+	LanguageModelExtraContentFunc           = func(choice openai.ChatCompletionChoice) []ai.Content
+	LanguageModelStreamExtraFunc            = func(chunk openai.ChatCompletionChunk, yield func(ai.StreamPart) bool, ctx map[string]any) (map[string]any, bool)
+	LanguageModelStreamUsageFunc            = func(chunk openai.ChatCompletionChunk, ctx map[string]any, metadata ai.ProviderMetadata) (ai.Usage, ai.ProviderMetadata)
+	LanguageModelStreamProviderMetadataFunc = func(choice openai.ChatCompletionChoice, metadata ai.ProviderMetadata) ai.ProviderMetadata
+)
 
 func defaultPrepareLanguageModelCall(model ai.LanguageModel, params *openai.ChatCompletionNewParams, call ai.Call) ([]ai.CallWarning, error) {
 	if call.ProviderOptions == nil {
@@ -146,4 +154,104 @@ func defaultPrepareLanguageModelCall(model ai.LanguageModel, params *openai.Chat
 		}
 	}
 	return warnings, nil
+}
+
+func defaultMapFinishReason(choice openai.ChatCompletionChoice) ai.FinishReason {
+	finishReason := choice.FinishReason
+	switch finishReason {
+	case "stop":
+		return ai.FinishReasonStop
+	case "length":
+		return ai.FinishReasonLength
+	case "content_filter":
+		return ai.FinishReasonContentFilter
+	case "function_call", "tool_calls":
+		return ai.FinishReasonToolCalls
+	default:
+		return ai.FinishReasonUnknown
+	}
+}
+
+func defaultUsage(response openai.ChatCompletion) (ai.Usage, ai.ProviderOptionsData) {
+	if len(response.Choices) == 0 {
+		return ai.Usage{}, nil
+	}
+	choice := response.Choices[0]
+	completionTokenDetails := response.Usage.CompletionTokensDetails
+	promptTokenDetails := response.Usage.PromptTokensDetails
+
+	// Build provider metadata
+	providerMetadata := &ProviderMetadata{}
+	// Add logprobs if available
+	if len(choice.Logprobs.Content) > 0 {
+		providerMetadata.Logprobs = choice.Logprobs.Content
+	}
+
+	// Add prediction tokens if available
+	if completionTokenDetails.AcceptedPredictionTokens > 0 || completionTokenDetails.RejectedPredictionTokens > 0 {
+		if completionTokenDetails.AcceptedPredictionTokens > 0 {
+			providerMetadata.AcceptedPredictionTokens = completionTokenDetails.AcceptedPredictionTokens
+		}
+		if completionTokenDetails.RejectedPredictionTokens > 0 {
+			providerMetadata.RejectedPredictionTokens = completionTokenDetails.RejectedPredictionTokens
+		}
+	}
+	return ai.Usage{
+		InputTokens:     response.Usage.PromptTokens,
+		OutputTokens:    response.Usage.CompletionTokens,
+		TotalTokens:     response.Usage.TotalTokens,
+		ReasoningTokens: completionTokenDetails.ReasoningTokens,
+		CacheReadTokens: promptTokenDetails.CachedTokens,
+	}, providerMetadata
+}
+
+func defaultStreamUsage(chunk openai.ChatCompletionChunk, ctx map[string]any, metadata ai.ProviderMetadata) (ai.Usage, ai.ProviderMetadata) {
+	if chunk.Usage.TotalTokens == 0 {
+		return ai.Usage{}, nil
+	}
+	streamProviderMetadata := &ProviderMetadata{}
+	if metadata != nil {
+		if providerMetadata, ok := metadata[Name]; ok {
+			converted, ok := providerMetadata.(*ProviderMetadata)
+			if ok {
+				streamProviderMetadata = converted
+			}
+		}
+	}
+	// we do this here because the acc does not add prompt details
+	completionTokenDetails := chunk.Usage.CompletionTokensDetails
+	promptTokenDetails := chunk.Usage.PromptTokensDetails
+	usage := ai.Usage{
+		InputTokens:     chunk.Usage.PromptTokens,
+		OutputTokens:    chunk.Usage.CompletionTokens,
+		TotalTokens:     chunk.Usage.TotalTokens,
+		ReasoningTokens: completionTokenDetails.ReasoningTokens,
+		CacheReadTokens: promptTokenDetails.CachedTokens,
+	}
+
+	// Add prediction tokens if available
+	if completionTokenDetails.AcceptedPredictionTokens > 0 || completionTokenDetails.RejectedPredictionTokens > 0 {
+		if completionTokenDetails.AcceptedPredictionTokens > 0 {
+			streamProviderMetadata.AcceptedPredictionTokens = completionTokenDetails.AcceptedPredictionTokens
+		}
+		if completionTokenDetails.RejectedPredictionTokens > 0 {
+			streamProviderMetadata.RejectedPredictionTokens = completionTokenDetails.RejectedPredictionTokens
+		}
+	}
+
+	return usage, ai.ProviderMetadata{
+		Name: streamProviderMetadata,
+	}
+}
+
+func defaultStreamProviderMetadataFunc(choice openai.ChatCompletionChoice, metadata ai.ProviderMetadata) ai.ProviderMetadata {
+	streamProviderMetadata, ok := metadata[Name]
+	if !ok {
+		streamProviderMetadata = &ProviderMetadata{}
+	}
+	if converted, ok := streamProviderMetadata.(*ProviderMetadata); ok {
+		converted.Logprobs = choice.Logprobs.Content
+		metadata[Name] = converted
+	}
+	return metadata
 }

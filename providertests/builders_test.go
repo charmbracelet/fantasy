@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/fantasy/anthropic"
 	"github.com/charmbracelet/fantasy/google"
 	"github.com/charmbracelet/fantasy/openai"
+	"github.com/charmbracelet/fantasy/openrouter"
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )
 
@@ -25,12 +26,14 @@ var languageModelBuilders = []builderPair{
 	{"anthropic-claude-sonnet", builderAnthropicClaudeSonnet4},
 	{"google-gemini-2.5-flash", builderGoogleGemini25Flash},
 	{"google-gemini-2.5-pro", builderGoogleGemini25Pro},
+	{"openrouter-kimi-k2", builderOpenrouterKimiK2},
 }
 
 var thinkingLanguageModelBuilders = []builderPair{
 	{"openai-gpt-5", builderOpenaiGpt5},
 	{"anthropic-claude-sonnet", builderAnthropicClaudeSonnet4},
 	{"google-gemini-2.5-pro", builderGoogleGemini25Pro},
+	{"openrouter-glm-4.5", builderOpenrouterGLM45},
 }
 
 func builderOpenaiGpt4o(r *recorder.Recorder) (ai.LanguageModel, error) {
@@ -79,4 +82,20 @@ func builderGoogleGemini25Pro(r *recorder.Recorder) (ai.LanguageModel, error) {
 		google.WithHTTPClient(&http.Client{Transport: r}),
 	)
 	return provider.LanguageModel("gemini-2.5-pro")
+}
+
+func builderOpenrouterKimiK2(r *recorder.Recorder) (ai.LanguageModel, error) {
+	provider := openrouter.New(
+		openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
+		openrouter.WithHTTPClient(&http.Client{Transport: r}),
+	)
+	return provider.LanguageModel("moonshotai/kimi-k2-0905")
+}
+
+func builderOpenrouterGLM45(r *recorder.Recorder) (ai.LanguageModel, error) {
+	provider := openrouter.New(
+		openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
+		openrouter.WithHTTPClient(&http.Client{Transport: r}),
+	)
+	return provider.LanguageModel("z-ai/glm-4.5")
 }

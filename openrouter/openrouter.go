@@ -14,6 +14,7 @@ type options struct {
 
 const (
 	DefaultURL = "https://openrouter.ai/api/v1"
+	Name       = "openrouter"
 )
 
 type Option = func(*options)
@@ -21,9 +22,15 @@ type Option = func(*options)
 func New(opts ...Option) ai.Provider {
 	providerOptions := options{
 		openaiOptions: []openai.Option{
+			openai.WithName(Name),
 			openai.WithBaseURL(DefaultURL),
 			openai.WithLanguageModelOptions(
-				openai.WithPrepareLanguageModelCallFunc(prepareLanguageModelCall),
+				openai.WithLanguageModelPrepareCallFunc(languagePrepareModelCall),
+				openai.WithLanguageModelUsageFunc(languageModelUsage),
+				openai.WithLanguageModelStreamUsageFunc(languageModelStreamUsage),
+				openai.WithLanguageModelStreamExtraFunc(languageModelStreamExtra),
+				openai.WithLanguageModelExtraContentFunc(languageModelExtraContent),
+				openai.WithLanguageModelMapFinishReasonFunc(languageModelMapFinishReason),
 			),
 		},
 	}

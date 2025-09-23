@@ -1,8 +1,8 @@
 ---
 version: 2
 interactions:
-    - id: 0
-      request:
+  - id: 0
+    request:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
@@ -11,36 +11,34 @@ interactions:
         body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"Say hi in Portuguese","role":"user"}],"model":"moonshotai/kimi-k2-0905","max_tokens":4000,"stream_options":{"include_usage":true},"provider":{"only":["moonshotai/turbo"]},"usage":{"include":true},"stream":true}'
         headers:
             Accept:
-                - application/json
+              - application/json
             Content-Type:
-                - application/json
+              - application/json
             User-Agent:
-                - OpenAI/Go 2.3.0
+              - OpenAI/Go 2.3.0
         url: https://openrouter.ai/api/v1/chat/completions
         method: POST
-      response:
+    response:
         proto: HTTP/2.0
         proto_major: 2
         proto_minor: 0
         content_length: -1
         body: |+
-            data: {"id":"gen-1758639335-6tKyMLfjzFV2qR97Acz8","provider":"Moonshot AI","model":"moonshotai/kimi-k2-0905","object":"chat.completion.chunk","created":1758639335,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"system_fingerprint":"fpv0_ec889fbb"}
+            data: {"id":"gen-1758647500-PUYPB4Y2HuxAFlamEjcR","provider":"Moonshot AI","model":"moonshotai/kimi-k2-0905","object":"chat.completion.chunk","created":1758647500,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"system_fingerprint":"fpv0_ec889fbb"}
 
-            data: {"id":"gen-1758639335-6tKyMLfjzFV2qR97Acz8","provider":"Moonshot AI","model":"moonshotai/kimi-k2-0905","object":"chat.completion.chunk","created":1758639335,"choices":[{"index":0,"delta":{"role":"assistant","content":"Ol"},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"system_fingerprint":"fpv0_ec889fbb"}
+            data: {"id":"gen-1758647500-PUYPB4Y2HuxAFlamEjcR","provider":"Moonshot AI","model":"moonshotai/kimi-k2-0905","object":"chat.completion.chunk","created":1758647500,"choices":[{"index":0,"delta":{"role":"assistant","content":"Oi"},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"system_fingerprint":"fpv0_ec889fbb"}
 
-            data: {"id":"gen-1758639335-6tKyMLfjzFV2qR97Acz8","provider":"Moonshot AI","model":"moonshotai/kimi-k2-0905","object":"chat.completion.chunk","created":1758639335,"choices":[{"index":0,"delta":{"role":"assistant","content":"á"},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"system_fingerprint":"fpv0_ec889fbb"}
+            data: {"id":"gen-1758647500-PUYPB4Y2HuxAFlamEjcR","provider":"Moonshot AI","model":"moonshotai/kimi-k2-0905","object":"chat.completion.chunk","created":1758647500,"choices":[{"index":0,"delta":{"role":"assistant","content":"!"},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"system_fingerprint":"fpv0_ec889fbb"}
 
-            data: {"id":"gen-1758639335-6tKyMLfjzFV2qR97Acz8","provider":"Moonshot AI","model":"moonshotai/kimi-k2-0905","object":"chat.completion.chunk","created":1758639335,"choices":[{"index":0,"delta":{"role":"assistant","content":"!"},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"system_fingerprint":"fpv0_ec889fbb"}
+            data: {"id":"gen-1758647500-PUYPB4Y2HuxAFlamEjcR","provider":"Moonshot AI","model":"moonshotai/kimi-k2-0905","object":"chat.completion.chunk","created":1758647500,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":"stop","native_finish_reason":"stop","logprobs":null}],"system_fingerprint":"fpv0_ec889fbb"}
 
-            data: {"id":"gen-1758639335-6tKyMLfjzFV2qR97Acz8","provider":"Moonshot AI","model":"moonshotai/kimi-k2-0905","object":"chat.completion.chunk","created":1758639335,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":"stop","native_finish_reason":"stop","logprobs":null}],"system_fingerprint":"fpv0_ec889fbb"}
-
-            data: {"id":"gen-1758639335-6tKyMLfjzFV2qR97Acz8","provider":"Moonshot AI","model":"moonshotai/kimi-k2-0905","object":"chat.completion.chunk","created":1758639335,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"usage":{"prompt_tokens":20,"completion_tokens":4,"total_tokens":24,"cost":0.000044,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.000024,"upstream_inference_completions_cost":0.00002},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}
+            data: {"id":"gen-1758647500-PUYPB4Y2HuxAFlamEjcR","provider":"Moonshot AI","model":"moonshotai/kimi-k2-0905","object":"chat.completion.chunk","created":1758647500,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"usage":{"prompt_tokens":20,"completion_tokens":3,"total_tokens":23,"cost":0.000039,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.000024,"upstream_inference_completions_cost":0.000015},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}
 
             data: [DONE]
 
         headers:
             Content-Type:
-                - text/event-stream
+              - text/event-stream
         status: 200 OK
         code: 200
-        duration: 1.289811792s
+        duration: 1.268958917s

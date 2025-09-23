@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"go.yaml.in/yaml/v4"
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/cassette"
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )
@@ -19,6 +20,7 @@ func newRecorder(t *testing.T) *recorder.Recorder {
 		cassetteName,
 		recorder.WithMode(recorder.ModeRecordOnce),
 		recorder.WithMatcher(customMatcher(t)),
+		recorder.WithMarshalFunc(marshalFunc),
 		recorder.WithSkipRequestLatency(true), // disable sleep to simulate response time, makes tests faster
 		recorder.WithHook(hookRemoveHeaders, recorder.AfterCaptureHook),
 	)
@@ -52,6 +54,16 @@ func customMatcher(t *testing.T) recorder.MatcherFunc {
 
 		return r.Method == i.Method && r.URL.String() == i.URL && string(reqBody) == i.Body
 	}
+}
+
+func marshalFunc(in any) ([]byte, error) {
+	var buff bytes.Buffer
+	enc := yaml.NewEncoder(&buff)
+	enc.CompactSeqIndent()
+	if err := enc.Encode(in); err != nil {
+		return nil, err
+	}
+	return buff.Bytes(), nil
 }
 
 var headersToKeep = map[string]struct{}{

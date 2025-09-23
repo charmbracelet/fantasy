@@ -2,9 +2,11 @@ package providertests
 
 import (
 	"bytes"
+	"encoding/json"
 	"io"
 	"net/http"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -42,17 +44,31 @@ func customMatcher(t *testing.T) recorder.MatcherFunc {
 		if r.Body == nil || r.Body == http.NoBody {
 			return cassette.DefaultMatcher(r, i)
 		}
+		if r.Method != i.Method || r.URL.String() != i.URL {
+			return false
+		}
 
-		var reqBody []byte
-		var err error
-		reqBody, err = io.ReadAll(r.Body)
+		reqBody, err := io.ReadAll(r.Body)
 		if err != nil {
 			t.Fatalf("recorder: failed to read request body")
 		}
 		r.Body.Close()
 		r.Body = io.NopCloser(bytes.NewBuffer(reqBody))
 
-		return r.Method == i.Method && r.URL.String() == i.URL && string(reqBody) == i.Body
+		// Some providers can sometimes generate JSON requests with keys in
+		// a different order, which means a direct string comparison will fail.
+		// Falling back to deserializing the content if we don't have a match.
+		if string(reqBody) == i.Body { // hot path
+			return true
+		}
+		var content1, content2 any
+		if err := json.Unmarshal(reqBody, &content1); err != nil {
+			return false
+		}
+		if err := json.Unmarshal([]byte(i.Body), &content2); err != nil {
+			return false
+		}
+		return reflect.DeepEqual(content1, content2)
 	}
 }
 

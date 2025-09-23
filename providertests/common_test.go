@@ -22,6 +22,8 @@ type builderPair struct {
 func testCommon(t *testing.T, pairs []builderPair) {
 	for _, pair := range pairs {
 		testSimple(t, pair)
+		testTool(t, pair)
+		testMultiTool(t, pair)
 	}
 }
 

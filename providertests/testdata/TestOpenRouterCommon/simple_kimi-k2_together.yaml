@@ -1,33 +1,33 @@
 ---
 version: 2
 interactions:
-    - id: 0
-      request:
+  - id: 0
+    request:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
         content_length: 231
         host: ""
-        body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"Say hi in Portuguese","role":"user"}],"model":"moonshotai/kimi-k2-0905","max_tokens":4000,"usage":{"include":true},"provider":{"only":["together"]}}'
+        body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"Say hi in Portuguese","role":"user"}],"model":"moonshotai/kimi-k2-0905","max_tokens":4000,"provider":{"only":["together"]},"usage":{"include":true}}'
         headers:
             Accept:
-                - application/json
+              - application/json
             Content-Type:
-                - application/json
+              - application/json
             User-Agent:
-                - OpenAI/Go 2.3.0
+              - OpenAI/Go 2.3.0
         url: https://openrouter.ai/api/v1/chat/completions
         method: POST
-      response:
+    response:
         proto: HTTP/2.0
         proto_major: 2
         proto_minor: 0
         content_length: -1
         uncompressed: true
-        body: "\n         \n\n         \n\n         \n{\"id\":\"gen-1758639332-Tug4bmqaH3ANNQGKvKml\",\"provider\":\"Together\",\"model\":\"moonshotai/kimi-k2-0905\",\"object\":\"chat.completion\",\"created\":1758639332,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"stop\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"Olá!\",\"refusal\":null,\"reasoning\":null}}],\"usage\":{\"prompt_tokens\":21,\"completion_tokens\":4,\"total_tokens\":25,\"cost\":0.000033,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.000021,\"upstream_inference_completions_cost\":0.000012},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0}}}"
+        body: "\n         \n\n         \n{\"id\":\"gen-1758647482-RkYXaCO7eBSu4Y0C4gF2\",\"provider\":\"Together\",\"model\":\"moonshotai/kimi-k2-0905\",\"object\":\"chat.completion\",\"created\":1758647482,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"stop\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"Olá!\",\"refusal\":null,\"reasoning\":null}}],\"usage\":{\"prompt_tokens\":21,\"completion_tokens\":4,\"total_tokens\":25,\"cost\":0.000033,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.000021,\"upstream_inference_completions_cost\":0.000012},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0}}}"
         headers:
             Content-Type:
-                - application/json
+              - application/json
         status: 200 OK
         code: 200
-        duration: 1.274655375s
+        duration: 1.212531584s

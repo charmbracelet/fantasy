@@ -1,0 +1,34 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 202
+        host: generativelanguage.googleapis.com
+        body: |
+            {"contents":[{"parts":[{"text":"Say hi in Portuguese"}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"}}
+        form:
+            alt:
+                - sse
+        headers:
+            Content-Type:
+                - application/json
+            User-Agent:
+                - google-genai-sdk/1.23.0 gl-go/go1.25.1
+        url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:streamGenerateContent?alt=sse
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        content_length: -1
+        body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"Of course!\\n\\nThe most common ways to say \\\"hi\\\" in Portuguese are:\\n\\n*   **Oi** (\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 11,\"candidatesTokenCount\": 24,\"totalTokenCount\": 528,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 11}],\"thoughtsTokenCount\": 493},\"modelVersion\": \"gemini-2.5-pro\",\"responseId\": \"nLHSaIr8FMTqnsEP6JadkAY\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"more informal, like \\\"hi\\\")\\n*   **Olá** (a bit more formal, like \\\"hello\\\")\\n\\nYou can also\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 11,\"candidatesTokenCount\": 51,\"totalTokenCount\": 555,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 11}],\"thoughtsTokenCount\": 493},\"modelVersion\": \"gemini-2.5-pro\",\"responseId\": \"nLHSaIr8FMTqnsEP6JadkAY\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \" use greetings like:\\n\\n*   **Tudo bem?** (How are you?)\\n*   **Bom dia** (Good\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 11,\"candidatesTokenCount\": 78,\"totalTokenCount\": 582,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 11}],\"thoughtsTokenCount\": 493},\"modelVersion\": \"gemini-2.5-pro\",\"responseId\": \"nLHSaIr8FMTqnsEP6JadkAY\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \" morning)\\n*   **Boa tarde** (Good afternoon)\\n*   **Boa noite** (Good evening /\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 11,\"candidatesTokenCount\": 102,\"totalTokenCount\": 606,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 11}],\"thoughtsTokenCount\": 493},\"modelVersion\": \"gemini-2.5-pro\",\"responseId\": \"nLHSaIr8FMTqnsEP6JadkAY\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \" Good night)\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 11,\"candidatesTokenCount\": 105,\"totalTokenCount\": 609,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 11}],\"thoughtsTokenCount\": 493},\"modelVersion\": \"gemini-2.5-pro\",\"responseId\": \"nLHSaIr8FMTqnsEP6JadkAY\"}\r\n\r\n"
+        headers:
+            Content-Type:
+                - text/event-stream
+        status: 200 OK
+        code: 200
+        duration: 8.837368541s

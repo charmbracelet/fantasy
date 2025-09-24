@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+  - id: 0
+    request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 834
+        host: ""
+        body: '{"messages":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"}],"model":"x-ai/grok-code-fast-1","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
+        headers:
+            Accept:
+              - application/json
+            Content-Type:
+              - application/json
+            User-Agent:
+              - OpenAI/Go 2.3.0
+        url: https://openrouter.ai/api/v1/chat/completions
+        method: POST
+    response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        content_length: -1
+        uncompressed: true
+        body: "\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1758707378-pn9PW3A62fyBGfaQH7G4\",\"provider\":\"xAI\",\"model\":\"x-ai/grok-code-fast-1\",\"object\":\"chat.completion\",\"created\":1758707378,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"native_finish_reason\":\"tool_calls\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"refusal\":null,\"reasoning\":\"First, the user asked to \\\"Add and multiply the number 2 and 3\\\". According to my system prompt, I must always use both add and multiply at the same time.\\n\\n\\n## Handling User Request  \\n- The user asked to add and multiply the numbers 2 and 3 simultaneously.  \\n- The task requires using both addition and multiplication operations together.\",\"tool_calls\":[{\"id\":\"call_76118981\",\"function\":{\"name\":\"add\",\"arguments\":\"{\\\"a\\\":2,\\\"b\\\":3}\"},\"index\":0,\"type\":\"function\"},{\"id\":\"call_17779443\",\"function\":{\"name\":\"multiply\",\"arguments\":\"{\\\"a\\\":2,\\\"b\\\":3}\"},\"index\":1,\"type\":\"function\"}],\"reasoning_details\":[{\"type\":\"reasoning.text\",\"text\":\"First, the user asked to \\\"Add and multiply the number 2 and 3\\\". According to my system prompt, I must always use both add and multiply at the same time.\\n\\n\\n## Handling User Request  \\n- The user asked to add and multiply the numbers 2 and 3 simultaneously.  \\n- The task requires using both addition and multiplication operations together.\",\"format\":\"unknown\",\"index\":0}]}}],\"system_fingerprint\":\"fp_10f00c862d\",\"usage\":{\"prompt_tokens\":467,\"completion_tokens\":427,\"total_tokens\":894,\"cost\":0.0006763,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":320,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.0000358,\"upstream_inference_completions_cost\":0.0006405},\"completion_tokens_details\":{\"reasoning_tokens\":359,\"image_tokens\":0}}}"
+        headers:
+            Content-Type:
+              - application/json
+        status: 200 OK
+        code: 200
+        duration: 676.507291ms
+  - id: 1
+    request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 1195
+        host: ""
+        body: '{"messages":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"tool_calls":[{"id":"call_76118981","function":{"arguments":"{\"a\":2,\"b\":3}","name":"add"},"type":"function"},{"id":"call_17779443","function":{"arguments":"{\"a\":2,\"b\":3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"call_76118981","role":"tool"},{"content":"6","tool_call_id":"call_17779443","role":"tool"}],"model":"x-ai/grok-code-fast-1","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
+        headers:
+            Accept:
+              - application/json
+            Content-Type:
+              - application/json
+            User-Agent:
+              - OpenAI/Go 2.3.0
+        url: https://openrouter.ai/api/v1/chat/completions
+        method: POST
+    response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        content_length: -1
+        uncompressed: true
+        body: "\n         \n\n         \n\n         \n{\"id\":\"gen-1758707381-ShjueDw3WxX7Z5hChCAD\",\"provider\":\"xAI\",\"model\":\"x-ai/grok-code-fast-1\",\"object\":\"chat.completion\",\"created\":1758707381,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"stop\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"The sum of 2 and 3 is 5.  \\nThe product of 2 and 3 is 6.\",\"refusal\":null,\"reasoning\":\"The user asked to add and multiply 2 and 3.\\n\",\"reasoning_details\":[{\"type\":\"reasoning.text\",\"text\":\"The user asked to add and multiply 2 and 3.\\n\",\"format\":\"unknown\",\"index\":0}]}}],\"system_fingerprint\":\"fp_10f00c862d\",\"usage\":{\"prompt_tokens\":908,\"completion_tokens\":79,\"total_tokens\":987,\"cost\":0.00015034,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":832,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.00003184,\"upstream_inference_completions_cost\":0.0001185},\"completion_tokens_details\":{\"reasoning_tokens\":54,\"image_tokens\":0}}}"
+        headers:
+            Content-Type:
+              - application/json
+        status: 200 OK
+        code: 200
+        duration: 1.10407175s

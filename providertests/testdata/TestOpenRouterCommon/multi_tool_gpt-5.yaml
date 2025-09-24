@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+  - id: 0
+    request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 836
+        host: ""
+        body: '{"messages":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"}],"model":"openai/gpt-5","max_completion_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
+        headers:
+            Accept:
+              - application/json
+            Content-Type:
+              - application/json
+            User-Agent:
+              - OpenAI/Go 2.3.0
+        url: https://openrouter.ai/api/v1/chat/completions
+        method: POST
+    response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        content_length: -1
+        uncompressed: true
+        body: "\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1758707649-pUgI61RYe8vRCgvNvwBU\",\"provider\":\"OpenAI\",\"model\":\"openai/gpt-5\",\"object\":\"chat.completion\",\"created\":1758707650,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"native_finish_reason\":\"completed\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"refusal\":null,\"reasoning\":null,\"tool_calls\":[{\"id\":\"call_6Lvs1oTBCNDDAD2bZNXUnEmk\",\"index\":1,\"type\":\"function\",\"function\":{\"name\":\"add\",\"arguments\":\"{\\\"a\\\":2,\\\"b\\\":3}\"}},{\"id\":\"call_5SAOr1sNSod2TRSKp5qimGvO\",\"index\":2,\"type\":\"function\",\"function\":{\"name\":\"multiply\",\"arguments\":\"{\\\"a\\\":2,\\\"b\\\":3}\"}}],\"reasoning_details\":[{\"type\":\"reasoning.encrypted\",\"data\":\"gAAAAABo07_Gg8F7qOMyxoklF8O3r_cgy32SNgEPO9OJpcmhtgSZHhakz1Q4eF8kZajtaORzh3udy27sLKvYE-Z5xmR4C4Y8EZtFrn4r9wsJ2COjYOwfc97mZDaR_lkU9oOdLQ5mGzKd8NAnQ8RAv24GjB5Ug0VZH8EJhbH-uJBylQ4Dl4xKNhQYi5VNKz6_pn_uVe2-b7-rCretw3h7Uzjc1UuSFuos94MBHzLwmJ6QyKSTn45PUT17SeApSTxaD2NSsMkr2843-8wwMn_BfY9_BRIJ_gkfbZMyJWiJ9Hdhpn9mYQLPdFG-JpI8vMkavbEBYD4ng4y7N5jOGsezN89heEcZS9W2J6HBVzCRekaLaRCQ_o_LgGzVPmrRX3q40hoDbQLrV8Q4l3zGher0L9TRTMIx3Tnmi7b0Z7xAihxICONlKB-t3j-_L2EePDDBWPeX5BUApc0z_lnRd_NM6jiivakTULPTbYA59NGzoTGS88a2WuKYSQ5hZtCnmZChQjM9Ph-2_-JeLaMgm5GYNkWO3eRR8moH3AntKwOE5sZ3L6haCEZk90Oyocknih1W0cYq3eVDbe3Yue_K2b5IZ-z1TRAQDnmGlPu8gwQsYjWykZijBhWehshIF9qbK704rr3_xF3uWhIhqCJ9s0JQoSV7nIpWPcEsW4Nr8iFegI5Yts2Mggy-LK4phIBR1Qj68r3eRn2FUoZRIl7zuUh23IAZfp7UXJBkYt2d-L7HdBgYeF-z6PBd0NQItPYW6xMkks3_g9m2zty-cA98LnopM6uuBzVZ-Egw9v4c_zfIMjHKMLKedC7PsMkw-KxQ9UzdHUG3VStVN6LNE2RCaZGDirY5ETvDPkogNlDfr5qft4Uf7etUfDrZCJ-puJiow2ftpicJykE7L_7HZSwTd7oIPA_3nQqXE1CzPR4oqEZqgm3Ei_aHIWUaXsjDWq4mBciflYIGwlNan825I9fzzEPQwbSccpKpK0C1P9QY0nCNYKYnJuI08YenilWY4nwPJv8Abqzif50q5T0G_Nqx0quHH0_kkzcJ2dtoEWVrc8WbHJJOhQlclDW5k8n6EhPUeCclua4q6Iv0nVvdoxE_0EEdEbBsykZW-WmqrJ9OAuSEf_w3tdmYWPDH4fbWBvmNbWiu4GNtlc8OraLjXU3hMNshkT0jJ83F9QTIAXIFfnl4y_0Gny2rLkb1OFp_Io27UUeYIVvWML8r7F_JMG4eDmUwpHgd7zfyod_kLYZRVA0i4FE9IKjxw6Ch9Jg2X4-aWCMTInepDto7vBv1rBqilesMBqlXB8EAqGrzz9Mk4ocFM8VSuxZQc4Q4dh4ajykq5z8O8kpCNdz2G5TEqioJUtRjEDsI7l23G7L4JhO1iAwfQYPcWn7xDuWKzYWUtLrT7At4duoe9ayIy4G6tYhZv5Yk941Tm3gzV990IZBi-nQDW67_89okmE1uDktgkEf4YT5p2gIeKvUswvhU4rvllnAChjA-utBCNffZbw7H8A4ZfH-D8FERGlx0J6mI8fvr1uuCzJlajgzv7B4PRauCe2R7jZCRBexy8EtM5X-S2prwMyGe07fgIDig1zEdoiWbkMsD4UkPxnKLWUH_zBd-Q0xMmSvFtesvuWyaHdTyxi8UXnYCP0D8c9MV14j2n582-FUR3flUaaLkZNw7ktVZ1p6E_-Xie-lSVmk8-RZtQZSMyfvmPK8bsDR0A-NmI4kyWSRQOyrI4-7IKjvbY7caYEPW44v3XVjXhXoK6HHrtjwelVP4F2zzY828wC_AWyMq6J1Us-WmsLh600urL9pWycrEV_dt0AAZTFEwlJ06wKDiqOXao18dz4AhhEQBiXtweTWdtlrM7r27RFFa0TXQrzNEREW4tLnt89DIQbARCdeibyjBJiOzwD00OWEiy6jRQjCJ-IgDpkJ8BEWJYWaZeXnC_jGsSuRQipTq9JWgSAYdMHcCb1Kcy52Furh0FNpK3dDKcXTIW8ikZEpqok32Ghreb1ryDRNYnIIoUOxctKdkl9_MGvr2hJE6qwLEEdP5nAqQDew6j2pM2AQAPJmFjkYEvqefEYPrWlPDOxd1mz_xq_dMEGFUyXBM7VgIKO4pc2atNLHQcY6-wcncA16Iq6MUKsbmLSl0UswVcg1ghPHXLGyEwXQq4G1YzM-AIPTtMg0_3vXfYT5VlO9pRMS2hiABNaktHnqQ8ip9NMG5AIzcNf0AJEVVwTg2Iy9gJI1NN5u5vZaRAR-I-aKcFosJUUVyC0Jgc0i8OZH5YQ==\",\"id\":\"rs_68d3bfc2b94c8193a50bfa4e90405ef00c68e5a43a8150bc\",\"format\":\"openai-responses-v1\",\"index\":0}]}}],\"usage\":{\"prompt_tokens\":108,\"completion_tokens\":247,\"total_tokens\":355,\"cost\":0.0013025,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.0000675,\"upstream_inference_completions_cost\":0.001235},\"completion_tokens_details\":{\"reasoning_tokens\":192,\"image_tokens\":0}}}"
+        headers:
+            Content-Type:
+              - application/json
+        status: 200 OK
+        code: 200
+        duration: 835.204209ms
+  - id: 1
+    request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 1261
+        host: ""
+        body: '{"messages":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"tool_calls":[{"id":"call_6Lvs1oTBCNDDAD2bZNXUnEmk","function":{"arguments":"{\"a\":2,\"b\":3}","name":"add"},"type":"function"},{"id":"call_5SAOr1sNSod2TRSKp5qimGvO","function":{"arguments":"{\"a\":2,\"b\":3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"call_6Lvs1oTBCNDDAD2bZNXUnEmk","role":"tool"},{"content":"6","tool_call_id":"call_5SAOr1sNSod2TRSKp5qimGvO","role":"tool"}],"model":"openai/gpt-5","max_completion_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
+        headers:
+            Accept:
+              - application/json
+            Content-Type:
+              - application/json
+            User-Agent:
+              - OpenAI/Go 2.3.0
+        url: https://openrouter.ai/api/v1/chat/completions
+        method: POST
+    response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        content_length: -1
+        uncompressed: true
+        body: "\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1758707655-VTPf9Unuu9NRoR2JSEfp\",\"provider\":\"OpenAI\",\"model\":\"openai/gpt-5\",\"object\":\"chat.completion\",\"created\":1758707655,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"completed\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"Results:\\n- Addition (2 + 3) = 5\\n- Multiplication (2 × 3) = 6\",\"refusal\":null,\"reasoning\":null}}],\"usage\":{\"prompt_tokens\":167,\"completion_tokens\":30,\"total_tokens\":197,\"cost\":0.000254375,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.000104375,\"upstream_inference_completions_cost\":0.00015},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0}}}"
+        headers:
+            Content-Type:
+              - application/json
+        status: 200 OK
+        code: 200
+        duration: 1.081003666s

@@ -22,6 +22,7 @@ func TestOpenRouterCommon(t *testing.T) {
 		kimiK2(),
 		grokCodeFast1(),
 		claudeSonnet4(),
+		grok4FastFree(),
 	}
 
 	for _, model := range models {
@@ -80,6 +81,22 @@ func grokCodeFast1() openrouterModel {
 				openrouter.WithHTTPClient(&http.Client{Transport: r}),
 			)
 			return provider.LanguageModel("x-ai/grok-code-fast-1")
+		},
+		providers: []string{
+			"xai",
+		},
+	}
+}
+
+func grok4FastFree() openrouterModel {
+	return openrouterModel{
+		name: "grok-4-fast-free",
+		builderFunc: func(r *recorder.Recorder) (ai.LanguageModel, error) {
+			provider := openrouter.New(
+				openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
+				openrouter.WithHTTPClient(&http.Client{Transport: r}),
+			)
+			return provider.LanguageModel("x-ai/grok-4-fast:free")
 		},
 		providers: []string{
 			"xai",

@@ -25,6 +25,7 @@ func TestOpenRouterCommon(t *testing.T) {
 		grok4FastFree(),
 		gemini25Flash(),
 		gemini20Flash(),
+		deepseekV31Free(),
 	}
 
 	for _, model := range models {
@@ -137,6 +138,22 @@ func gemini20Flash() openrouterModel {
 		providers: []string{
 			"google-ai-studio",
 			"google-vertex",
+		},
+	}
+}
+
+func deepseekV31Free() openrouterModel {
+	return openrouterModel{
+		name: "deepseek-chat-v3.1-free",
+		builderFunc: func(r *recorder.Recorder) (ai.LanguageModel, error) {
+			provider := openrouter.New(
+				openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
+				openrouter.WithHTTPClient(&http.Client{Transport: r}),
+			)
+			return provider.LanguageModel("deepseek/deepseek-chat-v3.1:free")
+		},
+		providers: []string{
+			"deepinfra",
 		},
 	}
 }

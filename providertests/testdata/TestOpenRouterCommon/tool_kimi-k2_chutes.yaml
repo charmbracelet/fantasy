@@ -24,21 +24,21 @@ interactions:
         proto_minor: 0
         content_length: -1
         uncompressed: true
-        body: "\n         \n\n         \n\n         \n{\"id\":\"gen-1758647723-Sc4IZ6YD0kYjrzDXUqV8\",\"provider\":\"Chutes\",\"model\":\"moonshotai/kimi-k2-0905\",\"object\":\"chat.completion\",\"created\":1758647723,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"native_finish_reason\":\"tool_calls\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"I'll check the weather in Florence, Italy for you.\",\"refusal\":null,\"reasoning\":null,\"tool_calls\":[{\"id\":\"functions.weather:0\",\"index\":0,\"type\":\"function\",\"function\":{\"name\":\"weather\",\"arguments\":\"{\\\"location\\\": \\\"Florence,Italy\\\"}\"}}]}}],\"usage\":{\"prompt_tokens\":94,\"completion_tokens\":32,\"total_tokens\":126,\"cost\":0.00008436,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.00003572,\"upstream_inference_completions_cost\":0.00004864},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0}}}"
+        body: "\n         \n\n         \n{\"id\":\"gen-1758698428-Tb8WQscWOBWUTZPuMlpo\",\"provider\":\"Chutes\",\"model\":\"moonshotai/kimi-k2-0905\",\"object\":\"chat.completion\",\"created\":1758698428,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"native_finish_reason\":\"tool_calls\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"I'll check the weather for Florence, Italy for you.\",\"refusal\":null,\"reasoning\":null,\"tool_calls\":[{\"id\":\"functions.weather:0\",\"index\":0,\"type\":\"function\",\"function\":{\"name\":\"weather\",\"arguments\":\"{\\\"location\\\": \\\"Florence, Italy\\\"}\"}}]}}],\"usage\":{\"prompt_tokens\":94,\"completion_tokens\":32,\"total_tokens\":126,\"cost\":0.00008436,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.00003572,\"upstream_inference_completions_cost\":0.00004864},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0}}}"
         headers:
             Content-Type:
               - application/json
         status: 200 OK
         code: 200
-        duration: 1.462345083s
+        duration: 817.740458ms
   - id: 1
     request:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 816
+        content_length: 818
         host: ""
-        body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"content":"I''ll check the weather in Florence, Italy for you.","tool_calls":[{"id":"functions.weather:0","function":{"arguments":"{\"location\": \"Florence,Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"functions.weather:0","role":"tool"}],"model":"moonshotai/kimi-k2-0905","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"provider":{"only":["chutes"]},"usage":{"include":true}}'
+        body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"content":"I''ll check the weather for Florence, Italy for you.","tool_calls":[{"id":"functions.weather:0","function":{"arguments":"{\"location\": \"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"functions.weather:0","role":"tool"}],"model":"moonshotai/kimi-k2-0905","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"provider":{"only":["chutes"]},"usage":{"include":true}}'
         headers:
             Accept:
               - application/json
@@ -54,10 +54,10 @@ interactions:
         proto_minor: 0
         content_length: -1
         uncompressed: true
-        body: "\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1758647725-l0uVaVaGbdYLOwZjQlUA\",\"provider\":\"Chutes\",\"model\":\"moonshotai/kimi-k2-0905\",\"object\":\"chat.completion\",\"created\":1758647725,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"stop\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"The current weather in Florence, Italy is 40°C (104°F) - that's quite hot! It's a very warm day there right now.\",\"refusal\":null,\"reasoning\":null}}],\"usage\":{\"prompt_tokens\":147,\"completion_tokens\":30,\"total_tokens\":177,\"cost\":0.00010146,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.00005586,\"upstream_inference_completions_cost\":0.0000456},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0}}}"
+        body: "\n         \n\n         \n\n         \n{\"id\":\"gen-1758698429-0b7ZJU7ECvyRdDlDNGPQ\",\"provider\":\"Chutes\",\"model\":\"moonshotai/kimi-k2-0905\",\"object\":\"chat.completion\",\"created\":1758698429,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"stop\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"The current weather in Florence, Italy is 40°C (104°F). It's quite hot there right now!\",\"refusal\":null,\"reasoning\":null}}],\"usage\":{\"prompt_tokens\":147,\"completion_tokens\":23,\"total_tokens\":170,\"cost\":0.00009082,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.00005586,\"upstream_inference_completions_cost\":0.00003496},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0}}}"
         headers:
             Content-Type:
               - application/json
         status: 200 OK
         code: 200
-        duration: 3.871714083s
+        duration: 1.329144167s

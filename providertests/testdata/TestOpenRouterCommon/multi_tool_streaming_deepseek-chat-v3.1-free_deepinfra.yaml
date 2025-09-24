@@ -1,0 +1,127 @@
+---
+version: 2
+interactions:
+  - id: 0
+    request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 933
+        host: ""
+        body: '{"messages":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"}],"model":"deepseek/deepseek-chat-v3.1:free","max_tokens":4000,"stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"provider":{"only":["deepinfra"]},"usage":{"include":true},"stream":true}'
+        headers:
+            Accept:
+              - application/json
+            Content-Type:
+              - application/json
+            User-Agent:
+              - OpenAI/Go 2.3.0
+        url: https://openrouter.ai/api/v1/chat/completions
+        method: POST
+    response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        content_length: -1
+        body: |+
+            data: {"id":"gen-1758704111-dT300jmM3hLhZq4SNDlo","provider":"DeepInfra","model":"deepseek/deepseek-chat-v3.1:free","object":"chat.completion.chunk","created":1758704111,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+            data: {"id":"gen-1758704111-dT300jmM3hLhZq4SNDlo","provider":"DeepInfra","model":"deepseek/deepseek-chat-v3.1:free","object":"chat.completion.chunk","created":1758704111,"choices":[{"index":0,"delta":{"role":"assistant","content":"I","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+            data: {"id":"gen-1758704111-dT300jmM3hLhZq4SNDlo","provider":"DeepInfra","model":"deepseek/deepseek-chat-v3.1:free","object":"chat.completion.chunk","created":1758704111,"choices":[{"index":0,"delta":{"role":"assistant","content":"'ll add","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+            data: {"id":"gen-1758704111-dT300jmM3hLhZq4SNDlo","provider":"DeepInfra","model":"deepseek/deepseek-chat-v3.1:free","object":"chat.completion.chunk","created":1758704111,"choices":[{"index":0,"delta":{"role":"assistant","content":" and multiply","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+            data: {"id":"gen-1758704111-dT300jmM3hLhZq4SNDlo","provider":"DeepInfra","model":"deepseek/deepseek-chat-v3.1:free","object":"chat.completion.chunk","created":1758704111,"choices":[{"index":0,"delta":{"role":"assistant","content":" the","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+            data: {"id":"gen-1758704111-dT300jmM3hLhZq4SNDlo","provider":"DeepInfra","model":"deepseek/deepseek-chat-v3.1:free","object":"chat.completion.chunk","created":1758704111,"choices":[{"index":0,"delta":{"role":"assistant","content":" numbers ","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+            data: {"id":"gen-1758704111-dT300jmM3hLhZq4SNDlo","provider":"DeepInfra","model":"deepseek/deepseek-chat-v3.1:free","object":"chat.completion.chunk","created":1758704111,"choices":[{"index":0,"delta":{"role":"assistant","content":"2 and","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+            data: {"id":"gen-1758704111-dT300jmM3hLhZq4SNDlo","provider":"DeepInfra","model":"deepseek/deepseek-chat-v3.1:free","object":"chat.completion.chunk","created":1758704111,"choices":[{"index":0,"delta":{"role":"assistant","content":" 3","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+            data: {"id":"gen-1758704111-dT300jmM3hLhZq4SNDlo","provider":"DeepInfra","model":"deepseek/deepseek-chat-v3.1:free","object":"chat.completion.chunk","created":1758704111,"choices":[{"index":0,"delta":{"role":"assistant","content":" simultaneously as","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+            data: {"id":"gen-1758704111-dT300jmM3hLhZq4SNDlo","provider":"DeepInfra","model":"deepseek/deepseek-chat-v3.1:free","object":"chat.completion.chunk","created":1758704111,"choices":[{"index":0,"delta":{"role":"assistant","content":" requested.","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+            data: {"id":"gen-1758704111-dT300jmM3hLhZq4SNDlo","provider":"DeepInfra","model":"deepseek/deepseek-chat-v3.1:free","object":"chat.completion.chunk","created":1758704111,"choices":[{"index":0,"delta":{"role":"assistant","content":null,"tool_calls":[{"index":0,"id":"call_1218","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"add"},"type":"function"}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+            data: {"id":"gen-1758704111-dT300jmM3hLhZq4SNDlo","provider":"DeepInfra","model":"deepseek/deepseek-chat-v3.1:free","object":"chat.completion.chunk","created":1758704111,"choices":[{"index":0,"delta":{"role":"assistant","content":null,"tool_calls":[{"index":1,"id":"call_c6a4","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"multiply"},"type":"function"}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+            data: {"id":"gen-1758704111-dT300jmM3hLhZq4SNDlo","provider":"DeepInfra","model":"deepseek/deepseek-chat-v3.1:free","object":"chat.completion.chunk","created":1758704111,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":null,"reasoning_details":[]},"finish_reason":"tool_calls","native_finish_reason":"tool_calls","logprobs":null}]}
+
+            data: {"id":"gen-1758704111-dT300jmM3hLhZq4SNDlo","provider":"DeepInfra","model":"deepseek/deepseek-chat-v3.1:free","object":"chat.completion.chunk","created":1758704111,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"usage":{"prompt_tokens":250,"completion_tokens":52,"total_tokens":302,"cost":0,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}
+
+            data: [DONE]
+
+        headers:
+            Content-Type:
+              - text/event-stream
+        status: 200 OK
+        code: 200
+        duration: 1.01682225s
+  - id: 1
+    request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 1367
+        host: ""
+        body: '{"messages":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"content":"I''ll add and multiply the numbers 2 and 3 simultaneously as requested.","tool_calls":[{"id":"call_1218","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"add"},"type":"function"},{"id":"call_c6a4","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"call_1218","role":"tool"},{"content":"6","tool_call_id":"call_c6a4","role":"tool"}],"model":"deepseek/deepseek-chat-v3.1:free","max_tokens":4000,"stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"provider":{"only":["deepinfra"]},"usage":{"include":true},"stream":true}'
+        headers:
+            Accept:
+              - application/json
+            Content-Type:
+              - application/json
+            User-Agent:
+              - OpenAI/Go 2.3.0
+        url: https://openrouter.ai/api/v1/chat/completions
+        method: POST
+    response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        content_length: -1
+        body: |+
+            data: {"id":"gen-1758704118-XmJ4FJpThUiis6ky0Ajg","provider":"DeepInfra","model":"deepseek/deepseek-chat-v3.1:free","object":"chat.completion.chunk","created":1758704118,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+            data: {"id":"gen-1758704118-XmJ4FJpThUiis6ky0Ajg","provider":"DeepInfra","model":"deepseek/deepseek-chat-v3.1:free","object":"chat.completion.chunk","created":1758704118,"choices":[{"index":0,"delta":{"role":"assistant","content":"The","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+            data: {"id":"gen-1758704118-XmJ4FJpThUiis6ky0Ajg","provider":"DeepInfra","model":"deepseek/deepseek-chat-v3.1:free","object":"chat.completion.chunk","created":1758704118,"choices":[{"index":0,"delta":{"role":"assistant","content":" addition of","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+            data: {"id":"gen-1758704118-XmJ4FJpThUiis6ky0Ajg","provider":"DeepInfra","model":"deepseek/deepseek-chat-v3.1:free","object":"chat.completion.chunk","created":1758704118,"choices":[{"index":0,"delta":{"role":"assistant","content":" 2","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+            data: {"id":"gen-1758704118-XmJ4FJpThUiis6ky0Ajg","provider":"DeepInfra","model":"deepseek/deepseek-chat-v3.1:free","object":"chat.completion.chunk","created":1758704118,"choices":[{"index":0,"delta":{"role":"assistant","content":" and ","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+            data: {"id":"gen-1758704118-XmJ4FJpThUiis6ky0Ajg","provider":"DeepInfra","model":"deepseek/deepseek-chat-v3.1:free","object":"chat.completion.chunk","created":1758704118,"choices":[{"index":0,"delta":{"role":"assistant","content":"3 gives","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+            data: {"id":"gen-1758704118-XmJ4FJpThUiis6ky0Ajg","provider":"DeepInfra","model":"deepseek/deepseek-chat-v3.1:free","object":"chat.completion.chunk","created":1758704118,"choices":[{"index":0,"delta":{"role":"assistant","content":":","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+            data: {"id":"gen-1758704118-XmJ4FJpThUiis6ky0Ajg","provider":"DeepInfra","model":"deepseek/deepseek-chat-v3.1:free","object":"chat.completion.chunk","created":1758704118,"choices":[{"index":0,"delta":{"role":"assistant","content":" **","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+            data: {"id":"gen-1758704118-XmJ4FJpThUiis6ky0Ajg","provider":"DeepInfra","model":"deepseek/deepseek-chat-v3.1:free","object":"chat.completion.chunk","created":1758704118,"choices":[{"index":0,"delta":{"role":"assistant","content":"5**\n","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+            data: {"id":"gen-1758704118-XmJ4FJpThUiis6ky0Ajg","provider":"DeepInfra","model":"deepseek/deepseek-chat-v3.1:free","object":"chat.completion.chunk","created":1758704118,"choices":[{"index":0,"delta":{"role":"assistant","content":"The multiplication","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+            data: {"id":"gen-1758704118-XmJ4FJpThUiis6ky0Ajg","provider":"DeepInfra","model":"deepseek/deepseek-chat-v3.1:free","object":"chat.completion.chunk","created":1758704118,"choices":[{"index":0,"delta":{"role":"assistant","content":" of ","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+            data: {"id":"gen-1758704118-XmJ4FJpThUiis6ky0Ajg","provider":"DeepInfra","model":"deepseek/deepseek-chat-v3.1:free","object":"chat.completion.chunk","created":1758704118,"choices":[{"index":0,"delta":{"role":"assistant","content":"2 and","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+            data: {"id":"gen-1758704118-XmJ4FJpThUiis6ky0Ajg","provider":"DeepInfra","model":"deepseek/deepseek-chat-v3.1:free","object":"chat.completion.chunk","created":1758704118,"choices":[{"index":0,"delta":{"role":"assistant","content":" 3","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+            data: {"id":"gen-1758704118-XmJ4FJpThUiis6ky0Ajg","provider":"DeepInfra","model":"deepseek/deepseek-chat-v3.1:free","object":"chat.completion.chunk","created":1758704118,"choices":[{"index":0,"delta":{"role":"assistant","content":" gives:","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+            data: {"id":"gen-1758704118-XmJ4FJpThUiis6ky0Ajg","provider":"DeepInfra","model":"deepseek/deepseek-chat-v3.1:free","object":"chat.completion.chunk","created":1758704118,"choices":[{"index":0,"delta":{"role":"assistant","content":" **6","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+            data: {"id":"gen-1758704118-XmJ4FJpThUiis6ky0Ajg","provider":"DeepInfra","model":"deepseek/deepseek-chat-v3.1:free","object":"chat.completion.chunk","created":1758704118,"choices":[{"index":0,"delta":{"role":"assistant","content":"**","reasoning":null,"reasoning_details":[]},"finish_reason":"stop","native_finish_reason":"stop","logprobs":null}]}
+
+            data: {"id":"gen-1758704118-XmJ4FJpThUiis6ky0Ajg","provider":"DeepInfra","model":"deepseek/deepseek-chat-v3.1:free","object":"chat.completion.chunk","created":1758704118,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"usage":{"prompt_tokens":310,"completion_tokens":27,"total_tokens":337,"cost":0,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}
+
+            data: [DONE]
+
+        headers:
+            Content-Type:
+              - text/event-stream
+        status: 200 OK
+        code: 200
+        duration: 774.504125ms

@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+  - id: 0
+    request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 862
+        host: ""
+        body: '{"messages":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"}],"model":"x-ai/grok-code-fast-1","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"provider":{"only":["xai"]},"usage":{"include":true}}'
+        headers:
+            Accept:
+              - application/json
+            Content-Type:
+              - application/json
+            User-Agent:
+              - OpenAI/Go 2.3.0
+        url: https://openrouter.ai/api/v1/chat/completions
+        method: POST
+    response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        content_length: -1
+        uncompressed: true
+        body: "\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1758703091-5vAiCyKhsyCicGPyXtny\",\"provider\":\"xAI\",\"model\":\"x-ai/grok-code-fast-1\",\"object\":\"chat.completion\",\"created\":1758703091,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"native_finish_reason\":\"tool_calls\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"refusal\":null,\"reasoning\":\"The user says: \\\"Add and multiply the number 2 and 3\\\"\\n\\n\\n## Interpreting user request  \\n- The user asked to add and multiply the numbers 2 and 3.  \\n- This involves calculating both 2 + 3 and 2 * 3 as separate operations.  \\n\\n## Performing calculations  \\n- Adding 2 and 3 gives a result of 5.  \\n- Multiplying 2 and 3 gives a result of 6.\",\"tool_calls\":[{\"id\":\"call_34241586\",\"function\":{\"name\":\"add\",\"arguments\":\"{\\\"a\\\":2,\\\"b\\\":3}\"},\"index\":0,\"type\":\"function\"},{\"id\":\"call_90731200\",\"function\":{\"name\":\"multiply\",\"arguments\":\"{\\\"a\\\":2,\\\"b\\\":3}\"},\"index\":1,\"type\":\"function\"}],\"reasoning_details\":[{\"type\":\"reasoning.text\",\"text\":\"The user says: \\\"Add and multiply the number 2 and 3\\\"\\n\\n\\n## Interpreting user request  \\n- The user asked to add and multiply the numbers 2 and 3.  \\n- This involves calculating both 2 + 3 and 2 * 3 as separate operations.  \\n\\n## Performing calculations  \\n- Adding 2 and 3 gives a result of 5.  \\n- Multiplying 2 and 3 gives a result of 6.\",\"format\":\"unknown\",\"index\":0}]}}],\"system_fingerprint\":\"fp_10f00c862d\",\"usage\":{\"prompt_tokens\":467,\"completion_tokens\":329,\"total_tokens\":796,\"cost\":0.0005293,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":320,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.0000358,\"upstream_inference_completions_cost\":0.0004935},\"completion_tokens_details\":{\"reasoning_tokens\":261,\"image_tokens\":0}}}"
+        headers:
+            Content-Type:
+              - application/json
+        status: 200 OK
+        code: 200
+        duration: 1.403105125s
+  - id: 1
+    request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 1223
+        host: ""
+        body: '{"messages":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"tool_calls":[{"id":"call_34241586","function":{"arguments":"{\"a\":2,\"b\":3}","name":"add"},"type":"function"},{"id":"call_90731200","function":{"arguments":"{\"a\":2,\"b\":3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"call_34241586","role":"tool"},{"content":"6","tool_call_id":"call_90731200","role":"tool"}],"model":"x-ai/grok-code-fast-1","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"provider":{"only":["xai"]},"usage":{"include":true}}'
+        headers:
+            Accept:
+              - application/json
+            Content-Type:
+              - application/json
+            User-Agent:
+              - OpenAI/Go 2.3.0
+        url: https://openrouter.ai/api/v1/chat/completions
+        method: POST
+    response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        content_length: -1
+        uncompressed: true
+        body: "\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1758703096-Yk0w2w1Rxy1JwWmF5muJ\",\"provider\":\"xAI\",\"model\":\"x-ai/grok-code-fast-1\",\"object\":\"chat.completion\",\"created\":1758703096,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"stop\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"2 + 3 = 5  \\n2 * 3 = 6\",\"refusal\":null,\"reasoning\":\"The tools returned: first is 5 (from add), second is 6 (from multiply).\\n\",\"reasoning_details\":[{\"type\":\"reasoning.text\",\"text\":\"The tools returned: first is 5 (from add), second is 6 (from multiply).\\n\",\"format\":\"unknown\",\"index\":0}]}}],\"system_fingerprint\":\"fp_10f00c862d\",\"usage\":{\"prompt_tokens\":810,\"completion_tokens\":82,\"total_tokens\":892,\"cost\":0.00015828,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":704,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.00003528,\"upstream_inference_completions_cost\":0.000123},\"completion_tokens_details\":{\"reasoning_tokens\":67,\"image_tokens\":0}}}"
+        headers:
+            Content-Type:
+              - application/json
+        status: 200 OK
+        code: 200
+        duration: 810.960542ms

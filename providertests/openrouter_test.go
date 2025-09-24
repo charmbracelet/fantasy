@@ -20,6 +20,7 @@ func TestOpenRouterCommon(t *testing.T) {
 	var pairs []builderPair
 	models := []openrouterModel{
 		kimiK2(),
+		grokCodeFast1(),
 	}
 
 	for _, model := range models {
@@ -62,17 +63,25 @@ func kimiK2() openrouterModel {
 			"novita",
 			"baseten",
 			"together",
-			// "groq",
+			"groq",
 			"moonshotai/turbo",
 			"wandb",
 		},
 	}
 }
 
-func builderOpenrouterGLM45(r *recorder.Recorder) (ai.LanguageModel, error) {
-	provider := openrouter.New(
-		openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
-		openrouter.WithHTTPClient(&http.Client{Transport: r}),
-	)
-	return provider.LanguageModel("z-ai/glm-4.5")
+func grokCodeFast1() openrouterModel {
+	return openrouterModel{
+		name: "grok-code-fast-1",
+		builderFunc: func(r *recorder.Recorder) (ai.LanguageModel, error) {
+			provider := openrouter.New(
+				openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
+				openrouter.WithHTTPClient(&http.Client{Transport: r}),
+			)
+			return provider.LanguageModel("x-ai/grok-code-fast-1")
+		},
+		providers: []string{
+			"xai",
+		},
+	}
 }

@@ -59,6 +59,7 @@ func customMatcher(t *testing.T) recorder.MatcherFunc {
 func marshalFunc(in any) ([]byte, error) {
 	var buff bytes.Buffer
 	enc := yaml.NewEncoder(&buff)
+	enc.SetIndent(2)
 	enc.CompactSeqIndent()
 	if err := enc.Encode(in); err != nil {
 		return nil, err

@@ -24,21 +24,21 @@ interactions:
         proto_minor: 0
         content_length: -1
         uncompressed: true
-        body: "\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1758647749-zqqWGbOM5UH9GFefUrTs\",\"provider\":\"DeepInfra\",\"model\":\"moonshotai/kimi-k2-0905\",\"object\":\"chat.completion\",\"created\":1758647749,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"native_finish_reason\":\"tool_calls\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"I'll add and multiply the numbers 2 and 3 simultaneously:\",\"refusal\":null,\"reasoning\":null,\"tool_calls\":[{\"index\":0,\"id\":\"0\",\"function\":{\"arguments\":\"{\\\"a\\\": 2, \\\"b\\\": 3}\",\"name\":\"add\"},\"type\":\"function\"},{\"index\":1,\"id\":\"1\",\"function\":{\"arguments\":\"{\\\"a\\\": 2, \\\"b\\\": 3}\",\"name\":\"multiply\"},\"type\":\"function\"}]}}],\"usage\":{\"prompt_tokens\":171,\"completion_tokens\":26,\"total_tokens\":197,\"cost\":0.0001375,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.0000855,\"upstream_inference_completions_cost\":0.000052},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0}}}"
+        body: "\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1758698449-e3XU27OpaY4v01tTfENE\",\"provider\":\"DeepInfra\",\"model\":\"moonshotai/kimi-k2-0905\",\"object\":\"chat.completion\",\"created\":1758698449,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"native_finish_reason\":\"tool_calls\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"I'll add and multiply 2 and 3 for you:\",\"refusal\":null,\"reasoning\":null,\"tool_calls\":[{\"index\":0,\"id\":\"0\",\"function\":{\"arguments\":\"{\\\"a\\\": 2, \\\"b\\\": 3}\",\"name\":\"add\"},\"type\":\"function\"},{\"index\":1,\"id\":\"1\",\"function\":{\"arguments\":\"{\\\"a\\\": 2, \\\"b\\\": 3}\",\"name\":\"multiply\"},\"type\":\"function\"}]}}],\"usage\":{\"prompt_tokens\":171,\"completion_tokens\":22,\"total_tokens\":193,\"cost\":0.0001295,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.0000855,\"upstream_inference_completions_cost\":0.000044},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0}}}"
         headers:
             Content-Type:
               - application/json
         status: 200 OK
         code: 200
-        duration: 734.548708ms
+        duration: 1.149145667s
   - id: 1
     request:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 1259
+        content_length: 1240
         host: ""
-        body: '{"messages":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"content":"I''ll add and multiply the numbers 2 and 3 simultaneously:","tool_calls":[{"id":"0","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"add"},"type":"function"},{"id":"1","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"0","role":"tool"},{"content":"6","tool_call_id":"1","role":"tool"}],"model":"moonshotai/kimi-k2-0905","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"provider":{"only":["deepinfra"]},"usage":{"include":true}}'
+        body: '{"messages":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"content":"I''ll add and multiply 2 and 3 for you:","tool_calls":[{"id":"0","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"add"},"type":"function"},{"id":"1","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"0","role":"tool"},{"content":"6","tool_call_id":"1","role":"tool"}],"model":"moonshotai/kimi-k2-0905","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true},"provider":{"only":["deepinfra"]}}'
         headers:
             Accept:
               - application/json
@@ -54,10 +54,10 @@ interactions:
         proto_minor: 0
         content_length: -1
         uncompressed: true
-        body: "\n         \n\n         \n{\"id\":\"gen-1758647751-WDFTJ7v0kiQOg8smDi71\",\"provider\":\"DeepInfra\",\"model\":\"moonshotai/kimi-k2-0905\",\"object\":\"chat.completion\",\"created\":1758647751,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"stop\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"The results are:\\n- 2 + 3 = 5\\n- 2 × 3 = 6\",\"refusal\":null,\"reasoning\":null}}],\"usage\":{\"prompt_tokens\":273,\"completion_tokens\":23,\"total_tokens\":296,\"cost\":0.0001825,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.0001365,\"upstream_inference_completions_cost\":0.000046},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0}}}"
+        body: "\n         \n\n         \n{\"id\":\"gen-1758698451-RTApipZcT6NzkIESYlAi\",\"provider\":\"DeepInfra\",\"model\":\"moonshotai/kimi-k2-0905\",\"object\":\"chat.completion\",\"created\":1758698451,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"stop\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"The calculations show:\\n- Addition: 2 + 3 = 5\\n- Multiplication: 2 × 3 = 6\",\"refusal\":null,\"reasoning\":null}}],\"usage\":{\"prompt_tokens\":272,\"completion_tokens\":28,\"total_tokens\":300,\"cost\":0.000192,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.000136,\"upstream_inference_completions_cost\":0.000056},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0}}}"
         headers:
             Content-Type:
               - application/json
         status: 200 OK
         code: 200
-        duration: 674.08675ms
+        duration: 628.999792ms

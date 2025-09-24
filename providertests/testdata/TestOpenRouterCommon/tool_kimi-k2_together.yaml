@@ -8,7 +8,7 @@ interactions:
         proto_minor: 1
         content_length: 523
         host: ""
-        body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"}],"model":"moonshotai/kimi-k2-0905","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"provider":{"only":["together"]},"usage":{"include":true}}'
+        body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"}],"model":"moonshotai/kimi-k2-0905","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"usage":{"include":true},"provider":{"only":["together"]}}'
         headers:
             Accept:
               - application/json
@@ -24,13 +24,13 @@ interactions:
         proto_minor: 0
         content_length: -1
         uncompressed: true
-        body: "\n         \n\n         \n\n         \n{\"id\":\"gen-1758647858-ceITKhpVGcd9PyidYDNu\",\"provider\":\"Together\",\"model\":\"moonshotai/kimi-k2-0905\",\"object\":\"chat.completion\",\"created\":1758647858,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"native_finish_reason\":\"tool_calls\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"refusal\":null,\"reasoning\":null,\"tool_calls\":[{\"index\":0,\"id\":\"call_7g6vt6hca29oimgmurwrcaqa\",\"type\":\"function\",\"function\":{\"name\":\"weather\",\"arguments\":\"{\\\"location\\\":\\\"Florence,Italy\\\"}\"}}]}}],\"usage\":{\"prompt_tokens\":105,\"completion_tokens\":21,\"total_tokens\":126,\"cost\":0.000168,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.000105,\"upstream_inference_completions_cost\":0.000063},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0}}}"
+        body: "\n         \n{\"id\":\"gen-1758698605-4GWVwkjiqfBR9eUVpeKa\",\"provider\":\"Together\",\"model\":\"moonshotai/kimi-k2-0905\",\"object\":\"chat.completion\",\"created\":1758698605,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"native_finish_reason\":\"tool_calls\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"refusal\":null,\"reasoning\":null,\"tool_calls\":[{\"index\":0,\"id\":\"call_s46a1jsh61wi8iquvxby0ygp\",\"type\":\"function\",\"function\":{\"name\":\"weather\",\"arguments\":\"{\\\"location\\\":\\\"Florence,Italy\\\"}\"}}]}}],\"usage\":{\"prompt_tokens\":105,\"completion_tokens\":21,\"total_tokens\":126,\"cost\":0.000168,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.000105,\"upstream_inference_completions_cost\":0.000063},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0}}}"
         headers:
             Content-Type:
               - application/json
         status: 200 OK
         code: 200
-        duration: 1.704329083s
+        duration: 832.583ms
   - id: 1
     request:
         proto: HTTP/1.1
@@ -38,7 +38,7 @@ interactions:
         proto_minor: 1
         content_length: 774
         host: ""
-        body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"call_7g6vt6hca29oimgmurwrcaqa","function":{"arguments":"{\"location\":\"Florence,Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"call_7g6vt6hca29oimgmurwrcaqa","role":"tool"}],"model":"moonshotai/kimi-k2-0905","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"usage":{"include":true},"provider":{"only":["together"]}}'
+        body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"call_s46a1jsh61wi8iquvxby0ygp","function":{"arguments":"{\"location\":\"Florence,Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"call_s46a1jsh61wi8iquvxby0ygp","role":"tool"}],"model":"moonshotai/kimi-k2-0905","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"provider":{"only":["together"]},"usage":{"include":true}}'
         headers:
             Accept:
               - application/json
@@ -54,10 +54,10 @@ interactions:
         proto_minor: 0
         content_length: -1
         uncompressed: true
-        body: "\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1758647860-IAImOeeO8lAgdrbBlSAm\",\"provider\":\"Together\",\"model\":\"moonshotai/kimi-k2-0905\",\"object\":\"chat.completion\",\"created\":1758647860,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"stop\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"It’s a sizzling 40 °C in Florence right now—definitely a day to seek shade, stay hydrated, and maybe linger over a long, air-conditioned gelato break!\",\"refusal\":null,\"reasoning\":null}}],\"usage\":{\"prompt_tokens\":180,\"completion_tokens\":40,\"total_tokens\":220,\"cost\":0.0003,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.00018,\"upstream_inference_completions_cost\":0.00012},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0}}}"
+        body: "\n         \n\n         \n{\"id\":\"gen-1758698606-brd5WwcctChPma4qEjXz\",\"provider\":\"Together\",\"model\":\"moonshotai/kimi-k2-0905\",\"object\":\"chat.completion\",\"created\":1758698606,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"stop\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"It’s a hot 40°C in Florence right now—stay cool and hydrated!\",\"refusal\":null,\"reasoning\":null}}],\"usage\":{\"prompt_tokens\":180,\"completion_tokens\":18,\"total_tokens\":198,\"cost\":0.000234,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.00018,\"upstream_inference_completions_cost\":0.000054},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0}}}"
         headers:
             Content-Type:
               - application/json
         status: 200 OK
         code: 200
-        duration: 1.154687s
+        duration: 1.216442833s

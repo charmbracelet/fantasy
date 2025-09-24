@@ -1,0 +1,33 @@
+---
+version: 2
+interactions:
+  - id: 0
+    request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 198
+        host: ""
+        body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"Say hi in Portuguese","role":"user"}],"model":"openai/gpt-5","max_completion_tokens":4000,"usage":{"include":true}}'
+        headers:
+            Accept:
+              - application/json
+            Content-Type:
+              - application/json
+            User-Agent:
+              - OpenAI/Go 2.3.0
+        url: https://openrouter.ai/api/v1/chat/completions
+        method: POST
+    response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        content_length: -1
+        uncompressed: true
+        body: "\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1758707610-yB7fsLutOErJTdVhkzne\",\"provider\":\"OpenAI\",\"model\":\"openai/gpt-5\",\"object\":\"chat.completion\",\"created\":1758707610,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"completed\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"Olá!\",\"refusal\":null,\"reasoning\":\"**Responding in Portuguese**\\n\\nThe user asked me to say hi in Portuguese, so I want to keep it simple and straightforward. The best options are \\\"Oi\\\" or \\\"Olá.\\\" Since they asked for a concise answer, I think I'll just respond with \\\"Olá!\\\" but maybe I'll also mention that it means \\\"hi\\\" or \\\"hello.\\\" Nonetheless, I'll stick to the simplest response. So, I'll just say, \\\"Olá! Done.\\\"\",\"reasoning_details\":[{\"type\":\"reasoning.summary\",\"summary\":\"**Responding in Portuguese**\\n\\nThe user asked me to say hi in Portuguese, so I want to keep it simple and straightforward. The best options are \\\"Oi\\\" or \\\"Olá.\\\" Since they asked for a concise answer, I think I'll just respond with \\\"Olá!\\\" but maybe I'll also mention that it means \\\"hi\\\" or \\\"hello.\\\" Nonetheless, I'll stick to the simplest response. So, I'll just say, \\\"Olá! Done.\\\"\",\"format\":\"openai-responses-v1\",\"index\":0},{\"type\":\"reasoning.encrypted\",\"data\":\"gAAAAABo07-faKE7Hzjjoif0K6Cz7yMEXIXVkUMu8WEO-PkyWr54VCWI1yprdYfb9fAaSDLad7pUc8vg5RnFw2Ah3xVs1iH6AWZEcNuC3LFgg_Mnzeg8NA1l7MtMeNx-tVh1ib4Dj53CYl7aCmJAuRoeeEFdxNicyTITtj4CzcspmFmIsXjmbl3B6beN2rTsWuPKjnbTsdJKUfTOIrC6IALGLChR7h7y5lR7Ba245z7c8yc1Fuq8eUS5uBFFjmAZXoJs2okx2mOnc63t5USyM7uZUlPcGIAKvIeokX6S-tSyqUWygpLQvWEv3azgHQ1iuc1OziCwQLiYqwg7AF4VPZsHGnorxzcJETmPpunrImF18Q36NBaUVorVllwfsvAyieX6aryM1ohbai2KkltR7kwtBqacudIR7m6sILLWqcOJJMBlO-TDZq6vDQg8BFFLw6R8uKGrhm1sLizD-UDki-ZqQj2KnK6huDvHxk4hosgbQ1nSJ4UxxqGUuc3IoHKcVUEctvuFOJlGHcl4Thy_KwOrKVtBABJeVlAfbaKWQl6ed14p7-Epgo3M1PuR6jaX_8vFrLk3Pi7YIrLewgq1eX5k8SQOWW8XYGnaWFzslRbf7I6oVQi8lst1bys01xQQmTlCe21-7VreU4hsdfM9OklOLJZhE1uV9z8pJcGm1amvyjioHMpvhu7__qbic4od5iQfKruISBcsZhYj6TQQ2o82IXBlrEyZx6b4JbK0q7Ejoy-Wu0PGnWrLNbIcVBvSFkKNKNyPU_nHvpU5p4kCj2HxytaOcN2knFIllQaCe95fi226DWDknWgM_pJKGL1W6yZuOvFcb0Eqm42ywrLYskPr5iq-HjURtiTpvqlzljXrjMxOBr7U8fOzA-9bJaYETMp4dvAilYpIX8TD8d3p-NzjgtGICtsjbyDR1TKjeQMar4oQJIeRQ1UGmwDaWUlHij057XsYfCxe5-PgfTL2hmqgY1Ptn4gL9Asjrd2xx-SRD7-Zcs1a4tpHoYePebBIhuvspdBDFNYl5cqZAQ6s0PDzxne8fhZyNi9o2xT9sJwZVpo5uOTNaQcrIaNNczcTfmj1zo0-wNYRJKbFRikrsEAQ-PZYKCz_iHm04lblR0XuBJHKirPM-8TqPJRgJ6AcQiI8e9E1EK2BlaR6IuqRqNVxRs6Ki65yYCoAn9pMRJcYQ8C2f2LxC2Vr9dGwMMk0E5wVp705xwziXX-0eucQLN7NyPrO5lz0w_er7ul633LpfVtsNNSPfvKqx7imwvNtV42eI2Bwiq5O1VLV4-n3IsfIckTDhpr8CjphUmudRSBbh3r8_rG6syqHW5xg-Q-DBKdSjoyqEeQUqCQ0EUi06AkBBWROoFMS-Q==\",\"id\":\"rs_68d3bf9c0d44819489ff8e37a02d93a3007f473bfaf79047\",\"format\":\"openai-responses-v1\",\"index\":0}]}}],\"usage\":{\"prompt_tokens\":19,\"completion_tokens\":72,\"total_tokens\":91,\"cost\":0.000371875,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.000011875,\"upstream_inference_completions_cost\":0.00036},\"completion_tokens_details\":{\"reasoning_tokens\":64,\"image_tokens\":0}}}"
+        headers:
+            Content-Type:
+              - application/json
+        status: 200 OK
+        code: 200
+        duration: 1.408275916s

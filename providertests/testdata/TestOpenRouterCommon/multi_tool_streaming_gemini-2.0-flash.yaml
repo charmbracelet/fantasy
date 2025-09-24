@@ -1,0 +1,77 @@
+---
+version: 2
+interactions:
+  - id: 0
+    request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 894
+        host: ""
+        body: '{"messages":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"}],"model":"google/gemini-2.0-flash-001","max_tokens":4000,"stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true},"stream":true}'
+        headers:
+            Accept:
+              - application/json
+            Content-Type:
+              - application/json
+            User-Agent:
+              - OpenAI/Go 2.3.0
+        url: https://openrouter.ai/api/v1/chat/completions
+        method: POST
+    response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        content_length: -1
+        body: |+
+            data: {"id":"gen-1758707458-cZd2shzRFx9lwNMJ5ZO9","provider":"Google AI Studio","model":"google/gemini-2.0-flash-001","object":"chat.completion.chunk","created":1758707458,"choices":[{"index":0,"delta":{"role":"assistant","content":null,"tool_calls":[{"index":0,"id":"tool_0_add_OANWtA5QFZ8mJn7rBE3t","type":"function","function":{"name":"add","arguments":"{\"b\":3,\"a\":2}"}},{"index":1,"id":"tool_1_multiply_iU7twvuBC0wB45OQUN6N","type":"function","function":{"name":"multiply","arguments":"{\"b\":3,\"a\":2}"}}]},"finish_reason":"tool_calls","native_finish_reason":"STOP","logprobs":null}]}
+
+            data: {"id":"gen-1758707458-cZd2shzRFx9lwNMJ5ZO9","provider":"Google AI Studio","model":"google/gemini-2.0-flash-001","object":"chat.completion.chunk","created":1758707458,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"usage":{"prompt_tokens":57,"completion_tokens":10,"total_tokens":67,"cost":0.0000097,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.0000057,"upstream_inference_completions_cost":0.000004},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}
+
+            data: [DONE]
+
+        headers:
+            Content-Type:
+              - text/event-stream
+        status: 200 OK
+        code: 200
+        duration: 820.145667ms
+  - id: 1
+    request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 1337
+        host: ""
+        body: '{"messages":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"tool_calls":[{"id":"tool_0_add_OANWtA5QFZ8mJn7rBE3t","function":{"arguments":"{\"b\":3,\"a\":2}","name":"add"},"type":"function"},{"id":"tool_1_multiply_iU7twvuBC0wB45OQUN6N","function":{"arguments":"{\"b\":3,\"a\":2}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"tool_0_add_OANWtA5QFZ8mJn7rBE3t","role":"tool"},{"content":"6","tool_call_id":"tool_1_multiply_iU7twvuBC0wB45OQUN6N","role":"tool"}],"model":"google/gemini-2.0-flash-001","max_tokens":4000,"stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true},"stream":true}'
+        headers:
+            Accept:
+              - application/json
+            Content-Type:
+              - application/json
+            User-Agent:
+              - OpenAI/Go 2.3.0
+        url: https://openrouter.ai/api/v1/chat/completions
+        method: POST
+    response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        content_length: -1
+        body: |+
+            data: {"id":"gen-1758707459-XituTw65gkdm6enlsHPw","provider":"Google AI Studio","model":"google/gemini-2.0-flash-001","object":"chat.completion.chunk","created":1758707459,"choices":[{"index":0,"delta":{"role":"assistant","content":"The"},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+            data: {"id":"gen-1758707459-XituTw65gkdm6enlsHPw","provider":"Google AI Studio","model":"google/gemini-2.0-flash-001","object":"chat.completion.chunk","created":1758707459,"choices":[{"index":0,"delta":{"role":"assistant","content":" sum of 2 and 3 is 5, and the product of 2 and "},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+            data: {"id":"gen-1758707459-XituTw65gkdm6enlsHPw","provider":"Google AI Studio","model":"google/gemini-2.0-flash-001","object":"chat.completion.chunk","created":1758707459,"choices":[{"index":0,"delta":{"role":"assistant","content":"3 is 6.\n"},"finish_reason":"stop","native_finish_reason":"STOP","logprobs":null}]}
+
+            data: {"id":"gen-1758707459-XituTw65gkdm6enlsHPw","provider":"Google AI Studio","model":"google/gemini-2.0-flash-001","object":"chat.completion.chunk","created":1758707459,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"usage":{"prompt_tokens":113,"completion_tokens":26,"total_tokens":139,"cost":0.0000217,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.0000113,"upstream_inference_completions_cost":0.0000104},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}
+
+            data: [DONE]
+
+        headers:
+            Content-Type:
+              - text/event-stream
+        status: 200 OK
+        code: 200
+        duration: 919.224541ms

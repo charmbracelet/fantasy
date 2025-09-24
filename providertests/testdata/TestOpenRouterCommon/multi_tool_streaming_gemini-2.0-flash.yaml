@@ -24,9 +24,9 @@ interactions:
         proto_minor: 0
         content_length: -1
         body: |+
-            data: {"id":"gen-1758709949-Jrfip9PNq2gmUbfd290T","provider":"Google","model":"google/gemini-2.0-flash-001","object":"chat.completion.chunk","created":1758709949,"choices":[{"index":0,"delta":{"role":"assistant","content":null,"tool_calls":[{"index":0,"id":"tool_0_add_kM776wR9n8RFAaTIVrUZ","type":"function","function":{"name":"add","arguments":"{\"a\":2,\"b\":3}"}},{"index":1,"id":"tool_1_multiply_j6xBsBDWWsMKmTQQlIrS","type":"function","function":{"name":"multiply","arguments":"{\"b\":3,\"a\":2}"}}]},"finish_reason":"tool_calls","native_finish_reason":"STOP","logprobs":null}]}
+            data: {"id":"gen-1758711127-YkQltErQCppBW4EPbztY","provider":"Google AI Studio","model":"google/gemini-2.0-flash-001","object":"chat.completion.chunk","created":1758711127,"choices":[{"index":0,"delta":{"role":"assistant","content":null,"tool_calls":[{"index":0,"id":"tool_0_add_Xx7CTt77LOuXCeqn65CJ","type":"function","function":{"name":"add","arguments":"{\"b\":3,\"a\":2}"}},{"index":1,"id":"tool_1_multiply_h7WIM2aqN2mmQm5L0Pel","type":"function","function":{"name":"multiply","arguments":"{\"a\":2,\"b\":3}"}}]},"finish_reason":"tool_calls","native_finish_reason":"STOP","logprobs":null}]}
 
-            data: {"id":"gen-1758709949-Jrfip9PNq2gmUbfd290T","provider":"Google","model":"google/gemini-2.0-flash-001","object":"chat.completion.chunk","created":1758709949,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"usage":{"prompt_tokens":57,"completion_tokens":10,"total_tokens":67,"cost":0.00001455,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.00000855,"upstream_inference_completions_cost":0.000006},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}
+            data: {"id":"gen-1758711127-YkQltErQCppBW4EPbztY","provider":"Google AI Studio","model":"google/gemini-2.0-flash-001","object":"chat.completion.chunk","created":1758711127,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"usage":{"prompt_tokens":57,"completion_tokens":10,"total_tokens":67,"cost":0.0000097,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.0000057,"upstream_inference_completions_cost":0.000004},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}
 
             data: [DONE]
 
@@ -35,7 +35,7 @@ interactions:
               - text/event-stream
         status: 200 OK
         code: 200
-        duration: 1.501293708s
+        duration: 960.158666ms
   - id: 1
     request:
         proto: HTTP/1.1
@@ -43,7 +43,7 @@ interactions:
         proto_minor: 1
         content_length: 1337
         host: ""
-        body: '{"messages":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"tool_calls":[{"id":"tool_0_add_kM776wR9n8RFAaTIVrUZ","function":{"arguments":"{\"a\":2,\"b\":3}","name":"add"},"type":"function"},{"id":"tool_1_multiply_j6xBsBDWWsMKmTQQlIrS","function":{"arguments":"{\"b\":3,\"a\":2}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"tool_0_add_kM776wR9n8RFAaTIVrUZ","role":"tool"},{"content":"6","tool_call_id":"tool_1_multiply_j6xBsBDWWsMKmTQQlIrS","role":"tool"}],"model":"google/gemini-2.0-flash-001","max_tokens":4000,"stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true},"stream":true}'
+        body: '{"messages":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"tool_calls":[{"id":"tool_0_add_Xx7CTt77LOuXCeqn65CJ","function":{"arguments":"{\"b\":3,\"a\":2}","name":"add"},"type":"function"},{"id":"tool_1_multiply_h7WIM2aqN2mmQm5L0Pel","function":{"arguments":"{\"a\":2,\"b\":3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"tool_0_add_Xx7CTt77LOuXCeqn65CJ","role":"tool"},{"content":"6","tool_call_id":"tool_1_multiply_h7WIM2aqN2mmQm5L0Pel","role":"tool"}],"model":"google/gemini-2.0-flash-001","max_tokens":4000,"stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true},"stream":true}'
         headers:
             Accept:
               - application/json
@@ -59,13 +59,13 @@ interactions:
         proto_minor: 0
         content_length: -1
         body: |+
-            data: {"id":"gen-1758709951-2k3X2JGEXBpfCkaAC8Sa","provider":"Google AI Studio","model":"google/gemini-2.0-flash-001","object":"chat.completion.chunk","created":1758709951,"choices":[{"index":0,"delta":{"role":"assistant","content":"The"},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+            data: {"id":"gen-1758711128-hnGukf16vM7usStaWuia","provider":"Google AI Studio","model":"google/gemini-2.0-flash-001","object":"chat.completion.chunk","created":1758711128,"choices":[{"index":0,"delta":{"role":"assistant","content":"The"},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
 
-            data: {"id":"gen-1758709951-2k3X2JGEXBpfCkaAC8Sa","provider":"Google AI Studio","model":"google/gemini-2.0-flash-001","object":"chat.completion.chunk","created":1758709951,"choices":[{"index":0,"delta":{"role":"assistant","content":" sum of 2 and 3 is 5, and the product of 2 and "},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+            data: {"id":"gen-1758711128-hnGukf16vM7usStaWuia","provider":"Google AI Studio","model":"google/gemini-2.0-flash-001","object":"chat.completion.chunk","created":1758711128,"choices":[{"index":0,"delta":{"role":"assistant","content":" sum of 2 and 3 is 5, and the product of "},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
 
-            data: {"id":"gen-1758709951-2k3X2JGEXBpfCkaAC8Sa","provider":"Google AI Studio","model":"google/gemini-2.0-flash-001","object":"chat.completion.chunk","created":1758709951,"choices":[{"index":0,"delta":{"role":"assistant","content":"3 is 6.\n"},"finish_reason":"stop","native_finish_reason":"STOP","logprobs":null}]}
+            data: {"id":"gen-1758711128-hnGukf16vM7usStaWuia","provider":"Google AI Studio","model":"google/gemini-2.0-flash-001","object":"chat.completion.chunk","created":1758711128,"choices":[{"index":0,"delta":{"role":"assistant","content":"2 and 3 is 6.\n"},"finish_reason":"stop","native_finish_reason":"STOP","logprobs":null}]}
 
-            data: {"id":"gen-1758709951-2k3X2JGEXBpfCkaAC8Sa","provider":"Google AI Studio","model":"google/gemini-2.0-flash-001","object":"chat.completion.chunk","created":1758709951,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"usage":{"prompt_tokens":113,"completion_tokens":26,"total_tokens":139,"cost":0.0000217,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.0000113,"upstream_inference_completions_cost":0.0000104},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}
+            data: {"id":"gen-1758711128-hnGukf16vM7usStaWuia","provider":"Google AI Studio","model":"google/gemini-2.0-flash-001","object":"chat.completion.chunk","created":1758711128,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"usage":{"prompt_tokens":111,"completion_tokens":26,"total_tokens":137,"cost":0.0000215,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.0000111,"upstream_inference_completions_cost":0.0000104},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}
 
             data: [DONE]
 
@@ -74,4 +74,4 @@ interactions:
               - text/event-stream
         status: 200 OK
         code: 200
-        duration: 550.195459ms
+        duration: 591.01ms

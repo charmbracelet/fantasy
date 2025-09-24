@@ -199,7 +199,7 @@ func testMultiTool(t *testing.T, pair builderPair) {
 
 		agent := ai.NewAgent(
 			languageModel,
-			ai.WithSystemPrompt("You are a helpful assistant. Always use both add and multiply at the same time."),
+			ai.WithSystemPrompt("You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS."),
 			ai.WithTools(addTool),
 			ai.WithTools(multiplyTool),
 		)

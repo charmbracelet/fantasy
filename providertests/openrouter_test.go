@@ -20,6 +20,7 @@ func TestOpenRouterCommon(t *testing.T) {
 		{"gemini-2.5-flash", builderOpenRouterGemini25Flash, nil},
 		{"gemini-2.0-flash", builderOpenRouterGemini20Flash, nil},
 		{"deepseek-chat-v3.1-free", builderOpenRouterDeepseekV31Free, nil},
+		{"qwen3-235b-a22b-2507", builderOpenRouterQwen3Instruct, nil},
 		{"gpt-5", builderOpenRouterGPT5, nil},
 		{"glm-4.5", builderOpenRouterGLM45, nil},
 	})
@@ -120,4 +121,12 @@ func builderOpenRouterGLM45(r *recorder.Recorder) (ai.LanguageModel, error) {
 		openrouter.WithHTTPClient(&http.Client{Transport: r}),
 	)
 	return provider.LanguageModel("z-ai/glm-4.5")
+}
+
+func builderOpenRouterQwen3Instruct(r *recorder.Recorder) (ai.LanguageModel, error) {
+	provider := openrouter.New(
+		openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
+		openrouter.WithHTTPClient(&http.Client{Transport: r}),
+	)
+	return provider.LanguageModel("qwen/qwen3-235b-a22b-2507")
 }

@@ -24,13 +24,13 @@ interactions:
         proto_minor: 0
         content_length: -1
         uncompressed: true
-        body: "\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1758707428-H3SBjjtbDH0lsiHg6znY\",\"provider\":\"xAI\",\"model\":\"x-ai/grok-4-fast:free\",\"object\":\"chat.completion\",\"created\":1758707428,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"native_finish_reason\":\"tool_calls\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"refusal\":null,\"reasoning\":null,\"tool_calls\":[{\"id\":\"call_18051373\",\"function\":{\"name\":\"weather\",\"arguments\":\"{\\\"location\\\":\\\"Florence, Italy\\\"}\"},\"index\":0,\"type\":\"function\"}]}}],\"system_fingerprint\":\"fp_9362061f30\",\"usage\":{\"prompt_tokens\":322,\"completion_tokens\":266,\"total_tokens\":588,\"cost\":0,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":266,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0,\"upstream_inference_completions_cost\":0},\"completion_tokens_details\":{\"reasoning_tokens\":240,\"image_tokens\":0}}}"
+        body: "\n         \n\n         \n\n         \n{\"id\":\"gen-1758709923-KWVBVrQU0ASlL4e93i2P\",\"provider\":\"xAI\",\"model\":\"x-ai/grok-4-fast:free\",\"object\":\"chat.completion\",\"created\":1758709923,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"native_finish_reason\":\"tool_calls\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"refusal\":null,\"reasoning\":null,\"tool_calls\":[{\"id\":\"call_43524874\",\"function\":{\"name\":\"weather\",\"arguments\":\"{\\\"location\\\":\\\"Florence, Italy\\\"}\"},\"index\":0,\"type\":\"function\"}]}}],\"system_fingerprint\":\"fp_9362061f30\",\"usage\":{\"prompt_tokens\":322,\"completion_tokens\":117,\"total_tokens\":439,\"cost\":0,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":265,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0,\"upstream_inference_completions_cost\":0},\"completion_tokens_details\":{\"reasoning_tokens\":91,\"image_tokens\":0}}}"
         headers:
             Content-Type:
               - application/json
         status: 200 OK
         code: 200
-        duration: 392.3505ms
+        duration: 288.419792ms
   - id: 1
     request:
         proto: HTTP/1.1
@@ -38,7 +38,7 @@ interactions:
         proto_minor: 1
         content_length: 708
         host: ""
-        body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"call_18051373","function":{"arguments":"{\"location\":\"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"call_18051373","role":"tool"}],"model":"x-ai/grok-4-fast:free","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
+        body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"call_43524874","function":{"arguments":"{\"location\":\"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"call_43524874","role":"tool"}],"model":"x-ai/grok-4-fast:free","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
         headers:
             Accept:
               - application/json
@@ -54,10 +54,10 @@ interactions:
         proto_minor: 0
         content_length: -1
         uncompressed: true
-        body: "\n         \n\n         \n\n         \n{\"id\":\"gen-1758707431-Gk1xvwMhvunb2oUNN73I\",\"provider\":\"xAI\",\"model\":\"x-ai/grok-4-fast:free\",\"object\":\"chat.completion\",\"created\":1758707431,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"stop\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"The current weather in Florence, Italy, is 40°C. It looks like a hot day—stay hydrated! If you need more details (like forecast or conditions), let me know.\",\"refusal\":null,\"reasoning\":null}}],\"system_fingerprint\":\"fp_9362061f30\",\"usage\":{\"prompt_tokens\":601,\"completion_tokens\":82,\"total_tokens\":683,\"cost\":0,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":265,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0,\"upstream_inference_completions_cost\":0},\"completion_tokens_details\":{\"reasoning_tokens\":44,\"image_tokens\":0}}}"
+        body: "\n         \n{\"id\":\"gen-1758709925-KW5q44trpZVPjx7magOa\",\"provider\":\"xAI\",\"model\":\"x-ai/grok-4-fast:free\",\"object\":\"chat.completion\",\"created\":1758709925,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"stop\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"The current temperature in Florence, Italy, is 40°C. If you need more details like forecast or conditions, let me know!\",\"refusal\":null,\"reasoning\":null}}],\"system_fingerprint\":\"fp_9362061f30\",\"usage\":{\"prompt_tokens\":452,\"completion_tokens\":81,\"total_tokens\":533,\"cost\":0,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":440,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0,\"upstream_inference_completions_cost\":0},\"completion_tokens_details\":{\"reasoning_tokens\":54,\"image_tokens\":0}}}"
         headers:
             Content-Type:
               - application/json
         status: 200 OK
         code: 200
-        duration: 452.725708ms
+        duration: 306.220959ms

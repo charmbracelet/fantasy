@@ -1,0 +1,130 @@
+---
+version: 2
+interactions:
+  - id: 0
+    request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 550
+        host: generativelanguage.googleapis.com
+        body: |
+            {"contents":[{"parts":[{"text":"What's the weather in Florence, Italy?"}],"role":"user"}],"generationConfig":{"thinkingConfig":{"includeThoughts":true,"thinkingBudget":128}},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}
+        headers:
+            Content-Type:
+              - application/json
+            User-Agent:
+              - google-genai-sdk/1.23.0 gl-go/go1.25.0
+        url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+        method: POST
+    response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        content_length: -1
+        uncompressed: true
+        body: |
+            {
+              "candidates": [
+                {
+                  "content": {
+                    "parts": [
+                      {
+                        "text": "**My Approach to the Florence Weather Query**\n\nOkay, so the user needs the weather for Florence, Italy. No problem. That's a straightforward request. I know I have a tool called `weather`, which is perfect for this. My first thought is to grab that tool and use it. I'll need to specify the location, of course.  \"Florence, Italy\" is what I need to feed into the `location` parameter of the `weather` tool.  Essentially, I'm just going to call the `weather` tool with \"Florence, Italy\" as the input. That should give me the weather information they're looking for.  Easy peasy.\n",
+                        "thought": true
+                      },
+                      {
+                        "functionCall": {
+                          "name": "weather",
+                          "args": {
+                            "location": "Florence, Italy"
+                          }
+                        },
+                        "thoughtSignature": "CpICAdHtim/uAn9hFcnUaVUJ5BitYNYMl+/HjfIwgECLXLa3/RJ5LabwcGy+nwddN6CF1P8/jUTBrNjwxP5ox9pPRMTUyuCKbDerCwo8lNJqqakI/rqXM8znQkO0jPdkTG+tyOJpjIAFvCL2b9zTXG6IIk3utmTAbvFkg2tR81WCcvf0zZshcWyjoGZYLL419U3Pn5tiOvwWbaZED0P1IHgyIQ1SWJrN4hlK2XSCdApHe9sYYg6Tq52pGVSNSBJOMxAjbPUhmRHA0kOAozgUiduvEqyzaxJTB8imN8KmrtLzZJxQUC54pg9KkSTQ5gz0jixmT+NTPATrnyUDOqZ6i69rPVtlWANHhscj8RooCKj6s3eX4A=="
+                      }
+                    ],
+                    "role": "model"
+                  },
+                  "finishReason": "STOP",
+                  "index": 0
+                }
+              ],
+              "usageMetadata": {
+                "promptTokenCount": 54,
+                "candidatesTokenCount": 15,
+                "totalTokenCount": 125,
+                "promptTokensDetails": [
+                  {
+                    "modality": "TEXT",
+                    "tokenCount": 54
+                  }
+                ],
+                "thoughtsTokenCount": 56
+              },
+              "modelVersion": "gemini-2.5-flash",
+              "responseId": "scXTaIm8B-m1nsEP4trWkAM"
+            }
+        headers:
+            Content-Type:
+              - application/json; charset=UTF-8
+        status: 200 OK
+        code: 200
+        duration: 2.234945625s
+  - id: 1
+    request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 776
+        host: generativelanguage.googleapis.com
+        body: |
+            {"contents":[{"parts":[{"text":"What's the weather in Florence, Italy?"}],"role":"user"},{"parts":[{"functionCall":{"args":{"location":"Florence, Italy"},"id":"weather","name":"weather"}}],"role":"model"},{"parts":[{"functionResponse":{"id":"weather","name":"weather","response":{"result":"40 C"}}}],"role":"user"}],"generationConfig":{"thinkingConfig":{"includeThoughts":true,"thinkingBudget":128}},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}
+        headers:
+            Content-Type:
+              - application/json
+            User-Agent:
+              - google-genai-sdk/1.23.0 gl-go/go1.25.0
+        url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+        method: POST
+    response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        content_length: -1
+        uncompressed: true
+        body: |
+            {
+              "candidates": [
+                {
+                  "content": {
+                    "parts": [
+                      {
+                        "text": "The weather in Florence, Italy is 40 degrees Celsius."
+                      }
+                    ],
+                    "role": "model"
+                  },
+                  "finishReason": "STOP",
+                  "index": 0
+                }
+              ],
+              "usageMetadata": {
+                "promptTokenCount": 84,
+                "candidatesTokenCount": 13,
+                "totalTokenCount": 97,
+                "promptTokensDetails": [
+                  {
+                    "modality": "TEXT",
+                    "tokenCount": 84
+                  }
+                ]
+              },
+              "modelVersion": "gemini-2.5-flash",
+              "responseId": "scXTaPDFIvPPnsEP4rTvuAM"
+            }
+        headers:
+            Content-Type:
+              - application/json; charset=UTF-8
+        status: 200 OK
+        code: 200
+        duration: 411.970958ms

@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+  - id: 0
+    request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 494
+        host: ""
+        body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence, Italy?","role":"user"}],"model":"z-ai/glm-4.5","tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"reasoning":{"effort":"medium"},"usage":{"include":true}}'
+        headers:
+            Accept:
+              - application/json
+            Content-Type:
+              - application/json
+            User-Agent:
+              - OpenAI/Go 2.3.0
+        url: https://openrouter.ai/api/v1/chat/completions
+        method: POST
+    response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        content_length: -1
+        uncompressed: true
+        body: "\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1758710084-rKyTKqwSdfgnfFQQurSG\",\"provider\":\"Z.AI\",\"model\":\"z-ai/glm-4.5\",\"object\":\"chat.completion\",\"created\":1758710084,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"native_finish_reason\":\"tool_calls\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\\n\\nI'll check the weather in Florence, Italy for you.\\n\",\"refusal\":null,\"reasoning\":\"The user is asking for the weather in Florence, Italy. I have access to a weather function that can get weather information for a location. The function requires a \\\"location\\\" parameter, and the user has specified \\\"Florence, Italy\\\" as the location. I should use this exact location string when calling the function.\",\"tool_calls\":[{\"id\":\"call_28e19b3460e24e5680a77050\",\"index\":0,\"type\":\"function\",\"function\":{\"name\":\"weather\",\"arguments\":\"{\\\"location\\\": \\\"Florence, Italy\\\"}\"}}],\"reasoning_details\":[{\"type\":\"reasoning.text\",\"text\":\"The user is asking for the weather in Florence, Italy. I have access to a weather function that can get weather information for a location. The function requires a \\\"location\\\" parameter, and the user has specified \\\"Florence, Italy\\\" as the location. I should use this exact location string when calling the function.\",\"format\":\"unknown\",\"index\":0}]}}],\"usage\":{\"prompt_tokens\":179,\"completion_tokens\":96,\"total_tokens\":275,\"cost\":0.00029753,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":43,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.00008633,\"upstream_inference_completions_cost\":0.0002112},\"completion_tokens_details\":{\"reasoning_tokens\":79,\"image_tokens\":0}}}"
+        headers:
+            Content-Type:
+              - application/json
+        status: 200 OK
+        code: 200
+        duration: 1.485824709s
+  - id: 1
+    request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 816
+        host: ""
+        body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence, Italy?","role":"user"},{"content":"\n\nI''ll check the weather in Florence, Italy for you.\n","tool_calls":[{"id":"call_28e19b3460e24e5680a77050","function":{"arguments":"{\"location\": \"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"call_28e19b3460e24e5680a77050","role":"tool"}],"model":"z-ai/glm-4.5","tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"reasoning":{"effort":"medium"},"usage":{"include":true}}'
+        headers:
+            Accept:
+              - application/json
+            Content-Type:
+              - application/json
+            User-Agent:
+              - OpenAI/Go 2.3.0
+        url: https://openrouter.ai/api/v1/chat/completions
+        method: POST
+    response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        content_length: -1
+        uncompressed: true
+        body: "\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1758710088-zK8TJKAI72pV9hTXs71p\",\"provider\":\"Z.AI\",\"model\":\"z-ai/glm-4.5\",\"object\":\"chat.completion\",\"created\":1758710088,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"stop\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\\n\\nThe weather in Florence, Italy is currently 40°C (104°F). That's quite hot - it's a very warm day there! Make sure to stay hydrated and seek shade if you're outdoors.\",\"refusal\":null,\"reasoning\":\"The weather function returned \\\"40 C\\\" for Florence, Italy. This appears to be a temperature reading of 40 degrees Celsius, which is quite hot. I should provide this information to the user in a clear and helpful way.\",\"reasoning_details\":[{\"type\":\"reasoning.text\",\"text\":\"The weather function returned \\\"40 C\\\" for Florence, Italy. This appears to be a temperature reading of 40 degrees Celsius, which is quite hot. I should provide this information to the user in a clear and helpful way.\",\"format\":\"unknown\",\"index\":0}]}}],\"usage\":{\"prompt_tokens\":219,\"completion_tokens\":92,\"total_tokens\":311,\"cost\":0.00031273,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":43,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.00011033,\"upstream_inference_completions_cost\":0.0002024},\"completion_tokens_details\":{\"reasoning_tokens\":54,\"image_tokens\":0}}}"
+        headers:
+            Content-Type:
+              - application/json
+        status: 200 OK
+        code: 200
+        duration: 618.183292ms

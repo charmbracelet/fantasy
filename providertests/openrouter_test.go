@@ -7,198 +7,117 @@ import (
 
 	"github.com/charmbracelet/fantasy/ai"
 	"github.com/charmbracelet/fantasy/openrouter"
+	"github.com/stretchr/testify/require"
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )
 
-type openrouterModel struct {
-	name        string
-	builderFunc builderFunc
-	providers   []string
+func TestOpenRouterCommon(t *testing.T) {
+	testCommon(t, []builderPair{
+		{"kimi-k2", builderOpenRouterKimiK2, nil},
+		{"grok-code-fast-1", builderOpenRouterGrokCodeFast1, nil},
+		{"claude-sonnet-4", builderOpenRouterClaudeSonnet4, nil},
+		{"grok-4-fast-free", builderOpenRouterGrok4FastFree, nil},
+		{"gemini-2.5-flash", builderOpenRouterGemini25Flash, nil},
+		{"gemini-2.0-flash", builderOpenRouterGemini20Flash, nil},
+		{"deepseek-chat-v3.1-free", builderOpenRouterDeepseekV31Free, nil},
+		{"gpt-5", builderOpenRouterGPT5, nil},
+		{"glm-4.5", builderOpenRouterGLM45, nil},
+	})
+	opts := ai.ProviderOptions{
+		openrouter.Name: &openrouter.ProviderOptions{
+			Reasoning: &openrouter.ReasoningOptions{
+				Effort: openrouter.ReasoningEffortOption(openrouter.ReasoningEffortMedium),
+			},
+		},
+	}
+	testThinking(t, []builderPair{
+		{"gpt-5", builderOpenRouterGPT5, opts},
+		{"glm-4.5", builderOpenRouterGLM45, opts},
+	}, testOpenrouterThinking)
 }
 
-func TestOpenRouterCommon(t *testing.T) {
-	var pairs []builderPair
-	models := []openrouterModel{
-		openrouterKimiK2(),
-		openrouterGrokCodeFast1(),
-		openrouterClaudeSonnet4(),
-		openrouterGrok4FastFree(),
-		openrouterGemini25Flash(),
-		openrouterGemini20Flash(),
-		openrouterDeepseekV31Free(),
-		openrouterGpt5(),
-	}
-
-	for _, model := range models {
-		// add one entry for multi provider tests
-		pairs = append(
-			pairs,
-			builderPair{
-				model.name,
-				model.builderFunc,
-				nil,
-			})
-		for _, provider := range model.providers {
-			pairs = append(
-				pairs,
-				builderPair{
-					model.name + "_" + provider,
-					model.builderFunc,
-					ai.ProviderOptions{
-						openrouter.Name: &openrouter.ProviderOptions{
-							Provider: &openrouter.Provider{
-								Only: []string{provider},
-							},
-						},
-					},
-				})
+func testOpenrouterThinking(t *testing.T, result *ai.AgentResult) {
+	reasoningContentCount := 0
+	for _, step := range result.Steps {
+		for _, msg := range step.Messages {
+			for _, content := range msg.Content {
+				if content.GetType() == ai.ContentTypeReasoning {
+					reasoningContentCount += 1
+				}
+			}
 		}
 	}
-
-	testCommon(t, pairs)
+	require.Greater(t, reasoningContentCount, 0)
 }
 
-func openrouterKimiK2() openrouterModel {
-	return openrouterModel{
-		name: "kimi-k2",
-		builderFunc: func(r *recorder.Recorder) (ai.LanguageModel, error) {
-			provider := openrouter.New(
-				openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
-				openrouter.WithHTTPClient(&http.Client{Transport: r}),
-			)
-			return provider.LanguageModel("moonshotai/kimi-k2-0905")
-		},
-		providers: []string{
-			"deepinfra",
-			"siliconflow",
-			"fireworks",
-			"moonshotai",
-			"novita",
-			"baseten",
-			"together",
-			"groq",
-			"moonshotai/turbo",
-			"wandb",
-		},
-	}
+func builderOpenRouterKimiK2(r *recorder.Recorder) (ai.LanguageModel, error) {
+	provider := openrouter.New(
+		openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
+		openrouter.WithHTTPClient(&http.Client{Transport: r}),
+	)
+	return provider.LanguageModel("moonshotai/kimi-k2-0905")
 }
 
-func openrouterGrokCodeFast1() openrouterModel {
-	return openrouterModel{
-		name: "grok-code-fast-1",
-		builderFunc: func(r *recorder.Recorder) (ai.LanguageModel, error) {
-			provider := openrouter.New(
-				openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
-				openrouter.WithHTTPClient(&http.Client{Transport: r}),
-			)
-			return provider.LanguageModel("x-ai/grok-code-fast-1")
-		},
-		providers: []string{
-			"xai",
-		},
-	}
+func builderOpenRouterGrokCodeFast1(r *recorder.Recorder) (ai.LanguageModel, error) {
+	provider := openrouter.New(
+		openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
+		openrouter.WithHTTPClient(&http.Client{Transport: r}),
+	)
+	return provider.LanguageModel("x-ai/grok-code-fast-1")
 }
 
-func openrouterGrok4FastFree() openrouterModel {
-	return openrouterModel{
-		name: "grok-4-fast-free",
-		builderFunc: func(r *recorder.Recorder) (ai.LanguageModel, error) {
-			provider := openrouter.New(
-				openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
-				openrouter.WithHTTPClient(&http.Client{Transport: r}),
-			)
-			return provider.LanguageModel("x-ai/grok-4-fast:free")
-		},
-		providers: []string{
-			"xai",
-		},
-	}
+func builderOpenRouterGrok4FastFree(r *recorder.Recorder) (ai.LanguageModel, error) {
+	provider := openrouter.New(
+		openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
+		openrouter.WithHTTPClient(&http.Client{Transport: r}),
+	)
+	return provider.LanguageModel("x-ai/grok-4-fast:free")
 }
 
-func openrouterGemini25Flash() openrouterModel {
-	return openrouterModel{
-		name: "gemini-2.5-flash",
-		builderFunc: func(r *recorder.Recorder) (ai.LanguageModel, error) {
-			provider := openrouter.New(
-				openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
-				openrouter.WithHTTPClient(&http.Client{Transport: r}),
-			)
-			return provider.LanguageModel("google/gemini-2.5-flash")
-		},
-		providers: []string{
-			"google-vertex/global",
-			"google-ai-studio",
-			"google-vertex",
-		},
-	}
+func builderOpenRouterGemini25Flash(r *recorder.Recorder) (ai.LanguageModel, error) {
+	provider := openrouter.New(
+		openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
+		openrouter.WithHTTPClient(&http.Client{Transport: r}),
+	)
+	return provider.LanguageModel("google/gemini-2.5-flash")
 }
 
-func openrouterGemini20Flash() openrouterModel {
-	return openrouterModel{
-		name: "gemini-2.0-flash",
-		builderFunc: func(r *recorder.Recorder) (ai.LanguageModel, error) {
-			provider := openrouter.New(
-				openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
-				openrouter.WithHTTPClient(&http.Client{Transport: r}),
-			)
-			return provider.LanguageModel("google/gemini-2.0-flash-001")
-		},
-		providers: []string{
-			"google-ai-studio",
-			"google-vertex",
-		},
-	}
+func builderOpenRouterGemini20Flash(r *recorder.Recorder) (ai.LanguageModel, error) {
+	provider := openrouter.New(
+		openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
+		openrouter.WithHTTPClient(&http.Client{Transport: r}),
+	)
+	return provider.LanguageModel("google/gemini-2.0-flash-001")
 }
 
-func openrouterDeepseekV31Free() openrouterModel {
-	return openrouterModel{
-		name: "deepseek-chat-v3.1-free",
-		builderFunc: func(r *recorder.Recorder) (ai.LanguageModel, error) {
-			provider := openrouter.New(
-				openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
-				openrouter.WithHTTPClient(&http.Client{Transport: r}),
-			)
-			return provider.LanguageModel("deepseek/deepseek-chat-v3.1:free")
-		},
-		providers: []string{
-			"deepinfra",
-		},
-	}
+func builderOpenRouterDeepseekV31Free(r *recorder.Recorder) (ai.LanguageModel, error) {
+	provider := openrouter.New(
+		openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
+		openrouter.WithHTTPClient(&http.Client{Transport: r}),
+	)
+	return provider.LanguageModel("deepseek/deepseek-chat-v3.1:free")
 }
 
-func openrouterClaudeSonnet4() openrouterModel {
-	return openrouterModel{
-		name: "claude-sonnet-4",
-		builderFunc: func(r *recorder.Recorder) (ai.LanguageModel, error) {
-			provider := openrouter.New(
-				openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
-				openrouter.WithHTTPClient(&http.Client{Transport: r}),
-			)
-			return provider.LanguageModel("anthropic/claude-sonnet-4")
-		},
-		providers: []string{
-			"google-vertex",
-			"google-vertex/global",
-			"anthropic",
-			"google-vertex/europe",
-			"amazon-bedrock",
-		},
-	}
+func builderOpenRouterClaudeSonnet4(r *recorder.Recorder) (ai.LanguageModel, error) {
+	provider := openrouter.New(
+		openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
+		openrouter.WithHTTPClient(&http.Client{Transport: r}),
+	)
+	return provider.LanguageModel("anthropic/claude-sonnet-4")
 }
 
-func openrouterGpt5() openrouterModel {
-	return openrouterModel{
-		name: "gpt-5",
-		builderFunc: func(r *recorder.Recorder) (ai.LanguageModel, error) {
-			provider := openrouter.New(
-				openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
-				openrouter.WithHTTPClient(&http.Client{Transport: r}),
-			)
-			return provider.LanguageModel("openai/gpt-5")
-		},
-		providers: []string{
-			"openai",
-			"azure",
-		},
-	}
+func builderOpenRouterGPT5(r *recorder.Recorder) (ai.LanguageModel, error) {
+	provider := openrouter.New(
+		openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
+		openrouter.WithHTTPClient(&http.Client{Transport: r}),
+	)
+	return provider.LanguageModel("openai/gpt-5")
+}
+
+func builderOpenRouterGLM45(r *recorder.Recorder) (ai.LanguageModel, error) {
+	provider := openrouter.New(
+		openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
+		openrouter.WithHTTPClient(&http.Client{Transport: r}),
+	)
+	return provider.LanguageModel("z-ai/glm-4.5")
 }

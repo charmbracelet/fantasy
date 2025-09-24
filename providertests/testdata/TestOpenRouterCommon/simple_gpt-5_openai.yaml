@@ -1,0 +1,33 @@
+---
+version: 2
+interactions:
+  - id: 0
+    request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 229
+        host: ""
+        body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"Say hi in Portuguese","role":"user"}],"model":"openai/gpt-5","max_completion_tokens":4000,"usage":{"include":true},"provider":{"only":["openai"]}}'
+        headers:
+            Accept:
+              - application/json
+            Content-Type:
+              - application/json
+            User-Agent:
+              - OpenAI/Go 2.3.0
+        url: https://openrouter.ai/api/v1/chat/completions
+        method: POST
+    response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        content_length: -1
+        uncompressed: true
+        body: "\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1758707037-spxAgURMfR1qAS3EgZXG\",\"provider\":\"OpenAI\",\"model\":\"openai/gpt-5\",\"object\":\"chat.completion\",\"created\":1758707038,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"completed\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"Olá!\",\"refusal\":null,\"reasoning\":\"**Providing a Portuguese greeting**\\n\\nThe user asked me to say hi in Portuguese, which is a straightforward task. I consider offering \\\"Olá!\\\" and maybe \\\"Oi!\\\" as alternatives, but it's best to keep it concise. Since the instruction is to avoid heavy formatting, I can simply say, \\\"Olá!\\\" without extra explanation. A single greeting seems sufficient, so I’ll go with that. Keeping it minimal is key here!\",\"reasoning_details\":[{\"type\":\"reasoning.summary\",\"summary\":\"**Providing a Portuguese greeting**\\n\\nThe user asked me to say hi in Portuguese, which is a straightforward task. I consider offering \\\"Olá!\\\" and maybe \\\"Oi!\\\" as alternatives, but it's best to keep it concise. Since the instruction is to avoid heavy formatting, I can simply say, \\\"Olá!\\\" without extra explanation. A single greeting seems sufficient, so I’ll go with that. Keeping it minimal is key here!\",\"format\":\"openai-responses-v1\",\"index\":0},{\"type\":\"reasoning.encrypted\",\"data\":\"gAAAAABo071mQig1LbpUtX7BiV4Fk_0Bwldmx_ZbTYVfuYNZdgSQPyQ0hluqdDKG1hRoVBRU0kMaFOaP4Zu-4RjRCavt6DVTIdge2SZgIStqfBix-pSpvoHloaeFNXBQvW1Ed2K3Cfo8oXmhroTSgk49Ma_Ip1QHXj5rjdo8ByoIk1eP3awUsxm29FqvBH18KOKlro4lOduv-lECjZ8ZPhZwJoB9RAEkRrQbf96zQPu6U9536h7SznfySJxFgU1UXS06snS57KsZ2BSNzciB95a6Lhx_FH3DognkU-6lr-dPOC3gUEEkoVgcvqKqRUSCglKM96uJaUoy6iT7swrlN6dC4Fvlvkcph5VD94Wcjb2Wx8JYXQhEim2eWsMR88V0IFPDpeCksOV9gOoZnViLTCIXl1KHk4kBUN5Rt_TdJ6vNGaPXuKPV9QHqavtLafHFS77f4f0-VW_4J_ZR2cNwCJpDGuu7AYrrwuPYEY3zEoOrffixy-Irix7osoRua0fkDwdoYnmCK3kPAR68Vv_PkisGSswVwgXhfBzDzMUbA7LmRmrRc7VA_8mKwQbG4T0_sZ4G3BZSRjRKvwBTfZVmPnI-ygvu76sxqjDglCGefjCIBvqyWUJl1rr_JI-daW3Y3F7wPp52tbk6MLb09OR2EjOK7QjS5VIPYsyWE6us5blCbRyRx5jN8zU93effZwT_xsi1wh5juIXjPc8Vx4Gja8Z94kQk03714Y7ZmpBhFtDvKNzV_lxV-FQr4vupDj9Ifys3yJQCZlpDq3LzpcJrqAIbfpCl3W-Vfo-DvaZ9ADowNc7biKwBoZUF1mOvpbYqoKY3d_LsBtFARadorw1yWZ_Gy6pbidm2w2Q5LVR_0zhuuEhAdtr5bXIYJE-u_wB_7djLS5PNssfvippyxO4ZPqvTGOvOgDCjICvcEf4aFZhLY_TZsjkbVo6QBTISUod-Vu6-YnI4JAkXq0hScG34cxYOT22Xw7gvU7G4FiXRCp6GdSnERpvC25lPfzX_yKbyGhaAv23y52DZzC0DfJiAQND40SfsaeKu7O_ur5c3iJhczb0ANsiMgRA_ULV2SVFCrAfQKRaObGL0tZ3K6znXcMqyIJcS9Jl4lCcV1aY3JPNTgJJx51sQ718J_vcu8rDUktPrSzpzO6eu4HLlaTdEhYlVcI5hC4N0W_cSO9XETOJsKk_GqTbtEDZZepiTTZuT8RsJEawUNbMPlgbRPEQsw0PIFUxbfVWYI3-4rRVjRaG4bFRwsExhToX4Ya2CtIqR5REtEL7o618Ocz6KdVdEsu_gXSylAcsdVk242ddJTknJMVmPCvEBpWVA-DT2vCuKAnG0ZocGmz2ad-Aq2OtqmNuymu9nll5uTuQ3ZMlFn40UKsowDh23TbJywISM4IehuqIyDnbb913v\",\"id\":\"rs_68d3bd5f0b748193bdad7b450ee649250e48741d4d14670c\",\"format\":\"openai-responses-v1\",\"index\":0}]}}],\"usage\":{\"prompt_tokens\":19,\"completion_tokens\":72,\"total_tokens\":91,\"cost\":0.000371875,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.000011875,\"upstream_inference_completions_cost\":0.00036},\"completion_tokens_details\":{\"reasoning_tokens\":64,\"image_tokens\":0}}}"
+        headers:
+            Content-Type:
+              - application/json
+        status: 200 OK
+        code: 200
+        duration: 1.195328042s

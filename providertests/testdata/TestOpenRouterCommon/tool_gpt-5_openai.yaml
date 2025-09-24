@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+  - id: 0
+    request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 521
+        host: ""
+        body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"}],"model":"openai/gpt-5","max_completion_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"provider":{"only":["openai"]},"usage":{"include":true}}'
+        headers:
+            Accept:
+              - application/json
+            Content-Type:
+              - application/json
+            User-Agent:
+              - OpenAI/Go 2.3.0
+        url: https://openrouter.ai/api/v1/chat/completions
+        method: POST
+    response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        content_length: -1
+        uncompressed: true
+        body: "\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1758707051-ayTLZRnOYjQfQnGHXIc8\",\"provider\":\"OpenAI\",\"model\":\"openai/gpt-5\",\"object\":\"chat.completion\",\"created\":1758707051,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"native_finish_reason\":\"completed\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"refusal\":null,\"reasoning\":\"**Checking weather for Florence**\\n\\nI need to get the weather, so I’ll use the weather tool, functions.weather, with the proper location format. For \\\"Florence, Italy,\\\" including the country is probably necessary to avoid confusion. I’ll go with \\\"Florence, Italy\\\" when I make the call. Since we only need one tool, I won't bother with the multi_tool_use.parallel function here. I’ll directly use functions.weather to retrieve the weather and then pass that information along to the user.\",\"tool_calls\":[{\"id\":\"call_1nTwPCVFTHJYq0BDbzlqZ3D7\",\"index\":1,\"type\":\"function\",\"function\":{\"name\":\"weather\",\"arguments\":\"{\\\"location\\\":\\\"Florence, Italy\\\"}\"}}],\"reasoning_details\":[{\"type\":\"reasoning.summary\",\"summary\":\"**Checking weather for Florence**\\n\\nI need to get the weather, so I’ll use the weather tool, functions.weather, with the proper location format. For \\\"Florence, Italy,\\\" including the country is probably necessary to avoid confusion. I’ll go with \\\"Florence, Italy\\\" when I make the call. Since we only need one tool, I won't bother with the multi_tool_use.parallel function here. I’ll directly use functions.weather to retrieve the weather and then pass that information along to the user.\",\"format\":\"openai-responses-v1\",\"index\":0},{\"type\":\"reasoning.encrypted\",\"data\":\"gAAAAABo071x45Ao4baXtnJzPWvz0pXKlKDarCrPqJaEKF9mnFZwuK-0Z0v1w5-_mKaC6nxBxKWL4NbDNVhVe2ktZpK8fH-eTbzW7SHtNQ_PyLnI4_1wp78urI7JiMeb6tBAi54GxrWRDXaj1X97W3PqiXsS5MSl9Er6hAQOcOo7xq1BEDxaPuTPZpMyn6tbgppykAgU6HopePOmoFNYuSAp2i4v0TOkFUpIdfr2e8F7NCyPULXKzL4-xijDkIFgtagb8txlt7Uyp66vEjAd-Du2Z5WoEYQ6ti1qEL0Oguwwf6BN0Jg6sWhirNcNC6d9hodPQmsIcbIe3BA1R1ejuox6ZtZatEPFsjtyDg6yWaC9v349xkvCNPjwGBBYWb_G2BFcLgjOeyQBmJ2uDYoMDcvQ4gCcNaqIyaqTZZ4HLKCs1VjqWpVaSA3pBOvFoEpGOK8dm3z8d1omMBUHKR28K-U3nylA8x2eks7zhzJqY7_AcvDpK4ElTcCEYYB7NEZq5_hml1GxIzU70eJzCMRUGhk-e2bjsj_9jtLCkxpZz_b6Q9T0xilJiCH53p9n5NDQBpubnUKb_KLF3JD_-NhsYJVSJyHAsK9t4IA_SaDJoR7bYNhRT1M72WjYQAVe07In1OaLHM0s0uBVG9MQmuQbFPPGxaHCE0OkD0dI2Ui8o6cGFAMI3vYvTrD882EJ7ER0qB2v4K11b3qApgzGbmSv_q0qaijIX_lRVDg_h9nvCGga8XEy_NhrXBV93oUWo2B5m0T0TeghHYQsGyc2GWjHMIOX-zez0Kd2bq3KuJle7R0wTddRTYSDmrB73BXcz_BTxBEAhFBaCl4UrVeiVYMPcVybb2nc6F4N42fUHkSuCWgeXuZ_rFtYaodWWjfBZPcjUQJXqFaSNq2dAQ17xfr1cG7t-VbMcG2eGtRd9aRDCaSeA_a35JdMLNRy4CNlYBfN-qzlZJG9Mb7aM6m0rVazA6N4S9AppUtN4inigyVLu_c9Ud06alVlV3t_FjqitT6VIjIKDI64tZY4sKGH1t29PipsVl8wk3ExGFkxphREJmyvQxVIIRgQgOdSdk7GbGiLOEzLkOBSvcv6Jlv0-TFRxU2PbW2uyLK8kyZdB_pe8Y5Y7rDxJhx3SLNmni3YYLtLVJZ2qMEPlTHJOkksQcRIyj-37irt0Vqs_UupfsL5rM-KA5ci-hramfUZec6GrFhpl2gEfKWUWheAzOoaVTtBAMoPNgsSWeI2-qRYiQstPHYJySXj-lGr8-Dlp74vWzfje5bkcwMcwi0FvYHCmJlbbQizO_kVsUAq5tKdCIUZn0lhTjXmyyRL2n3b_3z3cmZxavWJWtPRdHo80j77ffNaUF-IAi4auMEqMjWYk9Uayynsc3Bge8yT0d1nPQOlhtWt9B-_sjAFJMngYuQWDjH0ZPwhhqnRy6-euIvTSWPj5JU66Gw5lPpkLeAbDspycXswqY0zdbmJjZb8x7qhOm7w5lYgYIuAK8N-gHjkfHQJXaw097Cjw7OvcH5cWGB7Mi2-PvzrKPA7iF65BmvM1YIZaUKtwVPD9y2VirtTHmFXOaaypmQdPSzBuneVDvH3Q3OIudQZmqUwqaXshP7S_za_E0KOjqSpAPqtFZa6M1nxVakn3b2tBLl15QRWUdQr5CrP5hQxNawdMbN13-s7yubIeaekYIrn3MW141HV2dx4hNYjbeam8XKk5KUiv1VmeinmMuSqCQK6jqU4VGEBEaM7XZihneHfnA44L3_SSyXiZQQ40elRGm43__g=\",\"id\":\"rs_68d3bd6c9f348194b03f60f9a6ff9d3103533757e09dccce\",\"format\":\"openai-responses-v1\",\"index\":0}]}}],\"usage\":{\"prompt_tokens\":63,\"completion_tokens\":150,\"total_tokens\":213,\"cost\":0.00157875,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.00007875,\"upstream_inference_completions_cost\":0.0015},\"completion_tokens_details\":{\"reasoning_tokens\":128,\"image_tokens\":0}}}"
+        headers:
+            Content-Type:
+              - application/json
+        status: 200 OK
+        code: 200
+        duration: 627.963125ms
+  - id: 1
+    request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 773
+        host: ""
+        body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"call_1nTwPCVFTHJYq0BDbzlqZ3D7","function":{"arguments":"{\"location\":\"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"call_1nTwPCVFTHJYq0BDbzlqZ3D7","role":"tool"}],"model":"openai/gpt-5","max_completion_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"provider":{"only":["openai"]},"usage":{"include":true}}'
+        headers:
+            Accept:
+              - application/json
+            Content-Type:
+              - application/json
+            User-Agent:
+              - OpenAI/Go 2.3.0
+        url: https://openrouter.ai/api/v1/chat/completions
+        method: POST
+    response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        content_length: -1
+        uncompressed: true
+        body: "\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1758707058-5DsIxNqec92OgWRvLpVl\",\"provider\":\"OpenAI\",\"model\":\"openai/gpt-5\",\"object\":\"chat.completion\",\"created\":1758707058,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"completed\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"It’s currently about 40 °C (104 °F) in Florence, Italy—very hot. Want a short forecast or tips for staying cool?\",\"refusal\":null,\"reasoning\":\"**Sharing current weather**\\n\\nI noticed the weather tool returned \\\"40 C,\\\" which must be Celsius. So, I’ll present it to the user straightforwardly. It's about 40 °C (104 °F), and I'll suggest staying hydrated. The user asked for the weather in Florence, Italy, likely for now, so I'll confirm the current temperature in Florence. It might be useful to ask if they’d like a forecast, but I want to keep everything brief and simple.**Crafting a concise weather update**\\n\\nI think adding the Fahrenheit conversion is a safe calculation. It might be good to note that it’s \\\"very hot.\\\" So, I’ll put together a clear, concise response: “Currently around 40 °C (104 °F) in Florence, Italy.” I’ll also ask if the user would like a forecast. This way, I'm giving them useful info while keeping it brief. Let’s finalize this update!\",\"reasoning_details\":[{\"type\":\"reasoning.summary\",\"summary\":\"**Sharing current weather**\\n\\nI noticed the weather tool returned \\\"40 C,\\\" which must be Celsius. So, I’ll present it to the user straightforwardly. It's about 40 °C (104 °F), and I'll suggest staying hydrated. The user asked for the weather in Florence, Italy, likely for now, so I'll confirm the current temperature in Florence. It might be useful to ask if they’d like a forecast, but I want to keep everything brief and simple.**Crafting a concise weather update**\\n\\nI think adding the Fahrenheit conversion is a safe calculation. It might be good to note that it’s \\\"very hot.\\\" So, I’ll put together a clear, concise response: “Currently around 40 °C (104 °F) in Florence, Italy.” I’ll also ask if the user would like a forecast. This way, I'm giving them useful info while keeping it brief. Let’s finalize this update!\",\"format\":\"openai-responses-v1\",\"index\":0},{\"type\":\"reasoning.encrypted\",\"data\":\"gAAAAABo0717qoB__VmT-Mn7H2ZaA90zbJP0wEiJDTJny8swHdHYslffWT2LfalBjizVk6S_NM-lbcem1kVAetvRHjYs9tu_d7wD8kB_011ZITIKmKY0rVAUXaWmiv3U5bvAYyipkAfuWLrKcYTGxhYdOY5Og9ZcENPa0DlSQ0fabuPZlNakhP-pHLKpn9uYLj6jFk6H43u1ohUA48PvXJjp7XL88LzzJhOBBeMH5A9KIYhUbjV9tCsF-zV8hnw9WPl8-5iYCP1qLDROHOxmZeRkPKiApvEfLVi8xF5Hp_lvGZqRG1ai4TytWepyDHsSnJA6Rit-FYbMNicAc5GWRZ2nDgn5AfS9xMzvUZDN16GiODFtCG-z_0TWbASBZxYwkI5E9hrC7Pw3YJ5bP1n91kLQu904Xy7reHr2QdC-9MNivFJRaGsRc2jE20KvES_aXDQhqU2QzD-YeCmfz59Q4ciVVLfQgG8y5IbXu1pZ7APzIhLtg3Crq8VOB6n00TFuvDGejNj_os8pFsoa6E7r8xdipJJbpaVipSm_zgf8dFxWS2i-cza2Knv6jqSRDY3UbBY9CAFm4ak53fBof04jNL8R20WrZx0vbQqUh5WcUWwXFAPSf9B5HzA38udsW2SHxbzlOaojP1eZsu4dFPwdf_ijTt54D9YIKxRj7QAxp3rqv4n4XSUnLxzTiCYGUeJKdRke9VFeewYTdVWKvGShwTmVxjvqs3m_hlRwXyjBLnDWxDTRs0MMwzWG6_8YktvaBYVU44r0iZQs9hYxNUoUWcYQDpy6KM3aQ5KHEOePpv9HsNcUP20uNqvYCOuhqCHIeEwwWYsueiDO5o4lxhyj8HLWK4ufbdH514VrslxkZY-o2tsqtcBw1rD9TVgwgaGvTPBv8U9VA-SRDmeatGDZzdEPc9km4_6jaa-42GwGYeg3exV05WeyezOwD0J6SVXZsGb_hN5y88ngxo26MAPrQvgtnGKY6lhfh9dPSOR18rnkn-SVjBB_gr02F7W06jUTOT_0ONBCqXFlCdzNQ5aNDkCZC2MbToFFwkRgVCJfKdHG5Bs5fGTbEQQPAVTp0kEOQzKElqw6fAuiOplr2hpfvxnvQL_YS4WJCZ1Si_szGPrMjgurUnyE5jzcz8tyKZTENC_aMkLyo1s-lKlKXH-hTqsRjvH3fGBTbP_Edk4tDX34uIGVj0h5XiNUdbcuqeRM5ngRjkRXPXnMAdmTBm7mFWN6cZbxTaxVq3TQIj0TmhccwfqzjmkgvSraEJoWGwqfxrw0DYA6UVkRFlXSgY4YbdfXyuGECPo1x1F6P7IWeIy0zyECPZKNjMP8Hk9W-rSYSxvd2zUjhyvbVFQZ9uqoNLlA7CleV5ABNxQjLtYFtbv8kteaQj6BKR4yHWrICNuQkKMDz9L7u8Jo0oRKZ2q-0tziq02MLSrnvF5vOsFgG0ZTmYSLyzQTkRWfYo7D_MFXiDT6t7nTilWgQNhTnmiodRXb30Flt8uLMYAM8wh0LLTafjyeK7RvqzzQbBDtBQ6AFWBng9Q6hDK6_lot96EP1F0THXtGh7ypAzXXlvtOokwgW_m_ApiMqtzfq1Tude_Q4mgQonnwD7OUFYbSTS34Qis-gBcDvtd6rb-FxuhDfLWraVh8sw6Fk1qfsoSkO17dC209w-q2yGBVGVOTISDgy9l87oES-LWfnCBPGiOP7_At2CPtHvZBaquAFyfRa_jr_J08uu_u4AVZV89gNCE10jyvfqjx_S0KYNLD-2VYnudXTcreESjNBkKW1wAgS8i4Ar4Lay82fTw3pKDfTmCSm_v9Tv1slzCyx3ChOQoQ5_gKvArPCWU7h2NGxkN2SMS8SOrZA5fZnoELG_jDPE8y34A9RfEJR9ADZ3fBO7gWeH6K4idnP6FFptgCreWUIhVZbCejKE3y0OHJGFEw2PfEpb2e7h50crfocs3PkHRTSAAfN0pPEFQnr53iXf0dPZkgxgZ8G-f_tYin7TYlulmpQfZVXaoB7lb5UTw_LkNLSKztOzI7pHbgfqpujl9pVqKSswRlq8dZ7qrtsOs27otFfblWL95gE6hJneGvDJLcY89h1HBTJ2BnZ6afx4fbqi5kIi0Ri23ZEA1_jnSehFlFlZkIXSUsmhIqp5MuNps95xM58eBkCqExy_oaoxUraw0Bc7oPf9hetGRFUME_6kCGJ4NLBZWlTKFVyVQQkX4eKZFWkDdzgQPwwZ6r_EBaZpynv4oQGw3FkIsnw4CeCW5FXXbYjHgsYBju6QW3Y73JrGgWty7LXG8AM8xaClYES_CMDRUkrUencJjvUT1aoc2EwxvU84pZmL20UFB81TPG3Ir-lFYKIY7tCmw=\",\"id\":\"rs_68d3bd7371448190a2b8b6f2b5792699\",\"format\":\"openai-responses-v1\",\"index\":0}]}}],\"usage\":{\"prompt_tokens\":92,\"completion_tokens\":229,\"total_tokens\":321,\"cost\":0.0012025,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.0000575,\"upstream_inference_completions_cost\":0.001145},\"completion_tokens_details\":{\"reasoning_tokens\":192,\"image_tokens\":0}}}"
+        headers:
+            Content-Type:
+              - application/json
+        status: 200 OK
+        code: 200
+        duration: 950.966458ms

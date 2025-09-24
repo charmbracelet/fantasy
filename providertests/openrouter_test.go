@@ -26,6 +26,7 @@ func TestOpenRouterCommon(t *testing.T) {
 		gemini25Flash(),
 		gemini20Flash(),
 		deepseekV31Free(),
+		gpt5(),
 	}
 
 	for _, model := range models {
@@ -60,7 +61,6 @@ func kimiK2() openrouterModel {
 			return provider.LanguageModel("moonshotai/kimi-k2-0905")
 		},
 		providers: []string{
-			"chutes",
 			"deepinfra",
 			"siliconflow",
 			"fireworks",
@@ -174,6 +174,23 @@ func claudeSonnet4() openrouterModel {
 			"anthropic",
 			"google-vertex/europe",
 			"amazon-bedrock",
+		},
+	}
+}
+
+func gpt5() openrouterModel {
+	return openrouterModel{
+		name: "gpt-5",
+		builderFunc: func(r *recorder.Recorder) (ai.LanguageModel, error) {
+			provider := openrouter.New(
+				openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
+				openrouter.WithHTTPClient(&http.Client{Transport: r}),
+			)
+			return provider.LanguageModel("openai/gpt-5")
+		},
+		providers: []string{
+			"openai",
+			"azure",
 		},
 	}
 }

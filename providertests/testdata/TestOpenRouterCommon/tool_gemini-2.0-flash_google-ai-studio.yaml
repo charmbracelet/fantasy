@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+  - id: 0
+    request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 535
+        host: ""
+        body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"}],"model":"google/gemini-2.0-flash-001","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"provider":{"only":["google-ai-studio"]},"usage":{"include":true}}'
+        headers:
+            Accept:
+              - application/json
+            Content-Type:
+              - application/json
+            User-Agent:
+              - OpenAI/Go 2.3.0
+        url: https://openrouter.ai/api/v1/chat/completions
+        method: POST
+    response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        content_length: -1
+        uncompressed: true
+        body: "\n         \n{\"id\":\"gen-1758703929-eTRziOOBgqacZppoqJWF\",\"provider\":\"Google AI Studio\",\"model\":\"google/gemini-2.0-flash-001\",\"object\":\"chat.completion\",\"created\":1758703929,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"native_finish_reason\":\"STOP\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"refusal\":null,\"reasoning\":null,\"tool_calls\":[{\"index\":0,\"id\":\"tool_0_weather_ybikNXXUG7fijRORpBnF\",\"type\":\"function\",\"function\":{\"name\":\"weather\",\"arguments\":\"{\\\"location\\\":\\\"Florence\\\"}\"}}]}}],\"usage\":{\"prompt_tokens\":28,\"completion_tokens\":3,\"total_tokens\":31,\"cost\":0.000004,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.0000028,\"upstream_inference_completions_cost\":0.0000012},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0}}}"
+        headers:
+            Content-Type:
+              - application/json
+        status: 200 OK
+        code: 200
+        duration: 673.25875ms
+  - id: 1
+    request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 792
+        host: ""
+        body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"tool_0_weather_ybikNXXUG7fijRORpBnF","function":{"arguments":"{\"location\":\"Florence\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"tool_0_weather_ybikNXXUG7fijRORpBnF","role":"tool"}],"model":"google/gemini-2.0-flash-001","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"provider":{"only":["google-ai-studio"]},"usage":{"include":true}}'
+        headers:
+            Accept:
+              - application/json
+            Content-Type:
+              - application/json
+            User-Agent:
+              - OpenAI/Go 2.3.0
+        url: https://openrouter.ai/api/v1/chat/completions
+        method: POST
+    response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        content_length: -1
+        uncompressed: true
+        body: "\n         \n{\"id\":\"gen-1758703930-c9DOyE8qRm9vet9KAJ8L\",\"provider\":\"Google AI Studio\",\"model\":\"google/gemini-2.0-flash-001\",\"object\":\"chat.completion\",\"created\":1758703930,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"STOP\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"It is 40 C in Florence.\\n\",\"refusal\":null,\"reasoning\":null}}],\"usage\":{\"prompt_tokens\":52,\"completion_tokens\":10,\"total_tokens\":62,\"cost\":0.0000092,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.0000052,\"upstream_inference_completions_cost\":0.000004},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0}}}"
+        headers:
+            Content-Type:
+              - application/json
+        status: 200 OK
+        code: 200
+        duration: 660.390958ms

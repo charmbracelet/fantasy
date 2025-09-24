@@ -24,6 +24,7 @@ func TestOpenRouterCommon(t *testing.T) {
 		claudeSonnet4(),
 		grok4FastFree(),
 		gemini25Flash(),
+		gemini20Flash(),
 	}
 
 	for _, model := range models {
@@ -117,6 +118,23 @@ func gemini25Flash() openrouterModel {
 		},
 		providers: []string{
 			"google-vertex/global",
+			"google-ai-studio",
+			"google-vertex",
+		},
+	}
+}
+
+func gemini20Flash() openrouterModel {
+	return openrouterModel{
+		name: "gemini-2.0-flash",
+		builderFunc: func(r *recorder.Recorder) (ai.LanguageModel, error) {
+			provider := openrouter.New(
+				openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
+				openrouter.WithHTTPClient(&http.Client{Transport: r}),
+			)
+			return provider.LanguageModel("google/gemini-2.0-flash-001")
+		},
+		providers: []string{
 			"google-ai-studio",
 			"google-vertex",
 		},

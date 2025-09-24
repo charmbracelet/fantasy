@@ -94,6 +94,9 @@ func testTool(t *testing.T, pair builderPair) {
 				toolCalls = append(toolCalls, content.(ai.ToolCallContent))
 			}
 		}
+		for _, tc := range toolCalls {
+			require.False(t, tc.Invalid)
+		}
 		require.Len(t, toolCalls, 1)
 		require.Equal(t, toolCalls[0].ToolName, "weather")
 
@@ -178,6 +181,9 @@ func testMultiTool(t *testing.T, pair builderPair) {
 				toolCalls = append(toolCalls, content.(ai.ToolCallContent))
 			}
 		}
+		for _, tc := range toolCalls {
+			require.False(t, tc.Invalid)
+		}
 		require.Len(t, toolCalls, 2)
 
 		finalText := result.Response.Content.Text()
@@ -229,7 +235,7 @@ func testMultiTool(t *testing.T, pair builderPair) {
 
 func testThinking(t *testing.T, pairs []builderPair, thinkChecks func(*testing.T, *ai.AgentResult)) {
 	for _, pair := range pairs {
-		t.Run(pair.name, func(t *testing.T) {
+		t.Run("thinking-"+pair.name, func(t *testing.T) {
 			r := newRecorder(t)
 
 			languageModel, err := pair.builder(r)

@@ -6,9 +6,9 @@ interactions:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 799
+        content_length: 816
         host: ""
-        body: '{"messages":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"}],"model":"gpt-4o-mini","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
+        body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"}],"model":"gpt-4o-mini","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
         headers:
             Accept:
               - application/json
@@ -26,9 +26,9 @@ interactions:
         uncompressed: true
         body: |
             {
-              "id": "chatcmpl-CJ0tEeBsiJrcCok70gEzlNzmL8vYx",
+              "id": "chatcmpl-CJHNMiBU5lXyiDpJ3Yf1X8o8Crw80",
               "object": "chat.completion",
-              "created": 1758647688,
+              "created": 1758711060,
               "model": "gpt-4o-mini-2024-07-18",
               "choices": [
                 {
@@ -38,7 +38,7 @@ interactions:
                     "content": null,
                     "tool_calls": [
                       {
-                        "id": "call_IuNta21HfV8XZ4sGOz1xX6s0",
+                        "id": "call_fHc6yzovqB6JPczldIdg7r7Z",
                         "type": "function",
                         "function": {
                           "name": "add",
@@ -46,7 +46,7 @@ interactions:
                         }
                       },
                       {
-                        "id": "call_KVjSGunOLjNXLkrMpvLxMu9u",
+                        "id": "call_zumf4AvQJr4cmTe48gOOC24l",
                         "type": "function",
                         "function": {
                           "name": "multiply",
@@ -62,9 +62,9 @@ interactions:
                 }
               ],
               "usage": {
-                "prompt_tokens": 106,
+                "prompt_tokens": 110,
                 "completion_tokens": 50,
-                "total_tokens": 156,
+                "total_tokens": 160,
                 "prompt_tokens_details": {
                   "cached_tokens": 0,
                   "audio_tokens": 0
@@ -84,15 +84,15 @@ interactions:
               - application/json
         status: 200 OK
         code: 200
-        duration: 2.610235s
+        duration: 2.228339708s
   - id: 1
     request:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 1230
+        content_length: 1247
         host: ""
-        body: '{"messages":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"tool_calls":[{"id":"call_IuNta21HfV8XZ4sGOz1xX6s0","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"add"},"type":"function"},{"id":"call_KVjSGunOLjNXLkrMpvLxMu9u","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"call_IuNta21HfV8XZ4sGOz1xX6s0","role":"tool"},{"content":"6","tool_call_id":"call_KVjSGunOLjNXLkrMpvLxMu9u","role":"tool"}],"model":"gpt-4o-mini","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
+        body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"tool_calls":[{"id":"call_fHc6yzovqB6JPczldIdg7r7Z","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"add"},"type":"function"},{"id":"call_zumf4AvQJr4cmTe48gOOC24l","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"call_fHc6yzovqB6JPczldIdg7r7Z","role":"tool"},{"content":"6","tool_call_id":"call_zumf4AvQJr4cmTe48gOOC24l","role":"tool"}],"model":"gpt-4o-mini","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
         headers:
             Accept:
               - application/json
@@ -110,16 +110,16 @@ interactions:
         uncompressed: true
         body: |
             {
-              "id": "chatcmpl-CJ0tGSmMpqM5wxFt3ZU8LbTp1OZSv",
+              "id": "chatcmpl-CJHNOPDPmVIDiZcccGg7FBSAmkjuK",
               "object": "chat.completion",
-              "created": 1758647690,
+              "created": 1758711062,
               "model": "gpt-4o-mini-2024-07-18",
               "choices": [
                 {
                   "index": 0,
                   "message": {
                     "role": "assistant",
-                    "content": "The sum of 2 and 3 is 5, and the product of 2 and 3 is 6.",
+                    "content": "The result of adding 2 and 3 is 5, and the result of multiplying 2 and 3 is 6.",
                     "refusal": null,
                     "annotations": []
                   },
@@ -128,9 +128,9 @@ interactions:
                 }
               ],
               "usage": {
-                "prompt_tokens": 172,
-                "completion_tokens": 26,
-                "total_tokens": 198,
+                "prompt_tokens": 176,
+                "completion_tokens": 28,
+                "total_tokens": 204,
                 "prompt_tokens_details": {
                   "cached_tokens": 0,
                   "audio_tokens": 0
@@ -150,4 +150,4 @@ interactions:
               - application/json
         status: 200 OK
         code: 200
-        duration: 1.426818208s
+        duration: 1.681688625s

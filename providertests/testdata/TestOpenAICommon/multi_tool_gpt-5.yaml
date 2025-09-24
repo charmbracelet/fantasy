@@ -6,9 +6,9 @@ interactions:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 804
+        content_length: 821
         host: ""
-        body: '{"messages":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"}],"model":"gpt-5","max_completion_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
+        body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"}],"model":"gpt-5","max_completion_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
         headers:
             Accept:
               - application/json
@@ -26,9 +26,9 @@ interactions:
         uncompressed: true
         body: |
             {
-              "id": "chatcmpl-CJ0tchUwNad6KkHQ8EvUT3IOQeVrI",
+              "id": "chatcmpl-CJHNWTrpQnOjtZob48FeSHWZTT8J8",
               "object": "chat.completion",
-              "created": 1758647712,
+              "created": 1758711070,
               "model": "gpt-5-2025-08-07",
               "choices": [
                 {
@@ -38,7 +38,7 @@ interactions:
                     "content": null,
                     "tool_calls": [
                       {
-                        "id": "call_AJvaByHRmrdY8F8ahTfyEuwt",
+                        "id": "call_ucYrrss6ETc3YnQdA7grAXuZ",
                         "type": "function",
                         "function": {
                           "name": "add",
@@ -46,7 +46,7 @@ interactions:
                         }
                       },
                       {
-                        "id": "call_YZPAky6rN2y6wFVa8dFpv8bS",
+                        "id": "call_KZuPmn3DhLp34eU3WPV6d2BC",
                         "type": "function",
                         "function": {
                           "name": "multiply",
@@ -61,15 +61,15 @@ interactions:
                 }
               ],
               "usage": {
-                "prompt_tokens": 190,
-                "completion_tokens": 315,
-                "total_tokens": 505,
+                "prompt_tokens": 194,
+                "completion_tokens": 251,
+                "total_tokens": 445,
                 "prompt_tokens_details": {
                   "cached_tokens": 0,
                   "audio_tokens": 0
                 },
                 "completion_tokens_details": {
-                  "reasoning_tokens": 256,
+                  "reasoning_tokens": 192,
                   "audio_tokens": 0,
                   "accepted_prediction_tokens": 0,
                   "rejected_prediction_tokens": 0
@@ -83,15 +83,15 @@ interactions:
               - application/json
         status: 200 OK
         code: 200
-        duration: 4.623959125s
+        duration: 3.828985s
   - id: 1
     request:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 1235
+        content_length: 1252
         host: ""
-        body: '{"messages":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"tool_calls":[{"id":"call_AJvaByHRmrdY8F8ahTfyEuwt","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"add"},"type":"function"},{"id":"call_YZPAky6rN2y6wFVa8dFpv8bS","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"call_AJvaByHRmrdY8F8ahTfyEuwt","role":"tool"},{"content":"6","tool_call_id":"call_YZPAky6rN2y6wFVa8dFpv8bS","role":"tool"}],"model":"gpt-5","max_completion_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
+        body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"tool_calls":[{"id":"call_ucYrrss6ETc3YnQdA7grAXuZ","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"add"},"type":"function"},{"id":"call_KZuPmn3DhLp34eU3WPV6d2BC","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"call_ucYrrss6ETc3YnQdA7grAXuZ","role":"tool"},{"content":"6","tool_call_id":"call_KZuPmn3DhLp34eU3WPV6d2BC","role":"tool"}],"model":"gpt-5","max_completion_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
         headers:
             Accept:
               - application/json
@@ -109,16 +109,16 @@ interactions:
         uncompressed: true
         body: |
             {
-              "id": "chatcmpl-CJ0thnXad06l1VYNUlKTHIxqN9qzC",
+              "id": "chatcmpl-CJHNZ3DVA5PqYx0mpBu7rQS8mVlXI",
               "object": "chat.completion",
-              "created": 1758647717,
+              "created": 1758711073,
               "model": "gpt-5-2025-08-07",
               "choices": [
                 {
                   "index": 0,
                   "message": {
                     "role": "assistant",
-                    "content": "Results:\n- Sum (2 + 3) = 5\n- Product (2 × 3) = 6",
+                    "content": "Results:\n- Addition: 2 + 3 = 5\n- Multiplication: 2 × 3 = 6",
                     "refusal": null,
                     "annotations": []
                   },
@@ -126,9 +126,9 @@ interactions:
                 }
               ],
               "usage": {
-                "prompt_tokens": 262,
-                "completion_tokens": 28,
-                "total_tokens": 290,
+                "prompt_tokens": 266,
+                "completion_tokens": 29,
+                "total_tokens": 295,
                 "prompt_tokens_details": {
                   "cached_tokens": 0,
                   "audio_tokens": 0
@@ -148,4 +148,4 @@ interactions:
               - application/json
         status: 200 OK
         code: 200
-        duration: 1.864461959s
+        duration: 1.842280167s

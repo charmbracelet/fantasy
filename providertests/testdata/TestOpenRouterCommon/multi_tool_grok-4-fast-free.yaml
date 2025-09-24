@@ -6,9 +6,9 @@ interactions:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 834
+        content_length: 851
         host: ""
-        body: '{"messages":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"}],"model":"x-ai/grok-4-fast:free","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
+        body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"}],"model":"x-ai/grok-4-fast:free","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
         headers:
             Accept:
               - application/json
@@ -24,21 +24,21 @@ interactions:
         proto_minor: 0
         content_length: -1
         uncompressed: true
-        body: "\n         \n\n         \n\n         \n{\"id\":\"gen-1758709929-1gstYM5P4oqHK89RZsMN\",\"provider\":\"xAI\",\"model\":\"x-ai/grok-4-fast:free\",\"object\":\"chat.completion\",\"created\":1758709929,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"native_finish_reason\":\"tool_calls\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"refusal\":null,\"reasoning\":null,\"tool_calls\":[{\"id\":\"call_90182348\",\"function\":{\"name\":\"add\",\"arguments\":\"{\\\"a\\\":2,\\\"b\\\":3}\"},\"index\":0,\"type\":\"function\"},{\"id\":\"call_25656741\",\"function\":{\"name\":\"multiply\",\"arguments\":\"{\\\"a\\\":2,\\\"b\\\":3}\"},\"index\":1,\"type\":\"function\"}]}}],\"system_fingerprint\":\"fp_9362061f30\",\"usage\":{\"prompt_tokens\":394,\"completion_tokens\":246,\"total_tokens\":640,\"cost\":0,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":265,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0,\"upstream_inference_completions_cost\":0},\"completion_tokens_details\":{\"reasoning_tokens\":178,\"image_tokens\":0}}}"
+        body: "\n         \n\n         \n\n         \n{\"id\":\"gen-1758711116-dCE25caciE6ykrsOcwUB\",\"provider\":\"xAI\",\"model\":\"x-ai/grok-4-fast:free\",\"object\":\"chat.completion\",\"created\":1758711116,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"native_finish_reason\":\"tool_calls\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"refusal\":null,\"reasoning\":null,\"tool_calls\":[{\"id\":\"call_47704308\",\"function\":{\"name\":\"add\",\"arguments\":\"{\\\"a\\\":2,\\\"b\\\":3}\"},\"index\":0,\"type\":\"function\"},{\"id\":\"call_50126132\",\"function\":{\"name\":\"multiply\",\"arguments\":\"{\\\"a\\\":2,\\\"b\\\":3}\"},\"index\":1,\"type\":\"function\"}]}}],\"system_fingerprint\":\"fp_9362061f30\",\"usage\":{\"prompt_tokens\":398,\"completion_tokens\":202,\"total_tokens\":600,\"cost\":0,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":265,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0,\"upstream_inference_completions_cost\":0},\"completion_tokens_details\":{\"reasoning_tokens\":134,\"image_tokens\":0}}}"
         headers:
             Content-Type:
               - application/json
         status: 200 OK
         code: 200
-        duration: 678.570458ms
+        duration: 248.700959ms
   - id: 1
     request:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 1195
+        content_length: 1212
         host: ""
-        body: '{"messages":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"tool_calls":[{"id":"call_90182348","function":{"arguments":"{\"a\":2,\"b\":3}","name":"add"},"type":"function"},{"id":"call_25656741","function":{"arguments":"{\"a\":2,\"b\":3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"call_90182348","role":"tool"},{"content":"6","tool_call_id":"call_25656741","role":"tool"}],"model":"x-ai/grok-4-fast:free","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
+        body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"tool_calls":[{"id":"call_47704308","function":{"arguments":"{\"a\":2,\"b\":3}","name":"add"},"type":"function"},{"id":"call_50126132","function":{"arguments":"{\"a\":2,\"b\":3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"call_47704308","role":"tool"},{"content":"6","tool_call_id":"call_50126132","role":"tool"}],"model":"x-ai/grok-4-fast:free","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
         headers:
             Accept:
               - application/json
@@ -54,10 +54,10 @@ interactions:
         proto_minor: 0
         content_length: -1
         uncompressed: true
-        body: "\n         \n\n         \n{\"id\":\"gen-1758709931-bxZmqkMz8Tf6pibp78VI\",\"provider\":\"xAI\",\"model\":\"x-ai/grok-4-fast:free\",\"object\":\"chat.completion\",\"created\":1758709931,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"stop\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"The sum of 2 and 3 is 5.  \\nThe product of 2 and 3 is 6.\",\"refusal\":null,\"reasoning\":null}}],\"system_fingerprint\":\"fp_9362061f30\",\"usage\":{\"prompt_tokens\":654,\"completion_tokens\":95,\"total_tokens\":749,\"cost\":0,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":606,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0,\"upstream_inference_completions_cost\":0},\"completion_tokens_details\":{\"reasoning_tokens\":70,\"image_tokens\":0}}}"
+        body: "\n         \n{\"id\":\"gen-1758711118-C7t0QHAulVWg4zSYcUiQ\",\"provider\":\"xAI\",\"model\":\"x-ai/grok-4-fast:free\",\"object\":\"chat.completion\",\"created\":1758711118,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"stop\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"The sum of 2 and 3 is 5.  \\nThe product of 2 and 3 is 6.\",\"refusal\":null,\"reasoning\":null}}],\"system_fingerprint\":\"fp_9362061f30\",\"usage\":{\"prompt_tokens\":614,\"completion_tokens\":85,\"total_tokens\":699,\"cost\":0,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":566,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0,\"upstream_inference_completions_cost\":0},\"completion_tokens_details\":{\"reasoning_tokens\":60,\"image_tokens\":0}}}"
         headers:
             Content-Type:
               - application/json
         status: 200 OK
         code: 200
-        duration: 232.441959ms
+        duration: 323.741625ms

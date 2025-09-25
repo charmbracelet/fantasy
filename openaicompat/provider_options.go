@@ -10,6 +10,10 @@ type ProviderOptions struct {
 	ReasoningEffort *openai.ReasoningEffort `json:"reasoning_effort"`
 }
 
+type ReasoningData struct {
+	ReasoningContent string `json:"reasoning_content"`
+}
+
 func (*ProviderOptions) Options() {}
 
 func NewProviderOptions(opts *ProviderOptions) ai.ProviderOptions {

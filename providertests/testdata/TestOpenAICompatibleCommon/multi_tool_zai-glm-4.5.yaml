@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+  - id: 0
+    request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 812
+        host: ""
+        body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"}],"model":"glm-4.5","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
+        headers:
+            Accept:
+              - application/json
+            Content-Type:
+              - application/json
+            User-Agent:
+              - OpenAI/Go 2.3.0
+        url: https://api.z.ai/api/coding/paas/v4/chat/completions
+        method: POST
+    response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        content_length: -1
+        uncompressed: true
+        body: '{"choices":[{"finish_reason":"tool_calls","index":0,"message":{"content":"\n\nI''ll add and multiply the numbers 2 and 3 for you.\n","reasoning_content":"The user wants me to add and multiply the numbers 2 and 3. I need to use both the add and multiply functions with these two numbers.\n\nFor addition: add(2, 3)\nFor multiplication: multiply(2, 3)\n\nI''ll call both functions as requested.","role":"assistant","tool_calls":[{"function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"add"},"id":"call_-8307196618162840255","index":0,"type":"function"},{"function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"multiply"},"id":"call_-8307196618162840254","index":1,"type":"function"}]}}],"created":1758795567,"id":"2025092518192459228fd8ef9141ad","model":"glm-4.5","request_id":"2025092518192459228fd8ef9141ad","usage":{"completion_tokens":120,"prompt_tokens":286,"prompt_tokens_details":{"cached_tokens":43},"total_tokens":406}}'
+        headers:
+            Content-Type:
+              - application/json; charset=UTF-8
+        status: 200 OK
+        code: 200
+        duration: 2.931834166s
+  - id: 1
+    request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 1296
+        host: ""
+        body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"content":"\n\nI''ll add and multiply the numbers 2 and 3 for you.\n","tool_calls":[{"id":"call_-8307196618162840255","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"add"},"type":"function"},{"id":"call_-8307196618162840254","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"call_-8307196618162840255","role":"tool"},{"content":"6","tool_call_id":"call_-8307196618162840254","role":"tool"}],"model":"glm-4.5","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
+        headers:
+            Accept:
+              - application/json
+            Content-Type:
+              - application/json
+            User-Agent:
+              - OpenAI/Go 2.3.0
+        url: https://api.z.ai/api/coding/paas/v4/chat/completions
+        method: POST
+    response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        content_length: -1
+        uncompressed: true
+        body: '{"choices":[{"finish_reason":"stop","index":0,"message":{"content":"\n\nThe results of adding and multiplying 2 and 3 are:\n\n- Addition: 2 + 3 = 5\n- Multiplication: 2 × 3 = 6","reasoning_content":"The user asked me to add and multiply the numbers 2 and 3. I used both the add and multiply functions as required. The results are:\n- Addition: 2 + 3 = 5\n- Multiplication: 2 × 3 = 6\n\nI should present both results clearly to the user.","role":"assistant"}}],"created":1758795569,"id":"20250925181927e1d3b40f253144a8","model":"glm-4.5","request_id":"20250925181927e1d3b40f253144a8","usage":{"completion_tokens":108,"prompt_tokens":360,"prompt_tokens_details":{"cached_tokens":43},"total_tokens":468}}'
+        headers:
+            Content-Type:
+              - application/json; charset=UTF-8
+        status: 200 OK
+        code: 200
+        duration: 2.793087166s

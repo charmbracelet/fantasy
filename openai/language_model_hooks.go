@@ -4,12 +4,14 @@ import (
 	"fmt"
 
 	"github.com/charmbracelet/fantasy/ai"
+	"github.com/google/uuid"
 	"github.com/openai/openai-go/v2"
 	"github.com/openai/openai-go/v2/packages/param"
 	"github.com/openai/openai-go/v2/shared"
 )
 
 type (
+	LanguageModelGenerateIDFunc             = func() string
 	LanguageModelPrepareCallFunc            = func(model ai.LanguageModel, params *openai.ChatCompletionNewParams, call ai.Call) ([]ai.CallWarning, error)
 	LanguageModelMapFinishReasonFunc        = func(choice openai.ChatCompletionChoice) ai.FinishReason
 	LanguageModelUsageFunc                  = func(choice openai.ChatCompletion) (ai.Usage, ai.ProviderOptionsData)
@@ -18,6 +20,10 @@ type (
 	LanguageModelStreamUsageFunc            = func(chunk openai.ChatCompletionChunk, ctx map[string]any, metadata ai.ProviderMetadata) (ai.Usage, ai.ProviderMetadata)
 	LanguageModelStreamProviderMetadataFunc = func(choice openai.ChatCompletionChoice, metadata ai.ProviderMetadata) ai.ProviderMetadata
 )
+
+func defaultGenerateID() string {
+	return uuid.NewString()
+}
 
 func defaultPrepareLanguageModelCall(model ai.LanguageModel, params *openai.ChatCompletionNewParams, call ai.Call) ([]ai.CallWarning, error) {
 	if call.ProviderOptions == nil {

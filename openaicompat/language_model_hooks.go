@@ -1,6 +1,7 @@
 package openaicompat
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/charmbracelet/fantasy/ai"
@@ -43,8 +44,18 @@ func languagePrepareModelCall(model ai.LanguageModel, params *openaisdk.ChatComp
 }
 
 func languageModelExtraContent(choice openaisdk.ChatCompletionChoice) []ai.Content {
-	// TODO: check this
-	return []ai.Content{}
+	var content []ai.Content
+	reasoningData := ReasoningData{}
+	err := json.Unmarshal([]byte(choice.Message.RawJSON()), &reasoningData)
+	if err != nil {
+		return content
+	}
+	if reasoningData.ReasoningContent != "" {
+		content = append(content, ai.ReasoningContent{
+			Text: reasoningData.ReasoningContent,
+		})
+	}
+	return content
 }
 
 func extractReasoningContext(ctx map[string]any) bool {
@@ -60,66 +71,53 @@ func extractReasoningContext(ctx map[string]any) bool {
 }
 
 func languageModelStreamExtra(chunk openaisdk.ChatCompletionChunk, yield func(ai.StreamPart) bool, ctx map[string]any) (map[string]any, bool) {
-	// TODO: check this
-	// if len(chunk.Choices) == 0 {
-	// 	return ctx, true
-	// }
-	//
-	// reasoningStarted := extractReasoningContext(ctx)
-	//
-	// for inx, choice := range chunk.Choices {
-	// 	reasoningData := ReasoningData{}
-	// 	err := json.Unmarshal([]byte(choice.Delta.RawJSON()), &reasoningData)
-	// 	if err != nil {
-	// 		yield(ai.StreamPart{
-	// 			Type:  ai.StreamPartTypeError,
-	// 			Error: ai.NewAIError("Unexpected", "error unmarshalling delta", err),
-	// 		})
-	// 		return ctx, false
-	// 	}
-	//
-	// 	emitEvent := func(reasoningContent string) bool {
-	// 		if !reasoningStarted {
-	// 			shouldContinue := yield(ai.StreamPart{
-	// 				Type: ai.StreamPartTypeReasoningStart,
-	// 				ID:   fmt.Sprintf("%d", inx),
-	// 			})
-	// 			if !shouldContinue {
-	// 				return false
-	// 			}
-	// 		}
-	//
-	// 		return yield(ai.StreamPart{
-	// 			Type:  ai.StreamPartTypeReasoningDelta,
-	// 			ID:    fmt.Sprintf("%d", inx),
-	// 			Delta: reasoningContent,
-	// 		})
-	// 	}
-	// 	if len(reasoningData.ReasoningDetails) > 0 {
-	// 		for _, detail := range reasoningData.ReasoningDetails {
-	// 			if !reasoningStarted {
-	// 				ctx[reasoningStartedCtx] = true
-	// 			}
-	// 			switch detail.Type {
-	// 			case "reasoning.text":
-	// 				return ctx, emitEvent(detail.Text)
-	// 			case "reasoning.summary":
-	// 				return ctx, emitEvent(detail.Summary)
-	// 			case "reasoning.encrypted":
-	// 				return ctx, emitEvent("[REDACTED]")
-	// 			}
-	// 		}
-	// 	} else if reasoningData.Reasoning != "" {
-	// 		return ctx, emitEvent(reasoningData.Reasoning)
-	// 	}
-	// 	if reasoningStarted && (choice.Delta.Content != "" || len(choice.Delta.ToolCalls) > 0) {
-	// 		ctx[reasoningStartedCtx] = false
-	// 		return ctx, yield(ai.StreamPart{
-	// 			Type: ai.StreamPartTypeReasoningEnd,
-	// 			ID:   fmt.Sprintf("%d", inx),
-	// 		})
-	// 	}
-	// }
-	// return ctx, true
-	return nil, true
+	if len(chunk.Choices) == 0 {
+		return ctx, true
+	}
+
+	reasoningStarted := extractReasoningContext(ctx)
+
+	for inx, choice := range chunk.Choices {
+		reasoningData := ReasoningData{}
+		err := json.Unmarshal([]byte(choice.Delta.RawJSON()), &reasoningData)
+		if err != nil {
+			yield(ai.StreamPart{
+				Type:  ai.StreamPartTypeError,
+				Error: ai.NewAIError("Unexpected", "error unmarshalling delta", err),
+			})
+			return ctx, false
+		}
+
+		emitEvent := func(reasoningContent string) bool {
+			if !reasoningStarted {
+				shouldContinue := yield(ai.StreamPart{
+					Type: ai.StreamPartTypeReasoningStart,
+					ID:   fmt.Sprintf("%d", inx),
+				})
+				if !shouldContinue {
+					return false
+				}
+			}
+
+			return yield(ai.StreamPart{
+				Type:  ai.StreamPartTypeReasoningDelta,
+				ID:    fmt.Sprintf("%d", inx),
+				Delta: reasoningContent,
+			})
+		}
+		if reasoningData.ReasoningContent != "" {
+			if !reasoningStarted {
+				ctx[reasoningStartedCtx] = true
+			}
+			return ctx, emitEvent(reasoningData.ReasoningContent)
+		}
+		if reasoningStarted && (choice.Delta.Content != "" || len(choice.Delta.ToolCalls) > 0) {
+			ctx[reasoningStartedCtx] = false
+			return ctx, yield(ai.StreamPart{
+				Type: ai.StreamPartTypeReasoningEnd,
+				ID:   fmt.Sprintf("%d", inx),
+			})
+		}
+	}
+	return ctx, true
 }

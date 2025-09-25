@@ -2,6 +2,7 @@ package providertests
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 	"strconv"
@@ -10,7 +11,6 @@ import (
 
 	"github.com/charmbracelet/fantasy/ai"
 	"github.com/charmbracelet/fantasy/openrouter"
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )
@@ -97,8 +97,10 @@ func TestWithUniqueToolCallIDs(t *testing.T) {
 		require.Contains(t, finalText, "6", "expected response to contain '6', got: %q", finalText)
 	}
 
+	id := 0
 	generateIDFunc := func() string {
-		return "test-" + uuid.NewString()
+		id += 1
+		return fmt.Sprintf("test-%d", id)
 	}
 
 	t.Run("unique tool call ids", func(t *testing.T) {

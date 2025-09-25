@@ -27,8 +27,8 @@ func New(url string, opts ...Option) ai.Provider {
 		},
 		languageModelOptions: []openai.LanguageModelOption{
 			openai.WithLanguageModelPrepareCallFunc(languagePrepareModelCall),
-			// openai.WithLanguageModelStreamExtraFunc(languageModelStreamExtra),
-			// openai.WithLanguageModelExtraContentFunc(languageModelExtraContent),
+			openai.WithLanguageModelStreamExtraFunc(languageModelStreamExtra),
+			openai.WithLanguageModelExtraContentFunc(languageModelExtraContent),
 		},
 	}
 	for _, o := range opts {

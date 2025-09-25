@@ -257,22 +257,42 @@ func testThinking(t *testing.T, pairs []builderPair, thinkChecks func(*testing.T
 			result, err := agent.Generate(t.Context(), ai.AgentCall{
 				Prompt:          "What's the weather in Florence, Italy?",
 				ProviderOptions: pair.providerOptions,
-				// ProviderOptions: ai.ProviderOptions{
-				// 	"anthropic": &anthropic.ProviderOptions{
-				// 		Thinking: &anthropic.ThinkingProviderOption{
-				// 			BudgetTokens: 10_000,
-				// 		},
-				// 	},
-				// 	"google": &google.ProviderOptions{
-				// 		ThinkingConfig: &google.ThinkingConfig{
-				// 			ThinkingBudget:  ai.IntOption(100),
-				// 			IncludeThoughts: ai.BoolOption(true),
-				// 		},
-				// 	},
-				// 	"openai": &openai.ProviderOptions{
-				// 		ReasoningEffort: openai.ReasoningEffortOption(openai.ReasoningEffortMedium),
-				// 	},
-				// },
+			})
+			require.NoError(t, err, "failed to generate")
+
+			want1 := "Florence"
+			want2 := "40"
+			got := result.Response.Content.Text()
+			require.True(t, strings.Contains(got, want1) && strings.Contains(got, want2), "unexpected response: got %q, want %q %q", got, want1, want2)
+
+			thinkChecks(t, result)
+		})
+		t.Run("thinking-streaming-"+pair.name, func(t *testing.T) {
+			r := newRecorder(t)
+
+			languageModel, err := pair.builder(r)
+			require.NoError(t, err, "failed to build language model")
+
+			type WeatherInput struct {
+				Location string `json:"location" description:"the city"`
+			}
+
+			weatherTool := ai.NewAgentTool(
+				"weather",
+				"Get weather information for a location",
+				func(ctx context.Context, input WeatherInput, _ ai.ToolCall) (ai.ToolResponse, error) {
+					return ai.NewTextResponse("40 C"), nil
+				},
+			)
+
+			agent := ai.NewAgent(
+				languageModel,
+				ai.WithSystemPrompt("You are a helpful assistant"),
+				ai.WithTools(weatherTool),
+			)
+			result, err := agent.Stream(t.Context(), ai.AgentStreamCall{
+				Prompt:          "What's the weather in Florence, Italy?",
+				ProviderOptions: pair.providerOptions,
 			})
 			require.NoError(t, err, "failed to generate")
 

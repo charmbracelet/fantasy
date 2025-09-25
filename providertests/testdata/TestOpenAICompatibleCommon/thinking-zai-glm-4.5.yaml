@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+  - id: 0
+    request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 458
+        host: ""
+        body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence, Italy?","role":"user"}],"model":"glm-4.5","reasoning_effort":"high","tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+        headers:
+            Accept:
+              - application/json
+            Content-Type:
+              - application/json
+            User-Agent:
+              - OpenAI/Go 2.3.0
+        url: https://api.z.ai/api/coding/paas/v4/chat/completions
+        method: POST
+    response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        content_length: -1
+        uncompressed: true
+        body: '{"choices":[{"finish_reason":"tool_calls","index":0,"message":{"content":"\n\nI''ll get the weather information for Florence, Italy for you.\n","reasoning_content":"The user is asking for the weather in Florence, Italy. I have access to a weather function that takes a location parameter. The user has specified \"Florence, Italy\" as the location, so I have all the required parameters to make the function call.","role":"assistant","tool_calls":[{"function":{"arguments":"{\"location\": \"Florence, Italy\"}","name":"weather"},"id":"call_-8307179507012576275","index":0,"type":"function"}]}}],"created":1758795577,"id":"2025092518193524c7fcd1b80e4ad7","model":"glm-4.5","request_id":"2025092518193524c7fcd1b80e4ad7","usage":{"completion_tokens":85,"prompt_tokens":179,"prompt_tokens_details":{"cached_tokens":43},"total_tokens":264}}'
+        headers:
+            Content-Type:
+              - application/json; charset=UTF-8
+        status: 200 OK
+        code: 200
+        duration: 2.374119083s
+  - id: 1
+    request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 783
+        host: ""
+        body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence, Italy?","role":"user"},{"content":"\n\nI''ll get the weather information for Florence, Italy for you.\n","tool_calls":[{"id":"call_-8307179507012576275","function":{"arguments":"{\"location\": \"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"call_-8307179507012576275","role":"tool"}],"model":"glm-4.5","reasoning_effort":"high","tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+        headers:
+            Accept:
+              - application/json
+            Content-Type:
+              - application/json
+            User-Agent:
+              - OpenAI/Go 2.3.0
+        url: https://api.z.ai/api/coding/paas/v4/chat/completions
+        method: POST
+    response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        content_length: -1
+        uncompressed: true
+        body: '{"choices":[{"finish_reason":"stop","index":0,"message":{"content":"\n\nThe current weather in Florence, Italy is 40°C (104°F). That''s quite hot!","reasoning_content":"The function returned \"40 C\" which is the weather information for Florence, Italy. This appears to be the temperature in Celsius. I should provide this information to the user in a clear and helpful way.","role":"assistant"}}],"created":1758795584,"id":"20250925181938b2376e3f7fd74cc4","model":"glm-4.5","request_id":"20250925181938b2376e3f7fd74cc4","usage":{"completion_tokens":66,"prompt_tokens":220,"prompt_tokens_details":{"cached_tokens":43},"total_tokens":286}}'
+        headers:
+            Content-Type:
+              - application/json; charset=UTF-8
+        status: 200 OK
+        code: 200
+        duration: 6.861315834s

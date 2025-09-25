@@ -1,8 +1,6 @@
 package openaicompat
 
 import (
-	"encoding/json"
-
 	"github.com/charmbracelet/fantasy/ai"
 	"github.com/charmbracelet/fantasy/openai"
 	"github.com/openai/openai-go/v2/option"
@@ -73,17 +71,4 @@ func WithLanguageModelGenerateIDFunc(fn openai.LanguageModelGenerateIDFunc) Opti
 	return func(l *options) {
 		l.languageModelOptions = append(l.languageModelOptions, openai.WithLanguageModelGenerateIDFunc(fn))
 	}
-}
-
-func structToMapJSON(s any) (map[string]any, error) {
-	var result map[string]any
-	jsonBytes, err := json.Marshal(s)
-	if err != nil {
-		return nil, err
-	}
-	err = json.Unmarshal(jsonBytes, &result)
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
 }

@@ -9,7 +9,8 @@ import (
 )
 
 type options struct {
-	openaiOptions []openai.Option
+	openaiOptions        []openai.Option
+	languageModelOptions []openai.LanguageModelOption
 }
 
 const (
@@ -24,19 +25,21 @@ func New(opts ...Option) ai.Provider {
 		openaiOptions: []openai.Option{
 			openai.WithName(Name),
 			openai.WithBaseURL(DefaultURL),
-			openai.WithLanguageModelOptions(
-				openai.WithLanguageModelPrepareCallFunc(languagePrepareModelCall),
-				openai.WithLanguageModelUsageFunc(languageModelUsage),
-				openai.WithLanguageModelStreamUsageFunc(languageModelStreamUsage),
-				openai.WithLanguageModelStreamExtraFunc(languageModelStreamExtra),
-				openai.WithLanguageModelExtraContentFunc(languageModelExtraContent),
-				openai.WithLanguageModelMapFinishReasonFunc(languageModelMapFinishReason),
-			),
+		},
+		languageModelOptions: []openai.LanguageModelOption{
+			openai.WithLanguageModelPrepareCallFunc(languagePrepareModelCall),
+			openai.WithLanguageModelUsageFunc(languageModelUsage),
+			openai.WithLanguageModelStreamUsageFunc(languageModelStreamUsage),
+			openai.WithLanguageModelStreamExtraFunc(languageModelStreamExtra),
+			openai.WithLanguageModelExtraContentFunc(languageModelExtraContent),
+			openai.WithLanguageModelMapFinishReasonFunc(languageModelMapFinishReason),
 		},
 	}
 	for _, o := range opts {
 		o(&providerOptions)
 	}
+
+	providerOptions.openaiOptions = append(providerOptions.openaiOptions, openai.WithLanguageModelOptions(providerOptions.languageModelOptions...))
 	return openai.New(providerOptions.openaiOptions...)
 }
 
@@ -61,6 +64,18 @@ func WithHeaders(headers map[string]string) Option {
 func WithHTTPClient(client option.HTTPClient) Option {
 	return func(o *options) {
 		o.openaiOptions = append(o.openaiOptions, openai.WithHTTPClient(client))
+	}
+}
+
+func WithLanguageUniqueToolCallIds() Option {
+	return func(l *options) {
+		l.languageModelOptions = append(l.languageModelOptions, openai.WithLanguageUniqueToolCallIds())
+	}
+}
+
+func WithLanguageModelGenerateIDFunc(fn openai.LanguageModelGenerateIDFunc) Option {
+	return func(l *options) {
+		l.languageModelOptions = append(l.languageModelOptions, openai.WithLanguageModelGenerateIDFunc(fn))
 	}
 }
 

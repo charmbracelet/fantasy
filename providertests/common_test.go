@@ -147,10 +147,6 @@ func testTool(t *testing.T, pair builderPair) {
 }
 
 func testMultiTool(t *testing.T, pair builderPair) {
-	type WeatherInput struct {
-		Location string `json:"location" description:"the city"`
-	}
-
 	type CalculatorInput struct {
 		A int `json:"a" description:"first number"`
 		B int `json:"b" description:"second number"`

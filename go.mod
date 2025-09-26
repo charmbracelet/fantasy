@@ -12,7 +12,7 @@ require (
 	github.com/openai/openai-go/v2 v2.3.0
 	github.com/stretchr/testify v1.11.1
 	go.yaml.in/yaml/v4 v4.0.0-rc.2
-	google.golang.org/genai v1.23.0
+	google.golang.org/genai v1.26.0
 	gopkg.in/dnaeon/go-vcr.v4 v4.0.6-0.20250923044825-7b4892dd3117
 )
 

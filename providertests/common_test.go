@@ -11,6 +11,12 @@ import (
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )
 
+type testModel struct {
+	name      string
+	model     string
+	reasoning bool
+}
+
 type builderFunc func(r *recorder.Recorder) (ai.LanguageModel, error)
 
 type builderPair struct {
@@ -21,9 +27,11 @@ type builderPair struct {
 
 func testCommon(t *testing.T, pairs []builderPair) {
 	for _, pair := range pairs {
-		testSimple(t, pair)
-		testTool(t, pair)
-		testMultiTool(t, pair)
+		t.Run(pair.name, func(t *testing.T) {
+			testSimple(t, pair)
+			testTool(t, pair)
+			testMultiTool(t, pair)
+		})
 	}
 }
 
@@ -35,7 +43,7 @@ func testSimple(t *testing.T, pair builderPair) {
 		require.True(t, strings.Contains(got, option1) || strings.Contains(got, option2), "unexpected response: got %q, want %q or %q", got, option1, option2)
 	}
 
-	t.Run("simple "+pair.name, func(t *testing.T) {
+	t.Run("simple", func(t *testing.T) {
 		r := newRecorder(t)
 
 		languageModel, err := pair.builder(r)
@@ -53,7 +61,7 @@ func testSimple(t *testing.T, pair builderPair) {
 		require.NoError(t, err, "failed to generate")
 		checkResult(t, result)
 	})
-	t.Run("simple streaming "+pair.name, func(t *testing.T) {
+	t.Run("simple streaming", func(t *testing.T) {
 		r := newRecorder(t)
 
 		languageModel, err := pair.builder(r)
@@ -106,7 +114,7 @@ func testTool(t *testing.T, pair builderPair) {
 		require.True(t, strings.Contains(got, want1) && strings.Contains(got, want2), "unexpected response: got %q, want %q %q", got, want1, want2)
 	}
 
-	t.Run("tool "+pair.name, func(t *testing.T) {
+	t.Run("tool", func(t *testing.T) {
 		r := newRecorder(t)
 
 		languageModel, err := pair.builder(r)
@@ -125,7 +133,7 @@ func testTool(t *testing.T, pair builderPair) {
 		require.NoError(t, err, "failed to generate")
 		checkResult(t, result)
 	})
-	t.Run("tool streaming "+pair.name, func(t *testing.T) {
+	t.Run("tool streaming", func(t *testing.T) {
 		r := newRecorder(t)
 
 		languageModel, err := pair.builder(r)
@@ -187,7 +195,7 @@ func testMultiTool(t *testing.T, pair builderPair) {
 		require.Contains(t, finalText, "6", "expected response to contain '6', got: %q", finalText)
 	}
 
-	t.Run("multi tool "+pair.name, func(t *testing.T) {
+	t.Run("multi tool", func(t *testing.T) {
 		r := newRecorder(t)
 
 		languageModel, err := pair.builder(r)
@@ -207,7 +215,7 @@ func testMultiTool(t *testing.T, pair builderPair) {
 		require.NoError(t, err, "failed to generate")
 		checkResult(t, result)
 	})
-	t.Run("multi tool streaming "+pair.name, func(t *testing.T) {
+	t.Run("multi tool streaming", func(t *testing.T) {
 		r := newRecorder(t)
 
 		languageModel, err := pair.builder(r)
@@ -231,77 +239,79 @@ func testMultiTool(t *testing.T, pair builderPair) {
 
 func testThinking(t *testing.T, pairs []builderPair, thinkChecks func(*testing.T, *ai.AgentResult)) {
 	for _, pair := range pairs {
-		t.Run("thinking-"+pair.name, func(t *testing.T) {
-			r := newRecorder(t)
+		t.Run(pair.name, func(t *testing.T) {
+			t.Run("thinking", func(t *testing.T) {
+				r := newRecorder(t)
 
-			languageModel, err := pair.builder(r)
-			require.NoError(t, err, "failed to build language model")
+				languageModel, err := pair.builder(r)
+				require.NoError(t, err, "failed to build language model")
 
-			type WeatherInput struct {
-				Location string `json:"location" description:"the city"`
-			}
+				type WeatherInput struct {
+					Location string `json:"location" description:"the city"`
+				}
 
-			weatherTool := ai.NewAgentTool(
-				"weather",
-				"Get weather information for a location",
-				func(ctx context.Context, input WeatherInput, _ ai.ToolCall) (ai.ToolResponse, error) {
-					return ai.NewTextResponse("40 C"), nil
-				},
-			)
+				weatherTool := ai.NewAgentTool(
+					"weather",
+					"Get weather information for a location",
+					func(ctx context.Context, input WeatherInput, _ ai.ToolCall) (ai.ToolResponse, error) {
+						return ai.NewTextResponse("40 C"), nil
+					},
+				)
 
-			agent := ai.NewAgent(
-				languageModel,
-				ai.WithSystemPrompt("You are a helpful assistant"),
-				ai.WithTools(weatherTool),
-			)
-			result, err := agent.Generate(t.Context(), ai.AgentCall{
-				Prompt:          "What's the weather in Florence, Italy?",
-				ProviderOptions: pair.providerOptions,
+				agent := ai.NewAgent(
+					languageModel,
+					ai.WithSystemPrompt("You are a helpful assistant"),
+					ai.WithTools(weatherTool),
+				)
+				result, err := agent.Generate(t.Context(), ai.AgentCall{
+					Prompt:          "What's the weather in Florence, Italy?",
+					ProviderOptions: pair.providerOptions,
+				})
+				require.NoError(t, err, "failed to generate")
+
+				want1 := "Florence"
+				want2 := "40"
+				got := result.Response.Content.Text()
+				require.True(t, strings.Contains(got, want1) && strings.Contains(got, want2), "unexpected response: got %q, want %q %q", got, want1, want2)
+
+				thinkChecks(t, result)
 			})
-			require.NoError(t, err, "failed to generate")
+			t.Run("thinking-streaming", func(t *testing.T) {
+				r := newRecorder(t)
 
-			want1 := "Florence"
-			want2 := "40"
-			got := result.Response.Content.Text()
-			require.True(t, strings.Contains(got, want1) && strings.Contains(got, want2), "unexpected response: got %q, want %q %q", got, want1, want2)
+				languageModel, err := pair.builder(r)
+				require.NoError(t, err, "failed to build language model")
 
-			thinkChecks(t, result)
-		})
-		t.Run("thinking-streaming-"+pair.name, func(t *testing.T) {
-			r := newRecorder(t)
+				type WeatherInput struct {
+					Location string `json:"location" description:"the city"`
+				}
 
-			languageModel, err := pair.builder(r)
-			require.NoError(t, err, "failed to build language model")
+				weatherTool := ai.NewAgentTool(
+					"weather",
+					"Get weather information for a location",
+					func(ctx context.Context, input WeatherInput, _ ai.ToolCall) (ai.ToolResponse, error) {
+						return ai.NewTextResponse("40 C"), nil
+					},
+				)
 
-			type WeatherInput struct {
-				Location string `json:"location" description:"the city"`
-			}
+				agent := ai.NewAgent(
+					languageModel,
+					ai.WithSystemPrompt("You are a helpful assistant"),
+					ai.WithTools(weatherTool),
+				)
+				result, err := agent.Stream(t.Context(), ai.AgentStreamCall{
+					Prompt:          "What's the weather in Florence, Italy?",
+					ProviderOptions: pair.providerOptions,
+				})
+				require.NoError(t, err, "failed to generate")
 
-			weatherTool := ai.NewAgentTool(
-				"weather",
-				"Get weather information for a location",
-				func(ctx context.Context, input WeatherInput, _ ai.ToolCall) (ai.ToolResponse, error) {
-					return ai.NewTextResponse("40 C"), nil
-				},
-			)
+				want1 := "Florence"
+				want2 := "40"
+				got := result.Response.Content.Text()
+				require.True(t, strings.Contains(got, want1) && strings.Contains(got, want2), "unexpected response: got %q, want %q %q", got, want1, want2)
 
-			agent := ai.NewAgent(
-				languageModel,
-				ai.WithSystemPrompt("You are a helpful assistant"),
-				ai.WithTools(weatherTool),
-			)
-			result, err := agent.Stream(t.Context(), ai.AgentStreamCall{
-				Prompt:          "What's the weather in Florence, Italy?",
-				ProviderOptions: pair.providerOptions,
+				thinkChecks(t, result)
 			})
-			require.NoError(t, err, "failed to generate")
-
-			want1 := "Florence"
-			want2 := "40"
-			got := result.Response.Content.Text()
-			require.True(t, strings.Contains(got, want1) && strings.Contains(got, want2), "unexpected response: got %q, want %q %q", got, want1, want2)
-
-			thinkChecks(t, result)
 		})
 	}
 }

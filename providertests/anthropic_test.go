@@ -11,11 +11,19 @@ import (
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )
 
-func TestAnthropicCommon(t *testing.T) {
-	testCommon(t, []builderPair{
-		{"claude-sonnet-4", builderAnthropicClaudeSonnet4, nil},
-	})
+var anthropicTestModels = []testModel{
+	{"claude-sonnet-4", "claude-sonnet-4-20250514", true},
+}
 
+func TestAnthropicCommon(t *testing.T) {
+	var pairs []builderPair
+	for _, m := range anthropicTestModels {
+		pairs = append(pairs, builderPair{m.name, anthropicBuilder(m.model), nil})
+	}
+	testCommon(t, pairs)
+}
+
+func TestAnthropicThinking(t *testing.T) {
 	opts := ai.ProviderOptions{
 		anthropic.Name: &anthropic.ProviderOptions{
 			Thinking: &anthropic.ThinkingProviderOption{
@@ -23,9 +31,14 @@ func TestAnthropicCommon(t *testing.T) {
 			},
 		},
 	}
-	testThinking(t, []builderPair{
-		{"claude-sonnet-4", builderAnthropicClaudeSonnet4, opts},
-	}, testGoogleThinking)
+	var pairs []builderPair
+	for _, m := range anthropicTestModels {
+		if !m.reasoning {
+			continue
+		}
+		pairs = append(pairs, builderPair{m.name, anthropicBuilder(m.model), opts})
+	}
+	testThinking(t, pairs, testAnthropicThinking)
 }
 
 func testAnthropicThinking(t *testing.T, result *ai.AgentResult) {
@@ -64,10 +77,12 @@ func testAnthropicThinking(t *testing.T, result *ai.AgentResult) {
 	require.Equal(t, reasoningContentCount, signaturesCount)
 }
 
-func builderAnthropicClaudeSonnet4(r *recorder.Recorder) (ai.LanguageModel, error) {
-	provider := anthropic.New(
-		anthropic.WithAPIKey(os.Getenv("ANTHROPIC_API_KEY")),
-		anthropic.WithHTTPClient(&http.Client{Transport: r}),
-	)
-	return provider.LanguageModel("claude-sonnet-4-20250514")
+func anthropicBuilder(model string) builderFunc {
+	return func(r *recorder.Recorder) (ai.LanguageModel, error) {
+		provider := anthropic.New(
+			anthropic.WithAPIKey(os.Getenv("ANTHROPIC_API_KEY")),
+			anthropic.WithHTTPClient(&http.Client{Transport: r}),
+		)
+		return provider.LanguageModel(model)
+	}
 }

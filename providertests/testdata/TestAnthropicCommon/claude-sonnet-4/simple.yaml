@@ -1,0 +1,33 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 205
+    host: ""
+    body: '{"max_tokens":4000,"messages":[{"content":[{"text":"Say hi in Portuguese","type":"text"}],"role":"user"}],"model":"claude-sonnet-4-20250514","system":[{"text":"You are a helpful assistant","type":"text"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Anthropic/Go 1.10.0
+    url: https://api.anthropic.com/v1/messages
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"id":"msg_01P9AGfyVhqwFEY82kTBEeip","type":"message","role":"assistant","model":"claude-sonnet-4-20250514","content":[{"type":"text","text":"Olá! (Oh-LAH)\n\nThis is the most common way to say \"hi\" in Portuguese. You could also use \"Oi!\" (OY) which is a bit more casual and friendly."}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":16,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":50,"service_tier":"standard"}}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 3.286588541s

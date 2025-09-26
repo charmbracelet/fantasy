@@ -1,0 +1,33 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 198
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"Say hi in Portuguese","role":"user"}],"model":"openai/gpt-5","max_completion_tokens":4000,"usage":{"include":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.3.0
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1758884957-ozyc0QzQMx7lYy83GoZr\",\"provider\":\"OpenAI\",\"model\":\"openai/gpt-5\",\"object\":\"chat.completion\",\"created\":1758884957,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"completed\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"Olá!\",\"refusal\":null,\"reasoning\":\"**Responding in Portuguese**\\n\\nThe user asked for a greeting in Portuguese, so it's pretty straightforward. I think I'll go with \\\"Oi!\\\" or \\\"Olá!\\\" as both are common ways to say hi. But maybe I should just pick one to keep it minimal. I’m thinking \\\"Olá!\\\" might be the best choice since it sounds friendly and is widely used. So, I’ll respond with \\\"Olá!\\\" to keep it simple and effective!\",\"reasoning_details\":[{\"type\":\"reasoning.summary\",\"summary\":\"**Responding in Portuguese**\\n\\nThe user asked for a greeting in Portuguese, so it's pretty straightforward. I think I'll go with \\\"Oi!\\\" or \\\"Olá!\\\" as both are common ways to say hi. But maybe I should just pick one to keep it minimal. I’m thinking \\\"Olá!\\\" might be the best choice since it sounds friendly and is widely used. So, I’ll respond with \\\"Olá!\\\" to keep it simple and effective!\",\"format\":\"openai-responses-v1\",\"index\":0},{\"type\":\"reasoning.encrypted\",\"data\":\"gAAAAABo1nRiFqXmoxOc4l0mk0o7i-Qbuc-W9Z7n0Whfh5_9R4-23L_LoM5PWvzZGJGCCf--S7yOu-UdPXf1ObRwM3q9yQ9VDW6f7nhU1K0-YzbstSJh-Fzxb3rqjoYfLbohEow6vsAzuub6UfVY2C1OlU9MpDeZXUi92T55Klt6EZrgzbQUKXCBoiFgtpN9-hIdwDCvLfyabLlcMHcI3wxLJKbc7WTz7IW-9DgFyl3H4yvyfyW8VEHDxJkGaZpM7EOd1Qfb0dge8VN9zdyqwuMQzA_MylFm0Ux9Ow9wjuL93bpdzWGcUNjBeX6jHkC1QHrNjgAnvG8WjAnLNWhsypAo461YY3fOntntVFdp9KFQIsIJEY6Jt0OJGSt6O6H3Hd4IOAIR-5D7LSFZ1VWzI4gO3rxEUSIsv1sMgZr-up38K1rrpPoaS9HxCoYP_jgxgKTPRoe9j_zPJyZh0Of4AaLOLr0S5xnVYU4Oz45vJRPGzUYFaMyWEyTFbzNubaFsWLP_GKsH6tvHwNWjVU0BQkC7UJ-B4WjVrnJrjCXPN3XRt30xrgMZbpDs1LC4sY_bv9-xAvTa3krujq2XegXZfxpuJvVVqQY0ReY3gSzf3f2K1OPz61_1dUz2nPYsgz5G0sHGRi1LCr-f5LvNXn2GfiIfdOt5gnA0UjexlrniZrKkxV_GoETQHQN70Ld6cB8jTCzAg8KS5IiOsTDGs2NqyGn44jQkExcyv1DyjJvHJYyTRH_27tMgz-VZGpv3A3ep1C03v6iOfnQjkIp-N7qPQKM4obAfS0bF8P7PQH-RiWu0pJzegc4ucH4eCFknN8WOZAchIfS-uiIUPCdof-ETsyuw2vlMc2MdsjvNAhxR7dFKFqkB88JajOclTqHiV2YK5fVg8wKdRUcMXd4jq1BydoiL99HYivH6c9zfSkCpiGGctsPQ1efdM7tu056-hVtpw7YGAWundRxAGqjUZ01xml76LDOV1B2HXyRWeE5oXoFLCx9GTDnCl90GMew-uqEBLzWCwEmrTKldfN57CH7ogEFkKV5WEg9xN3ou5oLbJ30KDSk7CghSGE5QPieNECuPjP8zNY78VIKMNVrCAOSgIFZpfypJSfA596ruex3mwn7zqW42Dy4gRnHYSmxtkDwbDI7bJ5324oJNdHW6w7-5R7wN0wfNk20ghKpZCgakgZkBlwF9cRajU0UhI807hPHt9Ea-to07NoS7\",\"id\":\"rs_68d6745e62dc8196a2fb3c593d658d140287b580b77d495f\",\"format\":\"openai-responses-v1\",\"index\":0}]}}],\"usage\":{\"prompt_tokens\":19,\"completion_tokens\":72,\"total_tokens\":91,\"cost\":0.00074375,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.00002375,\"upstream_inference_completions_cost\":0.00072},\"completion_tokens_details\":{\"reasoning_tokens\":64,\"image_tokens\":0}}}"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 425.564958ms

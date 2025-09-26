@@ -1,0 +1,33 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 187
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"Say hi in Portuguese","role":"user"}],"model":"z-ai/glm-4.5","max_tokens":4000,"usage":{"include":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.3.0
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1758885018-7FDRbbLStfXg2wgirdlK\",\"provider\":\"Mancer 2\",\"model\":\"z-ai/glm-4.5\",\"object\":\"chat.completion\",\"created\":1758885018,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"stop\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\\nHi in Portuguese is \\\"Olá\\\". Another common way to say hi in Portuguese, especially in Brazil, is \\\"Oi\\\".\",\"refusal\":null,\"reasoning\":\"The user is asking me to say \\\"hi\\\" in Portuguese. In Portuguese, \\\"hi\\\" or \\\"hello\\\" is commonly translated as \\\"Olá\\\". I should provide this translation directly.\\n\\nThe Portuguese word for greeting is:\\n- \\\"Olá\\\" (which is a common, somewhat formal \\\"hello\\\")\\n- \\\"Oi\\\" (which is more informal and commonly used in Brazil)\\n\\nI think I'll provide both options since they're both commonly used, with a brief note about their usage.\",\"reasoning_details\":[{\"type\":\"reasoning.text\",\"text\":\"The user is asking me to say \\\"hi\\\" in Portuguese. In Portuguese, \\\"hi\\\" or \\\"hello\\\" is commonly translated as \\\"Olá\\\". I should provide this translation directly.\\n\\nThe Portuguese word for greeting is:\\n- \\\"Olá\\\" (which is a common, somewhat formal \\\"hello\\\")\\n- \\\"Oi\\\" (which is more informal and commonly used in Brazil)\\n\\nI think I'll provide both options since they're both commonly used, with a brief note about their usage.\",\"format\":\"unknown\",\"index\":0}]}}],\"usage\":{\"prompt_tokens\":16,\"completion_tokens\":127,\"total_tokens\":143,\"cost\":0.00026,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.000008,\"upstream_inference_completions_cost\":0.000254},\"completion_tokens_details\":{\"reasoning_tokens\":110,\"image_tokens\":0}}}"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 1.055259959s

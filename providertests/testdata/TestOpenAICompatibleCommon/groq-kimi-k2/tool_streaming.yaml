@@ -1,0 +1,123 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 528
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"}],"model":"moonshotai/kimi-k2-instruct-0905","max_tokens":4000,"stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.3.0
+    url: https://api.groq.com/openai/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"chatcmpl-f8dbbaa5-6f1a-48b5-8182-377b3774d8b1","object":"chat.completion.chunk","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_6e6ff3688b","choices":[{"index":0,"delta":{"role":"assistant","content":null},"logprobs":null,"finish_reason":null}],"x_groq":{"id":"req_01k62v69frexz821z0q8c8zy4z"}}
+
+      data: {"id":"chatcmpl-f8dbbaa5-6f1a-48b5-8182-377b3774d8b1","object":"chat.completion.chunk","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_6e6ff3688b","choices":[{"index":0,"delta":{"tool_calls":[{"id":"functions.weather:0","type":"function","function":{"name":"weather","arguments":"{\"location\":\"Florence,Italy\"}"},"index":0}]},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-f8dbbaa5-6f1a-48b5-8182-377b3774d8b1","object":"chat.completion.chunk","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_6e6ff3688b","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}],"x_groq":{"id":"req_01k62v69frexz821z0q8c8zy4z","usage":{"queue_time":0.03504137,"prompt_tokens":99,"prompt_time":0.016409098,"completion_tokens":21,"completion_time":0.068214998,"total_tokens":120,"total_time":0.084624096}},"usage":{"queue_time":0.03504137,"prompt_tokens":99,"prompt_time":0.016409098,"completion_tokens":21,"completion_time":0.068214998,"total_tokens":120,"total_time":0.084624096}}
+
+      data: {"id":"chatcmpl-f8dbbaa5-6f1a-48b5-8182-377b3774d8b1","object":"chat.completion.chunk","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_6e6ff3688b","choices":[],"usage":{"queue_time":0.03504137,"prompt_tokens":99,"prompt_time":0.016409098,"completion_tokens":21,"completion_time":0.068214998,"total_tokens":120,"total_time":0.084624096},"service_tier":"on_demand"}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 169.217209ms
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 759
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"functions.weather:0","function":{"arguments":"{\"location\":\"Florence,Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"functions.weather:0","role":"tool"}],"model":"moonshotai/kimi-k2-instruct-0905","max_tokens":4000,"stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.3.0
+    url: https://api.groq.com/openai/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"chatcmpl-8c7b9aab-0f33-4e49-a85c-a767e9f10cb3","object":"chat.completion.chunk","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_6e6ff3688b","choices":[{"index":0,"delta":{"role":"assistant","content":""},"logprobs":null,"finish_reason":null}],"x_groq":{"id":"req_01k62v69nqexz91h2x5y0qygzz"}}
+
+      data: {"id":"chatcmpl-8c7b9aab-0f33-4e49-a85c-a767e9f10cb3","object":"chat.completion.chunk","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_6e6ff3688b","choices":[{"index":0,"delta":{"content":"It"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-8c7b9aab-0f33-4e49-a85c-a767e9f10cb3","object":"chat.completion.chunk","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_6e6ff3688b","choices":[{"index":0,"delta":{"content":"’s"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-8c7b9aab-0f33-4e49-a85c-a767e9f10cb3","object":"chat.completion.chunk","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_6e6ff3688b","choices":[{"index":0,"delta":{"content":" currently"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-8c7b9aab-0f33-4e49-a85c-a767e9f10cb3","object":"chat.completion.chunk","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_6e6ff3688b","choices":[{"index":0,"delta":{"content":" "},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-8c7b9aab-0f33-4e49-a85c-a767e9f10cb3","object":"chat.completion.chunk","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_6e6ff3688b","choices":[{"index":0,"delta":{"content":"40"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-8c7b9aab-0f33-4e49-a85c-a767e9f10cb3","object":"chat.completion.chunk","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_6e6ff3688b","choices":[{"index":0,"delta":{"content":" °"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-8c7b9aab-0f33-4e49-a85c-a767e9f10cb3","object":"chat.completion.chunk","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_6e6ff3688b","choices":[{"index":0,"delta":{"content":"C"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-8c7b9aab-0f33-4e49-a85c-a767e9f10cb3","object":"chat.completion.chunk","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_6e6ff3688b","choices":[{"index":0,"delta":{"content":" ("},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-8c7b9aab-0f33-4e49-a85c-a767e9f10cb3","object":"chat.completion.chunk","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_6e6ff3688b","choices":[{"index":0,"delta":{"content":"about"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-8c7b9aab-0f33-4e49-a85c-a767e9f10cb3","object":"chat.completion.chunk","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_6e6ff3688b","choices":[{"index":0,"delta":{"content":" "},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-8c7b9aab-0f33-4e49-a85c-a767e9f10cb3","object":"chat.completion.chunk","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_6e6ff3688b","choices":[{"index":0,"delta":{"content":"104"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-8c7b9aab-0f33-4e49-a85c-a767e9f10cb3","object":"chat.completion.chunk","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_6e6ff3688b","choices":[{"index":0,"delta":{"content":" °"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-8c7b9aab-0f33-4e49-a85c-a767e9f10cb3","object":"chat.completion.chunk","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_6e6ff3688b","choices":[{"index":0,"delta":{"content":"F"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-8c7b9aab-0f33-4e49-a85c-a767e9f10cb3","object":"chat.completion.chunk","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_6e6ff3688b","choices":[{"index":0,"delta":{"content":")"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-8c7b9aab-0f33-4e49-a85c-a767e9f10cb3","object":"chat.completion.chunk","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_6e6ff3688b","choices":[{"index":0,"delta":{"content":" in"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-8c7b9aab-0f33-4e49-a85c-a767e9f10cb3","object":"chat.completion.chunk","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_6e6ff3688b","choices":[{"index":0,"delta":{"content":" Florence"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-8c7b9aab-0f33-4e49-a85c-a767e9f10cb3","object":"chat.completion.chunk","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_6e6ff3688b","choices":[{"index":0,"delta":{"content":","},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-8c7b9aab-0f33-4e49-a85c-a767e9f10cb3","object":"chat.completion.chunk","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_6e6ff3688b","choices":[{"index":0,"delta":{"content":" Italy"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-8c7b9aab-0f33-4e49-a85c-a767e9f10cb3","object":"chat.completion.chunk","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_6e6ff3688b","choices":[{"index":0,"delta":{"content":"—"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-8c7b9aab-0f33-4e49-a85c-a767e9f10cb3","object":"chat.completion.chunk","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_6e6ff3688b","choices":[{"index":0,"delta":{"content":"quite"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-8c7b9aab-0f33-4e49-a85c-a767e9f10cb3","object":"chat.completion.chunk","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_6e6ff3688b","choices":[{"index":0,"delta":{"content":" hot"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-8c7b9aab-0f33-4e49-a85c-a767e9f10cb3","object":"chat.completion.chunk","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_6e6ff3688b","choices":[{"index":0,"delta":{"content":"!"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-8c7b9aab-0f33-4e49-a85c-a767e9f10cb3","object":"chat.completion.chunk","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_6e6ff3688b","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"stop"}],"x_groq":{"id":"req_01k62v69nqexz91h2x5y0qygzz","usage":{"queue_time":0.035569563,"prompt_tokens":139,"prompt_time":0.016770892,"completion_tokens":23,"completion_time":0.079470705,"total_tokens":162,"total_time":0.096241597}},"usage":{"queue_time":0.035569563,"prompt_tokens":139,"prompt_time":0.016770892,"completion_tokens":23,"completion_time":0.079470705,"total_tokens":162,"total_time":0.096241597}}
+
+      data: {"id":"chatcmpl-8c7b9aab-0f33-4e49-a85c-a767e9f10cb3","object":"chat.completion.chunk","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_6e6ff3688b","choices":[],"usage":{"queue_time":0.035569563,"prompt_tokens":139,"prompt_time":0.016770892,"completion_tokens":23,"completion_time":0.079470705,"total_tokens":162,"total_time":0.096241597},"service_tier":"on_demand"}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 125.265708ms

@@ -1,0 +1,46 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 252
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"Say hi in Portuguese","role":"user"}],"model":"openai/gpt-5","max_completion_tokens":4000,"stream_options":{"include_usage":true},"usage":{"include":true},"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.3.0
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"gen-1758884962-fX03Skb1GH0VQrIND1mJ","provider":"OpenAI","model":"openai/gpt-5","object":"chat.completion.chunk","created":1758884962,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+      data: {"id":"gen-1758884962-fX03Skb1GH0VQrIND1mJ","provider":"OpenAI","model":"openai/gpt-5","object":"chat.completion.chunk","created":1758884962,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":null,"reasoning_details":[{"type":"reasoning.encrypted","data":"gAAAAABo1nRxcQ6NrQp0JMh6EvLSAUCY4vCJZKomb0j_E7JpPfbiUt42bQ-XtVeGOqTfF08fvNBiNxV74z9-oUk2TF27-fE1hAqVYUJOoJS5vae7yChSltDKBJ2hoxrYB0eLMDz0RSw0nHDX3shG1YMd4U64znHY3Q17Micj8vuJKZIJOTWiAmW8GFJnZhM2IyGzC3ZtHXEQ60PBo7hmf9nFshQA-x75cq8EHLb_7z03CzeERbRLUAlDEndq4-Z5NPercd3Tl4M3O_syyaijW9j-QS0LOQqR0nXPFMhyU259oTQcf3Y1LQIAHgK-TTxuQ2G3TpOKPLk20Yxx5m-QAeGE6rVCfp1WuVKDp6CNpGD9yEhBkO1Z1vnt0XB7VNde2vSHFxcKOIrImfmkmxnC0XXTkWg2dRONdhjJesJ6iLhfWEKxO329VJYTe-H6a_VQyC-e0M-oo2f4iIlnBLMqDZK9W94oX1L57iGtdlKXfqf1U6UyBT8ONXa_SQtch1ArWAMek0k6T_7VoUzs8vlgVb7Vr7KYGCxNv8HGw5SYk6-ONZppINHPN1lKKr55PMvk4gh0sJkBkS68f5SxhwRDypoYOjxk28NPtvMCym32j7ZWznpVM6CptKVKrIE5tj3PhZBUWkcpRAi2ZCn5SRv5JMJn86aAJNYuG-QqHd9-BUExvl0umNZlqknUn4JVt_s8tN9xjgMDOp464UsWLP4sTZKVDgGDlUFNE7buGh9bzrF7J66tvIMQfZAFd8vfTcLfikswc6PYJWeVglIslafyqkJtLoOrI4UaWAoTXRcR_QY3t1QOmP1inRNmWH6RwQonsAcvmLOkBkbV_6H17lMZdSSb5bOf8u9ICFA6aDgsyMeqavGoLC_3EsGiP_JQp11oaFyzD0zWrrADrJvUoBGFBBPTShTSqowP728s1NVQgb4iO3Cr9dNu4kOtS4N8ymYUueXi_P70Q5J9hAZMKJmgrnvsFRFRJj6i07qk6Ole6nBTlxa6YSoFTCD5rGPNK3ey7BOLR5k3aWsPq9ZSGSg-bQM_H1vwqludW-cTIbowSbQoB1cvVIaL9l-uqFm6aX5ZKrpMVaPgoLUDdN_woRXpIxZUtquUizAdcQRVnWx5O1xCZXBISpRHL4rGQTVJg_hSZQ0TgX8erHkGZNjK7cn-wFCkTIj2qRIEhLcc-00PISbHLVe28Dzu2sOGl3_A7BsnNv7RCzRPnN2pXctrTyhvGK_pgNzZ6R52D4h9iEYFAlmwp8FqvOUNapyfOBvjKxaEFDa90kB-2GKbmLZOtcpmXLMNaD2gkiQAaRrOycboQmlyzFgr2P_bOLa5MKGClMBFGrHVmtxAgu4xtGQcfeQnnydtGhH1xxHzm-rsadP8H8ZYFKyLL0S1UU7k7B7VY6O-tMdCoivdOq6ArZMUsRjzvRYN8SS-KGG9nmdwlTfViJK4kx-erPYZDxn8fBhhJID7Hlh_xUOI8iN3-DfZEVdHA8DMlRp3I6AYIEIGvhk1dsIHkpACk8HOtykMry-Gbmdkjch9PDr5OVEDcDcCeYJXmmsUlP1As0U_yiPNEXH4N43XxIYW0IK7hA9PryOMyolRqFdJMRAPkCSa0a6RIL2yn-NikkN5oQ_ZGrUlsI6rxP-6IxFuyOmor4PsKHdxRAd6Du1EGD4XIeG4QOXvyKje85iJpR99S6pw1N8qYbk30pI-X9ARmRcK4j0C8ixzhhkXKnWVrrCGK22Vg887tlpLlavX8eMDKLxYa3YURJrTEPMkL8EzOyuuTTIpqLZVKwsC1mHsCWZSO-DrBLcVMZIYiSWBy2dsYXFDhIoq3AbA9s4cTc8uFzxPAbdQV60eyaB_tRXELwqU7q10sAqtpGLt9-vSfDgasAJMvwsvDDX14HZCxw2nCBqNEQMFSp74DmWwK9tWwgG42gaS1CMWcaQFW23wLzg4GJU1lANUo-Zzbo3U9s_pRxpJx6_7M1ESDiNHAMk2U3DLWGlHIrWNvNBquvDg8O-rk7dw7bgsEA-5iw4LjMi8gEK9Nj2PUi-6m_-RYBzIESIzynPd-oeGfWdgGQJGO9AUN_vlq5GCbJFBcPYRjxBZ5grYvH81d4q18oEUUzpp-ThSjwDH8qR9_3UkSWfSQNIIFBLJyxllzaTnjJNZhzt-GP9dUdRzVxl0lBxiToH6ChE6hy6q","id":"rs_68d67463094c81939dfb04a08ba6fcfb05922c314c0bd99c","format":"openai-responses-v1","index":0}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+      data: {"id":"gen-1758884962-fX03Skb1GH0VQrIND1mJ","provider":"OpenAI","model":"openai/gpt-5","object":"chat.completion.chunk","created":1758884962,"choices":[{"index":0,"delta":{"role":"assistant","content":"Oi"},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+      data: {"id":"gen-1758884962-fX03Skb1GH0VQrIND1mJ","provider":"OpenAI","model":"openai/gpt-5","object":"chat.completion.chunk","created":1758884962,"choices":[{"index":0,"delta":{"role":"assistant","content":"!"},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+      data: {"id":"gen-1758884962-fX03Skb1GH0VQrIND1mJ","provider":"OpenAI","model":"openai/gpt-5","object":"chat.completion.chunk","created":1758884962,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":"stop","native_finish_reason":"completed","logprobs":null}]}
+
+      data: {"id":"gen-1758884962-fX03Skb1GH0VQrIND1mJ","provider":"OpenAI","model":"openai/gpt-5","object":"chat.completion.chunk","created":1758884962,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"usage":{"prompt_tokens":19,"completion_tokens":200,"total_tokens":219,"cost":0.00202375,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.00002375,"upstream_inference_completions_cost":0.002},"completion_tokens_details":{"reasoning_tokens":192,"image_tokens":0}}}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 417.176959ms

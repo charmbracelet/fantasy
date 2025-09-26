@@ -98,7 +98,6 @@ func languageModelExtraContent(choice openaisdk.ChatCompletionChoice) []ai.Conte
 		return content
 	}
 	for _, detail := range reasoningData.ReasoningDetails {
-
 		var metadata ai.ProviderMetadata
 
 		if detail.Signature != "" {

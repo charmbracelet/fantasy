@@ -43,6 +43,12 @@ type ProviderMetadata struct {
 
 func (*ProviderMetadata) Options() {}
 
+type ReasoningMetadata struct {
+	Signature string `json:"signature"`
+}
+
+func (*ReasoningMetadata) Options() {}
+
 type ReasoningOptions struct {
 	// Whether reasoning is enabled
 	Enabled *bool `json:"enabled,omitempty"`
@@ -96,9 +102,10 @@ type ProviderOptions struct {
 func (*ProviderOptions) Options() {}
 
 type ReasoningDetail struct {
-	Type    string `json:"type"`
-	Text    string `json:"text"`
-	Summary string `json:"summary"`
+	Type      string `json:"type"`
+	Text      string `json:"text"`
+	Summary   string `json:"summary"`
+	Signature string `json:"signature"`
 }
 type ReasoningData struct {
 	Reasoning        string            `json:"reasoning"`

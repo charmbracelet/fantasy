@@ -1,0 +1,62 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 202
+    host: generativelanguage.googleapis.com
+    body: |
+      {"contents":[{"parts":[{"text":"Say hi in Portuguese"}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"}}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - google-genai-sdk/1.23.0 gl-go/go1.25.1
+    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: |
+      {
+        "candidates": [
+          {
+            "content": {
+              "parts": [
+                {
+                  "text": "Of course!\n\nThe most common ways to say \"hi\" in Portuguese are:\n\n*   **Olá** (A bit more formal, like \"hello\")\n*   **Oi** (Very common and casual, like \"hi\")"
+                }
+              ],
+              "role": "model"
+            },
+            "finishReason": "STOP",
+            "index": 0
+          }
+        ],
+        "usageMetadata": {
+          "promptTokenCount": 11,
+          "candidatesTokenCount": 49,
+          "totalTokenCount": 677,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 11
+            }
+          ],
+          "thoughtsTokenCount": 617
+        },
+        "modelVersion": "gemini-2.5-pro",
+        "responseId": "8HLWaNeEFcqpkdUPnej7cA"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+    status: 200 OK
+    code: 200
+    duration: 7.315723791s

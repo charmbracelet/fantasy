@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 490
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"}],"model":"openai/gpt-5","max_completion_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.3.0
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1758884977-j54SZbXqGEMHXUNmdMkQ\",\"provider\":\"OpenAI\",\"model\":\"openai/gpt-5\",\"object\":\"chat.completion\",\"created\":1758884978,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"native_finish_reason\":\"completed\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"refusal\":null,\"reasoning\":null,\"tool_calls\":[{\"id\":\"call_t5AAVn2dwceGA0cbzHJYlFNG\",\"index\":1,\"type\":\"function\",\"function\":{\"name\":\"weather\",\"arguments\":\"{\\\"location\\\":\\\"Florence, Italy\\\"}\"}}],\"reasoning_details\":[{\"type\":\"reasoning.encrypted\",\"data\":\"gAAAAABo1nR0WAiymMDnXOwL8B6lyUIymb3ZCQdzfdQj8cJ1Lo669wC9ml5PTsI-mwZbPSoCp89PxJNeha1snIdNUeMbCQgZ7uKTBkN7FLaOqNJNNWpwaP2YlCyBEm9Mctw_Pa-EkuOowwgrTWk_bOULD35JSar8S9JLgUwnWmNC-S72XQJkoypGNRLdxbz5z49HdU22EfwDsNLPCp20bDels4SC7Bi-knm4YtysQq_BILY-cozo_ieVApk26L2_rrjRK5cifZ1CfGGD63HtsZAh2zDcvDUeT8T3ss973mRzVhg7PMx9lVOY0RG7-kibYopkJmt5OfBSQ1oYdeoVl8-N-PJKwGIhRPuYZ4DF_oNnYAPyCOCiYRJQMa30_kbIpZFeN18auiEBE3Ze-v9z_Oe6IfoUlNTWt02stL0-laAXZrK9Py8uCtDJfLVyvrv1-043tcmeVMYrpDGhbC-OO7eDBsy1Y-ApAAY_eVP6Oif-0MBquh8Va_QHEaQ2jmFVf1hQSqMNQ63Npt4l6JLk8Ho3suhhYP6q3abe50ra2sJwwOq1wzxJ9PUx1to-cyhZUOXXu1uOeEouTgW5rEYpUIcHx0thF9M89wqDKp0unLpwGbYQc8ysg9qWrClKTQnSGyIYfUiVMEciM9q0pYk2mUo_IRZLk4YwTTLrptVtzX9oezjmh1LLyMtaA5g4ifKxs8FZquZhE6Bugh6tSDnqMvWuxLFHe6FcnQTRZg5RQA9xYRNeq_mOB-GyLwFaIh7a6EOuOcilSlm4EyDSpbRmY1SJEmn8ocPHRvm_sw9HSNtDw1TGMNH44KquKziroA7RnxH2_4bCHiedOt0JLizWK61N-FMqMqEJH3DvgXvrkSCBpNopcB8UG2agB8ljlwPT2B_vxkr4dQhzSGBC0DX1oq--W5t_qEOcRTiONhiNvC58uQ8ktQL-NQNs4qCLDJ-C9rPgYRi5HECxowwYQWOkTb-85lk2sH8Z1SMFvLysYueIzlIRZg8iDC4rryONnoOVKJr0SV0wBme8lYDmi7NLnU5pRfiObu_GQv9G26j7eCbQmyFjyXNAgiA-fDrBOgFpFIkRTnPvb94SIhEaQe33rC1nZXF1IH9isPBwGlxQgt5KTd1UhYc_ld0YYM2mY0qlMiOCLJCA4_9XRuiupmOG6BxCVNHhL1sZOHEV6v9ePZgEhQBz4YzGm7X-jkLo6uPHaHMxaLjJZ6h_sh19WYPrrJADkWUlq0jU3b9I_pFN567r-DJx8M8vC8Egna7T6NFbgs1NvDBEUl44nXyc9P9m9t2aW2p4wDYAOeMhZm_P62c-ASQ5gShk7gZbreD8Vt_UH82qm5O5JD2Af9D8p2PTit9zsHz_D-d3hi-oXwoWl3f-Aw8LtjJk43Uxel00TNpMXXbXk-HQhXEpNGDJWBEJoBEr7YyAXnyQYrd8XO-VQR9DI3niAd6tnAcH85sv0r569RBrGdq92Z7c\",\"id\":\"rs_68d67472e4b081979a3070f34743b21d097d10dbc77736f6\",\"format\":\"openai-responses-v1\",\"index\":0}]}}],\"usage\":{\"prompt_tokens\":66,\"completion_tokens\":86,\"total_tokens\":152,\"cost\":0.0009425,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.0000825,\"upstream_inference_completions_cost\":0.00086},\"completion_tokens_details\":{\"reasoning_tokens\":64,\"image_tokens\":0}}}"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 679.4675ms
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 742
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"call_t5AAVn2dwceGA0cbzHJYlFNG","function":{"arguments":"{\"location\":\"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"call_t5AAVn2dwceGA0cbzHJYlFNG","role":"tool"}],"model":"openai/gpt-5","max_completion_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.3.0
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1758884981-veEUDoqiAwRsrUopoig3\",\"provider\":\"OpenAI\",\"model\":\"openai/gpt-5\",\"object\":\"chat.completion\",\"created\":1758884981,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"completed\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"It’s currently about 40°C (104°F) in Florence, Italy.\",\"refusal\":null,\"reasoning\":\"**Evaluating weather response**\\n\\nI called the weather function and got a response of \\\"40 C,\\\" which I presume is Celsius. It's important to provide this information clearly. I’ll keep it concise since the user just asked for the weather in Florence, Italy. I think I could say, \\\"Currently about 40°C (104°F) in Florence, Italy.\\\" It might be good to add a note to stay hydrated because it's hot. I might also ask if the user wants a forecast, but that's not necessary.**Finalizing temperature response**\\n\\nI need to keep my response minimal and straightforward. I received \\\"40 C,\\\" which I can assume is the current temperature. I'll phrase it as, \\\"The current temperature is about 40°C.\\\" This captures the necessary information without overcomplicating things. It’s important to be clear and concise, so I'll finalize that. I want the user to easily understand the current temperature without any unnecessary details.\",\"reasoning_details\":[{\"type\":\"reasoning.summary\",\"summary\":\"**Evaluating weather response**\\n\\nI called the weather function and got a response of \\\"40 C,\\\" which I presume is Celsius. It's important to provide this information clearly. I’ll keep it concise since the user just asked for the weather in Florence, Italy. I think I could say, \\\"Currently about 40°C (104°F) in Florence, Italy.\\\" It might be good to add a note to stay hydrated because it's hot. I might also ask if the user wants a forecast, but that's not necessary.**Finalizing temperature response**\\n\\nI need to keep my response minimal and straightforward. I received \\\"40 C,\\\" which I can assume is the current temperature. I'll phrase it as, \\\"The current temperature is about 40°C.\\\" This captures the necessary information without overcomplicating things. It’s important to be clear and concise, so I'll finalize that. I want the user to easily understand the current temperature without any unnecessary details.\",\"format\":\"openai-responses-v1\",\"index\":0},{\"type\":\"reasoning.encrypted\",\"data\":\"gAAAAABo1nR9KDyPRrP5G9TxQcW30_LpJfogOzDHUjImoukDdYEf0NTpGqaYb7f8VczaOJrtlWpYtk5YyRbSGOT5khPpqhV7Oq-W9CBeRmbM0CPgEW2FxVLyprhMVIhGPpEM0HFzIDDWZgXcQGB87iU4ETM_YRMA0ckg_iwVOVADhBEytZQjz8aGOEaWmdGGizMo3xoCpt3Do5tP7UIOR41s1yMGB94aOgPKB8g94lxx1nL6_tK2FKFgrOhptCoKjqb_OXiJSWvqlZlrRwwrAaDg68d8cv-EGLop0p4mioj-04pwbXryGP88j_AZebZEgIykmoMGNcoETcA4GS_wbu8AGmOkPkDNLaIldnjEs5ZUrP1qdQlZGtZj7CnCQEdVU3WMEKCKmhImZsxsSjZupdOrwVFDEBMwPqmetBo764ZW9rNfxTkaqYSc5i4ioQFbu8eEU2O4mAFj6cLnLD1z-K5j2Uwg4FVOMXHHNscSCZBtj9oBK9iqCs_h10GwABWlceePV66YqZnGBDapUD8T4GZrhh-9laJ9HDq3xkJEznUaTP3aIDy79cOS7WDPXK9-mFO29BYrRRfoF0PSrxK-dw-aCy7smHC04RTjPWKk7FCRGCzVGgrXwVjLIhb3y2vrw9AzNQTofwxP8pEIkqWeC1E5gx5wZpYNSTJcG-A33SVhBGW-0aHaJzeWIbR1Cl81nOc0bm-n0jxwq3kSue1ubRyrl8nQEC9T3BPE1_JRkXqnCNuJuI7JgnAoTZbKSg4SvCtx2ygk59REGOFW24oLDcbLL3DBNtPiQxxIhJ6qpHwzlLdoqoPQmbJgFe5wwO2qBy8mGK5JdP6JZakUCofIxT-l3_hRDWOaYHL5lR7uuNo7Dl3D-lRr6oZqufFhYdep2bdUYF-AVacDVJT5RC25plCFVK4GMB5I1Pg_K3O-ia5emjSRGDBr4sE56jRmX3w6sG7-hv74fDYnMw3kURbSrJUSnwa2w725GApZiOFDG7boWexJkbEw-TT8SfUVrTMjv0kHECzq9AGiIuUcVAjw2YpdMIsruIj4iW46x_RPHhw2eaJUHfFPZ7E858JrGy5Y3SzlmkdLZ3RAm2c8p_JI3xKLzo9nj3rATpwJnfb3d3CTWtT_F3aOrVTPKkSJGPmYOsXrDnKmT1gMT0zpzwixA9Vmxo7tIBjxx9EWb3yi9PiBWNU8gNHL0dI3HBjIB9bvX4QSz5f4TeEXHqFaAU7bdhmpAl95tBOHeRK8D0U7CIiFV_Wzt7b9ZsOLQOhc9zObWfiL31jFOQmfdeRqM5DJ5PUcBCY5mTlWerAY143ToTCqdT43KOLzDILJ6PGbBBSWGnh0rfQ9rmH3lK7ole_tIRNWXhCdoae9MVcGjM0bEXH9mkikk6L1pcq6i5egZwmT4EeqswxgsulUCkIQlPAL1Ayyb_TqmeRdAdUOy8rMpxnwdElfEv2KARAnzLFdElCwVprYQZkmdo_2TAvP8sfnluloTc3oqdZp8ff_ojh0pbZ0DKSJ-3fL8PnQswuHwv0-owDwYZgrS-6-grxH-TCg__nkdtkugFa0MgUGihGPJtv-gXMyaglstk-ePJiAD6xyXbU9bVLsNmFBFVr5LPo9Ilb-lGhvmOkbBl5lPKp0WQibkRX4mqHWSYBs5W2RH85dLwnPms59FlRqp4snmmHw22bwq9CIv8nTNzPSza_GrxHGNERduZ7mRs5AP6Nm-dQH3vo0K_0oFHwWJ7HiVqzDI47Yr12Bo4gKHkXJReL9UGgO_xsk9sSl_onGH4oQXY9wz8GZFzjZ00zN-n3x6rkScRSli4aTlygKTgWST-rnnkm36E5sJAfd9FWLQuuucFy6-3G70Q1cDxhh2zLmin_PRq5QHLzT2BAKU9oR5uzI0brB0GuPdz9WXoJAOd60ONTxGPGvLz_kZSnWVKBbVCvkWEnU_wBCHxngt_N5tt3tDv3wQS4XG1QbM0R-qsqVDyAXB7teuYu0NgMcVUgwAmCSNwudrXaThKEPNPoV220YmBvoYtLB0Z0QglPyoB_ek6jG4MNbmA8xGRwSwGCPnhobapyCEp7bTRNYddgCiqF72e2dijXcyZMbQazoPz4kGXQidA-a4Up26ShNoR6Csyk_7bW3HX1dycmNnRImYDTRu4XY2KxZNtNrR9hahLVsE6tlH3PpWY_qJho-6cIF8QWqjzc0avO_xq5ZfODPWM_lW2ZqHzFILxKLWKAXpJpvFIVthxDtWcS-NiqmzcXwguI8Nao4lGs_MDgJ1tROyx7rLXXSg0q5mU_QAFo_4TRUyNBJIbQJW80QFoH1DeODfJ7nJAP0zsQ_gjy8KvcgFB5MH25R9wwTpjgsUx9_S3D0m2nawnIMQfG1TEos5OSzSKjH9Cn4Khj0cGBg8A==\",\"id\":\"rs_68d67477b9f08190b19c46786af6de4c\",\"format\":\"openai-responses-v1\",\"index\":0}]}}],\"usage\":{\"prompt_tokens\":95,\"completion_tokens\":278,\"total_tokens\":373,\"cost\":0.00289875,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.00011875,\"upstream_inference_completions_cost\":0.00278},\"completion_tokens_details\":{\"reasoning_tokens\":256,\"image_tokens\":0}}}"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 1.695390792s

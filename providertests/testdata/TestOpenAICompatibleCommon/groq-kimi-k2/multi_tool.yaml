@@ -1,0 +1,65 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 837
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"}],"model":"moonshotai/kimi-k2-instruct-0905","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.3.0
+    url: https://api.groq.com/openai/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: |
+      {"id":"chatcmpl-821a45ca-0c2c-4744-90df-30250620bba7","object":"chat.completion","created":1758884735,"model":"moonshotai/kimi-k2-instruct-0905","choices":[{"index":0,"message":{"role":"assistant","tool_calls":[{"id":"functions.add:0","type":"function","function":{"name":"add","arguments":"{\"a\":2,\"b\":3}"}},{"id":"functions.multiply:1","type":"function","function":{"name":"multiply","arguments":"{\"a\":2,\"b\":3}"}}]},"logprobs":null,"finish_reason":"tool_calls"}],"usage":{"queue_time":0.034706122,"prompt_tokens":211,"prompt_time":0.02151364,"completion_tokens":41,"completion_time":0.175949957,"total_tokens":252,"total_time":0.197463597},"usage_breakdown":null,"system_fingerprint":"fp_6e6ff3688b","x_groq":{"id":"req_01k62v69wdeekbpebban95ny5e"},"service_tier":"on_demand"}
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 287.941834ms
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1216
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"tool_calls":[{"id":"functions.add:0","function":{"arguments":"{\"a\":2,\"b\":3}","name":"add"},"type":"function"},{"id":"functions.multiply:1","function":{"arguments":"{\"a\":2,\"b\":3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"functions.add:0","role":"tool"},{"content":"6","tool_call_id":"functions.multiply:1","role":"tool"}],"model":"moonshotai/kimi-k2-instruct-0905","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.3.0
+    url: https://api.groq.com/openai/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: |
+      {"id":"chatcmpl-2ac08e5f-cb4f-428e-88bc-ad449887955f","object":"chat.completion","created":1758884735,"model":"moonshotai/kimi-k2-instruct-0905","choices":[{"index":0,"message":{"role":"assistant","content":"- **Addition result:** 5  \n- **Multiplication result:** 6"},"logprobs":null,"finish_reason":"stop"}],"usage":{"queue_time":0.034671621,"prompt_tokens":279,"prompt_time":0.027295151,"completion_tokens":17,"completion_time":0.069346409,"total_tokens":296,"total_time":0.09664156},"usage_breakdown":null,"system_fingerprint":"fp_6e6ff3688b","x_groq":{"id":"req_01k62v6a5texza2ay40rkh8ppy"},"service_tier":"on_demand"}
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 198.746083ms

@@ -1,0 +1,160 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 562
+    host: ""
+    body: '{"max_tokens":8096,"messages":[{"content":[{"text":"What''s the weather in Florence, Italy?","type":"text"}],"role":"user"}],"model":"claude-sonnet-4-20250514","system":[{"text":"You are a helpful assistant","type":"text"}],"thinking":{"budget_tokens":4000,"type":"enabled"},"tool_choice":{"disable_parallel_tool_use":false,"type":"auto"},"tools":[{"input_schema":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location"}],"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Anthropic/Go 1.10.0
+    url: https://api.anthropic.com/v1/messages
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      event: message_start
+      data: {"type":"message_start","message":{"id":"msg_01WBeG2NaYQ8w99747S3n8MZ","type":"message","role":"assistant","model":"claude-sonnet-4-20250514","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":423,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":6,"service_tier":"standard"}}        }
+
+      event: content_block_start
+      data: {"type":"content_block_start","index":0,"content_block":{"type":"thinking","thinking":"","signature":""}            }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"The user is asking for"}}
+
+      event: ping
+      data: {"type": "ping"}
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" weather information for Florence, Italy. I have"}          }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" access to a weather function that takes a \"location\" parameter. The"}            }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" user has provided the location as \"Florence,"}              }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" Italy\" which is clear and specific. I have"}               }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" all the required parameters to make this function call."}           }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"signature_delta","signature":"EsQDCkYICBgCKkBr9+FTcKs+la0OlmRVB4HF/bTERKj+hr9pp9uxwdet2/P99iNZh/vwxm7Cd5wrZD0FnPkUz3DEqXv+ZoIL2fAoEgxOEzQepAptMFJiFJcaDM2L2wJzGec9170N1SIwHhl0DW0hXYbwHTRAR6w9biU0HwUh00oLghjeBusiv40ctsJB4tO/WyOR2f0iH7pZKqsC3UTE2b7nqQUmYP8dEDfnfNdbr24zEaWiZ2QMbwv9ZrwtUy0Wo/ot3n9JMpocHUSwtyKzB4GsMsgr/xtGEl9541AMSFhR1G8y3Ffn22e6pXV7dakwU/vxcBTvdwfBplrBxxJ1zT/ieuQUrdemKCRZS4QVmaVijUpYQMaQF7iCJJPKYI+wBhxT0y0yOoVqORKg2AuRmbkTpMfKZJ5xRBLAeydMhloeKfYswDDisWIChmJlclIro0Jr80OhpohTcQGayY4fjn0A/ir+9PYzLzjGitR3a+/lfHvuTmPC9AnWv3Sp87mddUuJ10jqO9QWXNTnAVdehLiN/heJVjOMkXCstWLVUycEgnfwXEqlNMMFuRAfOwTte0Ls9qHkl3Fzo8ompJiqxF879rSwcSEYAQ=="}        }
+
+      event: content_block_stop
+      data: {"type":"content_block_stop","index":0      }
+
+      event: content_block_start
+      data: {"type":"content_block_start","index":1,"content_block":{"type":"tool_use","id":"toolu_0171KFcBwn1Z64XzvQfz3sZS","name":"weather","input":{}}           }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":""}}
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"{\"location"}             }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"\": \"F"}               }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"lo"}          }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"rence, I"}          }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"taly"}          }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"\"}"}   }
+
+      event: content_block_stop
+      data: {"type":"content_block_stop","index":1    }
+
+      event: message_delta
+      data: {"type":"message_delta","delta":{"stop_reason":"tool_use","stop_sequence":null},"usage":{"input_tokens":423,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":119} }
+
+      event: message_stop
+      data: {"type":"message_stop"              }
+
+    headers:
+      Content-Type:
+      - text/event-stream; charset=utf-8
+    status: 200 OK
+    code: 200
+    duration: 1.294270083s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1796
+    host: ""
+    body: '{"max_tokens":8096,"messages":[{"content":[{"text":"What''s the weather in Florence, Italy?","type":"text"}],"role":"user"},{"content":[{"signature":"EsQDCkYICBgCKkBr9+FTcKs+la0OlmRVB4HF/bTERKj+hr9pp9uxwdet2/P99iNZh/vwxm7Cd5wrZD0FnPkUz3DEqXv+ZoIL2fAoEgxOEzQepAptMFJiFJcaDM2L2wJzGec9170N1SIwHhl0DW0hXYbwHTRAR6w9biU0HwUh00oLghjeBusiv40ctsJB4tO/WyOR2f0iH7pZKqsC3UTE2b7nqQUmYP8dEDfnfNdbr24zEaWiZ2QMbwv9ZrwtUy0Wo/ot3n9JMpocHUSwtyKzB4GsMsgr/xtGEl9541AMSFhR1G8y3Ffn22e6pXV7dakwU/vxcBTvdwfBplrBxxJ1zT/ieuQUrdemKCRZS4QVmaVijUpYQMaQF7iCJJPKYI+wBhxT0y0yOoVqORKg2AuRmbkTpMfKZJ5xRBLAeydMhloeKfYswDDisWIChmJlclIro0Jr80OhpohTcQGayY4fjn0A/ir+9PYzLzjGitR3a+/lfHvuTmPC9AnWv3Sp87mddUuJ10jqO9QWXNTnAVdehLiN/heJVjOMkXCstWLVUycEgnfwXEqlNMMFuRAfOwTte0Ls9qHkl3Fzo8ompJiqxF879rSwcSEYAQ==","thinking":"The user is asking for weather information for Florence, Italy. I have access to a weather function that takes a \"location\" parameter. The user has provided the location as \"Florence, Italy\" which is clear and specific. I have all the required parameters to make this function call.","type":"thinking"},{"id":"toolu_0171KFcBwn1Z64XzvQfz3sZS","input":{"location":"Florence, Italy"},"name":"weather","type":"tool_use"}],"role":"assistant"},{"content":[{"tool_use_id":"toolu_0171KFcBwn1Z64XzvQfz3sZS","content":[{"text":"40 C","type":"text"}],"type":"tool_result"}],"role":"user"}],"model":"claude-sonnet-4-20250514","system":[{"text":"You are a helpful assistant","type":"text"}],"thinking":{"budget_tokens":4000,"type":"enabled"},"tool_choice":{"disable_parallel_tool_use":false,"type":"auto"},"tools":[{"input_schema":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location"}],"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Anthropic/Go 1.10.0
+    url: https://api.anthropic.com/v1/messages
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      event: message_start
+      data: {"type":"message_start","message":{"id":"msg_013robXNGqrQ66iDpnRyejiu","type":"message","role":"assistant","model":"claude-sonnet-4-20250514","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":557,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":2,"service_tier":"standard"}}            }
+
+      event: content_block_start
+      data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}              }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"The current"}          }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" weather in Florence, Italy is 40°C (104°F)."}}
+
+      event: ping
+      data: {"type": "ping"}
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" That's quite hot! It appears"}          }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" to be a very warm day there"}          }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"."}      }
+
+      event: content_block_stop
+      data: {"type":"content_block_stop","index":0       }
+
+      event: message_delta
+      data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"input_tokens":557,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":35}}
+
+      event: message_stop
+      data: {"type":"message_stop"        }
+
+    headers:
+      Content-Type:
+      - text/event-stream; charset=utf-8
+    status: 200 OK
+    code: 200
+    duration: 1.164435458s

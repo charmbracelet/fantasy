@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 479
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"}],"model":"z-ai/glm-4.5","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.3.0
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1758885026-ObuQSLFXD2s21Obt6rAc\",\"provider\":\"Z.AI\",\"model\":\"z-ai/glm-4.5\",\"object\":\"chat.completion\",\"created\":1758885026,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"native_finish_reason\":\"tool_calls\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\\n\\nI'll get the weather information for Florence, Italy for you.\\n\",\"refusal\":null,\"reasoning\":\"The user is asking for the weather in Florence, Italy. I have a weather function available that takes a location parameter. The location should be \\\"Florence, Italy\\\" as that's exactly what the user specified. Let me call the weather function with this location.\",\"tool_calls\":[{\"id\":\"call_9b574f96936e47788983cf93\",\"index\":0,\"type\":\"function\",\"function\":{\"name\":\"weather\",\"arguments\":\"{\\\"location\\\": \\\"Florence, Italy\\\"}\"}}],\"reasoning_details\":[{\"type\":\"reasoning.text\",\"text\":\"The user is asking for the weather in Florence, Italy. I have a weather function available that takes a location parameter. The location should be \\\"Florence, Italy\\\" as that's exactly what the user specified. Let me call the weather function with this location.\",\"format\":\"unknown\",\"index\":0}]}}],\"usage\":{\"prompt_tokens\":179,\"completion_tokens\":86,\"total_tokens\":265,\"cost\":0.00027553,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":43,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.00008633,\"upstream_inference_completions_cost\":0.0001892},\"completion_tokens_details\":{\"reasoning_tokens\":65,\"image_tokens\":0}}}"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 1.792130708s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 812
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"content":"\n\nI''ll get the weather information for Florence, Italy for you.\n","tool_calls":[{"id":"call_9b574f96936e47788983cf93","function":{"arguments":"{\"location\": \"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"call_9b574f96936e47788983cf93","role":"tool"}],"model":"z-ai/glm-4.5","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.3.0
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1758885030-I0evfGTkn3mWGYvYfR7s\",\"provider\":\"Z.AI\",\"model\":\"z-ai/glm-4.5\",\"object\":\"chat.completion\",\"created\":1758885030,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"stop\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\\n\\nThe current weather in Florence, Italy is 40°C (104°F). That's quite hot! Make sure to stay hydrated and seek shade if you're there.\",\"refusal\":null,\"reasoning\":\"The weather function returned \\\"40 C\\\" for Florence, Italy. This seems to be a very high temperature - 40°C (104°F) is quite hot. I should report this information to the user clearly.\",\"reasoning_details\":[{\"type\":\"reasoning.text\",\"text\":\"The weather function returned \\\"40 C\\\" for Florence, Italy. This seems to be a very high temperature - 40°C (104°F) is quite hot. I should report this information to the user clearly.\",\"format\":\"unknown\",\"index\":0}]}}],\"usage\":{\"prompt_tokens\":220,\"completion_tokens\":81,\"total_tokens\":301,\"cost\":0.00028913,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":43,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.00011093,\"upstream_inference_completions_cost\":0.0001782},\"completion_tokens_details\":{\"reasoning_tokens\":47,\"image_tokens\":0}}}"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 849.225ms

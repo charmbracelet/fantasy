@@ -1,0 +1,92 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 853
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"}],"model":"moonshotai/kimi-k2-0905","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.3.0
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: '{"error":{"message":"Provider returned error","code":429,"metadata":{"raw":"moonshotai/kimi-k2-0905 is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate your rate limits: https://openrouter.ai/settings/integrations","provider_name":"GMICloud"}},"user_id":"user_2zMGmKqlf4zmAvL9snVImB1Z1ZQ"}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 429 Too Many Requests
+    code: 429
+    duration: 919.648708ms
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 853
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"}],"model":"moonshotai/kimi-k2-0905","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.3.0
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"id":"gen-1758885101-um9YPRvqCSM38v5zaTq9","provider":"Groq","model":"moonshotai/kimi-k2-0905","object":"chat.completion","created":1758885101,"choices":[{"logprobs":null,"finish_reason":"tool_calls","native_finish_reason":"tool_calls","index":0,"message":{"role":"assistant","content":"I''ll add and multiply the numbers 2 and 3 for you.","refusal":null,"reasoning":null,"tool_calls":[{"id":"functions.add:0","type":"function","function":{"name":"add","arguments":"{\"a\":2,\"b\":3}"},"index":0},{"id":"functions.multiply:1","type":"function","function":{"name":"multiply","arguments":"{\"a\":2,\"b\":3}"},"index":1}]}}],"system_fingerprint":"fp_6e6ff3688b","usage":{"prompt_tokens":211,"completion_tokens":55,"total_tokens":266,"cost":0.000376,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.000211,"upstream_inference_completions_cost":0.000165},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 271.736416ms
+- id: 2
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1249
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"content":"I''ll add and multiply the numbers 2 and 3 for you.","tool_calls":[{"id":"test-1","function":{"arguments":"{\"a\":2,\"b\":3}","name":"add"},"type":"function"},{"id":"test-2","function":{"arguments":"{\"a\":2,\"b\":3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"test-1","role":"tool"},{"content":"6","tool_call_id":"test-2","role":"tool"}],"model":"moonshotai/kimi-k2-0905","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.3.0
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "\n         \n\n         \n\n         \n{\"id\":\"gen-1758885101-g75YGMrzXtttJkg0cRav\",\"provider\":\"AtlasCloud\",\"model\":\"moonshotai/kimi-k2-0905\",\"object\":\"chat.completion\",\"created\":1758885101,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"stop\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"The results are:\\n- **Add:** 2 + 3 = **5**\\n- **Multiply:** 2 × 3 = **6**\\n\\nSo, when working with numbers 2 and 3: addition gives us **5** and multiplication gives us **6**.\",\"refusal\":null,\"reasoning\":null}}],\"usage\":{\"prompt_tokens\":287,\"completion_tokens\":56,\"total_tokens\":343,\"cost\":0.0003122,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.0001722,\"upstream_inference_completions_cost\":0.00014},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0}}}"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 551.526417ms

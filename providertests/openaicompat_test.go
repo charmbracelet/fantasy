@@ -19,6 +19,9 @@ func TestOpenAICompatibleCommon(t *testing.T) {
 		{"groq-kimi-k2", builderGroq, nil},
 		{"zai-glm-4.5", builderZAIGLM45, nil},
 	})
+}
+
+func TestOpenAICompatibleThinking(t *testing.T) {
 	opts := ai.ProviderOptions{
 		openaicompat.Name: &openaicompat.ProviderOptions{
 			ReasoningEffort: openai.ReasoningEffortOption(openai.ReasoningEffortHigh),

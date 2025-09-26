@@ -1,0 +1,34 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 202
+    host: generativelanguage.googleapis.com
+    body: |
+      {"contents":[{"parts":[{"text":"Say hi in Portuguese"}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"}}
+    form:
+      alt:
+      - sse
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - google-genai-sdk/1.23.0 gl-go/go1.25.1
+    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"Olá!\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 11,\"candidatesTokenCount\": 2,\"totalTokenCount\": 39,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 11}],\"thoughtsTokenCount\": 26},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"4nLWaP6OKvCDkdUP7Ze-gAc\"}\r\n\r\n"
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 423.699166ms

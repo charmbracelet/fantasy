@@ -15,19 +15,26 @@ import (
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )
 
+var openrouterTestModels = []testModel{
+	{"kimi-k2", "moonshotai/kimi-k2-0905", false},
+	{"grok-code-fast-1", "x-ai/grok-code-fast-1", false},
+	{"claude-sonnet-4", "anthropic/claude-sonnet-4", true},
+	{"gemini-2.5-flash", "google/gemini-2.5-flash", false},
+	{"deepseek-chat-v3.1-free", "deepseek/deepseek-chat-v3.1:free", false},
+	{"qwen3-235b-a22b-2507", "qwen/qwen3-235b-a22b-2507", false},
+	{"gpt-5", "openai/gpt-5", true},
+	{"glm-4.5", "z-ai/glm-4.5", false},
+}
+
 func TestOpenRouterCommon(t *testing.T) {
-	testCommon(t, []builderPair{
-		{"kimi-k2", builderOpenRouterKimiK2, nil},
-		{"grok-code-fast-1", builderOpenRouterGrokCodeFast1, nil},
-		{"claude-sonnet-4", builderOpenRouterClaudeSonnet4, nil},
-		{"grok-4-fast-free", builderOpenRouterGrok4FastFree, nil},
-		{"gemini-2.5-flash", builderOpenRouterGemini25Flash, nil},
-		{"gemini-2.0-flash", builderOpenRouterGemini20Flash, nil},
-		{"deepseek-chat-v3.1-free", builderOpenRouterDeepseekV31Free, nil},
-		{"qwen3-235b-a22b-2507", builderOpenRouterQwen3Instruct, nil},
-		{"gpt-5", builderOpenRouterGPT5, nil},
-		{"glm-4.5", builderOpenRouterGLM45, nil},
-	})
+	var pairs []builderPair
+	for _, m := range openrouterTestModels {
+		pairs = append(pairs, builderPair{m.name, openrouterBuilder(m.model), nil})
+	}
+	testCommon(t, pairs)
+}
+
+func TestOpenRouterThinking(t *testing.T) {
 	opts := ai.ProviderOptions{
 		openrouter.Name: &openrouter.ProviderOptions{
 			Reasoning: &openrouter.ReasoningOptions{
@@ -35,10 +42,15 @@ func TestOpenRouterCommon(t *testing.T) {
 			},
 		},
 	}
-	testThinking(t, []builderPair{
-		{"gpt-5", builderOpenRouterGPT5, opts},
-		{"glm-4.5", builderOpenRouterGLM45, opts},
-	}, testOpenrouterThinking)
+
+	var pairs []builderPair
+	for _, m := range openrouterTestModels {
+		if !m.reasoning {
+			continue
+		}
+		pairs = append(pairs, builderPair{m.name, openrouterBuilder(m.model), opts})
+	}
+	testThinking(t, pairs, testOpenrouterThinking)
 }
 
 func testOpenrouterThinking(t *testing.T, result *ai.AgentResult) {
@@ -55,7 +67,7 @@ func testOpenrouterThinking(t *testing.T, result *ai.AgentResult) {
 	require.Greater(t, reasoningContentCount, 0)
 }
 
-func TestWithUniqueToolCallIDs(t *testing.T) {
+func TestOpenRouterWithUniqueToolCallIDs(t *testing.T) {
 	type CalculatorInput struct {
 		A int `json:"a" description:"first number"`
 		B int `json:"b" description:"second number"`
@@ -155,82 +167,12 @@ func TestWithUniqueToolCallIDs(t *testing.T) {
 	})
 }
 
-func builderOpenRouterKimiK2(r *recorder.Recorder) (ai.LanguageModel, error) {
-	provider := openrouter.New(
-		openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
-		openrouter.WithHTTPClient(&http.Client{Transport: r}),
-	)
-	return provider.LanguageModel("moonshotai/kimi-k2-0905")
-}
-
-func builderOpenRouterGrokCodeFast1(r *recorder.Recorder) (ai.LanguageModel, error) {
-	provider := openrouter.New(
-		openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
-		openrouter.WithHTTPClient(&http.Client{Transport: r}),
-	)
-	return provider.LanguageModel("x-ai/grok-code-fast-1")
-}
-
-func builderOpenRouterGrok4FastFree(r *recorder.Recorder) (ai.LanguageModel, error) {
-	provider := openrouter.New(
-		openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
-		openrouter.WithHTTPClient(&http.Client{Transport: r}),
-	)
-	return provider.LanguageModel("x-ai/grok-4-fast:free")
-}
-
-func builderOpenRouterGemini25Flash(r *recorder.Recorder) (ai.LanguageModel, error) {
-	provider := openrouter.New(
-		openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
-		openrouter.WithHTTPClient(&http.Client{Transport: r}),
-	)
-	return provider.LanguageModel("google/gemini-2.5-flash")
-}
-
-func builderOpenRouterGemini20Flash(r *recorder.Recorder) (ai.LanguageModel, error) {
-	provider := openrouter.New(
-		openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
-		openrouter.WithHTTPClient(&http.Client{Transport: r}),
-	)
-	return provider.LanguageModel("google/gemini-2.0-flash-001")
-}
-
-func builderOpenRouterDeepseekV31Free(r *recorder.Recorder) (ai.LanguageModel, error) {
-	provider := openrouter.New(
-		openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
-		openrouter.WithHTTPClient(&http.Client{Transport: r}),
-	)
-	return provider.LanguageModel("deepseek/deepseek-chat-v3.1:free")
-}
-
-func builderOpenRouterClaudeSonnet4(r *recorder.Recorder) (ai.LanguageModel, error) {
-	provider := openrouter.New(
-		openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
-		openrouter.WithHTTPClient(&http.Client{Transport: r}),
-	)
-	return provider.LanguageModel("anthropic/claude-sonnet-4")
-}
-
-func builderOpenRouterGPT5(r *recorder.Recorder) (ai.LanguageModel, error) {
-	provider := openrouter.New(
-		openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
-		openrouter.WithHTTPClient(&http.Client{Transport: r}),
-	)
-	return provider.LanguageModel("openai/gpt-5")
-}
-
-func builderOpenRouterGLM45(r *recorder.Recorder) (ai.LanguageModel, error) {
-	provider := openrouter.New(
-		openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
-		openrouter.WithHTTPClient(&http.Client{Transport: r}),
-	)
-	return provider.LanguageModel("z-ai/glm-4.5")
-}
-
-func builderOpenRouterQwen3Instruct(r *recorder.Recorder) (ai.LanguageModel, error) {
-	provider := openrouter.New(
-		openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
-		openrouter.WithHTTPClient(&http.Client{Transport: r}),
-	)
-	return provider.LanguageModel("qwen/qwen3-235b-a22b-2507")
+func openrouterBuilder(model string) builderFunc {
+	return func(r *recorder.Recorder) (ai.LanguageModel, error) {
+		provider := openrouter.New(
+			openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
+			openrouter.WithHTTPClient(&http.Client{Transport: r}),
+		)
+		return provider.LanguageModel(model)
+	}
 }

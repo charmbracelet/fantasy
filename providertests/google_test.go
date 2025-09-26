@@ -12,11 +12,20 @@ import (
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )
 
+var googleTestModels = []testModel{
+	{"gemini-2.5-flash", "gemini-2.5-flash", true},
+	{"gemini-2.5-pro", "gemini-2.5-pro", true},
+}
+
 func TestGoogleCommon(t *testing.T) {
-	testCommon(t, []builderPair{
-		{"gemini-2.5-flash", builderGoogleGemini25Flash, nil},
-		{"gemini-2.5-pro", builderGoogleGemini25Pro, nil},
-	})
+	var pairs []builderPair
+	for _, m := range googleTestModels {
+		pairs = append(pairs, builderPair{m.name, googleBuilder(m.model), nil})
+	}
+	testCommon(t, pairs)
+}
+
+func TestGoogleThinking(t *testing.T) {
 	opts := ai.ProviderOptions{
 		google.Name: &google.ProviderOptions{
 			ThinkingConfig: &google.ThinkingConfig{
@@ -25,10 +34,15 @@ func TestGoogleCommon(t *testing.T) {
 			},
 		},
 	}
-	testThinking(t, []builderPair{
-		{"gemini-2.5-flash", builderGoogleGemini25Flash, opts},
-		{"gemini-2.5-pro", builderGoogleGemini25Pro, opts},
-	}, testGoogleThinking)
+
+	var pairs []builderPair
+	for _, m := range googleTestModels {
+		if !m.reasoning {
+			continue
+		}
+		pairs = append(pairs, builderPair{m.name, googleBuilder(m.model), opts})
+	}
+	testThinking(t, pairs, testGoogleThinking)
 }
 
 func testGoogleThinking(t *testing.T, result *ai.AgentResult) {
@@ -46,18 +60,12 @@ func testGoogleThinking(t *testing.T, result *ai.AgentResult) {
 	require.Greater(t, reasoningContentCount, 0)
 }
 
-func builderGoogleGemini25Flash(r *recorder.Recorder) (ai.LanguageModel, error) {
-	provider := google.New(
-		google.WithAPIKey(cmp.Or(os.Getenv("GEMINI_API_KEY"), "(missing)")),
-		google.WithHTTPClient(&http.Client{Transport: r}),
-	)
-	return provider.LanguageModel("gemini-2.5-flash")
-}
-
-func builderGoogleGemini25Pro(r *recorder.Recorder) (ai.LanguageModel, error) {
-	provider := google.New(
-		google.WithAPIKey(cmp.Or(os.Getenv("GEMINI_API_KEY"), "(missing)")),
-		google.WithHTTPClient(&http.Client{Transport: r}),
-	)
-	return provider.LanguageModel("gemini-2.5-pro")
+func googleBuilder(model string) builderFunc {
+	return func(r *recorder.Recorder) (ai.LanguageModel, error) {
+		provider := google.New(
+			google.WithAPIKey(cmp.Or(os.Getenv("GEMINI_API_KEY"), "(missing)")),
+			google.WithHTTPClient(&http.Client{Transport: r}),
+		)
+		return provider.LanguageModel(model)
+	}
 }

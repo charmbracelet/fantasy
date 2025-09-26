@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/charmbracelet/fantasy/ai"
+	_ "github.com/joho/godotenv/autoload"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )

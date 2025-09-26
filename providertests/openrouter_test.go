@@ -51,6 +51,49 @@ func TestOpenRouterThinking(t *testing.T) {
 		pairs = append(pairs, builderPair{m.name, openrouterBuilder(m.model), opts})
 	}
 	testThinking(t, pairs, testOpenrouterThinking)
+
+	// test anthropic signature
+	testThinking(t, []builderPair{
+		{"claude-sonnet-4-sig", openrouterBuilder("anthropic/claude-sonnet-4"), opts},
+	}, testOpenrouterThinkingWithSignature)
+}
+
+func testOpenrouterThinkingWithSignature(t *testing.T, result *ai.AgentResult) {
+	reasoningContentCount := 0
+	signaturesCount := 0
+	// Test if we got the signature
+	for _, step := range result.Steps {
+		for _, msg := range step.Messages {
+			for _, content := range msg.Content {
+				if content.GetType() == ai.ContentTypeReasoning {
+					reasoningContentCount += 1
+					reasoningContent, ok := ai.AsContentType[ai.ReasoningPart](content)
+					if !ok {
+						continue
+					}
+					if len(reasoningContent.ProviderOptions) == 0 {
+						continue
+					}
+
+					anthropicReasoningMetadata, ok := reasoningContent.ProviderOptions[openrouter.Name]
+					if !ok {
+						continue
+					}
+					if reasoningContent.Text != "" {
+						if typed, ok := anthropicReasoningMetadata.(*openrouter.ReasoningMetadata); ok {
+							require.NotEmpty(t, typed.Signature)
+							signaturesCount += 1
+						}
+					}
+				}
+			}
+		}
+	}
+	require.Greater(t, reasoningContentCount, 0)
+	require.Greater(t, signaturesCount, 0)
+	require.Equal(t, reasoningContentCount, signaturesCount)
+	// we also add the anthropic metadata so test that
+	testAnthropicThinking(t, result)
 }
 
 func testOpenrouterThinking(t *testing.T, result *ai.AgentResult) {

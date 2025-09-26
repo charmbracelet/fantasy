@@ -6,6 +6,7 @@ import (
 	"maps"
 
 	"github.com/charmbracelet/fantasy/ai"
+	"github.com/charmbracelet/fantasy/anthropic"
 	openaisdk "github.com/openai/openai-go/v2"
 	"github.com/openai/openai-go/v2/packages/param"
 )
@@ -97,18 +98,34 @@ func languageModelExtraContent(choice openaisdk.ChatCompletionChoice) []ai.Conte
 		return content
 	}
 	for _, detail := range reasoningData.ReasoningDetails {
+
+		var metadata ai.ProviderMetadata
+
+		if detail.Signature != "" {
+			metadata = ai.ProviderMetadata{
+				Name: &ReasoningMetadata{
+					Signature: detail.Signature,
+				},
+				anthropic.Name: &anthropic.ReasoningOptionMetadata{
+					Signature: detail.Signature,
+				},
+			}
+		}
 		switch detail.Type {
 		case "reasoning.text":
 			content = append(content, ai.ReasoningContent{
-				Text: detail.Text,
+				Text:             detail.Text,
+				ProviderMetadata: metadata,
 			})
 		case "reasoning.summary":
 			content = append(content, ai.ReasoningContent{
-				Text: detail.Summary,
+				Text:             detail.Summary,
+				ProviderMetadata: metadata,
 			})
 		case "reasoning.encrypted":
 			content = append(content, ai.ReasoningContent{
-				Text: "[REDACTED]",
+				Text:             "[REDACTED]",
+				ProviderMetadata: metadata,
 			})
 		}
 	}
@@ -145,7 +162,7 @@ func languageModelStreamExtra(chunk openaisdk.ChatCompletionChunk, yield func(ai
 			return ctx, false
 		}
 
-		emitEvent := func(reasoningContent string) bool {
+		emitEvent := func(reasoningContent string, signature string) bool {
 			if !reasoningStarted {
 				shouldContinue := yield(ai.StreamPart{
 					Type: ai.StreamPartTypeReasoningStart,
@@ -156,10 +173,24 @@ func languageModelStreamExtra(chunk openaisdk.ChatCompletionChunk, yield func(ai
 				}
 			}
 
+			var metadata ai.ProviderMetadata
+
+			if signature != "" {
+				metadata = ai.ProviderMetadata{
+					Name: &ReasoningMetadata{
+						Signature: signature,
+					},
+					anthropic.Name: &anthropic.ReasoningOptionMetadata{
+						Signature: signature,
+					},
+				}
+			}
+
 			return yield(ai.StreamPart{
-				Type:  ai.StreamPartTypeReasoningDelta,
-				ID:    fmt.Sprintf("%d", inx),
-				Delta: reasoningContent,
+				Type:             ai.StreamPartTypeReasoningDelta,
+				ID:               fmt.Sprintf("%d", inx),
+				Delta:            reasoningContent,
+				ProviderMetadata: metadata,
 			})
 		}
 		if len(reasoningData.ReasoningDetails) > 0 {
@@ -169,15 +200,15 @@ func languageModelStreamExtra(chunk openaisdk.ChatCompletionChunk, yield func(ai
 				}
 				switch detail.Type {
 				case "reasoning.text":
-					return ctx, emitEvent(detail.Text)
+					return ctx, emitEvent(detail.Text, detail.Signature)
 				case "reasoning.summary":
-					return ctx, emitEvent(detail.Summary)
+					return ctx, emitEvent(detail.Summary, detail.Signature)
 				case "reasoning.encrypted":
-					return ctx, emitEvent("[REDACTED]")
+					return ctx, emitEvent("[REDACTED]", detail.Signature)
 				}
 			}
 		} else if reasoningData.Reasoning != "" {
-			return ctx, emitEvent(reasoningData.Reasoning)
+			return ctx, emitEvent(reasoningData.Reasoning, "")
 		}
 		if reasoningStarted && (choice.Delta.Content != "" || len(choice.Delta.ToolCalls) > 0) {
 			ctx[reasoningStartedCtx] = false

@@ -50,7 +50,7 @@ func testOpenAICompatThinking(t *testing.T, result *ai.AgentResult) {
 func builderXAIGrokCodeFast(r *recorder.Recorder) (ai.LanguageModel, error) {
 	provider := openaicompat.New(
 		"https://api.x.ai/v1",
-		openaicompat.WithAPIKey(os.Getenv("XAI_API_KEY")),
+		openaicompat.WithAPIKey(os.Getenv("FANTASY_XAI_API_KEY")),
 		openaicompat.WithHTTPClient(&http.Client{Transport: r}),
 	)
 	return provider.LanguageModel("grok-code-fast-1")
@@ -59,7 +59,7 @@ func builderXAIGrokCodeFast(r *recorder.Recorder) (ai.LanguageModel, error) {
 func builderXAIGrok4Fast(r *recorder.Recorder) (ai.LanguageModel, error) {
 	provider := openaicompat.New(
 		"https://api.x.ai/v1",
-		openaicompat.WithAPIKey(os.Getenv("XAI_API_KEY")),
+		openaicompat.WithAPIKey(os.Getenv("FANTASY_XAI_API_KEY")),
 		openaicompat.WithHTTPClient(&http.Client{Transport: r}),
 	)
 	return provider.LanguageModel("grok-4-fast")
@@ -68,7 +68,7 @@ func builderXAIGrok4Fast(r *recorder.Recorder) (ai.LanguageModel, error) {
 func builderXAIGrok3Mini(r *recorder.Recorder) (ai.LanguageModel, error) {
 	provider := openaicompat.New(
 		"https://api.x.ai/v1",
-		openaicompat.WithAPIKey(os.Getenv("XAI_API_KEY")),
+		openaicompat.WithAPIKey(os.Getenv("FANTASY_XAI_API_KEY")),
 		openaicompat.WithHTTPClient(&http.Client{Transport: r}),
 	)
 	return provider.LanguageModel("grok-3-mini")
@@ -77,7 +77,7 @@ func builderXAIGrok3Mini(r *recorder.Recorder) (ai.LanguageModel, error) {
 func builderZAIGLM45(r *recorder.Recorder) (ai.LanguageModel, error) {
 	provider := openaicompat.New(
 		"https://api.z.ai/api/coding/paas/v4",
-		openaicompat.WithAPIKey(os.Getenv("ZAI_API_KEY")),
+		openaicompat.WithAPIKey(os.Getenv("FANTASY_ZAI_API_KEY")),
 		openaicompat.WithHTTPClient(&http.Client{Transport: r}),
 	)
 	return provider.LanguageModel("glm-4.5")
@@ -86,7 +86,7 @@ func builderZAIGLM45(r *recorder.Recorder) (ai.LanguageModel, error) {
 func builderGroq(r *recorder.Recorder) (ai.LanguageModel, error) {
 	provider := openaicompat.New(
 		"https://api.groq.com/openai/v1",
-		openaicompat.WithAPIKey(os.Getenv("GROQ_API_KEY")),
+		openaicompat.WithAPIKey(os.Getenv("FANTASY_GROQ_API_KEY")),
 		openaicompat.WithHTTPClient(&http.Client{Transport: r}),
 	)
 	return provider.LanguageModel("moonshotai/kimi-k2-instruct-0905")

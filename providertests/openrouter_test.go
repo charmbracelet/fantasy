@@ -162,7 +162,7 @@ func TestOpenRouterWithUniqueToolCallIDs(t *testing.T) {
 		r := newRecorder(t)
 
 		provider := openrouter.New(
-			openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
+			openrouter.WithAPIKey(os.Getenv("FANTASY_OPENROUTER_API_KEY")),
 			openrouter.WithHTTPClient(&http.Client{Transport: r}),
 			openrouter.WithLanguageUniqueToolCallIds(),
 			openrouter.WithLanguageModelGenerateIDFunc(generateIDFunc),
@@ -187,7 +187,7 @@ func TestOpenRouterWithUniqueToolCallIDs(t *testing.T) {
 		r := newRecorder(t)
 
 		provider := openrouter.New(
-			openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
+			openrouter.WithAPIKey(os.Getenv("FANTASY_OPENROUTER_API_KEY")),
 			openrouter.WithHTTPClient(&http.Client{Transport: r}),
 			openrouter.WithLanguageUniqueToolCallIds(),
 			openrouter.WithLanguageModelGenerateIDFunc(generateIDFunc),
@@ -213,7 +213,7 @@ func TestOpenRouterWithUniqueToolCallIDs(t *testing.T) {
 func openrouterBuilder(model string) builderFunc {
 	return func(r *recorder.Recorder) (ai.LanguageModel, error) {
 		provider := openrouter.New(
-			openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")),
+			openrouter.WithAPIKey(os.Getenv("FANTASY_OPENROUTER_API_KEY")),
 			openrouter.WithHTTPClient(&http.Client{Transport: r}),
 		)
 		return provider.LanguageModel(model)

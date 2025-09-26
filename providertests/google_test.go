@@ -63,7 +63,7 @@ func testGoogleThinking(t *testing.T, result *ai.AgentResult) {
 func googleBuilder(model string) builderFunc {
 	return func(r *recorder.Recorder) (ai.LanguageModel, error) {
 		provider := google.New(
-			google.WithAPIKey(cmp.Or(os.Getenv("GEMINI_API_KEY"), "(missing)")),
+			google.WithAPIKey(cmp.Or(os.Getenv("FANTASY_GEMINI_API_KEY"), "(missing)")),
 			google.WithHTTPClient(&http.Client{Transport: r}),
 		)
 		return provider.LanguageModel(model)

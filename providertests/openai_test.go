@@ -20,7 +20,7 @@ func TestOpenAICommon(t *testing.T) {
 
 func builderOpenaiGpt4o(r *recorder.Recorder) (ai.LanguageModel, error) {
 	provider := openai.New(
-		openai.WithAPIKey(os.Getenv("OPENAI_API_KEY")),
+		openai.WithAPIKey(os.Getenv("FANTASY_OPENAI_API_KEY")),
 		openai.WithHTTPClient(&http.Client{Transport: r}),
 	)
 	return provider.LanguageModel("gpt-4o")
@@ -28,7 +28,7 @@ func builderOpenaiGpt4o(r *recorder.Recorder) (ai.LanguageModel, error) {
 
 func builderOpenaiGpt4oMini(r *recorder.Recorder) (ai.LanguageModel, error) {
 	provider := openai.New(
-		openai.WithAPIKey(os.Getenv("OPENAI_API_KEY")),
+		openai.WithAPIKey(os.Getenv("FANTASY_OPENAI_API_KEY")),
 		openai.WithHTTPClient(&http.Client{Transport: r}),
 	)
 	return provider.LanguageModel("gpt-4o-mini")
@@ -36,7 +36,7 @@ func builderOpenaiGpt4oMini(r *recorder.Recorder) (ai.LanguageModel, error) {
 
 func builderOpenaiGpt5(r *recorder.Recorder) (ai.LanguageModel, error) {
 	provider := openai.New(
-		openai.WithAPIKey(os.Getenv("OPENAI_API_KEY")),
+		openai.WithAPIKey(os.Getenv("FANTASY_OPENAI_API_KEY")),
 		openai.WithHTTPClient(&http.Client{Transport: r}),
 	)
 	return provider.LanguageModel("gpt-5")

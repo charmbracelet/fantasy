@@ -80,7 +80,7 @@ func testAnthropicThinking(t *testing.T, result *ai.AgentResult) {
 func anthropicBuilder(model string) builderFunc {
 	return func(r *recorder.Recorder) (ai.LanguageModel, error) {
 		provider := anthropic.New(
-			anthropic.WithAPIKey(os.Getenv("ANTHROPIC_API_KEY")),
+			anthropic.WithAPIKey(os.Getenv("FANTASY_ANTHROPIC_API_KEY")),
 			anthropic.WithHTTPClient(&http.Client{Transport: r}),
 		)
 		return provider.LanguageModel(model)

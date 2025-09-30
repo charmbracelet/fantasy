@@ -81,6 +81,8 @@ func WithResponseMetadata(response ToolResponse, metadata any) ToolResponse {
 type AgentTool interface {
 	Info() ToolInfo
 	Run(ctx context.Context, params ToolCall) (ToolResponse, error)
+	ProviderOptions() ProviderOptions
+	SetProviderOptions(opts ProviderOptions)
 }
 
 // NewAgentTool creates a typed tool from a function with automatic schema generation.
@@ -103,10 +105,19 @@ func NewAgentTool[TInput any](
 
 // funcToolWrapper wraps a function to implement the AgentTool interface.
 type funcToolWrapper[TInput any] struct {
-	name        string
-	description string
-	fn          func(ctx context.Context, input TInput, call ToolCall) (ToolResponse, error)
-	schema      Schema
+	name            string
+	description     string
+	fn              func(ctx context.Context, input TInput, call ToolCall) (ToolResponse, error)
+	schema          Schema
+	providerOptions ProviderOptions
+}
+
+func (w *funcToolWrapper[TInput]) SetProviderOptions(opts ProviderOptions) {
+	w.providerOptions = opts
+}
+
+func (w *funcToolWrapper[TInput]) ProviderOptions() ProviderOptions {
+	return w.providerOptions
 }
 
 func (w *funcToolWrapper[TInput]) Info() ToolInfo {

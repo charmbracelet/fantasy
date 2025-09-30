@@ -912,6 +912,7 @@ func (a *agent) prepareTools(tools []AgentTool, activeTools []string, disableAll
 				"properties": info.Parameters,
 				"required":   info.Required,
 			},
+			ProviderOptions: tool.ProviderOptions(),
 		})
 	}
 	return preparedTools

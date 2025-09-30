@@ -441,8 +441,12 @@ func toPrompt(prompt ai.Prompt, sendReasoningData bool) ([]anthropic.TextBlockPa
 			}
 			finishedSystemBlock = true
 			for _, msg := range block.Messages {
-				for _, part := range msg.Content {
+				for i, part := range msg.Content {
+					isLastPart := i == len(msg.Content)-1
 					cacheControl := getCacheControl(part.Options())
+					if cacheControl == nil && isLastPart {
+						cacheControl = getCacheControl(msg.ProviderOptions)
+					}
 					text, ok := ai.AsMessagePart[ai.TextPart](part)
 					if !ok {
 						continue

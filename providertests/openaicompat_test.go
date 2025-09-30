@@ -44,12 +44,12 @@ func testOpenAICompatThinking(t *testing.T, result *ai.AgentResult) {
 			}
 		}
 	}
-	require.Greater(t, reasoningContentCount, 0)
+	require.Greater(t, reasoningContentCount, 0, "expected reasoning content, got none")
 }
 
 func builderXAIGrokCodeFast(r *recorder.Recorder) (ai.LanguageModel, error) {
 	provider := openaicompat.New(
-		"https://api.x.ai/v1",
+		openaicompat.WithBaseURL("https://api.x.ai/v1"),
 		openaicompat.WithAPIKey(os.Getenv("FANTASY_XAI_API_KEY")),
 		openaicompat.WithHTTPClient(&http.Client{Transport: r}),
 	)
@@ -58,7 +58,7 @@ func builderXAIGrokCodeFast(r *recorder.Recorder) (ai.LanguageModel, error) {
 
 func builderXAIGrok4Fast(r *recorder.Recorder) (ai.LanguageModel, error) {
 	provider := openaicompat.New(
-		"https://api.x.ai/v1",
+		openaicompat.WithBaseURL("https://api.x.ai/v1"),
 		openaicompat.WithAPIKey(os.Getenv("FANTASY_XAI_API_KEY")),
 		openaicompat.WithHTTPClient(&http.Client{Transport: r}),
 	)
@@ -67,7 +67,7 @@ func builderXAIGrok4Fast(r *recorder.Recorder) (ai.LanguageModel, error) {
 
 func builderXAIGrok3Mini(r *recorder.Recorder) (ai.LanguageModel, error) {
 	provider := openaicompat.New(
-		"https://api.x.ai/v1",
+		openaicompat.WithBaseURL("https://api.x.ai/v1"),
 		openaicompat.WithAPIKey(os.Getenv("FANTASY_XAI_API_KEY")),
 		openaicompat.WithHTTPClient(&http.Client{Transport: r}),
 	)
@@ -76,7 +76,7 @@ func builderXAIGrok3Mini(r *recorder.Recorder) (ai.LanguageModel, error) {
 
 func builderZAIGLM45(r *recorder.Recorder) (ai.LanguageModel, error) {
 	provider := openaicompat.New(
-		"https://api.z.ai/api/coding/paas/v4",
+		openaicompat.WithBaseURL("https://api.z.ai/api/coding/paas/v4"),
 		openaicompat.WithAPIKey(os.Getenv("FANTASY_ZAI_API_KEY")),
 		openaicompat.WithHTTPClient(&http.Client{Transport: r}),
 	)
@@ -85,7 +85,7 @@ func builderZAIGLM45(r *recorder.Recorder) (ai.LanguageModel, error) {
 
 func builderGroq(r *recorder.Recorder) (ai.LanguageModel, error) {
 	provider := openaicompat.New(
-		"https://api.groq.com/openai/v1",
+		openaicompat.WithBaseURL("https://api.groq.com/openai/v1"),
 		openaicompat.WithAPIKey(os.Getenv("FANTASY_GROQ_API_KEY")),
 		openaicompat.WithHTTPClient(&http.Client{Transport: r}),
 	)

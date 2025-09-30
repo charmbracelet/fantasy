@@ -17,11 +17,10 @@ const (
 
 type Option = func(*options)
 
-func New(url string, opts ...Option) ai.Provider {
+func New(opts ...Option) ai.Provider {
 	providerOptions := options{
 		openaiOptions: []openai.Option{
 			openai.WithName(Name),
-			openai.WithBaseURL(url),
 		},
 		languageModelOptions: []openai.LanguageModelOption{
 			openai.WithLanguageModelPrepareCallFunc(languagePrepareModelCall),
@@ -35,6 +34,12 @@ func New(url string, opts ...Option) ai.Provider {
 
 	providerOptions.openaiOptions = append(providerOptions.openaiOptions, openai.WithLanguageModelOptions(providerOptions.languageModelOptions...))
 	return openai.New(providerOptions.openaiOptions...)
+}
+
+func WithBaseURL(url string) Option {
+	return func(o *options) {
+		o.openaiOptions = append(o.openaiOptions, openai.WithBaseURL(url))
+	}
 }
 
 func WithAPIKey(apiKey string) Option {

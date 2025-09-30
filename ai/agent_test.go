@@ -12,11 +12,20 @@ import (
 
 // Mock tool for testing
 type mockTool struct {
-	name        string
-	description string
-	parameters  map[string]any
-	required    []string
-	executeFunc func(ctx context.Context, call ToolCall) (ToolResponse, error)
+	name            string
+	providerOptions ProviderOptions
+	description     string
+	parameters      map[string]any
+	required        []string
+	executeFunc     func(ctx context.Context, call ToolCall) (ToolResponse, error)
+}
+
+func (m *mockTool) SetProviderOptions(opts ProviderOptions) {
+	m.providerOptions = opts
+}
+
+func (m *mockTool) ProviderOptions() ProviderOptions {
+	return m.providerOptions
 }
 
 func (m *mockTool) Info() ToolInfo {

@@ -1,0 +1,49 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 225
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"Say hi in Portuguese","role":"user"}],"model":"gpt-5-mini","max_completion_tokens":4000,"stream_options":{"include_usage":true},"stream":true}'
+    form:
+      api-version:
+      - 2025-01-01-preview
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.3.0
+    url: https://fantasy-playground-resource.services.ai.azure.com/openai/deployments/gpt-5-mini/chat/completions?api-version=2025-01-01-preview
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"choices":[],"created":0,"id":"","model":"","object":"","prompt_filter_results":[{"prompt_index":0,"content_filter_results":{"hate":{"filtered":false,"severity":"safe"},"jailbreak":{"filtered":false,"detected":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}}}]}
+
+      data: {"choices":[{"content_filter_results":{},"delta":{"content":"","refusal":null,"role":"assistant"},"finish_reason":null,"index":0,"logprobs":null}],"created":1759350264,"id":"chatcmpl-CLxf6VStuacrIaxo8vDi3CgHCWd53","model":"gpt-5-mini-2025-08-07","obfuscation":"XVlAyJOxspdMjl","object":"chat.completion.chunk","system_fingerprint":null,"usage":null}
+
+      data: {"choices":[{"content_filter_results":{"hate":{"filtered":false,"severity":"safe"},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}},"delta":{"content":"Olá"},"finish_reason":null,"index":0,"logprobs":null}],"created":1759350264,"id":"chatcmpl-CLxf6VStuacrIaxo8vDi3CgHCWd53","model":"gpt-5-mini-2025-08-07","obfuscation":"chpqp0z3YDcaR","object":"chat.completion.chunk","system_fingerprint":null,"usage":null}
+
+      data: {"choices":[{"content_filter_results":{"hate":{"filtered":false,"severity":"safe"},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}},"delta":{"content":"!"},"finish_reason":null,"index":0,"logprobs":null}],"created":1759350264,"id":"chatcmpl-CLxf6VStuacrIaxo8vDi3CgHCWd53","model":"gpt-5-mini-2025-08-07","obfuscation":"l74mHkPbuPqwWfK","object":"chat.completion.chunk","system_fingerprint":null,"usage":null}
+
+      data: {"choices":[{"content_filter_results":{},"delta":{},"finish_reason":"stop","index":0,"logprobs":null}],"created":1759350264,"id":"chatcmpl-CLxf6VStuacrIaxo8vDi3CgHCWd53","model":"gpt-5-mini-2025-08-07","obfuscation":"fLeGCVdAbj","object":"chat.completion.chunk","system_fingerprint":null,"usage":null}
+
+      data: {"choices":[],"created":1759350264,"id":"chatcmpl-CLxf6VStuacrIaxo8vDi3CgHCWd53","model":"gpt-5-mini-2025-08-07","obfuscation":"5BNmJwjTHE4Nbv","object":"chat.completion.chunk","system_fingerprint":null,"usage":{"completion_tokens":76,"completion_tokens_details":{"accepted_prediction_tokens":0,"audio_tokens":0,"reasoning_tokens":64,"rejected_prediction_tokens":0},"prompt_tokens":19,"prompt_tokens_details":{"audio_tokens":0,"cached_tokens":0},"total_tokens":95}}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream; charset=utf-8
+    status: 200 OK
+    code: 200
+    duration: 2.557172792s

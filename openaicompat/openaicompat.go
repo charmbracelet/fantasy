@@ -9,6 +9,7 @@ import (
 type options struct {
 	openaiOptions        []openai.Option
 	languageModelOptions []openai.LanguageModelOption
+	sdkOptions           []option.RequestOption
 }
 
 const (
@@ -23,16 +24,20 @@ func New(opts ...Option) ai.Provider {
 			openai.WithName(Name),
 		},
 		languageModelOptions: []openai.LanguageModelOption{
-			openai.WithLanguageModelPrepareCallFunc(languagePrepareModelCall),
-			openai.WithLanguageModelStreamExtraFunc(languageModelStreamExtra),
-			openai.WithLanguageModelExtraContentFunc(languageModelExtraContent),
+			openai.WithLanguageModelPrepareCallFunc(PrepareCallFunc),
+			openai.WithLanguageModelStreamExtraFunc(StreamExtraFunc),
+			openai.WithLanguageModelExtraContentFunc(ExtraContentFunc),
 		},
 	}
 	for _, o := range opts {
 		o(&providerOptions)
 	}
 
-	providerOptions.openaiOptions = append(providerOptions.openaiOptions, openai.WithLanguageModelOptions(providerOptions.languageModelOptions...))
+	providerOptions.openaiOptions = append(
+		providerOptions.openaiOptions,
+		openai.WithSDKOptions(providerOptions.sdkOptions...),
+		openai.WithLanguageModelOptions(providerOptions.languageModelOptions...),
+	)
 	return openai.New(providerOptions.openaiOptions...)
 }
 
@@ -63,6 +68,12 @@ func WithHeaders(headers map[string]string) Option {
 func WithHTTPClient(client option.HTTPClient) Option {
 	return func(o *options) {
 		o.openaiOptions = append(o.openaiOptions, openai.WithHTTPClient(client))
+	}
+}
+
+func WithSDKOptions(opts ...option.RequestOption) Option {
+	return func(o *options) {
+		o.sdkOptions = append(o.sdkOptions, opts...)
 	}
 }
 

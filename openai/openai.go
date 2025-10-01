@@ -26,6 +26,7 @@ type options struct {
 	name                 string
 	headers              map[string]string
 	client               option.HTTPClient
+	sdkOptions           []option.RequestOption
 	languageModelOptions []LanguageModelOption
 }
 
@@ -95,6 +96,12 @@ func WithHTTPClient(client option.HTTPClient) Option {
 	}
 }
 
+func WithSDKOptions(opts ...option.RequestOption) Option {
+	return func(o *options) {
+		o.sdkOptions = append(o.sdkOptions, opts...)
+	}
+}
+
 func WithLanguageModelOptions(opts ...LanguageModelOption) Option {
 	return func(o *options) {
 		o.languageModelOptions = append(o.languageModelOptions, opts...)
@@ -103,7 +110,8 @@ func WithLanguageModelOptions(opts ...LanguageModelOption) Option {
 
 // LanguageModel implements ai.Provider.
 func (o *provider) LanguageModel(modelID string) (ai.LanguageModel, error) {
-	openaiClientOptions := []option.RequestOption{}
+	openaiClientOptions := make([]option.RequestOption, 0, 5+len(o.options.headers)+len(o.options.sdkOptions))
+
 	if o.options.apiKey != "" {
 		openaiClientOptions = append(openaiClientOptions, option.WithAPIKey(o.options.apiKey))
 	}
@@ -118,6 +126,8 @@ func (o *provider) LanguageModel(modelID string) (ai.LanguageModel, error) {
 	if o.options.client != nil {
 		openaiClientOptions = append(openaiClientOptions, option.WithHTTPClient(o.options.client))
 	}
+
+	openaiClientOptions = append(openaiClientOptions, o.options.sdkOptions...)
 
 	return newLanguageModel(
 		modelID,

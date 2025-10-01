@@ -13,7 +13,7 @@ import (
 
 const reasoningStartedCtx = "reasoning_started"
 
-func languagePrepareModelCall(model ai.LanguageModel, params *openaisdk.ChatCompletionNewParams, call ai.Call) ([]ai.CallWarning, error) {
+func PrepareCallFunc(model ai.LanguageModel, params *openaisdk.ChatCompletionNewParams, call ai.Call) ([]ai.CallWarning, error) {
 	providerOptions := &ProviderOptions{}
 	if v, ok := call.ProviderOptions[Name]; ok {
 		providerOptions, ok = v.(*ProviderOptions)
@@ -43,7 +43,7 @@ func languagePrepareModelCall(model ai.LanguageModel, params *openaisdk.ChatComp
 	return nil, nil
 }
 
-func languageModelExtraContent(choice openaisdk.ChatCompletionChoice) []ai.Content {
+func ExtraContentFunc(choice openaisdk.ChatCompletionChoice) []ai.Content {
 	var content []ai.Content
 	reasoningData := ReasoningData{}
 	err := json.Unmarshal([]byte(choice.Message.RawJSON()), &reasoningData)
@@ -70,7 +70,7 @@ func extractReasoningContext(ctx map[string]any) bool {
 	return b
 }
 
-func languageModelStreamExtra(chunk openaisdk.ChatCompletionChunk, yield func(ai.StreamPart) bool, ctx map[string]any) (map[string]any, bool) {
+func StreamExtraFunc(chunk openaisdk.ChatCompletionChunk, yield func(ai.StreamPart) bool, ctx map[string]any) (map[string]any, bool) {
 	if len(chunk.Choices) == 0 {
 		return ctx, true
 	}

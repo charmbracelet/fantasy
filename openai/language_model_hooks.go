@@ -21,11 +21,11 @@ type (
 	LanguageModelStreamProviderMetadataFunc = func(choice openai.ChatCompletionChoice, metadata ai.ProviderMetadata) ai.ProviderMetadata
 )
 
-func defaultGenerateID() string {
+func DefaultGenerateID() string {
 	return uuid.NewString()
 }
 
-func defaultPrepareLanguageModelCall(model ai.LanguageModel, params *openai.ChatCompletionNewParams, call ai.Call) ([]ai.CallWarning, error) {
+func DefaultPrepareCallFunc(model ai.LanguageModel, params *openai.ChatCompletionNewParams, call ai.Call) ([]ai.CallWarning, error) {
 	if call.ProviderOptions == nil {
 		return nil, nil
 	}
@@ -162,7 +162,7 @@ func defaultPrepareLanguageModelCall(model ai.LanguageModel, params *openai.Chat
 	return warnings, nil
 }
 
-func defaultMapFinishReason(choice openai.ChatCompletionChoice) ai.FinishReason {
+func DefaultMapFinishReasonFunc(choice openai.ChatCompletionChoice) ai.FinishReason {
 	finishReason := choice.FinishReason
 	switch finishReason {
 	case "stop":
@@ -178,7 +178,7 @@ func defaultMapFinishReason(choice openai.ChatCompletionChoice) ai.FinishReason 
 	}
 }
 
-func defaultUsage(response openai.ChatCompletion) (ai.Usage, ai.ProviderOptionsData) {
+func DefaultUsageFunc(response openai.ChatCompletion) (ai.Usage, ai.ProviderOptionsData) {
 	if len(response.Choices) == 0 {
 		return ai.Usage{}, nil
 	}
@@ -211,7 +211,7 @@ func defaultUsage(response openai.ChatCompletion) (ai.Usage, ai.ProviderOptionsD
 	}, providerMetadata
 }
 
-func defaultStreamUsage(chunk openai.ChatCompletionChunk, ctx map[string]any, metadata ai.ProviderMetadata) (ai.Usage, ai.ProviderMetadata) {
+func DefaultStreamUsageFunc(chunk openai.ChatCompletionChunk, ctx map[string]any, metadata ai.ProviderMetadata) (ai.Usage, ai.ProviderMetadata) {
 	if chunk.Usage.TotalTokens == 0 {
 		return ai.Usage{}, nil
 	}
@@ -250,7 +250,7 @@ func defaultStreamUsage(chunk openai.ChatCompletionChunk, ctx map[string]any, me
 	}
 }
 
-func defaultStreamProviderMetadataFunc(choice openai.ChatCompletionChoice, metadata ai.ProviderMetadata) ai.ProviderMetadata {
+func DefaultStreamProviderMetadataFunc(choice openai.ChatCompletionChoice, metadata ai.ProviderMetadata) ai.ProviderMetadata {
 	streamProviderMetadata, ok := metadata[Name]
 	if !ok {
 		streamProviderMetadata = &ProviderMetadata{}

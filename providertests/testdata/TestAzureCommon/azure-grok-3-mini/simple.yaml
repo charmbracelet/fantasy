@@ -1,0 +1,36 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 161
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"Say hi in Portuguese","role":"user"}],"model":"grok-3-mini","max_tokens":4000}'
+    form:
+      api-version:
+      - 2025-01-01-preview
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.3.0
+    url: https://fantasy-playground-resource.services.ai.azure.com/openai/deployments/grok-3-mini/chat/completions?api-version=2025-01-01-preview
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "{\"choices\":[{\"content_filter_results\":{\"hate\":{\"filtered\":false,\"severity\":\"safe\"},\"protected_material_text\":{\"filtered\":false,\"detected\":false},\"self_harm\":{\"filtered\":false,\"severity\":\"safe\"},\"sexual\":{\"filtered\":false,\"severity\":\"safe\"},\"violence\":{\"filtered\":false,\"severity\":\"safe\"}},\"finish_reason\":\"stop\",\"index\":0,\"logprobs\":null,\"message\":{\"content\":\"Oi! That's \\\"hi\\\" in Portuguese. \U0001F60A If you have more questions, feel free to ask!\",\"reasoning_content\":\"First, the user asked me to \\\"Say hi in Portuguese.\\\" I need to respond as a helpful assistant.\\n\\nThe phrase \\\"hi\\\" in English is a casual greeting. In Portuguese, the common casual greeting is \\\"oi\\\" or \\\"olá\\\". \\\"Oi\\\" is more informal, like \\\"hi\\\", and \\\"olá\\\" is a bit more formal, like \\\"hello\\\". Since the user said \\\"hi\\\", I should use the informal equivalent.\\n\\nI should confirm the language: Portuguese. I need to make sure I'm using the correct Portuguese greeting. In standard Portuguese, \\\"oi\\\" is widely understood and used in both Brazil and Portugal, but in Portugal, \\\"olá\\\" might be more common in some contexts. To keep it simple and directly matching \\\"hi\\\", I'll go with \\\"oi\\\".\\n\\nAs a helpful assistant, I should make the response engaging and friendly. Maybe I can add a little more to make it conversational, like saying \\\"Hi in Portuguese is 'oi'!\\\" or something similar.\\n\\nPossible responses:\\n\\n- Simply: \\\"Oi!\\\" (but that might be too abrupt; I should include an explanation.)\\n\\n- Better: \\\"Hi in Portuguese is 'oi'.\\\"\\n\\n- Or: \\\"Sure, 'oi' means hi in Portuguese!\\\"\\n\\nSince the user said \\\"Say hi in Portuguese\\\", they might want me to greet them in Portuguese, not just translate it. So, perhaps I should say \\\"Oi!\\\" as a greeting.\\n\\nReading the query again: \\\"Say hi in Portuguese.\\\" This could be interpreted as either translating the word or performing the greeting in that language.\\n\\nTo be helpful, I could do both: greet them and explain.\\n\\nFor example: \\\"Oi! That's 'hi' in Portuguese.\\\"\\n\\nThis way, I'm responding directly and educating a bit.\\n\\nKeep it concise since the query is simple.\\n\\nFinally, end my response appropriately as an AI assistant.\",\"refusal\":null,\"role\":\"assistant\",\"tool_calls\":null},\"stop_reason\":null}],\"created\":1759350279,\"id\":\"6cae6413-c9bc-425b-984a-7401e3e36311_sidecar\",\"model\":\"grok-3-mini-high\",\"object\":\"chat.completion\",\"prompt_filter_results\":[{\"prompt_index\":0,\"content_filter_results\":{\"hate\":{\"filtered\":false,\"severity\":\"safe\"},\"jailbreak\":{\"filtered\":false,\"detected\":false},\"self_harm\":{\"filtered\":false,\"severity\":\"safe\"},\"sexual\":{\"filtered\":false,\"severity\":\"safe\"},\"violence\":{\"filtered\":false,\"severity\":\"safe\"}}}],\"usage\":{\"audio_prompt_tokens\":0,\"completion_tokens\":22,\"completion_tokens_details\":{\"accepted_prediction_tokens\":0,\"audio_tokens\":0,\"reasoning_tokens\":374,\"rejected_prediction_tokens\":0},\"num_sources_used\":0,\"prompt_tokens\":20,\"prompt_tokens_details\":{\"audio_tokens\":0,\"cached_tokens\":0,\"image_tokens\":0,\"text_tokens\":20},\"total_tokens\":416}}\n"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 5.316308083s

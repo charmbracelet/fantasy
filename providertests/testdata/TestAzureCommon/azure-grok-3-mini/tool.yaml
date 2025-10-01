@@ -1,0 +1,71 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 453
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"}],"model":"grok-3-mini","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+    form:
+      api-version:
+      - 2025-01-01-preview
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.3.0
+    url: https://fantasy-playground-resource.services.ai.azure.com/openai/deployments/grok-3-mini/chat/completions?api-version=2025-01-01-preview
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: |
+      {"choices":[{"content_filter_results":{},"finish_reason":"tool_calls","index":0,"logprobs":null,"message":{"content":"","reasoning_content":"First, the user is asking about the weather in Florence, Italy. I have an available function called \"weather\" that can get weather information for a location.\n\nThe function description is: \"Get weather information for a location\". The parameters require a \"location\" which is a string describing the city.\n\nIn this query, the user has provided \"Florence, Italy\". This seems to clearly specify the location. The location parameter is described as \"the city\", but it includes both the city and the country, which should be fine as it precisely identifies the place.\n\nAll required parameters are provided: the location is given as \"Florence, Italy\". I don't need to infer anything else; it's straightforward.\n\nAccording to the instructions, if the user's query can be addressed using an available function and all required parameters are provided or obviously inferable, I should trigger a function call in JSON format within \u003cfunction_call\u003e\u003c/function_call\u003e tags.\n\nThis is a direct match, so I should call the \"weather\" function.\n\nThe function call format should be: \u003cfunction_call\u003e{\"action\": \"weather\", \"action_input\": {\"location\": \"Florence, Italy\"}}\u003c/function_call\u003e\n\nI need to ensure that my response is not verbose. The instructions say to keep responses clear and not verbose. So, I shouldn't add extra text unless necessary. Since I'm calling a function, my response should just contain the function call tag.\n\nThe instructions specify: \"You are only permitted to use the \u003cfunction_call\u003e tag in your response only if you have made the decision to call a function.\" And in this case, I have decided to call the function.\n\nAfter calling the function, in a multi-turn conversation, I might need to handle the response, but for now, this is the first step to advance the user's request.\n\nNo need to ask for clarification because the location is clear.\n\nSo, my response should simply be the function call.","refusal":null,"role":"assistant","tool_calls":[{"function":{"arguments":"{\"location\":\"Florence, Italy\"}","call_id":null,"name":"weather"},"id":"call_62421597","type":"function"}]},"stop_reason":null}],"created":1759350288,"id":"ab26da9d-9339-4db3-8a73-6cf565228eec_sidecar","model":"grok-3-mini-high","object":"chat.completion","prompt_filter_results":[{"prompt_index":0,"content_filter_results":{"hate":{"filtered":false,"severity":"safe"},"jailbreak":{"filtered":false,"detected":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}}}],"usage":{"audio_prompt_tokens":0,"completion_tokens":27,"completion_tokens_details":{"accepted_prediction_tokens":0,"audio_tokens":0,"reasoning_tokens":383,"rejected_prediction_tokens":0},"num_sources_used":0,"prompt_tokens":288,"prompt_tokens_details":{"audio_tokens":0,"cached_tokens":0,"image_tokens":0,"text_tokens":288},"total_tokens":698}}
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 5.632591625s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 673
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"call_62421597","function":{"arguments":"{\"location\":\"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"call_62421597","role":"tool"}],"model":"grok-3-mini","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+    form:
+      api-version:
+      - 2025-01-01-preview
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.3.0
+    url: https://fantasy-playground-resource.services.ai.azure.com/openai/deployments/grok-3-mini/chat/completions?api-version=2025-01-01-preview
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: |
+      {"choices":[{"content_filter_results":{"hate":{"filtered":false,"severity":"safe"},"protected_material_code":{"filtered":false,"detected":false},"protected_material_text":{"filtered":false,"detected":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}},"finish_reason":"stop","index":0,"logprobs":null,"message":{"content":"The weather in Florence, Italy is 40°C.","reasoning_content":"First, the user asked: \"What's the weather in Florence, Italy?\" This directly matches the available function \"weather\" which gets weather information for a location.\n\nThe required parameter for the \"weather\" function is \"location\", which is a string. The user provided \"Florence, Italy\", which clearly specifies the city and country, so all required parameters are present and inferable.\n\nI should call the function if it can advance the user's request. Here, calling the \"weather\" function will provide the weather information, fulfilling the query.\n\nIn my response, I need to use the exact format: \u003cfunction_call\u003e tags with JSON inside. I did that in my initial response.\n\nNow, after the function call, the system provided a response: \"Function: 40 C\". This seems to be the result of the function call. As the assistant, I need to handle this in a multi-turn conversation.\n\nThe instructions say: \"In multi-turn conversations, continue calling relevant functions to advance the user's request until either the user's request is fully fulfilled or you need more information to call a function.\"\n\nThe user's request was to get the weather, and the function call has been made and responded with \"40 C\". This likely means the weather is 40 degrees Celsius. So, the request might be fulfilled.\n\nI need to check if I should respond to the user with this information or if more action is needed. The instructions don't specify how to handle the function's response, but as a helpful assistant, I should provide a clear, non-verbose response to the user.\n\nSince the function call has been executed and we have the result, I should now present this information to the user in a clear way.\n\nMy response should not be verbose, so I'll keep it concise.\n\nFinal response structure: After the function call is resolved, I should output the result in a user-friendly way.\n\nResponse: The weather in Florence, Italy is 40°C.","refusal":null,"role":"assistant","tool_calls":null},"stop_reason":null}],"created":1759350293,"id":"7eeb3520-65aa-4650-a5f0-c6c0b75bb99b_sidecar","model":"grok-3-mini-high","object":"chat.completion","prompt_filter_results":[{"prompt_index":0,"content_filter_results":{"hate":{"filtered":false,"severity":"safe"},"jailbreak":{"filtered":false,"detected":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}}}],"usage":{"audio_prompt_tokens":0,"completion_tokens":11,"completion_tokens_details":{"accepted_prediction_tokens":0,"audio_tokens":0,"reasoning_tokens":389,"rejected_prediction_tokens":0},"num_sources_used":0,"prompt_tokens":332,"prompt_tokens_details":{"audio_tokens":0,"cached_tokens":0,"image_tokens":0,"text_tokens":332},"total_tokens":732}}
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 5.127197417s

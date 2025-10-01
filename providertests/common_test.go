@@ -38,10 +38,9 @@ func testCommon(t *testing.T, pairs []builderPair) {
 
 func testSimple(t *testing.T, pair builderPair) {
 	checkResult := func(t *testing.T, result *ai.AgentResult) {
-		option1 := "Oi"
-		option2 := "Olá"
+		options := []string{"Oi", "oi", "Olá", "olá"}
 		got := result.Response.Content.Text()
-		require.True(t, strings.Contains(got, option1) || strings.Contains(got, option2), "unexpected response: got %q, want %q or %q", got, option1, option2)
+		require.True(t, containsAny(got, options...), "unexpected response: got %q, want any of: %q", got, options)
 	}
 
 	t.Run("simple", func(t *testing.T) {
@@ -156,6 +155,11 @@ func testTool(t *testing.T, pair builderPair) {
 }
 
 func testMultiTool(t *testing.T, pair builderPair) {
+	// Apparently, Azure does not support multi-tools calls at all?
+	if strings.Contains(pair.name, "azure") {
+		t.Skip("skipping multi-tool tests for azure as it does not support parallel multi-tool calls")
+	}
+
 	type CalculatorInput struct {
 		A int `json:"a" description:"first number"`
 		B int `json:"b" description:"second number"`
@@ -315,4 +319,13 @@ func testThinking(t *testing.T, pairs []builderPair, thinkChecks func(*testing.T
 			})
 		})
 	}
+}
+
+func containsAny(s string, subs ...string) bool {
+	for _, sub := range subs {
+		if strings.Contains(s, sub) {
+			return true
+		}
+	}
+	return false
 }

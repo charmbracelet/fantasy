@@ -179,18 +179,15 @@ func DefaultMapFinishReasonFunc(choice openai.ChatCompletionChoice) ai.FinishRea
 }
 
 func DefaultUsageFunc(response openai.ChatCompletion) (ai.Usage, ai.ProviderOptionsData) {
-	if len(response.Choices) == 0 {
-		return ai.Usage{}, nil
-	}
-	choice := response.Choices[0]
 	completionTokenDetails := response.Usage.CompletionTokensDetails
 	promptTokenDetails := response.Usage.PromptTokensDetails
 
 	// Build provider metadata
 	providerMetadata := &ProviderMetadata{}
+
 	// Add logprobs if available
-	if len(choice.Logprobs.Content) > 0 {
-		providerMetadata.Logprobs = choice.Logprobs.Content
+	if len(response.Choices) > 0 && len(response.Choices[0].Logprobs.Content) > 0 {
+		providerMetadata.Logprobs = response.Choices[0].Logprobs.Content
 	}
 
 	// Add prediction tokens if available

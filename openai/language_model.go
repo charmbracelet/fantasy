@@ -87,12 +87,12 @@ func newLanguageModel(modelID string, provider string, client openai.Client, opt
 		modelID:                    modelID,
 		provider:                   provider,
 		client:                     client,
-		generateIDFunc:             defaultGenerateID,
-		prepareCallFunc:            defaultPrepareLanguageModelCall,
-		mapFinishReasonFunc:        defaultMapFinishReason,
-		usageFunc:                  defaultUsage,
-		streamUsageFunc:            defaultStreamUsage,
-		streamProviderMetadataFunc: defaultStreamProviderMetadataFunc,
+		generateIDFunc:             DefaultGenerateID,
+		prepareCallFunc:            DefaultPrepareCallFunc,
+		mapFinishReasonFunc:        DefaultMapFinishReasonFunc,
+		usageFunc:                  DefaultUsageFunc,
+		streamUsageFunc:            DefaultStreamUsageFunc,
+		streamProviderMetadataFunc: DefaultStreamProviderMetadataFunc,
 	}
 
 	for _, o := range opts {
@@ -303,7 +303,7 @@ func (o languageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response
 	return &ai.Response{
 		Content:      content,
 		Usage:        usage,
-		FinishReason: defaultMapFinishReason(choice),
+		FinishReason: DefaultMapFinishReasonFunc(choice),
 		ProviderMetadata: ai.ProviderMetadata{
 			Name: providerMetadata,
 		},

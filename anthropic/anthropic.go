@@ -260,14 +260,6 @@ func (a languageModel) prepareParams(call ai.Call) (*anthropic.MessageNewParams,
 	return params, warnings, nil
 }
 
-func (a *provider) ParseOptions(data map[string]any) (ai.ProviderOptionsData, error) {
-	var options ProviderOptions
-	if err := ai.ParseOptions(data, &options); err != nil {
-		return nil, err
-	}
-	return &options, nil
-}
-
 func (a *provider) Name() string {
 	return Name
 }

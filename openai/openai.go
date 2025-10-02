@@ -137,14 +137,6 @@ func (o *provider) LanguageModel(modelID string) (ai.LanguageModel, error) {
 	), nil
 }
 
-func (o *provider) ParseOptions(data map[string]any) (ai.ProviderOptionsData, error) {
-	var options ProviderOptions
-	if err := ai.ParseOptions(data, &options); err != nil {
-		return nil, err
-	}
-	return &options, nil
-}
-
 func (o *provider) Name() string {
 	return Name
 }

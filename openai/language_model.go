@@ -300,10 +300,14 @@ func (o languageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response
 
 	usage, providerMetadata := o.usageFunc(*response)
 
+	mappedFinishReason := o.mapFinishReasonFunc(choice.FinishReason)
+	if len(choice.Message.ToolCalls) > 0 {
+		mappedFinishReason = ai.FinishReasonToolCalls
+	}
 	return &ai.Response{
 		Content:      content,
 		Usage:        usage,
-		FinishReason: DefaultMapFinishReasonFunc(choice),
+		FinishReason: mappedFinishReason,
 		ProviderMetadata: ai.ProviderMetadata{
 			Name: providerMetadata,
 		},
@@ -333,6 +337,7 @@ func (o languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 	acc := openai.ChatCompletionAccumulator{}
 	extraContext := make(map[string]any)
 	var usage ai.Usage
+	var finishReason string
 	return func(yield func(ai.StreamPart) bool) {
 		if len(warnings) > 0 {
 			if !yield(ai.StreamPart{
@@ -350,6 +355,9 @@ func (o languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 				continue
 			}
 			for _, choice := range chunk.Choices {
+				if choice.FinishReason != "" {
+					finishReason = choice.FinishReason
+				}
 				switch {
 				case choice.Delta.Content != "":
 					if !isActiveText {
@@ -551,14 +559,17 @@ func (o languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 					}
 				}
 			}
-			finishReason := ai.FinishReasonUnknown
+			mappedFinishReason := o.mapFinishReasonFunc(finishReason)
 			if len(acc.Choices) > 0 {
-				finishReason = o.mapFinishReasonFunc(acc.Choices[0])
+				choice := acc.Choices[0]
+				if len(choice.Message.ToolCalls) > 0 {
+					mappedFinishReason = ai.FinishReasonToolCalls
+				}
 			}
 			yield(ai.StreamPart{
 				Type:             ai.StreamPartTypeFinish,
 				Usage:            usage,
-				FinishReason:     finishReason,
+				FinishReason:     mappedFinishReason,
 				ProviderMetadata: providerMetadata,
 			})
 			return

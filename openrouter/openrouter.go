@@ -32,7 +32,6 @@ func New(opts ...Option) ai.Provider {
 			openai.WithLanguageModelStreamUsageFunc(languageModelStreamUsage),
 			openai.WithLanguageModelStreamExtraFunc(languageModelStreamExtra),
 			openai.WithLanguageModelExtraContentFunc(languageModelExtraContent),
-			openai.WithLanguageModelMapFinishReasonFunc(languageModelMapFinishReason),
 		},
 	}
 	for _, o := range opts {

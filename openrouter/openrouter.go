@@ -66,18 +66,6 @@ func WithHTTPClient(client option.HTTPClient) Option {
 	}
 }
 
-func WithLanguageUniqueToolCallIds() Option {
-	return func(l *options) {
-		l.languageModelOptions = append(l.languageModelOptions, openai.WithLanguageUniqueToolCallIds())
-	}
-}
-
-func WithLanguageModelGenerateIDFunc(fn openai.LanguageModelGenerateIDFunc) Option {
-	return func(l *options) {
-		l.languageModelOptions = append(l.languageModelOptions, openai.WithLanguageModelGenerateIDFunc(fn))
-	}
-}
-
 func structToMapJSON(s any) (map[string]any, error) {
 	var result map[string]any
 	jsonBytes, err := json.Marshal(s)

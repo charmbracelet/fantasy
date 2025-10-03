@@ -21,8 +21,6 @@ type languageModel struct {
 	provider                   string
 	modelID                    string
 	client                     openai.Client
-	uniqueToolCallIds          bool
-	generateIDFunc             LanguageModelGenerateIDFunc
 	prepareCallFunc            LanguageModelPrepareCallFunc
 	mapFinishReasonFunc        LanguageModelMapFinishReasonFunc
 	extraContentFunc           LanguageModelExtraContentFunc
@@ -70,24 +68,11 @@ func WithLanguageModelStreamUsageFunc(fn LanguageModelStreamUsageFunc) LanguageM
 	}
 }
 
-func WithLanguageUniqueToolCallIds() LanguageModelOption {
-	return func(l *languageModel) {
-		l.uniqueToolCallIds = true
-	}
-}
-
-func WithLanguageModelGenerateIDFunc(fn LanguageModelGenerateIDFunc) LanguageModelOption {
-	return func(l *languageModel) {
-		l.generateIDFunc = fn
-	}
-}
-
 func newLanguageModel(modelID string, provider string, client openai.Client, opts ...LanguageModelOption) languageModel {
 	model := languageModel{
 		modelID:                    modelID,
 		provider:                   provider,
 		client:                     client,
-		generateIDFunc:             DefaultGenerateID,
 		prepareCallFunc:            DefaultPrepareCallFunc,
 		mapFinishReasonFunc:        DefaultMapFinishReasonFunc,
 		usageFunc:                  DefaultUsageFunc,
@@ -276,9 +261,6 @@ func (o languageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response
 	}
 	for _, tc := range choice.Message.ToolCalls {
 		toolCallID := tc.ID
-		if toolCallID == "" || o.uniqueToolCallIds {
-			toolCallID = o.generateIDFunc()
-		}
 		content = append(content, ai.ToolCallContent{
 			ProviderExecuted: false, // TODO: update when handling other tools
 			ToolCallID:       toolCallID,
@@ -440,15 +422,6 @@ func (o languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 									Error: o.handleError(stream.Err()),
 								})
 								return
-							}
-
-							// some providers do not send this as a unique id
-							// for some usecases in crush we need this ID to be unique.
-							// it won't change the behavior on the provider side because the
-							// provider only cares about the tool call id matching the result
-							// and in our case that will still be the case
-							if o.uniqueToolCallIds {
-								toolCallDelta.ID = o.generateIDFunc()
 							}
 
 							if !yield(ai.StreamPart{

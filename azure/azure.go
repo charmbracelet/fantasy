@@ -53,6 +53,12 @@ func WithAPIKey(apiKey string) Option {
 	}
 }
 
+func WithHeaders(headers map[string]string) Option {
+	return func(o *options) {
+		o.openaiOptions = append(o.openaiOptions, openaicompat.WithHeaders(headers))
+	}
+}
+
 func WithAPIVersion(version string) Option {
 	return func(o *options) {
 		o.apiVersion = version

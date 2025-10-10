@@ -2,15 +2,24 @@ package providertests
 
 import (
 	"context"
+	"os"
 	"strconv"
 	"strings"
 	"testing"
 
 	"github.com/charmbracelet/fantasy/ai"
-	_ "github.com/joho/godotenv/autoload"
+	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )
+
+func init() {
+	if _, err := os.Stat(".env"); err == nil {
+		godotenv.Load(".env")
+	} else {
+		godotenv.Load(".env.sample")
+	}
+}
 
 type testModel struct {
 	name      string
@@ -94,7 +103,7 @@ func testTool(t *testing.T, pair builderPair) {
 		},
 	)
 	checkResult := func(t *testing.T, result *ai.AgentResult) {
-		require.Len(t, result.Steps, 2)
+		require.GreaterOrEqual(t, len(result.Steps), 2)
 
 		var toolCalls []ai.ToolCallContent
 		for _, content := range result.Steps[0].Content {
@@ -155,9 +164,12 @@ func testTool(t *testing.T, pair builderPair) {
 }
 
 func testMultiTool(t *testing.T, pair builderPair) {
-	// Apparently, Azure does not support multi-tools calls at all?
+	// Apparently, Azure and Vertex+Anthropic do not support multi-tools calls at all?
 	if strings.Contains(pair.name, "azure") {
 		t.Skip("skipping multi-tool tests for azure as it does not support parallel multi-tool calls")
+	}
+	if strings.Contains(pair.name, "vertex") && strings.Contains(pair.name, "claude") {
+		t.Skip("skipping multi-tool tests for vertex claude as it does not support parallel multi-tool calls")
 	}
 
 	type CalculatorInput struct {

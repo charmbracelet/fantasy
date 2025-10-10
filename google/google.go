@@ -11,7 +11,9 @@ import (
 	"net/http"
 	"strings"
 
+	"cloud.google.com/go/auth"
 	"github.com/charmbracelet/fantasy/ai"
+	"github.com/charmbracelet/fantasy/anthropic"
 	"github.com/charmbracelet/x/exp/slice"
 	"github.com/google/uuid"
 	"google.golang.org/genai"
@@ -24,10 +26,14 @@ type provider struct {
 }
 
 type options struct {
-	apiKey  string
-	name    string
-	headers map[string]string
-	client  *http.Client
+	apiKey   string
+	name     string
+	headers  map[string]string
+	client   *http.Client
+	backend  genai.Backend
+	project  string
+	location string
+	skipAuth bool
 }
 
 type Option = func(*options)
@@ -47,9 +53,30 @@ func New(opts ...Option) ai.Provider {
 	}
 }
 
-func WithAPIKey(apiKey string) Option {
+func WithGeminiAPIKey(apiKey string) Option {
 	return func(o *options) {
+		o.backend = genai.BackendGeminiAPI
 		o.apiKey = apiKey
+		o.project = ""
+		o.location = ""
+	}
+}
+
+func WithVertex(project, location string) Option {
+	if project == "" || location == "" {
+		panic("project and location must be provided")
+	}
+	return func(o *options) {
+		o.backend = genai.BackendVertexAI
+		o.apiKey = ""
+		o.project = project
+		o.location = location
+	}
+}
+
+func WithSkipAuth(skipAuth bool) Option {
+	return func(o *options) {
+		o.skipAuth = skipAuth
 	}
 }
 
@@ -92,10 +119,23 @@ type languageModel struct {
 
 // LanguageModel implements ai.Provider.
 func (g *provider) LanguageModel(modelID string) (ai.LanguageModel, error) {
+	if strings.Contains(modelID, "anthropic") || strings.Contains(modelID, "claude") {
+		return anthropic.New(
+			anthropic.WithVertex(g.options.project, g.options.location),
+			anthropic.WithHTTPClient(g.options.client),
+			anthropic.WithSkipGoogleAuth(g.options.skipAuth),
+		).LanguageModel(modelID)
+	}
+
 	cc := &genai.ClientConfig{
-		APIKey:     g.options.apiKey,
-		Backend:    genai.BackendGeminiAPI,
 		HTTPClient: g.options.client,
+		Backend:    g.options.backend,
+		APIKey:     g.options.apiKey,
+		Project:    g.options.project,
+		Location:   g.options.location,
+	}
+	if g.options.skipAuth {
+		cc.Credentials = &auth.Credentials{TokenProvider: dummyTokenProvider{}}
 	}
 	client, err := genai.NewClient(context.Background(), cc)
 	if err != nil {
@@ -116,7 +156,7 @@ func (a languageModel) prepareParams(call ai.Call) (*genai.GenerateContentConfig
 	if v, ok := call.ProviderOptions[Name]; ok {
 		providerOptions, ok = v.(*ProviderOptions)
 		if !ok {
-			return nil, nil, nil, ai.NewInvalidArgumentError("providerOptions", "anthropic provider options should be *anthropic.ProviderOptions", nil)
+			return nil, nil, nil, ai.NewInvalidArgumentError("providerOptions", "google provider options should be *google.ProviderOptions", nil)
 		}
 	}
 
@@ -386,6 +426,8 @@ func toGooglePrompt(prompt ai.Prompt) (*genai.Content, []*genai.Content, []ai.Ca
 					Parts: parts,
 				})
 			}
+		default:
+			panic("unsupported message role: " + msg.Role)
 		}
 	}
 	return systemInstructions, content, warnings

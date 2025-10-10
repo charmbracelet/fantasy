@@ -1,0 +1,70 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 180
+    host: us-central1-aiplatform.googleapis.com
+    body: |
+      {"contents":[{"parts":[{"text":"Say hi in Portuguese"}],"role":"user"}],"generationConfig":{},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"}}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - google-genai-sdk/1.25.0 gl-go/go1.25.0
+    url: https://us-central1-aiplatform.googleapis.com/v1beta1/projects/fantasy-playground-472418/locations/us-central1/publishers/google/models/gemini-2.5-pro:generateContent
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: |
+      {
+        "candidates": [
+          {
+            "content": {
+              "role": "model",
+              "parts": [
+                {
+                  "text": "Of course! The most common ways to say \"hi\" in Portuguese are:\n\n*   **Olá** (oh-LAH) - This is the equivalent of \"hello\" and can be used in any situation.\n*   **Oi** (oy) - This is more informal, like \"hi,\" and is extremely common, especially in Brazil.\n\nYou can also use a greeting depending on the time of day:\n\n*   **Bom dia** (bohm JEE-ah) - Good morning\n*   **Boa tarde** (BOH-ah TAR-jee) - Good afternoon\n*   **Boa noite** (BOH-ah NOY-tchee) - Good evening / Good night"
+                }
+              ]
+            },
+            "finishReason": "STOP",
+            "avgLogprobs": -0.93591674386638479
+          }
+        ],
+        "usageMetadata": {
+          "promptTokenCount": 9,
+          "candidatesTokenCount": 146,
+          "totalTokenCount": 905,
+          "trafficType": "ON_DEMAND",
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 9
+            }
+          ],
+          "candidatesTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 146
+            }
+          ],
+          "thoughtsTokenCount": 750
+        },
+        "modelVersion": "gemini-2.5-pro",
+        "createTime": "2025-09-24T19:46:04.550048Z",
+        "responseId": "fErUaKDJIaChmecP8LzZwQs"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+    status: 200 OK
+    code: 200
+    duration: 8.665756459s

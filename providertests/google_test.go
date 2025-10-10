@@ -12,15 +12,24 @@ import (
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )
 
-var googleTestModels = []testModel{
+var geminiTestModels = []testModel{
 	{"gemini-2.5-flash", "gemini-2.5-flash", true},
 	{"gemini-2.5-pro", "gemini-2.5-pro", true},
 }
 
+var vertexTestModels = []testModel{
+	{"vertex-gemini-2-5-flash", "gemini-2.5-flash", true},
+	{"vertex-gemini-2-5-pro", "gemini-2.5-pro", true},
+	{"vertex-claude-3-7-sonnet", "claude-3-7-sonnet@20250219", true},
+}
+
 func TestGoogleCommon(t *testing.T) {
 	var pairs []builderPair
-	for _, m := range googleTestModels {
-		pairs = append(pairs, builderPair{m.name, googleBuilder(m.model), nil})
+	for _, m := range geminiTestModels {
+		pairs = append(pairs, builderPair{m.name, geminiBuilder(m.model), nil})
+	}
+	for _, m := range vertexTestModels {
+		pairs = append(pairs, builderPair{m.name, vertexBuilder(m.model), nil})
 	}
 	testCommon(t, pairs)
 }
@@ -36,11 +45,11 @@ func TestGoogleThinking(t *testing.T) {
 	}
 
 	var pairs []builderPair
-	for _, m := range googleTestModels {
+	for _, m := range geminiTestModels {
 		if !m.reasoning {
 			continue
 		}
-		pairs = append(pairs, builderPair{m.name, googleBuilder(m.model), opts})
+		pairs = append(pairs, builderPair{m.name, geminiBuilder(m.model), opts})
 	}
 	testThinking(t, pairs, testGoogleThinking)
 }
@@ -60,11 +69,22 @@ func testGoogleThinking(t *testing.T, result *ai.AgentResult) {
 	require.Greater(t, reasoningContentCount, 0)
 }
 
-func googleBuilder(model string) builderFunc {
+func geminiBuilder(model string) builderFunc {
 	return func(r *recorder.Recorder) (ai.LanguageModel, error) {
 		provider := google.New(
-			google.WithAPIKey(cmp.Or(os.Getenv("FANTASY_GEMINI_API_KEY"), "(missing)")),
+			google.WithGeminiAPIKey(cmp.Or(os.Getenv("FANTASY_GEMINI_API_KEY"), "(missing)")),
 			google.WithHTTPClient(&http.Client{Transport: r}),
+		)
+		return provider.LanguageModel(model)
+	}
+}
+
+func vertexBuilder(model string) builderFunc {
+	return func(r *recorder.Recorder) (ai.LanguageModel, error) {
+		provider := google.New(
+			google.WithVertex(os.Getenv("FANTASY_VERTEX_PROJECT"), os.Getenv("FANTASY_VERTEX_LOCATION")),
+			google.WithHTTPClient(&http.Client{Transport: r}),
+			google.WithSkipAuth(true),
 		)
 		return provider.LanguageModel(model)
 	}

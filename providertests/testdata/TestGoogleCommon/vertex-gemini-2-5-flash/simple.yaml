@@ -1,0 +1,70 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 202
+    host: us-east5-aiplatform.googleapis.com
+    body: |
+      {"contents":[{"parts":[{"text":"Say hi in Portuguese"}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"}}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - google-genai-sdk/1.29.0 gl-go/go1.25.0
+    url: https://us-east5-aiplatform.googleapis.com/v1beta1/projects/fantasy-playground-472418/locations/us-east5/publishers/google/models/gemini-2.5-flash:generateContent
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: |
+      {
+        "candidates": [
+          {
+            "content": {
+              "role": "model",
+              "parts": [
+                {
+                  "text": "Olá!"
+                }
+              ]
+            },
+            "finishReason": "STOP",
+            "avgLogprobs": -2.0520646572113037
+          }
+        ],
+        "usageMetadata": {
+          "promptTokenCount": 9,
+          "candidatesTokenCount": 2,
+          "totalTokenCount": 37,
+          "trafficType": "ON_DEMAND",
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 9
+            }
+          ],
+          "candidatesTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 2
+            }
+          ],
+          "thoughtsTokenCount": 26
+        },
+        "modelVersion": "gemini-2.5-flash",
+        "createTime": "2025-10-10T17:53:28.119129Z",
+        "responseId": "GEjpaNmiB8Kh18kP2devgQ4"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+    status: 200 OK
+    code: 200
+    duration: 1.410897667s

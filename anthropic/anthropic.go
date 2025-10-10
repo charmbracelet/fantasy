@@ -14,7 +14,9 @@ import (
 	"github.com/anthropics/anthropic-sdk-go"
 	"github.com/anthropics/anthropic-sdk-go/option"
 	"github.com/anthropics/anthropic-sdk-go/packages/param"
+	"github.com/anthropics/anthropic-sdk-go/vertex"
 	"github.com/charmbracelet/fantasy/ai"
+	"golang.org/x/oauth2/google"
 )
 
 const (
@@ -28,6 +30,10 @@ type options struct {
 	name    string
 	headers map[string]string
 	client  option.HTTPClient
+
+	vertexProject  string
+	vertexLocation string
+	skipGoogleAuth bool
 }
 
 type provider struct {
@@ -61,6 +67,19 @@ func WithAPIKey(apiKey string) Option {
 	}
 }
 
+func WithVertex(project, location string) Option {
+	return func(o *options) {
+		o.vertexProject = project
+		o.vertexLocation = location
+	}
+}
+
+func WithSkipGoogleAuth(skip bool) Option {
+	return func(o *options) {
+		o.skipGoogleAuth = skip
+	}
+}
+
 func WithName(name string) Option {
 	return func(o *options) {
 		o.name = name
@@ -80,26 +99,46 @@ func WithHTTPClient(client option.HTTPClient) Option {
 }
 
 func (a *provider) LanguageModel(modelID string) (ai.LanguageModel, error) {
-	anthropicClientOptions := []option.RequestOption{}
+	clientOptions := make([]option.RequestOption, 0, 5+len(a.options.headers))
 	if a.options.apiKey != "" {
-		anthropicClientOptions = append(anthropicClientOptions, option.WithAPIKey(a.options.apiKey))
+		clientOptions = append(clientOptions, option.WithAPIKey(a.options.apiKey))
 	}
 	if a.options.baseURL != "" {
-		anthropicClientOptions = append(anthropicClientOptions, option.WithBaseURL(a.options.baseURL))
+		clientOptions = append(clientOptions, option.WithBaseURL(a.options.baseURL))
 	}
-
 	for key, value := range a.options.headers {
-		anthropicClientOptions = append(anthropicClientOptions, option.WithHeader(key, value))
+		clientOptions = append(clientOptions, option.WithHeader(key, value))
 	}
-
 	if a.options.client != nil {
-		anthropicClientOptions = append(anthropicClientOptions, option.WithHTTPClient(a.options.client))
+		clientOptions = append(clientOptions, option.WithHTTPClient(a.options.client))
+	}
+	if a.options.vertexProject != "" && a.options.vertexLocation != "" {
+		var credentials *google.Credentials
+		if a.options.skipGoogleAuth {
+			credentials = &google.Credentials{TokenSource: &googleDummyTokenSource{}}
+		} else {
+			var err error
+			credentials, err = google.FindDefaultCredentials(context.Background())
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		clientOptions = append(
+			clientOptions,
+			vertex.WithCredentials(
+				context.Background(),
+				a.options.vertexLocation,
+				a.options.vertexProject,
+				credentials,
+			),
+		)
 	}
 	return languageModel{
 		modelID:  modelID,
 		provider: a.options.name,
 		options:  a.options,
-		client:   anthropic.NewClient(anthropicClientOptions...),
+		client:   anthropic.NewClient(clientOptions...),
 	}, nil
 }
 

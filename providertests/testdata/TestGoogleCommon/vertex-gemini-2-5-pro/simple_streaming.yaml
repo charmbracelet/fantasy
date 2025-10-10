@@ -1,0 +1,34 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 202
+    host: us-east5-aiplatform.googleapis.com
+    body: |
+      {"contents":[{"parts":[{"text":"Say hi in Portuguese"}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"}}
+    form:
+      alt:
+      - sse
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - google-genai-sdk/1.29.0 gl-go/go1.25.0
+    url: https://us-east5-aiplatform.googleapis.com/v1beta1/projects/fantasy-playground-472418/locations/us-east5/publishers/google/models/gemini-2.5-pro:streamGenerateContent?alt=sse
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: "data: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"text\": \"Of course! Here are a few ways to say \\\"hi\\\" in Portuguese, from the most common to other useful greetings.\\n\\nThe most common ways are:\\n\\n*   **Olá** (oh-LAH) - This is the direct translation of \\\"hello\\\" and can be used in any situation, formal or informal.\\n*\"}]}}],\"usageMetadata\": {\"trafficType\": \"ON_DEMAND\"},\"modelVersion\": \"gemini-2.5-pro\",\"createTime\": \"2025-10-10T17:53:52.753834Z\",\"responseId\": \"MEjpaKqBLuWJ0ekP4czIwAs\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"text\": \"   **Oi** (oy) - This is the most common, casual way to say \\\"hi,\\\" especially in Brazil. It's friendly and used everywhere.\\n\\nYou can also use these common greetings:\\n\\n*   **Tudo bem?** (TOO-doo beng?) - Means \\\"How are you?\\\" or\"}]}}],\"usageMetadata\": {\"trafficType\": \"ON_DEMAND\"},\"modelVersion\": \"gemini-2.5-pro\",\"createTime\": \"2025-10-10T17:53:52.753834Z\",\"responseId\": \"MEjpaKqBLuWJ0ekP4czIwAs\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"text\": \" \\\"Is everything well?\\\" and is often used as a greeting on its own.\\n*   **Bom dia** (bong JEE-ah) - \\\"Good morning.\\\"\\n*   **Boa tarde** (BOH-ah TARD-jay) - \\\"Good afternoon.\\\"\\n*   **Boa noite** (B\"}]}}],\"usageMetadata\": {\"trafficType\": \"ON_DEMAND\"},\"modelVersion\": \"gemini-2.5-pro\",\"createTime\": \"2025-10-10T17:53:52.753834Z\",\"responseId\": \"MEjpaKqBLuWJ0ekP4czIwAs\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"text\": \"OH-ah NOY-tchee) - \\\"Good evening\\\" or \\\"Good night.\\\"\\n\\nSo, a simple **\\\"Olá\\\"** or **\\\"Oi\\\"** is perfect\"}]},\"finishReason\": \"STOP\"}],\"usageMetadata\": {\"promptTokenCount\": 9,\"candidatesTokenCount\": 233,\"totalTokenCount\": 946,\"trafficType\": \"ON_DEMAND\",\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 9}],\"candidatesTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 233}],\"thoughtsTokenCount\": 704},\"modelVersion\": \"gemini-2.5-pro\",\"createTime\": \"2025-10-10T17:53:52.753834Z\",\"responseId\": \"MEjpaKqBLuWJ0ekP4czIwAs\"}\r\n\r\n"
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 8.862185916s

@@ -84,7 +84,7 @@ func vertexBuilder(model string) builderFunc {
 		provider := google.New(
 			google.WithVertex(os.Getenv("FANTASY_VERTEX_PROJECT"), os.Getenv("FANTASY_VERTEX_LOCATION")),
 			google.WithHTTPClient(&http.Client{Transport: r}),
-			google.WithSkipAuth(true),
+			google.WithSkipAuth(!r.IsRecording()),
 		)
 		return provider.LanguageModel(model)
 	}

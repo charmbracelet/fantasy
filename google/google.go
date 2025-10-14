@@ -122,7 +122,7 @@ func (g *provider) LanguageModel(modelID string) (ai.LanguageModel, error) {
 		return anthropic.New(
 			anthropic.WithVertex(g.options.project, g.options.location),
 			anthropic.WithHTTPClient(g.options.client),
-			anthropic.WithSkipGoogleAuth(g.options.skipAuth),
+			anthropic.WithSkipAuth(g.options.skipAuth),
 		).LanguageModel(modelID)
 	}
 

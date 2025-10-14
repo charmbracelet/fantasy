@@ -1,0 +1,208 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 468
+    host: ""
+    body: '{"max_tokens":4000,"messages":[{"content":[{"text":"What''s the weather in Florence,Italy?","type":"text"}],"role":"user"}],"system":[{"text":"You are a helpful assistant","type":"text"}],"tool_choice":{"type":"auto"},"tools":[{"input_schema":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location"}],"anthropic_version":"bedrock-2023-05-31"}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Anthropic/Go 1.13.0
+    url: https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-3-sonnet-20240229-v1%3A0/invoke-with-response-stream
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: !!binary |
+      AAAByAAAAEuWFTfOCzpldmVudC10eXBlBwAFY2h1bmsNOmNvbnRlbnQtdHlwZQcAEGFwcG
+      xpY2F0aW9uL2pzb24NOm1lc3NhZ2UtdHlwZQcABWV2ZW50eyJieXRlcyI6ImV5SjBlWEJs
+      SWpvaWJXVnpjMkZuWlY5emRHRnlkQ0lzSW0xbGMzTmhaMlVpT25zaWFXUWlPaUp0YzJkZl
+      ltUnlhMTh3TVVOVVJIbEVOSFJaUkhOM1dqTXlSMnRhVFdjNE1WRWlMQ0owZVhCbElqb2li
+      V1Z6YzJGblpTSXNJbkp2YkdVaU9pSmhjM05wYzNSaGJuUWlMQ0p0YjJSbGJDSTZJbU5zWV
+      hWa1pTMHpMWE52Ym01bGRDMHlNREkwTURJeU9TSXNJbU52Ym5SbGJuUWlPbHRkTENKemRH
+      OXdYM0psWVhOdmJpSTZiblZzYkN3aWMzUnZjRjl6WlhGMVpXNWpaU0k2Ym5Wc2JDd2lkWE
+      5oWjJVaU9uc2lhVzV3ZFhSZmRHOXJaVzV6SWpveU5EQXNJbTkxZEhCMWRGOTBiMnRsYm5N
+      aU9qRjlmWDA9IiwicCI6ImFiY2RlZmdoaWprbG1uIn1bk3KsAAABOgAAAEuk4TTzCzpldm
+      VudC10eXBlBwAFY2h1bmsNOmNvbnRlbnQtdHlwZQcAEGFwcGxpY2F0aW9uL2pzb24NOm1l
+      c3NhZ2UtdHlwZQcABWV2ZW50eyJieXRlcyI6ImV5SjBlWEJsSWpvaVkyOXVkR1Z1ZEY5aW
+      JHOWphMTl6ZEdGeWRDSXNJbWx1WkdWNElqb3dMQ0pqYjI1MFpXNTBYMkpzYjJOcklqcDdJ
+      blI1Y0dVaU9pSjBiMjlzWDNWelpTSXNJbWxrSWpvaWRHOXZiSFZmWW1SeWExOHdNVFEzZF
+      dKR00yRnlUVkpJVkc0MFZYUkJOSEJsUlRRaUxDSnVZVzFsSWpvaWQyVmhkR2hsY2lJc0lt
+      bHVjSFYwSWpwN2ZYMTkiLCJwIjoiYWJjZGVmZ2gifR5cOTUAAAENAAAAS7fgUGULOmV2ZW
+      50LXR5cGUHAAVjaHVuaw06Y29udGVudC10eXBlBwAQYXBwbGljYXRpb24vanNvbg06bWVz
+      c2FnZS10eXBlBwAFZXZlbnR7ImJ5dGVzIjoiZXlKMGVYQmxJam9pWTI5dWRHVnVkRjlpYk
+      c5amExOWtaV3gwWVNJc0ltbHVaR1Y0SWpvd0xDSmtaV3gwWVNJNmV5SjBlWEJsSWpvaWFX
+      NXdkWFJmYW5OdmJsOWtaV3gwWVNJc0luQmhjblJwWVd4ZmFuTnZiaUk2SWlKOWZRPT0iLC
+      JwIjoiYWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXpBQkNERSJ9hTLu0AAAAQoAAABLBcCM
+      dQs6ZXZlbnQtdHlwZQcABWNodW5rDTpjb250ZW50LXR5cGUHABBhcHBsaWNhdGlvbi9qc2
+      9uDTptZXNzYWdlLXR5cGUHAAVldmVudHsiYnl0ZXMiOiJleUowZVhCbElqb2lZMjl1ZEdW
+      dWRGOWliRzlqYTE5a1pXeDBZU0lzSW1sdVpHVjRJam93TENKa1pXeDBZU0k2ZXlKMGVYQm
+      xJam9pYVc1d2RYUmZhbk52Ymw5a1pXeDBZU0lzSW5CaGNuUnBZV3hmYW5OdmJpSTZJbnRj
+      SW14dlkyRjBJbjE5IiwicCI6ImFiY2RlZmdoaWprbG1ub3BxcnN0In3MEaHsAAABDwAAAE
+      vNIAMFCzpldmVudC10eXBlBwAFY2h1bmsNOmNvbnRlbnQtdHlwZQcAEGFwcGxpY2F0aW9u
+      L2pzb24NOm1lc3NhZ2UtdHlwZQcABWV2ZW50eyJieXRlcyI6ImV5SjBlWEJsSWpvaVkyOX
+      VkR1Z1ZEY5aWJHOWphMTlrWld4MFlTSXNJbWx1WkdWNElqb3dMQ0prWld4MFlTSTZleUow
+      ZVhCbElqb2lhVzV3ZFhSZmFuTnZibDlrWld4MFlTSXNJbkJoY25ScFlXeGZhbk52YmlJNk
+      ltbHZibHdpT2lCY0lrWnNJbjE5IiwicCI6ImFiY2RlZmdoaWprbG1ub3BxcnN0dSJ9MlKj
+      YAAAARwAAABL6mDuVws6ZXZlbnQtdHlwZQcABWNodW5rDTpjb250ZW50LXR5cGUHABBhcH
+      BsaWNhdGlvbi9qc29uDTptZXNzYWdlLXR5cGUHAAVldmVudHsiYnl0ZXMiOiJleUowZVhC
+      bElqb2lZMjl1ZEdWdWRGOWliRzlqYTE5a1pXeDBZU0lzSW1sdVpHVjRJam93TENKa1pXeD
+      BZU0k2ZXlKMGVYQmxJam9pYVc1d2RYUmZhbk52Ymw5a1pXeDBZU0lzSW5CaGNuUnBZV3hm
+      YW5OdmJpSTZJbTl5Wlc1alpTeEpkR0ZzSW4xOSIsInAiOiJhYmNkZWZnaGlqa2xtbm9wcX
+      JzdHV2d3h5ekFCQ0RFRkdIIn3kS/QUAAAA/wAAAEtOSID9CzpldmVudC10eXBlBwAFY2h1
+      bmsNOmNvbnRlbnQtdHlwZQcAEGFwcGxpY2F0aW9uL2pzb24NOm1lc3NhZ2UtdHlwZQcABW
+      V2ZW50eyJieXRlcyI6ImV5SjBlWEJsSWpvaVkyOXVkR1Z1ZEY5aWJHOWphMTlrWld4MFlT
+      SXNJbWx1WkdWNElqb3dMQ0prWld4MFlTSTZleUowZVhCbElqb2lhVzV3ZFhSZmFuTnZibD
+      lrWld4MFlTSXNJbkJoY25ScFlXeGZhbk52YmlJNklubGNJbjBpZlgwPSIsInAiOiJhYmNk
+      ZWZnaGlqa2xtIn0e+v+oAAAA2AAAAEs9qXPpCzpldmVudC10eXBlBwAFY2h1bmsNOmNvbn
+      RlbnQtdHlwZQcAEGFwcGxpY2F0aW9uL2pzb24NOm1lc3NhZ2UtdHlwZQcABWV2ZW50eyJi
+      eXRlcyI6ImV5SjBlWEJsSWpvaVkyOXVkR1Z1ZEY5aWJHOWphMTl6ZEc5d0lpd2lhVzVrWl
+      hnaU9qQjkiLCJwIjoiYWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXpBQkNERUZHSElKS0xN
+      Tk9QUVJTVFVWV1hZWjAxIn32VRefAAABIgAAAEv0ceiwCzpldmVudC10eXBlBwAFY2h1bm
+      sNOmNvbnRlbnQtdHlwZQcAEGFwcGxpY2F0aW9uL2pzb24NOm1lc3NhZ2UtdHlwZQcABWV2
+      ZW50eyJieXRlcyI6ImV5SjBlWEJsSWpvaWJXVnpjMkZuWlY5a1pXeDBZU0lzSW1SbGJIUm
+      hJanA3SW5OMGIzQmZjbVZoYzI5dUlqb2lkRzl2YkY5MWMyVWlMQ0p6ZEc5d1gzTmxjWFZs
+      Ym1ObElqcHVkV3hzZlN3aWRYTmhaMlVpT25zaWIzVjBjSFYwWDNSdmEyVnVjeUk2TlROOW
+      ZRPT0iLCJwIjoiYWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXpBQkNERUYifWTQLAYAAAFU
+      AAAAS4Lj/d8LOmV2ZW50LXR5cGUHAAVjaHVuaw06Y29udGVudC10eXBlBwAQYXBwbGljYX
+      Rpb24vanNvbg06bWVzc2FnZS10eXBlBwAFZXZlbnR7ImJ5dGVzIjoiZXlKMGVYQmxJam9p
+      YldWemMyRm5aVjl6ZEc5d0lpd2lZVzFoZW05dUxXSmxaSEp2WTJzdGFXNTJiMk5oZEdsdm
+      JrMWxkSEpwWTNNaU9uc2lhVzV3ZFhSVWIydGxia052ZFc1MElqb3lOREFzSW05MWRIQjFk
+      RlJ2YTJWdVEyOTFiblFpT2pNNUxDSnBiblp2WTJGMGFXOXVUR0YwWlc1amVTSTZNekE0Tn
+      l3aVptbHljM1JDZVhSbFRHRjBaVzVqZVNJNk16UXlmWDA9IiwicCI6ImFiY2RlZmdoaWpr
+      bG1ub3BxcnN0dXZ3eHl6In2+B8HI
+    headers:
+      Content-Type:
+      - application/vnd.amazon.eventstream
+    status: 200 OK
+    code: 200
+    duration: 490.224792ms
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 764
+    host: ""
+    body: '{"max_tokens":4000,"messages":[{"content":[{"text":"What''s the weather in Florence,Italy?","type":"text"}],"role":"user"},{"content":[{"id":"toolu_bdrk_0147ubF3arMRHTn4UtA4peE4","input":{"location":"Florence,Italy"},"name":"weather","type":"tool_use"}],"role":"assistant"},{"content":[{"tool_use_id":"toolu_bdrk_0147ubF3arMRHTn4UtA4peE4","content":[{"text":"40 C","type":"text"}],"type":"tool_result"}],"role":"user"}],"system":[{"text":"You are a helpful assistant","type":"text"}],"tool_choice":{"type":"auto"},"tools":[{"input_schema":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location"}],"anthropic_version":"bedrock-2023-05-31"}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Anthropic/Go 1.13.0
+    url: https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-3-sonnet-20240229-v1%3A0/invoke-with-response-stream
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: !!binary |
+      AAAB1QAAAEsOZWT9CzpldmVudC10eXBlBwAFY2h1bmsNOmNvbnRlbnQtdHlwZQcAEGFwcG
+      xpY2F0aW9uL2pzb24NOm1lc3NhZ2UtdHlwZQcABWV2ZW50eyJieXRlcyI6ImV5SjBlWEJs
+      SWpvaWJXVnpjMkZuWlY5emRHRnlkQ0lzSW0xbGMzTmhaMlVpT25zaWFXUWlPaUp0YzJkZl
+      ltUnlhMTh3TVVKeE5IbFFabVk0ZUdOeGVUUm9aR04yTkZKMU5FTWlMQ0owZVhCbElqb2li
+      V1Z6YzJGblpTSXNJbkp2YkdVaU9pSmhjM05wYzNSaGJuUWlMQ0p0YjJSbGJDSTZJbU5zWV
+      hWa1pTMHpMWE52Ym01bGRDMHlNREkwTURJeU9TSXNJbU52Ym5SbGJuUWlPbHRkTENKemRH
+      OXdYM0psWVhOdmJpSTZiblZzYkN3aWMzUnZjRjl6WlhGMVpXNWpaU0k2Ym5Wc2JDd2lkWE
+      5oWjJVaU9uc2lhVzV3ZFhSZmRHOXJaVzV6SWpvek1EZ3NJbTkxZEhCMWRGOTBiMnRsYm5N
+      aU9qSjlmWDA9IiwicCI6ImFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6QSJ9MxX82gAAAO
+      YAAABLI7h1Dgs6ZXZlbnQtdHlwZQcABWNodW5rDTpjb250ZW50LXR5cGUHABBhcHBsaWNh
+      dGlvbi9qc29uDTptZXNzYWdlLXR5cGUHAAVldmVudHsiYnl0ZXMiOiJleUowZVhCbElqb2
+      lZMjl1ZEdWdWRGOWliRzlqYTE5emRHRnlkQ0lzSW1sdVpHVjRJam93TENKamIyNTBaVzUw
+      WDJKc2IyTnJJanA3SW5SNWNHVWlPaUowWlhoMElpd2lkR1Y0ZENJNklpSjlmUT09IiwicC
+      I6ImFiY2RlZmdoIn3SrDB1AAAA8wAAAEuLuG38CzpldmVudC10eXBlBwAFY2h1bmsNOmNv
+      bnRlbnQtdHlwZQcAEGFwcGxpY2F0aW9uL2pzb24NOm1lc3NhZ2UtdHlwZQcABWV2ZW50ey
+      JieXRlcyI6ImV5SjBlWEJsSWpvaVkyOXVkR1Z1ZEY5aWJHOWphMTlrWld4MFlTSXNJbWx1
+      WkdWNElqb3dMQ0prWld4MFlTSTZleUowZVhCbElqb2lkR1Y0ZEY5a1pXeDBZU0lzSW5SbG
+      VIUWlPaUpjYmx4dVZHaGxJbjE5IiwicCI6ImFiY2RlZmdoaWprbG1ub3BxIn0bCMYyAAAB
+      AAAAAEtPcJTUCzpldmVudC10eXBlBwAFY2h1bmsNOmNvbnRlbnQtdHlwZQcAEGFwcGxpY2
+      F0aW9uL2pzb24NOm1lc3NhZ2UtdHlwZQcABWV2ZW50eyJieXRlcyI6ImV5SjBlWEJsSWpv
+      aVkyOXVkR1Z1ZEY5aWJHOWphMTlrWld4MFlTSXNJbWx1WkdWNElqb3dMQ0prWld4MFlTST
+      ZleUowZVhCbElqb2lkR1Y0ZEY5a1pXeDBZU0lzSW5SbGVIUWlPaUlnZDJWaGRHaGxjaUo5
+      ZlE9PSIsInAiOiJhYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5eiJ9gKialAAAAOIAAABL1j
+      jTzgs6ZXZlbnQtdHlwZQcABWNodW5rDTpjb250ZW50LXR5cGUHABBhcHBsaWNhdGlvbi9q
+      c29uDTptZXNzYWdlLXR5cGUHAAVldmVudHsiYnl0ZXMiOiJleUowZVhCbElqb2lZMjl1ZE
+      dWdWRGOWliRzlqYTE5a1pXeDBZU0lzSW1sdVpHVjRJam93TENKa1pXeDBZU0k2ZXlKMGVY
+      QmxJam9pZEdWNGRGOWtaV3gwWVNJc0luUmxlSFFpT2lJZ2FXNGlmWDA9IiwicCI6ImFiY2
+      QifXBDECYAAADsAAAAS2kIba8LOmV2ZW50LXR5cGUHAAVjaHVuaw06Y29udGVudC10eXBl
+      BwAQYXBwbGljYXRpb24vanNvbg06bWVzc2FnZS10eXBlBwAFZXZlbnR7ImJ5dGVzIjoiZX
+      lKMGVYQmxJam9pWTI5dWRHVnVkRjlpYkc5amExOWtaV3gwWVNJc0ltbHVaR1Y0SWpvd0xD
+      SmtaV3gwWVNJNmV5SjBlWEJsSWpvaWRHVjRkRjlrWld4MFlTSXNJblJsZUhRaU9pSWdSbX
+      h2Y21WdVkyVWlmWDA9IiwicCI6ImFiY2RlZiJ98lyl6AAAAOYAAABLI7h1Dgs6ZXZlbnQt
+      dHlwZQcABWNodW5rDTpjb250ZW50LXR5cGUHABBhcHBsaWNhdGlvbi9qc29uDTptZXNzYW
+      dlLXR5cGUHAAVldmVudHsiYnl0ZXMiOiJleUowZVhCbElqb2lZMjl1ZEdWdWRGOWliRzlq
+      YTE5a1pXeDBZU0lzSW1sdVpHVjRJam93TENKa1pXeDBZU0k2ZXlKMGVYQmxJam9pZEdWNG
+      RGOWtaV3gwWVNJc0luUmxlSFFpT2lJc0luMTkiLCJwIjoiYWJjZGVmZ2hpamtsIn0N27mp
+      AAABBwAAAEv9UEjECzpldmVudC10eXBlBwAFY2h1bmsNOmNvbnRlbnQtdHlwZQcAEGFwcG
+      xpY2F0aW9uL2pzb24NOm1lc3NhZ2UtdHlwZQcABWV2ZW50eyJieXRlcyI6ImV5SjBlWEJs
+      SWpvaVkyOXVkR1Z1ZEY5aWJHOWphMTlrWld4MFlTSXNJbWx1WkdWNElqb3dMQ0prWld4MF
+      lTSTZleUowZVhCbElqb2lkR1Y0ZEY5a1pXeDBZU0lzSW5SbGVIUWlPaUlnU1hSaGJIa2lm
+      WDA9IiwicCI6ImFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6QUJDREVGR0hJSksifccMNp
+      oAAAEAAAAAS09wlNQLOmV2ZW50LXR5cGUHAAVjaHVuaw06Y29udGVudC10eXBlBwAQYXBw
+      bGljYXRpb24vanNvbg06bWVzc2FnZS10eXBlBwAFZXZlbnR7ImJ5dGVzIjoiZXlKMGVYQm
+      xJam9pWTI5dWRHVnVkRjlpYkc5amExOWtaV3gwWVNJc0ltbHVaR1Y0SWpvd0xDSmtaV3gw
+      WVNJNmV5SjBlWEJsSWpvaWRHVjRkRjlrWld4MFlTSXNJblJsZUhRaU9pSWdZM1Z5Y21WdW
+      RHeDVJbjE5IiwicCI6ImFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6In1pHqATAAAA5AAA
+      AEtZeCZuCzpldmVudC10eXBlBwAFY2h1bmsNOmNvbnRlbnQtdHlwZQcAEGFwcGxpY2F0aW
+      9uL2pzb24NOm1lc3NhZ2UtdHlwZQcABWV2ZW50eyJieXRlcyI6ImV5SjBlWEJsSWpvaVky
+      OXVkR1Z1ZEY5aWJHOWphMTlrWld4MFlTSXNJbWx1WkdWNElqb3dMQ0prWld4MFlTSTZleU
+      owZVhCbElqb2lkR1Y0ZEY5a1pXeDBZU0lzSW5SbGVIUWlPaUlnYVhNaWZYMD0iLCJwIjoi
+      YWJjZGVmIn1D+kU3AAABAQAAAEtyEL1kCzpldmVudC10eXBlBwAFY2h1bmsNOmNvbnRlbn
+      QtdHlwZQcAEGFwcGxpY2F0aW9uL2pzb24NOm1lc3NhZ2UtdHlwZQcABWV2ZW50eyJieXRl
+      cyI6ImV5SjBlWEJsSWpvaVkyOXVkR1Z1ZEY5aWJHOWphMTlrWld4MFlTSXNJbWx1WkdWNE
+      lqb3dMQ0prWld4MFlTSTZleUowZVhCbElqb2lkR1Y0ZEY5a1pXeDBZU0lzSW5SbGVIUWlP
+      aUlnSW4xOSIsInAiOiJhYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ekFCQ0RFRkdISUpLTE
+      0ifXHHY7IAAAEJAAAAS0Jg9qULOmV2ZW50LXR5cGUHAAVjaHVuaw06Y29udGVudC10eXBl
+      BwAQYXBwbGljYXRpb24vanNvbg06bWVzc2FnZS10eXBlBwAFZXZlbnR7ImJ5dGVzIjoiZX
+      lKMGVYQmxJam9pWTI5dWRHVnVkRjlpYkc5amExOWtaV3gwWVNJc0ltbHVaR1Y0SWpvd0xD
+      SmtaV3gwWVNJNmV5SjBlWEJsSWpvaWRHVjRkRjlrWld4MFlTSXNJblJsZUhRaU9pSTBNQ0
+      o5ZlE9PSIsInAiOiJhYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ekFCQ0RFRkdISUpLTE1O
+      T1BRIn3XUit8AAAA+AAAAEv8aFztCzpldmVudC10eXBlBwAFY2h1bmsNOmNvbnRlbnQtdH
+      lwZQcAEGFwcGxpY2F0aW9uL2pzb24NOm1lc3NhZ2UtdHlwZQcABWV2ZW50eyJieXRlcyI6
+      ImV5SjBlWEJsSWpvaVkyOXVkR1Z1ZEY5aWJHOWphMTlrWld4MFlTSXNJbWx1WkdWNElqb3
+      dMQ0prWld4MFlTSTZleUowZVhCbElqb2lkR1Y0ZEY5a1pXeDBZU0lzSW5SbGVIUWlPaUxD
+      c0NKOWZRPT0iLCJwIjoiYWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoiffYMitIAAAEGAA
+      AAS8AwYXQLOmV2ZW50LXR5cGUHAAVjaHVuaw06Y29udGVudC10eXBlBwAQYXBwbGljYXRp
+      b24vanNvbg06bWVzc2FnZS10eXBlBwAFZXZlbnR7ImJ5dGVzIjoiZXlKMGVYQmxJam9pWT
+      I5dWRHVnVkRjlpYkc5amExOWtaV3gwWVNJc0ltbHVaR1Y0SWpvd0xDSmtaV3gwWVNJNmV5
+      SjBlWEJsSWpvaWRHVjRkRjlrWld4MFlTSXNJblJsZUhRaU9pSkRJbjE5IiwicCI6ImFiY2
+      RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6QUJDREVGR0hJSktMTU5PUFFSIn0nx3p/AAAA8AAA
+      AEvMGBcsCzpldmVudC10eXBlBwAFY2h1bmsNOmNvbnRlbnQtdHlwZQcAEGFwcGxpY2F0aW
+      9uL2pzb24NOm1lc3NhZ2UtdHlwZQcABWV2ZW50eyJieXRlcyI6ImV5SjBlWEJsSWpvaVky
+      OXVkR1Z1ZEY5aWJHOWphMTlrWld4MFlTSXNJbWx1WkdWNElqb3dMQ0prWld4MFlTSTZleU
+      owZVhCbElqb2lkR1Y0ZEY5a1pXeDBZU0lzSW5SbGVIUWlPaUl1SW4xOSIsInAiOiJhYmNk
+      ZWZnaGlqa2xtbm9wcXJzdHV2In1ME7fDAAAAtQAAAEtcC8AVCzpldmVudC10eXBlBwAFY2
+      h1bmsNOmNvbnRlbnQtdHlwZQcAEGFwcGxpY2F0aW9uL2pzb24NOm1lc3NhZ2UtdHlwZQcA
+      BWV2ZW50eyJieXRlcyI6ImV5SjBlWEJsSWpvaVkyOXVkR1Z1ZEY5aWJHOWphMTl6ZEc5d0
+      lpd2lhVzVrWlhnaU9qQjkiLCJwIjoiYWJjZGVmZ2hpamtsbW5vcHFycyJ9QnTMMwAAAQcA
+      AABL/VBIxAs6ZXZlbnQtdHlwZQcABWNodW5rDTpjb250ZW50LXR5cGUHABBhcHBsaWNhdG
+      lvbi9qc29uDTptZXNzYWdlLXR5cGUHAAVldmVudHsiYnl0ZXMiOiJleUowZVhCbElqb2li
+      V1Z6YzJGblpWOWtaV3gwWVNJc0ltUmxiSFJoSWpwN0luTjBiM0JmY21WaGMyOXVJam9pWl
+      c1a1gzUjFjbTRpTENKemRHOXdYM05sY1hWbGJtTmxJanB1ZFd4c2ZTd2lkWE5oWjJVaU9u
+      c2liM1YwY0hWMFgzUnZhMlZ1Y3lJNk1UZDlmUT09IiwicCI6ImFiY2RlIn1G7t0fAAABQA
+      AAAEsXg8ydCzpldmVudC10eXBlBwAFY2h1bmsNOmNvbnRlbnQtdHlwZQcAEGFwcGxpY2F0
+      aW9uL2pzb24NOm1lc3NhZ2UtdHlwZQcABWV2ZW50eyJieXRlcyI6ImV5SjBlWEJsSWpvaW
+      JXVnpjMkZuWlY5emRHOXdJaXdpWVcxaGVtOXVMV0psWkhKdlkyc3RhVzUyYjJOaGRHbHZi
+      azFsZEhKcFkzTWlPbnNpYVc1d2RYUlViMnRsYmtOdmRXNTBJam96TURnc0ltOTFkSEIxZE
+      ZSdmEyVnVRMjkxYm5RaU9qRTNMQ0pwYm5adlkyRjBhVzl1VEdGMFpXNWplU0k2TVRBd05p
+      d2labWx5YzNSQ2VYUmxUR0YwWlc1amVTSTZOVFl6ZlgwPSIsInAiOiJhYmNkZWYifepedk
+      U=
+    headers:
+      Content-Type:
+      - application/vnd.amazon.eventstream
+    status: 200 OK
+    code: 200
+    duration: 713.964541ms

@@ -76,15 +76,3 @@ func WithSDKOptions(opts ...option.RequestOption) Option {
 		o.sdkOptions = append(o.sdkOptions, opts...)
 	}
 }
-
-func WithLanguageUniqueToolCallIds() Option {
-	return func(l *options) {
-		l.languageModelOptions = append(l.languageModelOptions, openai.WithLanguageUniqueToolCallIds())
-	}
-}
-
-func WithLanguageModelGenerateIDFunc(fn openai.LanguageModelGenerateIDFunc) Option {
-	return func(l *options) {
-		l.languageModelOptions = append(l.languageModelOptions, openai.WithLanguageModelGenerateIDFunc(fn))
-	}
-}

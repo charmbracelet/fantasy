@@ -63,3 +63,11 @@ func NewProviderFileOptions(opts *ProviderFileOptions) ai.ProviderOptions {
 		Name: opts,
 	}
 }
+
+func ParseOptions(data map[string]any) (*ProviderOptions, error) {
+	var options ProviderOptions
+	if err := ai.ParseOptions(data, &options); err != nil {
+		return nil, err
+	}
+	return &options, nil
+}

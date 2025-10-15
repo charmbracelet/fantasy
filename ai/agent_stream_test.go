@@ -10,7 +10,17 @@ import (
 )
 
 // EchoTool is a simple tool that echoes back the input message
-type EchoTool struct{}
+type EchoTool struct {
+	providerOptions ProviderOptions
+}
+
+func (e *EchoTool) SetProviderOptions(opts ProviderOptions) {
+	e.providerOptions = opts
+}
+
+func (e *EchoTool) ProviderOptions() ProviderOptions {
+	return e.providerOptions
+}
 
 // Info returns the tool information
 func (e *EchoTool) Info() ToolInfo {

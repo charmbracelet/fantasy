@@ -67,29 +67,6 @@ func languagePrepareModelCall(model ai.LanguageModel, params *openaisdk.ChatComp
 	return nil, nil
 }
 
-func languageModelMapFinishReason(choice openaisdk.ChatCompletionChoice) ai.FinishReason {
-	finishReason := choice.FinishReason
-	switch finishReason {
-	case "stop":
-		return ai.FinishReasonStop
-	case "length":
-		return ai.FinishReasonLength
-	case "content_filter":
-		return ai.FinishReasonContentFilter
-	case "function_call", "tool_calls":
-		return ai.FinishReasonToolCalls
-	default:
-		// for streaming responses the openai accumulator is not working as expected with some provider
-		// therefore it is sending no finish reason so we need to manually handle it
-		if len(choice.Message.ToolCalls) > 0 {
-			return ai.FinishReasonToolCalls
-		} else if finishReason == "" {
-			return ai.FinishReasonStop
-		}
-		return ai.FinishReasonUnknown
-	}
-}
-
 func languageModelExtraContent(choice openaisdk.ChatCompletionChoice) []ai.Content {
 	var content []ai.Content
 	reasoningData := ReasoningData{}

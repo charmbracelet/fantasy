@@ -4,26 +4,20 @@ import (
 	"fmt"
 
 	"github.com/charmbracelet/fantasy/ai"
-	"github.com/google/uuid"
 	"github.com/openai/openai-go/v2"
 	"github.com/openai/openai-go/v2/packages/param"
 	"github.com/openai/openai-go/v2/shared"
 )
 
 type (
-	LanguageModelGenerateIDFunc             = func() string
 	LanguageModelPrepareCallFunc            = func(model ai.LanguageModel, params *openai.ChatCompletionNewParams, call ai.Call) ([]ai.CallWarning, error)
-	LanguageModelMapFinishReasonFunc        = func(choice openai.ChatCompletionChoice) ai.FinishReason
+	LanguageModelMapFinishReasonFunc        = func(finishReason string) ai.FinishReason
 	LanguageModelUsageFunc                  = func(choice openai.ChatCompletion) (ai.Usage, ai.ProviderOptionsData)
 	LanguageModelExtraContentFunc           = func(choice openai.ChatCompletionChoice) []ai.Content
 	LanguageModelStreamExtraFunc            = func(chunk openai.ChatCompletionChunk, yield func(ai.StreamPart) bool, ctx map[string]any) (map[string]any, bool)
 	LanguageModelStreamUsageFunc            = func(chunk openai.ChatCompletionChunk, ctx map[string]any, metadata ai.ProviderMetadata) (ai.Usage, ai.ProviderMetadata)
 	LanguageModelStreamProviderMetadataFunc = func(choice openai.ChatCompletionChoice, metadata ai.ProviderMetadata) ai.ProviderMetadata
 )
-
-func DefaultGenerateID() string {
-	return uuid.NewString()
-}
 
 func DefaultPrepareCallFunc(model ai.LanguageModel, params *openai.ChatCompletionNewParams, call ai.Call) ([]ai.CallWarning, error) {
 	if call.ProviderOptions == nil {
@@ -162,8 +156,7 @@ func DefaultPrepareCallFunc(model ai.LanguageModel, params *openai.ChatCompletio
 	return warnings, nil
 }
 
-func DefaultMapFinishReasonFunc(choice openai.ChatCompletionChoice) ai.FinishReason {
-	finishReason := choice.FinishReason
+func DefaultMapFinishReasonFunc(finishReason string) ai.FinishReason {
 	switch finishReason {
 	case "stop":
 		return ai.FinishReasonStop

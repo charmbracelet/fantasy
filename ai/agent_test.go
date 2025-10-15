@@ -12,11 +12,20 @@ import (
 
 // Mock tool for testing
 type mockTool struct {
-	name        string
-	description string
-	parameters  map[string]any
-	required    []string
-	executeFunc func(ctx context.Context, call ToolCall) (ToolResponse, error)
+	name            string
+	providerOptions ProviderOptions
+	description     string
+	parameters      map[string]any
+	required        []string
+	executeFunc     func(ctx context.Context, call ToolCall) (ToolResponse, error)
+}
+
+func (m *mockTool) SetProviderOptions(opts ProviderOptions) {
+	m.providerOptions = opts
+}
+
+func (m *mockTool) ProviderOptions() ProviderOptions {
+	return m.providerOptions
 }
 
 func (m *mockTool) Info() ToolInfo {
@@ -923,9 +932,9 @@ func TestPrepareStep(t *testing.T) {
 			},
 		}
 
-		prepareStepFunc := func(options PrepareStepFunctionOptions) (PrepareStepResult, error) {
+		prepareStepFunc := func(ctx context.Context, options PrepareStepFunctionOptions) (context.Context, PrepareStepResult, error) {
 			newSystem := "Modified system prompt for step " + fmt.Sprintf("%d", options.StepNumber)
-			return PrepareStepResult{
+			return ctx, PrepareStepResult{
 				Model:    options.Model,
 				Messages: options.Messages,
 				System:   &newSystem,
@@ -960,9 +969,9 @@ func TestPrepareStep(t *testing.T) {
 			},
 		}
 
-		prepareStepFunc := func(options PrepareStepFunctionOptions) (PrepareStepResult, error) {
+		prepareStepFunc := func(ctx context.Context, options PrepareStepFunctionOptions) (context.Context, PrepareStepResult, error) {
 			toolChoice := ToolChoiceNone
-			return PrepareStepResult{
+			return ctx, PrepareStepResult{
 				Model:      options.Model,
 				Messages:   options.Messages,
 				ToolChoice: &toolChoice,
@@ -1005,9 +1014,9 @@ func TestPrepareStep(t *testing.T) {
 		tool2 := &mockTool{name: "tool2", description: "Tool 2"}
 		tool3 := &mockTool{name: "tool3", description: "Tool 3"}
 
-		prepareStepFunc := func(options PrepareStepFunctionOptions) (PrepareStepResult, error) {
+		prepareStepFunc := func(ctx context.Context, options PrepareStepFunctionOptions) (context.Context, PrepareStepResult, error) {
 			activeTools := []string{"tool2"} // Only tool2 should be active
-			return PrepareStepResult{
+			return ctx, PrepareStepResult{
 				Model:       options.Model,
 				Messages:    options.Messages,
 				ActiveTools: activeTools,
@@ -1045,8 +1054,8 @@ func TestPrepareStep(t *testing.T) {
 
 		tool1 := &mockTool{name: "tool1", description: "Tool 1"}
 
-		prepareStepFunc := func(options PrepareStepFunctionOptions) (PrepareStepResult, error) {
-			return PrepareStepResult{
+		prepareStepFunc := func(ctx context.Context, options PrepareStepFunctionOptions) (context.Context, PrepareStepResult, error) {
+			return ctx, PrepareStepResult{
 				Model:           options.Model,
 				Messages:        options.Messages,
 				DisableAllTools: true, // Disable all tools for this step
@@ -1100,11 +1109,11 @@ func TestPrepareStep(t *testing.T) {
 		tool1 := &mockTool{name: "tool1", description: "Tool 1"}
 		tool2 := &mockTool{name: "tool2", description: "Tool 2"}
 
-		prepareStepFunc := func(options PrepareStepFunctionOptions) (PrepareStepResult, error) {
+		prepareStepFunc := func(ctx context.Context, options PrepareStepFunctionOptions) (context.Context, PrepareStepResult, error) {
 			newSystem := "Step-specific system"
 			toolChoice := SpecificToolChoice("tool1")
 			activeTools := []string{"tool1"}
-			return PrepareStepResult{
+			return ctx, PrepareStepResult{
 				Model:       options.Model,
 				Messages:    options.Messages,
 				System:      &newSystem,
@@ -1163,9 +1172,9 @@ func TestPrepareStep(t *testing.T) {
 
 		tool1 := &mockTool{name: "tool1", description: "Tool 1"}
 
-		prepareStepFunc := func(options PrepareStepFunctionOptions) (PrepareStepResult, error) {
+		prepareStepFunc := func(ctx context.Context, options PrepareStepFunctionOptions) (context.Context, PrepareStepResult, error) {
 			// All optional fields are nil, should use parent values
-			return PrepareStepResult{
+			return ctx, PrepareStepResult{
 				Model:       options.Model,
 				Messages:    options.Messages,
 				System:      nil, // Use parent
@@ -1212,8 +1221,8 @@ func TestPrepareStep(t *testing.T) {
 		tool1 := &mockTool{name: "tool1", description: "Tool 1"}
 		tool2 := &mockTool{name: "tool2", description: "Tool 2"}
 
-		prepareStepFunc := func(options PrepareStepFunctionOptions) (PrepareStepResult, error) {
-			return PrepareStepResult{
+		prepareStepFunc := func(ctx context.Context, options PrepareStepFunctionOptions) (context.Context, PrepareStepResult, error) {
+			return ctx, PrepareStepResult{
 				Model:       options.Model,
 				Messages:    options.Messages,
 				ActiveTools: []string{}, // Empty slice means all tools

@@ -1,5 +1,7 @@
 package google
 
+import "github.com/charmbracelet/fantasy/ai"
+
 type ThinkingConfig struct {
 	ThinkingBudget  *int64 `json:"thinking_budget"`
 	IncludeThoughts *bool  `json:"include_thoughts"`
@@ -42,3 +44,11 @@ type ProviderOptions struct {
 }
 
 func (o *ProviderOptions) Options() {}
+
+func ParseOptions(data map[string]any) (*ProviderOptions, error) {
+	var options ProviderOptions
+	if err := ai.ParseOptions(data, &options); err != nil {
+		return nil, err
+	}
+	return &options, nil
+}

@@ -105,7 +105,7 @@ type ToolCallRepairOptions struct {
 }
 
 type (
-	PrepareStepFunction    = func(options PrepareStepFunctionOptions) (PrepareStepResult, error)
+	PrepareStepFunction    = func(ctx context.Context, options PrepareStepFunctionOptions) (context.Context, PrepareStepResult, error)
 	OnStepFinishedFunction = func(step StepResult)
 	RepairToolCallFunction = func(ctx context.Context, options ToolCallRepairOptions) (*ToolCallContent, error)
 )
@@ -357,7 +357,7 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 		disableAllTools := false
 
 		if opts.PrepareStep != nil {
-			prepared, err := opts.PrepareStep(PrepareStepFunctionOptions{
+			updatedCtx, prepared, err := opts.PrepareStep(ctx, PrepareStepFunctionOptions{
 				Model:      stepModel,
 				Steps:      steps,
 				StepNumber: len(steps),
@@ -366,6 +366,8 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 			if err != nil {
 				return nil, err
 			}
+
+			ctx = updatedCtx
 
 			// Apply prepared step modifications
 			if prepared.Messages != nil {
@@ -774,7 +776,7 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 
 		// Apply step preparation if provided
 		if call.PrepareStep != nil {
-			prepared, err := call.PrepareStep(PrepareStepFunctionOptions{
+			updatedCtx, prepared, err := call.PrepareStep(ctx, PrepareStepFunctionOptions{
 				Model:      stepModel,
 				Steps:      steps,
 				StepNumber: stepNumber,
@@ -783,6 +785,8 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 			if err != nil {
 				return nil, err
 			}
+
+			ctx = updatedCtx
 
 			if prepared.Messages != nil {
 				stepInputMessages = prepared.Messages
@@ -912,6 +916,7 @@ func (a *agent) prepareTools(tools []AgentTool, activeTools []string, disableAll
 				"properties": info.Parameters,
 				"required":   info.Required,
 			},
+			ProviderOptions: tool.ProviderOptions(),
 		})
 	}
 	return preparedTools

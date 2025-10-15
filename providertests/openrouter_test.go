@@ -1,12 +1,8 @@
 package providertests
 
 import (
-	"context"
-	"fmt"
 	"net/http"
 	"os"
-	"strconv"
-	"strings"
 	"testing"
 
 	"github.com/charmbracelet/fantasy/ai"
@@ -108,106 +104,6 @@ func testOpenrouterThinking(t *testing.T, result *ai.AgentResult) {
 		}
 	}
 	require.Greater(t, reasoningContentCount, 0)
-}
-
-func TestOpenRouterWithUniqueToolCallIDs(t *testing.T) {
-	type CalculatorInput struct {
-		A int `json:"a" description:"first number"`
-		B int `json:"b" description:"second number"`
-	}
-
-	addTool := ai.NewAgentTool(
-		"add",
-		"Add two numbers",
-		func(ctx context.Context, input CalculatorInput, _ ai.ToolCall) (ai.ToolResponse, error) {
-			result := input.A + input.B
-			return ai.NewTextResponse(strings.TrimSpace(strconv.Itoa(result))), nil
-		},
-	)
-	multiplyTool := ai.NewAgentTool(
-		"multiply",
-		"Multiply two numbers",
-		func(ctx context.Context, input CalculatorInput, _ ai.ToolCall) (ai.ToolResponse, error) {
-			result := input.A * input.B
-			return ai.NewTextResponse(strings.TrimSpace(strconv.Itoa(result))), nil
-		},
-	)
-	checkResult := func(t *testing.T, result *ai.AgentResult) {
-		require.Len(t, result.Steps, 2)
-
-		var toolCalls []ai.ToolCallContent
-		for _, content := range result.Steps[0].Content {
-			if content.GetType() == ai.ContentTypeToolCall {
-				toolCalls = append(toolCalls, content.(ai.ToolCallContent))
-			}
-		}
-		for _, tc := range toolCalls {
-			require.False(t, tc.Invalid)
-			require.Contains(t, tc.ToolCallID, "test-")
-		}
-		require.Len(t, toolCalls, 2)
-
-		finalText := result.Response.Content.Text()
-		require.Contains(t, finalText, "5", "expected response to contain '5', got: %q", finalText)
-		require.Contains(t, finalText, "6", "expected response to contain '6', got: %q", finalText)
-	}
-
-	id := 0
-	generateIDFunc := func() string {
-		id += 1
-		return fmt.Sprintf("test-%d", id)
-	}
-
-	t.Run("unique tool call ids", func(t *testing.T) {
-		r := newRecorder(t)
-
-		provider := openrouter.New(
-			openrouter.WithAPIKey(os.Getenv("FANTASY_OPENROUTER_API_KEY")),
-			openrouter.WithHTTPClient(&http.Client{Transport: r}),
-			openrouter.WithLanguageUniqueToolCallIds(),
-			openrouter.WithLanguageModelGenerateIDFunc(generateIDFunc),
-		)
-		languageModel, err := provider.LanguageModel("moonshotai/kimi-k2-0905")
-		require.NoError(t, err, "failed to build language model")
-
-		agent := ai.NewAgent(
-			languageModel,
-			ai.WithSystemPrompt("You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS."),
-			ai.WithTools(addTool),
-			ai.WithTools(multiplyTool),
-		)
-		result, err := agent.Generate(t.Context(), ai.AgentCall{
-			Prompt:          "Add and multiply the number 2 and 3",
-			MaxOutputTokens: ai.IntOption(4000),
-		})
-		require.NoError(t, err, "failed to generate")
-		checkResult(t, result)
-	})
-	t.Run("stream unique tool call ids", func(t *testing.T) {
-		r := newRecorder(t)
-
-		provider := openrouter.New(
-			openrouter.WithAPIKey(os.Getenv("FANTASY_OPENROUTER_API_KEY")),
-			openrouter.WithHTTPClient(&http.Client{Transport: r}),
-			openrouter.WithLanguageUniqueToolCallIds(),
-			openrouter.WithLanguageModelGenerateIDFunc(generateIDFunc),
-		)
-		languageModel, err := provider.LanguageModel("moonshotai/kimi-k2-0905")
-		require.NoError(t, err, "failed to build language model")
-
-		agent := ai.NewAgent(
-			languageModel,
-			ai.WithSystemPrompt("You are a helpful assistant. Always use both add and multiply at the same time."),
-			ai.WithTools(addTool),
-			ai.WithTools(multiplyTool),
-		)
-		result, err := agent.Stream(t.Context(), ai.AgentStreamCall{
-			Prompt:          "Add and multiply the number 2 and 3",
-			MaxOutputTokens: ai.IntOption(4000),
-		})
-		require.NoError(t, err, "failed to generate")
-		checkResult(t, result)
-	})
 }
 
 func openrouterBuilder(model string) builderFunc {

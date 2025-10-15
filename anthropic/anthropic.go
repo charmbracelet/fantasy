@@ -260,14 +260,6 @@ func (a languageModel) prepareParams(call ai.Call) (*anthropic.MessageNewParams,
 	return params, warnings, nil
 }
 
-func (a *provider) ParseOptions(data map[string]any) (ai.ProviderOptionsData, error) {
-	var options ProviderOptions
-	if err := ai.ParseOptions(data, &options); err != nil {
-		return nil, err
-	}
-	return &options, nil
-}
-
 func (a *provider) Name() string {
 	return Name
 }
@@ -441,8 +433,12 @@ func toPrompt(prompt ai.Prompt, sendReasoningData bool) ([]anthropic.TextBlockPa
 			}
 			finishedSystemBlock = true
 			for _, msg := range block.Messages {
-				for _, part := range msg.Content {
+				for i, part := range msg.Content {
+					isLastPart := i == len(msg.Content)-1
 					cacheControl := getCacheControl(part.Options())
+					if cacheControl == nil && isLastPart {
+						cacheControl = getCacheControl(msg.ProviderOptions)
+					}
 					text, ok := ai.AsMessagePart[ai.TextPart](part)
 					if !ok {
 						continue

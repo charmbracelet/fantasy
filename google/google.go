@@ -28,6 +28,7 @@ type provider struct {
 type options struct {
 	apiKey   string
 	name     string
+	baseURL  string
 	headers  map[string]string
 	client   *http.Client
 	backend  genai.Backend
@@ -50,6 +51,12 @@ func New(opts ...Option) ai.Provider {
 
 	return &provider{
 		options: options,
+	}
+}
+
+func WithBaseURL(baseURL string) Option {
+	return func(o *options) {
+		o.baseURL = baseURL
 	}
 }
 
@@ -102,14 +109,6 @@ func (*provider) Name() string {
 	return Name
 }
 
-func (a *provider) ParseOptions(data map[string]any) (ai.ProviderOptionsData, error) {
-	var options ProviderOptions
-	if err := ai.ParseOptions(data, &options); err != nil {
-		return nil, err
-	}
-	return &options, nil
-}
-
 type languageModel struct {
 	provider        string
 	modelID         string
@@ -136,6 +135,17 @@ func (g *provider) LanguageModel(modelID string) (ai.LanguageModel, error) {
 	}
 	if g.options.skipAuth {
 		cc.Credentials = &auth.Credentials{TokenProvider: dummyTokenProvider{}}
+	}
+
+	if g.options.baseURL != "" || len(g.options.headers) > 0 {
+		headers := http.Header{}
+		for k, v := range g.options.headers {
+			headers.Add(k, v)
+		}
+		cc.HTTPOptions = genai.HTTPOptions{
+			BaseURL: g.options.baseURL,
+			Headers: headers,
+		}
 	}
 	client, err := genai.NewClient(context.Background(), cc)
 	if err != nil {

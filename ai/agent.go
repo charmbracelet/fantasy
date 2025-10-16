@@ -192,7 +192,7 @@ type (
 	OnTextEndFunc func(id string) error
 
 	// OnReasoningStartFunc is called when reasoning starts.
-	OnReasoningStartFunc func(id string) error
+	OnReasoningStartFunc func(id string, reasoning ReasoningContent) error
 
 	// OnReasoningDeltaFunc is called for reasoning deltas.
 	OnReasoningDeltaFunc func(id, text string) error
@@ -1135,9 +1135,13 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 			}
 
 		case StreamPartTypeReasoningStart:
-			activeReasoningContent[part.ID] = reasoningContent{content: ""}
+			activeReasoningContent[part.ID] = reasoningContent{content: "", options: part.ProviderMetadata}
 			if opts.OnReasoningStart != nil {
-				err := opts.OnReasoningStart(part.ID)
+				content := ReasoningContent{
+					Text:             "",
+					ProviderMetadata: part.ProviderMetadata,
+				}
+				err := opts.OnReasoningStart(part.ID, content)
 				if err != nil {
 					return StepResult{}, false, err
 				}
@@ -1158,6 +1162,9 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 
 		case StreamPartTypeReasoningEnd:
 			if active, exists := activeReasoningContent[part.ID]; exists {
+				if part.ProviderMetadata != nil {
+					active.options = part.ProviderMetadata
+				}
 				content := ReasoningContent{
 					Text:             active.content,
 					ProviderMetadata: active.options,

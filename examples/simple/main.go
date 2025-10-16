@@ -21,7 +21,7 @@ func main() {
 		Prompt: ai.Prompt{
 			ai.NewUserMessage("Hello"),
 		},
-		Temperature: ai.FloatOption(0.7),
+		Temperature: ai.Opt(0.7),
 	})
 	if err != nil {
 		fmt.Println(err)

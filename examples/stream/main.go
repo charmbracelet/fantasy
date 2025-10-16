@@ -22,7 +22,7 @@ func main() {
 		Prompt: ai.Prompt{
 			ai.NewUserMessage("Whats the weather in pristina."),
 		},
-		Temperature: ai.FloatOption(0.7),
+		Temperature: ai.Opt(0.7),
 		Tools: []ai.Tool{
 			ai.FunctionTool{
 				Name:        "weather",

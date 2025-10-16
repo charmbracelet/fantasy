@@ -65,7 +65,7 @@ func testSimple(t *testing.T, pair builderPair) {
 		result, err := agent.Generate(t.Context(), ai.AgentCall{
 			Prompt:          "Say hi in Portuguese",
 			ProviderOptions: pair.providerOptions,
-			MaxOutputTokens: ai.IntOption(4000),
+			MaxOutputTokens: ai.Opt(int64(4000)),
 		})
 		require.NoError(t, err, "failed to generate")
 		checkResult(t, result)
@@ -83,7 +83,7 @@ func testSimple(t *testing.T, pair builderPair) {
 		result, err := agent.Stream(t.Context(), ai.AgentStreamCall{
 			Prompt:          "Say hi in Portuguese",
 			ProviderOptions: pair.providerOptions,
-			MaxOutputTokens: ai.IntOption(4000),
+			MaxOutputTokens: ai.Opt(int64(4000)),
 		})
 		require.NoError(t, err, "failed to generate")
 		checkResult(t, result)
@@ -137,7 +137,7 @@ func testTool(t *testing.T, pair builderPair) {
 		result, err := agent.Generate(t.Context(), ai.AgentCall{
 			Prompt:          "What's the weather in Florence,Italy?",
 			ProviderOptions: pair.providerOptions,
-			MaxOutputTokens: ai.IntOption(4000),
+			MaxOutputTokens: ai.Opt(int64(4000)),
 		})
 		require.NoError(t, err, "failed to generate")
 		checkResult(t, result)
@@ -156,7 +156,7 @@ func testTool(t *testing.T, pair builderPair) {
 		result, err := agent.Stream(t.Context(), ai.AgentStreamCall{
 			Prompt:          "What's the weather in Florence,Italy?",
 			ProviderOptions: pair.providerOptions,
-			MaxOutputTokens: ai.IntOption(4000),
+			MaxOutputTokens: ai.Opt(int64(4000)),
 		})
 		require.NoError(t, err, "failed to generate")
 		checkResult(t, result)
@@ -173,6 +173,9 @@ func testMultiTool(t *testing.T, pair builderPair) {
 	}
 	if strings.Contains(pair.name, "bedrock") && strings.Contains(pair.name, "claude") {
 		t.Skip("skipping multi-tool tests for bedrock claude as it does not support parallel multi-tool calls")
+	}
+	if strings.Contains(pair.name, "openai") && strings.Contains(pair.name, "o4-mini") {
+		t.Skip("skipping multi-tool tests for openai o4-mini it for some reason is not doing parallel tool calls even if asked")
 	}
 
 	type CalculatorInput struct {
@@ -230,7 +233,7 @@ func testMultiTool(t *testing.T, pair builderPair) {
 		result, err := agent.Generate(t.Context(), ai.AgentCall{
 			Prompt:          "Add and multiply the number 2 and 3",
 			ProviderOptions: pair.providerOptions,
-			MaxOutputTokens: ai.IntOption(4000),
+			MaxOutputTokens: ai.Opt(int64(4000)),
 		})
 		require.NoError(t, err, "failed to generate")
 		checkResult(t, result)
@@ -250,7 +253,7 @@ func testMultiTool(t *testing.T, pair builderPair) {
 		result, err := agent.Stream(t.Context(), ai.AgentStreamCall{
 			Prompt:          "Add and multiply the number 2 and 3",
 			ProviderOptions: pair.providerOptions,
-			MaxOutputTokens: ai.IntOption(4000),
+			MaxOutputTokens: ai.Opt(int64(4000)),
 		})
 		require.NoError(t, err, "failed to generate")
 		checkResult(t, result)

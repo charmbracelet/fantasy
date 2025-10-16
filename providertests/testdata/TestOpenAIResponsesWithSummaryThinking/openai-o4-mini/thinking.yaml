@@ -1,0 +1,235 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 553
+    host: ""
+    body: '{"store":false,"include":["reasoning.encrypted_content"],"input":[{"content":"You are a helpful assistant","role":"developer"},{"content":[{"text":"What''s the weather in Florence, Italy?","type":"input_text"}],"role":"user"}],"model":"o4-mini","reasoning":{"effort":"high","summary":"auto"},"tool_choice":"auto","tools":[{"strict":false,"parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location","type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.3.0
+    url: https://api.openai.com/v1/responses
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: |-
+      {
+        "id": "resp_00f45739b037a2600168f239ace760819697f5959cb071a64f",
+        "object": "response",
+        "created_at": 1760704941,
+        "status": "completed",
+        "background": false,
+        "billing": {
+          "payer": "developer"
+        },
+        "error": null,
+        "incomplete_details": null,
+        "instructions": null,
+        "max_output_tokens": null,
+        "max_tool_calls": null,
+        "model": "o4-mini-2025-04-16",
+        "output": [
+          {
+            "id": "rs_00f45739b037a2600168f239ada3208196b9f9ec02572cc644",
+            "type": "reasoning",
+            "encrypted_content": "gAAAAABo8jm7xqIpOPbNnX4taz-HWeJL_L229xxdawa7BOkJxAeAguZU9nRYIQSTsFCLW2EzdVhj6SlCTbGTuOzEr_CvqREKlQ1IrSfW4e2-guPg_G3krEKwWcOrm3K8dIg_BWJe5Y-ogjUn30m0wU_IoaS7iJhtoiX5xbwBB4m9pymDyTF3otHTPLpkUeHI6zGJyETZYQ32bjQl8PKqortMp6JmUdRAEnVfGnbuG1SNOVkXvkk-j47eS0kkWnk4ioNvAWZaY6iWSETR80gx5eP3gBVeo80v3-PiuxoZIpIs31C8Y0ISSwC-cTlSvs_KFwzbnpkAiORU_mJ1DFQ6O2GatOy4sZvVwYxdUX3LIZs0tKbMJSbOoNVHDuq7PiiX8FZEno40og2M7YxE0uKhd291GhqY20vEvDA2f1lM2ILTHWm3r-TePkSy3XNcT60jieAhHoztL8u6GzOvkM_y96qVQebbsi8_dhzljZj2LETiV_VcnjKB4hjnA_9KULZLlD06sWJDCj2ePdeH383jcFZfp-ikum-8bC0JjW690R3GKFfCvY8RZb2UqTTj84mZuPsZ1rrB9onA3tXRbn77iYPds6pAKE2G4rc09FMh6RBFTRP5RRhkHpHO5uDpsR66UUKLhnv81ndbwuovwlDy4fqSSiJ7WTWdsu8zjUFWc5VgGFewQhMfV4pS5ue-y7YYqNVYzAx9sMw14FvWF6SZBnfcpgepOcCGnulaOOFFUe75H3voaQ5EJ38pE0zAXcgUtiSx_YdhVEPIAf7BGbDjZrE6dAns0d7PIhSqXYsV6c34DMwh0HmfQkQPx3BupQaMgfDMKsDovFLW3GsXe-YVk6d01UnMYEsIIMLByF5FpGCuc9bwGpgwljNf42HPaARLdWCGY6WW_ysxFebewRqSGMkMWVAZuR6khBJ89YnNThLWWR64nTwr_32OO2cTStvcn1YLP4jKhgz0YBu2EJuBJIYeHCP2xNEY-zL4_8Uld0bZDKaE3W54GK-eHwEJ1hEQqHhheCbFTYRzQWQEWYqjMG4pQlMboJrcJAfd4QF3tWwp4lCwLr6WGBUPwK9J0chjILV6Ry78Z829dPl2YI_lBmOtG1FsmtKBCj-tXTOfN0_lhhy57upsu9M2oH5Mb8iNj1M-LXlsQdsFqLjBkssagUQFjlMmXJiF2LbUdVvjFMAbMyWmEJLV5UzqsaLClYA6sSun8dDpml4Z0FfxLysfmXUdo1NGYhrN166U_kC8779mREHTkGBvtHwsW_5CTQLIRbZtixV0yK0giOuUuVcxfnK6x0_Gcvu_frnUWji_FD71sa02y_1-3wrzyCckhzNhvb4nZEliu2DcuYk9LGrhbNZZRhBDKFwP2CMm4L3HLaPbThc7WCIaYa_pmoLGRQaWHjUoyU8yakbR3z8km1YEMHoxLIp2furli6y7S9KYSfO3ewh8AHrDf7JKesHEAynvYZp6qS3wehOIFwfewwZJhI09HOgpgRPTLc9PQcuEDSGj0BRzCAX6Iom06x-adsHrnJS9LtH1WcR8OOF4D02R9pjnXwvoSsWiUoSKbM3-b4HPdnupqq7FAQsvwlUy7n8yE8Mz0nIlejbOTCsg1nfJ2enzLD2JcdtPdG1bQI-GNGmBabPWt_YHolQ6pMlfhx8QZSn0gLgrL0nJeB5nZiP06xsEflkcVUXfiu8spA1tkxu8VYH_HuamCJlnr-BYXsiOuUmCYq5LJLB2dcVYoH_7HrQHE0m4vgl3abTNwBIsHyb-tomHiVQZoET9MfTYaNckcGQ-WAYjd5Eu37Tu13dfde_Nx7Wz0pRRPDonmBGRFuotdaL7Ey6WnzcDinRbqNke6tF1pIN9fjN5U5yYa0uvpbKVAVAO7kBdO7-Ns6MsqI21CdS0A6SS9C4n6sjCdiJ4vDzDJWXpH4PAytK6dLcW1KoRV9GXjYl5wfd2xcQeO0AVx9xfDHuQwk7i_CvDaaqqFq4tKCzKvOdc7bULf7xKyHxzrGbXoiH1EEWfrzIP8P7xZdPHNDPj9LS5iKDHM9SJX6Nfefnmjr6PX3C7imyiKebGT7Ap0sNjXsvpMRBtHNaVji29qjFXhXKBQSRnIjfng1bFboSpgqLUEzT8Z_K87cGkb4M8QcJgeiBOfAs0GSV5fE6OY-u1vOfuivmqjzxjWpstxrsUSnPPQtNk9NfJERLzhvUZmeZBExiN7O32_2iwExbFwxMCPn3XShR92CIHB7-rIeZV-gVPLcKJUy4EueclfHDFDZbbp5Pj37hZr3Q2dqarGyDcnMXIss_bsFHH73wOKiusvX5GR1LDFqKnTkDXwhkCUMIPwET9h6N9VaS_cAjFUwIfXc4KsbNCws2s3N8ZIGaQR1R1gIGxG7O0lfEA7kwDff76CT11G9I7De5GLCev5sJiZtT5qxjKUckKlM8WkfvwjhDHnhwV_rmiodeU5YnodTMHdzzd7FNBopEr9sOv2p9iiaxrVq0xcjw7sY3zd6yFnDPg4P5KEz2SieNYZi-KefO10KtjnaiqNnxxWmL8_wJhyRru_bwiU4X35Ajob7uYrV3yuo_IK_AJ49KuXsS8ISiSmFPiOyQPIhTPqbm1fN6o8WfAhVVuIcZ5xIOIzTaXLyHp7m3JkzXEbwTIZvJSKXXGyhj0XRZSCraQVj1MRYdhHBARORP0VrgQ7Nrg5ymIM7v0NFDSkSWDAVtIbvZIbQFzHkfiUh8W3CBe2XJNpsvyUAEi_yxCfEWOBdVuqqXQPwWFDI1dbPSmqq266JS4bJ9yBONfme0RZK1fFKCGtRFQQygHlF7NJMirCvYqKV4aZRA-mF36HlGRdSkDioZAyVHpMpZ4QVr2bUW0sx7wJMi3VhtLlCEzP5o2syZHPl5VaU70iyNkt9L5I3dIZVQ1z8ejV7Fh8oDjBoPcEhf8510ykm-wXgiqz9Kanb_fgQZX_PS66EY7EFTbGVmoDNlbwTg6XzjNYa8qPIP-rLL-sGkXubNT8l2xRZcehu7QQ4bG5X3sy6QA9lpGGD5sPk3aa3_F84FEclxIlmQOUy1Ng5bWgnzPRDWU4Bx4M6k6empXQZvOawobsA9EZOVoem0yB9WfcoVLVzFaGqUpZ00477PeLb37ARxN94hCo6z7Z39hbd3tHWji7Dv632im-S36nJIGLhFkR1idC0BtdDBRtG-RcCzBv2iPFflnmXe7f_j8TLyBcOZ0NoIcwpycD3ry6FWrYNlQuioNDZeqmBspShklQvfmeX7BVU9vJA3N1tdhjR4Go7uitaccWBSIEYPbnPe4rYBlFQ3iUaWKAf-_aszAArg8uOyKACBGltCzWWJjQsoivdMplSUtV9n7ZpcNcY3JZcSdWlkuDa6xFx1RnMKTuwbZZ7SuMcv9XX5Kp1tXbIdo1PYnECKHvkqICn5xSJyB9FP3XXoBmr1dpNucd4F288y0KuwTuDigViZnec_X4g81_tClm5634xyyH5-4Ew46hqre_UQULwnOtYjFIfnSmSwzmgLNGibE_h577aRO57miyAr05j-asTnpoOnDMIcw6yzQRdgToiiCmf4ZKRjKsKYCzYBLdobjxewLdF4BdeYIlbwyVy56nyn0fxo9ALvW_JRnEnWmkA_lvzn7qAlCm3Z1gWma2HGoCmnCGxTRSYc1LxLrSkR1-T17PiL-0uLVU_z7eve2d8FJ9x6HU4euqpeV7bcf2TIWsYXhiDbBO3UnU8OhkVlKpEMsQEX2-aljJvsz0StYaDpgU1ivBVW389ZR5No5YiE6_SVYxjAzL7JuONFbxrxZiurlZRsL966JEGUdjXQHgVd2R3NU7bfkNPHinLwb-31IYCxHccmW8xxHd8Gw0cSlZq2iMPQ4LVm7vLhexwuvqWfoV5agGmU8Oebxjbffm1f4QCIsc-AcdkEZ0OO1mAZUpvFI5XVUUF9xtCmFA06ML3VcGZi-j7I4bxJ6A70-S0Gko5vJW7s7obQGVrBqY9TINilJrUKhSGu5vqiQ_8uyfCk96pqFGSVi-jT1bKlUBbyrXcjqjMOgeiw3jluzDND-GM31wK7V-DzICcBNaGq9dws1HZXThm6-nwnEe6VxTTNidlr2NKkiGXufdGDSqb2MrwXca_-j0d1Y048QswFa5DJ6HRF-Y7vI6Td_3hjlXGhfo0XWKY00J6jFdnjEVAzcYF7rcruXQzHfT8FPp7SWgQeu6arM3VrIp4y1aFim_zypRRXs6HxRzPwf7gH9aaZ1-l2UpVOGRKtUUKIreWNlkZCFTifYEoxYrSAuxI53exaHN-y1fVthU5XD7oEf2rLrb1zRF8aqFf-v9bq_5ymWTDTkUjheS_qql-SWtvg1-yvNHjQSiljS4BN2GUUnmX69BxsuC31aTi0off6fgOB8oh3M9FvhkwlaP16oLvghsLMT8fiB8xC8voPXhxAAz8tsTWRDLihKqR7F4l7bmRBbi5dqIftL_UyzTiScRITUl1NMElID5Nu6nJI78rwpTDyj9cD9E7C8nxkqZ4xSlClwWkAfnl19h3jAvcoVamuayGXEdzUYQiQ9ZndH4Loi1MIPkcdek7VOJKbPFet9IwW1hYdH3KClVCbwzTgkIpwPVuAQnqY1wbe--wepgI-4n5EOn7UwN86EpMZ04V7tUw5VwTpEWKDvXaUdjcy8n91M5AOFAXP5PnhZwPGPUCzF69a7cvhSxlm3wwqqeUWEvQECfO37QjQ0kCgnXH6u66JooCvfw7gXau5ipfQ2sVXwCetc96R7QYA3eDNod7kWOYQFqJf98wnrXxM1mvuSo7pNcWoYH2yBOt-QEt6fPr_eGl0bzreAcW92SBwS4KNkFQCYyfM_5f2kvZO0-VoOYCIZJK_jfByWYLPaDGmm0q1QuziP4GvCaM2wIz8jnRSJCZct4scxZLv4zyzqwyALgXccUFMlpiSb_W6YNft7L0vUNNVCIW_o64dj7vrmmsu96qnK83TOK3QsPq48S1-C4bTB3eGgjFCs8aKh47u4W2EfJLNv5o_zEymCutj5cHRpIM-vvVfiVPAfaLp4uvHhPDGs_Ef2z980447hoqzIjlf5Dt8f-1P_oRFbhIJjH8QlkRXfHKYcpqw_Pj16bbPNRpybiVDndKVUH5-Bl9xRUeYlv5cWnoL9eqZaQMJuj8yzXLW-EHQtJzZxkc5ZpKAzxWHa6C2-yeC0ysjurv8dS8Toz2ADzaS0_q_jJTTUBTQLnzY2iKXgL8ieyxM6GeRrR3e9JzoIvR8mb-v6i8Mho4d1y8iGuEcPBuB9BXXdKNvI_QZY2s4j8Tot3WZszT7IeiD8xlRL59bSYMlZDubIEhrZa88g2UETPqWK8hQlPt4Faa1YfuU1O7PZr0pa82BJWZHxeDGDbLxbSzDg39cngXcKpaE-1TOm-dgzVvPc0oxxOhw9AkFQOqHuWbIQhLOH9rIsu6RPhaDspnW_o3XlzzkjPsqGg8wmMOwZQ9EAFKV7imlj93FjfqxHdTX061lBSl9euneWTSrTBQjqNx3jkUdfa5sOh8YGt-eycbISmPfvH5N0cAow3Y7MD2aEeG6xlHznVZPrZ4xBKjixX514THnQiaZwUFNjWPjXwT9rGBDHyMbEbNSrZF2bgd3KYexNTirLNX-wvJld6kb87Kk-WpDaaGxtyCOj02aoleC5Ph-GhkqVMsxncrcMZeN6liUxRfNWtuVbfkWj9Bp-xT0qi0Fb9vN-2T98GbS66zNpFa96lrf9IVMgWR6h3u8-TXL4WzdAg_YQpmWZpqVfj_1oWpCgS0DU1bSLz0iFRMYw4FRoKMLRx8mjfmoQnqzStrTNiyk9JjYte5_Uy9NeQaCcoEYBAs1n3JZb-HsnHxM3En4dL28snqfHAqfUBxX6u63uSsnF3lJhtry5vFpeIEN4lrrH10QIbLmjf-5fPHTq1QY31XaaZ3VkAtlOxgL2-jkQMynlcfXw8YrovBtetSozLXW_M0BS7N2kZOfLSd03Dd0BIoPOJ40VmlnXYmNanjb1wv_DJFaaT95Pp_idVoTFAztHW9F7XEMLpfXjH51j1Fe7MhZcgCy4Ef_gGrHFFc_gL0JD_xtnEjBnK8IZhufUrmJIgeDgsmQ3BcvW4qKJd7ot9BLwof7DP4stxD6_8lh62kosEoHog4HeUStwqa8S5NlOrlW5kSv9seQRr87hMIyX0NUJRkc6REAtgAygV9tceCVCh7P5KNaNWmuK-AoLLsQJLK59kiV-UdjUxXWWloKZh541qf-ua_kc0ne1Y8W6yet4Mw7bbgQGMQcuUUOz17E5EQBJrm4ZVV3iRv9N71h8qZi7aiCzsIWEE350K9T9F2py91ObA-Xi4SXQK4WEd05O1lLi4ag4XNvZ0x34p2nPoaxpoCNvCVp1icxwjlCagZ-qjjKwmNt83SRRAe7uwyDVwB8G2tkh9Paqt4TFTcjOJhEwVrLm1SlLV8oBLVKsmtnT9fW2DKlZNdfMVOwYzkufwc7W25i5yVj2fYdgJlQvSkwZx5a5JN8kuO0NIQwJ6NFla_qW7io0_BwE_zvgMgZ2HNUc4lGY1K0sEmAsm8Yv7b4qxhx0o829wdsBcBSWVhUMdSuksOisr4WiSurexcKkhJVufl7NspCVFHeNeYr2c07dS06bk_xafqIxkuyn0mQt5fYjFbLN-oZiN2txDLzx3KIuYOe1Z9_EsjEbWPp7uNNRfEpynlf0EGJ_ZFW1_zkgyuBNoWwcwZnyQOAN12EbGwnw1RzGfPouzgxKAKAcJEuJHhbyghWOC4Yk2lK56QuiZss4CFlTThhFCTFJ1fF3N6VWoPwUUzY5UWfsIlqIgOCUHNDKCI18pDuYd2rCixKHs7PLOoVdUOU1lv-6iKuGfPrhG9Xo56KX9PDOfVwO1TRa-hICs8oF7vnlFiCDnMO2Kgt_NKLDpvE3apafxx8a4PIFNc1EUjA6kZzCVjILgksTrZOUDqZP2AdpEMPU4Vg2v-IxZSqEY0arQsAtMkdESS437QvDoa-UJhMv0Rid27HUAKgkKA7yVZCsC_n1xiOm-cqGD_jei_iAakDPnBQdX678UG9kJmcuyj__C8tPmRnRVZwt1peaMqo-Z2xISMH3BzxI1S2HrLgiSp4epUo3nAFfN1M0ugQdK8mTKSzBjxCeL13-bQa7vaAqtFjrMQrwTlRJpL1tUQKjC_nrjgYY4sObO8FokbFx9rH_aPH9I0IXrd2lFktTMRtp0ETSmzc7FKyzMLZRxAP6x84Mv3hXmT82e96LbE4maeFJTkaILrV8e03x-CetgcsIzCN9PvQdTQqcUw9Ml-GxL1896zBje5lwEZEtDXVyfpwr-cE8NGiRp59dE2Fs47ogMgZsHJqpYJlimj2lP2ExgHYgogsNOj9yM7YxlbVJpLlo5RtynA6GWzLnV9BSSjrkXBM444SZILrx2-rBSDeAlQH4ViYa16EHunLPXyWBzCxth2ubmoAkqxsPTr-fa6JjoZlWecg0QH6H6PTXVd01QwS68Bbwrcj8n35LLNaWVm5Dpy46lMzPaYFJlW4dpXVRJ2WVkLnTyPdsnWIqQ22K4xeZP1mTxZPf-XYVC6eHD5PBQmx8cUiqYLe0WA9pvtKwkfLjAuGlZbm-N6SMgs1Wcik2dlFL15TDJJv58DHxZcEGk5RNz4daVQNQLMyav5AhcwF8wC20AcjS0pjsEKGXPXKur7CtyfkPHA0MBlDEZre6nenkXo6jp-ZTgqxYJCXZXgZqLX9Qw9tibmt1Sf9x85XaAkq7hXikPZdHyWczjdS4YA-3gSnwpJ5gS-0tetWag6fkzkI4qHFMg9UrNXGVxrxsEUH9Jbwj49VJAJkgSJWVJgOSPtKPPwzAiSMWWttiFTVCVLXB3tbn-kHMUlvlf_zlTyS2HXHFyIZpqTpwyco6LyST7PBvJan_c99eAGmkOW5Yzua_EeVwSOlHs9s-1cDxkxGPVyz3GXRm_T1qKZ68ILQtUc8c8hNbvgbn7ctnkSIMHSzHoBw0rHaMRX1KDB3j-s-3Uys9myyChiqufM4L9V5aaXlnN91mv4vPURzIVS5TReWqjN7z7lm4M8WgcjkDj9Rvx60qD73CDkJLy77uFT6iJXKDneM1YSKse4r20zQ0OkwcDjb7iEowcqHgvx5KEppKdBWccZWVNHJXZl-tfGI5lWbDPwuWuEK64RIXZJe6JykSphNbWzz5oSp4aMqv4MFWggcKdYkVrlGovI3EpLElDHqBswUUxNJ2JWyJfdtWujOWmNrhpKZbq6EvqrqFd94X2Ay5D_Xz3EO4jRJZhbw4uRUAlrFDRoBUtZ0gFeL-N6ab6_sVdR3U6BV1hchCT-v7Zbt5No_4ULgQ4xb4QYqHL3DVwqfm8UPlGhivAc5n8QFjv-e86xERdWI39x7fE6v2oWCzLmQKW5GBX7ohbbQyOU3c96Haa-N2EQOjms5pQfa4-YJ5E_o4n6LSLtprIfY-3O316UfQNTvbsSkYv447LwoyS-9sHBklvC8RbN36s71UOrCLbGk9S6ypfxnIRYPmrhpd1wHT_jB0fCqQJZwgI5mILYqXnH-uqoHKjUqSPgHnhzT-iVqVSBE6Zq8xqUut-LqESULZ81A35SiGwlYrIQy5dHs5wadUIdbNz1ZWWI2ZybVTE39Ukv1DQp9MrhmYJZYrapTpguEN2me-EBjNNnpLRDsO86eSQAhVzV9J000jIvXxGdlUo3SKwZfM-1P0L2CdhicIgI7-KVSGrpJPxQA00Keey2Oj4P6Vdzsrp362WNlkuMIqueVSfRl8P63JzASuXCRlPwDKZ19D15h36uiyvgtBsKhPeAbzGfM7UTLFU-q5vP1gHgpiLqs6Bw61oo7E51yTu6zrmHukuao-AOGhKbctckfrvrVuZ7PpxD_tuQCoYeHUCW8-cjsh8rVsaA0TOo8g_TGpM-c47gXMYjUbfoo-mJV2hBZSW4a3npoZMgCCgPchFzJONFqs7VEcaVS6a6oXDl3woqq0v_LzNLfoGll6ixi9c5okjLeTvf3z6MROAabvxedMD8u8dkLqvL86q7d4FDrvBZDM8E5DbryvvVRPp9rfSa7KLwInjrM9bzpnV4e7TTk7-LDKg54YU8GF_RLC2vIdOvCRGE23BfG2KZVZof3rmhMITLEbGCSL9zd34d2YXhdqbOsTJ2DaZq_Nwii1lx5RBSf_6RSKyPwm0Q7vP30QKAE6FBMHqr2CQwsldDC9R-nI9Y_FNIrbo03lkz7TQe66pBOCUL22IXO1tcdw6PHnowVfOoI_pzrEAwP66gwnTC7Ysb7hREsTH9SIO-EZvPAb_045jovUfYTQmdYZmTgyr-zPzWn-jkprYnHEUX82Hn7LN3cTjRRNvhH9ELSmfrWYhRaW2Q==",
+            "summary": []
+          },
+          {
+            "id": "fc_00f45739b037a2600168f239bb58b88196b17b26934fd24de2",
+            "type": "function_call",
+            "status": "completed",
+            "arguments": "{\"location\":\"Florence, Italy\"}",
+            "call_id": "call_ewLJJaD4OO6pdsTnaDtMuNn0",
+            "name": "weather"
+          }
+        ],
+        "parallel_tool_calls": true,
+        "previous_response_id": null,
+        "prompt_cache_key": null,
+        "reasoning": {
+          "effort": "high",
+          "summary": "detailed"
+        },
+        "safety_identifier": null,
+        "service_tier": "default",
+        "store": false,
+        "temperature": 1.0,
+        "text": {
+          "format": {
+            "type": "text"
+          },
+          "verbosity": "medium"
+        },
+        "tool_choice": "auto",
+        "tools": [
+          {
+            "type": "function",
+            "description": "Get weather information for a location",
+            "name": "weather",
+            "parameters": {
+              "properties": {
+                "location": {
+                  "description": "the city",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "location"
+              ],
+              "type": "object"
+            },
+            "strict": false
+          }
+        ],
+        "top_logprobs": 0,
+        "top_p": 1.0,
+        "truncation": "disabled",
+        "usage": {
+          "input_tokens": 60,
+          "input_tokens_details": {
+            "cached_tokens": 0
+          },
+          "output_tokens": 1302,
+          "output_tokens_details": {
+            "reasoning_tokens": 1280
+          },
+          "total_tokens": 1362
+        },
+        "user": null,
+        "metadata": {}
+      }
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 14.800628916s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 10319
+    host: ""
+    body: '{"store":false,"include":["reasoning.encrypted_content"],"input":[{"content":"You are a helpful assistant","role":"developer"},{"content":[{"text":"What''s the weather in Florence, Italy?","type":"input_text"}],"role":"user"},{"id":"rs_00f45739b037a2600168f239ada3208196b9f9ec02572cc644","summary":[{"text":"","type":"summary_text"}],"encrypted_content":"gAAAAABo8jm7xqIpOPbNnX4taz-HWeJL_L229xxdawa7BOkJxAeAguZU9nRYIQSTsFCLW2EzdVhj6SlCTbGTuOzEr_CvqREKlQ1IrSfW4e2-guPg_G3krEKwWcOrm3K8dIg_BWJe5Y-ogjUn30m0wU_IoaS7iJhtoiX5xbwBB4m9pymDyTF3otHTPLpkUeHI6zGJyETZYQ32bjQl8PKqortMp6JmUdRAEnVfGnbuG1SNOVkXvkk-j47eS0kkWnk4ioNvAWZaY6iWSETR80gx5eP3gBVeo80v3-PiuxoZIpIs31C8Y0ISSwC-cTlSvs_KFwzbnpkAiORU_mJ1DFQ6O2GatOy4sZvVwYxdUX3LIZs0tKbMJSbOoNVHDuq7PiiX8FZEno40og2M7YxE0uKhd291GhqY20vEvDA2f1lM2ILTHWm3r-TePkSy3XNcT60jieAhHoztL8u6GzOvkM_y96qVQebbsi8_dhzljZj2LETiV_VcnjKB4hjnA_9KULZLlD06sWJDCj2ePdeH383jcFZfp-ikum-8bC0JjW690R3GKFfCvY8RZb2UqTTj84mZuPsZ1rrB9onA3tXRbn77iYPds6pAKE2G4rc09FMh6RBFTRP5RRhkHpHO5uDpsR66UUKLhnv81ndbwuovwlDy4fqSSiJ7WTWdsu8zjUFWc5VgGFewQhMfV4pS5ue-y7YYqNVYzAx9sMw14FvWF6SZBnfcpgepOcCGnulaOOFFUe75H3voaQ5EJ38pE0zAXcgUtiSx_YdhVEPIAf7BGbDjZrE6dAns0d7PIhSqXYsV6c34DMwh0HmfQkQPx3BupQaMgfDMKsDovFLW3GsXe-YVk6d01UnMYEsIIMLByF5FpGCuc9bwGpgwljNf42HPaARLdWCGY6WW_ysxFebewRqSGMkMWVAZuR6khBJ89YnNThLWWR64nTwr_32OO2cTStvcn1YLP4jKhgz0YBu2EJuBJIYeHCP2xNEY-zL4_8Uld0bZDKaE3W54GK-eHwEJ1hEQqHhheCbFTYRzQWQEWYqjMG4pQlMboJrcJAfd4QF3tWwp4lCwLr6WGBUPwK9J0chjILV6Ry78Z829dPl2YI_lBmOtG1FsmtKBCj-tXTOfN0_lhhy57upsu9M2oH5Mb8iNj1M-LXlsQdsFqLjBkssagUQFjlMmXJiF2LbUdVvjFMAbMyWmEJLV5UzqsaLClYA6sSun8dDpml4Z0FfxLysfmXUdo1NGYhrN166U_kC8779mREHTkGBvtHwsW_5CTQLIRbZtixV0yK0giOuUuVcxfnK6x0_Gcvu_frnUWji_FD71sa02y_1-3wrzyCckhzNhvb4nZEliu2DcuYk9LGrhbNZZRhBDKFwP2CMm4L3HLaPbThc7WCIaYa_pmoLGRQaWHjUoyU8yakbR3z8km1YEMHoxLIp2furli6y7S9KYSfO3ewh8AHrDf7JKesHEAynvYZp6qS3wehOIFwfewwZJhI09HOgpgRPTLc9PQcuEDSGj0BRzCAX6Iom06x-adsHrnJS9LtH1WcR8OOF4D02R9pjnXwvoSsWiUoSKbM3-b4HPdnupqq7FAQsvwlUy7n8yE8Mz0nIlejbOTCsg1nfJ2enzLD2JcdtPdG1bQI-GNGmBabPWt_YHolQ6pMlfhx8QZSn0gLgrL0nJeB5nZiP06xsEflkcVUXfiu8spA1tkxu8VYH_HuamCJlnr-BYXsiOuUmCYq5LJLB2dcVYoH_7HrQHE0m4vgl3abTNwBIsHyb-tomHiVQZoET9MfTYaNckcGQ-WAYjd5Eu37Tu13dfde_Nx7Wz0pRRPDonmBGRFuotdaL7Ey6WnzcDinRbqNke6tF1pIN9fjN5U5yYa0uvpbKVAVAO7kBdO7-Ns6MsqI21CdS0A6SS9C4n6sjCdiJ4vDzDJWXpH4PAytK6dLcW1KoRV9GXjYl5wfd2xcQeO0AVx9xfDHuQwk7i_CvDaaqqFq4tKCzKvOdc7bULf7xKyHxzrGbXoiH1EEWfrzIP8P7xZdPHNDPj9LS5iKDHM9SJX6Nfefnmjr6PX3C7imyiKebGT7Ap0sNjXsvpMRBtHNaVji29qjFXhXKBQSRnIjfng1bFboSpgqLUEzT8Z_K87cGkb4M8QcJgeiBOfAs0GSV5fE6OY-u1vOfuivmqjzxjWpstxrsUSnPPQtNk9NfJERLzhvUZmeZBExiN7O32_2iwExbFwxMCPn3XShR92CIHB7-rIeZV-gVPLcKJUy4EueclfHDFDZbbp5Pj37hZr3Q2dqarGyDcnMXIss_bsFHH73wOKiusvX5GR1LDFqKnTkDXwhkCUMIPwET9h6N9VaS_cAjFUwIfXc4KsbNCws2s3N8ZIGaQR1R1gIGxG7O0lfEA7kwDff76CT11G9I7De5GLCev5sJiZtT5qxjKUckKlM8WkfvwjhDHnhwV_rmiodeU5YnodTMHdzzd7FNBopEr9sOv2p9iiaxrVq0xcjw7sY3zd6yFnDPg4P5KEz2SieNYZi-KefO10KtjnaiqNnxxWmL8_wJhyRru_bwiU4X35Ajob7uYrV3yuo_IK_AJ49KuXsS8ISiSmFPiOyQPIhTPqbm1fN6o8WfAhVVuIcZ5xIOIzTaXLyHp7m3JkzXEbwTIZvJSKXXGyhj0XRZSCraQVj1MRYdhHBARORP0VrgQ7Nrg5ymIM7v0NFDSkSWDAVtIbvZIbQFzHkfiUh8W3CBe2XJNpsvyUAEi_yxCfEWOBdVuqqXQPwWFDI1dbPSmqq266JS4bJ9yBONfme0RZK1fFKCGtRFQQygHlF7NJMirCvYqKV4aZRA-mF36HlGRdSkDioZAyVHpMpZ4QVr2bUW0sx7wJMi3VhtLlCEzP5o2syZHPl5VaU70iyNkt9L5I3dIZVQ1z8ejV7Fh8oDjBoPcEhf8510ykm-wXgiqz9Kanb_fgQZX_PS66EY7EFTbGVmoDNlbwTg6XzjNYa8qPIP-rLL-sGkXubNT8l2xRZcehu7QQ4bG5X3sy6QA9lpGGD5sPk3aa3_F84FEclxIlmQOUy1Ng5bWgnzPRDWU4Bx4M6k6empXQZvOawobsA9EZOVoem0yB9WfcoVLVzFaGqUpZ00477PeLb37ARxN94hCo6z7Z39hbd3tHWji7Dv632im-S36nJIGLhFkR1idC0BtdDBRtG-RcCzBv2iPFflnmXe7f_j8TLyBcOZ0NoIcwpycD3ry6FWrYNlQuioNDZeqmBspShklQvfmeX7BVU9vJA3N1tdhjR4Go7uitaccWBSIEYPbnPe4rYBlFQ3iUaWKAf-_aszAArg8uOyKACBGltCzWWJjQsoivdMplSUtV9n7ZpcNcY3JZcSdWlkuDa6xFx1RnMKTuwbZZ7SuMcv9XX5Kp1tXbIdo1PYnECKHvkqICn5xSJyB9FP3XXoBmr1dpNucd4F288y0KuwTuDigViZnec_X4g81_tClm5634xyyH5-4Ew46hqre_UQULwnOtYjFIfnSmSwzmgLNGibE_h577aRO57miyAr05j-asTnpoOnDMIcw6yzQRdgToiiCmf4ZKRjKsKYCzYBLdobjxewLdF4BdeYIlbwyVy56nyn0fxo9ALvW_JRnEnWmkA_lvzn7qAlCm3Z1gWma2HGoCmnCGxTRSYc1LxLrSkR1-T17PiL-0uLVU_z7eve2d8FJ9x6HU4euqpeV7bcf2TIWsYXhiDbBO3UnU8OhkVlKpEMsQEX2-aljJvsz0StYaDpgU1ivBVW389ZR5No5YiE6_SVYxjAzL7JuONFbxrxZiurlZRsL966JEGUdjXQHgVd2R3NU7bfkNPHinLwb-31IYCxHccmW8xxHd8Gw0cSlZq2iMPQ4LVm7vLhexwuvqWfoV5agGmU8Oebxjbffm1f4QCIsc-AcdkEZ0OO1mAZUpvFI5XVUUF9xtCmFA06ML3VcGZi-j7I4bxJ6A70-S0Gko5vJW7s7obQGVrBqY9TINilJrUKhSGu5vqiQ_8uyfCk96pqFGSVi-jT1bKlUBbyrXcjqjMOgeiw3jluzDND-GM31wK7V-DzICcBNaGq9dws1HZXThm6-nwnEe6VxTTNidlr2NKkiGXufdGDSqb2MrwXca_-j0d1Y048QswFa5DJ6HRF-Y7vI6Td_3hjlXGhfo0XWKY00J6jFdnjEVAzcYF7rcruXQzHfT8FPp7SWgQeu6arM3VrIp4y1aFim_zypRRXs6HxRzPwf7gH9aaZ1-l2UpVOGRKtUUKIreWNlkZCFTifYEoxYrSAuxI53exaHN-y1fVthU5XD7oEf2rLrb1zRF8aqFf-v9bq_5ymWTDTkUjheS_qql-SWtvg1-yvNHjQSiljS4BN2GUUnmX69BxsuC31aTi0off6fgOB8oh3M9FvhkwlaP16oLvghsLMT8fiB8xC8voPXhxAAz8tsTWRDLihKqR7F4l7bmRBbi5dqIftL_UyzTiScRITUl1NMElID5Nu6nJI78rwpTDyj9cD9E7C8nxkqZ4xSlClwWkAfnl19h3jAvcoVamuayGXEdzUYQiQ9ZndH4Loi1MIPkcdek7VOJKbPFet9IwW1hYdH3KClVCbwzTgkIpwPVuAQnqY1wbe--wepgI-4n5EOn7UwN86EpMZ04V7tUw5VwTpEWKDvXaUdjcy8n91M5AOFAXP5PnhZwPGPUCzF69a7cvhSxlm3wwqqeUWEvQECfO37QjQ0kCgnXH6u66JooCvfw7gXau5ipfQ2sVXwCetc96R7QYA3eDNod7kWOYQFqJf98wnrXxM1mvuSo7pNcWoYH2yBOt-QEt6fPr_eGl0bzreAcW92SBwS4KNkFQCYyfM_5f2kvZO0-VoOYCIZJK_jfByWYLPaDGmm0q1QuziP4GvCaM2wIz8jnRSJCZct4scxZLv4zyzqwyALgXccUFMlpiSb_W6YNft7L0vUNNVCIW_o64dj7vrmmsu96qnK83TOK3QsPq48S1-C4bTB3eGgjFCs8aKh47u4W2EfJLNv5o_zEymCutj5cHRpIM-vvVfiVPAfaLp4uvHhPDGs_Ef2z980447hoqzIjlf5Dt8f-1P_oRFbhIJjH8QlkRXfHKYcpqw_Pj16bbPNRpybiVDndKVUH5-Bl9xRUeYlv5cWnoL9eqZaQMJuj8yzXLW-EHQtJzZxkc5ZpKAzxWHa6C2-yeC0ysjurv8dS8Toz2ADzaS0_q_jJTTUBTQLnzY2iKXgL8ieyxM6GeRrR3e9JzoIvR8mb-v6i8Mho4d1y8iGuEcPBuB9BXXdKNvI_QZY2s4j8Tot3WZszT7IeiD8xlRL59bSYMlZDubIEhrZa88g2UETPqWK8hQlPt4Faa1YfuU1O7PZr0pa82BJWZHxeDGDbLxbSzDg39cngXcKpaE-1TOm-dgzVvPc0oxxOhw9AkFQOqHuWbIQhLOH9rIsu6RPhaDspnW_o3XlzzkjPsqGg8wmMOwZQ9EAFKV7imlj93FjfqxHdTX061lBSl9euneWTSrTBQjqNx3jkUdfa5sOh8YGt-eycbISmPfvH5N0cAow3Y7MD2aEeG6xlHznVZPrZ4xBKjixX514THnQiaZwUFNjWPjXwT9rGBDHyMbEbNSrZF2bgd3KYexNTirLNX-wvJld6kb87Kk-WpDaaGxtyCOj02aoleC5Ph-GhkqVMsxncrcMZeN6liUxRfNWtuVbfkWj9Bp-xT0qi0Fb9vN-2T98GbS66zNpFa96lrf9IVMgWR6h3u8-TXL4WzdAg_YQpmWZpqVfj_1oWpCgS0DU1bSLz0iFRMYw4FRoKMLRx8mjfmoQnqzStrTNiyk9JjYte5_Uy9NeQaCcoEYBAs1n3JZb-HsnHxM3En4dL28snqfHAqfUBxX6u63uSsnF3lJhtry5vFpeIEN4lrrH10QIbLmjf-5fPHTq1QY31XaaZ3VkAtlOxgL2-jkQMynlcfXw8YrovBtetSozLXW_M0BS7N2kZOfLSd03Dd0BIoPOJ40VmlnXYmNanjb1wv_DJFaaT95Pp_idVoTFAztHW9F7XEMLpfXjH51j1Fe7MhZcgCy4Ef_gGrHFFc_gL0JD_xtnEjBnK8IZhufUrmJIgeDgsmQ3BcvW4qKJd7ot9BLwof7DP4stxD6_8lh62kosEoHog4HeUStwqa8S5NlOrlW5kSv9seQRr87hMIyX0NUJRkc6REAtgAygV9tceCVCh7P5KNaNWmuK-AoLLsQJLK59kiV-UdjUxXWWloKZh541qf-ua_kc0ne1Y8W6yet4Mw7bbgQGMQcuUUOz17E5EQBJrm4ZVV3iRv9N71h8qZi7aiCzsIWEE350K9T9F2py91ObA-Xi4SXQK4WEd05O1lLi4ag4XNvZ0x34p2nPoaxpoCNvCVp1icxwjlCagZ-qjjKwmNt83SRRAe7uwyDVwB8G2tkh9Paqt4TFTcjOJhEwVrLm1SlLV8oBLVKsmtnT9fW2DKlZNdfMVOwYzkufwc7W25i5yVj2fYdgJlQvSkwZx5a5JN8kuO0NIQwJ6NFla_qW7io0_BwE_zvgMgZ2HNUc4lGY1K0sEmAsm8Yv7b4qxhx0o829wdsBcBSWVhUMdSuksOisr4WiSurexcKkhJVufl7NspCVFHeNeYr2c07dS06bk_xafqIxkuyn0mQt5fYjFbLN-oZiN2txDLzx3KIuYOe1Z9_EsjEbWPp7uNNRfEpynlf0EGJ_ZFW1_zkgyuBNoWwcwZnyQOAN12EbGwnw1RzGfPouzgxKAKAcJEuJHhbyghWOC4Yk2lK56QuiZss4CFlTThhFCTFJ1fF3N6VWoPwUUzY5UWfsIlqIgOCUHNDKCI18pDuYd2rCixKHs7PLOoVdUOU1lv-6iKuGfPrhG9Xo56KX9PDOfVwO1TRa-hICs8oF7vnlFiCDnMO2Kgt_NKLDpvE3apafxx8a4PIFNc1EUjA6kZzCVjILgksTrZOUDqZP2AdpEMPU4Vg2v-IxZSqEY0arQsAtMkdESS437QvDoa-UJhMv0Rid27HUAKgkKA7yVZCsC_n1xiOm-cqGD_jei_iAakDPnBQdX678UG9kJmcuyj__C8tPmRnRVZwt1peaMqo-Z2xISMH3BzxI1S2HrLgiSp4epUo3nAFfN1M0ugQdK8mTKSzBjxCeL13-bQa7vaAqtFjrMQrwTlRJpL1tUQKjC_nrjgYY4sObO8FokbFx9rH_aPH9I0IXrd2lFktTMRtp0ETSmzc7FKyzMLZRxAP6x84Mv3hXmT82e96LbE4maeFJTkaILrV8e03x-CetgcsIzCN9PvQdTQqcUw9Ml-GxL1896zBje5lwEZEtDXVyfpwr-cE8NGiRp59dE2Fs47ogMgZsHJqpYJlimj2lP2ExgHYgogsNOj9yM7YxlbVJpLlo5RtynA6GWzLnV9BSSjrkXBM444SZILrx2-rBSDeAlQH4ViYa16EHunLPXyWBzCxth2ubmoAkqxsPTr-fa6JjoZlWecg0QH6H6PTXVd01QwS68Bbwrcj8n35LLNaWVm5Dpy46lMzPaYFJlW4dpXVRJ2WVkLnTyPdsnWIqQ22K4xeZP1mTxZPf-XYVC6eHD5PBQmx8cUiqYLe0WA9pvtKwkfLjAuGlZbm-N6SMgs1Wcik2dlFL15TDJJv58DHxZcEGk5RNz4daVQNQLMyav5AhcwF8wC20AcjS0pjsEKGXPXKur7CtyfkPHA0MBlDEZre6nenkXo6jp-ZTgqxYJCXZXgZqLX9Qw9tibmt1Sf9x85XaAkq7hXikPZdHyWczjdS4YA-3gSnwpJ5gS-0tetWag6fkzkI4qHFMg9UrNXGVxrxsEUH9Jbwj49VJAJkgSJWVJgOSPtKPPwzAiSMWWttiFTVCVLXB3tbn-kHMUlvlf_zlTyS2HXHFyIZpqTpwyco6LyST7PBvJan_c99eAGmkOW5Yzua_EeVwSOlHs9s-1cDxkxGPVyz3GXRm_T1qKZ68ILQtUc8c8hNbvgbn7ctnkSIMHSzHoBw0rHaMRX1KDB3j-s-3Uys9myyChiqufM4L9V5aaXlnN91mv4vPURzIVS5TReWqjN7z7lm4M8WgcjkDj9Rvx60qD73CDkJLy77uFT6iJXKDneM1YSKse4r20zQ0OkwcDjb7iEowcqHgvx5KEppKdBWccZWVNHJXZl-tfGI5lWbDPwuWuEK64RIXZJe6JykSphNbWzz5oSp4aMqv4MFWggcKdYkVrlGovI3EpLElDHqBswUUxNJ2JWyJfdtWujOWmNrhpKZbq6EvqrqFd94X2Ay5D_Xz3EO4jRJZhbw4uRUAlrFDRoBUtZ0gFeL-N6ab6_sVdR3U6BV1hchCT-v7Zbt5No_4ULgQ4xb4QYqHL3DVwqfm8UPlGhivAc5n8QFjv-e86xERdWI39x7fE6v2oWCzLmQKW5GBX7ohbbQyOU3c96Haa-N2EQOjms5pQfa4-YJ5E_o4n6LSLtprIfY-3O316UfQNTvbsSkYv447LwoyS-9sHBklvC8RbN36s71UOrCLbGk9S6ypfxnIRYPmrhpd1wHT_jB0fCqQJZwgI5mILYqXnH-uqoHKjUqSPgHnhzT-iVqVSBE6Zq8xqUut-LqESULZ81A35SiGwlYrIQy5dHs5wadUIdbNz1ZWWI2ZybVTE39Ukv1DQp9MrhmYJZYrapTpguEN2me-EBjNNnpLRDsO86eSQAhVzV9J000jIvXxGdlUo3SKwZfM-1P0L2CdhicIgI7-KVSGrpJPxQA00Keey2Oj4P6Vdzsrp362WNlkuMIqueVSfRl8P63JzASuXCRlPwDKZ19D15h36uiyvgtBsKhPeAbzGfM7UTLFU-q5vP1gHgpiLqs6Bw61oo7E51yTu6zrmHukuao-AOGhKbctckfrvrVuZ7PpxD_tuQCoYeHUCW8-cjsh8rVsaA0TOo8g_TGpM-c47gXMYjUbfoo-mJV2hBZSW4a3npoZMgCCgPchFzJONFqs7VEcaVS6a6oXDl3woqq0v_LzNLfoGll6ixi9c5okjLeTvf3z6MROAabvxedMD8u8dkLqvL86q7d4FDrvBZDM8E5DbryvvVRPp9rfSa7KLwInjrM9bzpnV4e7TTk7-LDKg54YU8GF_RLC2vIdOvCRGE23BfG2KZVZof3rmhMITLEbGCSL9zd34d2YXhdqbOsTJ2DaZq_Nwii1lx5RBSf_6RSKyPwm0Q7vP30QKAE6FBMHqr2CQwsldDC9R-nI9Y_FNIrbo03lkz7TQe66pBOCUL22IXO1tcdw6PHnowVfOoI_pzrEAwP66gwnTC7Ysb7hREsTH9SIO-EZvPAb_045jovUfYTQmdYZmTgyr-zPzWn-jkprYnHEUX82Hn7LN3cTjRRNvhH9ELSmfrWYhRaW2Q==","type":"reasoning"},{"arguments":"\"{\\\"location\\\":\\\"Florence, Italy\\\"}\"","call_id":"call_ewLJJaD4OO6pdsTnaDtMuNn0","name":"weather","type":"function_call"},{"call_id":"call_ewLJJaD4OO6pdsTnaDtMuNn0","output":"40 C","type":"function_call_output"}],"model":"o4-mini","reasoning":{"effort":"high","summary":"auto"},"tool_choice":"auto","tools":[{"strict":false,"parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location","type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.3.0
+    url: https://api.openai.com/v1/responses
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: |-
+      {
+        "id": "resp_00f45739b037a2600168f239bbb9188196b53e629e83c81309",
+        "object": "response",
+        "created_at": 1760704955,
+        "status": "completed",
+        "background": false,
+        "billing": {
+          "payer": "developer"
+        },
+        "error": null,
+        "incomplete_details": null,
+        "instructions": null,
+        "max_output_tokens": null,
+        "max_tool_calls": null,
+        "model": "o4-mini-2025-04-16",
+        "output": [
+          {
+            "id": "msg_00f45739b037a2600168f239bc36348196b6b0cfe62701d820",
+            "type": "message",
+            "status": "completed",
+            "content": [
+              {
+                "type": "output_text",
+                "annotations": [],
+                "logprobs": [],
+                "text": "It\u2019s currently 40\u00b0C in Florence, Italy."
+              }
+            ],
+            "role": "assistant"
+          }
+        ],
+        "parallel_tool_calls": true,
+        "previous_response_id": null,
+        "prompt_cache_key": null,
+        "reasoning": {
+          "effort": "high",
+          "summary": "detailed"
+        },
+        "safety_identifier": null,
+        "service_tier": "default",
+        "store": false,
+        "temperature": 1.0,
+        "text": {
+          "format": {
+            "type": "text"
+          },
+          "verbosity": "medium"
+        },
+        "tool_choice": "auto",
+        "tools": [
+          {
+            "type": "function",
+            "description": "Get weather information for a location",
+            "name": "weather",
+            "parameters": {
+              "properties": {
+                "location": {
+                  "description": "the city",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "location"
+              ],
+              "type": "object"
+            },
+            "strict": false
+          }
+        ],
+        "top_logprobs": 0,
+        "top_p": 1.0,
+        "truncation": "disabled",
+        "usage": {
+          "input_tokens": 1406,
+          "input_tokens_details": {
+            "cached_tokens": 1152
+          },
+          "output_tokens": 15,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 1421
+        },
+        "user": null,
+        "metadata": {}
+      }
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 972.409834ms

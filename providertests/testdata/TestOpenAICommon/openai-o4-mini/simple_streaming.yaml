@@ -1,0 +1,44 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 222
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"Say hi in Portuguese","role":"user"}],"model":"o4-mini","max_completion_tokens":4000,"stream_options":{"include_usage":true},"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.3.0
+    url: https://api.openai.com/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"chatcmpl-CRdznBTZHwiwBn3wgDxF7dJBJmoV8","object":"chat.completion.chunk","created":1760704635,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"role":"assistant","content":"","refusal":null},"finish_reason":null}],"usage":null,"obfuscation":"In0BspKy"}
+
+      data: {"id":"chatcmpl-CRdznBTZHwiwBn3wgDxF7dJBJmoV8","object":"chat.completion.chunk","created":1760704635,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":"Oi"},"finish_reason":null}],"usage":null,"obfuscation":"RHZ9L7BA"}
+
+      data: {"id":"chatcmpl-CRdznBTZHwiwBn3wgDxF7dJBJmoV8","object":"chat.completion.chunk","created":1760704635,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":"!"},"finish_reason":null}],"usage":null,"obfuscation":"X8LMBUcZV"}
+
+      data: {"id":"chatcmpl-CRdznBTZHwiwBn3wgDxF7dJBJmoV8","object":"chat.completion.chunk","created":1760704635,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"usage":null,"obfuscation":"q1Yq"}
+
+      data: {"id":"chatcmpl-CRdznBTZHwiwBn3wgDxF7dJBJmoV8","object":"chat.completion.chunk","created":1760704635,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[],"usage":{"prompt_tokens":19,"completion_tokens":148,"total_tokens":167,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"completion_tokens_details":{"reasoning_tokens":128,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0}},"obfuscation":"VkPeD"}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream; charset=utf-8
+    status: 200 OK
+    code: 200
+    duration: 3.133094s

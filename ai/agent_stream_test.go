@@ -157,7 +157,7 @@ func TestStreamingAgentCallbacks(t *testing.T) {
 			callbacks["OnTextEnd"] = true
 			return nil
 		},
-		OnReasoningStart: func(id string) error {
+		OnReasoningStart: func(id string, _ ReasoningContent) error {
 			callbacks["OnReasoningStart"] = true
 			return nil
 		},

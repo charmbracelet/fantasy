@@ -3,7 +3,7 @@ package openai
 import (
 	"slices"
 
-	"github.com/charmbracelet/fantasy/ai"
+	"charm.land/fantasy/ai"
 )
 
 type ResponsesReasoningMetadata struct {

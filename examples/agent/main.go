@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/charmbracelet/fantasy/ai"
-	"github.com/charmbracelet/fantasy/openrouter"
+	"charm.land/fantasy/ai"
+	"charm.land/fantasy/openrouter"
 )
 
 func main() {

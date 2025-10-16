@@ -3,7 +3,7 @@ package openai
 import (
 	"fmt"
 
-	"github.com/charmbracelet/fantasy/ai"
+	"charm.land/fantasy/ai"
 	"github.com/openai/openai-go/v2"
 	"github.com/openai/openai-go/v2/packages/param"
 	"github.com/openai/openai-go/v2/shared"

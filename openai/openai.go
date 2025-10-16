@@ -5,7 +5,7 @@ import (
 	"cmp"
 	"maps"
 
-	"github.com/charmbracelet/fantasy/ai"
+	"charm.land/fantasy/ai"
 	"github.com/openai/openai-go/v2"
 	"github.com/openai/openai-go/v2/option"
 )

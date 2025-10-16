@@ -11,9 +11,9 @@ import (
 	"net/http"
 	"strings"
 
+	"charm.land/fantasy/ai"
+	"charm.land/fantasy/anthropic"
 	"cloud.google.com/go/auth"
-	"github.com/charmbracelet/fantasy/ai"
-	"github.com/charmbracelet/fantasy/anthropic"
 	"github.com/charmbracelet/x/exp/slice"
 	"github.com/google/uuid"
 	"google.golang.org/genai"

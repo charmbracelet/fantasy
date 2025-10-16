@@ -1,9 +1,9 @@
 package bedrock
 
 import (
+	"charm.land/fantasy/ai"
+	"charm.land/fantasy/anthropic"
 	"github.com/anthropics/anthropic-sdk-go/option"
-	"github.com/charmbracelet/fantasy/ai"
-	"github.com/charmbracelet/fantasy/anthropic"
 )
 
 type options struct {

@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/charmbracelet/fantasy/ai"
-	"github.com/charmbracelet/fantasy/openai"
+	"charm.land/fantasy/ai"
+	"charm.land/fantasy/openai"
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )
 

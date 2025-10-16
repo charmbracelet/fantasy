@@ -1,8 +1,8 @@
 package azure
 
 import (
-	"github.com/charmbracelet/fantasy/ai"
-	"github.com/charmbracelet/fantasy/openaicompat"
+	"charm.land/fantasy/ai"
+	"charm.land/fantasy/openaicompat"
 	"github.com/openai/openai-go/v2/azure"
 	"github.com/openai/openai-go/v2/option"
 )

@@ -11,12 +11,12 @@ import (
 	"maps"
 	"strings"
 
+	"charm.land/fantasy/ai"
 	"github.com/anthropics/anthropic-sdk-go"
 	"github.com/anthropics/anthropic-sdk-go/bedrock"
 	"github.com/anthropics/anthropic-sdk-go/option"
 	"github.com/anthropics/anthropic-sdk-go/packages/param"
 	"github.com/anthropics/anthropic-sdk-go/vertex"
-	"github.com/charmbracelet/fantasy/ai"
 	"golang.org/x/oauth2/google"
 )
 

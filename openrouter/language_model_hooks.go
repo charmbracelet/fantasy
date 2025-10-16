@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"maps"
 
-	"github.com/charmbracelet/fantasy/ai"
-	"github.com/charmbracelet/fantasy/anthropic"
+	"charm.land/fantasy/ai"
+	"charm.land/fantasy/anthropic"
 	openaisdk "github.com/openai/openai-go/v2"
 	"github.com/openai/openai-go/v2/packages/param"
 )

@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/anthropics/anthropic-sdk-go"
+	"github.com/anthropics/anthropic-sdk-go/bedrock"
 	"github.com/anthropics/anthropic-sdk-go/option"
 	"github.com/anthropics/anthropic-sdk-go/packages/param"
 	"github.com/anthropics/anthropic-sdk-go/vertex"
@@ -33,7 +34,9 @@ type options struct {
 
 	vertexProject  string
 	vertexLocation string
-	skipGoogleAuth bool
+	skipAuth       bool
+
+	useBedrock bool
 }
 
 type provider struct {
@@ -74,9 +77,15 @@ func WithVertex(project, location string) Option {
 	}
 }
 
-func WithSkipGoogleAuth(skip bool) Option {
+func WithSkipAuth(skip bool) Option {
 	return func(o *options) {
-		o.skipGoogleAuth = skip
+		o.skipAuth = skip
+	}
+}
+
+func WithBedrock() Option {
+	return func(o *options) {
+		o.useBedrock = true
 	}
 }
 
@@ -114,11 +123,11 @@ func (a *provider) LanguageModel(modelID string) (ai.LanguageModel, error) {
 	}
 	if a.options.vertexProject != "" && a.options.vertexLocation != "" {
 		var credentials *google.Credentials
-		if a.options.skipGoogleAuth {
+		if a.options.skipAuth {
 			credentials = &google.Credentials{TokenSource: &googleDummyTokenSource{}}
 		} else {
 			var err error
-			credentials, err = google.FindDefaultCredentials(context.Background())
+			credentials, err = google.FindDefaultCredentials(context.TODO())
 			if err != nil {
 				return nil, err
 			}
@@ -127,12 +136,25 @@ func (a *provider) LanguageModel(modelID string) (ai.LanguageModel, error) {
 		clientOptions = append(
 			clientOptions,
 			vertex.WithCredentials(
-				context.Background(),
+				context.TODO(),
 				a.options.vertexLocation,
 				a.options.vertexProject,
 				credentials,
 			),
 		)
+	}
+	if a.options.useBedrock {
+		if a.options.skipAuth {
+			clientOptions = append(
+				clientOptions,
+				bedrock.WithConfig(dummyBedrockConfig),
+			)
+		} else {
+			clientOptions = append(
+				clientOptions,
+				bedrock.WithLoadDefaultConfig(context.TODO()),
+			)
+		}
 	}
 	return languageModel{
 		modelID:  modelID,
@@ -249,7 +271,7 @@ func (a languageModel) prepareParams(call ai.Call) (*anthropic.MessageNewParams,
 		if providerOptions.DisableParallelToolUse != nil {
 			disableParallelToolUse = *providerOptions.DisableParallelToolUse
 		}
-		tools, toolChoice, toolWarnings := toTools(call.Tools, call.ToolChoice, disableParallelToolUse)
+		tools, toolChoice, toolWarnings := a.toTools(call.Tools, call.ToolChoice, disableParallelToolUse)
 		params.Tools = tools
 		if toolChoice != nil {
 			params.ToolChoice = *toolChoice
@@ -335,7 +357,7 @@ func groupIntoBlocks(prompt ai.Prompt) []*messageBlock {
 	return blocks
 }
 
-func toTools(tools []ai.Tool, toolChoice *ai.ToolChoice, disableParallelToolCalls bool) (anthropicTools []anthropic.ToolUnionParam, anthropicToolChoice *anthropic.ToolChoiceUnionParam, warnings []ai.CallWarning) {
+func (a languageModel) toTools(tools []ai.Tool, toolChoice *ai.ToolChoice, disableParallelToolCalls bool) (anthropicTools []anthropic.ToolUnionParam, anthropicToolChoice *anthropic.ToolChoiceUnionParam, warnings []ai.CallWarning) {
 	for _, tool := range tools {
 		if tool.GetType() == ai.ToolTypeFunction {
 			ft, ok := tool.(ai.FunctionTool)
@@ -375,12 +397,19 @@ func toTools(tools []ai.Tool, toolChoice *ai.ToolChoice, disableParallelToolCall
 			Message: "tool is not supported",
 		})
 	}
+
+	// NOTE: Bedrock does not support this attribute.
+	var disableParallelToolUse param.Opt[bool]
+	if !a.options.useBedrock {
+		disableParallelToolUse = param.NewOpt(disableParallelToolCalls)
+	}
+
 	if toolChoice == nil {
 		if disableParallelToolCalls {
 			anthropicToolChoice = &anthropic.ToolChoiceUnionParam{
 				OfAuto: &anthropic.ToolChoiceAutoParam{
 					Type:                   "auto",
-					DisableParallelToolUse: param.NewOpt(disableParallelToolCalls),
+					DisableParallelToolUse: disableParallelToolUse,
 				},
 			}
 		}
@@ -392,14 +421,14 @@ func toTools(tools []ai.Tool, toolChoice *ai.ToolChoice, disableParallelToolCall
 		anthropicToolChoice = &anthropic.ToolChoiceUnionParam{
 			OfAuto: &anthropic.ToolChoiceAutoParam{
 				Type:                   "auto",
-				DisableParallelToolUse: param.NewOpt(disableParallelToolCalls),
+				DisableParallelToolUse: disableParallelToolUse,
 			},
 		}
 	case ai.ToolChoiceRequired:
 		anthropicToolChoice = &anthropic.ToolChoiceUnionParam{
 			OfAny: &anthropic.ToolChoiceAnyParam{
 				Type:                   "any",
-				DisableParallelToolUse: param.NewOpt(disableParallelToolCalls),
+				DisableParallelToolUse: disableParallelToolUse,
 			},
 		}
 	case ai.ToolChoiceNone:
@@ -409,7 +438,7 @@ func toTools(tools []ai.Tool, toolChoice *ai.ToolChoice, disableParallelToolCall
 			OfTool: &anthropic.ToolChoiceToolParam{
 				Type:                   "tool",
 				Name:                   string(*toolChoice),
-				DisableParallelToolUse: param.NewOpt(disableParallelToolCalls),
+				DisableParallelToolUse: disableParallelToolUse,
 			},
 		}
 	}

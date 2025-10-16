@@ -171,6 +171,9 @@ func testMultiTool(t *testing.T, pair builderPair) {
 	if strings.Contains(pair.name, "vertex") && strings.Contains(pair.name, "claude") {
 		t.Skip("skipping multi-tool tests for vertex claude as it does not support parallel multi-tool calls")
 	}
+	if strings.Contains(pair.name, "bedrock") && strings.Contains(pair.name, "claude") {
+		t.Skip("skipping multi-tool tests for bedrock claude as it does not support parallel multi-tool calls")
+	}
 
 	type CalculatorInput struct {
 		A int `json:"a" description:"first number"`

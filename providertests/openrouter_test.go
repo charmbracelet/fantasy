@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"charm.land/fantasy"
-	"charm.land/fantasy/openrouter"
+	"charm.land/fantasy/providers/openrouter"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )

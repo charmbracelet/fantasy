@@ -2,7 +2,7 @@ package azure
 
 import (
 	"charm.land/fantasy"
-	"charm.land/fantasy/openaicompat"
+	"charm.land/fantasy/providers/openaicompat"
 	"github.com/openai/openai-go/v2/azure"
 	"github.com/openai/openai-go/v2/option"
 )

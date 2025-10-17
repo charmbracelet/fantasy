@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"charm.land/fantasy"
-	"charm.land/fantasy/openai"
+	"charm.land/fantasy/providers/openai"
 )
 
 func main() {

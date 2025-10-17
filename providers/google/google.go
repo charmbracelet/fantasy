@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	"charm.land/fantasy"
-	"charm.land/fantasy/anthropic"
+	"charm.land/fantasy/providers/anthropic"
 	"cloud.google.com/go/auth"
 	"github.com/charmbracelet/x/exp/slice"
 	"github.com/google/uuid"

@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"charm.land/fantasy"
-	"charm.land/fantasy/openrouter"
+	"charm.land/fantasy/providers/openrouter"
 )
 
 func main() {

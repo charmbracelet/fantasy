@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"charm.land/fantasy"
-	"charm.land/fantasy/anthropic"
+	"charm.land/fantasy/providers/anthropic"
 )
 
 func main() {

@@ -2,7 +2,7 @@ package openaicompat
 
 import (
 	"charm.land/fantasy"
-	"charm.land/fantasy/openai"
+	"charm.land/fantasy/providers/openai"
 )
 
 type ProviderOptions struct {

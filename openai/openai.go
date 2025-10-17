@@ -110,7 +110,7 @@ func WithLanguageModelOptions(opts ...LanguageModelOption) Option {
 	}
 }
 
-// WithUseResponsesAPI makes it so the provider uses responses API for models that support it
+// WithUseResponsesAPI makes it so the provider uses responses API for models that support it.
 func WithUseResponsesAPI() Option {
 	return func(o *options) {
 		o.useResponsesAPI = true

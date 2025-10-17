@@ -25,7 +25,7 @@ type responsesLanguageModel struct {
 }
 
 // newResponsesLanguageModel implements a responses api model
-// INFO: (kujtim) currently we do not support stored parameter we default it to false
+// INFO: (kujtim) currently we do not support stored parameter we default it to false.
 func newResponsesLanguageModel(modelID string, provider string, client openai.Client) responsesLanguageModel {
 	return responsesLanguageModel{
 		modelID:  modelID,
@@ -112,7 +112,7 @@ func getResponsesModelConfig(modelID string) responsesModelConfig {
 	}
 }
 
-func (o responsesLanguageModel) prepareParams(call ai.Call) (*responses.ResponseNewParams, []ai.CallWarning, error) {
+func (o responsesLanguageModel) prepareParams(call ai.Call) (*responses.ResponseNewParams, []ai.CallWarning) {
 	var warnings []ai.CallWarning
 	params := &responses.ResponseNewParams{
 		Store: param.NewOpt(false),
@@ -319,7 +319,7 @@ func (o responsesLanguageModel) prepareParams(call ai.Call) (*responses.Response
 		params.ToolChoice = toolChoice
 	}
 
-	return params, warnings, nil
+	return params, warnings
 }
 
 func toResponsesPrompt(prompt ai.Prompt, systemMessageMode string) (responses.ResponseInputParam, []ai.CallWarning) {
@@ -503,7 +503,6 @@ func toResponsesPrompt(prompt ai.Prompt, systemMessageMode string) (responses.Re
 					input = append(input, responses.ResponseInputItemUnionParam{
 						OfReasoning: reasoning,
 					})
-
 				}
 			}
 
@@ -582,7 +581,7 @@ func toResponsesPrompt(prompt ai.Prompt, systemMessageMode string) (responses.Re
 }
 
 func toResponsesTools(tools []ai.Tool, toolChoice *ai.ToolChoice, options *ResponsesProviderOptions) ([]responses.ToolUnionParam, responses.ResponseNewParamsToolChoiceUnion, []ai.CallWarning) {
-	var warnings []ai.CallWarning
+	warnings := make([]ai.CallWarning, 0)
 	var openaiTools []responses.ToolUnionParam
 
 	if len(tools) == 0 {
@@ -675,11 +674,7 @@ func (o responsesLanguageModel) handleError(err error) error {
 }
 
 func (o responsesLanguageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response, error) {
-	params, warnings, err := o.prepareParams(call)
-	if err != nil {
-		return nil, err
-	}
-
+	params, warnings := o.prepareParams(call)
 	response, err := o.client.Responses.New(ctx, *params)
 	if err != nil {
 		return nil, o.handleError(err)
@@ -771,7 +766,6 @@ func (o responsesLanguageModel) Generate(ctx context.Context, call ai.Call) (*ai
 					Name: metadata,
 				},
 			})
-
 		}
 	}
 
@@ -817,10 +811,7 @@ func mapResponsesFinishReason(reason string, hasFunctionCall bool) ai.FinishReas
 }
 
 func (o responsesLanguageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamResponse, error) {
-	params, warnings, err := o.prepareParams(call)
-	if err != nil {
-		return nil, err
-	}
+	params, warnings := o.prepareParams(call)
 
 	stream := o.client.Responses.NewStreaming(ctx, *params)
 

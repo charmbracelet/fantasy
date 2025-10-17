@@ -76,5 +76,5 @@ require (
 replace github.com/anthropics/anthropic-sdk-go => github.com/charmbracelet/anthropic-sdk-go v0.0.0-20251010172108-7b952cdeeb9d
 
 // NOTE(@andreynering): Temporarily pinning @fantasy branch with fixes:
-// https://github.com/charmbracelet/anthropic-sdk-go/commits/fantasy/
+// https://github.com/charmbracelet/go-genai/commits/fantasy/
 replace google.golang.org/genai => github.com/charmbracelet/go-genai v0.0.0-20251009191514-c6fa9e37d847

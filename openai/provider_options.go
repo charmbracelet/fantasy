@@ -1,7 +1,7 @@
 package openai
 
 import (
-	"github.com/charmbracelet/fantasy/ai"
+	"charm.land/fantasy/ai"
 	"github.com/openai/openai-go/v2"
 )
 

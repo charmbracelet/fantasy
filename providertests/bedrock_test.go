@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/charmbracelet/fantasy/ai"
-	"github.com/charmbracelet/fantasy/bedrock"
+	"charm.land/fantasy/ai"
+	"charm.land/fantasy/bedrock"
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )
 

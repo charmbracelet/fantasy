@@ -9,7 +9,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/charmbracelet/fantasy/ai"
+	"charm.land/fantasy/ai"
 	xjson "github.com/charmbracelet/x/json"
 	"github.com/google/uuid"
 	"github.com/openai/openai-go/v2"

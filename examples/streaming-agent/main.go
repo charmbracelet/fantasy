@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/charmbracelet/fantasy/ai"
-	"github.com/charmbracelet/fantasy/anthropic"
+	"charm.land/fantasy/ai"
+	"charm.land/fantasy/anthropic"
 )
 
 func main() {

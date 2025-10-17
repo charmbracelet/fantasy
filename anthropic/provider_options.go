@@ -1,6 +1,6 @@
 package anthropic
 
-import "github.com/charmbracelet/fantasy/ai"
+import "charm.land/fantasy/ai"
 
 type ProviderOptions struct {
 	SendReasoning          *bool                   `json:"send_reasoning"`

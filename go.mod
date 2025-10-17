@@ -1,4 +1,4 @@
-module github.com/charmbracelet/fantasy
+module charm.land/fantasy
 
 go 1.24.5
 

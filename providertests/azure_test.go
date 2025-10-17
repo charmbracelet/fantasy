@@ -6,9 +6,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/charmbracelet/fantasy/ai"
-	"github.com/charmbracelet/fantasy/azure"
-	"github.com/charmbracelet/fantasy/openai"
+	"charm.land/fantasy/ai"
+	"charm.land/fantasy/azure"
+	"charm.land/fantasy/openai"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )

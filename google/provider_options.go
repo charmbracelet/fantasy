@@ -1,6 +1,6 @@
 package google
 
-import "github.com/charmbracelet/fantasy/ai"
+import "charm.land/fantasy/ai"
 
 type ThinkingConfig struct {
 	ThinkingBudget  *int64 `json:"thinking_budget"`

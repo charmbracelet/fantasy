@@ -3,8 +3,8 @@ package openrouter
 import (
 	"encoding/json"
 
-	"github.com/charmbracelet/fantasy/ai"
-	"github.com/charmbracelet/fantasy/openai"
+	"charm.land/fantasy/ai"
+	"charm.land/fantasy/openai"
 	"github.com/openai/openai-go/v2/option"
 )
 

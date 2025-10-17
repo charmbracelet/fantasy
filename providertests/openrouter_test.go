@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/charmbracelet/fantasy/ai"
-	"github.com/charmbracelet/fantasy/openrouter"
+	"charm.land/fantasy/ai"
+	"charm.land/fantasy/openrouter"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )

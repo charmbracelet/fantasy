@@ -1,8 +1,8 @@
 package openaicompat
 
 import (
-	"github.com/charmbracelet/fantasy/ai"
-	"github.com/charmbracelet/fantasy/openai"
+	"charm.land/fantasy/ai"
+	"charm.land/fantasy/openai"
 )
 
 type ProviderOptions struct {

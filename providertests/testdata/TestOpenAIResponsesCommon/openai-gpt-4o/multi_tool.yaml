@@ -1,0 +1,293 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 834
+    host: ""
+    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":[{"text":"Add and multiply the number 2 and 3","type":"input_text"}],"role":"user"}],"model":"gpt-4o","tool_choice":"auto","tools":[{"strict":false,"parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"name":"add","description":"Add two numbers","type":"function"},{"strict":false,"parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"name":"multiply","description":"Multiply two numbers","type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.3.0
+    url: https://api.openai.com/v1/responses
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: |-
+      {
+        "id": "resp_0e4ad943aeeb6f440168f237e4ba68819d82d960503add3455",
+        "object": "response",
+        "created_at": 1760704484,
+        "status": "completed",
+        "background": false,
+        "billing": {
+          "payer": "developer"
+        },
+        "error": null,
+        "incomplete_details": null,
+        "instructions": null,
+        "max_output_tokens": 4000,
+        "max_tool_calls": null,
+        "model": "gpt-4o-2024-08-06",
+        "output": [
+          {
+            "id": "fc_0e4ad943aeeb6f440168f237e55708819dbb4bacb951338226",
+            "type": "function_call",
+            "status": "completed",
+            "arguments": "{\"a\":2,\"b\":3}",
+            "call_id": "call_fWTsR6VaKuyav2YHicLHxgUu",
+            "name": "add"
+          },
+          {
+            "id": "fc_0e4ad943aeeb6f440168f237e57510819db015d8ff8e768bdb",
+            "type": "function_call",
+            "status": "completed",
+            "arguments": "{\"a\":2,\"b\":3}",
+            "call_id": "call_KLpoIGIQ4rbE8b3AWCUaui6g",
+            "name": "multiply"
+          }
+        ],
+        "parallel_tool_calls": true,
+        "previous_response_id": null,
+        "prompt_cache_key": null,
+        "reasoning": {
+          "effort": null,
+          "summary": null
+        },
+        "safety_identifier": null,
+        "service_tier": "default",
+        "store": false,
+        "temperature": 1.0,
+        "text": {
+          "format": {
+            "type": "text"
+          },
+          "verbosity": "medium"
+        },
+        "tool_choice": "auto",
+        "tools": [
+          {
+            "type": "function",
+            "description": "Add two numbers",
+            "name": "add",
+            "parameters": {
+              "properties": {
+                "a": {
+                  "description": "first number",
+                  "type": "integer"
+                },
+                "b": {
+                  "description": "second number",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "a",
+                "b"
+              ],
+              "type": "object"
+            },
+            "strict": false
+          },
+          {
+            "type": "function",
+            "description": "Multiply two numbers",
+            "name": "multiply",
+            "parameters": {
+              "properties": {
+                "a": {
+                  "description": "first number",
+                  "type": "integer"
+                },
+                "b": {
+                  "description": "second number",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "a",
+                "b"
+              ],
+              "type": "object"
+            },
+            "strict": false
+          }
+        ],
+        "top_logprobs": 0,
+        "top_p": 1.0,
+        "truncation": "disabled",
+        "usage": {
+          "input_tokens": 54,
+          "input_tokens_details": {
+            "cached_tokens": 0
+          },
+          "output_tokens": 50,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 104
+        },
+        "user": null,
+        "metadata": {}
+      }
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 991.245209ms
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1261
+    host: ""
+    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":[{"text":"Add and multiply the number 2 and 3","type":"input_text"}],"role":"user"},{"arguments":"\"{\\\"a\\\":2,\\\"b\\\":3}\"","call_id":"call_fWTsR6VaKuyav2YHicLHxgUu","name":"add","type":"function_call"},{"arguments":"\"{\\\"a\\\":2,\\\"b\\\":3}\"","call_id":"call_KLpoIGIQ4rbE8b3AWCUaui6g","name":"multiply","type":"function_call"},{"call_id":"call_fWTsR6VaKuyav2YHicLHxgUu","output":"5","type":"function_call_output"},{"call_id":"call_KLpoIGIQ4rbE8b3AWCUaui6g","output":"6","type":"function_call_output"}],"model":"gpt-4o","tool_choice":"auto","tools":[{"strict":false,"parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"name":"add","description":"Add two numbers","type":"function"},{"strict":false,"parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"name":"multiply","description":"Multiply two numbers","type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.3.0
+    url: https://api.openai.com/v1/responses
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: |-
+      {
+        "id": "resp_03837d599fa2bb470168f237e5bb18819c981526bc15969e4b",
+        "object": "response",
+        "created_at": 1760704485,
+        "status": "completed",
+        "background": false,
+        "billing": {
+          "payer": "developer"
+        },
+        "error": null,
+        "incomplete_details": null,
+        "instructions": null,
+        "max_output_tokens": 4000,
+        "max_tool_calls": null,
+        "model": "gpt-4o-2024-08-06",
+        "output": [
+          {
+            "id": "msg_03837d599fa2bb470168f237e6987c819c8c1f2bd707a5ecd0",
+            "type": "message",
+            "status": "completed",
+            "content": [
+              {
+                "type": "output_text",
+                "annotations": [],
+                "logprobs": [],
+                "text": "The sum of 2 and 3 is 5, and their product is 6."
+              }
+            ],
+            "role": "assistant"
+          }
+        ],
+        "parallel_tool_calls": true,
+        "previous_response_id": null,
+        "prompt_cache_key": null,
+        "reasoning": {
+          "effort": null,
+          "summary": null
+        },
+        "safety_identifier": null,
+        "service_tier": "default",
+        "store": false,
+        "temperature": 1.0,
+        "text": {
+          "format": {
+            "type": "text"
+          },
+          "verbosity": "medium"
+        },
+        "tool_choice": "auto",
+        "tools": [
+          {
+            "type": "function",
+            "description": "Add two numbers",
+            "name": "add",
+            "parameters": {
+              "properties": {
+                "a": {
+                  "description": "first number",
+                  "type": "integer"
+                },
+                "b": {
+                  "description": "second number",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "a",
+                "b"
+              ],
+              "type": "object"
+            },
+            "strict": false
+          },
+          {
+            "type": "function",
+            "description": "Multiply two numbers",
+            "name": "multiply",
+            "parameters": {
+              "properties": {
+                "a": {
+                  "description": "first number",
+                  "type": "integer"
+                },
+                "b": {
+                  "description": "second number",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "a",
+                "b"
+              ],
+              "type": "object"
+            },
+            "strict": false
+          }
+        ],
+        "top_logprobs": 0,
+        "top_p": 1.0,
+        "truncation": "disabled",
+        "usage": {
+          "input_tokens": 156,
+          "input_tokens_details": {
+            "cached_tokens": 0
+          },
+          "output_tokens": 21,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 177
+        },
+        "user": null,
+        "metadata": {}
+      }
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 1.167056291s

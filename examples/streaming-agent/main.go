@@ -166,7 +166,7 @@ func main() {
 			fmt.Println()
 			return nil
 		},
-		OnReasoningStart: func(id string) error {
+		OnReasoningStart: func(id string, _ ai.ReasoningContent) error {
 			fmt.Print("🤔 Thinking: ")
 			return nil
 		},

@@ -940,7 +940,7 @@ func TestDoGenerate(t *testing.T) {
 		result, err := model.Generate(context.Background(), ai.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				LogProbs: ai.BoolOption(true),
+				LogProbs: ai.Opt(true),
 			}),
 		})
 
@@ -1057,8 +1057,8 @@ func TestDoGenerate(t *testing.T) {
 				LogitBias: map[string]int64{
 					"50256": -100,
 				},
-				ParallelToolCalls: ai.BoolOption(false),
-				User:              ai.StringOption("test-user-id"),
+				ParallelToolCalls: ai.Opt(false),
+				User:              ai.Opt("test-user-id"),
 			}),
 		})
 
@@ -1136,7 +1136,7 @@ func TestDoGenerate(t *testing.T) {
 		_, err := model.Generate(context.Background(), ai.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				TextVerbosity: ai.StringOption("low"),
+				TextVerbosity: ai.Opt("low"),
 			}),
 		})
 
@@ -1528,7 +1528,7 @@ func TestDoGenerate(t *testing.T) {
 		_, err := model.Generate(context.Background(), ai.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				MaxCompletionTokens: ai.IntOption(255),
+				MaxCompletionTokens: ai.Opt(int64(255)),
 			}),
 		})
 
@@ -1610,7 +1610,7 @@ func TestDoGenerate(t *testing.T) {
 		_, err := model.Generate(context.Background(), ai.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				Store: ai.BoolOption(true),
+				Store: ai.Opt(true),
 			}),
 		})
 
@@ -1690,7 +1690,7 @@ func TestDoGenerate(t *testing.T) {
 		_, err := model.Generate(context.Background(), ai.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				PromptCacheKey: ai.StringOption("test-cache-key-123"),
+				PromptCacheKey: ai.Opt("test-cache-key-123"),
 			}),
 		})
 
@@ -1728,7 +1728,7 @@ func TestDoGenerate(t *testing.T) {
 		_, err := model.Generate(context.Background(), ai.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				SafetyIdentifier: ai.StringOption("test-safety-identifier-123"),
+				SafetyIdentifier: ai.Opt("test-safety-identifier-123"),
 			}),
 		})
 
@@ -1798,7 +1798,7 @@ func TestDoGenerate(t *testing.T) {
 		_, err := model.Generate(context.Background(), ai.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				ServiceTier: ai.StringOption("flex"),
+				ServiceTier: ai.Opt("flex"),
 			}),
 		})
 
@@ -1834,7 +1834,7 @@ func TestDoGenerate(t *testing.T) {
 		result, err := model.Generate(context.Background(), ai.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				ServiceTier: ai.StringOption("flex"),
+				ServiceTier: ai.Opt("flex"),
 			}),
 		})
 
@@ -1867,7 +1867,7 @@ func TestDoGenerate(t *testing.T) {
 		_, err := model.Generate(context.Background(), ai.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				ServiceTier: ai.StringOption("priority"),
+				ServiceTier: ai.Opt("priority"),
 			}),
 		})
 
@@ -1903,7 +1903,7 @@ func TestDoGenerate(t *testing.T) {
 		result, err := model.Generate(context.Background(), ai.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				ServiceTier: ai.StringOption("priority"),
+				ServiceTier: ai.Opt("priority"),
 			}),
 		})
 
@@ -2573,7 +2573,7 @@ func TestDoStream(t *testing.T) {
 		_, err := model.Stream(context.Background(), ai.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				Store: ai.BoolOption(true),
+				Store: ai.Opt(true),
 			}),
 		})
 
@@ -2661,7 +2661,7 @@ func TestDoStream(t *testing.T) {
 		_, err := model.Stream(context.Background(), ai.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				ServiceTier: ai.StringOption("flex"),
+				ServiceTier: ai.Opt("flex"),
 			}),
 		})
 
@@ -2703,7 +2703,7 @@ func TestDoStream(t *testing.T) {
 		_, err := model.Stream(context.Background(), ai.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				ServiceTier: ai.StringOption("priority"),
+				ServiceTier: ai.Opt("priority"),
 			}),
 		})
 

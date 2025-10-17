@@ -1,0 +1,149 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 514
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"}],"model":"o4-mini","max_completion_tokens":4000,"stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.3.0
+    url: https://api.openai.com/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"chatcmpl-CRdzvzjPGfHTfxYWBuHOE6Fqgbd3w","object":"chat.completion.chunk","created":1760704643,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"role":"assistant","content":null,"tool_calls":[{"index":0,"id":"call_XevDuUMYIPg4YiA0oGOYlJTt","type":"function","function":{"name":"weather","arguments":""}}],"refusal":null},"finish_reason":null}],"usage":null,"obfuscation":"kPmohDP"}
+
+      data: {"id":"chatcmpl-CRdzvzjPGfHTfxYWBuHOE6Fqgbd3w","object":"chat.completion.chunk","created":1760704643,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"{\""}}]},"finish_reason":null}],"usage":null,"obfuscation":"l8ZBA4sqknndZ"}
+
+      data: {"id":"chatcmpl-CRdzvzjPGfHTfxYWBuHOE6Fqgbd3w","object":"chat.completion.chunk","created":1760704643,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"location"}}]},"finish_reason":null}],"usage":null,"obfuscation":"uDtteUEc"}
+
+      data: {"id":"chatcmpl-CRdzvzjPGfHTfxYWBuHOE6Fqgbd3w","object":"chat.completion.chunk","created":1760704643,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"\":\""}}]},"finish_reason":null}],"usage":null,"obfuscation":"RLch0C57YvN"}
+
+      data: {"id":"chatcmpl-CRdzvzjPGfHTfxYWBuHOE6Fqgbd3w","object":"chat.completion.chunk","created":1760704643,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"Flor"}}]},"finish_reason":null}],"usage":null,"obfuscation":"ubrkTTBECEch"}
+
+      data: {"id":"chatcmpl-CRdzvzjPGfHTfxYWBuHOE6Fqgbd3w","object":"chat.completion.chunk","created":1760704643,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"ence"}}]},"finish_reason":null}],"usage":null,"obfuscation":"ymKoTibZF2Wx"}
+
+      data: {"id":"chatcmpl-CRdzvzjPGfHTfxYWBuHOE6Fqgbd3w","object":"chat.completion.chunk","created":1760704643,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":","}}]},"finish_reason":null}],"usage":null,"obfuscation":"lunIUN6UnqixGVS"}
+
+      data: {"id":"chatcmpl-CRdzvzjPGfHTfxYWBuHOE6Fqgbd3w","object":"chat.completion.chunk","created":1760704643,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":" Italy"}}]},"finish_reason":null}],"usage":null,"obfuscation":"0R7CM90wrz"}
+
+      data: {"id":"chatcmpl-CRdzvzjPGfHTfxYWBuHOE6Fqgbd3w","object":"chat.completion.chunk","created":1760704643,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"\"}"}}]},"finish_reason":null}],"usage":null,"obfuscation":"UoUH2orSC5M6H"}
+
+      data: {"id":"chatcmpl-CRdzvzjPGfHTfxYWBuHOE6Fqgbd3w","object":"chat.completion.chunk","created":1760704643,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}],"usage":null,"obfuscation":"kyr6C4vgS6KpIx"}
+
+      data: {"id":"chatcmpl-CRdzvzjPGfHTfxYWBuHOE6Fqgbd3w","object":"chat.completion.chunk","created":1760704643,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[],"usage":{"prompt_tokens":64,"completion_tokens":25,"total_tokens":89,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"completion_tokens_details":{"reasoning_tokens":0,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0}},"obfuscation":"BMYaOAORX"}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream; charset=utf-8
+    status: 200 OK
+    code: 200
+    duration: 1.742662959s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 766
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"call_XevDuUMYIPg4YiA0oGOYlJTt","function":{"arguments":"{\"location\":\"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"call_XevDuUMYIPg4YiA0oGOYlJTt","role":"tool"}],"model":"o4-mini","max_completion_tokens":4000,"stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.3.0
+    url: https://api.openai.com/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"chatcmpl-CRdzxUM84mYwaVLVUEQ0BMkH7N3rK","object":"chat.completion.chunk","created":1760704645,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"role":"assistant","content":"","refusal":null},"finish_reason":null}],"usage":null,"obfuscation":"J9fqcxQ0"}
+
+      data: {"id":"chatcmpl-CRdzxUM84mYwaVLVUEQ0BMkH7N3rK","object":"chat.completion.chunk","created":1760704645,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":"The"},"finish_reason":null}],"usage":null,"obfuscation":"9psTh4S"}
+
+      data: {"id":"chatcmpl-CRdzxUM84mYwaVLVUEQ0BMkH7N3rK","object":"chat.completion.chunk","created":1760704645,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":" current"},"finish_reason":null}],"usage":null,"obfuscation":"qC"}
+
+      data: {"id":"chatcmpl-CRdzxUM84mYwaVLVUEQ0BMkH7N3rK","object":"chat.completion.chunk","created":1760704645,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":" temperature"},"finish_reason":null}],"usage":null,"obfuscation":"IWaJutlGMgxvCa"}
+
+      data: {"id":"chatcmpl-CRdzxUM84mYwaVLVUEQ0BMkH7N3rK","object":"chat.completion.chunk","created":1760704645,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":" in"},"finish_reason":null}],"usage":null,"obfuscation":"7GnoJrO"}
+
+      data: {"id":"chatcmpl-CRdzxUM84mYwaVLVUEQ0BMkH7N3rK","object":"chat.completion.chunk","created":1760704645,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":" Florence"},"finish_reason":null}],"usage":null,"obfuscation":"C"}
+
+      data: {"id":"chatcmpl-CRdzxUM84mYwaVLVUEQ0BMkH7N3rK","object":"chat.completion.chunk","created":1760704645,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":","},"finish_reason":null}],"usage":null,"obfuscation":"7uviSp1f4"}
+
+      data: {"id":"chatcmpl-CRdzxUM84mYwaVLVUEQ0BMkH7N3rK","object":"chat.completion.chunk","created":1760704645,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":" Italy"},"finish_reason":null}],"usage":null,"obfuscation":"OIuc"}
+
+      data: {"id":"chatcmpl-CRdzxUM84mYwaVLVUEQ0BMkH7N3rK","object":"chat.completion.chunk","created":1760704645,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":" is"},"finish_reason":null}],"usage":null,"obfuscation":"FefXEvV"}
+
+      data: {"id":"chatcmpl-CRdzxUM84mYwaVLVUEQ0BMkH7N3rK","object":"chat.completion.chunk","created":1760704645,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":" "},"finish_reason":null}],"usage":null,"obfuscation":"zMQLb8hcU"}
+
+      data: {"id":"chatcmpl-CRdzxUM84mYwaVLVUEQ0BMkH7N3rK","object":"chat.completion.chunk","created":1760704645,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":"40"},"finish_reason":null}],"usage":null,"obfuscation":"dqTN5maD"}
+
+      data: {"id":"chatcmpl-CRdzxUM84mYwaVLVUEQ0BMkH7N3rK","object":"chat.completion.chunk","created":1760704645,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":"°C"},"finish_reason":null}],"usage":null,"obfuscation":"zmWzszVf"}
+
+      data: {"id":"chatcmpl-CRdzxUM84mYwaVLVUEQ0BMkH7N3rK","object":"chat.completion.chunk","created":1760704645,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":"."},"finish_reason":null}],"usage":null,"obfuscation":"wcGkYYod2"}
+
+      data: {"id":"chatcmpl-CRdzxUM84mYwaVLVUEQ0BMkH7N3rK","object":"chat.completion.chunk","created":1760704645,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":" Would"},"finish_reason":null}],"usage":null,"obfuscation":"Y3wl"}
+
+      data: {"id":"chatcmpl-CRdzxUM84mYwaVLVUEQ0BMkH7N3rK","object":"chat.completion.chunk","created":1760704645,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":" you"},"finish_reason":null}],"usage":null,"obfuscation":"whFvbn"}
+
+      data: {"id":"chatcmpl-CRdzxUM84mYwaVLVUEQ0BMkH7N3rK","object":"chat.completion.chunk","created":1760704645,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":" like"},"finish_reason":null}],"usage":null,"obfuscation":"zleYy"}
+
+      data: {"id":"chatcmpl-CRdzxUM84mYwaVLVUEQ0BMkH7N3rK","object":"chat.completion.chunk","created":1760704645,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":" more"},"finish_reason":null}],"usage":null,"obfuscation":"LvKVS"}
+
+      data: {"id":"chatcmpl-CRdzxUM84mYwaVLVUEQ0BMkH7N3rK","object":"chat.completion.chunk","created":1760704645,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":" details"},"finish_reason":null}],"usage":null,"obfuscation":"6S"}
+
+      data: {"id":"chatcmpl-CRdzxUM84mYwaVLVUEQ0BMkH7N3rK","object":"chat.completion.chunk","created":1760704645,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":" ("},"finish_reason":null}],"usage":null,"obfuscation":"CN2vr0cw"}
+
+      data: {"id":"chatcmpl-CRdzxUM84mYwaVLVUEQ0BMkH7N3rK","object":"chat.completion.chunk","created":1760704645,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":"e"},"finish_reason":null}],"usage":null,"obfuscation":"MnqKVTshP"}
+
+      data: {"id":"chatcmpl-CRdzxUM84mYwaVLVUEQ0BMkH7N3rK","object":"chat.completion.chunk","created":1760704645,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":".g"},"finish_reason":null}],"usage":null,"obfuscation":"3dgCtAmi"}
+
+      data: {"id":"chatcmpl-CRdzxUM84mYwaVLVUEQ0BMkH7N3rK","object":"chat.completion.chunk","created":1760704645,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":".,"},"finish_reason":null}],"usage":null,"obfuscation":"3PssNymm"}
+
+      data: {"id":"chatcmpl-CRdzxUM84mYwaVLVUEQ0BMkH7N3rK","object":"chat.completion.chunk","created":1760704645,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":" humidity"},"finish_reason":null}],"usage":null,"obfuscation":"2"}
+
+      data: {"id":"chatcmpl-CRdzxUM84mYwaVLVUEQ0BMkH7N3rK","object":"chat.completion.chunk","created":1760704645,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":","},"finish_reason":null}],"usage":null,"obfuscation":"YOzesgDGD"}
+
+      data: {"id":"chatcmpl-CRdzxUM84mYwaVLVUEQ0BMkH7N3rK","object":"chat.completion.chunk","created":1760704645,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":" wind"},"finish_reason":null}],"usage":null,"obfuscation":"WcWEd"}
+
+      data: {"id":"chatcmpl-CRdzxUM84mYwaVLVUEQ0BMkH7N3rK","object":"chat.completion.chunk","created":1760704645,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":" speed"},"finish_reason":null}],"usage":null,"obfuscation":"22yU"}
+
+      data: {"id":"chatcmpl-CRdzxUM84mYwaVLVUEQ0BMkH7N3rK","object":"chat.completion.chunk","created":1760704645,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":","},"finish_reason":null}],"usage":null,"obfuscation":"YM4evRNHw"}
+
+      data: {"id":"chatcmpl-CRdzxUM84mYwaVLVUEQ0BMkH7N3rK","object":"chat.completion.chunk","created":1760704645,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":" forecast"},"finish_reason":null}],"usage":null,"obfuscation":"X"}
+
+      data: {"id":"chatcmpl-CRdzxUM84mYwaVLVUEQ0BMkH7N3rK","object":"chat.completion.chunk","created":1760704645,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":")?"},"finish_reason":null}],"usage":null,"obfuscation":"kWnwQGZK"}
+
+      data: {"id":"chatcmpl-CRdzxUM84mYwaVLVUEQ0BMkH7N3rK","object":"chat.completion.chunk","created":1760704645,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"usage":null,"obfuscation":"u1V5"}
+
+      data: {"id":"chatcmpl-CRdzxUM84mYwaVLVUEQ0BMkH7N3rK","object":"chat.completion.chunk","created":1760704645,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[],"usage":{"prompt_tokens":95,"completion_tokens":40,"total_tokens":135,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"completion_tokens_details":{"reasoning_tokens":0,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0}},"obfuscation":"WOSHdxIx"}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream; charset=utf-8
+    status: 200 OK
+    code: 200
+    duration: 905.154333ms

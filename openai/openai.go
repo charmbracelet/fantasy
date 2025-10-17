@@ -1,3 +1,4 @@
+// Package openai contains the openai provider
 package openai
 
 import (
@@ -24,6 +25,7 @@ type options struct {
 	organization         string
 	project              string
 	name                 string
+	useResponsesAPI      bool
 	headers              map[string]string
 	client               option.HTTPClient
 	sdkOptions           []option.RequestOption
@@ -108,6 +110,13 @@ func WithLanguageModelOptions(opts ...LanguageModelOption) Option {
 	}
 }
 
+// WithUseResponsesAPI makes it so the provider uses responses API for models that support it.
+func WithUseResponsesAPI() Option {
+	return func(o *options) {
+		o.useResponsesAPI = true
+	}
+}
+
 // LanguageModel implements ai.Provider.
 func (o *provider) LanguageModel(modelID string) (ai.LanguageModel, error) {
 	openaiClientOptions := make([]option.RequestOption, 0, 5+len(o.options.headers)+len(o.options.sdkOptions))
@@ -129,10 +138,16 @@ func (o *provider) LanguageModel(modelID string) (ai.LanguageModel, error) {
 
 	openaiClientOptions = append(openaiClientOptions, o.options.sdkOptions...)
 
+	client := openai.NewClient(openaiClientOptions...)
+
+	if o.options.useResponsesAPI && IsResponsesModel(modelID) {
+		return newResponsesLanguageModel(modelID, o.options.name, client), nil
+	}
+
 	return newLanguageModel(
 		modelID,
 		o.options.name,
-		openai.NewClient(openaiClientOptions...),
+		client,
 		o.options.languageModelOptions...,
 	), nil
 }

@@ -10,34 +10,27 @@ import (
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )
 
+var openaiTestModels = []testModel{
+	{"openai-gpt-4o", "gpt-4o", false},
+	{"openai-gpt-4o-mini", "gpt-4o-mini", false},
+	{"openai-gpt-5", "gpt-5", true},
+	{"openai-o4-mini", "o4-mini", true},
+}
+
 func TestOpenAICommon(t *testing.T) {
-	testCommon(t, []builderPair{
-		{"gpt-4o", builderOpenaiGpt4o, nil},
-		{"gpt-4o-mini", builderOpenaiGpt4oMini, nil},
-		{"gpt-5", builderOpenaiGpt5, nil},
-	})
+	var pairs []builderPair
+	for _, m := range openaiTestModels {
+		pairs = append(pairs, builderPair{m.name, openAIBuilder(m.model), nil})
+	}
+	testCommon(t, pairs)
 }
 
-func builderOpenaiGpt4o(r *recorder.Recorder) (ai.LanguageModel, error) {
-	provider := openai.New(
-		openai.WithAPIKey(os.Getenv("FANTASY_OPENAI_API_KEY")),
-		openai.WithHTTPClient(&http.Client{Transport: r}),
-	)
-	return provider.LanguageModel("gpt-4o")
-}
-
-func builderOpenaiGpt4oMini(r *recorder.Recorder) (ai.LanguageModel, error) {
-	provider := openai.New(
-		openai.WithAPIKey(os.Getenv("FANTASY_OPENAI_API_KEY")),
-		openai.WithHTTPClient(&http.Client{Transport: r}),
-	)
-	return provider.LanguageModel("gpt-4o-mini")
-}
-
-func builderOpenaiGpt5(r *recorder.Recorder) (ai.LanguageModel, error) {
-	provider := openai.New(
-		openai.WithAPIKey(os.Getenv("FANTASY_OPENAI_API_KEY")),
-		openai.WithHTTPClient(&http.Client{Transport: r}),
-	)
-	return provider.LanguageModel("gpt-5")
+func openAIBuilder(model string) builderFunc {
+	return func(r *recorder.Recorder) (ai.LanguageModel, error) {
+		provider := openai.New(
+			openai.WithAPIKey(os.Getenv("FANTASY_OPENAI_API_KEY")),
+			openai.WithHTTPClient(&http.Client{Transport: r}),
+		)
+		return provider.LanguageModel(model)
+	}
 }

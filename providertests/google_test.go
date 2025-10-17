@@ -38,8 +38,8 @@ func TestGoogleThinking(t *testing.T) {
 	opts := ai.ProviderOptions{
 		google.Name: &google.ProviderOptions{
 			ThinkingConfig: &google.ThinkingConfig{
-				ThinkingBudget:  ai.IntOption(100),
-				IncludeThoughts: ai.BoolOption(true),
+				ThinkingBudget:  ai.Opt(int64(100)),
+				IncludeThoughts: ai.Opt(true),
 			},
 		},
 	}

@@ -190,7 +190,7 @@ func (a languageModel) prepareParams(call ai.Call) (*genai.GenerateContentConfig
 				Type:    ai.CallWarningTypeOther,
 				Message: "The 'thinking_budget' option can not be under 128 and will be set to 128 by default",
 			})
-			providerOptions.ThinkingConfig.ThinkingBudget = ai.IntOption(128)
+			providerOptions.ThinkingConfig.ThinkingBudget = ai.Opt(int64(128))
 		}
 	}
 

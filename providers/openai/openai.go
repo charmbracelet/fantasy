@@ -1,4 +1,4 @@
-// Package openai contains the openai provider
+// Package openai provides an implementation of the fantasy AI SDK for OpenAI's language models.
 package openai
 
 import (
@@ -11,7 +11,9 @@ import (
 )
 
 const (
-	Name       = "openai"
+	// Name is the name of the OpenAI provider.
+	Name = "openai"
+	// DefaultURL is the default URL for the OpenAI API.
 	DefaultURL = "https://api.openai.com/v1"
 )
 
@@ -32,8 +34,10 @@ type options struct {
 	languageModelOptions []LanguageModelOption
 }
 
+// Option defines a function that configures OpenAI provider options.
 type Option = func(*options)
 
+// New creates a new OpenAI provider with the given options.
 func New(opts ...Option) fantasy.Provider {
 	providerOptions := options{
 		headers:              map[string]string{},
@@ -56,61 +60,70 @@ func New(opts ...Option) fantasy.Provider {
 	return &provider{options: providerOptions}
 }
 
+// WithBaseURL sets the base URL for the OpenAI provider.
 func WithBaseURL(baseURL string) Option {
 	return func(o *options) {
 		o.baseURL = baseURL
 	}
 }
 
+// WithAPIKey sets the API key for the OpenAI provider.
 func WithAPIKey(apiKey string) Option {
 	return func(o *options) {
 		o.apiKey = apiKey
 	}
 }
 
+// WithOrganization sets the organization for the OpenAI provider.
 func WithOrganization(organization string) Option {
 	return func(o *options) {
 		o.organization = organization
 	}
 }
 
+// WithProject sets the project for the OpenAI provider.
 func WithProject(project string) Option {
 	return func(o *options) {
 		o.project = project
 	}
 }
 
+// WithName sets the name for the OpenAI provider.
 func WithName(name string) Option {
 	return func(o *options) {
 		o.name = name
 	}
 }
 
+// WithHeaders sets the headers for the OpenAI provider.
 func WithHeaders(headers map[string]string) Option {
 	return func(o *options) {
 		maps.Copy(o.headers, headers)
 	}
 }
 
+// WithHTTPClient sets the HTTP client for the OpenAI provider.
 func WithHTTPClient(client option.HTTPClient) Option {
 	return func(o *options) {
 		o.client = client
 	}
 }
 
+// WithSDKOptions sets the SDK options for the OpenAI provider.
 func WithSDKOptions(opts ...option.RequestOption) Option {
 	return func(o *options) {
 		o.sdkOptions = append(o.sdkOptions, opts...)
 	}
 }
 
+// WithLanguageModelOptions sets the language model options for the OpenAI provider.
 func WithLanguageModelOptions(opts ...LanguageModelOption) Option {
 	return func(o *options) {
 		o.languageModelOptions = append(o.languageModelOptions, opts...)
 	}
 }
 
-// WithUseResponsesAPI makes it so the provider uses responses API for models that support it.
+// WithUseResponsesAPI configures the provider to use the responses API for models that support it.
 func WithUseResponsesAPI() Option {
 	return func(o *options) {
 		o.useResponsesAPI = true

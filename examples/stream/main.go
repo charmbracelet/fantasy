@@ -1,3 +1,4 @@
+// Package main provides a streaming example of using the fantasy AI SDK.
 package main
 
 import (

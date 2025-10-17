@@ -190,11 +190,16 @@ func NewNoContentGeneratedError(message string) *NoContentGeneratedError {
 type ModelType string
 
 const (
-	ModelTypeLanguage      ModelType = "languageModel"
+	// ModelTypeLanguage represents a language model.
+	ModelTypeLanguage ModelType = "languageModel"
+	// ModelTypeTextEmbedding represents a text embedding model.
 	ModelTypeTextEmbedding ModelType = "textEmbeddingModel"
-	ModelTypeImage         ModelType = "imageModel"
+	// ModelTypeImage represents an image model.
+	ModelTypeImage ModelType = "imageModel"
+	// ModelTypeTranscription represents a transcription model.
 	ModelTypeTranscription ModelType = "transcriptionModel"
-	ModelTypeSpeech        ModelType = "speechModel"
+	// ModelTypeSpeech represents a speech model.
+	ModelTypeSpeech ModelType = "speechModel"
 )
 
 // NoSuchModelError represents an error when a model is not found.

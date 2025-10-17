@@ -1,3 +1,4 @@
+// Package openai provides an implementation of the fantasy AI SDK for OpenAI's language models.
 package openai
 
 import (
@@ -6,38 +7,53 @@ import (
 	"charm.land/fantasy"
 )
 
+// ResponsesReasoningMetadata represents reasoning metadata for OpenAI Responses API.
 type ResponsesReasoningMetadata struct {
 	ItemID           string   `json:"item_id"`
 	EncryptedContent *string  `json:"encrypted_content"`
 	Summary          []string `json:"summary"`
 }
 
+// Options implements the ProviderOptions interface.
 func (*ResponsesReasoningMetadata) Options() {}
 
+// IncludeType represents the type of content to include for OpenAI Responses API.
 type IncludeType string
 
 const (
+	// IncludeReasoningEncryptedContent includes encrypted reasoning content.
 	IncludeReasoningEncryptedContent IncludeType = "reasoning.encrypted_content"
-	IncludeFileSearchCallResults     IncludeType = "file_search_call.results"
+	// IncludeFileSearchCallResults includes file search call results.
+	IncludeFileSearchCallResults IncludeType = "file_search_call.results"
+	// IncludeMessageOutputTextLogprobs includes message output text log probabilities.
 	IncludeMessageOutputTextLogprobs IncludeType = "message.output_text.logprobs"
 )
 
+// ServiceTier represents the service tier for OpenAI Responses API.
 type ServiceTier string
 
 const (
-	ServiceTierAuto     ServiceTier = "auto"
-	ServiceTierFlex     ServiceTier = "flex"
+	// ServiceTierAuto represents the auto service tier.
+	ServiceTierAuto ServiceTier = "auto"
+	// ServiceTierFlex represents the flex service tier.
+	ServiceTierFlex ServiceTier = "flex"
+	// ServiceTierPriority represents the priority service tier.
 	ServiceTierPriority ServiceTier = "priority"
 )
 
+// TextVerbosity represents the text verbosity level for OpenAI Responses API.
 type TextVerbosity string
 
 const (
-	TextVerbosityLow    TextVerbosity = "low"
+	// TextVerbosityLow represents low text verbosity.
+	TextVerbosityLow TextVerbosity = "low"
+	// TextVerbosityMedium represents medium text verbosity.
 	TextVerbosityMedium TextVerbosity = "medium"
-	TextVerbosityHigh   TextVerbosity = "high"
+	// TextVerbosityHigh represents high text verbosity.
+	TextVerbosityHigh TextVerbosity = "high"
 )
 
+// ResponsesProviderOptions represents additional options for OpenAI Responses API.
 type ResponsesProviderOptions struct {
 	Include           []IncludeType    `json:"include"`
 	Instructions      *string          `json:"instructions"`
@@ -55,7 +71,8 @@ type ResponsesProviderOptions struct {
 	User              *string          `json:"user"`
 }
 
-var responsesReasoningModelIds = []string{
+// responsesReasoningModelIds lists the model IDs that support reasoning for OpenAI Responses API.
+var responsesReasoningModelIDs = []string{
 	"o1",
 	"o1-2024-12-17",
 	"o3-mini",
@@ -74,7 +91,8 @@ var responsesReasoningModelIds = []string{
 	"gpt-5-codex",
 }
 
-var responsesModelIds = append([]string{
+// responsesModelIds lists all model IDs for OpenAI Responses API.
+var responsesModelIDs = append([]string{
 	"gpt-4.1",
 	"gpt-4.1-2025-04-14",
 	"gpt-4.1-mini",
@@ -101,16 +119,19 @@ var responsesModelIds = append([]string{
 	"gpt-3.5-turbo-1106",
 	"chatgpt-4o-latest",
 	"gpt-5-chat-latest",
-}, responsesReasoningModelIds...)
+}, responsesReasoningModelIDs...)
 
+// Options implements the ProviderOptions interface.
 func (*ResponsesProviderOptions) Options() {}
 
+// NewResponsesProviderOptions creates new provider options for OpenAI Responses API.
 func NewResponsesProviderOptions(opts *ResponsesProviderOptions) fantasy.ProviderOptions {
 	return fantasy.ProviderOptions{
 		Name: opts,
 	}
 }
 
+// ParseResponsesOptions parses provider options from a map for OpenAI Responses API.
 func ParseResponsesOptions(data map[string]any) (*ResponsesProviderOptions, error) {
 	var options ResponsesProviderOptions
 	if err := fantasy.ParseOptions(data, &options); err != nil {
@@ -119,10 +140,12 @@ func ParseResponsesOptions(data map[string]any) (*ResponsesProviderOptions, erro
 	return &options, nil
 }
 
+// IsResponsesModel checks if a model ID is a Responses API model for OpenAI.
 func IsResponsesModel(modelID string) bool {
-	return slices.Contains(responsesModelIds, modelID)
+	return slices.Contains(responsesModelIDs, modelID)
 }
 
+// IsResponsesReasoningModel checks if a model ID is a Responses API reasoning model for OpenAI.
 func IsResponsesReasoningModel(modelID string) bool {
-	return slices.Contains(responsesReasoningModelIds, modelID)
+	return slices.Contains(responsesReasoningModelIDs, modelID)
 }

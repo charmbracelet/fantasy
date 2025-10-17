@@ -1,3 +1,4 @@
+// Package main provides an example of using the fantasy AI SDK with an agent.
 package main
 
 import (
@@ -27,7 +28,7 @@ func main() {
 	weatherTool := fantasy.NewAgentTool(
 		"weather",
 		"Get weather information for a location",
-		func(ctx context.Context, input WeatherInput, _ fantasy.ToolCall) (fantasy.ToolResponse, error) {
+		func(_ context.Context, _ WeatherInput, _ fantasy.ToolCall) (fantasy.ToolResponse, error) {
 			return fantasy.NewTextResponse("40 C"), nil
 		},
 	)

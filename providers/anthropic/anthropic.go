@@ -1,3 +1,4 @@
+// Package anthropic provides an implementation of the fantasy AI SDK for Anthropic's language models.
 package anthropic
 
 import (
@@ -21,7 +22,9 @@ import (
 )
 
 const (
-	Name       = "anthropic"
+	// Name is the name of the Anthropic provider.
+	Name = "anthropic"
+	// DefaultURL is the default URL for the Anthropic API.
 	DefaultURL = "https://api.anthropic.com"
 )
 
@@ -43,8 +46,10 @@ type provider struct {
 	options options
 }
 
+// Option defines a function that configures Anthropic provider options.
 type Option = func(*options)
 
+// New creates a new Anthropic provider with the given options.
 func New(opts ...Option) fantasy.Provider {
 	providerOptions := options{
 		headers: map[string]string{},
@@ -58,18 +63,21 @@ func New(opts ...Option) fantasy.Provider {
 	return &provider{options: providerOptions}
 }
 
+// WithBaseURL sets the base URL for the Anthropic provider.
 func WithBaseURL(baseURL string) Option {
 	return func(o *options) {
 		o.baseURL = baseURL
 	}
 }
 
+// WithAPIKey sets the API key for the Anthropic provider.
 func WithAPIKey(apiKey string) Option {
 	return func(o *options) {
 		o.apiKey = apiKey
 	}
 }
 
+// WithVertex configures the Anthropic provider to use Vertex AI.
 func WithVertex(project, location string) Option {
 	return func(o *options) {
 		o.vertexProject = project
@@ -77,30 +85,35 @@ func WithVertex(project, location string) Option {
 	}
 }
 
+// WithSkipAuth configures whether to skip authentication for the Anthropic provider.
 func WithSkipAuth(skip bool) Option {
 	return func(o *options) {
 		o.skipAuth = skip
 	}
 }
 
+// WithBedrock configures the Anthropic provider to use AWS Bedrock.
 func WithBedrock() Option {
 	return func(o *options) {
 		o.useBedrock = true
 	}
 }
 
+// WithName sets the name for the Anthropic provider.
 func WithName(name string) Option {
 	return func(o *options) {
 		o.name = name
 	}
 }
 
+// WithHeaders sets the headers for the Anthropic provider.
 func WithHeaders(headers map[string]string) Option {
 	return func(o *options) {
 		maps.Copy(o.headers, headers)
 	}
 }
 
+// WithHTTPClient sets the HTTP client for the Anthropic provider.
 func WithHTTPClient(client option.HTTPClient) Option {
 	return func(o *options) {
 		o.client = client
@@ -673,7 +686,7 @@ func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBl
 	return systemBlocks, messages, warnings
 }
 
-func (o languageModel) handleError(err error) error {
+func (a languageModel) handleError(err error) error {
 	var apiErr *anthropic.Error
 	if errors.As(err, &apiErr) {
 		requestDump := apiErr.DumpRequest(true)
@@ -948,7 +961,7 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 				ProviderMetadata: fantasy.ProviderMetadata{},
 			})
 			return
-		} else {
+		} else { //nolint: revive
 			yield(fantasy.StreamPart{
 				Type:  fantasy.StreamPartTypeError,
 				Error: a.handleError(err),

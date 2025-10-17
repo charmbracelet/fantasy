@@ -6,6 +6,7 @@ import (
 	"iter"
 )
 
+// Usage represents token usage statistics for a model call.
 type Usage struct {
 	InputTokens         int64 `json:"input_tokens"`
 	OutputTokens        int64 `json:"output_tokens"`
@@ -26,8 +27,10 @@ func (u Usage) String() string {
 	)
 }
 
+// ResponseContent represents the content of a model response.
 type ResponseContent []Content
 
+// Text returns the text content of the response.
 func (r ResponseContent) Text() string {
 	for _, c := range r {
 		if c.GetType() == ContentTypeText {
@@ -111,6 +114,7 @@ func (r ResponseContent) ToolResults() []ToolResultContent {
 	return toolResults
 }
 
+// Response represents a response from a language model.
 type Response struct {
 	Content      ResponseContent `json:"content"`
 	FinishReason FinishReason    `json:"finish_reason"`
@@ -121,27 +125,44 @@ type Response struct {
 	ProviderMetadata ProviderMetadata `json:"provider_metadata"`
 }
 
+// StreamPartType represents the type of a stream part.
 type StreamPartType string
 
 const (
-	StreamPartTypeWarnings  StreamPartType = "warnings"
+	// StreamPartTypeWarnings represents warnings stream part type.
+	StreamPartTypeWarnings StreamPartType = "warnings"
+	// StreamPartTypeTextStart represents text start stream part type.
 	StreamPartTypeTextStart StreamPartType = "text_start"
+	// StreamPartTypeTextDelta represents text delta stream part type.
 	StreamPartTypeTextDelta StreamPartType = "text_delta"
-	StreamPartTypeTextEnd   StreamPartType = "text_end"
+	// StreamPartTypeTextEnd represents text end stream part type.
+	StreamPartTypeTextEnd StreamPartType = "text_end"
 
+	// StreamPartTypeReasoningStart represents reasoning start stream part type.
 	StreamPartTypeReasoningStart StreamPartType = "reasoning_start"
+	// StreamPartTypeReasoningDelta represents reasoning delta stream part type.
 	StreamPartTypeReasoningDelta StreamPartType = "reasoning_delta"
-	StreamPartTypeReasoningEnd   StreamPartType = "reasoning_end"
+	// StreamPartTypeReasoningEnd represents reasoning end stream part type.
+	StreamPartTypeReasoningEnd StreamPartType = "reasoning_end"
+	// StreamPartTypeToolInputStart represents tool input start stream part type.
 	StreamPartTypeToolInputStart StreamPartType = "tool_input_start"
+	// StreamPartTypeToolInputDelta represents tool input delta stream part type.
 	StreamPartTypeToolInputDelta StreamPartType = "tool_input_delta"
-	StreamPartTypeToolInputEnd   StreamPartType = "tool_input_end"
-	StreamPartTypeToolCall       StreamPartType = "tool_call"
-	StreamPartTypeToolResult     StreamPartType = "tool_result"
-	StreamPartTypeSource         StreamPartType = "source"
-	StreamPartTypeFinish         StreamPartType = "finish"
-	StreamPartTypeError          StreamPartType = "error"
+	// StreamPartTypeToolInputEnd represents tool input end stream part type.
+	StreamPartTypeToolInputEnd StreamPartType = "tool_input_end"
+	// StreamPartTypeToolCall represents tool call stream part type.
+	StreamPartTypeToolCall StreamPartType = "tool_call"
+	// StreamPartTypeToolResult represents tool result stream part type.
+	StreamPartTypeToolResult StreamPartType = "tool_result"
+	// StreamPartTypeSource represents source stream part type.
+	StreamPartTypeSource StreamPartType = "source"
+	// StreamPartTypeFinish represents finish stream part type.
+	StreamPartTypeFinish StreamPartType = "finish"
+	// StreamPartTypeError represents error stream part type.
+	StreamPartTypeError StreamPartType = "error"
 )
 
+// StreamPart represents a part of a streaming response.
 type StreamPart struct {
 	Type             StreamPartType `json:"type"`
 	ID               string         `json:"id"`
@@ -161,20 +182,28 @@ type StreamPart struct {
 
 	ProviderMetadata ProviderMetadata `json:"provider_metadata"`
 }
+
+// StreamResponse represents a streaming response sequence.
 type StreamResponse = iter.Seq[StreamPart]
 
+// ToolChoice represents the tool choice preference for a model call.
 type ToolChoice string
 
 const (
-	ToolChoiceNone     ToolChoice = "none"
-	ToolChoiceAuto     ToolChoice = "auto"
+	// ToolChoiceNone indicates no tools should be used.
+	ToolChoiceNone ToolChoice = "none"
+	// ToolChoiceAuto indicates tools should be used automatically.
+	ToolChoiceAuto ToolChoice = "auto"
+	// ToolChoiceRequired indicates tools are required.
 	ToolChoiceRequired ToolChoice = "required"
 )
 
+// SpecificToolChoice creates a tool choice for a specific tool name.
 func SpecificToolChoice(name string) ToolChoice {
 	return ToolChoice(name)
 }
 
+// Call represents a call to a language model.
 type Call struct {
 	Prompt           Prompt      `json:"prompt"`
 	MaxOutputTokens  *int64      `json:"max_output_tokens"`
@@ -190,6 +219,7 @@ type Call struct {
 	ProviderOptions ProviderOptions `json:"provider_options"`
 }
 
+// CallWarningType represents the type of call warning.
 // CallWarningType represents the type of call warning.
 type CallWarningType string
 
@@ -213,6 +243,7 @@ type CallWarning struct {
 	Message string          `json:"message"`
 }
 
+// LanguageModel represents a language model that can generate responses and stream responses.
 type LanguageModel interface {
 	Generate(context.Context, Call) (*Response, error)
 	Stream(context.Context, Call) (StreamResponse, error)

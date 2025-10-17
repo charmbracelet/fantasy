@@ -1,3 +1,4 @@
+// Package main provides a comprehensive streaming agent example of using the fantasy AI SDK.
 package main
 
 import (
@@ -45,7 +46,7 @@ func main() {
 	weatherTool := fantasy.NewAgentTool(
 		"get_weather",
 		"Get the current weather for a specific location",
-		func(ctx context.Context, input WeatherInput, _ fantasy.ToolCall) (fantasy.ToolResponse, error) {
+		func(_ context.Context, input WeatherInput, _ fantasy.ToolCall) (fantasy.ToolResponse, error) {
 			// Simulate weather lookup with some fake data
 			location := input.Location
 			if location == "" {
@@ -86,7 +87,7 @@ func main() {
 	calculatorTool := fantasy.NewAgentTool(
 		"calculate",
 		"Perform basic mathematical calculations",
-		func(ctx context.Context, input CalculatorInput, _ fantasy.ToolCall) (fantasy.ToolResponse, error) {
+		func(_ context.Context, input CalculatorInput, _ fantasy.ToolCall) (fantasy.ToolResponse, error) {
 			// Simple calculator simulation
 			expr := strings.TrimSpace(input.Expression)
 			if strings.Contains(expr, "2 + 2") || strings.Contains(expr, "2+2") {
@@ -153,43 +154,43 @@ func main() {
 			}
 			return nil
 		},
-		OnTextStart: func(id string) error {
+		OnTextStart: func(_ string) error {
 			fmt.Print("💭 Assistant: ")
 			return nil
 		},
-		OnTextDelta: func(id, text string) error {
+		OnTextDelta: func(_ string, text string) error {
 			fmt.Print(text)
 			textBuffer.WriteString(text)
 			return nil
 		},
-		OnTextEnd: func(id string) error {
+		OnTextEnd: func(_ string) error {
 			fmt.Println()
 			return nil
 		},
-		OnReasoningStart: func(id string, _ fantasy.ReasoningContent) error {
+		OnReasoningStart: func(_ string, _ fantasy.ReasoningContent) error {
 			fmt.Print("🤔 Thinking: ")
 			return nil
 		},
-		OnReasoningDelta: func(id, text string) error {
+		OnReasoningDelta: func(_ string, text string) error {
 			reasoningBuffer.WriteString(text)
 			return nil
 		},
-		OnReasoningEnd: func(id string, content fantasy.ReasoningContent) error {
+		OnReasoningEnd: func(_ string, _ fantasy.ReasoningContent) error {
 			if reasoningBuffer.Len() > 0 {
 				fmt.Printf("%s\n", reasoningBuffer.String())
 				reasoningBuffer.Reset()
 			}
 			return nil
 		},
-		OnToolInputStart: func(id, toolName string) error {
+		OnToolInputStart: func(_ string, toolName string) error {
 			fmt.Printf("🔧 Calling tool: %s\n", toolName)
 			return nil
 		},
-		OnToolInputDelta: func(id, delta string) error {
+		OnToolInputDelta: func(_ string, _ string) error {
 			// Could show tool input being built, but it's often noisy
 			return nil
 		},
-		OnToolInputEnd: func(id string) error {
+		OnToolInputEnd: func(_ string) error {
 			// Tool input complete
 			return nil
 		},
@@ -212,7 +213,7 @@ func main() {
 			fmt.Printf("📚 Source: %s (%s)\n", source.Title, source.URL)
 			return nil
 		},
-		OnStreamFinish: func(usage fantasy.Usage, finishReason fantasy.FinishReason, providerMetadata fantasy.ProviderMetadata) error {
+		OnStreamFinish: func(usage fantasy.Usage, finishReason fantasy.FinishReason, _ fantasy.ProviderMetadata) error {
 			fmt.Printf("📊 Stream finished (reason: %s, tokens: %d)\n", finishReason, usage.TotalTokens)
 			return nil
 		},

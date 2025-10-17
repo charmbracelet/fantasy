@@ -19,6 +19,7 @@ import (
 	"google.golang.org/genai"
 )
 
+// Name is the name of the Google provider.
 const Name = "google"
 
 type provider struct {
@@ -37,8 +38,10 @@ type options struct {
 	skipAuth bool
 }
 
+// Option defines a function that configures Google provider options.
 type Option = func(*options)
 
+// New creates a new Google provider with the given options.
 func New(opts ...Option) fantasy.Provider {
 	options := options{
 		headers: map[string]string{},
@@ -54,12 +57,14 @@ func New(opts ...Option) fantasy.Provider {
 	}
 }
 
+// WithBaseURL sets the base URL for the Google provider.
 func WithBaseURL(baseURL string) Option {
 	return func(o *options) {
 		o.baseURL = baseURL
 	}
 }
 
+// WithGeminiAPIKey sets the Gemini API key for the Google provider.
 func WithGeminiAPIKey(apiKey string) Option {
 	return func(o *options) {
 		o.backend = genai.BackendGeminiAPI
@@ -69,6 +74,7 @@ func WithGeminiAPIKey(apiKey string) Option {
 	}
 }
 
+// WithVertex configures the Google provider to use Vertex AI.
 func WithVertex(project, location string) Option {
 	if project == "" || location == "" {
 		panic("project and location must be provided")
@@ -81,24 +87,28 @@ func WithVertex(project, location string) Option {
 	}
 }
 
+// WithSkipAuth configures whether to skip authentication for the Google provider.
 func WithSkipAuth(skipAuth bool) Option {
 	return func(o *options) {
 		o.skipAuth = skipAuth
 	}
 }
 
+// WithName sets the name for the Google provider.
 func WithName(name string) Option {
 	return func(o *options) {
 		o.name = name
 	}
 }
 
+// WithHeaders sets the headers for the Google provider.
 func WithHeaders(headers map[string]string) Option {
 	return func(o *options) {
 		maps.Copy(o.headers, headers)
 	}
 }
 
+// WithHTTPClient sets the HTTP client for the Google provider.
 func WithHTTPClient(client *http.Client) Option {
 	return func(o *options) {
 		o.client = client
@@ -117,33 +127,33 @@ type languageModel struct {
 }
 
 // LanguageModel implements fantasy.Provider.
-func (g *provider) LanguageModel(modelID string) (fantasy.LanguageModel, error) {
+func (a *provider) LanguageModel(modelID string) (fantasy.LanguageModel, error) {
 	if strings.Contains(modelID, "anthropic") || strings.Contains(modelID, "claude") {
 		return anthropic.New(
-			anthropic.WithVertex(g.options.project, g.options.location),
-			anthropic.WithHTTPClient(g.options.client),
-			anthropic.WithSkipAuth(g.options.skipAuth),
+			anthropic.WithVertex(a.options.project, a.options.location),
+			anthropic.WithHTTPClient(a.options.client),
+			anthropic.WithSkipAuth(a.options.skipAuth),
 		).LanguageModel(modelID)
 	}
 
 	cc := &genai.ClientConfig{
-		HTTPClient: g.options.client,
-		Backend:    g.options.backend,
-		APIKey:     g.options.apiKey,
-		Project:    g.options.project,
-		Location:   g.options.location,
+		HTTPClient: a.options.client,
+		Backend:    a.options.backend,
+		APIKey:     a.options.apiKey,
+		Project:    a.options.project,
+		Location:   a.options.location,
 	}
-	if g.options.skipAuth {
+	if a.options.skipAuth {
 		cc.Credentials = &auth.Credentials{TokenProvider: dummyTokenProvider{}}
 	}
 
-	if g.options.baseURL != "" || len(g.options.headers) > 0 {
+	if a.options.baseURL != "" || len(a.options.headers) > 0 {
 		headers := http.Header{}
-		for k, v := range g.options.headers {
+		for k, v := range a.options.headers {
 			headers.Add(k, v)
 		}
 		cc.HTTPOptions = genai.HTTPOptions{
-			BaseURL: g.options.baseURL,
+			BaseURL: a.options.baseURL,
 			Headers: headers,
 		}
 	}
@@ -153,13 +163,13 @@ func (g *provider) LanguageModel(modelID string) (fantasy.LanguageModel, error) 
 	}
 	return &languageModel{
 		modelID:         modelID,
-		provider:        g.options.name,
-		providerOptions: g.options,
+		provider:        a.options.name,
+		providerOptions: a.options,
 		client:          client,
 	}, nil
 }
 
-func (a languageModel) prepareParams(call fantasy.Call) (*genai.GenerateContentConfig, []*genai.Content, []fantasy.CallWarning, error) {
+func (g languageModel) prepareParams(call fantasy.Call) (*genai.GenerateContentConfig, []*genai.Content, []fantasy.CallWarning, error) {
 	config := &genai.GenerateContentConfig{}
 
 	providerOptions := &ProviderOptions{}
@@ -175,12 +185,12 @@ func (a languageModel) prepareParams(call fantasy.Call) (*genai.GenerateContentC
 	if providerOptions.ThinkingConfig != nil {
 		if providerOptions.ThinkingConfig.IncludeThoughts != nil &&
 			*providerOptions.ThinkingConfig.IncludeThoughts &&
-			strings.HasPrefix(a.provider, "google.vertex.") {
+			strings.HasPrefix(g.provider, "google.vertex.") {
 			warnings = append(warnings, fantasy.CallWarning{
 				Type: fantasy.CallWarningTypeOther,
 				Message: "The 'includeThoughts' option is only supported with the Google Vertex provider " +
 					"and might not be supported or could behave unexpectedly with the current Google provider " +
-					fmt.Sprintf("(%s)", a.provider),
+					fmt.Sprintf("(%s)", g.provider),
 			})
 		}
 
@@ -194,7 +204,7 @@ func (a languageModel) prepareParams(call fantasy.Call) (*genai.GenerateContentC
 		}
 	}
 
-	isGemmaModel := strings.HasPrefix(strings.ToLower(a.modelID), "gemma-")
+	isGemmaModel := strings.HasPrefix(strings.ToLower(g.modelID), "gemma-")
 
 	if isGemmaModel && systemInstructions != nil && len(systemInstructions.Parts) > 0 {
 		if len(content) > 0 && content[0].Role == genai.RoleUser {

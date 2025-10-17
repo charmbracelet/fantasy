@@ -1,3 +1,4 @@
+// Package main provides a simple streaming agent example of using the fantasy AI SDK.
 package main
 
 import (
@@ -35,7 +36,7 @@ func main() {
 	echoTool := fantasy.NewAgentTool(
 		"echo",
 		"Echo back the provided message",
-		func(ctx context.Context, input EchoInput, _ fantasy.ToolCall) (fantasy.ToolResponse, error) {
+		func(_ context.Context, input EchoInput, _ fantasy.ToolCall) (fantasy.ToolResponse, error) {
 			return fantasy.NewTextResponse("Echo: " + input.Message), nil
 		},
 	)
@@ -58,7 +59,7 @@ func main() {
 		Prompt: "Please echo back 'Hello, streaming world!'",
 
 		// Show real-time text as it streams
-		OnTextDelta: func(id, text string) error {
+		OnTextDelta: func(_ string, text string) error {
 			fmt.Print(text)
 			return nil
 		},
@@ -70,7 +71,7 @@ func main() {
 		},
 
 		// Show tool results
-		OnToolResult: func(result fantasy.ToolResultContent) error {
+		OnToolResult: func(_ fantasy.ToolResultContent) error {
 			fmt.Printf("[Tool result received]\n")
 			return nil
 		},

@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"charm.land/fantasy"
-	"charm.land/fantasy/openai"
+	"charm.land/fantasy/providers/openai"
 	openaisdk "github.com/openai/openai-go/v2"
 	"github.com/openai/openai-go/v2/packages/param"
 	"github.com/openai/openai-go/v2/shared"

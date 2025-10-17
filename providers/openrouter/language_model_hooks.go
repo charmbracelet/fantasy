@@ -6,7 +6,7 @@ import (
 	"maps"
 
 	"charm.land/fantasy"
-	"charm.land/fantasy/anthropic"
+	"charm.land/fantasy/providers/anthropic"
 	openaisdk "github.com/openai/openai-go/v2"
 	"github.com/openai/openai-go/v2/packages/param"
 )

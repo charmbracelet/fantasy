@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"charm.land/fantasy"
-	"charm.land/fantasy/bedrock"
+	"charm.land/fantasy/providers/bedrock"
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )
 

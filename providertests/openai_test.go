@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"charm.land/fantasy"
-	"charm.land/fantasy/openai"
+	"charm.land/fantasy/providers/openai"
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )
 

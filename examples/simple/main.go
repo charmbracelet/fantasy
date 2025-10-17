@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"charm.land/fantasy/ai"
+	"charm.land/fantasy"
 	"charm.land/fantasy/anthropic"
 )
 
@@ -17,11 +17,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	response, err := model.Generate(context.Background(), ai.Call{
-		Prompt: ai.Prompt{
-			ai.NewUserMessage("Hello"),
+	response, err := model.Generate(context.Background(), fantasy.Call{
+		Prompt: fantasy.Prompt{
+			fantasy.NewUserMessage("Hello"),
 		},
-		Temperature: ai.Opt(0.7),
+		Temperature: fantasy.Opt(0.7),
 	})
 	if err != nil {
 		fmt.Println(err)

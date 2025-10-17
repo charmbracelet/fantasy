@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"charm.land/fantasy/ai"
+	"charm.land/fantasy"
 	"charm.land/fantasy/openai"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
@@ -20,7 +20,7 @@ func TestOpenAIResponsesCommon(t *testing.T) {
 }
 
 func openAIReasoningBuilder(model string) builderFunc {
-	return func(r *recorder.Recorder) (ai.LanguageModel, error) {
+	return func(r *recorder.Recorder) (fantasy.LanguageModel, error) {
 		provider := openai.New(
 			openai.WithAPIKey(os.Getenv("FANTASY_OPENAI_API_KEY")),
 			openai.WithHTTPClient(&http.Client{Transport: r}),
@@ -31,13 +31,13 @@ func openAIReasoningBuilder(model string) builderFunc {
 }
 
 func TestOpenAIResponsesWithSummaryThinking(t *testing.T) {
-	opts := ai.ProviderOptions{
+	opts := fantasy.ProviderOptions{
 		openai.Name: &openai.ResponsesProviderOptions{
 			Include: []openai.IncludeType{
 				openai.IncludeReasoningEncryptedContent,
 			},
 			ReasoningEffort:  openai.ReasoningEffortOption(openai.ReasoningEffortHigh),
-			ReasoningSummary: ai.Opt("auto"),
+			ReasoningSummary: fantasy.Opt("auto"),
 		},
 	}
 	var pairs []builderPair
@@ -50,16 +50,16 @@ func TestOpenAIResponsesWithSummaryThinking(t *testing.T) {
 	testThinking(t, pairs, testOpenAIResponsesThinkingWithSummaryThinking)
 }
 
-func testOpenAIResponsesThinkingWithSummaryThinking(t *testing.T, result *ai.AgentResult) {
+func testOpenAIResponsesThinkingWithSummaryThinking(t *testing.T, result *fantasy.AgentResult) {
 	reasoningContentCount := 0
 	encryptedData := 0
 	// Test if we got the signature
 	for _, step := range result.Steps {
 		for _, msg := range step.Messages {
 			for _, content := range msg.Content {
-				if content.GetType() == ai.ContentTypeReasoning {
+				if content.GetType() == fantasy.ContentTypeReasoning {
 					reasoningContentCount += 1
-					reasoningContent, ok := ai.AsContentType[ai.ReasoningPart](content)
+					reasoningContent, ok := fantasy.AsContentType[fantasy.ReasoningPart](content)
 					if !ok {
 						continue
 					}

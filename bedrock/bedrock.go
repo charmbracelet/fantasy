@@ -1,7 +1,7 @@
 package bedrock
 
 import (
-	"charm.land/fantasy/ai"
+	"charm.land/fantasy"
 	"charm.land/fantasy/anthropic"
 	"github.com/anthropics/anthropic-sdk-go/option"
 )
@@ -17,7 +17,7 @@ const (
 
 type Option = func(*options)
 
-func New(opts ...Option) ai.Provider {
+func New(opts ...Option) fantasy.Provider {
 	var o options
 	for _, opt := range opts {
 		opt(&o)

@@ -1,7 +1,7 @@
 package openrouter
 
 import (
-	"charm.land/fantasy/ai"
+	"charm.land/fantasy"
 )
 
 type ReasoningEffort string
@@ -116,15 +116,15 @@ func ReasoningEffortOption(e ReasoningEffort) *ReasoningEffort {
 	return &e
 }
 
-func NewProviderOptions(opts *ProviderOptions) ai.ProviderOptions {
-	return ai.ProviderOptions{
+func NewProviderOptions(opts *ProviderOptions) fantasy.ProviderOptions {
+	return fantasy.ProviderOptions{
 		Name: opts,
 	}
 }
 
 func ParseOptions(data map[string]any) (*ProviderOptions, error) {
 	var options ProviderOptions
-	if err := ai.ParseOptions(data, &options); err != nil {
+	if err := fantasy.ParseOptions(data, &options); err != nil {
 		return nil, err
 	}
 	return &options, nil

@@ -3,7 +3,7 @@ package openai
 import (
 	"slices"
 
-	"charm.land/fantasy/ai"
+	"charm.land/fantasy"
 )
 
 type ResponsesReasoningMetadata struct {
@@ -105,15 +105,15 @@ var responsesModelIds = append([]string{
 
 func (*ResponsesProviderOptions) Options() {}
 
-func NewResponsesProviderOptions(opts *ResponsesProviderOptions) ai.ProviderOptions {
-	return ai.ProviderOptions{
+func NewResponsesProviderOptions(opts *ResponsesProviderOptions) fantasy.ProviderOptions {
+	return fantasy.ProviderOptions{
 		Name: opts,
 	}
 }
 
 func ParseResponsesOptions(data map[string]any) (*ResponsesProviderOptions, error) {
 	var options ResponsesProviderOptions
-	if err := ai.ParseOptions(data, &options); err != nil {
+	if err := fantasy.ParseOptions(data, &options); err != nil {
 		return nil, err
 	}
 	return &options, nil

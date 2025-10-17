@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"charm.land/fantasy/ai"
+	"charm.land/fantasy"
 	"charm.land/fantasy/openai"
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )
@@ -26,7 +26,7 @@ func TestOpenAICommon(t *testing.T) {
 }
 
 func openAIBuilder(model string) builderFunc {
-	return func(r *recorder.Recorder) (ai.LanguageModel, error) {
+	return func(r *recorder.Recorder) (fantasy.LanguageModel, error) {
 		provider := openai.New(
 			openai.WithAPIKey(os.Getenv("FANTASY_OPENAI_API_KEY")),
 			openai.WithHTTPClient(&http.Client{Transport: r}),

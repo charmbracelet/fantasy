@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"charm.land/fantasy/ai"
+	"charm.land/fantasy"
 	"charm.land/fantasy/openrouter"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
@@ -31,7 +31,7 @@ func TestOpenRouterCommon(t *testing.T) {
 }
 
 func TestOpenRouterThinking(t *testing.T) {
-	opts := ai.ProviderOptions{
+	opts := fantasy.ProviderOptions{
 		openrouter.Name: &openrouter.ProviderOptions{
 			Reasoning: &openrouter.ReasoningOptions{
 				Effort: openrouter.ReasoningEffortOption(openrouter.ReasoningEffortMedium),
@@ -54,16 +54,16 @@ func TestOpenRouterThinking(t *testing.T) {
 	}, testOpenrouterThinkingWithSignature)
 }
 
-func testOpenrouterThinkingWithSignature(t *testing.T, result *ai.AgentResult) {
+func testOpenrouterThinkingWithSignature(t *testing.T, result *fantasy.AgentResult) {
 	reasoningContentCount := 0
 	signaturesCount := 0
 	// Test if we got the signature
 	for _, step := range result.Steps {
 		for _, msg := range step.Messages {
 			for _, content := range msg.Content {
-				if content.GetType() == ai.ContentTypeReasoning {
+				if content.GetType() == fantasy.ContentTypeReasoning {
 					reasoningContentCount += 1
-					reasoningContent, ok := ai.AsContentType[ai.ReasoningPart](content)
+					reasoningContent, ok := fantasy.AsContentType[fantasy.ReasoningPart](content)
 					if !ok {
 						continue
 					}
@@ -92,12 +92,12 @@ func testOpenrouterThinkingWithSignature(t *testing.T, result *ai.AgentResult) {
 	testAnthropicThinking(t, result)
 }
 
-func testOpenrouterThinking(t *testing.T, result *ai.AgentResult) {
+func testOpenrouterThinking(t *testing.T, result *fantasy.AgentResult) {
 	reasoningContentCount := 0
 	for _, step := range result.Steps {
 		for _, msg := range step.Messages {
 			for _, content := range msg.Content {
-				if content.GetType() == ai.ContentTypeReasoning {
+				if content.GetType() == fantasy.ContentTypeReasoning {
 					reasoningContentCount += 1
 				}
 			}
@@ -107,7 +107,7 @@ func testOpenrouterThinking(t *testing.T, result *ai.AgentResult) {
 }
 
 func openrouterBuilder(model string) builderFunc {
-	return func(r *recorder.Recorder) (ai.LanguageModel, error) {
+	return func(r *recorder.Recorder) (fantasy.LanguageModel, error) {
 		provider := openrouter.New(
 			openrouter.WithAPIKey(os.Getenv("FANTASY_OPENROUTER_API_KEY")),
 			openrouter.WithHTTPClient(&http.Client{Transport: r}),

@@ -1,4 +1,4 @@
-package ai
+package fantasy
 
 // ProviderOptionsData is an interface for provider-specific options data.
 type ProviderOptionsData interface {

@@ -11,7 +11,7 @@ import (
 	"maps"
 	"strings"
 
-	"charm.land/fantasy/ai"
+	"charm.land/fantasy"
 	"github.com/anthropics/anthropic-sdk-go"
 	"github.com/anthropics/anthropic-sdk-go/bedrock"
 	"github.com/anthropics/anthropic-sdk-go/option"
@@ -45,7 +45,7 @@ type provider struct {
 
 type Option = func(*options)
 
-func New(opts ...Option) ai.Provider {
+func New(opts ...Option) fantasy.Provider {
 	providerOptions := options{
 		headers: map[string]string{},
 	}
@@ -107,7 +107,7 @@ func WithHTTPClient(client option.HTTPClient) Option {
 	}
 }
 
-func (a *provider) LanguageModel(modelID string) (ai.LanguageModel, error) {
+func (a *provider) LanguageModel(modelID string) (fantasy.LanguageModel, error) {
 	clientOptions := make([]option.RequestOption, 0, 5+len(a.options.headers))
 	if a.options.apiKey != "" {
 		clientOptions = append(clientOptions, option.WithAPIKey(a.options.apiKey))
@@ -171,23 +171,23 @@ type languageModel struct {
 	options  options
 }
 
-// Model implements ai.LanguageModel.
+// Model implements fantasy.LanguageModel.
 func (a languageModel) Model() string {
 	return a.modelID
 }
 
-// Provider implements ai.LanguageModel.
+// Provider implements fantasy.LanguageModel.
 func (a languageModel) Provider() string {
 	return a.provider
 }
 
-func (a languageModel) prepareParams(call ai.Call) (*anthropic.MessageNewParams, []ai.CallWarning, error) {
+func (a languageModel) prepareParams(call fantasy.Call) (*anthropic.MessageNewParams, []fantasy.CallWarning, error) {
 	params := &anthropic.MessageNewParams{}
 	providerOptions := &ProviderOptions{}
 	if v, ok := call.ProviderOptions[Name]; ok {
 		providerOptions, ok = v.(*ProviderOptions)
 		if !ok {
-			return nil, nil, ai.NewInvalidArgumentError("providerOptions", "anthropic provider options should be *anthropic.ProviderOptions", nil)
+			return nil, nil, fantasy.NewInvalidArgumentError("providerOptions", "anthropic provider options should be *anthropic.ProviderOptions", nil)
 		}
 	}
 	sendReasoning := true
@@ -197,14 +197,14 @@ func (a languageModel) prepareParams(call ai.Call) (*anthropic.MessageNewParams,
 	systemBlocks, messages, warnings := toPrompt(call.Prompt, sendReasoning)
 
 	if call.FrequencyPenalty != nil {
-		warnings = append(warnings, ai.CallWarning{
-			Type:    ai.CallWarningTypeUnsupportedSetting,
+		warnings = append(warnings, fantasy.CallWarning{
+			Type:    fantasy.CallWarningTypeUnsupportedSetting,
 			Setting: "FrequencyPenalty",
 		})
 	}
 	if call.PresencePenalty != nil {
-		warnings = append(warnings, ai.CallWarning{
-			Type:    ai.CallWarningTypeUnsupportedSetting,
+		warnings = append(warnings, fantasy.CallWarning{
+			Type:    fantasy.CallWarningTypeUnsupportedSetting,
 			Setting: "PresencePenalty",
 		})
 	}
@@ -236,29 +236,29 @@ func (a languageModel) prepareParams(call ai.Call) (*anthropic.MessageNewParams,
 	}
 	if isThinking {
 		if thinkingBudget == 0 {
-			return nil, nil, ai.NewUnsupportedFunctionalityError("thinking requires budget", "")
+			return nil, nil, fantasy.NewUnsupportedFunctionalityError("thinking requires budget", "")
 		}
 		params.Thinking = anthropic.ThinkingConfigParamOfEnabled(thinkingBudget)
 		if call.Temperature != nil {
 			params.Temperature = param.Opt[float64]{}
-			warnings = append(warnings, ai.CallWarning{
-				Type:    ai.CallWarningTypeUnsupportedSetting,
+			warnings = append(warnings, fantasy.CallWarning{
+				Type:    fantasy.CallWarningTypeUnsupportedSetting,
 				Setting: "temperature",
 				Details: "temperature is not supported when thinking is enabled",
 			})
 		}
 		if call.TopP != nil {
 			params.TopP = param.Opt[float64]{}
-			warnings = append(warnings, ai.CallWarning{
-				Type:    ai.CallWarningTypeUnsupportedSetting,
+			warnings = append(warnings, fantasy.CallWarning{
+				Type:    fantasy.CallWarningTypeUnsupportedSetting,
 				Setting: "TopP",
 				Details: "TopP is not supported when thinking is enabled",
 			})
 		}
 		if call.TopK != nil {
 			params.TopK = param.Opt[int64]{}
-			warnings = append(warnings, ai.CallWarning{
-				Type:    ai.CallWarningTypeUnsupportedSetting,
+			warnings = append(warnings, fantasy.CallWarning{
+				Type:    fantasy.CallWarningTypeUnsupportedSetting,
 				Setting: "TopK",
 				Details: "TopK is not supported when thinking is enabled",
 			})
@@ -286,7 +286,7 @@ func (a *provider) Name() string {
 	return Name
 }
 
-func getCacheControl(providerOptions ai.ProviderOptions) *CacheControl {
+func getCacheControl(providerOptions fantasy.ProviderOptions) *CacheControl {
 	if anthropicOptions, ok := providerOptions[Name]; ok {
 		if options, ok := anthropicOptions.(*ProviderCacheControlOptions); ok {
 			return &options.CacheControl
@@ -295,7 +295,7 @@ func getCacheControl(providerOptions ai.ProviderOptions) *CacheControl {
 	return nil
 }
 
-func getReasoningMetadata(providerOptions ai.ProviderOptions) *ReasoningOptionMetadata {
+func getReasoningMetadata(providerOptions fantasy.ProviderOptions) *ReasoningOptionMetadata {
 	if anthropicOptions, ok := providerOptions[Name]; ok {
 		if reasoning, ok := anthropicOptions.(*ReasoningOptionMetadata); ok {
 			return reasoning
@@ -305,49 +305,49 @@ func getReasoningMetadata(providerOptions ai.ProviderOptions) *ReasoningOptionMe
 }
 
 type messageBlock struct {
-	Role     ai.MessageRole
-	Messages []ai.Message
+	Role     fantasy.MessageRole
+	Messages []fantasy.Message
 }
 
-func groupIntoBlocks(prompt ai.Prompt) []*messageBlock {
+func groupIntoBlocks(prompt fantasy.Prompt) []*messageBlock {
 	var blocks []*messageBlock
 
 	var currentBlock *messageBlock
 
 	for _, msg := range prompt {
 		switch msg.Role {
-		case ai.MessageRoleSystem:
-			if currentBlock == nil || currentBlock.Role != ai.MessageRoleSystem {
+		case fantasy.MessageRoleSystem:
+			if currentBlock == nil || currentBlock.Role != fantasy.MessageRoleSystem {
 				currentBlock = &messageBlock{
-					Role:     ai.MessageRoleSystem,
-					Messages: []ai.Message{},
+					Role:     fantasy.MessageRoleSystem,
+					Messages: []fantasy.Message{},
 				}
 				blocks = append(blocks, currentBlock)
 			}
 			currentBlock.Messages = append(currentBlock.Messages, msg)
-		case ai.MessageRoleUser:
-			if currentBlock == nil || currentBlock.Role != ai.MessageRoleUser {
+		case fantasy.MessageRoleUser:
+			if currentBlock == nil || currentBlock.Role != fantasy.MessageRoleUser {
 				currentBlock = &messageBlock{
-					Role:     ai.MessageRoleUser,
-					Messages: []ai.Message{},
+					Role:     fantasy.MessageRoleUser,
+					Messages: []fantasy.Message{},
 				}
 				blocks = append(blocks, currentBlock)
 			}
 			currentBlock.Messages = append(currentBlock.Messages, msg)
-		case ai.MessageRoleAssistant:
-			if currentBlock == nil || currentBlock.Role != ai.MessageRoleAssistant {
+		case fantasy.MessageRoleAssistant:
+			if currentBlock == nil || currentBlock.Role != fantasy.MessageRoleAssistant {
 				currentBlock = &messageBlock{
-					Role:     ai.MessageRoleAssistant,
-					Messages: []ai.Message{},
+					Role:     fantasy.MessageRoleAssistant,
+					Messages: []fantasy.Message{},
 				}
 				blocks = append(blocks, currentBlock)
 			}
 			currentBlock.Messages = append(currentBlock.Messages, msg)
-		case ai.MessageRoleTool:
-			if currentBlock == nil || currentBlock.Role != ai.MessageRoleUser {
+		case fantasy.MessageRoleTool:
+			if currentBlock == nil || currentBlock.Role != fantasy.MessageRoleUser {
 				currentBlock = &messageBlock{
-					Role:     ai.MessageRoleUser,
-					Messages: []ai.Message{},
+					Role:     fantasy.MessageRoleUser,
+					Messages: []fantasy.Message{},
 				}
 				blocks = append(blocks, currentBlock)
 			}
@@ -357,10 +357,10 @@ func groupIntoBlocks(prompt ai.Prompt) []*messageBlock {
 	return blocks
 }
 
-func (a languageModel) toTools(tools []ai.Tool, toolChoice *ai.ToolChoice, disableParallelToolCalls bool) (anthropicTools []anthropic.ToolUnionParam, anthropicToolChoice *anthropic.ToolChoiceUnionParam, warnings []ai.CallWarning) {
+func (a languageModel) toTools(tools []fantasy.Tool, toolChoice *fantasy.ToolChoice, disableParallelToolCalls bool) (anthropicTools []anthropic.ToolUnionParam, anthropicToolChoice *anthropic.ToolChoiceUnionParam, warnings []fantasy.CallWarning) {
 	for _, tool := range tools {
-		if tool.GetType() == ai.ToolTypeFunction {
-			ft, ok := tool.(ai.FunctionTool)
+		if tool.GetType() == fantasy.ToolTypeFunction {
+			ft, ok := tool.(fantasy.FunctionTool)
 			if !ok {
 				continue
 			}
@@ -391,8 +391,8 @@ func (a languageModel) toTools(tools []ai.Tool, toolChoice *ai.ToolChoice, disab
 			continue
 		}
 		// TODO: handle provider tool calls
-		warnings = append(warnings, ai.CallWarning{
-			Type:    ai.CallWarningTypeUnsupportedTool,
+		warnings = append(warnings, fantasy.CallWarning{
+			Type:    fantasy.CallWarningTypeUnsupportedTool,
 			Tool:    tool,
 			Message: "tool is not supported",
 		})
@@ -417,21 +417,21 @@ func (a languageModel) toTools(tools []ai.Tool, toolChoice *ai.ToolChoice, disab
 	}
 
 	switch *toolChoice {
-	case ai.ToolChoiceAuto:
+	case fantasy.ToolChoiceAuto:
 		anthropicToolChoice = &anthropic.ToolChoiceUnionParam{
 			OfAuto: &anthropic.ToolChoiceAutoParam{
 				Type:                   "auto",
 				DisableParallelToolUse: disableParallelToolUse,
 			},
 		}
-	case ai.ToolChoiceRequired:
+	case fantasy.ToolChoiceRequired:
 		anthropicToolChoice = &anthropic.ToolChoiceUnionParam{
 			OfAny: &anthropic.ToolChoiceAnyParam{
 				Type:                   "any",
 				DisableParallelToolUse: disableParallelToolUse,
 			},
 		}
-	case ai.ToolChoiceNone:
+	case fantasy.ToolChoiceNone:
 		return anthropicTools, anthropicToolChoice, warnings
 	default:
 		anthropicToolChoice = &anthropic.ToolChoiceUnionParam{
@@ -445,16 +445,16 @@ func (a languageModel) toTools(tools []ai.Tool, toolChoice *ai.ToolChoice, disab
 	return anthropicTools, anthropicToolChoice, warnings
 }
 
-func toPrompt(prompt ai.Prompt, sendReasoningData bool) ([]anthropic.TextBlockParam, []anthropic.MessageParam, []ai.CallWarning) {
+func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBlockParam, []anthropic.MessageParam, []fantasy.CallWarning) {
 	var systemBlocks []anthropic.TextBlockParam
 	var messages []anthropic.MessageParam
-	var warnings []ai.CallWarning
+	var warnings []fantasy.CallWarning
 
 	blocks := groupIntoBlocks(prompt)
 	finishedSystemBlock := false
 	for _, block := range blocks {
 		switch block.Role {
-		case ai.MessageRoleSystem:
+		case fantasy.MessageRoleSystem:
 			if finishedSystemBlock {
 				// skip multiple system messages that are separated by user/assistant messages
 				// TODO: see if we need to send error here?
@@ -468,7 +468,7 @@ func toPrompt(prompt ai.Prompt, sendReasoningData bool) ([]anthropic.TextBlockPa
 					if cacheControl == nil && isLastPart {
 						cacheControl = getCacheControl(msg.ProviderOptions)
 					}
-					text, ok := ai.AsMessagePart[ai.TextPart](part)
+					text, ok := fantasy.AsMessagePart[fantasy.TextPart](part)
 					if !ok {
 						continue
 					}
@@ -482,10 +482,10 @@ func toPrompt(prompt ai.Prompt, sendReasoningData bool) ([]anthropic.TextBlockPa
 				}
 			}
 
-		case ai.MessageRoleUser:
+		case fantasy.MessageRoleUser:
 			var anthropicContent []anthropic.ContentBlockParamUnion
 			for _, msg := range block.Messages {
-				if msg.Role == ai.MessageRoleUser {
+				if msg.Role == fantasy.MessageRoleUser {
 					for i, part := range msg.Content {
 						isLastPart := i == len(msg.Content)-1
 						cacheControl := getCacheControl(part.Options())
@@ -493,8 +493,8 @@ func toPrompt(prompt ai.Prompt, sendReasoningData bool) ([]anthropic.TextBlockPa
 							cacheControl = getCacheControl(msg.ProviderOptions)
 						}
 						switch part.GetType() {
-						case ai.ContentTypeText:
-							text, ok := ai.AsMessagePart[ai.TextPart](part)
+						case fantasy.ContentTypeText:
+							text, ok := fantasy.AsMessagePart[fantasy.TextPart](part)
 							if !ok {
 								continue
 							}
@@ -507,8 +507,8 @@ func toPrompt(prompt ai.Prompt, sendReasoningData bool) ([]anthropic.TextBlockPa
 							anthropicContent = append(anthropicContent, anthropic.ContentBlockParamUnion{
 								OfText: textBlock,
 							})
-						case ai.ContentTypeFile:
-							file, ok := ai.AsMessagePart[ai.FilePart](part)
+						case fantasy.ContentTypeFile:
+							file, ok := fantasy.AsMessagePart[fantasy.FilePart](part)
 							if !ok {
 								continue
 							}
@@ -525,14 +525,14 @@ func toPrompt(prompt ai.Prompt, sendReasoningData bool) ([]anthropic.TextBlockPa
 							anthropicContent = append(anthropicContent, imageBlock)
 						}
 					}
-				} else if msg.Role == ai.MessageRoleTool {
+				} else if msg.Role == fantasy.MessageRoleTool {
 					for i, part := range msg.Content {
 						isLastPart := i == len(msg.Content)-1
 						cacheControl := getCacheControl(part.Options())
 						if cacheControl == nil && isLastPart {
 							cacheControl = getCacheControl(msg.ProviderOptions)
 						}
-						result, ok := ai.AsMessagePart[ai.ToolResultPart](part)
+						result, ok := fantasy.AsMessagePart[fantasy.ToolResultPart](part)
 						if !ok {
 							continue
 						}
@@ -540,8 +540,8 @@ func toPrompt(prompt ai.Prompt, sendReasoningData bool) ([]anthropic.TextBlockPa
 							ToolUseID: result.ToolCallID,
 						}
 						switch result.Output.GetType() {
-						case ai.ToolResultContentTypeText:
-							content, ok := ai.AsToolResultOutputType[ai.ToolResultOutputContentText](result.Output)
+						case fantasy.ToolResultContentTypeText:
+							content, ok := fantasy.AsToolResultOutputType[fantasy.ToolResultOutputContentText](result.Output)
 							if !ok {
 								continue
 							}
@@ -552,8 +552,8 @@ func toPrompt(prompt ai.Prompt, sendReasoningData bool) ([]anthropic.TextBlockPa
 									},
 								},
 							}
-						case ai.ToolResultContentTypeMedia:
-							content, ok := ai.AsToolResultOutputType[ai.ToolResultOutputContentMedia](result.Output)
+						case fantasy.ToolResultContentTypeMedia:
+							content, ok := fantasy.AsToolResultOutputType[fantasy.ToolResultOutputContentMedia](result.Output)
 							if !ok {
 								continue
 							}
@@ -562,8 +562,8 @@ func toPrompt(prompt ai.Prompt, sendReasoningData bool) ([]anthropic.TextBlockPa
 									OfImage: anthropic.NewImageBlockBase64(content.MediaType, content.Data).OfImage,
 								},
 							}
-						case ai.ToolResultContentTypeError:
-							content, ok := ai.AsToolResultOutputType[ai.ToolResultOutputContentError](result.Output)
+						case fantasy.ToolResultContentTypeError:
+							content, ok := fantasy.AsToolResultOutputType[fantasy.ToolResultOutputContentError](result.Output)
 							if !ok {
 								continue
 							}
@@ -586,7 +586,7 @@ func toPrompt(prompt ai.Prompt, sendReasoningData bool) ([]anthropic.TextBlockPa
 				}
 			}
 			messages = append(messages, anthropic.NewUserMessage(anthropicContent...))
-		case ai.MessageRoleAssistant:
+		case fantasy.MessageRoleAssistant:
 			var anthropicContent []anthropic.ContentBlockParamUnion
 			for _, msg := range block.Messages {
 				for i, part := range msg.Content {
@@ -596,8 +596,8 @@ func toPrompt(prompt ai.Prompt, sendReasoningData bool) ([]anthropic.TextBlockPa
 						cacheControl = getCacheControl(msg.ProviderOptions)
 					}
 					switch part.GetType() {
-					case ai.ContentTypeText:
-						text, ok := ai.AsMessagePart[ai.TextPart](part)
+					case fantasy.ContentTypeText:
+						text, ok := fantasy.AsMessagePart[fantasy.TextPart](part)
 						if !ok {
 							continue
 						}
@@ -610,13 +610,13 @@ func toPrompt(prompt ai.Prompt, sendReasoningData bool) ([]anthropic.TextBlockPa
 						anthropicContent = append(anthropicContent, anthropic.ContentBlockParamUnion{
 							OfText: textBlock,
 						})
-					case ai.ContentTypeReasoning:
-						reasoning, ok := ai.AsMessagePart[ai.ReasoningPart](part)
+					case fantasy.ContentTypeReasoning:
+						reasoning, ok := fantasy.AsMessagePart[fantasy.ReasoningPart](part)
 						if !ok {
 							continue
 						}
 						if !sendReasoningData {
-							warnings = append(warnings, ai.CallWarning{
+							warnings = append(warnings, fantasy.CallWarning{
 								Type:    "other",
 								Message: "sending reasoning content is disabled for this model",
 							})
@@ -624,7 +624,7 @@ func toPrompt(prompt ai.Prompt, sendReasoningData bool) ([]anthropic.TextBlockPa
 						}
 						reasoningMetadata := getReasoningMetadata(part.Options())
 						if reasoningMetadata == nil {
-							warnings = append(warnings, ai.CallWarning{
+							warnings = append(warnings, fantasy.CallWarning{
 								Type:    "other",
 								Message: "unsupported reasoning metadata",
 							})
@@ -636,14 +636,14 @@ func toPrompt(prompt ai.Prompt, sendReasoningData bool) ([]anthropic.TextBlockPa
 						} else if reasoningMetadata.RedactedData != "" {
 							anthropicContent = append(anthropicContent, anthropic.NewRedactedThinkingBlock(reasoningMetadata.RedactedData))
 						} else {
-							warnings = append(warnings, ai.CallWarning{
+							warnings = append(warnings, fantasy.CallWarning{
 								Type:    "other",
 								Message: "unsupported reasoning metadata",
 							})
 							continue
 						}
-					case ai.ContentTypeToolCall:
-						toolCall, ok := ai.AsMessagePart[ai.ToolCallPart](part)
+					case fantasy.ContentTypeToolCall:
+						toolCall, ok := fantasy.AsMessagePart[fantasy.ToolCallPart](part)
 						if !ok {
 							continue
 						}
@@ -662,7 +662,7 @@ func toPrompt(prompt ai.Prompt, sendReasoningData bool) ([]anthropic.TextBlockPa
 							toolUseBlock.OfToolUse.CacheControl = anthropic.NewCacheControlEphemeralParam()
 						}
 						anthropicContent = append(anthropicContent, toolUseBlock)
-					case ai.ContentTypeToolResult:
+					case fantasy.ContentTypeToolResult:
 						// TODO: implement provider executed tool result
 					}
 				}
@@ -683,7 +683,7 @@ func (o languageModel) handleError(err error) error {
 			v := h[len(h)-1]
 			headers[strings.ToLower(k)] = v
 		}
-		return ai.NewAPICallError(
+		return fantasy.NewAPICallError(
 			apiErr.Error(),
 			apiErr.Request.URL.String(),
 			string(requestDump),
@@ -697,21 +697,21 @@ func (o languageModel) handleError(err error) error {
 	return err
 }
 
-func mapFinishReason(finishReason string) ai.FinishReason {
+func mapFinishReason(finishReason string) fantasy.FinishReason {
 	switch finishReason {
 	case "end_turn", "pause_turn", "stop_sequence":
-		return ai.FinishReasonStop
+		return fantasy.FinishReasonStop
 	case "max_tokens":
-		return ai.FinishReasonLength
+		return fantasy.FinishReasonLength
 	case "tool_use":
-		return ai.FinishReasonToolCalls
+		return fantasy.FinishReasonToolCalls
 	default:
-		return ai.FinishReasonUnknown
+		return fantasy.FinishReasonUnknown
 	}
 }
 
-// Generate implements ai.LanguageModel.
-func (a languageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response, error) {
+// Generate implements fantasy.LanguageModel.
+func (a languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantasy.Response, error) {
 	params, warnings, err := a.prepareParams(call)
 	if err != nil {
 		return nil, err
@@ -721,7 +721,7 @@ func (a languageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response
 		return nil, a.handleError(err)
 	}
 
-	var content []ai.Content
+	var content []fantasy.Content
 	for _, block := range response.Content {
 		switch block.Type {
 		case "text":
@@ -729,7 +729,7 @@ func (a languageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response
 			if !ok {
 				continue
 			}
-			content = append(content, ai.TextContent{
+			content = append(content, fantasy.TextContent{
 				Text: text.Text,
 			})
 		case "thinking":
@@ -737,9 +737,9 @@ func (a languageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response
 			if !ok {
 				continue
 			}
-			content = append(content, ai.ReasoningContent{
+			content = append(content, fantasy.ReasoningContent{
 				Text: reasoning.Thinking,
-				ProviderMetadata: ai.ProviderMetadata{
+				ProviderMetadata: fantasy.ProviderMetadata{
 					Name: &ReasoningOptionMetadata{
 						Signature: reasoning.Signature,
 					},
@@ -750,9 +750,9 @@ func (a languageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response
 			if !ok {
 				continue
 			}
-			content = append(content, ai.ReasoningContent{
+			content = append(content, fantasy.ReasoningContent{
 				Text: "",
-				ProviderMetadata: ai.ProviderMetadata{
+				ProviderMetadata: fantasy.ProviderMetadata{
 					Name: &ReasoningOptionMetadata{
 						RedactedData: reasoning.Data,
 					},
@@ -763,7 +763,7 @@ func (a languageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response
 			if !ok {
 				continue
 			}
-			content = append(content, ai.ToolCallContent{
+			content = append(content, fantasy.ToolCallContent{
 				ToolCallID:       toolUse.ID,
 				ToolName:         toolUse.Name,
 				Input:            string(toolUse.Input),
@@ -772,9 +772,9 @@ func (a languageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response
 		}
 	}
 
-	return &ai.Response{
+	return &fantasy.Response{
 		Content: content,
-		Usage: ai.Usage{
+		Usage: fantasy.Usage{
 			InputTokens:         response.Usage.InputTokens,
 			OutputTokens:        response.Usage.OutputTokens,
 			TotalTokens:         response.Usage.InputTokens + response.Usage.OutputTokens,
@@ -782,13 +782,13 @@ func (a languageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response
 			CacheReadTokens:     response.Usage.CacheReadInputTokens,
 		},
 		FinishReason:     mapFinishReason(string(response.StopReason)),
-		ProviderMetadata: ai.ProviderMetadata{},
+		ProviderMetadata: fantasy.ProviderMetadata{},
 		Warnings:         warnings,
 	}, nil
 }
 
-// Stream implements ai.LanguageModel.
-func (a languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamResponse, error) {
+// Stream implements fantasy.LanguageModel.
+func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.StreamResponse, error) {
 	params, warnings, err := a.prepareParams(call)
 	if err != nil {
 		return nil, err
@@ -796,10 +796,10 @@ func (a languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 
 	stream := a.client.Messages.NewStreaming(ctx, *params)
 	acc := anthropic.Message{}
-	return func(yield func(ai.StreamPart) bool) {
+	return func(yield func(fantasy.StreamPart) bool) {
 		if len(warnings) > 0 {
-			if !yield(ai.StreamPart{
-				Type:     ai.StreamPartTypeWarnings,
+			if !yield(fantasy.StreamPart{
+				Type:     fantasy.StreamPartTypeWarnings,
 				Warnings: warnings,
 			}) {
 				return
@@ -814,24 +814,24 @@ func (a languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 				contentBlockType := chunk.ContentBlock.Type
 				switch contentBlockType {
 				case "text":
-					if !yield(ai.StreamPart{
-						Type: ai.StreamPartTypeTextStart,
+					if !yield(fantasy.StreamPart{
+						Type: fantasy.StreamPartTypeTextStart,
 						ID:   fmt.Sprintf("%d", chunk.Index),
 					}) {
 						return
 					}
 				case "thinking":
-					if !yield(ai.StreamPart{
-						Type: ai.StreamPartTypeReasoningStart,
+					if !yield(fantasy.StreamPart{
+						Type: fantasy.StreamPartTypeReasoningStart,
 						ID:   fmt.Sprintf("%d", chunk.Index),
 					}) {
 						return
 					}
 				case "redacted_thinking":
-					if !yield(ai.StreamPart{
-						Type: ai.StreamPartTypeReasoningStart,
+					if !yield(fantasy.StreamPart{
+						Type: fantasy.StreamPartTypeReasoningStart,
 						ID:   fmt.Sprintf("%d", chunk.Index),
-						ProviderMetadata: ai.ProviderMetadata{
+						ProviderMetadata: fantasy.ProviderMetadata{
 							Name: &ReasoningOptionMetadata{
 								RedactedData: chunk.ContentBlock.Data,
 							},
@@ -840,8 +840,8 @@ func (a languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 						return
 					}
 				case "tool_use":
-					if !yield(ai.StreamPart{
-						Type:          ai.StreamPartTypeToolInputStart,
+					if !yield(fantasy.StreamPart{
+						Type:          fantasy.StreamPartTypeToolInputStart,
 						ID:            chunk.ContentBlock.ID,
 						ToolCallName:  chunk.ContentBlock.Name,
 						ToolCallInput: "",
@@ -856,28 +856,28 @@ func (a languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 				contentBlock := acc.Content[int(chunk.Index)]
 				switch contentBlock.Type {
 				case "text":
-					if !yield(ai.StreamPart{
-						Type: ai.StreamPartTypeTextEnd,
+					if !yield(fantasy.StreamPart{
+						Type: fantasy.StreamPartTypeTextEnd,
 						ID:   fmt.Sprintf("%d", chunk.Index),
 					}) {
 						return
 					}
 				case "thinking":
-					if !yield(ai.StreamPart{
-						Type: ai.StreamPartTypeReasoningEnd,
+					if !yield(fantasy.StreamPart{
+						Type: fantasy.StreamPartTypeReasoningEnd,
 						ID:   fmt.Sprintf("%d", chunk.Index),
 					}) {
 						return
 					}
 				case "tool_use":
-					if !yield(ai.StreamPart{
-						Type: ai.StreamPartTypeToolInputEnd,
+					if !yield(fantasy.StreamPart{
+						Type: fantasy.StreamPartTypeToolInputEnd,
 						ID:   contentBlock.ID,
 					}) {
 						return
 					}
-					if !yield(ai.StreamPart{
-						Type:          ai.StreamPartTypeToolCall,
+					if !yield(fantasy.StreamPart{
+						Type:          fantasy.StreamPartTypeToolCall,
 						ID:            contentBlock.ID,
 						ToolCallName:  contentBlock.Name,
 						ToolCallInput: string(contentBlock.Input),
@@ -888,26 +888,26 @@ func (a languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 			case "content_block_delta":
 				switch chunk.Delta.Type {
 				case "text_delta":
-					if !yield(ai.StreamPart{
-						Type:  ai.StreamPartTypeTextDelta,
+					if !yield(fantasy.StreamPart{
+						Type:  fantasy.StreamPartTypeTextDelta,
 						ID:    fmt.Sprintf("%d", chunk.Index),
 						Delta: chunk.Delta.Text,
 					}) {
 						return
 					}
 				case "thinking_delta":
-					if !yield(ai.StreamPart{
-						Type:  ai.StreamPartTypeReasoningDelta,
+					if !yield(fantasy.StreamPart{
+						Type:  fantasy.StreamPartTypeReasoningDelta,
 						ID:    fmt.Sprintf("%d", chunk.Index),
 						Delta: chunk.Delta.Thinking,
 					}) {
 						return
 					}
 				case "signature_delta":
-					if !yield(ai.StreamPart{
-						Type: ai.StreamPartTypeReasoningDelta,
+					if !yield(fantasy.StreamPart{
+						Type: fantasy.StreamPartTypeReasoningDelta,
 						ID:   fmt.Sprintf("%d", chunk.Index),
-						ProviderMetadata: ai.ProviderMetadata{
+						ProviderMetadata: fantasy.ProviderMetadata{
 							Name: &ReasoningOptionMetadata{
 								Signature: chunk.Delta.Signature,
 							},
@@ -920,8 +920,8 @@ func (a languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 						continue
 					}
 					contentBlock := acc.Content[int(chunk.Index)]
-					if !yield(ai.StreamPart{
-						Type:          ai.StreamPartTypeToolInputDelta,
+					if !yield(fantasy.StreamPart{
+						Type:          fantasy.StreamPartTypeToolInputDelta,
 						ID:            contentBlock.ID,
 						ToolCallInput: chunk.Delta.PartialJSON,
 					}) {
@@ -934,23 +934,23 @@ func (a languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamRespo
 
 		err := stream.Err()
 		if err == nil || errors.Is(err, io.EOF) {
-			yield(ai.StreamPart{
-				Type:         ai.StreamPartTypeFinish,
+			yield(fantasy.StreamPart{
+				Type:         fantasy.StreamPartTypeFinish,
 				ID:           acc.ID,
 				FinishReason: mapFinishReason(string(acc.StopReason)),
-				Usage: ai.Usage{
+				Usage: fantasy.Usage{
 					InputTokens:         acc.Usage.InputTokens,
 					OutputTokens:        acc.Usage.OutputTokens,
 					TotalTokens:         acc.Usage.InputTokens + acc.Usage.OutputTokens,
 					CacheCreationTokens: acc.Usage.CacheCreationInputTokens,
 					CacheReadTokens:     acc.Usage.CacheReadInputTokens,
 				},
-				ProviderMetadata: ai.ProviderMetadata{},
+				ProviderMetadata: fantasy.ProviderMetadata{},
 			})
 			return
 		} else {
-			yield(ai.StreamPart{
-				Type:  ai.StreamPartTypeError,
+			yield(fantasy.StreamPart{
+				Type:  fantasy.StreamPartTypeError,
 				Error: a.handleError(err),
 			})
 			return

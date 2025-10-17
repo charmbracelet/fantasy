@@ -5,7 +5,7 @@ import (
 	"cmp"
 	"maps"
 
-	"charm.land/fantasy/ai"
+	"charm.land/fantasy"
 	"github.com/openai/openai-go/v2"
 	"github.com/openai/openai-go/v2/option"
 )
@@ -34,7 +34,7 @@ type options struct {
 
 type Option = func(*options)
 
-func New(opts ...Option) ai.Provider {
+func New(opts ...Option) fantasy.Provider {
 	providerOptions := options{
 		headers:              map[string]string{},
 		languageModelOptions: make([]LanguageModelOption, 0),
@@ -117,8 +117,8 @@ func WithUseResponsesAPI() Option {
 	}
 }
 
-// LanguageModel implements ai.Provider.
-func (o *provider) LanguageModel(modelID string) (ai.LanguageModel, error) {
+// LanguageModel implements fantasy.Provider.
+func (o *provider) LanguageModel(modelID string) (fantasy.LanguageModel, error) {
 	openaiClientOptions := make([]option.RequestOption, 0, 5+len(o.options.headers)+len(o.options.sdkOptions))
 
 	if o.options.apiKey != "" {

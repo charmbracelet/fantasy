@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"charm.land/fantasy/ai"
+	"charm.land/fantasy"
 	"charm.land/fantasy/anthropic"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
@@ -24,7 +24,7 @@ func TestAnthropicCommon(t *testing.T) {
 }
 
 func TestAnthropicThinking(t *testing.T) {
-	opts := ai.ProviderOptions{
+	opts := fantasy.ProviderOptions{
 		anthropic.Name: &anthropic.ProviderOptions{
 			Thinking: &anthropic.ThinkingProviderOption{
 				BudgetTokens: 4000,
@@ -41,16 +41,16 @@ func TestAnthropicThinking(t *testing.T) {
 	testThinking(t, pairs, testAnthropicThinking)
 }
 
-func testAnthropicThinking(t *testing.T, result *ai.AgentResult) {
+func testAnthropicThinking(t *testing.T, result *fantasy.AgentResult) {
 	reasoningContentCount := 0
 	signaturesCount := 0
 	// Test if we got the signature
 	for _, step := range result.Steps {
 		for _, msg := range step.Messages {
 			for _, content := range msg.Content {
-				if content.GetType() == ai.ContentTypeReasoning {
+				if content.GetType() == fantasy.ContentTypeReasoning {
 					reasoningContentCount += 1
-					reasoningContent, ok := ai.AsContentType[ai.ReasoningPart](content)
+					reasoningContent, ok := fantasy.AsContentType[fantasy.ReasoningPart](content)
 					if !ok {
 						continue
 					}
@@ -78,7 +78,7 @@ func testAnthropicThinking(t *testing.T, result *ai.AgentResult) {
 }
 
 func anthropicBuilder(model string) builderFunc {
-	return func(r *recorder.Recorder) (ai.LanguageModel, error) {
+	return func(r *recorder.Recorder) (fantasy.LanguageModel, error) {
 		provider := anthropic.New(
 			anthropic.WithAPIKey(os.Getenv("FANTASY_ANTHROPIC_API_KEY")),
 			anthropic.WithHTTPClient(&http.Client{Transport: r}),

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"charm.land/fantasy/ai"
+	"charm.land/fantasy"
 	"charm.land/fantasy/openai"
 )
 
@@ -18,13 +18,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	stream, err := model.Stream(context.Background(), ai.Call{
-		Prompt: ai.Prompt{
-			ai.NewUserMessage("Whats the weather in pristina."),
+	stream, err := model.Stream(context.Background(), fantasy.Call{
+		Prompt: fantasy.Prompt{
+			fantasy.NewUserMessage("Whats the weather in pristina."),
 		},
-		Temperature: ai.Opt(0.7),
-		Tools: []ai.Tool{
-			ai.FunctionTool{
+		Temperature: fantasy.Opt(0.7),
+		Tools: []fantasy.Tool{
+			fantasy.FunctionTool{
 				Name:        "weather",
 				Description: "Gets the weather for a location",
 				InputSchema: map[string]any{

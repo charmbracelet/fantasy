@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"charm.land/fantasy/ai"
+	"charm.land/fantasy"
 	"charm.land/fantasy/openai"
 	"charm.land/fantasy/openaicompat"
 	"github.com/stretchr/testify/require"
@@ -22,7 +22,7 @@ func TestOpenAICompatibleCommon(t *testing.T) {
 }
 
 func TestOpenAICompatibleThinking(t *testing.T) {
-	opts := ai.ProviderOptions{
+	opts := fantasy.ProviderOptions{
 		openaicompat.Name: &openaicompat.ProviderOptions{
 			ReasoningEffort: openai.ReasoningEffortOption(openai.ReasoningEffortHigh),
 		},
@@ -33,12 +33,12 @@ func TestOpenAICompatibleThinking(t *testing.T) {
 	}, testOpenAICompatThinking)
 }
 
-func testOpenAICompatThinking(t *testing.T, result *ai.AgentResult) {
+func testOpenAICompatThinking(t *testing.T, result *fantasy.AgentResult) {
 	reasoningContentCount := 0
 	for _, step := range result.Steps {
 		for _, msg := range step.Messages {
 			for _, content := range msg.Content {
-				if content.GetType() == ai.ContentTypeReasoning {
+				if content.GetType() == fantasy.ContentTypeReasoning {
 					reasoningContentCount += 1
 				}
 			}
@@ -47,7 +47,7 @@ func testOpenAICompatThinking(t *testing.T, result *ai.AgentResult) {
 	require.Greater(t, reasoningContentCount, 0, "expected reasoning content, got none")
 }
 
-func builderXAIGrokCodeFast(r *recorder.Recorder) (ai.LanguageModel, error) {
+func builderXAIGrokCodeFast(r *recorder.Recorder) (fantasy.LanguageModel, error) {
 	provider := openaicompat.New(
 		openaicompat.WithBaseURL("https://api.x.ai/v1"),
 		openaicompat.WithAPIKey(os.Getenv("FANTASY_XAI_API_KEY")),
@@ -56,7 +56,7 @@ func builderXAIGrokCodeFast(r *recorder.Recorder) (ai.LanguageModel, error) {
 	return provider.LanguageModel("grok-code-fast-1")
 }
 
-func builderXAIGrok4Fast(r *recorder.Recorder) (ai.LanguageModel, error) {
+func builderXAIGrok4Fast(r *recorder.Recorder) (fantasy.LanguageModel, error) {
 	provider := openaicompat.New(
 		openaicompat.WithBaseURL("https://api.x.ai/v1"),
 		openaicompat.WithAPIKey(os.Getenv("FANTASY_XAI_API_KEY")),
@@ -65,7 +65,7 @@ func builderXAIGrok4Fast(r *recorder.Recorder) (ai.LanguageModel, error) {
 	return provider.LanguageModel("grok-4-fast")
 }
 
-func builderXAIGrok3Mini(r *recorder.Recorder) (ai.LanguageModel, error) {
+func builderXAIGrok3Mini(r *recorder.Recorder) (fantasy.LanguageModel, error) {
 	provider := openaicompat.New(
 		openaicompat.WithBaseURL("https://api.x.ai/v1"),
 		openaicompat.WithAPIKey(os.Getenv("FANTASY_XAI_API_KEY")),
@@ -74,7 +74,7 @@ func builderXAIGrok3Mini(r *recorder.Recorder) (ai.LanguageModel, error) {
 	return provider.LanguageModel("grok-3-mini")
 }
 
-func builderZAIGLM45(r *recorder.Recorder) (ai.LanguageModel, error) {
+func builderZAIGLM45(r *recorder.Recorder) (fantasy.LanguageModel, error) {
 	provider := openaicompat.New(
 		openaicompat.WithBaseURL("https://api.z.ai/api/coding/paas/v4"),
 		openaicompat.WithAPIKey(os.Getenv("FANTASY_ZAI_API_KEY")),
@@ -83,7 +83,7 @@ func builderZAIGLM45(r *recorder.Recorder) (ai.LanguageModel, error) {
 	return provider.LanguageModel("glm-4.5")
 }
 
-func builderGroq(r *recorder.Recorder) (ai.LanguageModel, error) {
+func builderGroq(r *recorder.Recorder) (fantasy.LanguageModel, error) {
 	provider := openaicompat.New(
 		openaicompat.WithBaseURL("https://api.groq.com/openai/v1"),
 		openaicompat.WithAPIKey(os.Getenv("FANTASY_GROQ_API_KEY")),

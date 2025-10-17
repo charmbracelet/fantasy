@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"testing"
 
-	"charm.land/fantasy/ai"
+	"charm.land/fantasy"
 	"charm.land/fantasy/bedrock"
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )
@@ -17,7 +17,7 @@ func TestBedrockCommon(t *testing.T) {
 	})
 }
 
-func builderBedrockClaude3Sonnet(r *recorder.Recorder) (ai.LanguageModel, error) {
+func builderBedrockClaude3Sonnet(r *recorder.Recorder) (fantasy.LanguageModel, error) {
 	provider := bedrock.New(
 		bedrock.WithHTTPClient(&http.Client{Transport: r}),
 		bedrock.WithSkipAuth(!r.IsRecording()),
@@ -25,7 +25,7 @@ func builderBedrockClaude3Sonnet(r *recorder.Recorder) (ai.LanguageModel, error)
 	return provider.LanguageModel("us.anthropic.claude-3-sonnet-20240229-v1:0")
 }
 
-func builderBedrockClaude3Opus(r *recorder.Recorder) (ai.LanguageModel, error) {
+func builderBedrockClaude3Opus(r *recorder.Recorder) (fantasy.LanguageModel, error) {
 	provider := bedrock.New(
 		bedrock.WithHTTPClient(&http.Client{Transport: r}),
 		bedrock.WithSkipAuth(!r.IsRecording()),
@@ -33,7 +33,7 @@ func builderBedrockClaude3Opus(r *recorder.Recorder) (ai.LanguageModel, error) {
 	return provider.LanguageModel("us.anthropic.claude-3-opus-20240229-v1:0")
 }
 
-func builderBedrockClaude3Haiku(r *recorder.Recorder) (ai.LanguageModel, error) {
+func builderBedrockClaude3Haiku(r *recorder.Recorder) (fantasy.LanguageModel, error) {
 	provider := bedrock.New(
 		bedrock.WithHTTPClient(&http.Client{Transport: r}),
 		bedrock.WithSkipAuth(!r.IsRecording()),

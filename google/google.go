@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"strings"
 
-	"charm.land/fantasy/ai"
+	"charm.land/fantasy"
 	"charm.land/fantasy/anthropic"
 	"cloud.google.com/go/auth"
 	"github.com/charmbracelet/x/exp/slice"
@@ -39,7 +39,7 @@ type options struct {
 
 type Option = func(*options)
 
-func New(opts ...Option) ai.Provider {
+func New(opts ...Option) fantasy.Provider {
 	options := options{
 		headers: map[string]string{},
 	}
@@ -116,8 +116,8 @@ type languageModel struct {
 	providerOptions options
 }
 
-// LanguageModel implements ai.Provider.
-func (g *provider) LanguageModel(modelID string) (ai.LanguageModel, error) {
+// LanguageModel implements fantasy.Provider.
+func (g *provider) LanguageModel(modelID string) (fantasy.LanguageModel, error) {
 	if strings.Contains(modelID, "anthropic") || strings.Contains(modelID, "claude") {
 		return anthropic.New(
 			anthropic.WithVertex(g.options.project, g.options.location),
@@ -159,14 +159,14 @@ func (g *provider) LanguageModel(modelID string) (ai.LanguageModel, error) {
 	}, nil
 }
 
-func (a languageModel) prepareParams(call ai.Call) (*genai.GenerateContentConfig, []*genai.Content, []ai.CallWarning, error) {
+func (a languageModel) prepareParams(call fantasy.Call) (*genai.GenerateContentConfig, []*genai.Content, []fantasy.CallWarning, error) {
 	config := &genai.GenerateContentConfig{}
 
 	providerOptions := &ProviderOptions{}
 	if v, ok := call.ProviderOptions[Name]; ok {
 		providerOptions, ok = v.(*ProviderOptions)
 		if !ok {
-			return nil, nil, nil, ai.NewInvalidArgumentError("providerOptions", "google provider options should be *google.ProviderOptions", nil)
+			return nil, nil, nil, fantasy.NewInvalidArgumentError("providerOptions", "google provider options should be *google.ProviderOptions", nil)
 		}
 	}
 
@@ -176,8 +176,8 @@ func (a languageModel) prepareParams(call ai.Call) (*genai.GenerateContentConfig
 		if providerOptions.ThinkingConfig.IncludeThoughts != nil &&
 			*providerOptions.ThinkingConfig.IncludeThoughts &&
 			strings.HasPrefix(a.provider, "google.vertex.") {
-			warnings = append(warnings, ai.CallWarning{
-				Type: ai.CallWarningTypeOther,
+			warnings = append(warnings, fantasy.CallWarning{
+				Type: fantasy.CallWarningTypeOther,
 				Message: "The 'includeThoughts' option is only supported with the Google Vertex provider " +
 					"and might not be supported or could behave unexpectedly with the current Google provider " +
 					fmt.Sprintf("(%s)", a.provider),
@@ -186,11 +186,11 @@ func (a languageModel) prepareParams(call ai.Call) (*genai.GenerateContentConfig
 
 		if providerOptions.ThinkingConfig.ThinkingBudget != nil &&
 			*providerOptions.ThinkingConfig.ThinkingBudget < 128 {
-			warnings = append(warnings, ai.CallWarning{
-				Type:    ai.CallWarningTypeOther,
+			warnings = append(warnings, fantasy.CallWarning{
+				Type:    fantasy.CallWarningTypeOther,
 				Message: "The 'thinking_budget' option can not be under 128 and will be set to 128 by default",
 			})
-			providerOptions.ThinkingConfig.ThinkingBudget = ai.Opt(int64(128))
+			providerOptions.ThinkingConfig.ThinkingBudget = fantasy.Opt(int64(128))
 		}
 	}
 
@@ -271,15 +271,15 @@ func (a languageModel) prepareParams(call ai.Call) (*genai.GenerateContentConfig
 	return config, content, warnings, nil
 }
 
-func toGooglePrompt(prompt ai.Prompt) (*genai.Content, []*genai.Content, []ai.CallWarning) { //nolint: unparam
+func toGooglePrompt(prompt fantasy.Prompt) (*genai.Content, []*genai.Content, []fantasy.CallWarning) { //nolint: unparam
 	var systemInstructions *genai.Content
 	var content []*genai.Content
-	var warnings []ai.CallWarning
+	var warnings []fantasy.CallWarning
 
 	finishedSystemBlock := false
 	for _, msg := range prompt {
 		switch msg.Role {
-		case ai.MessageRoleSystem:
+		case fantasy.MessageRoleSystem:
 			if finishedSystemBlock {
 				// skip multiple system messages that are separated by user/assistant messages
 				// TODO: see if we need to send error here?
@@ -289,7 +289,7 @@ func toGooglePrompt(prompt ai.Prompt) (*genai.Content, []*genai.Content, []ai.Ca
 
 			var systemMessages []string
 			for _, part := range msg.Content {
-				text, ok := ai.AsMessagePart[ai.TextPart](part)
+				text, ok := fantasy.AsMessagePart[fantasy.TextPart](part)
 				if !ok || text.Text == "" {
 					continue
 				}
@@ -304,20 +304,20 @@ func toGooglePrompt(prompt ai.Prompt) (*genai.Content, []*genai.Content, []ai.Ca
 					},
 				}
 			}
-		case ai.MessageRoleUser:
+		case fantasy.MessageRoleUser:
 			var parts []*genai.Part
 			for _, part := range msg.Content {
 				switch part.GetType() {
-				case ai.ContentTypeText:
-					text, ok := ai.AsMessagePart[ai.TextPart](part)
+				case fantasy.ContentTypeText:
+					text, ok := fantasy.AsMessagePart[fantasy.TextPart](part)
 					if !ok || text.Text == "" {
 						continue
 					}
 					parts = append(parts, &genai.Part{
 						Text: text.Text,
 					})
-				case ai.ContentTypeFile:
-					file, ok := ai.AsMessagePart[ai.FilePart](part)
+				case fantasy.ContentTypeFile:
+					file, ok := fantasy.AsMessagePart[fantasy.FilePart](part)
 					if !ok {
 						continue
 					}
@@ -337,20 +337,20 @@ func toGooglePrompt(prompt ai.Prompt) (*genai.Content, []*genai.Content, []ai.Ca
 					Parts: parts,
 				})
 			}
-		case ai.MessageRoleAssistant:
+		case fantasy.MessageRoleAssistant:
 			var parts []*genai.Part
 			for _, part := range msg.Content {
 				switch part.GetType() {
-				case ai.ContentTypeText:
-					text, ok := ai.AsMessagePart[ai.TextPart](part)
+				case fantasy.ContentTypeText:
+					text, ok := fantasy.AsMessagePart[fantasy.TextPart](part)
 					if !ok || text.Text == "" {
 						continue
 					}
 					parts = append(parts, &genai.Part{
 						Text: text.Text,
 					})
-				case ai.ContentTypeToolCall:
-					toolCall, ok := ai.AsMessagePart[ai.ToolCallPart](part)
+				case fantasy.ContentTypeToolCall:
+					toolCall, ok := fantasy.AsMessagePart[fantasy.ToolCallPart](part)
 					if !ok {
 						continue
 					}
@@ -375,20 +375,20 @@ func toGooglePrompt(prompt ai.Prompt) (*genai.Content, []*genai.Content, []ai.Ca
 					Parts: parts,
 				})
 			}
-		case ai.MessageRoleTool:
+		case fantasy.MessageRoleTool:
 			var parts []*genai.Part
 			for _, part := range msg.Content {
 				switch part.GetType() {
-				case ai.ContentTypeToolResult:
-					result, ok := ai.AsMessagePart[ai.ToolResultPart](part)
+				case fantasy.ContentTypeToolResult:
+					result, ok := fantasy.AsMessagePart[fantasy.ToolResultPart](part)
 					if !ok {
 						continue
 					}
-					var toolCall ai.ToolCallPart
+					var toolCall fantasy.ToolCallPart
 					for _, m := range prompt {
-						if m.Role == ai.MessageRoleAssistant {
+						if m.Role == fantasy.MessageRoleAssistant {
 							for _, content := range m.Content {
-								tc, ok := ai.AsMessagePart[ai.ToolCallPart](content)
+								tc, ok := fantasy.AsMessagePart[fantasy.ToolCallPart](content)
 								if !ok {
 									continue
 								}
@@ -400,8 +400,8 @@ func toGooglePrompt(prompt ai.Prompt) (*genai.Content, []*genai.Content, []ai.Ca
 						}
 					}
 					switch result.Output.GetType() {
-					case ai.ToolResultContentTypeText:
-						content, ok := ai.AsToolResultOutputType[ai.ToolResultOutputContentText](result.Output)
+					case fantasy.ToolResultContentTypeText:
+						content, ok := fantasy.AsToolResultOutputType[fantasy.ToolResultOutputContentText](result.Output)
 						if !ok {
 							continue
 						}
@@ -414,8 +414,8 @@ func toGooglePrompt(prompt ai.Prompt) (*genai.Content, []*genai.Content, []ai.Ca
 							},
 						})
 
-					case ai.ToolResultContentTypeError:
-						content, ok := ai.AsToolResultOutputType[ai.ToolResultOutputContentError](result.Output)
+					case fantasy.ToolResultContentTypeError:
+						content, ok := fantasy.AsToolResultOutputType[fantasy.ToolResultOutputContentError](result.Output)
 						if !ok {
 							continue
 						}
@@ -443,8 +443,8 @@ func toGooglePrompt(prompt ai.Prompt) (*genai.Content, []*genai.Content, []ai.Ca
 	return systemInstructions, content, warnings
 }
 
-// Generate implements ai.LanguageModel.
-func (g *languageModel) Generate(ctx context.Context, call ai.Call) (*ai.Response, error) {
+// Generate implements fantasy.LanguageModel.
+func (g *languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantasy.Response, error) {
 	config, contents, warnings, err := g.prepareParams(call)
 	if err != nil {
 		return nil, err
@@ -468,18 +468,18 @@ func (g *languageModel) Generate(ctx context.Context, call ai.Call) (*ai.Respons
 	return mapResponse(response, warnings)
 }
 
-// Model implements ai.LanguageModel.
+// Model implements fantasy.LanguageModel.
 func (g *languageModel) Model() string {
 	return g.modelID
 }
 
-// Provider implements ai.LanguageModel.
+// Provider implements fantasy.LanguageModel.
 func (g *languageModel) Provider() string {
 	return g.provider
 }
 
-// Stream implements ai.LanguageModel.
-func (g *languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamResponse, error) {
+// Stream implements fantasy.LanguageModel.
+func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.StreamResponse, error) {
 	config, contents, warnings, err := g.prepareParams(call)
 	if err != nil {
 		return nil, err
@@ -495,10 +495,10 @@ func (g *languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamResp
 		return nil, err
 	}
 
-	return func(yield func(ai.StreamPart) bool) {
+	return func(yield func(fantasy.StreamPart) bool) {
 		if len(warnings) > 0 {
-			if !yield(ai.StreamPart{
-				Type:     ai.StreamPartTypeWarnings,
+			if !yield(fantasy.StreamPart{
+				Type:     fantasy.StreamPartTypeWarnings,
 				Warnings: warnings,
 			}) {
 				return
@@ -506,19 +506,19 @@ func (g *languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamResp
 		}
 
 		var currentContent string
-		var toolCalls []ai.ToolCallContent
+		var toolCalls []fantasy.ToolCallContent
 		var isActiveText bool
 		var isActiveReasoning bool
 		var blockCounter int
 		var currentTextBlockID string
 		var currentReasoningBlockID string
-		var usage ai.Usage
-		var lastFinishReason ai.FinishReason
+		var usage fantasy.Usage
+		var lastFinishReason fantasy.FinishReason
 
 		for resp, err := range chat.SendMessageStream(ctx, depointerSlice(lastMessage.Parts)...) {
 			if err != nil {
-				yield(ai.StreamPart{
-					Type:  ai.StreamPartTypeError,
+				yield(fantasy.StreamPart{
+					Type:  fantasy.StreamPartTypeError,
 					Error: err,
 				})
 				return
@@ -535,8 +535,8 @@ func (g *languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamResp
 								// End any active text block before starting reasoning
 								if isActiveText {
 									isActiveText = false
-									if !yield(ai.StreamPart{
-										Type: ai.StreamPartTypeTextEnd,
+									if !yield(fantasy.StreamPart{
+										Type: fantasy.StreamPartTypeTextEnd,
 										ID:   currentTextBlockID,
 									}) {
 										return
@@ -548,16 +548,16 @@ func (g *languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamResp
 									isActiveReasoning = true
 									currentReasoningBlockID = fmt.Sprintf("%d", blockCounter)
 									blockCounter++
-									if !yield(ai.StreamPart{
-										Type: ai.StreamPartTypeReasoningStart,
+									if !yield(fantasy.StreamPart{
+										Type: fantasy.StreamPartTypeReasoningStart,
 										ID:   currentReasoningBlockID,
 									}) {
 										return
 									}
 								}
 
-								if !yield(ai.StreamPart{
-									Type:  ai.StreamPartTypeReasoningDelta,
+								if !yield(fantasy.StreamPart{
+									Type:  fantasy.StreamPartTypeReasoningDelta,
 									ID:    currentReasoningBlockID,
 									Delta: delta,
 								}) {
@@ -568,8 +568,8 @@ func (g *languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamResp
 								// End any active reasoning block before starting text
 								if isActiveReasoning {
 									isActiveReasoning = false
-									if !yield(ai.StreamPart{
-										Type: ai.StreamPartTypeReasoningEnd,
+									if !yield(fantasy.StreamPart{
+										Type: fantasy.StreamPartTypeReasoningEnd,
 										ID:   currentReasoningBlockID,
 									}) {
 										return
@@ -581,16 +581,16 @@ func (g *languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamResp
 									isActiveText = true
 									currentTextBlockID = fmt.Sprintf("%d", blockCounter)
 									blockCounter++
-									if !yield(ai.StreamPart{
-										Type: ai.StreamPartTypeTextStart,
+									if !yield(fantasy.StreamPart{
+										Type: fantasy.StreamPartTypeTextStart,
 										ID:   currentTextBlockID,
 									}) {
 										return
 									}
 								}
 
-								if !yield(ai.StreamPart{
-									Type:  ai.StreamPartTypeTextDelta,
+								if !yield(fantasy.StreamPart{
+									Type:  fantasy.StreamPartTypeTextDelta,
 									ID:    currentTextBlockID,
 									Delta: delta,
 								}) {
@@ -603,8 +603,8 @@ func (g *languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamResp
 						// End any active text or reasoning blocks
 						if isActiveText {
 							isActiveText = false
-							if !yield(ai.StreamPart{
-								Type: ai.StreamPartTypeTextEnd,
+							if !yield(fantasy.StreamPart{
+								Type: fantasy.StreamPartTypeTextEnd,
 								ID:   currentTextBlockID,
 							}) {
 								return
@@ -612,8 +612,8 @@ func (g *languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamResp
 						}
 						if isActiveReasoning {
 							isActiveReasoning = false
-							if !yield(ai.StreamPart{
-								Type: ai.StreamPartTypeReasoningEnd,
+							if !yield(fantasy.StreamPart{
+								Type: fantasy.StreamPartTypeReasoningEnd,
 								ID:   currentReasoningBlockID,
 							}) {
 								return
@@ -624,38 +624,38 @@ func (g *languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamResp
 
 						args, err := json.Marshal(part.FunctionCall.Args)
 						if err != nil {
-							yield(ai.StreamPart{
-								Type:  ai.StreamPartTypeError,
+							yield(fantasy.StreamPart{
+								Type:  fantasy.StreamPartTypeError,
 								Error: err,
 							})
 							return
 						}
 
-						if !yield(ai.StreamPart{
-							Type:         ai.StreamPartTypeToolInputStart,
+						if !yield(fantasy.StreamPart{
+							Type:         fantasy.StreamPartTypeToolInputStart,
 							ID:           toolCallID,
 							ToolCallName: part.FunctionCall.Name,
 						}) {
 							return
 						}
 
-						if !yield(ai.StreamPart{
-							Type:  ai.StreamPartTypeToolInputDelta,
+						if !yield(fantasy.StreamPart{
+							Type:  fantasy.StreamPartTypeToolInputDelta,
 							ID:    toolCallID,
 							Delta: string(args),
 						}) {
 							return
 						}
 
-						if !yield(ai.StreamPart{
-							Type: ai.StreamPartTypeToolInputEnd,
+						if !yield(fantasy.StreamPart{
+							Type: fantasy.StreamPartTypeToolInputEnd,
 							ID:   toolCallID,
 						}) {
 							return
 						}
 
-						if !yield(ai.StreamPart{
-							Type:             ai.StreamPartTypeToolCall,
+						if !yield(fantasy.StreamPart{
+							Type:             fantasy.StreamPartTypeToolCall,
 							ID:               toolCallID,
 							ToolCallName:     part.FunctionCall.Name,
 							ToolCallInput:    string(args),
@@ -664,7 +664,7 @@ func (g *languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamResp
 							return
 						}
 
-						toolCalls = append(toolCalls, ai.ToolCallContent{
+						toolCalls = append(toolCalls, fantasy.ToolCallContent{
 							ToolCallID:       toolCallID,
 							ToolName:         part.FunctionCall.Name,
 							Input:            string(args),
@@ -685,16 +685,16 @@ func (g *languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamResp
 
 		// Close any open blocks before finishing
 		if isActiveText {
-			if !yield(ai.StreamPart{
-				Type: ai.StreamPartTypeTextEnd,
+			if !yield(fantasy.StreamPart{
+				Type: fantasy.StreamPartTypeTextEnd,
 				ID:   currentTextBlockID,
 			}) {
 				return
 			}
 		}
 		if isActiveReasoning {
-			if !yield(ai.StreamPart{
-				Type: ai.StreamPartTypeReasoningEnd,
+			if !yield(fantasy.StreamPart{
+				Type: fantasy.StreamPartTypeReasoningEnd,
 				ID:   currentReasoningBlockID,
 			}) {
 				return
@@ -703,23 +703,23 @@ func (g *languageModel) Stream(ctx context.Context, call ai.Call) (ai.StreamResp
 
 		finishReason := lastFinishReason
 		if len(toolCalls) > 0 {
-			finishReason = ai.FinishReasonToolCalls
+			finishReason = fantasy.FinishReasonToolCalls
 		} else if finishReason == "" {
-			finishReason = ai.FinishReasonStop
+			finishReason = fantasy.FinishReasonStop
 		}
 
-		yield(ai.StreamPart{
-			Type:         ai.StreamPartTypeFinish,
+		yield(fantasy.StreamPart{
+			Type:         fantasy.StreamPartTypeFinish,
 			Usage:        usage,
 			FinishReason: finishReason,
 		})
 	}, nil
 }
 
-func toGoogleTools(tools []ai.Tool, toolChoice *ai.ToolChoice) (googleTools []*genai.FunctionDeclaration, googleToolChoice *genai.ToolConfig, warnings []ai.CallWarning) {
+func toGoogleTools(tools []fantasy.Tool, toolChoice *fantasy.ToolChoice) (googleTools []*genai.FunctionDeclaration, googleToolChoice *genai.ToolConfig, warnings []fantasy.CallWarning) {
 	for _, tool := range tools {
-		if tool.GetType() == ai.ToolTypeFunction {
-			ft, ok := tool.(ai.FunctionTool)
+		if tool.GetType() == fantasy.ToolTypeFunction {
+			ft, ok := tool.(fantasy.FunctionTool)
 			if !ok {
 				continue
 			}
@@ -747,8 +747,8 @@ func toGoogleTools(tools []ai.Tool, toolChoice *ai.ToolChoice) (googleTools []*g
 			continue
 		}
 		// TODO: handle provider tool calls
-		warnings = append(warnings, ai.CallWarning{
-			Type:    ai.CallWarningTypeUnsupportedTool,
+		warnings = append(warnings, fantasy.CallWarning{
+			Type:    fantasy.CallWarningTypeUnsupportedTool,
 			Tool:    tool,
 			Message: "tool is not supported",
 		})
@@ -757,19 +757,19 @@ func toGoogleTools(tools []ai.Tool, toolChoice *ai.ToolChoice) (googleTools []*g
 		return googleTools, googleToolChoice, warnings
 	}
 	switch *toolChoice {
-	case ai.ToolChoiceAuto:
+	case fantasy.ToolChoiceAuto:
 		googleToolChoice = &genai.ToolConfig{
 			FunctionCallingConfig: &genai.FunctionCallingConfig{
 				Mode: genai.FunctionCallingConfigModeAuto,
 			},
 		}
-	case ai.ToolChoiceRequired:
+	case fantasy.ToolChoiceRequired:
 		googleToolChoice = &genai.ToolConfig{
 			FunctionCallingConfig: &genai.FunctionCallingConfig{
 				Mode: genai.FunctionCallingConfigModeAny,
 			},
 		}
-	case ai.ToolChoiceNone:
+	case fantasy.ToolChoiceNone:
 		googleToolChoice = &genai.ToolConfig{
 			FunctionCallingConfig: &genai.FunctionCallingConfig{
 				Mode: genai.FunctionCallingConfigModeNone,
@@ -862,14 +862,14 @@ func mapJSONTypeToGoogle(jsonType string) genai.Type {
 	}
 }
 
-func mapResponse(response *genai.GenerateContentResponse, warnings []ai.CallWarning) (*ai.Response, error) {
+func mapResponse(response *genai.GenerateContentResponse, warnings []fantasy.CallWarning) (*fantasy.Response, error) {
 	if len(response.Candidates) == 0 || response.Candidates[0].Content == nil {
 		return nil, errors.New("no response from model")
 	}
 
 	var (
-		content      []ai.Content
-		finishReason ai.FinishReason
+		content      []fantasy.Content
+		finishReason fantasy.FinishReason
 		hasToolCalls bool
 		candidate    = response.Candidates[0]
 	)
@@ -878,9 +878,9 @@ func mapResponse(response *genai.GenerateContentResponse, warnings []ai.CallWarn
 		switch {
 		case part.Text != "":
 			if part.Thought {
-				content = append(content, ai.ReasoningContent{Text: part.Text})
+				content = append(content, fantasy.ReasoningContent{Text: part.Text})
 			} else {
-				content = append(content, ai.TextContent{Text: part.Text})
+				content = append(content, fantasy.TextContent{Text: part.Text})
 			}
 		case part.FunctionCall != nil:
 			input, err := json.Marshal(part.FunctionCall.Args)
@@ -888,7 +888,7 @@ func mapResponse(response *genai.GenerateContentResponse, warnings []ai.CallWarn
 				return nil, err
 			}
 			toolCallID := cmp.Or(part.FunctionCall.ID, part.FunctionCall.Name, uuid.NewString())
-			content = append(content, ai.ToolCallContent{
+			content = append(content, fantasy.ToolCallContent{
 				ToolCallID:       toolCallID,
 				ToolName:         part.FunctionCall.Name,
 				Input:            string(input),
@@ -902,12 +902,12 @@ func mapResponse(response *genai.GenerateContentResponse, warnings []ai.CallWarn
 	}
 
 	if hasToolCalls {
-		finishReason = ai.FinishReasonToolCalls
+		finishReason = fantasy.FinishReasonToolCalls
 	} else {
 		finishReason = mapFinishReason(candidate.FinishReason)
 	}
 
-	return &ai.Response{
+	return &fantasy.Response{
 		Content:      content,
 		Usage:        mapUsage(response.UsageMetadata),
 		FinishReason: finishReason,
@@ -915,31 +915,31 @@ func mapResponse(response *genai.GenerateContentResponse, warnings []ai.CallWarn
 	}, nil
 }
 
-func mapFinishReason(reason genai.FinishReason) ai.FinishReason {
+func mapFinishReason(reason genai.FinishReason) fantasy.FinishReason {
 	switch reason {
 	case genai.FinishReasonStop:
-		return ai.FinishReasonStop
+		return fantasy.FinishReasonStop
 	case genai.FinishReasonMaxTokens:
-		return ai.FinishReasonLength
+		return fantasy.FinishReasonLength
 	case genai.FinishReasonSafety,
 		genai.FinishReasonBlocklist,
 		genai.FinishReasonProhibitedContent,
 		genai.FinishReasonSPII,
 		genai.FinishReasonImageSafety:
-		return ai.FinishReasonContentFilter
+		return fantasy.FinishReasonContentFilter
 	case genai.FinishReasonRecitation,
 		genai.FinishReasonLanguage,
 		genai.FinishReasonMalformedFunctionCall:
-		return ai.FinishReasonError
+		return fantasy.FinishReasonError
 	case genai.FinishReasonOther:
-		return ai.FinishReasonOther
+		return fantasy.FinishReasonOther
 	default:
-		return ai.FinishReasonUnknown
+		return fantasy.FinishReasonUnknown
 	}
 }
 
-func mapUsage(usage *genai.GenerateContentResponseUsageMetadata) ai.Usage {
-	return ai.Usage{
+func mapUsage(usage *genai.GenerateContentResponseUsageMetadata) fantasy.Usage {
+	return fantasy.Usage{
 		InputTokens:         int64(usage.ToolUsePromptTokenCount),
 		OutputTokens:        int64(usage.CandidatesTokenCount),
 		TotalTokens:         int64(usage.TotalTokenCount),

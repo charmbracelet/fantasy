@@ -3,32 +3,32 @@ package openai
 import (
 	"fmt"
 
-	"charm.land/fantasy/ai"
+	"charm.land/fantasy"
 	"github.com/openai/openai-go/v2"
 	"github.com/openai/openai-go/v2/packages/param"
 	"github.com/openai/openai-go/v2/shared"
 )
 
 type (
-	LanguageModelPrepareCallFunc            = func(model ai.LanguageModel, params *openai.ChatCompletionNewParams, call ai.Call) ([]ai.CallWarning, error)
-	LanguageModelMapFinishReasonFunc        = func(finishReason string) ai.FinishReason
-	LanguageModelUsageFunc                  = func(choice openai.ChatCompletion) (ai.Usage, ai.ProviderOptionsData)
-	LanguageModelExtraContentFunc           = func(choice openai.ChatCompletionChoice) []ai.Content
-	LanguageModelStreamExtraFunc            = func(chunk openai.ChatCompletionChunk, yield func(ai.StreamPart) bool, ctx map[string]any) (map[string]any, bool)
-	LanguageModelStreamUsageFunc            = func(chunk openai.ChatCompletionChunk, ctx map[string]any, metadata ai.ProviderMetadata) (ai.Usage, ai.ProviderMetadata)
-	LanguageModelStreamProviderMetadataFunc = func(choice openai.ChatCompletionChoice, metadata ai.ProviderMetadata) ai.ProviderMetadata
+	LanguageModelPrepareCallFunc            = func(model fantasy.LanguageModel, params *openai.ChatCompletionNewParams, call fantasy.Call) ([]fantasy.CallWarning, error)
+	LanguageModelMapFinishReasonFunc        = func(finishReason string) fantasy.FinishReason
+	LanguageModelUsageFunc                  = func(choice openai.ChatCompletion) (fantasy.Usage, fantasy.ProviderOptionsData)
+	LanguageModelExtraContentFunc           = func(choice openai.ChatCompletionChoice) []fantasy.Content
+	LanguageModelStreamExtraFunc            = func(chunk openai.ChatCompletionChunk, yield func(fantasy.StreamPart) bool, ctx map[string]any) (map[string]any, bool)
+	LanguageModelStreamUsageFunc            = func(chunk openai.ChatCompletionChunk, ctx map[string]any, metadata fantasy.ProviderMetadata) (fantasy.Usage, fantasy.ProviderMetadata)
+	LanguageModelStreamProviderMetadataFunc = func(choice openai.ChatCompletionChoice, metadata fantasy.ProviderMetadata) fantasy.ProviderMetadata
 )
 
-func DefaultPrepareCallFunc(model ai.LanguageModel, params *openai.ChatCompletionNewParams, call ai.Call) ([]ai.CallWarning, error) {
+func DefaultPrepareCallFunc(model fantasy.LanguageModel, params *openai.ChatCompletionNewParams, call fantasy.Call) ([]fantasy.CallWarning, error) {
 	if call.ProviderOptions == nil {
 		return nil, nil
 	}
-	var warnings []ai.CallWarning
+	var warnings []fantasy.CallWarning
 	providerOptions := &ProviderOptions{}
 	if v, ok := call.ProviderOptions[Name]; ok {
 		providerOptions, ok = v.(*ProviderOptions)
 		if !ok {
-			return nil, ai.NewInvalidArgumentError("providerOptions", "openai provider options should be *openai.ProviderOptions", nil)
+			return nil, fantasy.NewInvalidArgumentError("providerOptions", "openai provider options should be *openai.ProviderOptions", nil)
 		}
 	}
 
@@ -110,24 +110,24 @@ func DefaultPrepareCallFunc(model ai.LanguageModel, params *openai.ChatCompletio
 	if isReasoningModel(model.Model()) {
 		if providerOptions.LogitBias != nil {
 			params.LogitBias = nil
-			warnings = append(warnings, ai.CallWarning{
-				Type:    ai.CallWarningTypeUnsupportedSetting,
+			warnings = append(warnings, fantasy.CallWarning{
+				Type:    fantasy.CallWarningTypeUnsupportedSetting,
 				Setting: "LogitBias",
 				Message: "LogitBias is not supported for reasoning models",
 			})
 		}
 		if providerOptions.LogProbs != nil {
 			params.Logprobs = param.Opt[bool]{}
-			warnings = append(warnings, ai.CallWarning{
-				Type:    ai.CallWarningTypeUnsupportedSetting,
+			warnings = append(warnings, fantasy.CallWarning{
+				Type:    fantasy.CallWarningTypeUnsupportedSetting,
 				Setting: "Logprobs",
 				Message: "Logprobs is not supported for reasoning models",
 			})
 		}
 		if providerOptions.TopLogProbs != nil {
 			params.TopLogprobs = param.Opt[int64]{}
-			warnings = append(warnings, ai.CallWarning{
-				Type:    ai.CallWarningTypeUnsupportedSetting,
+			warnings = append(warnings, fantasy.CallWarning{
+				Type:    fantasy.CallWarningTypeUnsupportedSetting,
 				Setting: "TopLogprobs",
 				Message: "TopLogprobs is not supported for reasoning models",
 			})
@@ -139,15 +139,15 @@ func DefaultPrepareCallFunc(model ai.LanguageModel, params *openai.ChatCompletio
 		serviceTier := *providerOptions.ServiceTier
 		if serviceTier == "flex" && !supportsFlexProcessing(model.Model()) {
 			params.ServiceTier = ""
-			warnings = append(warnings, ai.CallWarning{
-				Type:    ai.CallWarningTypeUnsupportedSetting,
+			warnings = append(warnings, fantasy.CallWarning{
+				Type:    fantasy.CallWarningTypeUnsupportedSetting,
 				Setting: "ServiceTier",
 				Details: "flex processing is only available for o3, o4-mini, and gpt-5 models",
 			})
 		} else if serviceTier == "priority" && !supportsPriorityProcessing(model.Model()) {
 			params.ServiceTier = ""
-			warnings = append(warnings, ai.CallWarning{
-				Type:    ai.CallWarningTypeUnsupportedSetting,
+			warnings = append(warnings, fantasy.CallWarning{
+				Type:    fantasy.CallWarningTypeUnsupportedSetting,
 				Setting: "ServiceTier",
 				Details: "priority processing is only available for supported models (gpt-4, gpt-5, gpt-5-mini, o3, o4-mini) and requires Enterprise access. gpt-5-nano is not supported",
 			})
@@ -156,22 +156,22 @@ func DefaultPrepareCallFunc(model ai.LanguageModel, params *openai.ChatCompletio
 	return warnings, nil
 }
 
-func DefaultMapFinishReasonFunc(finishReason string) ai.FinishReason {
+func DefaultMapFinishReasonFunc(finishReason string) fantasy.FinishReason {
 	switch finishReason {
 	case "stop":
-		return ai.FinishReasonStop
+		return fantasy.FinishReasonStop
 	case "length":
-		return ai.FinishReasonLength
+		return fantasy.FinishReasonLength
 	case "content_filter":
-		return ai.FinishReasonContentFilter
+		return fantasy.FinishReasonContentFilter
 	case "function_call", "tool_calls":
-		return ai.FinishReasonToolCalls
+		return fantasy.FinishReasonToolCalls
 	default:
-		return ai.FinishReasonUnknown
+		return fantasy.FinishReasonUnknown
 	}
 }
 
-func DefaultUsageFunc(response openai.ChatCompletion) (ai.Usage, ai.ProviderOptionsData) {
+func DefaultUsageFunc(response openai.ChatCompletion) (fantasy.Usage, fantasy.ProviderOptionsData) {
 	completionTokenDetails := response.Usage.CompletionTokensDetails
 	promptTokenDetails := response.Usage.PromptTokensDetails
 
@@ -192,7 +192,7 @@ func DefaultUsageFunc(response openai.ChatCompletion) (ai.Usage, ai.ProviderOpti
 			providerMetadata.RejectedPredictionTokens = completionTokenDetails.RejectedPredictionTokens
 		}
 	}
-	return ai.Usage{
+	return fantasy.Usage{
 		InputTokens:     response.Usage.PromptTokens,
 		OutputTokens:    response.Usage.CompletionTokens,
 		TotalTokens:     response.Usage.TotalTokens,
@@ -201,9 +201,9 @@ func DefaultUsageFunc(response openai.ChatCompletion) (ai.Usage, ai.ProviderOpti
 	}, providerMetadata
 }
 
-func DefaultStreamUsageFunc(chunk openai.ChatCompletionChunk, ctx map[string]any, metadata ai.ProviderMetadata) (ai.Usage, ai.ProviderMetadata) {
+func DefaultStreamUsageFunc(chunk openai.ChatCompletionChunk, ctx map[string]any, metadata fantasy.ProviderMetadata) (fantasy.Usage, fantasy.ProviderMetadata) {
 	if chunk.Usage.TotalTokens == 0 {
-		return ai.Usage{}, nil
+		return fantasy.Usage{}, nil
 	}
 	streamProviderMetadata := &ProviderMetadata{}
 	if metadata != nil {
@@ -217,7 +217,7 @@ func DefaultStreamUsageFunc(chunk openai.ChatCompletionChunk, ctx map[string]any
 	// we do this here because the acc does not add prompt details
 	completionTokenDetails := chunk.Usage.CompletionTokensDetails
 	promptTokenDetails := chunk.Usage.PromptTokensDetails
-	usage := ai.Usage{
+	usage := fantasy.Usage{
 		InputTokens:     chunk.Usage.PromptTokens,
 		OutputTokens:    chunk.Usage.CompletionTokens,
 		TotalTokens:     chunk.Usage.TotalTokens,
@@ -235,12 +235,12 @@ func DefaultStreamUsageFunc(chunk openai.ChatCompletionChunk, ctx map[string]any
 		}
 	}
 
-	return usage, ai.ProviderMetadata{
+	return usage, fantasy.ProviderMetadata{
 		Name: streamProviderMetadata,
 	}
 }
 
-func DefaultStreamProviderMetadataFunc(choice openai.ChatCompletionChoice, metadata ai.ProviderMetadata) ai.ProviderMetadata {
+func DefaultStreamProviderMetadataFunc(choice openai.ChatCompletionChoice, metadata fantasy.ProviderMetadata) fantasy.ProviderMetadata {
 	streamProviderMetadata, ok := metadata[Name]
 	if !ok {
 		streamProviderMetadata = &ProviderMetadata{}

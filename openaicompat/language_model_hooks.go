@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"charm.land/fantasy/ai"
+	"charm.land/fantasy"
 	"charm.land/fantasy/openai"
 	openaisdk "github.com/openai/openai-go/v2"
 	"github.com/openai/openai-go/v2/packages/param"
@@ -13,12 +13,12 @@ import (
 
 const reasoningStartedCtx = "reasoning_started"
 
-func PrepareCallFunc(model ai.LanguageModel, params *openaisdk.ChatCompletionNewParams, call ai.Call) ([]ai.CallWarning, error) {
+func PrepareCallFunc(model fantasy.LanguageModel, params *openaisdk.ChatCompletionNewParams, call fantasy.Call) ([]fantasy.CallWarning, error) {
 	providerOptions := &ProviderOptions{}
 	if v, ok := call.ProviderOptions[Name]; ok {
 		providerOptions, ok = v.(*ProviderOptions)
 		if !ok {
-			return nil, ai.NewInvalidArgumentError("providerOptions", "openrouter provider options should be *openrouter.ProviderOptions", nil)
+			return nil, fantasy.NewInvalidArgumentError("providerOptions", "openrouter provider options should be *openrouter.ProviderOptions", nil)
 		}
 	}
 
@@ -43,15 +43,15 @@ func PrepareCallFunc(model ai.LanguageModel, params *openaisdk.ChatCompletionNew
 	return nil, nil
 }
 
-func ExtraContentFunc(choice openaisdk.ChatCompletionChoice) []ai.Content {
-	var content []ai.Content
+func ExtraContentFunc(choice openaisdk.ChatCompletionChoice) []fantasy.Content {
+	var content []fantasy.Content
 	reasoningData := ReasoningData{}
 	err := json.Unmarshal([]byte(choice.Message.RawJSON()), &reasoningData)
 	if err != nil {
 		return content
 	}
 	if reasoningData.ReasoningContent != "" {
-		content = append(content, ai.ReasoningContent{
+		content = append(content, fantasy.ReasoningContent{
 			Text: reasoningData.ReasoningContent,
 		})
 	}
@@ -70,7 +70,7 @@ func extractReasoningContext(ctx map[string]any) bool {
 	return b
 }
 
-func StreamExtraFunc(chunk openaisdk.ChatCompletionChunk, yield func(ai.StreamPart) bool, ctx map[string]any) (map[string]any, bool) {
+func StreamExtraFunc(chunk openaisdk.ChatCompletionChunk, yield func(fantasy.StreamPart) bool, ctx map[string]any) (map[string]any, bool) {
 	if len(chunk.Choices) == 0 {
 		return ctx, true
 	}
@@ -81,17 +81,17 @@ func StreamExtraFunc(chunk openaisdk.ChatCompletionChunk, yield func(ai.StreamPa
 		reasoningData := ReasoningData{}
 		err := json.Unmarshal([]byte(choice.Delta.RawJSON()), &reasoningData)
 		if err != nil {
-			yield(ai.StreamPart{
-				Type:  ai.StreamPartTypeError,
-				Error: ai.NewAIError("Unexpected", "error unmarshalling delta", err),
+			yield(fantasy.StreamPart{
+				Type:  fantasy.StreamPartTypeError,
+				Error: fantasy.NewAIError("Unexpected", "error unmarshalling delta", err),
 			})
 			return ctx, false
 		}
 
 		emitEvent := func(reasoningContent string) bool {
 			if !reasoningStarted {
-				shouldContinue := yield(ai.StreamPart{
-					Type: ai.StreamPartTypeReasoningStart,
+				shouldContinue := yield(fantasy.StreamPart{
+					Type: fantasy.StreamPartTypeReasoningStart,
 					ID:   fmt.Sprintf("%d", inx),
 				})
 				if !shouldContinue {
@@ -99,8 +99,8 @@ func StreamExtraFunc(chunk openaisdk.ChatCompletionChunk, yield func(ai.StreamPa
 				}
 			}
 
-			return yield(ai.StreamPart{
-				Type:  ai.StreamPartTypeReasoningDelta,
+			return yield(fantasy.StreamPart{
+				Type:  fantasy.StreamPartTypeReasoningDelta,
 				ID:    fmt.Sprintf("%d", inx),
 				Delta: reasoningContent,
 			})
@@ -113,8 +113,8 @@ func StreamExtraFunc(chunk openaisdk.ChatCompletionChunk, yield func(ai.StreamPa
 		}
 		if reasoningStarted && (choice.Delta.Content != "" || len(choice.Delta.ToolCalls) > 0) {
 			ctx[reasoningStartedCtx] = false
-			return ctx, yield(ai.StreamPart{
-				Type: ai.StreamPartTypeReasoningEnd,
+			return ctx, yield(fantasy.StreamPart{
+				Type: fantasy.StreamPartTypeReasoningEnd,
 				ID:   fmt.Sprintf("%d", inx),
 			})
 		}

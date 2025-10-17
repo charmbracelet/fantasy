@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"charm.land/fantasy/ai"
+	"charm.land/fantasy"
 	"charm.land/fantasy/google"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
@@ -35,11 +35,11 @@ func TestGoogleCommon(t *testing.T) {
 }
 
 func TestGoogleThinking(t *testing.T) {
-	opts := ai.ProviderOptions{
+	opts := fantasy.ProviderOptions{
 		google.Name: &google.ProviderOptions{
 			ThinkingConfig: &google.ThinkingConfig{
-				ThinkingBudget:  ai.Opt(int64(100)),
-				IncludeThoughts: ai.Opt(true),
+				ThinkingBudget:  fantasy.Opt(int64(100)),
+				IncludeThoughts: fantasy.Opt(true),
 			},
 		},
 	}
@@ -54,13 +54,13 @@ func TestGoogleThinking(t *testing.T) {
 	testThinking(t, pairs, testGoogleThinking)
 }
 
-func testGoogleThinking(t *testing.T, result *ai.AgentResult) {
+func testGoogleThinking(t *testing.T, result *fantasy.AgentResult) {
 	reasoningContentCount := 0
 	// Test if we got the signature
 	for _, step := range result.Steps {
 		for _, msg := range step.Messages {
 			for _, content := range msg.Content {
-				if content.GetType() == ai.ContentTypeReasoning {
+				if content.GetType() == fantasy.ContentTypeReasoning {
 					reasoningContentCount += 1
 				}
 			}
@@ -70,7 +70,7 @@ func testGoogleThinking(t *testing.T, result *ai.AgentResult) {
 }
 
 func geminiBuilder(model string) builderFunc {
-	return func(r *recorder.Recorder) (ai.LanguageModel, error) {
+	return func(r *recorder.Recorder) (fantasy.LanguageModel, error) {
 		provider := google.New(
 			google.WithGeminiAPIKey(cmp.Or(os.Getenv("FANTASY_GEMINI_API_KEY"), "(missing)")),
 			google.WithHTTPClient(&http.Client{Transport: r}),
@@ -80,7 +80,7 @@ func geminiBuilder(model string) builderFunc {
 }
 
 func vertexBuilder(model string) builderFunc {
-	return func(r *recorder.Recorder) (ai.LanguageModel, error) {
+	return func(r *recorder.Recorder) (fantasy.LanguageModel, error) {
 		provider := google.New(
 			google.WithVertex(os.Getenv("FANTASY_VERTEX_PROJECT"), os.Getenv("FANTASY_VERTEX_LOCATION")),
 			google.WithHTTPClient(&http.Client{Transport: r}),

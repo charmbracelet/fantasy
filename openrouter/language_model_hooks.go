@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"maps"
 
-	"charm.land/fantasy/ai"
+	"charm.land/fantasy"
 	"charm.land/fantasy/anthropic"
 	openaisdk "github.com/openai/openai-go/v2"
 	"github.com/openai/openai-go/v2/packages/param"
@@ -13,12 +13,12 @@ import (
 
 const reasoningStartedCtx = "reasoning_started"
 
-func languagePrepareModelCall(model ai.LanguageModel, params *openaisdk.ChatCompletionNewParams, call ai.Call) ([]ai.CallWarning, error) {
+func languagePrepareModelCall(model fantasy.LanguageModel, params *openaisdk.ChatCompletionNewParams, call fantasy.Call) ([]fantasy.CallWarning, error) {
 	providerOptions := &ProviderOptions{}
 	if v, ok := call.ProviderOptions[Name]; ok {
 		providerOptions, ok = v.(*ProviderOptions)
 		if !ok {
-			return nil, ai.NewInvalidArgumentError("providerOptions", "openrouter provider options should be *openrouter.ProviderOptions", nil)
+			return nil, fantasy.NewInvalidArgumentError("providerOptions", "openrouter provider options should be *openrouter.ProviderOptions", nil)
 		}
 	}
 
@@ -67,18 +67,18 @@ func languagePrepareModelCall(model ai.LanguageModel, params *openaisdk.ChatComp
 	return nil, nil
 }
 
-func languageModelExtraContent(choice openaisdk.ChatCompletionChoice) []ai.Content {
-	var content []ai.Content
+func languageModelExtraContent(choice openaisdk.ChatCompletionChoice) []fantasy.Content {
+	var content []fantasy.Content
 	reasoningData := ReasoningData{}
 	err := json.Unmarshal([]byte(choice.Message.RawJSON()), &reasoningData)
 	if err != nil {
 		return content
 	}
 	for _, detail := range reasoningData.ReasoningDetails {
-		var metadata ai.ProviderMetadata
+		var metadata fantasy.ProviderMetadata
 
 		if detail.Signature != "" {
-			metadata = ai.ProviderMetadata{
+			metadata = fantasy.ProviderMetadata{
 				Name: &ReasoningMetadata{
 					Signature: detail.Signature,
 				},
@@ -89,17 +89,17 @@ func languageModelExtraContent(choice openaisdk.ChatCompletionChoice) []ai.Conte
 		}
 		switch detail.Type {
 		case "reasoning.text":
-			content = append(content, ai.ReasoningContent{
+			content = append(content, fantasy.ReasoningContent{
 				Text:             detail.Text,
 				ProviderMetadata: metadata,
 			})
 		case "reasoning.summary":
-			content = append(content, ai.ReasoningContent{
+			content = append(content, fantasy.ReasoningContent{
 				Text:             detail.Summary,
 				ProviderMetadata: metadata,
 			})
 		case "reasoning.encrypted":
-			content = append(content, ai.ReasoningContent{
+			content = append(content, fantasy.ReasoningContent{
 				Text:             "[REDACTED]",
 				ProviderMetadata: metadata,
 			})
@@ -120,7 +120,7 @@ func extractReasoningContext(ctx map[string]any) bool {
 	return b
 }
 
-func languageModelStreamExtra(chunk openaisdk.ChatCompletionChunk, yield func(ai.StreamPart) bool, ctx map[string]any) (map[string]any, bool) {
+func languageModelStreamExtra(chunk openaisdk.ChatCompletionChunk, yield func(fantasy.StreamPart) bool, ctx map[string]any) (map[string]any, bool) {
 	if len(chunk.Choices) == 0 {
 		return ctx, true
 	}
@@ -131,17 +131,17 @@ func languageModelStreamExtra(chunk openaisdk.ChatCompletionChunk, yield func(ai
 		reasoningData := ReasoningData{}
 		err := json.Unmarshal([]byte(choice.Delta.RawJSON()), &reasoningData)
 		if err != nil {
-			yield(ai.StreamPart{
-				Type:  ai.StreamPartTypeError,
-				Error: ai.NewAIError("Unexpected", "error unmarshalling delta", err),
+			yield(fantasy.StreamPart{
+				Type:  fantasy.StreamPartTypeError,
+				Error: fantasy.NewAIError("Unexpected", "error unmarshalling delta", err),
 			})
 			return ctx, false
 		}
 
 		emitEvent := func(reasoningContent string, signature string) bool {
 			if !reasoningStarted {
-				shouldContinue := yield(ai.StreamPart{
-					Type: ai.StreamPartTypeReasoningStart,
+				shouldContinue := yield(fantasy.StreamPart{
+					Type: fantasy.StreamPartTypeReasoningStart,
 					ID:   fmt.Sprintf("%d", inx),
 				})
 				if !shouldContinue {
@@ -149,10 +149,10 @@ func languageModelStreamExtra(chunk openaisdk.ChatCompletionChunk, yield func(ai
 				}
 			}
 
-			var metadata ai.ProviderMetadata
+			var metadata fantasy.ProviderMetadata
 
 			if signature != "" {
-				metadata = ai.ProviderMetadata{
+				metadata = fantasy.ProviderMetadata{
 					Name: &ReasoningMetadata{
 						Signature: signature,
 					},
@@ -162,8 +162,8 @@ func languageModelStreamExtra(chunk openaisdk.ChatCompletionChunk, yield func(ai
 				}
 			}
 
-			return yield(ai.StreamPart{
-				Type:             ai.StreamPartTypeReasoningDelta,
+			return yield(fantasy.StreamPart{
+				Type:             fantasy.StreamPartTypeReasoningDelta,
 				ID:               fmt.Sprintf("%d", inx),
 				Delta:            reasoningContent,
 				ProviderMetadata: metadata,
@@ -188,8 +188,8 @@ func languageModelStreamExtra(chunk openaisdk.ChatCompletionChunk, yield func(ai
 		}
 		if reasoningStarted && (choice.Delta.Content != "" || len(choice.Delta.ToolCalls) > 0) {
 			ctx[reasoningStartedCtx] = false
-			return ctx, yield(ai.StreamPart{
-				Type: ai.StreamPartTypeReasoningEnd,
+			return ctx, yield(fantasy.StreamPart{
+				Type: fantasy.StreamPartTypeReasoningEnd,
 				ID:   fmt.Sprintf("%d", inx),
 			})
 		}
@@ -197,9 +197,9 @@ func languageModelStreamExtra(chunk openaisdk.ChatCompletionChunk, yield func(ai
 	return ctx, true
 }
 
-func languageModelUsage(response openaisdk.ChatCompletion) (ai.Usage, ai.ProviderOptionsData) {
+func languageModelUsage(response openaisdk.ChatCompletion) (fantasy.Usage, fantasy.ProviderOptionsData) {
 	if len(response.Choices) == 0 {
-		return ai.Usage{}, nil
+		return fantasy.Usage{}, nil
 	}
 	openrouterUsage := UsageAccounting{}
 	usage := response.Usage
@@ -220,7 +220,7 @@ func languageModelUsage(response openaisdk.ChatCompletion) (ai.Usage, ai.Provide
 		Usage:    openrouterUsage,
 	}
 
-	return ai.Usage{
+	return fantasy.Usage{
 		InputTokens:     usage.PromptTokens,
 		OutputTokens:    usage.CompletionTokens,
 		TotalTokens:     usage.TotalTokens,
@@ -229,10 +229,10 @@ func languageModelUsage(response openaisdk.ChatCompletion) (ai.Usage, ai.Provide
 	}, providerMetadata
 }
 
-func languageModelStreamUsage(chunk openaisdk.ChatCompletionChunk, _ map[string]any, metadata ai.ProviderMetadata) (ai.Usage, ai.ProviderMetadata) {
+func languageModelStreamUsage(chunk openaisdk.ChatCompletionChunk, _ map[string]any, metadata fantasy.ProviderMetadata) (fantasy.Usage, fantasy.ProviderMetadata) {
 	usage := chunk.Usage
 	if usage.TotalTokens == 0 {
-		return ai.Usage{}, nil
+		return fantasy.Usage{}, nil
 	}
 
 	streamProviderMetadata := &ProviderMetadata{}
@@ -255,7 +255,7 @@ func languageModelStreamUsage(chunk openaisdk.ChatCompletionChunk, _ map[string]
 	// we do this here because the acc does not add prompt details
 	completionTokenDetails := usage.CompletionTokensDetails
 	promptTokenDetails := usage.PromptTokensDetails
-	aiUsage := ai.Usage{
+	aiUsage := fantasy.Usage{
 		InputTokens:     usage.PromptTokens,
 		OutputTokens:    usage.CompletionTokens,
 		TotalTokens:     usage.TotalTokens,
@@ -263,7 +263,7 @@ func languageModelStreamUsage(chunk openaisdk.ChatCompletionChunk, _ map[string]
 		CacheReadTokens: promptTokenDetails.CachedTokens,
 	}
 
-	return aiUsage, ai.ProviderMetadata{
+	return aiUsage, fantasy.ProviderMetadata{
 		Name: streamProviderMetadata,
 	}
 }

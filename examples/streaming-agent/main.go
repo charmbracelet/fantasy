@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"charm.land/fantasy/ai"
+	"charm.land/fantasy"
 	"charm.land/fantasy/anthropic"
 )
 
@@ -42,10 +42,10 @@ func main() {
 	}
 
 	// Create weather tool using the new type-safe API
-	weatherTool := ai.NewAgentTool(
+	weatherTool := fantasy.NewAgentTool(
 		"get_weather",
 		"Get the current weather for a specific location",
-		func(ctx context.Context, input WeatherInput, _ ai.ToolCall) (ai.ToolResponse, error) {
+		func(ctx context.Context, input WeatherInput, _ fantasy.ToolCall) (fantasy.ToolResponse, error) {
 			// Simulate weather lookup with some fake data
 			location := input.Location
 			if location == "" {
@@ -78,33 +78,33 @@ func main() {
 			}
 
 			weather := fmt.Sprintf("The current weather in %s is %s with partly cloudy skies and light winds.", location, temp)
-			return ai.NewTextResponse(weather), nil
+			return fantasy.NewTextResponse(weather), nil
 		},
 	)
 
 	// Create calculator tool using the new type-safe API
-	calculatorTool := ai.NewAgentTool(
+	calculatorTool := fantasy.NewAgentTool(
 		"calculate",
 		"Perform basic mathematical calculations",
-		func(ctx context.Context, input CalculatorInput, _ ai.ToolCall) (ai.ToolResponse, error) {
+		func(ctx context.Context, input CalculatorInput, _ fantasy.ToolCall) (fantasy.ToolResponse, error) {
 			// Simple calculator simulation
 			expr := strings.TrimSpace(input.Expression)
 			if strings.Contains(expr, "2 + 2") || strings.Contains(expr, "2+2") {
-				return ai.NewTextResponse("2 + 2 = 4"), nil
+				return fantasy.NewTextResponse("2 + 2 = 4"), nil
 			} else if strings.Contains(expr, "10 * 5") || strings.Contains(expr, "10*5") {
-				return ai.NewTextResponse("10 * 5 = 50"), nil
+				return fantasy.NewTextResponse("10 * 5 = 50"), nil
 			} else if strings.Contains(expr, "15 + 27") || strings.Contains(expr, "15+27") {
-				return ai.NewTextResponse("15 + 27 = 42"), nil
+				return fantasy.NewTextResponse("15 + 27 = 42"), nil
 			}
-			return ai.NewTextResponse("I can calculate simple expressions like '2 + 2', '10 * 5', or '15 + 27'"), nil
+			return fantasy.NewTextResponse("I can calculate simple expressions like '2 + 2', '10 * 5', or '15 + 27'"), nil
 		},
 	)
 
 	// Create agent with tools
-	agent := ai.NewAgent(
+	agent := fantasy.NewAgent(
 		model,
-		ai.WithSystemPrompt("You are a helpful assistant that can check weather and do calculations. Be concise and friendly."),
-		ai.WithTools(weatherTool, calculatorTool),
+		fantasy.WithSystemPrompt("You are a helpful assistant that can check weather and do calculations. Be concise and friendly."),
+		fantasy.WithTools(weatherTool, calculatorTool),
 	)
 
 	ctx := context.Background()
@@ -119,14 +119,14 @@ func main() {
 	var reasoningBuffer strings.Builder
 
 	// Create streaming call with all callbacks
-	streamCall := ai.AgentStreamCall{
+	streamCall := fantasy.AgentStreamCall{
 		Prompt: "What's the weather in Pristina and what's 2 + 2?",
 
 		// Agent-level callbacks
 		OnAgentStart: func() {
 			fmt.Println("🎬 Agent started")
 		},
-		OnAgentFinish: func(result *ai.AgentResult) error {
+		OnAgentFinish: func(result *fantasy.AgentResult) error {
 			fmt.Printf("🏁 Agent finished with %d steps, total tokens: %d\n", len(result.Steps), result.TotalUsage.TotalTokens)
 			return nil
 		},
@@ -135,11 +135,11 @@ func main() {
 			fmt.Printf("📝 Step %d started\n", stepNumber+1)
 			return nil
 		},
-		OnStepFinish: func(stepResult ai.StepResult) error {
+		OnStepFinish: func(stepResult fantasy.StepResult) error {
 			fmt.Printf("✅ Step completed (reason: %s, tokens: %d)\n", stepResult.FinishReason, stepResult.Usage.TotalTokens)
 			return nil
 		},
-		OnFinish: func(result *ai.AgentResult) {
+		OnFinish: func(result *fantasy.AgentResult) {
 			fmt.Printf("🎯 Final result ready with %d steps\n", len(result.Steps))
 		},
 		OnError: func(err error) {
@@ -147,7 +147,7 @@ func main() {
 		},
 
 		// Stream part callbacks
-		OnWarnings: func(warnings []ai.CallWarning) error {
+		OnWarnings: func(warnings []fantasy.CallWarning) error {
 			for _, warning := range warnings {
 				fmt.Printf("⚠️  Warning: %s\n", warning.Message)
 			}
@@ -166,7 +166,7 @@ func main() {
 			fmt.Println()
 			return nil
 		},
-		OnReasoningStart: func(id string, _ ai.ReasoningContent) error {
+		OnReasoningStart: func(id string, _ fantasy.ReasoningContent) error {
 			fmt.Print("🤔 Thinking: ")
 			return nil
 		},
@@ -174,7 +174,7 @@ func main() {
 			reasoningBuffer.WriteString(text)
 			return nil
 		},
-		OnReasoningEnd: func(id string, content ai.ReasoningContent) error {
+		OnReasoningEnd: func(id string, content fantasy.ReasoningContent) error {
 			if reasoningBuffer.Len() > 0 {
 				fmt.Printf("%s\n", reasoningBuffer.String())
 				reasoningBuffer.Reset()
@@ -193,26 +193,26 @@ func main() {
 			// Tool input complete
 			return nil
 		},
-		OnToolCall: func(toolCall ai.ToolCallContent) error {
+		OnToolCall: func(toolCall fantasy.ToolCallContent) error {
 			fmt.Printf("🛠️  Tool call: %s\n", toolCall.ToolName)
 			fmt.Printf("   Input: %s\n", toolCall.Input)
 			return nil
 		},
-		OnToolResult: func(result ai.ToolResultContent) error {
+		OnToolResult: func(result fantasy.ToolResultContent) error {
 			fmt.Printf("🎯 Tool result from %s:\n", result.ToolName)
 			switch output := result.Result.(type) {
-			case ai.ToolResultOutputContentText:
+			case fantasy.ToolResultOutputContentText:
 				fmt.Printf("   %s\n", output.Text)
-			case ai.ToolResultOutputContentError:
+			case fantasy.ToolResultOutputContentError:
 				fmt.Printf("   Error: %s\n", output.Error.Error())
 			}
 			return nil
 		},
-		OnSource: func(source ai.SourceContent) error {
+		OnSource: func(source fantasy.SourceContent) error {
 			fmt.Printf("📚 Source: %s (%s)\n", source.Title, source.URL)
 			return nil
 		},
-		OnStreamFinish: func(usage ai.Usage, finishReason ai.FinishReason, providerMetadata ai.ProviderMetadata) error {
+		OnStreamFinish: func(usage fantasy.Usage, finishReason fantasy.FinishReason, providerMetadata fantasy.ProviderMetadata) error {
 			fmt.Printf("📊 Stream finished (reason: %s, tokens: %d)\n", finishReason, usage.TotalTokens)
 			return nil
 		},

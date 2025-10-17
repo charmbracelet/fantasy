@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"charm.land/fantasy/ai"
+	"charm.land/fantasy"
 	"charm.land/fantasy/azure"
 	"charm.land/fantasy/openai"
 	"github.com/stretchr/testify/require"
@@ -24,7 +24,7 @@ func TestAzureCommon(t *testing.T) {
 }
 
 func TestAzureThinking(t *testing.T) {
-	opts := ai.ProviderOptions{
+	opts := fantasy.ProviderOptions{
 		openai.Name: &openai.ProviderOptions{
 			ReasoningEffort: openai.ReasoningEffortOption(openai.ReasoningEffortLow),
 		},
@@ -35,11 +35,11 @@ func TestAzureThinking(t *testing.T) {
 	}, testAzureThinking)
 }
 
-func testAzureThinking(t *testing.T, result *ai.AgentResult) {
+func testAzureThinking(t *testing.T, result *fantasy.AgentResult) {
 	require.Greater(t, result.Response.Usage.ReasoningTokens, int64(0), "expected reasoning tokens, got none")
 }
 
-func builderAzureO4Mini(r *recorder.Recorder) (ai.LanguageModel, error) {
+func builderAzureO4Mini(r *recorder.Recorder) (fantasy.LanguageModel, error) {
 	provider := azure.New(
 		azure.WithBaseURL(cmp.Or(os.Getenv("FANTASY_AZURE_BASE_URL"), defaultBaseURL)),
 		azure.WithAPIKey(cmp.Or(os.Getenv("FANTASY_AZURE_API_KEY"), "(missing)")),
@@ -48,7 +48,7 @@ func builderAzureO4Mini(r *recorder.Recorder) (ai.LanguageModel, error) {
 	return provider.LanguageModel("o4-mini")
 }
 
-func builderAzureGpt5Mini(r *recorder.Recorder) (ai.LanguageModel, error) {
+func builderAzureGpt5Mini(r *recorder.Recorder) (fantasy.LanguageModel, error) {
 	provider := azure.New(
 		azure.WithBaseURL(cmp.Or(os.Getenv("FANTASY_AZURE_BASE_URL"), defaultBaseURL)),
 		azure.WithAPIKey(cmp.Or(os.Getenv("FANTASY_AZURE_API_KEY"), "(missing)")),
@@ -57,7 +57,7 @@ func builderAzureGpt5Mini(r *recorder.Recorder) (ai.LanguageModel, error) {
 	return provider.LanguageModel("gpt-5-mini")
 }
 
-func builderAzureGrok3Mini(r *recorder.Recorder) (ai.LanguageModel, error) {
+func builderAzureGrok3Mini(r *recorder.Recorder) (fantasy.LanguageModel, error) {
 	provider := azure.New(
 		azure.WithBaseURL(cmp.Or(os.Getenv("FANTASY_AZURE_BASE_URL"), defaultBaseURL)),
 		azure.WithAPIKey(cmp.Or(os.Getenv("FANTASY_AZURE_API_KEY"), "(missing)")),

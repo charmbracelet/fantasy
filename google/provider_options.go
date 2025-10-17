@@ -1,6 +1,6 @@
 package google
 
-import "charm.land/fantasy/ai"
+import "charm.land/fantasy"
 
 type ThinkingConfig struct {
 	ThinkingBudget  *int64 `json:"thinking_budget"`
@@ -47,7 +47,7 @@ func (o *ProviderOptions) Options() {}
 
 func ParseOptions(data map[string]any) (*ProviderOptions, error) {
 	var options ProviderOptions
-	if err := ai.ParseOptions(data, &options); err != nil {
+	if err := fantasy.ParseOptions(data, &options); err != nil {
 		return nil, err
 	}
 	return &options, nil

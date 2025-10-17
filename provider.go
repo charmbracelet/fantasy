@@ -1,4 +1,4 @@
-package ai
+package fantasy
 
 type Provider interface {
 	Name() string

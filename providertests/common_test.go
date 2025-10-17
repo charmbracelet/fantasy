@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"charm.land/fantasy/ai"
+	"charm.land/fantasy"
 	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
@@ -27,12 +27,12 @@ type testModel struct {
 	reasoning bool
 }
 
-type builderFunc func(r *recorder.Recorder) (ai.LanguageModel, error)
+type builderFunc func(r *recorder.Recorder) (fantasy.LanguageModel, error)
 
 type builderPair struct {
 	name            string
 	builder         builderFunc
-	providerOptions ai.ProviderOptions
+	providerOptions fantasy.ProviderOptions
 }
 
 func testCommon(t *testing.T, pairs []builderPair) {
@@ -46,7 +46,7 @@ func testCommon(t *testing.T, pairs []builderPair) {
 }
 
 func testSimple(t *testing.T, pair builderPair) {
-	checkResult := func(t *testing.T, result *ai.AgentResult) {
+	checkResult := func(t *testing.T, result *fantasy.AgentResult) {
 		options := []string{"Oi", "oi", "Olá", "olá"}
 		got := result.Response.Content.Text()
 		require.True(t, containsAny(got, options...), "unexpected response: got %q, want any of: %q", got, options)
@@ -58,14 +58,14 @@ func testSimple(t *testing.T, pair builderPair) {
 		languageModel, err := pair.builder(r)
 		require.NoError(t, err, "failed to build language model")
 
-		agent := ai.NewAgent(
+		agent := fantasy.NewAgent(
 			languageModel,
-			ai.WithSystemPrompt("You are a helpful assistant"),
+			fantasy.WithSystemPrompt("You are a helpful assistant"),
 		)
-		result, err := agent.Generate(t.Context(), ai.AgentCall{
+		result, err := agent.Generate(t.Context(), fantasy.AgentCall{
 			Prompt:          "Say hi in Portuguese",
 			ProviderOptions: pair.providerOptions,
-			MaxOutputTokens: ai.Opt(int64(4000)),
+			MaxOutputTokens: fantasy.Opt(int64(4000)),
 		})
 		require.NoError(t, err, "failed to generate")
 		checkResult(t, result)
@@ -76,14 +76,14 @@ func testSimple(t *testing.T, pair builderPair) {
 		languageModel, err := pair.builder(r)
 		require.NoError(t, err, "failed to build language model")
 
-		agent := ai.NewAgent(
+		agent := fantasy.NewAgent(
 			languageModel,
-			ai.WithSystemPrompt("You are a helpful assistant"),
+			fantasy.WithSystemPrompt("You are a helpful assistant"),
 		)
-		result, err := agent.Stream(t.Context(), ai.AgentStreamCall{
+		result, err := agent.Stream(t.Context(), fantasy.AgentStreamCall{
 			Prompt:          "Say hi in Portuguese",
 			ProviderOptions: pair.providerOptions,
-			MaxOutputTokens: ai.Opt(int64(4000)),
+			MaxOutputTokens: fantasy.Opt(int64(4000)),
 		})
 		require.NoError(t, err, "failed to generate")
 		checkResult(t, result)
@@ -95,20 +95,20 @@ func testTool(t *testing.T, pair builderPair) {
 		Location string `json:"location" description:"the city"`
 	}
 
-	weatherTool := ai.NewAgentTool(
+	weatherTool := fantasy.NewAgentTool(
 		"weather",
 		"Get weather information for a location",
-		func(ctx context.Context, input WeatherInput, _ ai.ToolCall) (ai.ToolResponse, error) {
-			return ai.NewTextResponse("40 C"), nil
+		func(ctx context.Context, input WeatherInput, _ fantasy.ToolCall) (fantasy.ToolResponse, error) {
+			return fantasy.NewTextResponse("40 C"), nil
 		},
 	)
-	checkResult := func(t *testing.T, result *ai.AgentResult) {
+	checkResult := func(t *testing.T, result *fantasy.AgentResult) {
 		require.GreaterOrEqual(t, len(result.Steps), 2)
 
-		var toolCalls []ai.ToolCallContent
+		var toolCalls []fantasy.ToolCallContent
 		for _, content := range result.Steps[0].Content {
-			if content.GetType() == ai.ContentTypeToolCall {
-				toolCalls = append(toolCalls, content.(ai.ToolCallContent))
+			if content.GetType() == fantasy.ContentTypeToolCall {
+				toolCalls = append(toolCalls, content.(fantasy.ToolCallContent))
 			}
 		}
 		for _, tc := range toolCalls {
@@ -129,15 +129,15 @@ func testTool(t *testing.T, pair builderPair) {
 		languageModel, err := pair.builder(r)
 		require.NoError(t, err, "failed to build language model")
 
-		agent := ai.NewAgent(
+		agent := fantasy.NewAgent(
 			languageModel,
-			ai.WithSystemPrompt("You are a helpful assistant"),
-			ai.WithTools(weatherTool),
+			fantasy.WithSystemPrompt("You are a helpful assistant"),
+			fantasy.WithTools(weatherTool),
 		)
-		result, err := agent.Generate(t.Context(), ai.AgentCall{
+		result, err := agent.Generate(t.Context(), fantasy.AgentCall{
 			Prompt:          "What's the weather in Florence,Italy?",
 			ProviderOptions: pair.providerOptions,
-			MaxOutputTokens: ai.Opt(int64(4000)),
+			MaxOutputTokens: fantasy.Opt(int64(4000)),
 		})
 		require.NoError(t, err, "failed to generate")
 		checkResult(t, result)
@@ -148,15 +148,15 @@ func testTool(t *testing.T, pair builderPair) {
 		languageModel, err := pair.builder(r)
 		require.NoError(t, err, "failed to build language model")
 
-		agent := ai.NewAgent(
+		agent := fantasy.NewAgent(
 			languageModel,
-			ai.WithSystemPrompt("You are a helpful assistant"),
-			ai.WithTools(weatherTool),
+			fantasy.WithSystemPrompt("You are a helpful assistant"),
+			fantasy.WithTools(weatherTool),
 		)
-		result, err := agent.Stream(t.Context(), ai.AgentStreamCall{
+		result, err := agent.Stream(t.Context(), fantasy.AgentStreamCall{
 			Prompt:          "What's the weather in Florence,Italy?",
 			ProviderOptions: pair.providerOptions,
-			MaxOutputTokens: ai.Opt(int64(4000)),
+			MaxOutputTokens: fantasy.Opt(int64(4000)),
 		})
 		require.NoError(t, err, "failed to generate")
 		checkResult(t, result)
@@ -183,29 +183,29 @@ func testMultiTool(t *testing.T, pair builderPair) {
 		B int `json:"b" description:"second number"`
 	}
 
-	addTool := ai.NewAgentTool(
+	addTool := fantasy.NewAgentTool(
 		"add",
 		"Add two numbers",
-		func(ctx context.Context, input CalculatorInput, _ ai.ToolCall) (ai.ToolResponse, error) {
+		func(ctx context.Context, input CalculatorInput, _ fantasy.ToolCall) (fantasy.ToolResponse, error) {
 			result := input.A + input.B
-			return ai.NewTextResponse(strings.TrimSpace(strconv.Itoa(result))), nil
+			return fantasy.NewTextResponse(strings.TrimSpace(strconv.Itoa(result))), nil
 		},
 	)
-	multiplyTool := ai.NewAgentTool(
+	multiplyTool := fantasy.NewAgentTool(
 		"multiply",
 		"Multiply two numbers",
-		func(ctx context.Context, input CalculatorInput, _ ai.ToolCall) (ai.ToolResponse, error) {
+		func(ctx context.Context, input CalculatorInput, _ fantasy.ToolCall) (fantasy.ToolResponse, error) {
 			result := input.A * input.B
-			return ai.NewTextResponse(strings.TrimSpace(strconv.Itoa(result))), nil
+			return fantasy.NewTextResponse(strings.TrimSpace(strconv.Itoa(result))), nil
 		},
 	)
-	checkResult := func(t *testing.T, result *ai.AgentResult) {
+	checkResult := func(t *testing.T, result *fantasy.AgentResult) {
 		require.Len(t, result.Steps, 2)
 
-		var toolCalls []ai.ToolCallContent
+		var toolCalls []fantasy.ToolCallContent
 		for _, content := range result.Steps[0].Content {
-			if content.GetType() == ai.ContentTypeToolCall {
-				toolCalls = append(toolCalls, content.(ai.ToolCallContent))
+			if content.GetType() == fantasy.ContentTypeToolCall {
+				toolCalls = append(toolCalls, content.(fantasy.ToolCallContent))
 			}
 		}
 		for _, tc := range toolCalls {
@@ -224,16 +224,16 @@ func testMultiTool(t *testing.T, pair builderPair) {
 		languageModel, err := pair.builder(r)
 		require.NoError(t, err, "failed to build language model")
 
-		agent := ai.NewAgent(
+		agent := fantasy.NewAgent(
 			languageModel,
-			ai.WithSystemPrompt("You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS."),
-			ai.WithTools(addTool),
-			ai.WithTools(multiplyTool),
+			fantasy.WithSystemPrompt("You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS."),
+			fantasy.WithTools(addTool),
+			fantasy.WithTools(multiplyTool),
 		)
-		result, err := agent.Generate(t.Context(), ai.AgentCall{
+		result, err := agent.Generate(t.Context(), fantasy.AgentCall{
 			Prompt:          "Add and multiply the number 2 and 3",
 			ProviderOptions: pair.providerOptions,
-			MaxOutputTokens: ai.Opt(int64(4000)),
+			MaxOutputTokens: fantasy.Opt(int64(4000)),
 		})
 		require.NoError(t, err, "failed to generate")
 		checkResult(t, result)
@@ -244,23 +244,23 @@ func testMultiTool(t *testing.T, pair builderPair) {
 		languageModel, err := pair.builder(r)
 		require.NoError(t, err, "failed to build language model")
 
-		agent := ai.NewAgent(
+		agent := fantasy.NewAgent(
 			languageModel,
-			ai.WithSystemPrompt("You are a helpful assistant. Always use both add and multiply at the same time."),
-			ai.WithTools(addTool),
-			ai.WithTools(multiplyTool),
+			fantasy.WithSystemPrompt("You are a helpful assistant. Always use both add and multiply at the same time."),
+			fantasy.WithTools(addTool),
+			fantasy.WithTools(multiplyTool),
 		)
-		result, err := agent.Stream(t.Context(), ai.AgentStreamCall{
+		result, err := agent.Stream(t.Context(), fantasy.AgentStreamCall{
 			Prompt:          "Add and multiply the number 2 and 3",
 			ProviderOptions: pair.providerOptions,
-			MaxOutputTokens: ai.Opt(int64(4000)),
+			MaxOutputTokens: fantasy.Opt(int64(4000)),
 		})
 		require.NoError(t, err, "failed to generate")
 		checkResult(t, result)
 	})
 }
 
-func testThinking(t *testing.T, pairs []builderPair, thinkChecks func(*testing.T, *ai.AgentResult)) {
+func testThinking(t *testing.T, pairs []builderPair, thinkChecks func(*testing.T, *fantasy.AgentResult)) {
 	for _, pair := range pairs {
 		t.Run(pair.name, func(t *testing.T) {
 			t.Run("thinking", func(t *testing.T) {
@@ -273,20 +273,20 @@ func testThinking(t *testing.T, pairs []builderPair, thinkChecks func(*testing.T
 					Location string `json:"location" description:"the city"`
 				}
 
-				weatherTool := ai.NewAgentTool(
+				weatherTool := fantasy.NewAgentTool(
 					"weather",
 					"Get weather information for a location",
-					func(ctx context.Context, input WeatherInput, _ ai.ToolCall) (ai.ToolResponse, error) {
-						return ai.NewTextResponse("40 C"), nil
+					func(ctx context.Context, input WeatherInput, _ fantasy.ToolCall) (fantasy.ToolResponse, error) {
+						return fantasy.NewTextResponse("40 C"), nil
 					},
 				)
 
-				agent := ai.NewAgent(
+				agent := fantasy.NewAgent(
 					languageModel,
-					ai.WithSystemPrompt("You are a helpful assistant"),
-					ai.WithTools(weatherTool),
+					fantasy.WithSystemPrompt("You are a helpful assistant"),
+					fantasy.WithTools(weatherTool),
 				)
-				result, err := agent.Generate(t.Context(), ai.AgentCall{
+				result, err := agent.Generate(t.Context(), fantasy.AgentCall{
 					Prompt:          "What's the weather in Florence, Italy?",
 					ProviderOptions: pair.providerOptions,
 				})
@@ -309,20 +309,20 @@ func testThinking(t *testing.T, pairs []builderPair, thinkChecks func(*testing.T
 					Location string `json:"location" description:"the city"`
 				}
 
-				weatherTool := ai.NewAgentTool(
+				weatherTool := fantasy.NewAgentTool(
 					"weather",
 					"Get weather information for a location",
-					func(ctx context.Context, input WeatherInput, _ ai.ToolCall) (ai.ToolResponse, error) {
-						return ai.NewTextResponse("40 C"), nil
+					func(ctx context.Context, input WeatherInput, _ fantasy.ToolCall) (fantasy.ToolResponse, error) {
+						return fantasy.NewTextResponse("40 C"), nil
 					},
 				)
 
-				agent := ai.NewAgent(
+				agent := fantasy.NewAgent(
 					languageModel,
-					ai.WithSystemPrompt("You are a helpful assistant"),
-					ai.WithTools(weatherTool),
+					fantasy.WithSystemPrompt("You are a helpful assistant"),
+					fantasy.WithTools(weatherTool),
 				)
-				result, err := agent.Stream(t.Context(), ai.AgentStreamCall{
+				result, err := agent.Stream(t.Context(), fantasy.AgentStreamCall{
 					Prompt:          "What's the weather in Florence, Italy?",
 					ProviderOptions: pair.providerOptions,
 				})

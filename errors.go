@@ -1,4 +1,4 @@
-package ai
+package fantasy
 
 import (
 	"encoding/json"
@@ -7,7 +7,7 @@ import (
 )
 
 // markerSymbol is used for identifying AI SDK Error instances.
-var markerSymbol = "ai.error"
+var markerSymbol = "fantasy.error"
 
 // AIError is a custom error type for AI SDK related errors.
 type AIError struct {

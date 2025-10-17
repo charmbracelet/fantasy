@@ -1,4 +1,4 @@
-package ai
+package fantasy
 
 import "github.com/go-viper/mapstructure/v2"
 

@@ -3,7 +3,7 @@ package openrouter
 import (
 	"encoding/json"
 
-	"charm.land/fantasy/ai"
+	"charm.land/fantasy"
 	"charm.land/fantasy/openai"
 	"github.com/openai/openai-go/v2/option"
 )
@@ -20,7 +20,7 @@ const (
 
 type Option = func(*options)
 
-func New(opts ...Option) ai.Provider {
+func New(opts ...Option) fantasy.Provider {
 	providerOptions := options{
 		openaiOptions: []openai.Option{
 			openai.WithName(Name),

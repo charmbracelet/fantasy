@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"charm.land/fantasy/ai"
+	"charm.land/fantasy"
 	"github.com/openai/openai-go/v2/packages/param"
 	"github.com/stretchr/testify/require"
 )
@@ -21,11 +21,11 @@ func TestToOpenAiPrompt_SystemMessages(t *testing.T) {
 	t.Run("should forward system messages", func(t *testing.T) {
 		t.Parallel()
 
-		prompt := ai.Prompt{
+		prompt := fantasy.Prompt{
 			{
-				Role: ai.MessageRoleSystem,
-				Content: []ai.MessagePart{
-					ai.TextPart{Text: "You are a helpful assistant."},
+				Role: fantasy.MessageRoleSystem,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "You are a helpful assistant."},
 				},
 			},
 		}
@@ -43,10 +43,10 @@ func TestToOpenAiPrompt_SystemMessages(t *testing.T) {
 	t.Run("should handle empty system messages", func(t *testing.T) {
 		t.Parallel()
 
-		prompt := ai.Prompt{
+		prompt := fantasy.Prompt{
 			{
-				Role:    ai.MessageRoleSystem,
-				Content: []ai.MessagePart{},
+				Role:    fantasy.MessageRoleSystem,
+				Content: []fantasy.MessagePart{},
 			},
 		}
 
@@ -60,12 +60,12 @@ func TestToOpenAiPrompt_SystemMessages(t *testing.T) {
 	t.Run("should join multiple system text parts", func(t *testing.T) {
 		t.Parallel()
 
-		prompt := ai.Prompt{
+		prompt := fantasy.Prompt{
 			{
-				Role: ai.MessageRoleSystem,
-				Content: []ai.MessagePart{
-					ai.TextPart{Text: "You are a helpful assistant."},
-					ai.TextPart{Text: "Be concise."},
+				Role: fantasy.MessageRoleSystem,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "You are a helpful assistant."},
+					fantasy.TextPart{Text: "Be concise."},
 				},
 			},
 		}
@@ -87,11 +87,11 @@ func TestToOpenAiPrompt_UserMessages(t *testing.T) {
 	t.Run("should convert messages with only a text part to a string content", func(t *testing.T) {
 		t.Parallel()
 
-		prompt := ai.Prompt{
+		prompt := fantasy.Prompt{
 			{
-				Role: ai.MessageRoleUser,
-				Content: []ai.MessagePart{
-					ai.TextPart{Text: "Hello"},
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "Hello"},
 				},
 			},
 		}
@@ -110,12 +110,12 @@ func TestToOpenAiPrompt_UserMessages(t *testing.T) {
 		t.Parallel()
 
 		imageData := []byte{0, 1, 2, 3}
-		prompt := ai.Prompt{
+		prompt := fantasy.Prompt{
 			{
-				Role: ai.MessageRoleUser,
-				Content: []ai.MessagePart{
-					ai.TextPart{Text: "Hello"},
-					ai.FilePart{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "Hello"},
+					fantasy.FilePart{
 						MediaType: "image/png",
 						Data:      imageData,
 					},
@@ -150,11 +150,11 @@ func TestToOpenAiPrompt_UserMessages(t *testing.T) {
 		t.Parallel()
 
 		imageData := []byte{0, 1, 2, 3}
-		prompt := ai.Prompt{
+		prompt := fantasy.Prompt{
 			{
-				Role: ai.MessageRoleUser,
-				Content: []ai.MessagePart{
-					ai.FilePart{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.FilePart{
 						MediaType: "image/png",
 						Data:      imageData,
 						ProviderOptions: NewProviderFileOptions(&ProviderFileOptions{
@@ -188,11 +188,11 @@ func TestToOpenAiPrompt_FileParts(t *testing.T) {
 	t.Run("should throw for unsupported mime types", func(t *testing.T) {
 		t.Parallel()
 
-		prompt := ai.Prompt{
+		prompt := fantasy.Prompt{
 			{
-				Role: ai.MessageRoleUser,
-				Content: []ai.MessagePart{
-					ai.FilePart{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.FilePart{
 						MediaType: "application/something",
 						Data:      []byte("test"),
 					},
@@ -211,11 +211,11 @@ func TestToOpenAiPrompt_FileParts(t *testing.T) {
 		t.Parallel()
 
 		audioData := []byte{0, 1, 2, 3}
-		prompt := ai.Prompt{
+		prompt := fantasy.Prompt{
 			{
-				Role: ai.MessageRoleUser,
-				Content: []ai.MessagePart{
-					ai.FilePart{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.FilePart{
 						MediaType: "audio/wav",
 						Data:      audioData,
 					},
@@ -244,11 +244,11 @@ func TestToOpenAiPrompt_FileParts(t *testing.T) {
 		t.Parallel()
 
 		audioData := []byte{0, 1, 2, 3}
-		prompt := ai.Prompt{
+		prompt := fantasy.Prompt{
 			{
-				Role: ai.MessageRoleUser,
-				Content: []ai.MessagePart{
-					ai.FilePart{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.FilePart{
 						MediaType: "audio/mpeg",
 						Data:      audioData,
 					},
@@ -272,11 +272,11 @@ func TestToOpenAiPrompt_FileParts(t *testing.T) {
 		t.Parallel()
 
 		audioData := []byte{0, 1, 2, 3}
-		prompt := ai.Prompt{
+		prompt := fantasy.Prompt{
 			{
-				Role: ai.MessageRoleUser,
-				Content: []ai.MessagePart{
-					ai.FilePart{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.FilePart{
 						MediaType: "audio/mp3",
 						Data:      audioData,
 					},
@@ -300,11 +300,11 @@ func TestToOpenAiPrompt_FileParts(t *testing.T) {
 		t.Parallel()
 
 		pdfData := []byte{1, 2, 3, 4, 5}
-		prompt := ai.Prompt{
+		prompt := fantasy.Prompt{
 			{
-				Role: ai.MessageRoleUser,
-				Content: []ai.MessagePart{
-					ai.FilePart{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.FilePart{
 						MediaType: "application/pdf",
 						Data:      pdfData,
 						Filename:  "document.pdf",
@@ -334,11 +334,11 @@ func TestToOpenAiPrompt_FileParts(t *testing.T) {
 		t.Parallel()
 
 		pdfData := []byte{1, 2, 3, 4, 5}
-		prompt := ai.Prompt{
+		prompt := fantasy.Prompt{
 			{
-				Role: ai.MessageRoleUser,
-				Content: []ai.MessagePart{
-					ai.FilePart{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.FilePart{
 						MediaType: "application/pdf",
 						Data:      pdfData,
 						Filename:  "document.pdf",
@@ -364,11 +364,11 @@ func TestToOpenAiPrompt_FileParts(t *testing.T) {
 	t.Run("should convert messages with PDF file parts using file_id", func(t *testing.T) {
 		t.Parallel()
 
-		prompt := ai.Prompt{
+		prompt := fantasy.Prompt{
 			{
-				Role: ai.MessageRoleUser,
-				Content: []ai.MessagePart{
-					ai.FilePart{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.FilePart{
 						MediaType: "application/pdf",
 						Data:      []byte("file-pdf-12345"),
 					},
@@ -394,11 +394,11 @@ func TestToOpenAiPrompt_FileParts(t *testing.T) {
 		t.Parallel()
 
 		pdfData := []byte{1, 2, 3, 4, 5}
-		prompt := ai.Prompt{
+		prompt := fantasy.Prompt{
 			{
-				Role: ai.MessageRoleUser,
-				Content: []ai.MessagePart{
-					ai.FilePart{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.FilePart{
 						MediaType: "application/pdf",
 						Data:      pdfData,
 					},
@@ -431,11 +431,11 @@ func TestToOpenAiPrompt_ToolCalls(t *testing.T) {
 		outputResult := map[string]any{"oof": "321rab"}
 		outputJSON, _ := json.Marshal(outputResult)
 
-		prompt := ai.Prompt{
+		prompt := fantasy.Prompt{
 			{
-				Role: ai.MessageRoleAssistant,
-				Content: []ai.MessagePart{
-					ai.ToolCallPart{
+				Role: fantasy.MessageRoleAssistant,
+				Content: []fantasy.MessagePart{
+					fantasy.ToolCallPart{
 						ToolCallID: "quux",
 						ToolName:   "thwomp",
 						Input:      string(inputJSON),
@@ -443,11 +443,11 @@ func TestToOpenAiPrompt_ToolCalls(t *testing.T) {
 				},
 			},
 			{
-				Role: ai.MessageRoleTool,
-				Content: []ai.MessagePart{
-					ai.ToolResultPart{
+				Role: fantasy.MessageRoleTool,
+				Content: []fantasy.MessagePart{
+					fantasy.ToolResultPart{
 						ToolCallID: "quux",
-						Output: ai.ToolResultOutputContentText{
+						Output: fantasy.ToolResultOutputContentText{
 							Text: string(outputJSON),
 						},
 					},
@@ -482,19 +482,19 @@ func TestToOpenAiPrompt_ToolCalls(t *testing.T) {
 	t.Run("should handle different tool output types", func(t *testing.T) {
 		t.Parallel()
 
-		prompt := ai.Prompt{
+		prompt := fantasy.Prompt{
 			{
-				Role: ai.MessageRoleTool,
-				Content: []ai.MessagePart{
-					ai.ToolResultPart{
+				Role: fantasy.MessageRoleTool,
+				Content: []fantasy.MessagePart{
+					fantasy.ToolResultPart{
 						ToolCallID: "text-tool",
-						Output: ai.ToolResultOutputContentText{
+						Output: fantasy.ToolResultOutputContentText{
 							Text: "Hello world",
 						},
 					},
-					ai.ToolResultPart{
+					fantasy.ToolResultPart{
 						ToolCallID: "error-tool",
-						Output: ai.ToolResultOutputContentError{
+						Output: fantasy.ToolResultOutputContentError{
 							Error: errors.New("Something went wrong"),
 						},
 					},
@@ -527,11 +527,11 @@ func TestToOpenAiPrompt_AssistantMessages(t *testing.T) {
 	t.Run("should handle simple text assistant messages", func(t *testing.T) {
 		t.Parallel()
 
-		prompt := ai.Prompt{
+		prompt := fantasy.Prompt{
 			{
-				Role: ai.MessageRoleAssistant,
-				Content: []ai.MessagePart{
-					ai.TextPart{Text: "Hello, how can I help you?"},
+				Role: fantasy.MessageRoleAssistant,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "Hello, how can I help you?"},
 				},
 			},
 		}
@@ -552,12 +552,12 @@ func TestToOpenAiPrompt_AssistantMessages(t *testing.T) {
 		inputArgs := map[string]any{"query": "test"}
 		inputJSON, _ := json.Marshal(inputArgs)
 
-		prompt := ai.Prompt{
+		prompt := fantasy.Prompt{
 			{
-				Role: ai.MessageRoleAssistant,
-				Content: []ai.MessagePart{
-					ai.TextPart{Text: "Let me search for that."},
-					ai.ToolCallPart{
+				Role: fantasy.MessageRoleAssistant,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "Let me search for that."},
+					fantasy.ToolCallPart{
 						ToolCallID: "call-123",
 						ToolName:   "search",
 						Input:      string(inputJSON),
@@ -583,11 +583,11 @@ func TestToOpenAiPrompt_AssistantMessages(t *testing.T) {
 	})
 }
 
-var testPrompt = ai.Prompt{
+var testPrompt = fantasy.Prompt{
 	{
-		Role: ai.MessageRoleUser,
-		Content: []ai.MessagePart{
-			ai.TextPart{Text: "Hello"},
+		Role: fantasy.MessageRoleUser,
+		Content: []fantasy.MessagePart{
+			fantasy.TextPart{Text: "Hello"},
 		},
 	},
 }
@@ -815,14 +815,14 @@ func TestDoGenerate(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
-		result, err := model.Generate(context.Background(), ai.Call{
+		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 		})
 
 		require.NoError(t, err)
 		require.Len(t, result.Content, 1)
 
-		textContent, ok := result.Content[0].(ai.TextContent)
+		textContent, ok := result.Content[0].(fantasy.TextContent)
 		require.True(t, ok)
 		require.Equal(t, "Hello, World!", textContent.Text)
 	})
@@ -847,7 +847,7 @@ func TestDoGenerate(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
-		result, err := model.Generate(context.Background(), ai.Call{
+		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 		})
 
@@ -871,7 +871,7 @@ func TestDoGenerate(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
-		_, err := model.Generate(context.Background(), ai.Call{
+		_, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 		})
 
@@ -911,7 +911,7 @@ func TestDoGenerate(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
-		result, err := model.Generate(context.Background(), ai.Call{
+		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 		})
 
@@ -937,10 +937,10 @@ func TestDoGenerate(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
-		result, err := model.Generate(context.Background(), ai.Call{
+		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				LogProbs: ai.Opt(true),
+				LogProbs: fantasy.Opt(true),
 			}),
 		})
 
@@ -971,12 +971,12 @@ func TestDoGenerate(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
-		result, err := model.Generate(context.Background(), ai.Call{
+		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 		})
 
 		require.NoError(t, err)
-		require.Equal(t, ai.FinishReasonStop, result.FinishReason)
+		require.Equal(t, fantasy.FinishReasonStop, result.FinishReason)
 	})
 
 	t.Run("should support unknown finish reason", func(t *testing.T) {
@@ -995,12 +995,12 @@ func TestDoGenerate(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
-		result, err := model.Generate(context.Background(), ai.Call{
+		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 		})
 
 		require.NoError(t, err)
-		require.Equal(t, ai.FinishReasonUnknown, result.FinishReason)
+		require.Equal(t, fantasy.FinishReasonUnknown, result.FinishReason)
 	})
 
 	t.Run("should pass the model and the messages", func(t *testing.T) {
@@ -1019,7 +1019,7 @@ func TestDoGenerate(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
-		_, err := model.Generate(context.Background(), ai.Call{
+		_, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 		})
 
@@ -1051,14 +1051,14 @@ func TestDoGenerate(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
-		_, err := model.Generate(context.Background(), ai.Call{
+		_, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
 				LogitBias: map[string]int64{
 					"50256": -100,
 				},
-				ParallelToolCalls: ai.Opt(false),
-				User:              ai.Opt("test-user-id"),
+				ParallelToolCalls: fantasy.Opt(false),
+				User:              fantasy.Opt("test-user-id"),
 			}),
 		})
 
@@ -1093,7 +1093,7 @@ func TestDoGenerate(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("o1-mini")
 
-		_, err := model.Generate(context.Background(), ai.Call{
+		_, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(
 				&ProviderOptions{
@@ -1133,10 +1133,10 @@ func TestDoGenerate(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("gpt-4o")
 
-		_, err := model.Generate(context.Background(), ai.Call{
+		_, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				TextVerbosity: ai.Opt("low"),
+				TextVerbosity: fantasy.Opt("low"),
 			}),
 		})
 
@@ -1171,10 +1171,10 @@ func TestDoGenerate(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
-		_, err := model.Generate(context.Background(), ai.Call{
+		_, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
-			Tools: []ai.Tool{
-				ai.FunctionTool{
+			Tools: []fantasy.Tool{
+				fantasy.FunctionTool{
 					Name: "test-tool",
 					InputSchema: map[string]any{
 						"type": "object",
@@ -1189,7 +1189,7 @@ func TestDoGenerate(t *testing.T) {
 					},
 				},
 			},
-			ToolChoice: &[]ai.ToolChoice{ai.ToolChoice("test-tool")}[0],
+			ToolChoice: &[]fantasy.ToolChoice{fantasy.ToolChoice("test-tool")}[0],
 		})
 
 		require.NoError(t, err)
@@ -1243,10 +1243,10 @@ func TestDoGenerate(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
-		result, err := model.Generate(context.Background(), ai.Call{
+		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
-			Tools: []ai.Tool{
-				ai.FunctionTool{
+			Tools: []fantasy.Tool{
+				fantasy.FunctionTool{
 					Name: "test-tool",
 					InputSchema: map[string]any{
 						"type": "object",
@@ -1261,13 +1261,13 @@ func TestDoGenerate(t *testing.T) {
 					},
 				},
 			},
-			ToolChoice: &[]ai.ToolChoice{ai.ToolChoice("test-tool")}[0],
+			ToolChoice: &[]fantasy.ToolChoice{fantasy.ToolChoice("test-tool")}[0],
 		})
 
 		require.NoError(t, err)
 		require.Len(t, result.Content, 1)
 
-		toolCall, ok := result.Content[0].(ai.ToolCallContent)
+		toolCall, ok := result.Content[0].(fantasy.ToolCallContent)
 		require.True(t, ok)
 		require.Equal(t, "call_O17Uplv4lJvD6DVdIvFFeRMw", toolCall.ToolCallID)
 		require.Equal(t, "test-tool", toolCall.ToolName)
@@ -1301,20 +1301,20 @@ func TestDoGenerate(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
-		result, err := model.Generate(context.Background(), ai.Call{
+		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 		})
 
 		require.NoError(t, err)
 		require.Len(t, result.Content, 2)
 
-		textContent, ok := result.Content[0].(ai.TextContent)
+		textContent, ok := result.Content[0].(fantasy.TextContent)
 		require.True(t, ok)
 		require.Equal(t, "Based on the search results [doc1], I found information.", textContent.Text)
 
-		sourceContent, ok := result.Content[1].(ai.SourceContent)
+		sourceContent, ok := result.Content[1].(fantasy.SourceContent)
 		require.True(t, ok)
-		require.Equal(t, ai.SourceTypeURL, sourceContent.SourceType)
+		require.Equal(t, fantasy.SourceTypeURL, sourceContent.SourceType)
 		require.Equal(t, "https://example.com/doc1.pdf", sourceContent.URL)
 		require.Equal(t, "Document 1", sourceContent.Title)
 		require.NotEmpty(t, sourceContent.ID)
@@ -1343,7 +1343,7 @@ func TestDoGenerate(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("gpt-4o-mini")
 
-		result, err := model.Generate(context.Background(), ai.Call{
+		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 		})
 
@@ -1378,7 +1378,7 @@ func TestDoGenerate(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("gpt-4o-mini")
 
-		result, err := model.Generate(context.Background(), ai.Call{
+		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 		})
 
@@ -1406,7 +1406,7 @@ func TestDoGenerate(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("o1-preview")
 
-		result, err := model.Generate(context.Background(), ai.Call{
+		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt:           testPrompt,
 			Temperature:      &[]float64{0.5}[0],
 			TopP:             &[]float64{0.7}[0],
@@ -1435,7 +1435,7 @@ func TestDoGenerate(t *testing.T) {
 
 		// Should have warnings
 		require.Len(t, result.Warnings, 4)
-		require.Equal(t, ai.CallWarningTypeUnsupportedSetting, result.Warnings[0].Type)
+		require.Equal(t, fantasy.CallWarningTypeUnsupportedSetting, result.Warnings[0].Type)
 		require.Equal(t, "temperature", result.Warnings[0].Setting)
 		require.Contains(t, result.Warnings[0].Details, "temperature is not supported for reasoning models")
 	})
@@ -1454,7 +1454,7 @@ func TestDoGenerate(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("o1-preview")
 
-		_, err := model.Generate(context.Background(), ai.Call{
+		_, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt:          testPrompt,
 			MaxOutputTokens: &[]int64{1000}[0],
 		})
@@ -1498,7 +1498,7 @@ func TestDoGenerate(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("o1-preview")
 
-		result, err := model.Generate(context.Background(), ai.Call{
+		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 		})
 
@@ -1525,10 +1525,10 @@ func TestDoGenerate(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("o1-preview")
 
-		_, err := model.Generate(context.Background(), ai.Call{
+		_, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				MaxCompletionTokens: ai.Opt(int64(255)),
+				MaxCompletionTokens: fantasy.Opt(int64(255)),
 			}),
 		})
 
@@ -1563,7 +1563,7 @@ func TestDoGenerate(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
-		_, err := model.Generate(context.Background(), ai.Call{
+		_, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
 				Prediction: map[string]any{
@@ -1607,10 +1607,10 @@ func TestDoGenerate(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
-		_, err := model.Generate(context.Background(), ai.Call{
+		_, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				Store: ai.Opt(true),
+				Store: fantasy.Opt(true),
 			}),
 		})
 
@@ -1645,7 +1645,7 @@ func TestDoGenerate(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
-		_, err := model.Generate(context.Background(), ai.Call{
+		_, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
 				Metadata: map[string]any{
@@ -1687,10 +1687,10 @@ func TestDoGenerate(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
-		_, err := model.Generate(context.Background(), ai.Call{
+		_, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				PromptCacheKey: ai.Opt("test-cache-key-123"),
+				PromptCacheKey: fantasy.Opt("test-cache-key-123"),
 			}),
 		})
 
@@ -1725,10 +1725,10 @@ func TestDoGenerate(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
-		_, err := model.Generate(context.Background(), ai.Call{
+		_, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				SafetyIdentifier: ai.Opt("test-safety-identifier-123"),
+				SafetyIdentifier: fantasy.Opt("test-safety-identifier-123"),
 			}),
 		})
 
@@ -1761,7 +1761,7 @@ func TestDoGenerate(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("gpt-4o-search-preview")
 
-		result, err := model.Generate(context.Background(), ai.Call{
+		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt:      testPrompt,
 			Temperature: &[]float64{0.7}[0],
 		})
@@ -1774,7 +1774,7 @@ func TestDoGenerate(t *testing.T) {
 		require.Nil(t, call.body["temperature"])
 
 		require.Len(t, result.Warnings, 1)
-		require.Equal(t, ai.CallWarningTypeUnsupportedSetting, result.Warnings[0].Type)
+		require.Equal(t, fantasy.CallWarningTypeUnsupportedSetting, result.Warnings[0].Type)
 		require.Equal(t, "temperature", result.Warnings[0].Setting)
 		require.Contains(t, result.Warnings[0].Details, "search preview models")
 	})
@@ -1795,10 +1795,10 @@ func TestDoGenerate(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("o3-mini")
 
-		_, err := model.Generate(context.Background(), ai.Call{
+		_, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				ServiceTier: ai.Opt("flex"),
+				ServiceTier: fantasy.Opt("flex"),
 			}),
 		})
 
@@ -1831,10 +1831,10 @@ func TestDoGenerate(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("gpt-4o-mini")
 
-		result, err := model.Generate(context.Background(), ai.Call{
+		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				ServiceTier: ai.Opt("flex"),
+				ServiceTier: fantasy.Opt("flex"),
 			}),
 		})
 
@@ -1845,7 +1845,7 @@ func TestDoGenerate(t *testing.T) {
 		require.Nil(t, call.body["service_tier"])
 
 		require.Len(t, result.Warnings, 1)
-		require.Equal(t, ai.CallWarningTypeUnsupportedSetting, result.Warnings[0].Type)
+		require.Equal(t, fantasy.CallWarningTypeUnsupportedSetting, result.Warnings[0].Type)
 		require.Equal(t, "ServiceTier", result.Warnings[0].Setting)
 		require.Contains(t, result.Warnings[0].Details, "flex processing is only available")
 	})
@@ -1864,10 +1864,10 @@ func TestDoGenerate(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("gpt-4o-mini")
 
-		_, err := model.Generate(context.Background(), ai.Call{
+		_, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				ServiceTier: ai.Opt("priority"),
+				ServiceTier: fantasy.Opt("priority"),
 			}),
 		})
 
@@ -1900,10 +1900,10 @@ func TestDoGenerate(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
-		result, err := model.Generate(context.Background(), ai.Call{
+		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				ServiceTier: ai.Opt("priority"),
+				ServiceTier: fantasy.Opt("priority"),
 			}),
 		})
 
@@ -1914,7 +1914,7 @@ func TestDoGenerate(t *testing.T) {
 		require.Nil(t, call.body["service_tier"])
 
 		require.Len(t, result.Warnings, 1)
-		require.Equal(t, ai.CallWarningTypeUnsupportedSetting, result.Warnings[0].Type)
+		require.Equal(t, fantasy.CallWarningTypeUnsupportedSetting, result.Warnings[0].Type)
 		require.Equal(t, "ServiceTier", result.Warnings[0].Setting)
 		require.Contains(t, result.Warnings[0].Details, "priority processing is only available")
 	})
@@ -2167,14 +2167,14 @@ func (sms *streamingMockServer) prepareErrorStreamResponse() {
 	sms.chunks = chunks
 }
 
-func collectStreamParts(stream ai.StreamResponse) ([]ai.StreamPart, error) {
-	var parts []ai.StreamPart
+func collectStreamParts(stream fantasy.StreamResponse) ([]fantasy.StreamPart, error) {
+	var parts []fantasy.StreamPart
 	for part := range stream {
 		parts = append(parts, part)
-		if part.Type == ai.StreamPartTypeError {
+		if part.Type == fantasy.StreamPartTypeError {
 			break
 		}
-		if part.Type == ai.StreamPartTypeFinish {
+		if part.Type == fantasy.StreamPartTypeFinish {
 			break
 		}
 	}
@@ -2207,7 +2207,7 @@ func TestDoStream(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
-		stream, err := model.Stream(context.Background(), ai.Call{
+		stream, err := model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 		})
 
@@ -2225,13 +2225,13 @@ func TestDoStream(t *testing.T) {
 
 		for i, part := range parts {
 			switch part.Type {
-			case ai.StreamPartTypeTextStart:
+			case fantasy.StreamPartTypeTextStart:
 				textStart = i
-			case ai.StreamPartTypeTextDelta:
+			case fantasy.StreamPartTypeTextDelta:
 				deltas = append(deltas, part.Delta)
-			case ai.StreamPartTypeTextEnd:
+			case fantasy.StreamPartTypeTextEnd:
 				textEnd = i
-			case ai.StreamPartTypeFinish:
+			case fantasy.StreamPartTypeFinish:
 				finish = i
 			}
 		}
@@ -2243,7 +2243,7 @@ func TestDoStream(t *testing.T) {
 
 		// Check finish part
 		finishPart := parts[finish]
-		require.Equal(t, ai.FinishReasonStop, finishPart.FinishReason)
+		require.Equal(t, fantasy.FinishReasonStop, finishPart.FinishReason)
 		require.Equal(t, int64(17), finishPart.Usage.InputTokens)
 		require.Equal(t, int64(227), finishPart.Usage.OutputTokens)
 		require.Equal(t, int64(244), finishPart.Usage.TotalTokens)
@@ -2263,10 +2263,10 @@ func TestDoStream(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
-		stream, err := model.Stream(context.Background(), ai.Call{
+		stream, err := model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
-			Tools: []ai.Tool{
-				ai.FunctionTool{
+			Tools: []fantasy.Tool{
+				fantasy.FunctionTool{
 					Name: "test-tool",
 					InputSchema: map[string]any{
 						"type": "object",
@@ -2294,15 +2294,15 @@ func TestDoStream(t *testing.T) {
 
 		for i, part := range parts {
 			switch part.Type {
-			case ai.StreamPartTypeToolInputStart:
+			case fantasy.StreamPartTypeToolInputStart:
 				toolInputStart = i
 				require.Equal(t, "call_O17Uplv4lJvD6DVdIvFFeRMw", part.ID)
 				require.Equal(t, "test-tool", part.ToolCallName)
-			case ai.StreamPartTypeToolInputDelta:
+			case fantasy.StreamPartTypeToolInputDelta:
 				toolDeltas = append(toolDeltas, part.Delta)
-			case ai.StreamPartTypeToolInputEnd:
+			case fantasy.StreamPartTypeToolInputEnd:
 				toolInputEnd = i
-			case ai.StreamPartTypeToolCall:
+			case fantasy.StreamPartTypeToolCall:
 				toolCall = i
 				require.Equal(t, "call_O17Uplv4lJvD6DVdIvFFeRMw", part.ID)
 				require.Equal(t, "test-tool", part.ToolCallName)
@@ -2349,7 +2349,7 @@ func TestDoStream(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
-		stream, err := model.Stream(context.Background(), ai.Call{
+		stream, err := model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 		})
 
@@ -2359,16 +2359,16 @@ func TestDoStream(t *testing.T) {
 		require.NoError(t, err)
 
 		// Find source part
-		var sourcePart *ai.StreamPart
+		var sourcePart *fantasy.StreamPart
 		for _, part := range parts {
-			if part.Type == ai.StreamPartTypeSource {
+			if part.Type == fantasy.StreamPartTypeSource {
 				sourcePart = &part
 				break
 			}
 		}
 
 		require.NotNil(t, sourcePart)
-		require.Equal(t, ai.SourceTypeURL, sourcePart.SourceType)
+		require.Equal(t, fantasy.SourceTypeURL, sourcePart.SourceType)
 		require.Equal(t, "https://example.com/doc1.pdf", sourcePart.URL)
 		require.Equal(t, "Document 1", sourcePart.Title)
 		require.NotEmpty(t, sourcePart.ID)
@@ -2388,7 +2388,7 @@ func TestDoStream(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
-		stream, err := model.Stream(context.Background(), ai.Call{
+		stream, err := model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 		})
 
@@ -2401,9 +2401,9 @@ func TestDoStream(t *testing.T) {
 		require.True(t, len(parts) >= 1)
 
 		// Find error part
-		var errorPart *ai.StreamPart
+		var errorPart *fantasy.StreamPart
 		for _, part := range parts {
-			if part.Type == ai.StreamPartTypeError {
+			if part.Type == fantasy.StreamPartTypeError {
 				errorPart = &part
 				break
 			}
@@ -2429,7 +2429,7 @@ func TestDoStream(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
-		_, err := model.Stream(context.Background(), ai.Call{
+		_, err := model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 		})
 
@@ -2477,7 +2477,7 @@ func TestDoStream(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
-		stream, err := model.Stream(context.Background(), ai.Call{
+		stream, err := model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 		})
 
@@ -2487,9 +2487,9 @@ func TestDoStream(t *testing.T) {
 		require.NoError(t, err)
 
 		// Find finish part
-		var finishPart *ai.StreamPart
+		var finishPart *fantasy.StreamPart
 		for _, part := range parts {
-			if part.Type == ai.StreamPartTypeFinish {
+			if part.Type == fantasy.StreamPartTypeFinish {
 				finishPart = &part
 				break
 			}
@@ -2527,7 +2527,7 @@ func TestDoStream(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
-		stream, err := model.Stream(context.Background(), ai.Call{
+		stream, err := model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 		})
 
@@ -2537,9 +2537,9 @@ func TestDoStream(t *testing.T) {
 		require.NoError(t, err)
 
 		// Find finish part
-		var finishPart *ai.StreamPart
+		var finishPart *fantasy.StreamPart
 		for _, part := range parts {
-			if part.Type == ai.StreamPartTypeFinish {
+			if part.Type == fantasy.StreamPartTypeFinish {
 				finishPart = &part
 				break
 			}
@@ -2570,10 +2570,10 @@ func TestDoStream(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
-		_, err := model.Stream(context.Background(), ai.Call{
+		_, err := model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				Store: ai.Opt(true),
+				Store: fantasy.Opt(true),
 			}),
 		})
 
@@ -2612,7 +2612,7 @@ func TestDoStream(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("gpt-3.5-turbo")
 
-		_, err := model.Stream(context.Background(), ai.Call{
+		_, err := model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
 				Metadata: map[string]any{
@@ -2658,10 +2658,10 @@ func TestDoStream(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("o3-mini")
 
-		_, err := model.Stream(context.Background(), ai.Call{
+		_, err := model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				ServiceTier: ai.Opt("flex"),
+				ServiceTier: fantasy.Opt("flex"),
 			}),
 		})
 
@@ -2700,10 +2700,10 @@ func TestDoStream(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("gpt-4o-mini")
 
-		_, err := model.Stream(context.Background(), ai.Call{
+		_, err := model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				ServiceTier: ai.Opt("priority"),
+				ServiceTier: fantasy.Opt("priority"),
 			}),
 		})
 
@@ -2743,7 +2743,7 @@ func TestDoStream(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("o1-preview")
 
-		stream, err := model.Stream(context.Background(), ai.Call{
+		stream, err := model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 		})
 
@@ -2755,7 +2755,7 @@ func TestDoStream(t *testing.T) {
 		// Find text parts
 		var textDeltas []string
 		for _, part := range parts {
-			if part.Type == ai.StreamPartTypeTextDelta {
+			if part.Type == fantasy.StreamPartTypeTextDelta {
 				textDeltas = append(textDeltas, part.Delta)
 			}
 		}
@@ -2789,7 +2789,7 @@ func TestDoStream(t *testing.T) {
 		)
 		model, _ := provider.LanguageModel("o1-preview")
 
-		stream, err := model.Stream(context.Background(), ai.Call{
+		stream, err := model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 		})
 
@@ -2799,9 +2799,9 @@ func TestDoStream(t *testing.T) {
 		require.NoError(t, err)
 
 		// Find finish part
-		var finishPart *ai.StreamPart
+		var finishPart *fantasy.StreamPart
 		for _, part := range parts {
-			if part.Type == ai.StreamPartTypeFinish {
+			if part.Type == fantasy.StreamPartTypeFinish {
 				finishPart = &part
 				break
 			}

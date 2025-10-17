@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"charm.land/fantasy/ai"
+	"charm.land/fantasy"
 	"charm.land/fantasy/openai"
 )
 
@@ -32,19 +32,19 @@ func main() {
 		Message string `json:"message" description:"The message to echo back"`
 	}
 
-	echoTool := ai.NewAgentTool(
+	echoTool := fantasy.NewAgentTool(
 		"echo",
 		"Echo back the provided message",
-		func(ctx context.Context, input EchoInput, _ ai.ToolCall) (ai.ToolResponse, error) {
-			return ai.NewTextResponse("Echo: " + input.Message), nil
+		func(ctx context.Context, input EchoInput, _ fantasy.ToolCall) (fantasy.ToolResponse, error) {
+			return fantasy.NewTextResponse("Echo: " + input.Message), nil
 		},
 	)
 
 	// Create streaming agent
-	agent := ai.NewAgent(
+	agent := fantasy.NewAgent(
 		model,
-		ai.WithSystemPrompt("You are a helpful assistant."),
-		ai.WithTools(echoTool),
+		fantasy.WithSystemPrompt("You are a helpful assistant."),
+		fantasy.WithTools(echoTool),
 	)
 
 	ctx := context.Background()
@@ -54,7 +54,7 @@ func main() {
 	fmt.Println()
 
 	// Basic streaming with key callbacks
-	streamCall := ai.AgentStreamCall{
+	streamCall := fantasy.AgentStreamCall{
 		Prompt: "Please echo back 'Hello, streaming world!'",
 
 		// Show real-time text as it streams
@@ -64,19 +64,19 @@ func main() {
 		},
 
 		// Show when tools are called
-		OnToolCall: func(toolCall ai.ToolCallContent) error {
+		OnToolCall: func(toolCall fantasy.ToolCallContent) error {
 			fmt.Printf("\n[Tool: %s called]\n", toolCall.ToolName)
 			return nil
 		},
 
 		// Show tool results
-		OnToolResult: func(result ai.ToolResultContent) error {
+		OnToolResult: func(result fantasy.ToolResultContent) error {
 			fmt.Printf("[Tool result received]\n")
 			return nil
 		},
 
 		// Show when each step completes
-		OnStepFinish: func(step ai.StepResult) error {
+		OnStepFinish: func(step fantasy.StepResult) error {
 			fmt.Printf("\n[Step completed: %s]\n", step.FinishReason)
 			return nil
 		},

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"charm.land/fantasy/ai"
+	"charm.land/fantasy"
 	"charm.land/fantasy/openrouter"
 )
 
@@ -24,21 +24,21 @@ func main() {
 		Location string `json:"location" description:"the city"`
 	}
 
-	weatherTool := ai.NewAgentTool(
+	weatherTool := fantasy.NewAgentTool(
 		"weather",
 		"Get weather information for a location",
-		func(ctx context.Context, input WeatherInput, _ ai.ToolCall) (ai.ToolResponse, error) {
-			return ai.NewTextResponse("40 C"), nil
+		func(ctx context.Context, input WeatherInput, _ fantasy.ToolCall) (fantasy.ToolResponse, error) {
+			return fantasy.NewTextResponse("40 C"), nil
 		},
 	)
 
-	agent := ai.NewAgent(
+	agent := fantasy.NewAgent(
 		model,
-		ai.WithSystemPrompt("You are a helpful assistant"),
-		ai.WithTools(weatherTool),
+		fantasy.WithSystemPrompt("You are a helpful assistant"),
+		fantasy.WithTools(weatherTool),
 	)
 
-	result, err := agent.Generate(context.Background(), ai.AgentCall{
+	result, err := agent.Generate(context.Background(), fantasy.AgentCall{
 		Prompt: "What's the weather in pristina",
 	})
 	if err != nil {
@@ -49,8 +49,8 @@ func main() {
 	fmt.Println("Steps: ", len(result.Steps))
 	for _, s := range result.Steps {
 		for _, c := range s.Content {
-			if c.GetType() == ai.ContentTypeToolCall {
-				tc, _ := ai.AsContentType[ai.ToolCallContent](c)
+			if c.GetType() == fantasy.ContentTypeToolCall {
+				tc, _ := fantasy.AsContentType[fantasy.ToolCallContent](c)
 				fmt.Println("ToolCall: ", tc.ToolName)
 			}
 		}

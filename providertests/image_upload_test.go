@@ -60,10 +60,10 @@ func TestImageUploadAgent(t *testing.T) {
 		},
 	}
 
-	img, err := os.ReadFile("testdata/crush.png")
+	img, err := os.ReadFile("testdata/wish.png")
 	require.NoError(t, err)
 
-	file := fantasy.FilePart{Filename: "crush.png", Data: img, MediaType: "image/png"}
+	file := fantasy.FilePart{Filename: "wish.png", Data: img, MediaType: "image/png"}
 
 	for _, pair := range pairs {
 		pair := pair
@@ -107,10 +107,10 @@ func TestImageUploadAgentStreaming(t *testing.T) {
 		},
 	}
 
-	img, err := os.ReadFile("testdata/crush.png")
+	img, err := os.ReadFile("testdata/wish.png")
 	require.NoError(t, err)
 
-	file := fantasy.FilePart{Filename: "crush.png", Data: img, MediaType: "image/png"}
+	file := fantasy.FilePart{Filename: "wish.png", Data: img, MediaType: "image/png"}
 
 	for _, pair := range pairs {
 		pair := pair

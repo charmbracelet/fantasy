@@ -9,16 +9,28 @@ import (
 	"github.com/openai/openai-go/v2/shared"
 )
 
-type (
-	LanguageModelPrepareCallFunc            = func(model fantasy.LanguageModel, params *openai.ChatCompletionNewParams, call fantasy.Call) ([]fantasy.CallWarning, error)
-	LanguageModelMapFinishReasonFunc        = func(finishReason string) fantasy.FinishReason
-	LanguageModelUsageFunc                  = func(choice openai.ChatCompletion) (fantasy.Usage, fantasy.ProviderOptionsData)
-	LanguageModelExtraContentFunc           = func(choice openai.ChatCompletionChoice) []fantasy.Content
-	LanguageModelStreamExtraFunc            = func(chunk openai.ChatCompletionChunk, yield func(fantasy.StreamPart) bool, ctx map[string]any) (map[string]any, bool)
-	LanguageModelStreamUsageFunc            = func(chunk openai.ChatCompletionChunk, ctx map[string]any, metadata fantasy.ProviderMetadata) (fantasy.Usage, fantasy.ProviderMetadata)
-	LanguageModelStreamProviderMetadataFunc = func(choice openai.ChatCompletionChoice, metadata fantasy.ProviderMetadata) fantasy.ProviderMetadata
-)
+// LanguageModelPrepareCallFunc is a function that prepares the call for the language model.
+type LanguageModelPrepareCallFunc = func(model fantasy.LanguageModel, params *openai.ChatCompletionNewParams, call fantasy.Call) ([]fantasy.CallWarning, error)
 
+// LanguageModelMapFinishReasonFunc is a function that maps the finish reason for the language model.
+type LanguageModelMapFinishReasonFunc = func(finishReason string) fantasy.FinishReason
+
+// LanguageModelUsageFunc is a function that calculates usage for the language model.
+type LanguageModelUsageFunc = func(choice openai.ChatCompletion) (fantasy.Usage, fantasy.ProviderOptionsData)
+
+// LanguageModelExtraContentFunc is a function that adds extra content for the language model.
+type LanguageModelExtraContentFunc = func(choice openai.ChatCompletionChoice) []fantasy.Content
+
+// LanguageModelStreamExtraFunc is a function that handles stream extra functionality for the language model.
+type LanguageModelStreamExtraFunc = func(chunk openai.ChatCompletionChunk, yield func(fantasy.StreamPart) bool, ctx map[string]any) (map[string]any, bool)
+
+// LanguageModelStreamUsageFunc is a function that calculates stream usage for the language model.
+type LanguageModelStreamUsageFunc = func(chunk openai.ChatCompletionChunk, ctx map[string]any, metadata fantasy.ProviderMetadata) (fantasy.Usage, fantasy.ProviderMetadata)
+
+// LanguageModelStreamProviderMetadataFunc is a function that handles stream provider metadata for the language model.
+type LanguageModelStreamProviderMetadataFunc = func(choice openai.ChatCompletionChoice, metadata fantasy.ProviderMetadata) fantasy.ProviderMetadata
+
+// DefaultPrepareCallFunc is the default implementation for preparing a call to the language model.
 func DefaultPrepareCallFunc(model fantasy.LanguageModel, params *openai.ChatCompletionNewParams, call fantasy.Call) ([]fantasy.CallWarning, error) {
 	if call.ProviderOptions == nil {
 		return nil, nil
@@ -156,6 +168,7 @@ func DefaultPrepareCallFunc(model fantasy.LanguageModel, params *openai.ChatComp
 	return warnings, nil
 }
 
+// DefaultMapFinishReasonFunc is the default implementation for mapping finish reasons.
 func DefaultMapFinishReasonFunc(finishReason string) fantasy.FinishReason {
 	switch finishReason {
 	case "stop":
@@ -171,6 +184,7 @@ func DefaultMapFinishReasonFunc(finishReason string) fantasy.FinishReason {
 	}
 }
 
+// DefaultUsageFunc is the default implementation for calculating usage.
 func DefaultUsageFunc(response openai.ChatCompletion) (fantasy.Usage, fantasy.ProviderOptionsData) {
 	completionTokenDetails := response.Usage.CompletionTokensDetails
 	promptTokenDetails := response.Usage.PromptTokensDetails
@@ -201,7 +215,8 @@ func DefaultUsageFunc(response openai.ChatCompletion) (fantasy.Usage, fantasy.Pr
 	}, providerMetadata
 }
 
-func DefaultStreamUsageFunc(chunk openai.ChatCompletionChunk, ctx map[string]any, metadata fantasy.ProviderMetadata) (fantasy.Usage, fantasy.ProviderMetadata) {
+// DefaultStreamUsageFunc is the default implementation for calculating stream usage.
+func DefaultStreamUsageFunc(chunk openai.ChatCompletionChunk, _ map[string]any, metadata fantasy.ProviderMetadata) (fantasy.Usage, fantasy.ProviderMetadata) {
 	if chunk.Usage.TotalTokens == 0 {
 		return fantasy.Usage{}, nil
 	}
@@ -240,6 +255,7 @@ func DefaultStreamUsageFunc(chunk openai.ChatCompletionChunk, ctx map[string]any
 	}
 }
 
+// DefaultStreamProviderMetadataFunc is the default implementation for handling stream provider metadata.
 func DefaultStreamProviderMetadataFunc(choice openai.ChatCompletionChoice, metadata fantasy.ProviderMetadata) fantasy.ProviderMetadata {
 	streamProviderMetadata, ok := metadata[Name]
 	if !ok {

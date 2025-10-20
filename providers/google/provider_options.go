@@ -1,12 +1,15 @@
+// Package google provides an implementation of the fantasy AI SDK for Google's language models.
 package google
 
 import "charm.land/fantasy"
 
+// ThinkingConfig represents thinking configuration for the Google provider.
 type ThinkingConfig struct {
 	ThinkingBudget  *int64 `json:"thinking_budget"`
 	IncludeThoughts *bool  `json:"include_thoughts"`
 }
 
+// SafetySetting represents safety settings for the Google provider.
 type SafetySetting struct {
 	// 'HARM_CATEGORY_UNSPECIFIED',
 	// 'HARM_CATEGORY_HATE_SPEECH',
@@ -24,6 +27,8 @@ type SafetySetting struct {
 	// 'OFF',
 	Threshold string `json:"threshold"`
 }
+
+// ProviderOptions represents additional options for the Google provider.
 type ProviderOptions struct {
 	ThinkingConfig *ThinkingConfig `json:"thinking_config"`
 
@@ -43,8 +48,10 @@ type ProviderOptions struct {
 	Threshold string `json:"threshold"`
 }
 
+// Options implements the ProviderOptionsData interface for ProviderOptions.
 func (o *ProviderOptions) Options() {}
 
+// ParseOptions parses provider options from a map for the Google provider.
 func ParseOptions(data map[string]any) (*ProviderOptions, error) {
 	var options ProviderOptions
 	if err := fantasy.ParseOptions(data, &options); err != nil {

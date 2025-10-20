@@ -18,8 +18,10 @@ type RetryFunction[T any] func(ctx context.Context, fn RetryFn[T]) (T, error)
 type RetryReason string
 
 const (
+	// RetryReasonMaxRetriesExceeded indicates the maximum number of retries was exceeded.
 	RetryReasonMaxRetriesExceeded RetryReason = "maxRetriesExceeded"
-	RetryReasonErrorNotRetryable  RetryReason = "errorNotRetryable"
+	// RetryReasonErrorNotRetryable indicates the error is not retryable.
+	RetryReasonErrorNotRetryable RetryReason = "errorNotRetryable"
 )
 
 // RetryError represents an error that occurred during retry operations.
@@ -98,8 +100,10 @@ type RetryOptions struct {
 	OnRetry        OnRetryCallback
 }
 
+// OnRetryCallback defines a function that is called when a retry occurs.
 type OnRetryCallback = func(err *APICallError, delay time.Duration)
 
+// DefaultRetryOptions returns the default retry options.
 // DefaultRetryOptions returns the default retry options.
 func DefaultRetryOptions() RetryOptions {
 	return RetryOptions{

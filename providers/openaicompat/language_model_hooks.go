@@ -13,7 +13,8 @@ import (
 
 const reasoningStartedCtx = "reasoning_started"
 
-func PrepareCallFunc(model fantasy.LanguageModel, params *openaisdk.ChatCompletionNewParams, call fantasy.Call) ([]fantasy.CallWarning, error) {
+// PrepareCallFunc prepares the call for the language model.
+func PrepareCallFunc(_ fantasy.LanguageModel, params *openaisdk.ChatCompletionNewParams, call fantasy.Call) ([]fantasy.CallWarning, error) {
 	providerOptions := &ProviderOptions{}
 	if v, ok := call.ProviderOptions[Name]; ok {
 		providerOptions, ok = v.(*ProviderOptions)
@@ -43,6 +44,7 @@ func PrepareCallFunc(model fantasy.LanguageModel, params *openaisdk.ChatCompleti
 	return nil, nil
 }
 
+// ExtraContentFunc adds extra content to the response.
 func ExtraContentFunc(choice openaisdk.ChatCompletionChoice) []fantasy.Content {
 	var content []fantasy.Content
 	reasoningData := ReasoningData{}
@@ -70,6 +72,7 @@ func extractReasoningContext(ctx map[string]any) bool {
 	return b
 }
 
+// StreamExtraFunc handles extra functionality for streaming responses.
 func StreamExtraFunc(chunk openaisdk.ChatCompletionChunk, yield func(fantasy.StreamPart) bool, ctx map[string]any) (map[string]any, bool) {
 	if len(chunk.Choices) == 0 {
 		return ctx, true

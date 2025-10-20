@@ -54,13 +54,20 @@ type ProviderOptions map[string]ProviderOptionsData
 type FinishReason string
 
 const (
-	FinishReasonStop          FinishReason = "stop"           // model generated stop sequence
-	FinishReasonLength        FinishReason = "length"         // model generated maximum number of tokens
+	// FinishReasonStop indicates the model generated a stop sequence.
+	FinishReasonStop FinishReason = "stop" // model generated stop sequence
+	// FinishReasonLength indicates the model generated maximum number of tokens.
+	FinishReasonLength FinishReason = "length" // model generated maximum number of tokens
+	// FinishReasonContentFilter indicates content filter violation stopped the model.
 	FinishReasonContentFilter FinishReason = "content-filter" // content filter violation stopped the model
-	FinishReasonToolCalls     FinishReason = "tool-calls"     // model triggered tool calls
-	FinishReasonError         FinishReason = "error"          // model stopped because of an error
-	FinishReasonOther         FinishReason = "other"          // model stopped for other reasons
-	FinishReasonUnknown       FinishReason = "unknown"        // the model has not transmitted a finish reason
+	// FinishReasonToolCalls indicates the model triggered tool calls.
+	FinishReasonToolCalls FinishReason = "tool-calls" // model triggered tool calls
+	// FinishReasonError indicates the model stopped because of an error.
+	FinishReasonError FinishReason = "error" // model stopped because of an error
+	// FinishReasonOther indicates the model stopped for other reasons.
+	FinishReasonOther FinishReason = "other" // model stopped for other reasons
+	// FinishReasonUnknown indicates the model has not transmitted a finish reason.
+	FinishReasonUnknown FinishReason = "unknown" // the model has not transmitted a finish reason
 )
 
 // Prompt represents a list of messages for the language model.
@@ -70,10 +77,14 @@ type Prompt []Message
 type MessageRole string
 
 const (
-	MessageRoleSystem    MessageRole = "system"
-	MessageRoleUser      MessageRole = "user"
+	// MessageRoleSystem represents a system message.
+	MessageRoleSystem MessageRole = "system"
+	// MessageRoleUser represents a user message.
+	MessageRoleUser MessageRole = "user"
+	// MessageRoleAssistant represents an assistant message.
 	MessageRoleAssistant MessageRole = "assistant"
-	MessageRoleTool      MessageRole = "tool"
+	// MessageRoleTool represents a tool message.
+	MessageRoleTool MessageRole = "tool"
 )
 
 // Message represents a message in a prompt.
@@ -83,6 +94,7 @@ type Message struct {
 	ProviderOptions ProviderOptions `json:"provider_options"`
 }
 
+// AsContentType converts a Content interface to a specific content type.
 func AsContentType[T Content](content Content) (T, bool) {
 	var zero T
 	if content == nil {
@@ -98,6 +110,7 @@ func AsContentType[T Content](content Content) (T, bool) {
 	}
 }
 
+// AsMessagePart converts a MessagePart interface to a specific message part type.
 func AsMessagePart[T MessagePart](content MessagePart) (T, bool) {
 	var zero T
 	if content == nil {
@@ -130,6 +143,7 @@ func (t TextPart) GetType() ContentType {
 	return ContentTypeText
 }
 
+// Options returns the provider options for the text part.
 func (t TextPart) Options() ProviderOptions {
 	return t.ProviderOptions
 }
@@ -145,6 +159,7 @@ func (r ReasoningPart) GetType() ContentType {
 	return ContentTypeReasoning
 }
 
+// Options returns the provider options for the reasoning part.
 func (r ReasoningPart) Options() ProviderOptions {
 	return r.ProviderOptions
 }
@@ -162,6 +177,7 @@ func (f FilePart) GetType() ContentType {
 	return ContentTypeFile
 }
 
+// Options returns the provider options for the file part.
 func (f FilePart) Options() ProviderOptions {
 	return f.ProviderOptions
 }
@@ -180,6 +196,7 @@ func (t ToolCallPart) GetType() ContentType {
 	return ContentTypeToolCall
 }
 
+// Options returns the provider options for the tool call part.
 func (t ToolCallPart) Options() ProviderOptions {
 	return t.ProviderOptions
 }
@@ -196,6 +213,7 @@ func (t ToolResultPart) GetType() ContentType {
 	return ContentTypeToolResult
 }
 
+// Options returns the provider options for the tool result part.
 func (t ToolResultPart) Options() ProviderOptions {
 	return t.ProviderOptions
 }
@@ -212,35 +230,43 @@ const (
 	ToolResultContentTypeMedia ToolResultContentType = "media"
 )
 
+// ToolResultOutputContent represents the output content of a tool result.
 type ToolResultOutputContent interface {
 	GetType() ToolResultContentType
 }
 
+// ToolResultOutputContentText represents text output content of a tool result.
 type ToolResultOutputContentText struct {
 	Text string `json:"text"`
 }
 
+// GetType returns the type of the tool result output content text.
 func (t ToolResultOutputContentText) GetType() ToolResultContentType {
 	return ToolResultContentTypeText
 }
 
+// ToolResultOutputContentError represents error output content of a tool result.
 type ToolResultOutputContentError struct {
 	Error error `json:"error"`
 }
 
+// GetType returns the type of the tool result output content error.
 func (t ToolResultOutputContentError) GetType() ToolResultContentType {
 	return ToolResultContentTypeError
 }
 
+// ToolResultOutputContentMedia represents media output content of a tool result.
 type ToolResultOutputContentMedia struct {
 	Data      string `json:"data"`       // for media type (base64)
 	MediaType string `json:"media_type"` // for media type
 }
 
+// GetType returns the type of the tool result output content media.
 func (t ToolResultOutputContentMedia) GetType() ToolResultContentType {
 	return ToolResultContentTypeMedia
 }
 
+// AsToolResultOutputType converts a ToolResultOutputContent interface to a specific type.
 func AsToolResultOutputType[T ToolResultOutputContent](content ToolResultOutputContent) (T, bool) {
 	var zero T
 	if content == nil {
@@ -455,7 +481,7 @@ func (p ProviderDefinedTool) GetName() string {
 	return p.Name
 }
 
-// Helpers.
+// NewUserMessage creates a new user message with the given prompt and optional files.
 func NewUserMessage(prompt string, files ...FilePart) Message {
 	content := []MessagePart{
 		TextPart{
@@ -473,6 +499,7 @@ func NewUserMessage(prompt string, files ...FilePart) Message {
 	}
 }
 
+// NewSystemMessage creates a new system message with the given prompts.
 func NewSystemMessage(prompt ...string) Message {
 	content := make([]MessagePart, 0, len(prompt))
 	for _, p := range prompt {

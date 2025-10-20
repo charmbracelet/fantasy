@@ -1,31 +1,40 @@
+// Package openrouter provides an implementation of the fantasy AI SDK for OpenRouter's language models.
 package openrouter
 
 import (
 	"charm.land/fantasy"
 )
 
+// ReasoningEffort represents the reasoning effort level for OpenRouter models.
 type ReasoningEffort string
 
 const (
-	ReasoningEffortLow    ReasoningEffort = "low"
+	// ReasoningEffortLow represents low reasoning effort.
+	ReasoningEffortLow ReasoningEffort = "low"
+	// ReasoningEffortMedium represents medium reasoning effort.
 	ReasoningEffortMedium ReasoningEffort = "medium"
-	ReasoningEffortHigh   ReasoningEffort = "high"
+	// ReasoningEffortHigh represents high reasoning effort.
+	ReasoningEffortHigh ReasoningEffort = "high"
 )
 
+// PromptTokensDetails represents details about prompt tokens for OpenRouter.
 type PromptTokensDetails struct {
 	CachedTokens int64
 }
 
+// CompletionTokensDetails represents details about completion tokens for OpenRouter.
 type CompletionTokensDetails struct {
 	ReasoningTokens int64
 }
 
+// CostDetails represents cost details for OpenRouter.
 type CostDetails struct {
 	UpstreamInferenceCost            float64 `json:"upstream_inference_cost"`
 	UpstreamInferencePromptCost      float64 `json:"upstream_inference_prompt_cost"`
 	UpstreamInferenceCompletionsCost float64 `json:"upstream_inference_completions_cost"`
 }
 
+// UsageAccounting represents usage accounting details for OpenRouter.
 type UsageAccounting struct {
 	PromptTokens            int64                   `json:"prompt_tokens"`
 	PromptTokensDetails     PromptTokensDetails     `json:"prompt_tokens_details"`
@@ -36,19 +45,24 @@ type UsageAccounting struct {
 	CostDetails             CostDetails             `json:"cost_details"`
 }
 
+// ProviderMetadata represents metadata from OpenRouter provider.
 type ProviderMetadata struct {
 	Provider string          `json:"provider"`
 	Usage    UsageAccounting `json:"usage"`
 }
 
+// Options implements the ProviderOptionsData interface for ProviderMetadata.
 func (*ProviderMetadata) Options() {}
 
+// ReasoningMetadata represents reasoning metadata for OpenRouter.
 type ReasoningMetadata struct {
 	Signature string `json:"signature"`
 }
 
+// Options implements the ProviderOptionsData interface for ReasoningMetadata.
 func (*ReasoningMetadata) Options() {}
 
+// ReasoningOptions represents reasoning options for OpenRouter.
 type ReasoningOptions struct {
 	// Whether reasoning is enabled
 	Enabled *bool `json:"enabled,omitempty"`
@@ -60,6 +74,7 @@ type ReasoningOptions struct {
 	Effort *ReasoningEffort `json:"effort,omitempty"`
 }
 
+// Provider represents provider routing preferences for OpenRouter.
 type Provider struct {
 	// List of provider slugs to try in order (e.g. ["anthropic", "openai"])
 	Order []string `json:"order,omitempty"`
@@ -79,6 +94,7 @@ type Provider struct {
 	Sort *string `json:"sort,omitempty"`
 }
 
+// ProviderOptions represents additional options for OpenRouter provider.
 type ProviderOptions struct {
 	Reasoning    *ReasoningOptions `json:"reasoning,omitempty"`
 	ExtraBody    map[string]any    `json:"extra_body,omitempty"`
@@ -99,29 +115,36 @@ type ProviderOptions struct {
 	// TODO: add the web search plugin config
 }
 
+// Options implements the ProviderOptionsData interface for ProviderOptions.
 func (*ProviderOptions) Options() {}
 
+// ReasoningDetail represents a reasoning detail for OpenRouter.
 type ReasoningDetail struct {
 	Type      string `json:"type"`
 	Text      string `json:"text"`
 	Summary   string `json:"summary"`
 	Signature string `json:"signature"`
 }
+
+// ReasoningData represents reasoning data for OpenRouter.
 type ReasoningData struct {
 	Reasoning        string            `json:"reasoning"`
 	ReasoningDetails []ReasoningDetail `json:"reasoning_details"`
 }
 
+// ReasoningEffortOption creates a pointer to a ReasoningEffort value for OpenRouter.
 func ReasoningEffortOption(e ReasoningEffort) *ReasoningEffort {
 	return &e
 }
 
+// NewProviderOptions creates new provider options for OpenRouter.
 func NewProviderOptions(opts *ProviderOptions) fantasy.ProviderOptions {
 	return fantasy.ProviderOptions{
 		Name: opts,
 	}
 }
 
+// ParseOptions parses provider options from a map for OpenRouter.
 func ParseOptions(data map[string]any) (*ProviderOptions, error) {
 	var options ProviderOptions
 	if err := fantasy.ParseOptions(data, &options); err != nil {

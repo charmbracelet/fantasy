@@ -30,38 +30,45 @@ type languageModel struct {
 	streamProviderMetadataFunc LanguageModelStreamProviderMetadataFunc
 }
 
+// LanguageModelOption is a function that configures a languageModel.
 type LanguageModelOption = func(*languageModel)
 
+// WithLanguageModelPrepareCallFunc sets the prepare call function for the language model.
 func WithLanguageModelPrepareCallFunc(fn LanguageModelPrepareCallFunc) LanguageModelOption {
 	return func(l *languageModel) {
 		l.prepareCallFunc = fn
 	}
 }
 
+// WithLanguageModelMapFinishReasonFunc sets the map finish reason function for the language model.
 func WithLanguageModelMapFinishReasonFunc(fn LanguageModelMapFinishReasonFunc) LanguageModelOption {
 	return func(l *languageModel) {
 		l.mapFinishReasonFunc = fn
 	}
 }
 
+// WithLanguageModelExtraContentFunc sets the extra content function for the language model.
 func WithLanguageModelExtraContentFunc(fn LanguageModelExtraContentFunc) LanguageModelOption {
 	return func(l *languageModel) {
 		l.extraContentFunc = fn
 	}
 }
 
+// WithLanguageModelStreamExtraFunc sets the stream extra function for the language model.
 func WithLanguageModelStreamExtraFunc(fn LanguageModelStreamExtraFunc) LanguageModelOption {
 	return func(l *languageModel) {
 		l.streamExtraFunc = fn
 	}
 }
 
+// WithLanguageModelUsageFunc sets the usage function for the language model.
 func WithLanguageModelUsageFunc(fn LanguageModelUsageFunc) LanguageModelOption {
 	return func(l *languageModel) {
 		l.usageFunc = fn
 	}
 }
 
+// WithLanguageModelStreamUsageFunc sets the stream usage function for the language model.
 func WithLanguageModelStreamUsageFunc(fn LanguageModelStreamUsageFunc) LanguageModelOption {
 	return func(l *languageModel) {
 		l.streamUsageFunc = fn
@@ -546,7 +553,7 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 				ProviderMetadata: providerMetadata,
 			})
 			return
-		} else {
+		} else { //nolint: revive
 			yield(fantasy.StreamPart{
 				Type:  fantasy.StreamPartTypeError,
 				Error: o.handleError(err),

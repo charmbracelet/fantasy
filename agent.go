@@ -11,11 +11,13 @@ import (
 	"sync"
 )
 
+// StepResult represents the result of a single step in an agent execution.
 type StepResult struct {
 	Response
 	Messages []Message
 }
 
+// StopCondition defines a function that determines when an agent should stop executing.
 type StopCondition = func(steps []StepResult) bool
 
 // StepCountIs returns a stop condition that stops after the specified number of steps.
@@ -80,6 +82,7 @@ func MaxTokensUsed(maxTokens int64) StopCondition {
 	}
 }
 
+// PrepareStepFunctionOptions contains the options for preparing a step in an agent execution.
 type PrepareStepFunctionOptions struct {
 	Steps      []StepResult
 	StepNumber int
@@ -87,6 +90,7 @@ type PrepareStepFunctionOptions struct {
 	Messages   []Message
 }
 
+// PrepareStepResult contains the result of preparing a step in an agent execution.
 type PrepareStepResult struct {
 	Model           LanguageModel
 	Messages        []Message
@@ -96,6 +100,7 @@ type PrepareStepResult struct {
 	DisableAllTools bool
 }
 
+// ToolCallRepairOptions contains the options for repairing a tool call.
 type ToolCallRepairOptions struct {
 	OriginalToolCall ToolCallContent
 	ValidationError  error
@@ -105,8 +110,13 @@ type ToolCallRepairOptions struct {
 }
 
 type (
-	PrepareStepFunction    = func(ctx context.Context, options PrepareStepFunctionOptions) (context.Context, PrepareStepResult, error)
+	// PrepareStepFunction defines a function that prepares a step in an agent execution.
+	PrepareStepFunction = func(ctx context.Context, options PrepareStepFunctionOptions) (context.Context, PrepareStepResult, error)
+
+	// OnStepFinishedFunction defines a function that is called when a step finishes.
 	OnStepFinishedFunction = func(step StepResult)
+
+	// RepairToolCallFunction defines a function that repairs a tool call.
 	RepairToolCallFunction = func(ctx context.Context, options ToolCallRepairOptions) (*ToolCallContent, error)
 )
 
@@ -133,6 +143,7 @@ type agentSettings struct {
 	onRetry        OnRetryCallback
 }
 
+// AgentCall represents a call to an agent.
 type AgentCall struct {
 	Prompt           string     `json:"prompt"`
 	Files            []FilePart `json:"files"`
@@ -222,6 +233,7 @@ type (
 	OnStreamFinishFunc func(usage Usage, finishReason FinishReason, providerMetadata ProviderMetadata) error
 )
 
+// AgentStreamCall represents a streaming call to an agent.
 type AgentStreamCall struct {
 	Prompt           string     `json:"prompt"`
 	Files            []FilePart `json:"files"`
@@ -268,6 +280,7 @@ type AgentStreamCall struct {
 	OnStreamFinish   OnStreamFinishFunc   // Called when stream finishes
 }
 
+// AgentResult represents the result of an agent execution.
 type AgentResult struct {
 	Steps []StepResult
 	// Final response
@@ -275,17 +288,20 @@ type AgentResult struct {
 	TotalUsage Usage
 }
 
+// Agent represents an AI agent that can generate responses and stream responses.
 type Agent interface {
 	Generate(context.Context, AgentCall) (*AgentResult, error)
 	Stream(context.Context, AgentStreamCall) (*AgentResult, error)
 }
 
+// AgentOption defines a function that configures agent settings.
 type AgentOption = func(*agentSettings)
 
 type agent struct {
 	settings agentSettings
 }
 
+// NewAgent creates a new agent with the given language model and options.
 func NewAgent(model LanguageModel, opts ...AgentOption) Agent {
 	settings := agentSettings{
 		model: model,
@@ -926,7 +942,7 @@ func (a *agent) prepareTools(tools []AgentTool, activeTools []string, disableAll
 func (a *agent) validateAndRepairToolCall(ctx context.Context, toolCall ToolCallContent, availableTools []AgentTool, systemPrompt string, messages []Message, repairFunc RepairToolCallFunction) ToolCallContent {
 	if err := a.validateToolCall(toolCall, availableTools); err == nil {
 		return toolCall
-	} else {
+	} else { //nolint: revive
 		if repairFunc != nil {
 			repairOptions := ToolCallRepairOptions{
 				OriginalToolCall: toolCall,
@@ -996,66 +1012,77 @@ func (a *agent) createPrompt(system, prompt string, messages []Message, files ..
 	return preparedPrompt, nil
 }
 
+// WithSystemPrompt sets the system prompt for the agent.
 func WithSystemPrompt(prompt string) AgentOption {
 	return func(s *agentSettings) {
 		s.systemPrompt = prompt
 	}
 }
 
+// WithMaxOutputTokens sets the maximum output tokens for the agent.
 func WithMaxOutputTokens(tokens int64) AgentOption {
 	return func(s *agentSettings) {
 		s.maxOutputTokens = &tokens
 	}
 }
 
+// WithTemperature sets the temperature for the agent.
 func WithTemperature(temp float64) AgentOption {
 	return func(s *agentSettings) {
 		s.temperature = &temp
 	}
 }
 
+// WithTopP sets the top-p value for the agent.
 func WithTopP(topP float64) AgentOption {
 	return func(s *agentSettings) {
 		s.topP = &topP
 	}
 }
 
+// WithTopK sets the top-k value for the agent.
 func WithTopK(topK int64) AgentOption {
 	return func(s *agentSettings) {
 		s.topK = &topK
 	}
 }
 
+// WithPresencePenalty sets the presence penalty for the agent.
 func WithPresencePenalty(penalty float64) AgentOption {
 	return func(s *agentSettings) {
 		s.presencePenalty = &penalty
 	}
 }
 
+// WithFrequencyPenalty sets the frequency penalty for the agent.
 func WithFrequencyPenalty(penalty float64) AgentOption {
 	return func(s *agentSettings) {
 		s.frequencyPenalty = &penalty
 	}
 }
 
+// WithTools sets the tools for the agent.
 func WithTools(tools ...AgentTool) AgentOption {
 	return func(s *agentSettings) {
 		s.tools = append(s.tools, tools...)
 	}
 }
 
+// WithStopConditions sets the stop conditions for the agent.
 func WithStopConditions(conditions ...StopCondition) AgentOption {
 	return func(s *agentSettings) {
 		s.stopWhen = append(s.stopWhen, conditions...)
 	}
 }
 
+// WithPrepareStep sets the prepare step function for the agent.
 func WithPrepareStep(fn PrepareStepFunction) AgentOption {
 	return func(s *agentSettings) {
 		s.prepareStep = fn
 	}
 }
 
+// WithRepairToolCall sets the repair tool call function for the agent.
 func WithRepairToolCall(fn RepairToolCallFunction) AgentOption {
 	return func(s *agentSettings) {
 		s.repairToolCall = fn
@@ -1313,12 +1340,14 @@ func addUsage(a, b Usage) Usage {
 	}
 }
 
+// WithHeaders sets the headers for the agent.
 func WithHeaders(headers map[string]string) AgentOption {
 	return func(s *agentSettings) {
 		s.headers = headers
 	}
 }
 
+// WithProviderOptions sets the provider options for the agent.
 func WithProviderOptions(providerOptions ProviderOptions) AgentOption {
 	return func(s *agentSettings) {
 		s.providerOptions = providerOptions

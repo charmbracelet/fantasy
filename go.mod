@@ -6,6 +6,7 @@ require (
 	cloud.google.com/go/auth v0.17.0
 	github.com/anthropics/anthropic-sdk-go v1.10.0
 	github.com/aws/aws-sdk-go-v2 v1.39.3
+	github.com/aws/smithy-go v1.23.1
 	github.com/charmbracelet/x/exp/slice v0.0.0-20250904123553-b4e2667e5ad5
 	github.com/charmbracelet/x/json v0.2.0
 	github.com/go-viper/mapstructure/v2 v2.4.0
@@ -37,7 +38,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sso v1.22.4 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.26.4 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.30.3 // indirect
-	github.com/aws/smithy-go v1.23.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
@@ -73,7 +73,7 @@ require (
 
 // NOTE(@andreynering): Temporarily pinning @fantasy branch with fixes:
 // https://github.com/charmbracelet/anthropic-sdk-go/commits/fantasy/
-replace github.com/anthropics/anthropic-sdk-go => github.com/charmbracelet/anthropic-sdk-go v0.0.0-20251010172108-7b952cdeeb9d
+replace github.com/anthropics/anthropic-sdk-go => github.com/charmbracelet/anthropic-sdk-go v0.0.0-20251020200929-fdb68318b7af
 
 // NOTE(@andreynering): Temporarily pinning @fantasy branch with fixes:
 // https://github.com/charmbracelet/go-genai/commits/fantasy/

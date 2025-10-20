@@ -1,0 +1,76 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 211
+    host: ""
+    body: '{"max_tokens":4000,"messages":[{"content":[{"text":"Say hi in Portuguese","type":"text"}],"role":"user"}],"system":[{"text":"You are a helpful assistant","type":"text"}],"anthropic_version":"bedrock-2023-05-31"}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Anthropic/Go 1.14.0
+    url: https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-3-sonnet-20240229-v1%3A0/invoke-with-response-stream
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: !!binary |
+      AAABvQAAAEunJ1hxCzpldmVudC10eXBlBwAFY2h1bmsNOmNvbnRlbnQtdHlwZQcAEGFwcG
+      xpY2F0aW9uL2pzb24NOm1lc3NhZ2UtdHlwZQcABWV2ZW50eyJieXRlcyI6ImV5SjBlWEJs
+      SWpvaWJXVnpjMkZuWlY5emRHRnlkQ0lzSW0xbGMzTmhaMlVpT25zaWFXUWlPaUp0YzJkZl
+      ltUnlhMTh3TVVjM1ZUWXlaMU4zYWxwU1ptMVVTMkpDWjNGQmExSWlMQ0owZVhCbElqb2li
+      V1Z6YzJGblpTSXNJbkp2YkdVaU9pSmhjM05wYzNSaGJuUWlMQ0p0YjJSbGJDSTZJbU5zWV
+      hWa1pTMHpMWE52Ym01bGRDMHlNREkwTURJeU9TSXNJbU52Ym5SbGJuUWlPbHRkTENKemRH
+      OXdYM0psWVhOdmJpSTZiblZzYkN3aWMzUnZjRjl6WlhGMVpXNWpaU0k2Ym5Wc2JDd2lkWE
+      5oWjJVaU9uc2lhVzV3ZFhSZmRHOXJaVzV6SWpveE5pd2liM1YwY0hWMFgzUnZhMlZ1Y3lJ
+      Nk1uMTlmUT09IiwicCI6ImFiYyJ9vnwv4QAAAPgAAABL/Ghc7Qs6ZXZlbnQtdHlwZQcABW
+      NodW5rDTpjb250ZW50LXR5cGUHABBhcHBsaWNhdGlvbi9qc29uDTptZXNzYWdlLXR5cGUH
+      AAVldmVudHsiYnl0ZXMiOiJleUowZVhCbElqb2lZMjl1ZEdWdWRGOWliRzlqYTE5emRHRn
+      lkQ0lzSW1sdVpHVjRJam93TENKamIyNTBaVzUwWDJKc2IyTnJJanA3SW5SNWNHVWlPaUow
+      WlhoMElpd2lkR1Y0ZENJNklpSjlmUT09IiwicCI6ImFiY2RlZmdoaWprbG1ub3BxcnN0dX
+      Z3eHl6In2rrhIPAAAA+gAAAEuGqA+NCzpldmVudC10eXBlBwAFY2h1bmsNOmNvbnRlbnQt
+      dHlwZQcAEGFwcGxpY2F0aW9uL2pzb24NOm1lc3NhZ2UtdHlwZQcABWV2ZW50eyJieXRlcy
+      I6ImV5SjBlWEJsSWpvaVkyOXVkR1Z1ZEY5aWJHOWphMTlrWld4MFlTSXNJbWx1WkdWNElq
+      b3dMQ0prWld4MFlTSTZleUowZVhCbElqb2lkR1Y0ZEY5a1pXeDBZU0lzSW5SbGVIUWlPaU
+      pQYkNKOWZRPT0iLCJwIjoiYWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXpBQiJ9FHa6UgAA
+      AQ0AAABLt+BQZQs6ZXZlbnQtdHlwZQcABWNodW5rDTpjb250ZW50LXR5cGUHABBhcHBsaW
+      NhdGlvbi9qc29uDTptZXNzYWdlLXR5cGUHAAVldmVudHsiYnl0ZXMiOiJleUowZVhCbElq
+      b2lZMjl1ZEdWdWRGOWliRzlqYTE5a1pXeDBZU0lzSW1sdVpHVjRJam93TENKa1pXeDBZU0
+      k2ZXlKMGVYQmxJam9pZEdWNGRGOWtaV3gwWVNJc0luUmxlSFFpT2lMRG9TSjlmUT09Iiwi
+      cCI6ImFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6QUJDREVGR0hJSktMTU5PUFFSU1RVIn
+      3UdODmAAAA9AAAAEs5mLHsCzpldmVudC10eXBlBwAFY2h1bmsNOmNvbnRlbnQtdHlwZQcA
+      EGFwcGxpY2F0aW9uL2pzb24NOm1lc3NhZ2UtdHlwZQcABWV2ZW50eyJieXRlcyI6ImV5Sj
+      BlWEJsSWpvaVkyOXVkR1Z1ZEY5aWJHOWphMTlrWld4MFlTSXNJbWx1WkdWNElqb3dMQ0pr
+      Wld4MFlTSTZleUowZVhCbElqb2lkR1Y0ZEY5a1pXeDBZU0lzSW5SbGVIUWlPaUloSW4xOS
+      IsInAiOiJhYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5eiJ9l8ofGQAAANMAAABLSnlC+As6
+      ZXZlbnQtdHlwZQcABWNodW5rDTpjb250ZW50LXR5cGUHABBhcHBsaWNhdGlvbi9qc29uDT
+      ptZXNzYWdlLXR5cGUHAAVldmVudHsiYnl0ZXMiOiJleUowZVhCbElqb2lZMjl1ZEdWdWRG
+      OWliRzlqYTE5emRHOXdJaXdpYVc1a1pYZ2lPakI5IiwicCI6ImFiY2RlZmdoaWprbG1ub3
+      BxcnN0dXZ3eHl6QUJDREVGR0hJSktMTU5PUFFSU1RVVlcifUu+MSwAAAEuAAAASzGBBbEL
+      OmV2ZW50LXR5cGUHAAVjaHVuaw06Y29udGVudC10eXBlBwAQYXBwbGljYXRpb24vanNvbg
+      06bWVzc2FnZS10eXBlBwAFZXZlbnR7ImJ5dGVzIjoiZXlKMGVYQmxJam9pYldWemMyRm5a
+      VjlrWld4MFlTSXNJbVJsYkhSaElqcDdJbk4wYjNCZmNtVmhjMjl1SWpvaVpXNWtYM1IxY2
+      00aUxDSnpkRzl3WDNObGNYVmxibU5sSWpwdWRXeHNmU3dpZFhOaFoyVWlPbnNpYjNWMGNI
+      VjBYM1J2YTJWdWN5STZOMzE5IiwicCI6ImFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6QU
+      JDREVGR0hJSktMTU5PUFFSU1RVViJ9tMfCKgAAAVMAAABLMMMhzws6ZXZlbnQtdHlwZQcA
+      BWNodW5rDTpjb250ZW50LXR5cGUHABBhcHBsaWNhdGlvbi9qc29uDTptZXNzYWdlLXR5cG
+      UHAAVldmVudHsiYnl0ZXMiOiJleUowZVhCbElqb2liV1Z6YzJGblpWOXpkRzl3SWl3aVlX
+      MWhlbTl1TFdKbFpISnZZMnN0YVc1MmIyTmhkR2x2YmsxbGRISnBZM01pT25zaWFXNXdkWF
+      JVYjJ0bGJrTnZkVzUwSWpveE5pd2liM1YwY0hWMFZHOXJaVzVEYjNWdWRDSTZOeXdpYVc1
+      MmIyTmhkR2x2Ymt4aGRHVnVZM2tpT2pVMk5Dd2labWx5YzNSQ2VYUmxUR0YwWlc1amVTST
+      ZOVFEyZlgwPSIsInAiOiJhYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ekFCQyJ9KKxn3Q==
+    headers:
+      Content-Type:
+      - application/vnd.amazon.eventstream
+    status: 200 OK
+    code: 200
+    duration: 693.876083ms

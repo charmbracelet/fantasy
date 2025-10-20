@@ -3,7 +3,6 @@ package google
 import (
 	"cmp"
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -331,11 +330,9 @@ func toGooglePrompt(prompt fantasy.Prompt) (*genai.Content, []*genai.Content, []
 					if !ok {
 						continue
 					}
-					var encoded []byte
-					base64.StdEncoding.Encode(encoded, file.Data)
 					parts = append(parts, &genai.Part{
 						InlineData: &genai.Blob{
-							Data:     encoded,
+							Data:     file.Data,
 							MIMEType: file.MediaType,
 						},
 					})

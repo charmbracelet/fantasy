@@ -1,6 +1,7 @@
 package providertests
 
 import (
+	"cmp"
 	"net/http"
 	"os"
 	"testing"
@@ -16,7 +17,7 @@ import (
 func anthropicImageBuilder(model string) builderFunc {
 	return func(r *recorder.Recorder) (fantasy.LanguageModel, error) {
 		provider := anthropic.New(
-			anthropic.WithAPIKey(os.Getenv("FANTASY_ANTHROPIC_API_KEY")),
+			anthropic.WithAPIKey(cmp.Or(os.Getenv("FANTASY_ANTHROPIC_API_KEY"), "(missing)")),
 			anthropic.WithHTTPClient(&http.Client{Transport: r}),
 		)
 		return provider.LanguageModel(model)
@@ -26,7 +27,7 @@ func anthropicImageBuilder(model string) builderFunc {
 func openAIImageBuilder(model string) builderFunc {
 	return func(r *recorder.Recorder) (fantasy.LanguageModel, error) {
 		provider := openai.New(
-			openai.WithAPIKey(os.Getenv("FANTASY_OPENAI_API_KEY")),
+			openai.WithAPIKey(cmp.Or(os.Getenv("FANTASY_OPENAI_API_KEY"), "(missing)")),
 			openai.WithHTTPClient(&http.Client{Transport: r}),
 		)
 		return provider.LanguageModel(model)
@@ -36,7 +37,7 @@ func openAIImageBuilder(model string) builderFunc {
 func geminiImageBuilder(model string) builderFunc {
 	return func(r *recorder.Recorder) (fantasy.LanguageModel, error) {
 		provider := google.New(
-			google.WithGeminiAPIKey(os.Getenv("FANTASY_GEMINI_API_KEY")),
+			google.WithGeminiAPIKey(cmp.Or(os.Getenv("FANTASY_GEMINI_API_KEY"), "(missing)")),
 			google.WithHTTPClient(&http.Client{Transport: r}),
 		)
 		return provider.LanguageModel(model)

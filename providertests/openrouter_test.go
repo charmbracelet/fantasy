@@ -20,6 +20,7 @@ var openrouterTestModels = []testModel{
 	{"qwen3-235b-a22b-2507", "qwen/qwen3-235b-a22b-2507", false},
 	{"gpt-5", "openai/gpt-5", true},
 	{"glm-4.5", "z-ai/glm-4.5", false},
+	{"glm-4.6", "z-ai/glm-4.6", true},
 }
 
 func TestOpenRouterCommon(t *testing.T) {

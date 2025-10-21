@@ -273,6 +273,7 @@ func DefaultStreamProviderMetadataFunc(choice openai.ChatCompletionChoice, metad
 	return metadata
 }
 
+// DefaultToPrompt converts a fantasy prompt to OpenAI format with default handling.
 func DefaultToPrompt(prompt fantasy.Prompt, _, _ string) ([]openai.ChatCompletionMessageParamUnion, []fantasy.CallWarning) {
 	var messages []openai.ChatCompletionMessageParamUnion
 	var warnings []fantasy.CallWarning

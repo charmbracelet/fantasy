@@ -5,22 +5,20 @@ import (
 	"fmt"
 )
 
-// toolResultOutputJSON is a helper type for JSON serialization of ToolResultOutputContent
+// toolResultOutputJSON is a helper type for JSON serialization of ToolResultOutputContent.
 type toolResultOutputJSON struct {
 	Type string          `json:"type"`
 	Data json.RawMessage `json:"data"`
 }
 
-// messagePartJSON is a helper type for JSON serialization of MessagePart
+// messagePartJSON is a helper type for JSON serialization of MessagePart.
 type messagePartJSON struct {
 	Type string          `json:"type"`
 	Data json.RawMessage `json:"data"`
 }
 
-// MarshalJSON implements custom JSON marshaling for Message
+// MarshalJSON implements custom JSON marshaling for Message.
 func (m Message) MarshalJSON() ([]byte, error) {
-	type Alias Message
-
 	// Convert MessagePart slice to a JSON-friendly format
 	contentJSON := make([]messagePartJSON, len(m.Content))
 	for i, part := range m.Content {
@@ -45,7 +43,7 @@ func (m Message) MarshalJSON() ([]byte, error) {
 	})
 }
 
-// UnmarshalJSON implements custom JSON unmarshaling for Message
+// UnmarshalJSON implements custom JSON unmarshaling for Message.
 func (m *Message) UnmarshalJSON(data []byte) error {
 	aux := &struct {
 		Role            MessageRole       `json:"role"`
@@ -100,7 +98,7 @@ func (m *Message) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// MarshalJSON implements custom JSON marshaling for ToolResultPart
+// MarshalJSON implements custom JSON marshaling for ToolResultPart.
 func (t ToolResultPart) MarshalJSON() ([]byte, error) {
 	outputData, err := json.Marshal(t.Output)
 	if err != nil {
@@ -121,7 +119,7 @@ func (t ToolResultPart) MarshalJSON() ([]byte, error) {
 	})
 }
 
-// UnmarshalJSON implements custom JSON unmarshaling for ToolResultPart
+// UnmarshalJSON implements custom JSON unmarshaling for ToolResultPart.
 func (t *ToolResultPart) UnmarshalJSON(data []byte) error {
 	aux := &struct {
 		ToolCallID      string               `json:"tool_call_id"`
@@ -164,7 +162,7 @@ func (t *ToolResultPart) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// MarshalJSON implements custom JSON marshaling for ToolResultOutputContentError
+// MarshalJSON implements custom JSON marshaling for ToolResultOutputContentError.
 func (t ToolResultOutputContentError) MarshalJSON() ([]byte, error) {
 	var errorStr string
 	if t.Error != nil {
@@ -178,7 +176,7 @@ func (t ToolResultOutputContentError) MarshalJSON() ([]byte, error) {
 	})
 }
 
-// UnmarshalJSON implements custom JSON unmarshaling for ToolResultOutputContentError
+// UnmarshalJSON implements custom JSON unmarshaling for ToolResultOutputContentError.
 func (t *ToolResultOutputContentError) UnmarshalJSON(data []byte) error {
 	aux := &struct {
 		Error string `json:"error"`

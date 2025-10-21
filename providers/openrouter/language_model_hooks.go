@@ -71,7 +71,7 @@ func languagePrepareModelCall(_ fantasy.LanguageModel, params *openaisdk.ChatCom
 }
 
 func languageModelExtraContent(choice openaisdk.ChatCompletionChoice) []fantasy.Content {
-	var content []fantasy.Content
+	content := make([]fantasy.Content, 0)
 	reasoningData := ReasoningData{}
 	err := json.Unmarshal([]byte(choice.Message.RawJSON()), &reasoningData)
 	if err != nil {
@@ -82,9 +82,9 @@ func languageModelExtraContent(choice openaisdk.ChatCompletionChoice) []fantasy.
 		metadata *anthropic.ReasoningOptionMetadata
 	}
 
-	var responsesReasoningBlocks []openai.ResponsesReasoningMetadata
-	var anthropicReasoningBlocks []anthropicReasoningBlock
-	var otherReasoning []string
+	responsesReasoningBlocks := make([]openai.ResponsesReasoningMetadata, 0)
+	anthropicReasoningBlocks := make([]anthropicReasoningBlock, 0)
+	otherReasoning := make([]string, 0)
 	for _, detail := range reasoningData.ReasoningDetails {
 		if strings.HasPrefix(detail.Format, "openai-responses") || strings.HasPrefix(detail.Format, "xai-responses") {
 			var thinkingBlock openai.ResponsesReasoningMetadata
@@ -132,9 +132,7 @@ func languageModelExtraContent(choice openaisdk.ChatCompletionChoice) []fantasy.
 				openai.Name: &block,
 			},
 		})
-
 	}
-
 	for _, block := range anthropicReasoningBlocks {
 		content = append(content, fantasy.ReasoningContent{
 			Text: block.text,
@@ -236,9 +234,7 @@ func languageModelStreamExtra(chunk openaisdk.ChatCompletionChunk, yield func(fa
 			Delta:            detail.Summary,
 			ProviderMetadata: metadata,
 		})
-
 	}
-
 	if len(reasoningData.ReasoningDetails) == 0 {
 		// this means its a model different from openai/anthropic that ended reasoning
 		if choice.Delta.Content != "" || len(choice.Delta.ToolCalls) > 0 {
@@ -720,7 +716,7 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 						})
 						data, _ := json.Marshal(reasoningDetails)
 						reasoningDetailsMap := []map[string]any{}
-						json.Unmarshal(data, &reasoningDetailsMap)
+						_ = json.Unmarshal(data, &reasoningDetailsMap)
 						assistantMsg.SetExtraFields(map[string]any{
 							"reasoning_details": reasoningDetailsMap,
 							"reasoning":         reasoningPart.Text,
@@ -757,7 +753,7 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 						})
 						data, _ := json.Marshal(reasoningDetails)
 						reasoningDetailsMap := []map[string]any{}
-						json.Unmarshal(data, &reasoningDetailsMap)
+						_ = json.Unmarshal(data, &reasoningDetailsMap)
 						assistantMsg.SetExtraFields(map[string]any{
 							"reasoning_details": reasoningDetailsMap,
 						})
@@ -793,7 +789,7 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 						})
 						data, _ := json.Marshal(reasoningDetails)
 						reasoningDetailsMap := []map[string]any{}
-						json.Unmarshal(data, &reasoningDetailsMap)
+						_ = json.Unmarshal(data, &reasoningDetailsMap)
 						assistantMsg.SetExtraFields(map[string]any{
 							"reasoning_details": reasoningDetailsMap,
 						})
@@ -806,7 +802,7 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 						})
 						data, _ := json.Marshal(reasoningDetails)
 						reasoningDetailsMap := []map[string]any{}
-						json.Unmarshal(data, &reasoningDetailsMap)
+						_ = json.Unmarshal(data, &reasoningDetailsMap)
 						assistantMsg.SetExtraFields(map[string]any{
 							"reasoning_details": reasoningDetailsMap,
 						})

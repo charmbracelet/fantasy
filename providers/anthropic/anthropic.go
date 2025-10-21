@@ -299,6 +299,7 @@ func (a *provider) Name() string {
 	return Name
 }
 
+// GetCacheControl extracts cache control settings from provider options.
 func GetCacheControl(providerOptions fantasy.ProviderOptions) *CacheControl {
 	if anthropicOptions, ok := providerOptions[Name]; ok {
 		if options, ok := anthropicOptions.(*ProviderCacheControlOptions); ok {
@@ -308,6 +309,7 @@ func GetCacheControl(providerOptions fantasy.ProviderOptions) *CacheControl {
 	return nil
 }
 
+// GetReasoningMetadata extracts reasoning metadata from provider options.
 func GetReasoningMetadata(providerOptions fantasy.ProviderOptions) *ReasoningOptionMetadata {
 	if anthropicOptions, ok := providerOptions[Name]; ok {
 		if reasoning, ok := anthropicOptions.(*ReasoningOptionMetadata); ok {

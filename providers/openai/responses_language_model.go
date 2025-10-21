@@ -1036,6 +1036,7 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 	}, nil
 }
 
+// GetReasoningMetadata extracts reasoning metadata from provider options for responses models.
 func GetReasoningMetadata(providerOptions fantasy.ProviderOptions) *ResponsesReasoningMetadata {
 	if openaiResponsesOptions, ok := providerOptions[Name]; ok {
 		if reasoning, ok := openaiResponsesOptions.(*ResponsesReasoningMetadata); ok {

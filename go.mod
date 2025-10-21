@@ -4,9 +4,10 @@ go 1.24.5
 
 require (
 	cloud.google.com/go/auth v0.17.0
-	github.com/anthropics/anthropic-sdk-go v1.10.0
 	github.com/aws/aws-sdk-go-v2 v1.39.3
 	github.com/aws/smithy-go v1.23.1
+	github.com/charmbracelet/anthropic-sdk-go v0.0.0-20251021163913-d29170d047bf
+	github.com/charmbracelet/go-genai v0.0.0-20251021165952-9befde14ce97
 	github.com/charmbracelet/x/exp/slice v0.0.0-20250904123553-b4e2667e5ad5
 	github.com/charmbracelet/x/json v0.2.0
 	github.com/go-viper/mapstructure/v2 v2.4.0
@@ -16,7 +17,6 @@ require (
 	github.com/stretchr/testify v1.11.1
 	go.yaml.in/yaml/v4 v4.0.0-rc.2
 	golang.org/x/oauth2 v0.32.0
-	google.golang.org/genai v1.26.0
 	gopkg.in/dnaeon/go-vcr.v4 v4.0.6-0.20250923044825-7b4892dd3117
 )
 
@@ -70,11 +70,3 @@ require (
 	google.golang.org/protobuf v1.36.7 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-// NOTE(@andreynering): Temporarily pinning @fantasy branch with fixes:
-// https://github.com/charmbracelet/anthropic-sdk-go/commits/fantasy/
-replace github.com/anthropics/anthropic-sdk-go => github.com/charmbracelet/anthropic-sdk-go v0.0.0-20251020200929-fdb68318b7af
-
-// NOTE(@andreynering): Temporarily pinning @fantasy branch with fixes:
-// https://github.com/charmbracelet/go-genai/commits/fantasy/
-replace google.golang.org/genai => github.com/charmbracelet/go-genai v0.0.0-20251009191514-c6fa9e37d847

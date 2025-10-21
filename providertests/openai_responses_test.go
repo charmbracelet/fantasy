@@ -14,7 +14,7 @@ import (
 func TestOpenAIResponsesCommon(t *testing.T) {
 	var pairs []builderPair
 	for _, m := range openaiTestModels {
-		pairs = append(pairs, builderPair{m.name, openAIReasoningBuilder(m.model), nil})
+		pairs = append(pairs, builderPair{m.name, openAIReasoningBuilder(m.model), nil, nil})
 	}
 	testCommon(t, pairs)
 }
@@ -45,7 +45,7 @@ func TestOpenAIResponsesWithSummaryThinking(t *testing.T) {
 		if !m.reasoning {
 			continue
 		}
-		pairs = append(pairs, builderPair{m.name, openAIReasoningBuilder(m.model), opts})
+		pairs = append(pairs, builderPair{m.name, openAIReasoningBuilder(m.model), opts, nil})
 	}
 	testThinking(t, pairs, testOpenAIResponsesThinkingWithSummaryThinking)
 }

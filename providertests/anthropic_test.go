@@ -1,6 +1,7 @@
 package providertests
 
 import (
+	"context"
 	"net/http"
 	"os"
 	"testing"
@@ -18,7 +19,46 @@ var anthropicTestModels = []testModel{
 func TestAnthropicCommon(t *testing.T) {
 	var pairs []builderPair
 	for _, m := range anthropicTestModels {
-		pairs = append(pairs, builderPair{m.name, anthropicBuilder(m.model), nil})
+		pairs = append(pairs, builderPair{m.name, anthropicBuilder(m.model), nil, nil})
+	}
+	testCommon(t, pairs)
+}
+
+func addAnthropicCaching(ctx context.Context, options fantasy.PrepareStepFunctionOptions) (context.Context, fantasy.PrepareStepResult, error) {
+	prepared := fantasy.PrepareStepResult{}
+	prepared.Messages = options.Messages
+
+	for i := range prepared.Messages {
+		prepared.Messages[i].ProviderOptions = nil
+	}
+	providerOption := fantasy.ProviderOptions{
+		anthropic.Name: &anthropic.ProviderCacheControlOptions{
+			CacheControl: anthropic.CacheControl{Type: "ephemeral"},
+		},
+	}
+
+	lastSystemRoleInx := 0
+	systemMessageUpdated := false
+	for i, msg := range prepared.Messages {
+		// only add cache control to the last message
+		if msg.Role == fantasy.MessageRoleSystem {
+			lastSystemRoleInx = i
+		} else if !systemMessageUpdated {
+			prepared.Messages[lastSystemRoleInx].ProviderOptions = providerOption
+			systemMessageUpdated = true
+		}
+		// than add cache control to the last 2 messages
+		if i > len(prepared.Messages)-3 {
+			prepared.Messages[i].ProviderOptions = providerOption
+		}
+	}
+	return ctx, prepared, nil
+}
+
+func TestAnthropicCommonWithCacheControl(t *testing.T) {
+	var pairs []builderPair
+	for _, m := range anthropicTestModels {
+		pairs = append(pairs, builderPair{m.name, anthropicBuilder(m.model), nil, addAnthropicCaching})
 	}
 	testCommon(t, pairs)
 }
@@ -36,7 +76,25 @@ func TestAnthropicThinking(t *testing.T) {
 		if !m.reasoning {
 			continue
 		}
-		pairs = append(pairs, builderPair{m.name, anthropicBuilder(m.model), opts})
+		pairs = append(pairs, builderPair{m.name, anthropicBuilder(m.model), opts, nil})
+	}
+	testThinking(t, pairs, testAnthropicThinking)
+}
+
+func TestAnthropicThinkingWithCacheControl(t *testing.T) {
+	opts := fantasy.ProviderOptions{
+		anthropic.Name: &anthropic.ProviderOptions{
+			Thinking: &anthropic.ThinkingProviderOption{
+				BudgetTokens: 4000,
+			},
+		},
+	}
+	var pairs []builderPair
+	for _, m := range anthropicTestModels {
+		if !m.reasoning {
+			continue
+		}
+		pairs = append(pairs, builderPair{m.name, anthropicBuilder(m.model), opts, addAnthropicCaching})
 	}
 	testThinking(t, pairs, testAnthropicThinking)
 }

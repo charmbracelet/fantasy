@@ -17,9 +17,9 @@ const defaultBaseURL = "https://fantasy-playground-resource.services.ai.azure.co
 
 func TestAzureCommon(t *testing.T) {
 	testCommon(t, []builderPair{
-		{"azure-o4-mini", builderAzureO4Mini, nil},
-		{"azure-gpt-5-mini", builderAzureGpt5Mini, nil},
-		{"azure-grok-3-mini", builderAzureGrok3Mini, nil},
+		{"azure-o4-mini", builderAzureO4Mini, nil, nil},
+		{"azure-gpt-5-mini", builderAzureGpt5Mini, nil, nil},
+		{"azure-grok-3-mini", builderAzureGrok3Mini, nil, nil},
 	})
 }
 
@@ -30,8 +30,8 @@ func TestAzureThinking(t *testing.T) {
 		},
 	}
 	testThinking(t, []builderPair{
-		{"azure-gpt-5-mini", builderAzureGpt5Mini, opts},
-		{"azure-grok-3-mini", builderAzureGrok3Mini, opts},
+		{"azure-gpt-5-mini", builderAzureGpt5Mini, opts, nil},
+		{"azure-grok-3-mini", builderAzureGrok3Mini, opts, nil},
 	}, testAzureThinking)
 }
 

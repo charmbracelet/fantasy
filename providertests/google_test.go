@@ -26,10 +26,10 @@ var vertexTestModels = []testModel{
 func TestGoogleCommon(t *testing.T) {
 	var pairs []builderPair
 	for _, m := range geminiTestModels {
-		pairs = append(pairs, builderPair{m.name, geminiBuilder(m.model), nil})
+		pairs = append(pairs, builderPair{m.name, geminiBuilder(m.model), nil, nil})
 	}
 	for _, m := range vertexTestModels {
-		pairs = append(pairs, builderPair{m.name, vertexBuilder(m.model), nil})
+		pairs = append(pairs, builderPair{m.name, vertexBuilder(m.model), nil, nil})
 	}
 	testCommon(t, pairs)
 }
@@ -49,7 +49,7 @@ func TestGoogleThinking(t *testing.T) {
 		if !m.reasoning {
 			continue
 		}
-		pairs = append(pairs, builderPair{m.name, geminiBuilder(m.model), opts})
+		pairs = append(pairs, builderPair{m.name, geminiBuilder(m.model), opts, nil})
 	}
 	testThinking(t, pairs, testGoogleThinking)
 }

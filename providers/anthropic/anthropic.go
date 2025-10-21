@@ -299,7 +299,7 @@ func (a *provider) Name() string {
 	return Name
 }
 
-func getCacheControl(providerOptions fantasy.ProviderOptions) *CacheControl {
+func GetCacheControl(providerOptions fantasy.ProviderOptions) *CacheControl {
 	if anthropicOptions, ok := providerOptions[Name]; ok {
 		if options, ok := anthropicOptions.(*ProviderCacheControlOptions); ok {
 			return &options.CacheControl
@@ -387,7 +387,7 @@ func (a languageModel) toTools(tools []fantasy.Tool, toolChoice *fantasy.ToolCho
 					required = reqArr
 				}
 			}
-			cacheControl := getCacheControl(ft.ProviderOptions)
+			cacheControl := GetCacheControl(ft.ProviderOptions)
 
 			anthropicTool := anthropic.ToolParam{
 				Name:        ft.Name,
@@ -477,9 +477,9 @@ func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBl
 			for _, msg := range block.Messages {
 				for i, part := range msg.Content {
 					isLastPart := i == len(msg.Content)-1
-					cacheControl := getCacheControl(part.Options())
+					cacheControl := GetCacheControl(part.Options())
 					if cacheControl == nil && isLastPart {
-						cacheControl = getCacheControl(msg.ProviderOptions)
+						cacheControl = GetCacheControl(msg.ProviderOptions)
 					}
 					text, ok := fantasy.AsMessagePart[fantasy.TextPart](part)
 					if !ok {
@@ -501,9 +501,9 @@ func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBl
 				if msg.Role == fantasy.MessageRoleUser {
 					for i, part := range msg.Content {
 						isLastPart := i == len(msg.Content)-1
-						cacheControl := getCacheControl(part.Options())
+						cacheControl := GetCacheControl(part.Options())
 						if cacheControl == nil && isLastPart {
-							cacheControl = getCacheControl(msg.ProviderOptions)
+							cacheControl = GetCacheControl(msg.ProviderOptions)
 						}
 						switch part.GetType() {
 						case fantasy.ContentTypeText:
@@ -541,9 +541,9 @@ func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBl
 				} else if msg.Role == fantasy.MessageRoleTool {
 					for i, part := range msg.Content {
 						isLastPart := i == len(msg.Content)-1
-						cacheControl := getCacheControl(part.Options())
+						cacheControl := GetCacheControl(part.Options())
 						if cacheControl == nil && isLastPart {
-							cacheControl = getCacheControl(msg.ProviderOptions)
+							cacheControl = GetCacheControl(msg.ProviderOptions)
 						}
 						result, ok := fantasy.AsMessagePart[fantasy.ToolResultPart](part)
 						if !ok {
@@ -604,9 +604,9 @@ func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBl
 			for _, msg := range block.Messages {
 				for i, part := range msg.Content {
 					isLastPart := i == len(msg.Content)-1
-					cacheControl := getCacheControl(part.Options())
+					cacheControl := GetCacheControl(part.Options())
 					if cacheControl == nil && isLastPart {
-						cacheControl = getCacheControl(msg.ProviderOptions)
+						cacheControl = GetCacheControl(msg.ProviderOptions)
 					}
 					switch part.GetType() {
 					case fantasy.ContentTypeText:

@@ -33,6 +33,7 @@ type builderPair struct {
 	name            string
 	builder         builderFunc
 	providerOptions fantasy.ProviderOptions
+	prepareStep     fantasy.PrepareStepFunction
 }
 
 func testCommon(t *testing.T, pairs []builderPair) {
@@ -66,6 +67,7 @@ func testSimple(t *testing.T, pair builderPair) {
 			Prompt:          "Say hi in Portuguese",
 			ProviderOptions: pair.providerOptions,
 			MaxOutputTokens: fantasy.Opt(int64(4000)),
+			PrepareStep:     pair.prepareStep,
 		})
 		require.NoError(t, err, "failed to generate")
 		checkResult(t, result)
@@ -84,6 +86,7 @@ func testSimple(t *testing.T, pair builderPair) {
 			Prompt:          "Say hi in Portuguese",
 			ProviderOptions: pair.providerOptions,
 			MaxOutputTokens: fantasy.Opt(int64(4000)),
+			PrepareStep:     pair.prepareStep,
 		})
 		require.NoError(t, err, "failed to generate")
 		checkResult(t, result)
@@ -138,6 +141,7 @@ func testTool(t *testing.T, pair builderPair) {
 			Prompt:          "What's the weather in Florence,Italy?",
 			ProviderOptions: pair.providerOptions,
 			MaxOutputTokens: fantasy.Opt(int64(4000)),
+			PrepareStep:     pair.prepareStep,
 		})
 		require.NoError(t, err, "failed to generate")
 		checkResult(t, result)
@@ -157,6 +161,7 @@ func testTool(t *testing.T, pair builderPair) {
 			Prompt:          "What's the weather in Florence,Italy?",
 			ProviderOptions: pair.providerOptions,
 			MaxOutputTokens: fantasy.Opt(int64(4000)),
+			PrepareStep:     pair.prepareStep,
 		})
 		require.NoError(t, err, "failed to generate")
 		checkResult(t, result)
@@ -234,6 +239,7 @@ func testMultiTool(t *testing.T, pair builderPair) {
 			Prompt:          "Add and multiply the number 2 and 3",
 			ProviderOptions: pair.providerOptions,
 			MaxOutputTokens: fantasy.Opt(int64(4000)),
+			PrepareStep:     pair.prepareStep,
 		})
 		require.NoError(t, err, "failed to generate")
 		checkResult(t, result)
@@ -254,6 +260,7 @@ func testMultiTool(t *testing.T, pair builderPair) {
 			Prompt:          "Add and multiply the number 2 and 3",
 			ProviderOptions: pair.providerOptions,
 			MaxOutputTokens: fantasy.Opt(int64(4000)),
+			PrepareStep:     pair.prepareStep,
 		})
 		require.NoError(t, err, "failed to generate")
 		checkResult(t, result)
@@ -289,6 +296,7 @@ func testThinking(t *testing.T, pairs []builderPair, thinkChecks func(*testing.T
 				result, err := agent.Generate(t.Context(), fantasy.AgentCall{
 					Prompt:          "What's the weather in Florence, Italy?",
 					ProviderOptions: pair.providerOptions,
+					PrepareStep:     pair.prepareStep,
 				})
 				require.NoError(t, err, "failed to generate")
 
@@ -325,6 +333,7 @@ func testThinking(t *testing.T, pairs []builderPair, thinkChecks func(*testing.T
 				result, err := agent.Stream(t.Context(), fantasy.AgentStreamCall{
 					Prompt:          "What's the weather in Florence, Italy?",
 					ProviderOptions: pair.providerOptions,
+					PrepareStep:     pair.prepareStep,
 				})
 				require.NoError(t, err, "failed to generate")
 

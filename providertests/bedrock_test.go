@@ -12,14 +12,14 @@ import (
 
 func TestBedrockCommon(t *testing.T) {
 	testCommon(t, []builderPair{
-		{"bedrock-anthropic-claude-3-sonnet", builderBedrockClaude3Sonnet, nil},
-		{"bedrock-anthropic-claude-3-opus", builderBedrockClaude3Opus, nil},
-		{"bedrock-anthropic-claude-3-haiku", builderBedrockClaude3Haiku, nil},
+		{"bedrock-anthropic-claude-3-sonnet", builderBedrockClaude3Sonnet, nil, nil},
+		{"bedrock-anthropic-claude-3-opus", builderBedrockClaude3Opus, nil, nil},
+		{"bedrock-anthropic-claude-3-haiku", builderBedrockClaude3Haiku, nil, nil},
 	})
 }
 
 func TestBedrockBasicAuth(t *testing.T) {
-	testSimple(t, builderPair{"bedrock-anthropic-claude-3-sonnet", buildersBedrockBasicAuth, nil})
+	testSimple(t, builderPair{"bedrock-anthropic-claude-3-sonnet", buildersBedrockBasicAuth, nil, nil})
 }
 
 func builderBedrockClaude3Sonnet(r *recorder.Recorder) (fantasy.LanguageModel, error) {

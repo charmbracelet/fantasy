@@ -14,11 +14,11 @@ import (
 
 func TestOpenAICompatibleCommon(t *testing.T) {
 	testCommon(t, []builderPair{
-		{"xai-grok-4-fast", builderXAIGrok4Fast, nil},
-		{"xai-grok-code-fast", builderXAIGrokCodeFast, nil},
-		{"groq-kimi-k2", builderGroq, nil},
-		{"zai-glm-4.5", builderZAIGLM45, nil},
-		{"huggingface-qwen3-coder", builderHuggingFace, nil},
+		{"xai-grok-4-fast", builderXAIGrok4Fast, nil, nil},
+		{"xai-grok-code-fast", builderXAIGrokCodeFast, nil, nil},
+		{"groq-kimi-k2", builderGroq, nil, nil},
+		{"zai-glm-4.5", builderZAIGLM45, nil, nil},
+		{"huggingface-qwen3-coder", builderHuggingFace, nil, nil},
 	})
 }
 
@@ -29,8 +29,8 @@ func TestOpenAICompatibleThinking(t *testing.T) {
 		},
 	}
 	testThinking(t, []builderPair{
-		{"xai-grok-3-mini", builderXAIGrok3Mini, opts},
-		{"zai-glm-4.5", builderZAIGLM45, opts},
+		{"xai-grok-3-mini", builderXAIGrok3Mini, opts, nil},
+		{"zai-glm-4.5", builderZAIGLM45, opts, nil},
 	}, testOpenAICompatThinking)
 }
 

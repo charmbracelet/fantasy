@@ -37,6 +37,7 @@ func New(opts ...Option) fantasy.Provider {
 			openai.WithLanguageModelStreamUsageFunc(languageModelStreamUsage),
 			openai.WithLanguageModelStreamExtraFunc(languageModelStreamExtra),
 			openai.WithLanguageModelExtraContentFunc(languageModelExtraContent),
+			openai.WithLanguageModelToPromptFunc(languageModelToPrompt),
 		},
 	}
 	for _, o := range opts {

@@ -26,9 +26,15 @@ var openrouterTestModels = []testModel{
 func TestOpenRouterCommon(t *testing.T) {
 	var pairs []builderPair
 	for _, m := range openrouterTestModels {
-		pairs = append(pairs, builderPair{m.name, openrouterBuilder(m.model), nil})
+		pairs = append(pairs, builderPair{m.name, openrouterBuilder(m.model), nil, nil})
 	}
 	testCommon(t, pairs)
+}
+
+func TestOpenRouterCommonWithAnthropicCache(t *testing.T) {
+	testCommon(t, []builderPair{
+		{"claude-sonnet-4", openrouterBuilder("anthropic/claude-sonnet-4"), nil, addAnthropicCaching},
+	})
 }
 
 func TestOpenRouterThinking(t *testing.T) {
@@ -45,13 +51,13 @@ func TestOpenRouterThinking(t *testing.T) {
 		if !m.reasoning {
 			continue
 		}
-		pairs = append(pairs, builderPair{m.name, openrouterBuilder(m.model), opts})
+		pairs = append(pairs, builderPair{m.name, openrouterBuilder(m.model), opts, nil})
 	}
 	testThinking(t, pairs, testOpenrouterThinking)
 
 	// test anthropic signature
 	testThinking(t, []builderPair{
-		{"claude-sonnet-4-sig", openrouterBuilder("anthropic/claude-sonnet-4"), opts},
+		{"claude-sonnet-4-sig", openrouterBuilder("anthropic/claude-sonnet-4"), opts, nil},
 	}, testOpenrouterThinkingWithSignature)
 }
 

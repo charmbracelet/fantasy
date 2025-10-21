@@ -13,11 +13,11 @@ import (
 	"strings"
 
 	"charm.land/fantasy"
-	"github.com/anthropics/anthropic-sdk-go"
-	"github.com/anthropics/anthropic-sdk-go/bedrock"
-	"github.com/anthropics/anthropic-sdk-go/option"
-	"github.com/anthropics/anthropic-sdk-go/packages/param"
-	"github.com/anthropics/anthropic-sdk-go/vertex"
+	"github.com/charmbracelet/anthropic-sdk-go"
+	"github.com/charmbracelet/anthropic-sdk-go/bedrock"
+	"github.com/charmbracelet/anthropic-sdk-go/option"
+	"github.com/charmbracelet/anthropic-sdk-go/packages/param"
+	"github.com/charmbracelet/anthropic-sdk-go/vertex"
 	"golang.org/x/oauth2/google"
 )
 

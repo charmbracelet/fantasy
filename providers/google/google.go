@@ -13,9 +13,9 @@ import (
 	"charm.land/fantasy"
 	"charm.land/fantasy/providers/anthropic"
 	"cloud.google.com/go/auth"
+	"github.com/charmbracelet/go-genai"
 	"github.com/charmbracelet/x/exp/slice"
 	"github.com/google/uuid"
-	"google.golang.org/genai"
 )
 
 // Name is the name of the Google provider.

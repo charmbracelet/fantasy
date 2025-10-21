@@ -122,7 +122,7 @@ func WithHTTPClient(client option.HTTPClient) Option {
 
 func (a *provider) LanguageModel(modelID string) (fantasy.LanguageModel, error) {
 	clientOptions := make([]option.RequestOption, 0, 5+len(a.options.headers))
-	if a.options.apiKey != "" {
+	if a.options.apiKey != "" && !a.options.useBedrock {
 		clientOptions = append(clientOptions, option.WithAPIKey(a.options.apiKey))
 	}
 	if a.options.baseURL != "" {
@@ -157,10 +157,10 @@ func (a *provider) LanguageModel(modelID string) (fantasy.LanguageModel, error) 
 		)
 	}
 	if a.options.useBedrock {
-		if a.options.skipAuth {
+		if a.options.skipAuth || a.options.apiKey != "" {
 			clientOptions = append(
 				clientOptions,
-				bedrock.WithConfig(dummyBedrockConfig),
+				bedrock.WithConfig(bedrockBasicAuthConfig(a.options.apiKey)),
 			)
 		} else {
 			clientOptions = append(

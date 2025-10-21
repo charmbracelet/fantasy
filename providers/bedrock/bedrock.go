@@ -36,6 +36,13 @@ func New(opts ...Option) fantasy.Provider {
 	)
 }
 
+// WithAPIKey sets the access token for the Bedrock provider.
+func WithAPIKey(apiKey string) Option {
+	return func(o *options) {
+		o.anthropicOptions = append(o.anthropicOptions, anthropic.WithAPIKey(apiKey))
+	}
+}
+
 // WithHeaders sets the headers for the Bedrock provider.
 func WithHeaders(headers map[string]string) Option {
 	return func(o *options) {

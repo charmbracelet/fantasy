@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"charm.land/fantasy"
+	"charm.land/fantasy/providers/anthropic"
 	"charm.land/fantasy/providers/openrouter"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
@@ -13,7 +14,7 @@ import (
 
 var openrouterTestModels = []testModel{
 	{"kimi-k2", "moonshotai/kimi-k2-0905", false},
-	{"grok-code-fast-1", "x-ai/grok-code-fast-1", false},
+	{"grok-code-fast-1", "x-ai/grok-code-fast-1", true},
 	{"claude-sonnet-4", "anthropic/claude-sonnet-4", true},
 	{"gemini-2.5-flash", "google/gemini-2.5-flash", false},
 	{"deepseek-chat-v3.1-free", "deepseek/deepseek-chat-v3.1:free", false},
@@ -78,12 +79,12 @@ func testOpenrouterThinkingWithSignature(t *testing.T, result *fantasy.AgentResu
 						continue
 					}
 
-					anthropicReasoningMetadata, ok := reasoningContent.ProviderOptions[openrouter.Name]
+					anthropicReasoningMetadata, ok := reasoningContent.ProviderOptions[anthropic.Name]
 					if !ok {
 						continue
 					}
 					if reasoningContent.Text != "" {
-						if typed, ok := anthropicReasoningMetadata.(*openrouter.ReasoningMetadata); ok {
+						if typed, ok := anthropicReasoningMetadata.(*anthropic.ReasoningOptionMetadata); ok {
 							require.NotEmpty(t, typed.Signature)
 							signaturesCount += 1
 						}

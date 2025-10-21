@@ -119,7 +119,7 @@ func (o languageModel) Provider() string {
 
 func (o languageModel) prepareParams(call fantasy.Call) (*openai.ChatCompletionNewParams, []fantasy.CallWarning, error) {
 	params := &openai.ChatCompletionNewParams{}
-	messages, warnings := o.toPromptFunc(call.Prompt)
+	messages, warnings := o.toPromptFunc(call.Prompt, o.provider, o.modelID)
 	if call.TopK != nil {
 		warnings = append(warnings, fantasy.CallWarning{
 			Type:    fantasy.CallWarningTypeUnsupportedSetting,

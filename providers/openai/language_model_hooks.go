@@ -33,7 +33,7 @@ type LanguageModelStreamUsageFunc = func(chunk openai.ChatCompletionChunk, ctx m
 type LanguageModelStreamProviderMetadataFunc = func(choice openai.ChatCompletionChoice, metadata fantasy.ProviderMetadata) fantasy.ProviderMetadata
 
 // LanguageModelToPromptFunc is a function that handles converting fantasy prompts to openai sdk messages.
-type LanguageModelToPromptFunc = func(prompt fantasy.Prompt) ([]openai.ChatCompletionMessageParamUnion, []fantasy.CallWarning)
+type LanguageModelToPromptFunc = func(prompt fantasy.Prompt, provider, model string) ([]openai.ChatCompletionMessageParamUnion, []fantasy.CallWarning)
 
 // DefaultPrepareCallFunc is the default implementation for preparing a call to the language model.
 func DefaultPrepareCallFunc(model fantasy.LanguageModel, params *openai.ChatCompletionNewParams, call fantasy.Call) ([]fantasy.CallWarning, error) {
@@ -273,7 +273,7 @@ func DefaultStreamProviderMetadataFunc(choice openai.ChatCompletionChoice, metad
 	return metadata
 }
 
-func DefaultToPrompt(prompt fantasy.Prompt) ([]openai.ChatCompletionMessageParamUnion, []fantasy.CallWarning) {
+func DefaultToPrompt(prompt fantasy.Prompt, _, _ string) ([]openai.ChatCompletionMessageParamUnion, []fantasy.CallWarning) {
 	var messages []openai.ChatCompletionMessageParamUnion
 	var warnings []fantasy.CallWarning
 	for _, msg := range prompt {

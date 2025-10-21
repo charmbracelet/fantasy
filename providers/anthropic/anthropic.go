@@ -308,7 +308,7 @@ func GetCacheControl(providerOptions fantasy.ProviderOptions) *CacheControl {
 	return nil
 }
 
-func getReasoningMetadata(providerOptions fantasy.ProviderOptions) *ReasoningOptionMetadata {
+func GetReasoningMetadata(providerOptions fantasy.ProviderOptions) *ReasoningOptionMetadata {
 	if anthropicOptions, ok := providerOptions[Name]; ok {
 		if reasoning, ok := anthropicOptions.(*ReasoningOptionMetadata); ok {
 			return reasoning
@@ -635,7 +635,7 @@ func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBl
 							})
 							continue
 						}
-						reasoningMetadata := getReasoningMetadata(part.Options())
+						reasoningMetadata := GetReasoningMetadata(part.Options())
 						if reasoningMetadata == nil {
 							warnings = append(warnings, fantasy.CallWarning{
 								Type:    "other",

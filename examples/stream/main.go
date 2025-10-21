@@ -3,7 +3,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 
@@ -15,13 +14,13 @@ func main() {
 	provider := openai.New(openai.WithAPIKey(os.Getenv("OPENAI_API_KEY")))
 	model, err := provider.LanguageModel("gpt-4o")
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprint(os.Stderr, err)
 		os.Exit(1)
 	}
 
 	stream, err := model.Stream(context.Background(), fantasy.Call{
 		Prompt: fantasy.Prompt{
-			fantasy.NewUserMessage("Whats the weather in pristina."),
+			fantasy.NewUserMessage("Whats the weather in Pristina, Kosovo?"),
 		},
 		Temperature: fantasy.Opt(0.7),
 		Tools: []fantasy.Tool{
@@ -44,16 +43,16 @@ func main() {
 		},
 	})
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprint(os.Stderr, err)
 		os.Exit(1)
 	}
 
 	for chunk := range stream {
-		data, err := json.Marshal(chunk)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Fprint(os.Stderr, err)
 			continue
 		}
-		fmt.Println(string(data))
+		fmt.Print(chunk.Delta)
 	}
+	fmt.Print("\n")
 }

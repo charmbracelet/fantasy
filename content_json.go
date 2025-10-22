@@ -30,6 +30,7 @@ type toolJSON struct {
 	Data json.RawMessage `json:"data"`
 }
 
+// MarshalJSON implements json.Marshaler for TextContent.
 func (t TextContent) MarshalJSON() ([]byte, error) {
 	dataBytes, err := json.Marshal(struct {
 		Text             string           `json:"text"`
@@ -48,6 +49,7 @@ func (t TextContent) MarshalJSON() ([]byte, error) {
 	})
 }
 
+// UnmarshalJSON implements json.Unmarshaler for TextContent.
 func (t *TextContent) UnmarshalJSON(data []byte) error {
 	var cj contentJSON
 	if err := json.Unmarshal(data, &cj); err != nil {
@@ -76,6 +78,7 @@ func (t *TextContent) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// MarshalJSON implements json.Marshaler for ReasoningContent.
 func (r ReasoningContent) MarshalJSON() ([]byte, error) {
 	dataBytes, err := json.Marshal(struct {
 		Text             string           `json:"text"`
@@ -94,6 +97,7 @@ func (r ReasoningContent) MarshalJSON() ([]byte, error) {
 	})
 }
 
+// UnmarshalJSON implements json.Unmarshaler for ReasoningContent.
 func (r *ReasoningContent) UnmarshalJSON(data []byte) error {
 	var cj contentJSON
 	if err := json.Unmarshal(data, &cj); err != nil {
@@ -122,6 +126,7 @@ func (r *ReasoningContent) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// MarshalJSON implements json.Marshaler for FileContent.
 func (f FileContent) MarshalJSON() ([]byte, error) {
 	dataBytes, err := json.Marshal(struct {
 		MediaType        string           `json:"media_type"`
@@ -142,6 +147,7 @@ func (f FileContent) MarshalJSON() ([]byte, error) {
 	})
 }
 
+// UnmarshalJSON implements json.Unmarshaler for FileContent.
 func (f *FileContent) UnmarshalJSON(data []byte) error {
 	var cj contentJSON
 	if err := json.Unmarshal(data, &cj); err != nil {
@@ -172,6 +178,7 @@ func (f *FileContent) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// MarshalJSON implements json.Marshaler for SourceContent.
 func (s SourceContent) MarshalJSON() ([]byte, error) {
 	dataBytes, err := json.Marshal(struct {
 		SourceType       SourceType       `json:"source_type"`
@@ -200,6 +207,7 @@ func (s SourceContent) MarshalJSON() ([]byte, error) {
 	})
 }
 
+// UnmarshalJSON implements json.Unmarshaler for SourceContent.
 func (s *SourceContent) UnmarshalJSON(data []byte) error {
 	var cj contentJSON
 	if err := json.Unmarshal(data, &cj); err != nil {
@@ -238,6 +246,7 @@ func (s *SourceContent) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// MarshalJSON implements json.Marshaler for ToolCallContent.
 func (t ToolCallContent) MarshalJSON() ([]byte, error) {
 	dataBytes, err := json.Marshal(struct {
 		ToolCallID       string           `json:"tool_call_id"`
@@ -266,6 +275,7 @@ func (t ToolCallContent) MarshalJSON() ([]byte, error) {
 	})
 }
 
+// UnmarshalJSON implements json.Unmarshaler for ToolCallContent.
 func (t *ToolCallContent) UnmarshalJSON(data []byte) error {
 	var cj contentJSON
 	if err := json.Unmarshal(data, &cj); err != nil {
@@ -304,6 +314,7 @@ func (t *ToolCallContent) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// MarshalJSON implements json.Marshaler for ToolResultContent.
 func (t ToolResultContent) MarshalJSON() ([]byte, error) {
 	dataBytes, err := json.Marshal(struct {
 		ToolCallID       string                  `json:"tool_call_id"`
@@ -330,6 +341,7 @@ func (t ToolResultContent) MarshalJSON() ([]byte, error) {
 	})
 }
 
+// UnmarshalJSON implements json.Unmarshaler for ToolResultContent.
 func (t *ToolResultContent) UnmarshalJSON(data []byte) error {
 	var cj contentJSON
 	if err := json.Unmarshal(data, &cj); err != nil {
@@ -372,6 +384,7 @@ func (t *ToolResultContent) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// MarshalJSON implements json.Marshaler for ToolResultOutputContentText.
 func (t ToolResultOutputContentText) MarshalJSON() ([]byte, error) {
 	dataBytes, err := json.Marshal(struct {
 		Text string `json:"text"`
@@ -388,6 +401,7 @@ func (t ToolResultOutputContentText) MarshalJSON() ([]byte, error) {
 	})
 }
 
+// UnmarshalJSON implements json.Unmarshaler for ToolResultOutputContentText.
 func (t *ToolResultOutputContentText) UnmarshalJSON(data []byte) error {
 	var tr toolResultOutputJSON
 	if err := json.Unmarshal(data, &tr); err != nil {
@@ -406,6 +420,7 @@ func (t *ToolResultOutputContentText) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// MarshalJSON implements json.Marshaler for ToolResultOutputContentError.
 func (t ToolResultOutputContentError) MarshalJSON() ([]byte, error) {
 	errMsg := ""
 	if t.Error != nil {
@@ -426,6 +441,7 @@ func (t ToolResultOutputContentError) MarshalJSON() ([]byte, error) {
 	})
 }
 
+// UnmarshalJSON implements json.Unmarshaler for ToolResultOutputContentError.
 func (t *ToolResultOutputContentError) UnmarshalJSON(data []byte) error {
 	var tr toolResultOutputJSON
 	if err := json.Unmarshal(data, &tr); err != nil {
@@ -445,6 +461,7 @@ func (t *ToolResultOutputContentError) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// MarshalJSON implements json.Marshaler for ToolResultOutputContentMedia.
 func (t ToolResultOutputContentMedia) MarshalJSON() ([]byte, error) {
 	dataBytes, err := json.Marshal(struct {
 		Data      string `json:"data"`
@@ -463,6 +480,7 @@ func (t ToolResultOutputContentMedia) MarshalJSON() ([]byte, error) {
 	})
 }
 
+// UnmarshalJSON implements json.Unmarshaler for ToolResultOutputContentMedia.
 func (t *ToolResultOutputContentMedia) UnmarshalJSON(data []byte) error {
 	var tr toolResultOutputJSON
 	if err := json.Unmarshal(data, &tr); err != nil {
@@ -483,6 +501,7 @@ func (t *ToolResultOutputContentMedia) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// MarshalJSON implements json.Marshaler for TextPart.
 func (t TextPart) MarshalJSON() ([]byte, error) {
 	dataBytes, err := json.Marshal(struct {
 		Text            string          `json:"text"`
@@ -501,6 +520,7 @@ func (t TextPart) MarshalJSON() ([]byte, error) {
 	})
 }
 
+// UnmarshalJSON implements json.Unmarshaler for TextPart.
 func (t *TextPart) UnmarshalJSON(data []byte) error {
 	var mpj messagePartJSON
 	if err := json.Unmarshal(data, &mpj); err != nil {
@@ -529,6 +549,7 @@ func (t *TextPart) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// MarshalJSON implements json.Marshaler for ReasoningPart.
 func (r ReasoningPart) MarshalJSON() ([]byte, error) {
 	dataBytes, err := json.Marshal(struct {
 		Text            string          `json:"text"`
@@ -547,6 +568,7 @@ func (r ReasoningPart) MarshalJSON() ([]byte, error) {
 	})
 }
 
+// UnmarshalJSON implements json.Unmarshaler for ReasoningPart.
 func (r *ReasoningPart) UnmarshalJSON(data []byte) error {
 	var mpj messagePartJSON
 	if err := json.Unmarshal(data, &mpj); err != nil {
@@ -575,6 +597,7 @@ func (r *ReasoningPart) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// MarshalJSON implements json.Marshaler for FilePart.
 func (f FilePart) MarshalJSON() ([]byte, error) {
 	dataBytes, err := json.Marshal(struct {
 		Filename        string          `json:"filename"`
@@ -597,6 +620,7 @@ func (f FilePart) MarshalJSON() ([]byte, error) {
 	})
 }
 
+// UnmarshalJSON implements json.Unmarshaler for FilePart.
 func (f *FilePart) UnmarshalJSON(data []byte) error {
 	var mpj messagePartJSON
 	if err := json.Unmarshal(data, &mpj); err != nil {
@@ -629,6 +653,7 @@ func (f *FilePart) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// MarshalJSON implements json.Marshaler for ToolCallPart.
 func (t ToolCallPart) MarshalJSON() ([]byte, error) {
 	dataBytes, err := json.Marshal(struct {
 		ToolCallID       string          `json:"tool_call_id"`
@@ -653,6 +678,7 @@ func (t ToolCallPart) MarshalJSON() ([]byte, error) {
 	})
 }
 
+// UnmarshalJSON implements json.Unmarshaler for ToolCallPart.
 func (t *ToolCallPart) UnmarshalJSON(data []byte) error {
 	var mpj messagePartJSON
 	if err := json.Unmarshal(data, &mpj); err != nil {
@@ -687,6 +713,7 @@ func (t *ToolCallPart) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// MarshalJSON implements json.Marshaler for ToolResultPart.
 func (t ToolResultPart) MarshalJSON() ([]byte, error) {
 	dataBytes, err := json.Marshal(struct {
 		ToolCallID      string                  `json:"tool_call_id"`
@@ -707,6 +734,7 @@ func (t ToolResultPart) MarshalJSON() ([]byte, error) {
 	})
 }
 
+// UnmarshalJSON implements json.Unmarshaler for ToolResultPart.
 func (t *ToolResultPart) UnmarshalJSON(data []byte) error {
 	var mpj messagePartJSON
 	if err := json.Unmarshal(data, &mpj); err != nil {
@@ -743,6 +771,7 @@ func (t *ToolResultPart) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// UnmarshalJSON implements json.Unmarshaler for Message.
 func (m *Message) UnmarshalJSON(data []byte) error {
 	var aux struct {
 		Role            MessageRole                `json:"role"`
@@ -776,6 +805,7 @@ func (m *Message) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// MarshalJSON implements json.Marshaler for FunctionTool.
 func (f FunctionTool) MarshalJSON() ([]byte, error) {
 	dataBytes, err := json.Marshal(struct {
 		Name            string          `json:"name"`
@@ -798,6 +828,7 @@ func (f FunctionTool) MarshalJSON() ([]byte, error) {
 	})
 }
 
+// UnmarshalJSON implements json.Unmarshaler for FunctionTool.
 func (f *FunctionTool) UnmarshalJSON(data []byte) error {
 	var tj toolJSON
 	if err := json.Unmarshal(data, &tj); err != nil {
@@ -830,6 +861,7 @@ func (f *FunctionTool) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// MarshalJSON implements json.Marshaler for ProviderDefinedTool.
 func (p ProviderDefinedTool) MarshalJSON() ([]byte, error) {
 	dataBytes, err := json.Marshal(struct {
 		ID   string         `json:"id"`
@@ -850,6 +882,7 @@ func (p ProviderDefinedTool) MarshalJSON() ([]byte, error) {
 	})
 }
 
+// UnmarshalJSON implements json.Unmarshaler for ProviderDefinedTool.
 func (p *ProviderDefinedTool) UnmarshalJSON(data []byte) error {
 	var tj toolJSON
 	if err := json.Unmarshal(data, &tj); err != nil {
@@ -873,7 +906,7 @@ func (p *ProviderDefinedTool) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// UnmarshalTool unmarshals JSON into the appropriate Tool type
+// UnmarshalTool unmarshals JSON into the appropriate Tool type.
 func UnmarshalTool(data []byte) (Tool, error) {
 	var tj toolJSON
 	if err := json.Unmarshal(data, &tj); err != nil {
@@ -898,7 +931,7 @@ func UnmarshalTool(data []byte) (Tool, error) {
 	}
 }
 
-// UnmarshalContent unmarshals JSON into the appropriate Content type
+// UnmarshalContent unmarshals JSON into the appropriate Content type.
 func UnmarshalContent(data []byte) (Content, error) {
 	var cj contentJSON
 	if err := json.Unmarshal(data, &cj); err != nil {
@@ -947,7 +980,7 @@ func UnmarshalContent(data []byte) (Content, error) {
 	}
 }
 
-// UnmarshalMessagePart unmarshals JSON into the appropriate MessagePart type
+// UnmarshalMessagePart unmarshals JSON into the appropriate MessagePart type.
 func UnmarshalMessagePart(data []byte) (MessagePart, error) {
 	var mpj messagePartJSON
 	if err := json.Unmarshal(data, &mpj); err != nil {
@@ -990,7 +1023,7 @@ func UnmarshalMessagePart(data []byte) (MessagePart, error) {
 	}
 }
 
-// UnmarshalToolResultOutputContent unmarshals JSON into the appropriate ToolResultOutputContent type
+// UnmarshalToolResultOutputContent unmarshals JSON into the appropriate ToolResultOutputContent type.
 func UnmarshalToolResultOutputContent(data []byte) (ToolResultOutputContent, error) {
 	var troj toolResultOutputJSON
 	if err := json.Unmarshal(data, &troj); err != nil {

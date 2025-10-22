@@ -5,6 +5,7 @@ import (
 	"fmt"
 )
 
+// UnmarshalJSON implements json.Unmarshaler for Call.
 func (c *Call) UnmarshalJSON(data []byte) error {
 	var aux struct {
 		Prompt           Prompt                     `json:"prompt"`
@@ -54,6 +55,7 @@ func (c *Call) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// UnmarshalJSON implements json.Unmarshaler for Response.
 func (r *Response) UnmarshalJSON(data []byte) error {
 	var aux struct {
 		Content          json.RawMessage            `json:"content"`
@@ -100,6 +102,7 @@ func (r *Response) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// UnmarshalJSON implements json.Unmarshaler for StreamPart.
 func (s *StreamPart) UnmarshalJSON(data []byte) error {
 	var aux struct {
 		Type             StreamPartType             `json:"type"`

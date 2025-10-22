@@ -2,6 +2,8 @@
 package openrouter
 
 import (
+	"encoding/json"
+
 	"charm.land/fantasy"
 )
 
@@ -15,6 +17,12 @@ const (
 	ReasoningEffortMedium ReasoningEffort = "medium"
 	// ReasoningEffortHigh represents high reasoning effort.
 	ReasoningEffortHigh ReasoningEffort = "high"
+)
+
+// Global type identifiers for OpenRouter-specific provider data.
+const (
+	TypeProviderOptions  = Name + ".options"
+	TypeProviderMetadata = Name + ".metadata"
 )
 
 // PromptTokensDetails represents details about prompt tokens for OpenRouter.
@@ -53,6 +61,34 @@ type ProviderMetadata struct {
 
 // Options implements the ProviderOptionsData interface for ProviderMetadata.
 func (*ProviderMetadata) Options() {}
+
+// MarshalJSON implements custom JSON marshaling with type info for ProviderMetadata.
+func (m ProviderMetadata) MarshalJSON() ([]byte, error) {
+	type plain ProviderMetadata
+	raw, err := json.Marshal(plain(m))
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(struct {
+		Type string          `json:"type"`
+		Data json.RawMessage `json:"data"`
+	}{
+		Type: TypeProviderMetadata,
+		Data: raw,
+	})
+}
+
+// UnmarshalJSON implements custom JSON unmarshaling with type info for ProviderMetadata.
+func (m *ProviderMetadata) UnmarshalJSON(data []byte) error {
+	type plain ProviderMetadata
+	var pm plain
+	err := json.Unmarshal(data, &pm)
+	if err != nil {
+		return err
+	}
+	*m = ProviderMetadata(pm)
+	return nil
+}
 
 // ReasoningOptions represents reasoning options for OpenRouter.
 type ReasoningOptions struct {
@@ -110,6 +146,34 @@ type ProviderOptions struct {
 // Options implements the ProviderOptionsData interface for ProviderOptions.
 func (*ProviderOptions) Options() {}
 
+// MarshalJSON implements custom JSON marshaling with type info for ProviderOptions.
+func (o ProviderOptions) MarshalJSON() ([]byte, error) {
+	type plain ProviderOptions
+	raw, err := json.Marshal(plain(o))
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(struct {
+		Type string          `json:"type"`
+		Data json.RawMessage `json:"data"`
+	}{
+		Type: TypeProviderOptions,
+		Data: raw,
+	})
+}
+
+// UnmarshalJSON implements custom JSON unmarshaling with type info for ProviderOptions.
+func (o *ProviderOptions) UnmarshalJSON(data []byte) error {
+	type plain ProviderOptions
+	var oo plain
+	err := json.Unmarshal(data, &oo)
+	if err != nil {
+		return err
+	}
+	*o = ProviderOptions(oo)
+	return nil
+}
+
 // ReasoningDetail represents a reasoning detail for OpenRouter.
 type ReasoningDetail struct {
 	ID        string `json:"id,omitempty"`
@@ -147,4 +211,22 @@ func ParseOptions(data map[string]any) (*ProviderOptions, error) {
 		return nil, err
 	}
 	return &options, nil
+}
+
+// Register OpenRouter provider-specific types with the global registry.
+func init() {
+	fantasy.RegisterProviderType(TypeProviderOptions, func(data []byte) (fantasy.ProviderOptionsData, error) {
+		var v ProviderOptions
+		if err := json.Unmarshal(data, &v); err != nil {
+			return nil, err
+		}
+		return &v, nil
+	})
+	fantasy.RegisterProviderType(TypeProviderMetadata, func(data []byte) (fantasy.ProviderOptionsData, error) {
+		var v ProviderMetadata
+		if err := json.Unmarshal(data, &v); err != nil {
+			return nil, err
+		}
+		return &v, nil
+	})
 }

@@ -1,7 +1,16 @@
 // Package google provides an implementation of the fantasy AI SDK for Google's language models.
 package google
 
-import "charm.land/fantasy"
+import (
+	"encoding/json"
+
+	"charm.land/fantasy"
+)
+
+// Global type identifiers for Google-specific provider data.
+const (
+	TypeProviderOptions = Name + ".options"
+)
 
 // ThinkingConfig represents thinking configuration for the Google provider.
 type ThinkingConfig struct {
@@ -51,6 +60,34 @@ type ProviderOptions struct {
 // Options implements the ProviderOptionsData interface for ProviderOptions.
 func (o *ProviderOptions) Options() {}
 
+// MarshalJSON implements custom JSON marshaling with type info for ProviderOptions.
+func (o ProviderOptions) MarshalJSON() ([]byte, error) {
+	type plain ProviderOptions
+	raw, err := json.Marshal(plain(o))
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(struct {
+		Type string          `json:"type"`
+		Data json.RawMessage `json:"data"`
+	}{
+		Type: TypeProviderOptions,
+		Data: raw,
+	})
+}
+
+// UnmarshalJSON implements custom JSON unmarshaling with type info for ProviderOptions.
+func (o *ProviderOptions) UnmarshalJSON(data []byte) error {
+	type plain ProviderOptions
+	var oo plain
+	err := json.Unmarshal(data, &oo)
+	if err != nil {
+		return err
+	}
+	*o = ProviderOptions(oo)
+	return nil
+}
+
 // ParseOptions parses provider options from a map for the Google provider.
 func ParseOptions(data map[string]any) (*ProviderOptions, error) {
 	var options ProviderOptions
@@ -58,4 +95,15 @@ func ParseOptions(data map[string]any) (*ProviderOptions, error) {
 		return nil, err
 	}
 	return &options, nil
+}
+
+// Register Google provider-specific types with the global registry.
+func init() {
+	fantasy.RegisterProviderType(TypeProviderOptions, func(data []byte) (fantasy.ProviderOptionsData, error) {
+		var v ProviderOptions
+		if err := json.Unmarshal(data, &v); err != nil {
+			return nil, err
+		}
+		return &v, nil
+	})
 }

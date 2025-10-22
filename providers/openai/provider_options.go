@@ -2,6 +2,8 @@
 package openai
 
 import (
+	"encoding/json"
+
 	"charm.land/fantasy"
 	"github.com/openai/openai-go/v2"
 )
@@ -20,6 +22,13 @@ const (
 	ReasoningEffortHigh ReasoningEffort = "high"
 )
 
+// Global type identifiers for OpenAI-specific provider data.
+const (
+	TypeProviderOptions     = Name + ".options"
+	TypeProviderFileOptions = Name + ".file_options"
+	TypeProviderMetadata    = Name + ".metadata"
+)
+
 // ProviderMetadata represents additional metadata from OpenAI provider.
 type ProviderMetadata struct {
 	Logprobs                 []openai.ChatCompletionTokenLogprob `json:"logprobs"`
@@ -29,6 +38,34 @@ type ProviderMetadata struct {
 
 // Options implements the ProviderOptions interface.
 func (*ProviderMetadata) Options() {}
+
+// MarshalJSON implements custom JSON marshaling with type info for ProviderMetadata.
+func (m ProviderMetadata) MarshalJSON() ([]byte, error) {
+	type plain ProviderMetadata
+	raw, err := json.Marshal(plain(m))
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(struct {
+		Type string          `json:"type"`
+		Data json.RawMessage `json:"data"`
+	}{
+		Type: TypeProviderMetadata,
+		Data: raw,
+	})
+}
+
+// UnmarshalJSON implements custom JSON unmarshaling with type info for ProviderMetadata.
+func (m *ProviderMetadata) UnmarshalJSON(data []byte) error {
+	type plain ProviderMetadata
+	var pm plain
+	err := json.Unmarshal(data, &pm)
+	if err != nil {
+		return err
+	}
+	*m = ProviderMetadata(pm)
+	return nil
+}
 
 // ProviderOptions represents additional options for OpenAI provider.
 type ProviderOptions struct {
@@ -52,6 +89,34 @@ type ProviderOptions struct {
 // Options implements the ProviderOptions interface.
 func (*ProviderOptions) Options() {}
 
+// MarshalJSON implements custom JSON marshaling with type info for ProviderOptions.
+func (o ProviderOptions) MarshalJSON() ([]byte, error) {
+	type plain ProviderOptions
+	raw, err := json.Marshal(plain(o))
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(struct {
+		Type string          `json:"type"`
+		Data json.RawMessage `json:"data"`
+	}{
+		Type: TypeProviderOptions,
+		Data: raw,
+	})
+}
+
+// UnmarshalJSON implements custom JSON unmarshaling with type info for ProviderOptions.
+func (o *ProviderOptions) UnmarshalJSON(data []byte) error {
+	type plain ProviderOptions
+	var oo plain
+	err := json.Unmarshal(data, &oo)
+	if err != nil {
+		return err
+	}
+	*o = ProviderOptions(oo)
+	return nil
+}
+
 // ProviderFileOptions represents file options for OpenAI provider.
 type ProviderFileOptions struct {
 	ImageDetail string `json:"image_detail"`
@@ -59,6 +124,34 @@ type ProviderFileOptions struct {
 
 // Options implements the ProviderOptions interface.
 func (*ProviderFileOptions) Options() {}
+
+// MarshalJSON implements custom JSON marshaling with type info for ProviderFileOptions.
+func (o ProviderFileOptions) MarshalJSON() ([]byte, error) {
+	type plain ProviderFileOptions
+	raw, err := json.Marshal(plain(o))
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(struct {
+		Type string          `json:"type"`
+		Data json.RawMessage `json:"data"`
+	}{
+		Type: TypeProviderFileOptions,
+		Data: raw,
+	})
+}
+
+// UnmarshalJSON implements custom JSON unmarshaling with type info for ProviderFileOptions.
+func (o *ProviderFileOptions) UnmarshalJSON(data []byte) error {
+	type plain ProviderFileOptions
+	var of plain
+	err := json.Unmarshal(data, &of)
+	if err != nil {
+		return err
+	}
+	*o = ProviderFileOptions(of)
+	return nil
+}
 
 // ReasoningEffortOption creates a pointer to a ReasoningEffort value.
 func ReasoningEffortOption(e ReasoningEffort) *ReasoningEffort {
@@ -86,4 +179,29 @@ func ParseOptions(data map[string]any) (*ProviderOptions, error) {
 		return nil, err
 	}
 	return &options, nil
+}
+
+// Register OpenAI provider-specific types with the global registry.
+func init() {
+	fantasy.RegisterProviderType(TypeProviderOptions, func(data []byte) (fantasy.ProviderOptionsData, error) {
+		var v ProviderOptions
+		if err := json.Unmarshal(data, &v); err != nil {
+			return nil, err
+		}
+		return &v, nil
+	})
+	fantasy.RegisterProviderType(TypeProviderFileOptions, func(data []byte) (fantasy.ProviderOptionsData, error) {
+		var v ProviderFileOptions
+		if err := json.Unmarshal(data, &v); err != nil {
+			return nil, err
+		}
+		return &v, nil
+	})
+	fantasy.RegisterProviderType(TypeProviderMetadata, func(data []byte) (fantasy.ProviderOptionsData, error) {
+		var v ProviderMetadata
+		if err := json.Unmarshal(data, &v); err != nil {
+			return nil, err
+		}
+		return &v, nil
+	})
 }

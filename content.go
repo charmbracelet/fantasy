@@ -1,8 +1,56 @@
 package fantasy
 
+import "encoding/json"
+
 // ProviderOptionsData is an interface for provider-specific options data.
+// All implementations MUST also implement encoding/json.Marshaler and
+// encoding/json.Unmarshaler interfaces to ensure proper JSON serialization
+// with the provider registry system.
+//
+// Required implementation pattern:
+//
+//	type MyProviderOptions struct {
+//	    Field string `json:"field"`
+//	}
+//
+//	// Implement ProviderOptionsData
+//	func (*MyProviderOptions) Options() {}
+//
+//	// Implement json.Marshaler - use fantasy.MarshalProviderData
+//	func (m MyProviderOptions) MarshalJSON() ([]byte, error) {
+//	    return fantasy.MarshalProviderData(&m, "provider.type")
+//	}
+//
+//	// Implement json.Unmarshaler - use fantasy.UnmarshalProviderData
+//	func (m *MyProviderOptions) UnmarshalJSON(data []byte) error {
+//	    providerData, err := fantasy.UnmarshalProviderData(data)
+//	    if err != nil {
+//	        return err
+//	    }
+//	    opts, ok := providerData.(*MyProviderOptions)
+//	    if !ok {
+//	        return fmt.Errorf("invalid type")
+//	    }
+//	    *m = *opts
+//	    return nil
+//	}
+//
+// Additionally, register the type in init():
+//
+//	func init() {
+//	    fantasy.RegisterProviderType("provider.type", func(data []byte) (fantasy.ProviderOptionsData, error) {
+//	        var opts MyProviderOptions
+//	        if err := json.Unmarshal(data, &opts); err != nil {
+//	            return nil, err
+//	        }
+//	        return &opts, nil
+//	    })
+//	}
 type ProviderOptionsData interface {
+	// Options is a marker method that identifies types implementing this interface.
 	Options()
+	json.Marshaler
+	json.Unmarshaler
 }
 
 // ProviderMetadata represents additional provider-specific metadata.

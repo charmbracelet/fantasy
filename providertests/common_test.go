@@ -27,7 +27,7 @@ type testModel struct {
 	reasoning bool
 }
 
-type builderFunc func(r *recorder.Recorder) (fantasy.LanguageModel, error)
+type builderFunc func(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error)
 
 type builderPair struct {
 	name            string
@@ -56,7 +56,7 @@ func testSimple(t *testing.T, pair builderPair) {
 	t.Run("simple", func(t *testing.T) {
 		r := newRecorder(t)
 
-		languageModel, err := pair.builder(r)
+		languageModel, err := pair.builder(t, r)
 		require.NoError(t, err, "failed to build language model")
 
 		agent := fantasy.NewAgent(
@@ -75,7 +75,7 @@ func testSimple(t *testing.T, pair builderPair) {
 	t.Run("simple streaming", func(t *testing.T) {
 		r := newRecorder(t)
 
-		languageModel, err := pair.builder(r)
+		languageModel, err := pair.builder(t, r)
 		require.NoError(t, err, "failed to build language model")
 
 		agent := fantasy.NewAgent(
@@ -129,7 +129,7 @@ func testTool(t *testing.T, pair builderPair) {
 	t.Run("tool", func(t *testing.T) {
 		r := newRecorder(t)
 
-		languageModel, err := pair.builder(r)
+		languageModel, err := pair.builder(t, r)
 		require.NoError(t, err, "failed to build language model")
 
 		agent := fantasy.NewAgent(
@@ -149,7 +149,7 @@ func testTool(t *testing.T, pair builderPair) {
 	t.Run("tool streaming", func(t *testing.T) {
 		r := newRecorder(t)
 
-		languageModel, err := pair.builder(r)
+		languageModel, err := pair.builder(t, r)
 		require.NoError(t, err, "failed to build language model")
 
 		agent := fantasy.NewAgent(
@@ -226,7 +226,7 @@ func testMultiTool(t *testing.T, pair builderPair) {
 	t.Run("multi tool", func(t *testing.T) {
 		r := newRecorder(t)
 
-		languageModel, err := pair.builder(r)
+		languageModel, err := pair.builder(t, r)
 		require.NoError(t, err, "failed to build language model")
 
 		agent := fantasy.NewAgent(
@@ -247,7 +247,7 @@ func testMultiTool(t *testing.T, pair builderPair) {
 	t.Run("multi tool streaming", func(t *testing.T) {
 		r := newRecorder(t)
 
-		languageModel, err := pair.builder(r)
+		languageModel, err := pair.builder(t, r)
 		require.NoError(t, err, "failed to build language model")
 
 		agent := fantasy.NewAgent(
@@ -273,7 +273,7 @@ func testThinking(t *testing.T, pairs []builderPair, thinkChecks func(*testing.T
 			t.Run("thinking", func(t *testing.T) {
 				r := newRecorder(t)
 
-				languageModel, err := pair.builder(r)
+				languageModel, err := pair.builder(t, r)
 				require.NoError(t, err, "failed to build language model")
 
 				type WeatherInput struct {
@@ -310,7 +310,7 @@ func testThinking(t *testing.T, pairs []builderPair, thinkChecks func(*testing.T
 			t.Run("thinking-streaming", func(t *testing.T) {
 				r := newRecorder(t)
 
-				languageModel, err := pair.builder(r)
+				languageModel, err := pair.builder(t, r)
 				require.NoError(t, err, "failed to build language model")
 
 				type WeatherInput struct {

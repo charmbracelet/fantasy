@@ -814,7 +814,7 @@ func TestDoGenerate(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -847,7 +847,7 @@ func TestDoGenerate(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -872,7 +872,7 @@ func TestDoGenerate(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		_, err = model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -913,7 +913,7 @@ func TestDoGenerate(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -940,7 +940,7 @@ func TestDoGenerate(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -975,7 +975,7 @@ func TestDoGenerate(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -1000,7 +1000,7 @@ func TestDoGenerate(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -1025,7 +1025,7 @@ func TestDoGenerate(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		_, err = model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -1058,7 +1058,7 @@ func TestDoGenerate(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		_, err = model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -1101,7 +1101,7 @@ func TestDoGenerate(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("o1-mini")
+		model, _ := provider.LanguageModel(t.Context(), "o1-mini")
 
 		_, err = model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -1142,7 +1142,7 @@ func TestDoGenerate(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("gpt-4o")
+		model, _ := provider.LanguageModel(t.Context(), "gpt-4o")
 
 		_, err = model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -1181,7 +1181,7 @@ func TestDoGenerate(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		_, err = model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -1254,7 +1254,7 @@ func TestDoGenerate(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -1313,7 +1313,7 @@ func TestDoGenerate(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -1356,7 +1356,7 @@ func TestDoGenerate(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("gpt-4o-mini")
+		model, _ := provider.LanguageModel(t.Context(), "gpt-4o-mini")
 
 		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -1392,7 +1392,7 @@ func TestDoGenerate(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("gpt-4o-mini")
+		model, _ := provider.LanguageModel(t.Context(), "gpt-4o-mini")
 
 		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -1421,7 +1421,7 @@ func TestDoGenerate(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("o1-preview")
+		model, _ := provider.LanguageModel(t.Context(), "o1-preview")
 
 		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt:           testPrompt,
@@ -1470,7 +1470,7 @@ func TestDoGenerate(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("o1-preview")
+		model, _ := provider.LanguageModel(t.Context(), "o1-preview")
 
 		_, err = model.Generate(context.Background(), fantasy.Call{
 			Prompt:          testPrompt,
@@ -1515,7 +1515,7 @@ func TestDoGenerate(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("o1-preview")
+		model, _ := provider.LanguageModel(t.Context(), "o1-preview")
 
 		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -1543,7 +1543,7 @@ func TestDoGenerate(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("o1-preview")
+		model, _ := provider.LanguageModel(t.Context(), "o1-preview")
 
 		_, err = model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -1582,7 +1582,7 @@ func TestDoGenerate(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		_, err = model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -1627,7 +1627,7 @@ func TestDoGenerate(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		_, err = model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -1666,7 +1666,7 @@ func TestDoGenerate(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		_, err = model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -1709,7 +1709,7 @@ func TestDoGenerate(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		_, err = model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -1748,7 +1748,7 @@ func TestDoGenerate(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		_, err = model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -1785,7 +1785,7 @@ func TestDoGenerate(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("gpt-4o-search-preview")
+		model, _ := provider.LanguageModel(t.Context(), "gpt-4o-search-preview")
 
 		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt:      testPrompt,
@@ -1820,7 +1820,7 @@ func TestDoGenerate(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("o3-mini")
+		model, _ := provider.LanguageModel(t.Context(), "o3-mini")
 
 		_, err = model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -1857,7 +1857,7 @@ func TestDoGenerate(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("gpt-4o-mini")
+		model, _ := provider.LanguageModel(t.Context(), "gpt-4o-mini")
 
 		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -1891,7 +1891,7 @@ func TestDoGenerate(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("gpt-4o-mini")
+		model, _ := provider.LanguageModel(t.Context(), "gpt-4o-mini")
 
 		_, err = model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -1928,7 +1928,7 @@ func TestDoGenerate(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -2236,7 +2236,7 @@ func TestDoStream(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		stream, err := model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -2293,7 +2293,7 @@ func TestDoStream(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		stream, err := model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -2380,7 +2380,7 @@ func TestDoStream(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		stream, err := model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -2420,7 +2420,7 @@ func TestDoStream(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		stream, err := model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -2462,7 +2462,7 @@ func TestDoStream(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		_, err = model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -2511,7 +2511,7 @@ func TestDoStream(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		stream, err := model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -2562,7 +2562,7 @@ func TestDoStream(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		stream, err := model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -2606,7 +2606,7 @@ func TestDoStream(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		_, err = model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -2649,7 +2649,7 @@ func TestDoStream(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		_, err = model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -2696,7 +2696,7 @@ func TestDoStream(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("o3-mini")
+		model, _ := provider.LanguageModel(t.Context(), "o3-mini")
 
 		_, err = model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -2739,7 +2739,7 @@ func TestDoStream(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("gpt-4o-mini")
+		model, _ := provider.LanguageModel(t.Context(), "gpt-4o-mini")
 
 		_, err = model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -2783,7 +2783,7 @@ func TestDoStream(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("o1-preview")
+		model, _ := provider.LanguageModel(t.Context(), "o1-preview")
 
 		stream, err := model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -2830,7 +2830,7 @@ func TestDoStream(t *testing.T) {
 			WithBaseURL(server.server.URL),
 		)
 		require.NoError(t, err)
-		model, _ := provider.LanguageModel("o1-preview")
+		model, _ := provider.LanguageModel(t.Context(), "o1-preview")
 
 		stream, err := model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,

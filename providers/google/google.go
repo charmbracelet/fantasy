@@ -126,7 +126,7 @@ type languageModel struct {
 }
 
 // LanguageModel implements fantasy.Provider.
-func (a *provider) LanguageModel(modelID string) (fantasy.LanguageModel, error) {
+func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.LanguageModel, error) {
 	if strings.Contains(modelID, "anthropic") || strings.Contains(modelID, "claude") {
 		p, err := anthropic.New(
 			anthropic.WithVertex(a.options.project, a.options.location),
@@ -136,7 +136,7 @@ func (a *provider) LanguageModel(modelID string) (fantasy.LanguageModel, error) 
 		if err != nil {
 			return nil, err
 		}
-		return p.LanguageModel(modelID)
+		return p.LanguageModel(ctx, modelID)
 	}
 
 	cc := &genai.ClientConfig{
@@ -160,7 +160,7 @@ func (a *provider) LanguageModel(modelID string) (fantasy.LanguageModel, error) 
 			Headers: headers,
 		}
 	}
-	client, err := genai.NewClient(context.Background(), cc)
+	client, err := genai.NewClient(ctx, cc)
 	if err != nil {
 		return nil, err
 	}

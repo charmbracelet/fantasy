@@ -70,7 +70,7 @@ func testGoogleThinking(t *testing.T, result *fantasy.AgentResult) {
 }
 
 func geminiBuilder(model string) builderFunc {
-	return func(r *recorder.Recorder) (fantasy.LanguageModel, error) {
+	return func(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
 		provider, err := google.New(
 			google.WithGeminiAPIKey(cmp.Or(os.Getenv("FANTASY_GEMINI_API_KEY"), "(missing)")),
 			google.WithHTTPClient(&http.Client{Transport: r}),
@@ -78,12 +78,12 @@ func geminiBuilder(model string) builderFunc {
 		if err != nil {
 			return nil, err
 		}
-		return provider.LanguageModel(model)
+		return provider.LanguageModel(t.Context(), model)
 	}
 }
 
 func vertexBuilder(model string) builderFunc {
-	return func(r *recorder.Recorder) (fantasy.LanguageModel, error) {
+	return func(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
 		provider, err := google.New(
 			google.WithVertex(os.Getenv("FANTASY_VERTEX_PROJECT"), os.Getenv("FANTASY_VERTEX_LOCATION")),
 			google.WithHTTPClient(&http.Client{Transport: r}),
@@ -92,6 +92,6 @@ func vertexBuilder(model string) builderFunc {
 		if err != nil {
 			return nil, err
 		}
-		return provider.LanguageModel(model)
+		return provider.LanguageModel(t.Context(), model)
 	}
 }

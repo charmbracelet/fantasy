@@ -48,7 +48,7 @@ func testOpenAICompatThinking(t *testing.T, result *fantasy.AgentResult) {
 	require.Greater(t, reasoningContentCount, 0, "expected reasoning content, got none")
 }
 
-func builderXAIGrokCodeFast(r *recorder.Recorder) (fantasy.LanguageModel, error) {
+func builderXAIGrokCodeFast(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
 	provider, err := openaicompat.New(
 		openaicompat.WithBaseURL("https://api.x.ai/v1"),
 		openaicompat.WithAPIKey(os.Getenv("FANTASY_XAI_API_KEY")),
@@ -57,10 +57,10 @@ func builderXAIGrokCodeFast(r *recorder.Recorder) (fantasy.LanguageModel, error)
 	if err != nil {
 		return nil, err
 	}
-	return provider.LanguageModel("grok-code-fast-1")
+	return provider.LanguageModel(t.Context(), "grok-code-fast-1")
 }
 
-func builderXAIGrok4Fast(r *recorder.Recorder) (fantasy.LanguageModel, error) {
+func builderXAIGrok4Fast(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
 	provider, err := openaicompat.New(
 		openaicompat.WithBaseURL("https://api.x.ai/v1"),
 		openaicompat.WithAPIKey(os.Getenv("FANTASY_XAI_API_KEY")),
@@ -69,10 +69,10 @@ func builderXAIGrok4Fast(r *recorder.Recorder) (fantasy.LanguageModel, error) {
 	if err != nil {
 		return nil, err
 	}
-	return provider.LanguageModel("grok-4-fast")
+	return provider.LanguageModel(t.Context(), "grok-4-fast")
 }
 
-func builderXAIGrok3Mini(r *recorder.Recorder) (fantasy.LanguageModel, error) {
+func builderXAIGrok3Mini(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
 	provider, err := openaicompat.New(
 		openaicompat.WithBaseURL("https://api.x.ai/v1"),
 		openaicompat.WithAPIKey(os.Getenv("FANTASY_XAI_API_KEY")),
@@ -81,10 +81,10 @@ func builderXAIGrok3Mini(r *recorder.Recorder) (fantasy.LanguageModel, error) {
 	if err != nil {
 		return nil, err
 	}
-	return provider.LanguageModel("grok-3-mini")
+	return provider.LanguageModel(t.Context(), "grok-3-mini")
 }
 
-func builderZAIGLM45(r *recorder.Recorder) (fantasy.LanguageModel, error) {
+func builderZAIGLM45(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
 	provider, err := openaicompat.New(
 		openaicompat.WithBaseURL("https://api.z.ai/api/coding/paas/v4"),
 		openaicompat.WithAPIKey(os.Getenv("FANTASY_ZAI_API_KEY")),
@@ -93,10 +93,10 @@ func builderZAIGLM45(r *recorder.Recorder) (fantasy.LanguageModel, error) {
 	if err != nil {
 		return nil, err
 	}
-	return provider.LanguageModel("glm-4.5")
+	return provider.LanguageModel(t.Context(), "glm-4.5")
 }
 
-func builderGroq(r *recorder.Recorder) (fantasy.LanguageModel, error) {
+func builderGroq(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
 	provider, err := openaicompat.New(
 		openaicompat.WithBaseURL("https://api.groq.com/openai/v1"),
 		openaicompat.WithAPIKey(os.Getenv("FANTASY_GROQ_API_KEY")),
@@ -105,10 +105,10 @@ func builderGroq(r *recorder.Recorder) (fantasy.LanguageModel, error) {
 	if err != nil {
 		return nil, err
 	}
-	return provider.LanguageModel("moonshotai/kimi-k2-instruct-0905")
+	return provider.LanguageModel(t.Context(), "moonshotai/kimi-k2-instruct-0905")
 }
 
-func builderHuggingFace(r *recorder.Recorder) (fantasy.LanguageModel, error) {
+func builderHuggingFace(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
 	provider, err := openaicompat.New(
 		openaicompat.WithBaseURL("https://router.huggingface.co/v1"),
 		openaicompat.WithAPIKey(os.Getenv("FANTASY_HUGGINGFACE_API_KEY")),
@@ -117,5 +117,5 @@ func builderHuggingFace(r *recorder.Recorder) (fantasy.LanguageModel, error) {
 	if err != nil {
 		return nil, err
 	}
-	return provider.LanguageModel("Qwen/Qwen3-Coder-480B-A35B-Instruct:cerebras")
+	return provider.LanguageModel(t.Context(), "Qwen/Qwen3-Coder-480B-A35B-Instruct:cerebras")
 }

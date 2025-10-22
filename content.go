@@ -9,31 +9,22 @@ import "encoding/json"
 //
 // Required implementation pattern:
 //
-//	type MyProviderOptions struct {
-//	    Field string `json:"field"`
-//	}
+//		type MyProviderOptions struct {
+//		    Field string `json:"field"`
+//		}
 //
-//	// Implement ProviderOptionsData
-//	func (*MyProviderOptions) Options() {}
+//		// Implement ProviderOptionsData
+//		func (*MyProviderOptions) Options() {}
 //
-//	// Implement json.Marshaler - use fantasy.MarshalProviderData
-//	func (m MyProviderOptions) MarshalJSON() ([]byte, error) {
-//	    return fantasy.MarshalProviderData(&m, "provider.type")
-//	}
+//		// Implement json.Marshaler - use fantasy.MarshalProviderData
+//		func (m MyProviderOptions) MarshalJSON() ([]byte, error) {
+//		...
+//		}
 //
-//	// Implement json.Unmarshaler - use fantasy.UnmarshalProviderData
-//	func (m *MyProviderOptions) UnmarshalJSON(data []byte) error {
-//	    providerData, err := fantasy.UnmarshalProviderData(data)
-//	    if err != nil {
-//	        return err
-//	    }
-//	    opts, ok := providerData.(*MyProviderOptions)
-//	    if !ok {
-//	        return fmt.Errorf("invalid type")
-//	    }
-//	    *m = *opts
-//	    return nil
-//	}
+//		// Implement json.Unmarshaler - use fantasy.UnmarshalProviderData
+//		func (m *MyProviderOptions) UnmarshalJSON(data []byte) error {
+//	  ...
+//		}
 //
 // Additionally, register the type in init():
 //

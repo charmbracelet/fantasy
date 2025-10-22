@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 622
+    host: ""
+    body: '{"max_tokens":8096,"messages":[{"content":[{"text":"What''s the weather in Florence, Italy?","cache_control":{"type":"ephemeral"},"type":"text"}],"role":"user"}],"model":"claude-sonnet-4-20250514","system":[{"text":"You are a helpful assistant","cache_control":{"type":"ephemeral"},"type":"text"}],"thinking":{"budget_tokens":4000,"type":"enabled"},"tool_choice":{"disable_parallel_tool_use":false,"type":"auto"},"tools":[{"input_schema":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Anthropic/Go 1.14.0
+    url: https://api.anthropic.com/v1/messages
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"model":"claude-sonnet-4-20250514","id":"msg_019nCdrqNy56N4FPDPkMaz7B","type":"message","role":"assistant","content":[{"type":"thinking","thinking":"The user is asking for weather information for Florence, Italy. I have a weather function available that takes a location parameter. The user has provided \"Florence, Italy\" as the location. I have all the required parameters to make the function call.","signature":"EqQDCkYICBgCKkD+6F3ZCJ3CoiNs91jnjkz/6xYefJjve+nbgY/runWHxGeBEg21iA6vjJVq7OceBDUlc+TFtcdi0WkUTiiBe0S5EgxwzS43u6Xgdl6soBAaDKzHQ0Z1Vrcz7LHSUCIwU6Qn02eS0AhhP5SpNdLRzSPWLN3oHDC3vhxs4wiNY4TkWpXa9nyIRhwUKNd5ud+uKosCJgjHGR/uLuODWUEGlJbrxAhr3xrQbciN/sDfV4tqfPOj+t5tm96khBOGNXXIO/SE3If0wlexbIGis17tQxnH6z0MRB7SiRzS6CjWzMK361uwv2pgUgy9lHKsbARcjtFCaCCrFpFLPO0lySJK0D60RmPO6DmFfkamYAcCT1870iZrI+RB0Hu7xbWnoZ3VURmxBv+VxX7cRll6zfcgOhTVVtVFdgghuuHujtyPMMau3HiZUJVv4juzrSNCIS15LP2RfCFGJ6Xes6hoWXeGcVQOeJmbJ1s3E2prELzM31wkeEE26ftwfF7VF4yCt62ocEuc07zsycVKRRZEDBe9CEb9Ny+HW4dbrEX/DMvPGAE="},{"type":"tool_use","id":"toolu_014gjpHAaavY4696WA2WGDLS","name":"weather","input":{"location":"Florence, Italy"}}],"stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":423,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":111,"service_tier":"standard"}}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 3.529551375s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1816
+    host: ""
+    body: '{"max_tokens":8096,"messages":[{"content":[{"text":"What''s the weather in Florence, Italy?","type":"text"}],"role":"user"},{"content":[{"signature":"EqQDCkYICBgCKkD+6F3ZCJ3CoiNs91jnjkz/6xYefJjve+nbgY/runWHxGeBEg21iA6vjJVq7OceBDUlc+TFtcdi0WkUTiiBe0S5EgxwzS43u6Xgdl6soBAaDKzHQ0Z1Vrcz7LHSUCIwU6Qn02eS0AhhP5SpNdLRzSPWLN3oHDC3vhxs4wiNY4TkWpXa9nyIRhwUKNd5ud+uKosCJgjHGR/uLuODWUEGlJbrxAhr3xrQbciN/sDfV4tqfPOj+t5tm96khBOGNXXIO/SE3If0wlexbIGis17tQxnH6z0MRB7SiRzS6CjWzMK361uwv2pgUgy9lHKsbARcjtFCaCCrFpFLPO0lySJK0D60RmPO6DmFfkamYAcCT1870iZrI+RB0Hu7xbWnoZ3VURmxBv+VxX7cRll6zfcgOhTVVtVFdgghuuHujtyPMMau3HiZUJVv4juzrSNCIS15LP2RfCFGJ6Xes6hoWXeGcVQOeJmbJ1s3E2prELzM31wkeEE26ftwfF7VF4yCt62ocEuc07zsycVKRRZEDBe9CEb9Ny+HW4dbrEX/DMvPGAE=","thinking":"The user is asking for weather information for Florence, Italy. I have a weather function available that takes a location parameter. The user has provided \"Florence, Italy\" as the location. I have all the required parameters to make the function call.","type":"thinking"},{"id":"toolu_014gjpHAaavY4696WA2WGDLS","input":{"location":"Florence, Italy"},"name":"weather","cache_control":{"type":"ephemeral"},"type":"tool_use"}],"role":"assistant"},{"content":[{"tool_use_id":"toolu_014gjpHAaavY4696WA2WGDLS","cache_control":{"type":"ephemeral"},"content":[{"text":"40 C","type":"text"}],"type":"tool_result"}],"role":"user"}],"model":"claude-sonnet-4-20250514","system":[{"text":"You are a helpful assistant","cache_control":{"type":"ephemeral"},"type":"text"}],"thinking":{"budget_tokens":4000,"type":"enabled"},"tool_choice":{"disable_parallel_tool_use":false,"type":"auto"},"tools":[{"input_schema":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Anthropic/Go 1.14.0
+    url: https://api.anthropic.com/v1/messages
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"model":"claude-sonnet-4-20250514","id":"msg_011vbhawoMAwZzuGJEzTmfaK","type":"message","role":"assistant","content":[{"type":"text","text":"The current weather in Florence, Italy is 40°C (104°F). That''s quite hot! It''s a very warm day in Florence."}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":549,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":34,"service_tier":"standard"}}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 2.484467584s

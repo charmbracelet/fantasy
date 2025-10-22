@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - OpenAI/Go 2.7.1
     url: https://openrouter.ai/api/v1/chat/completions
     method: POST
   response:
@@ -24,28 +24,28 @@ interactions:
     proto_minor: 0
     content_length: -1
     uncompressed: true
-    body: "\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1758885041-lGus0z3IqfajvtBiZY5w\",\"provider\":\"Z.AI\",\"model\":\"z-ai/glm-4.5\",\"object\":\"chat.completion\",\"created\":1758885041,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"native_finish_reason\":\"tool_calls\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\\n\\nI'll add and multiply the numbers 2 and 3 for you.\\n\",\"refusal\":null,\"reasoning\":\"The user is asking me to both add and multiply the numbers 2 and 3. I have two functions available: \\\"add\\\" and \\\"multiply\\\". I need to call both functions with the parameters a=2 and b=3.\\n\\nLet me make both function calls:\\n1. add(2, 3) \\n2. multiply(2, 3)\",\"tool_calls\":[{\"id\":\"call_7361af8cbf8a441e89e4d455\",\"index\":0,\"type\":\"function\",\"function\":{\"name\":\"add\",\"arguments\":\"{\\\"a\\\": 2, \\\"b\\\": 3}\"}},{\"id\":\"call_7100cb895a0449c293cc62b0\",\"index\":1,\"type\":\"function\",\"function\":{\"name\":\"multiply\",\"arguments\":\"{\\\"a\\\": 2, \\\"b\\\": 3}\"}}],\"reasoning_details\":[{\"type\":\"reasoning.text\",\"text\":\"The user is asking me to both add and multiply the numbers 2 and 3. I have two functions available: \\\"add\\\" and \\\"multiply\\\". I need to call both functions with the parameters a=2 and b=3.\\n\\nLet me make both function calls:\\n1. add(2, 3) \\n2. multiply(2, 3)\",\"format\":\"unknown\",\"index\":0}]}}],\"usage\":{\"prompt_tokens\":286,\"completion_tokens\":135,\"total_tokens\":421,\"cost\":0.00044753,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":43,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.00015053,\"upstream_inference_completions_cost\":0.000297},\"completion_tokens_details\":{\"reasoning_tokens\":66,\"image_tokens\":0}}}"
+    body: "\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1761054179-qLoGjMjTQwOC2zpt8yLb\",\"provider\":\"Z.AI\",\"model\":\"z-ai/glm-4.5\",\"object\":\"chat.completion\",\"created\":1761054179,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"native_finish_reason\":\"tool_calls\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\\nI'll both add and multiply the numbers 2 and 3 for you.\\n\",\"refusal\":null,\"reasoning\":\"\\nThe user is asking me to both add and multiply the numbers 2 and 3. I need to use both the add and multiply functions as requested. Let me call both functions with the parameters a=2 and b=3.\",\"tool_calls\":[{\"id\":\"call_37172aa3ef2a4e3d896c64a3\",\"index\":0,\"type\":\"function\",\"function\":{\"name\":\"add\",\"arguments\":\"{\\\"a\\\":2,\\\"b\\\":3}\"}},{\"id\":\"call_d6b73be9f6344636b4c5b9ca\",\"index\":1,\"type\":\"function\",\"function\":{\"name\":\"multiply\",\"arguments\":\"{\\\"a\\\":2,\\\"b\\\":3}\"}}],\"reasoning_details\":[{\"type\":\"reasoning.text\",\"text\":\"\\nThe user is asking me to both add and multiply the numbers 2 and 3. I need to use both the add and multiply functions as requested. Let me call both functions with the parameters a=2 and b=3.\",\"format\":\"unknown\",\"index\":0}]}}],\"usage\":{\"prompt_tokens\":286,\"completion_tokens\":109,\"total_tokens\":395,\"cost\":0.00027175,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":285,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.00003195,\"upstream_inference_completions_cost\":0.0002398},\"completion_tokens_details\":{\"reasoning_tokens\":49,\"image_tokens\":0}}}"
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 847.340417ms
+    duration: 779.738958ms
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 1342
+    content_length: 1619
     host: ""
-    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"content":"\n\nI''ll add and multiply the numbers 2 and 3 for you.\n","tool_calls":[{"id":"call_7361af8cbf8a441e89e4d455","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"add"},"type":"function"},{"id":"call_7100cb895a0449c293cc62b0","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"call_7361af8cbf8a441e89e4d455","role":"tool"},{"content":"6","tool_call_id":"call_7100cb895a0449c293cc62b0","role":"tool"}],"model":"z-ai/glm-4.5","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"content":"\nI''ll both add and multiply the numbers 2 and 3 for you.\n","tool_calls":[{"id":"call_37172aa3ef2a4e3d896c64a3","function":{"arguments":"{\"a\":2,\"b\":3}","name":"add"},"type":"function"},{"id":"call_d6b73be9f6344636b4c5b9ca","function":{"arguments":"{\"a\":2,\"b\":3}","name":"multiply"},"type":"function"}],"role":"assistant","reasoning_details":[{"format":"unknown","index":0,"text":"\nThe user is asking me to both add and multiply the numbers 2 and 3. I need to use both the add and multiply functions as requested. Let me call both functions with the parameters a=2 and b=3.","type":"reasoning.text"}]},{"content":"5","tool_call_id":"call_37172aa3ef2a4e3d896c64a3","role":"tool"},{"content":"6","tool_call_id":"call_d6b73be9f6344636b4c5b9ca","role":"tool"}],"model":"z-ai/glm-4.5","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
     headers:
       Accept:
       - application/json
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - OpenAI/Go 2.7.1
     url: https://openrouter.ai/api/v1/chat/completions
     method: POST
   response:
@@ -54,10 +54,10 @@ interactions:
     proto_minor: 0
     content_length: -1
     uncompressed: true
-    body: "\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1758885049-FChIVzPMZzGE5cdD8P2D\",\"provider\":\"Z.AI\",\"model\":\"z-ai/glm-4.5\",\"object\":\"chat.completion\",\"created\":1758885049,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"stop\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\\n\\nThe results for adding and multiplying 2 and 3 are:\\n\\n- Addition: 2 + 3 = 5\\n- Multiplication: 2 × 3 = 6\",\"refusal\":null,\"reasoning\":\"The user asked me to add and multiply the numbers 2 and 3. I used both the add and multiply functions as requested:\\n\\n- Adding 2 and 3 gives 5\\n- Multiplying 2 and 3 gives 6\\n\\nI should present both results clearly to the user.\",\"reasoning_details\":[{\"type\":\"reasoning.text\",\"text\":\"The user asked me to add and multiply the numbers 2 and 3. I used both the add and multiply functions as requested:\\n\\n- Adding 2 and 3 gives 5\\n- Multiplying 2 and 3 gives 6\\n\\nI should present both results clearly to the user.\",\"format\":\"unknown\",\"index\":0}]}}],\"usage\":{\"prompt_tokens\":360,\"completion_tokens\":102,\"total_tokens\":462,\"cost\":0.00041933,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":43,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.00019493,\"upstream_inference_completions_cost\":0.0002244},\"completion_tokens_details\":{\"reasoning_tokens\":60,\"image_tokens\":0}}}"
+    body: "\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1761054183-s23tnwwmDM6FLYUTCiTH\",\"provider\":\"Z.AI\",\"model\":\"z-ai/glm-4.5\",\"object\":\"chat.completion\",\"created\":1761054183,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"stop\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\\nThe results for adding and multiplying 2 and 3 are:\\n\\n- **Addition**: 2 + 3 = 5\\n- **Multiplication**: 2 × 3 = 6\",\"refusal\":null,\"reasoning\":\"\\nThe user asked me to add and multiply the numbers 2 and 3. I used both functions as requested:\\n- Add: 2 + 3 = 5\\n- Multiply: 2 × 3 = 6\\n\\nI should present both results clearly to the user.\",\"reasoning_details\":[{\"type\":\"reasoning.text\",\"text\":\"\\nThe user asked me to add and multiply the numbers 2 and 3. I used both functions as requested:\\n- Add: 2 + 3 = 5\\n- Multiply: 2 × 3 = 6\\n\\nI should present both results clearly to the user.\",\"format\":\"unknown\",\"index\":0}]}}],\"usage\":{\"prompt_tokens\":361,\"completion_tokens\":102,\"total_tokens\":463,\"cost\":0.00041993,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":43,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.00019553,\"upstream_inference_completions_cost\":0.0002244},\"completion_tokens_details\":{\"reasoning_tokens\":51,\"image_tokens\":0}}}"
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 851.707667ms
+    duration: 603.16025ms

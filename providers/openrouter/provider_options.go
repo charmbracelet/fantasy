@@ -54,14 +54,6 @@ type ProviderMetadata struct {
 // Options implements the ProviderOptionsData interface for ProviderMetadata.
 func (*ProviderMetadata) Options() {}
 
-// ReasoningMetadata represents reasoning metadata for OpenRouter.
-type ReasoningMetadata struct {
-	Signature string `json:"signature"`
-}
-
-// Options implements the ProviderOptionsData interface for ReasoningMetadata.
-func (*ReasoningMetadata) Options() {}
-
 // ReasoningOptions represents reasoning options for OpenRouter.
 type ReasoningOptions struct {
 	// Whether reasoning is enabled
@@ -120,10 +112,14 @@ func (*ProviderOptions) Options() {}
 
 // ReasoningDetail represents a reasoning detail for OpenRouter.
 type ReasoningDetail struct {
-	Type      string `json:"type"`
-	Text      string `json:"text"`
-	Summary   string `json:"summary"`
-	Signature string `json:"signature"`
+	ID        string `json:"id,omitempty"`
+	Type      string `json:"type,omitempty"`
+	Text      string `json:"text,omitempty"`
+	Data      string `json:"data,omitempty"`
+	Format    string `json:"format,omitempty"`
+	Summary   string `json:"summary,omitempty"`
+	Signature string `json:"signature,omitempty"`
+	Index     int    `json:"index"`
 }
 
 // ReasoningData represents reasoning data for OpenRouter.

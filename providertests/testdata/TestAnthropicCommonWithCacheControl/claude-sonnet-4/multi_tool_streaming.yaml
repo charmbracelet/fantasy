@@ -1,0 +1,163 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 886
+    host: ""
+    body: '{"max_tokens":4000,"messages":[{"content":[{"text":"Add and multiply the number 2 and 3","cache_control":{"type":"ephemeral"},"type":"text"}],"role":"user"}],"model":"claude-sonnet-4-20250514","system":[{"text":"You are a helpful assistant. Always use both add and multiply at the same time.","cache_control":{"type":"ephemeral"},"type":"text"}],"tool_choice":{"disable_parallel_tool_use":false,"type":"auto"},"tools":[{"input_schema":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"name":"add","description":"Add two numbers"},{"input_schema":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"name":"multiply","description":"Multiply two numbers"}],"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Anthropic/Go 1.14.0
+    url: https://api.anthropic.com/v1/messages
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      event: message_start
+      data: {"type":"message_start","message":{"model":"claude-sonnet-4-20250514","id":"msg_01Ps4SquTmAkLoZixSEW4SrN","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":502,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":4,"service_tier":"standard"}}              }
+
+      event: content_block_start
+      data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}       }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"I'll add an"}       }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"d multiply the numbers 2 and 3 for"}           }
+
+      event: ping
+      data: {"type": "ping"}
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" you."}           }
+
+      event: content_block_stop
+      data: {"type":"content_block_stop","index":0}
+
+      event: content_block_start
+      data: {"type":"content_block_start","index":1,"content_block":{"type":"tool_use","id":"toolu_014EzUJ1TCJvs3dR7mZZgoyd","name":"add","input":{}}   }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":""}               }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"{\"a\":"}          }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":" 2"}        }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":", "}         }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"\"b\": 3}"}        }
+
+      event: content_block_stop
+      data: {"type":"content_block_stop","index":1              }
+
+      event: content_block_start
+      data: {"type":"content_block_start","index":2,"content_block":{"type":"tool_use","id":"toolu_01GYivdvVTotPKuatZiCkQvv","name":"multiply","input":{}}       }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":""}           }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"{\"a\": "}      }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"2"}               }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":", \"b\": "}              }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"3}"} }
+
+      event: content_block_stop
+      data: {"type":"content_block_stop","index":2         }
+
+      event: message_delta
+      data: {"type":"message_delta","delta":{"stop_reason":"tool_use","stop_sequence":null},"usage":{"input_tokens":502,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":137}   }
+
+      event: message_stop
+      data: {"type":"message_stop"              }
+
+    headers:
+      Content-Type:
+      - text/event-stream; charset=utf-8
+    status: 200 OK
+    code: 200
+    duration: 1.806945584s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1469
+    host: ""
+    body: '{"max_tokens":4000,"messages":[{"content":[{"text":"Add and multiply the number 2 and 3","type":"text"}],"role":"user"},{"content":[{"text":"I''ll add and multiply the numbers 2 and 3 for you.","type":"text"},{"id":"toolu_014EzUJ1TCJvs3dR7mZZgoyd","input":{"a":2,"b":3},"name":"add","type":"tool_use"},{"id":"toolu_01GYivdvVTotPKuatZiCkQvv","input":{"a":2,"b":3},"name":"multiply","cache_control":{"type":"ephemeral"},"type":"tool_use"}],"role":"assistant"},{"content":[{"tool_use_id":"toolu_014EzUJ1TCJvs3dR7mZZgoyd","content":[{"text":"5","type":"text"}],"type":"tool_result"},{"tool_use_id":"toolu_01GYivdvVTotPKuatZiCkQvv","cache_control":{"type":"ephemeral"},"content":[{"text":"6","type":"text"}],"type":"tool_result"}],"role":"user"}],"model":"claude-sonnet-4-20250514","system":[{"text":"You are a helpful assistant. Always use both add and multiply at the same time.","cache_control":{"type":"ephemeral"},"type":"text"}],"tool_choice":{"disable_parallel_tool_use":false,"type":"auto"},"tools":[{"input_schema":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"name":"add","description":"Add two numbers"},{"input_schema":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"name":"multiply","description":"Multiply two numbers"}],"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Anthropic/Go 1.14.0
+    url: https://api.anthropic.com/v1/messages
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      event: message_start
+      data: {"type":"message_start","message":{"model":"claude-sonnet-4-20250514","id":"msg_016tKmgfhWH1tfpDjeFE5JXn","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":700,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1,"service_tier":"standard"}}           }
+
+      event: content_block_start
+      data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}  }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"The"}    }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" results are:\n- Adding"}     }
+
+      event: ping
+      data: {"type": "ping"}
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" 2 + 3 = 5\n-"}              }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" Multiplying 2 × "}           }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"3 = 6"}             }
+
+      event: content_block_stop
+      data: {"type":"content_block_stop","index":0           }
+
+      event: message_delta
+      data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"input_tokens":700,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":35}             }
+
+      event: message_stop
+      data: {"type":"message_stop"           }
+
+    headers:
+      Content-Type:
+      - text/event-stream; charset=utf-8
+    status: 200 OK
+    code: 200
+    duration: 1.850997125s

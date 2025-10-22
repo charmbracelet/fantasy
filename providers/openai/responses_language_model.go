@@ -474,7 +474,7 @@ func toResponsesPrompt(prompt fantasy.Prompt, systemMessageMode string) (respons
 
 					input = append(input, responses.ResponseInputItemParamOfFunctionCall(string(inputJSON), toolCallPart.ToolCallID, toolCallPart.ToolName))
 				case fantasy.ContentTypeReasoning:
-					reasoningMetadata := getReasoningMetadata(c.Options())
+					reasoningMetadata := GetReasoningMetadata(c.Options())
 					if reasoningMetadata == nil || reasoningMetadata.ItemID == "" {
 						continue
 					}
@@ -753,15 +753,12 @@ func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call)
 				summaries = []responses.ResponseReasoningItemSummary{{Type: "summary_text", Text: ""}}
 			}
 
-			var summaryParts []string
-
 			for _, s := range summaries {
 				metadata.Summary = append(metadata.Summary, s.Text)
-				summaryParts = append(summaryParts, s.Text)
 			}
 
 			content = append(content, fantasy.ReasoningContent{
-				Text: strings.Join(summaryParts, "\n"),
+				Text: strings.Join(metadata.Summary, "\n"),
 				ProviderMetadata: fantasy.ProviderMetadata{
 					Name: metadata,
 				},
@@ -1039,7 +1036,8 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 	}, nil
 }
 
-func getReasoningMetadata(providerOptions fantasy.ProviderOptions) *ResponsesReasoningMetadata {
+// GetReasoningMetadata extracts reasoning metadata from provider options for responses models.
+func GetReasoningMetadata(providerOptions fantasy.ProviderOptions) *ResponsesReasoningMetadata {
 	if openaiResponsesOptions, ok := providerOptions[Name]; ok {
 		if reasoning, ok := openaiResponsesOptions.(*ResponsesReasoningMetadata); ok {
 			return reasoning

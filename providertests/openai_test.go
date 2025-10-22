@@ -20,7 +20,7 @@ var openaiTestModels = []testModel{
 func TestOpenAICommon(t *testing.T) {
 	var pairs []builderPair
 	for _, m := range openaiTestModels {
-		pairs = append(pairs, builderPair{m.name, openAIBuilder(m.model), nil})
+		pairs = append(pairs, builderPair{m.name, openAIBuilder(m.model), nil, nil})
 	}
 	testCommon(t, pairs)
 }

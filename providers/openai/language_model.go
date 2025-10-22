@@ -2,10 +2,8 @@ package openai
 
 import (
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"strings"
 
@@ -28,6 +26,7 @@ type languageModel struct {
 	streamUsageFunc            LanguageModelStreamUsageFunc
 	streamExtraFunc            LanguageModelStreamExtraFunc
 	streamProviderMetadataFunc LanguageModelStreamProviderMetadataFunc
+	toPromptFunc               LanguageModelToPromptFunc
 }
 
 // LanguageModelOption is a function that configures a languageModel.
@@ -75,6 +74,13 @@ func WithLanguageModelStreamUsageFunc(fn LanguageModelStreamUsageFunc) LanguageM
 	}
 }
 
+// WithLanguageModelToPromptFunc sets the to prompt function for the language model.
+func WithLanguageModelToPromptFunc(fn LanguageModelToPromptFunc) LanguageModelOption {
+	return func(l *languageModel) {
+		l.toPromptFunc = fn
+	}
+}
+
 func newLanguageModel(modelID string, provider string, client openai.Client, opts ...LanguageModelOption) languageModel {
 	model := languageModel{
 		modelID:                    modelID,
@@ -85,6 +91,7 @@ func newLanguageModel(modelID string, provider string, client openai.Client, opt
 		usageFunc:                  DefaultUsageFunc,
 		streamUsageFunc:            DefaultStreamUsageFunc,
 		streamProviderMetadataFunc: DefaultStreamProviderMetadataFunc,
+		toPromptFunc:               DefaultToPrompt,
 	}
 
 	for _, o := range opts {
@@ -112,7 +119,7 @@ func (o languageModel) Provider() string {
 
 func (o languageModel) prepareParams(call fantasy.Call) (*openai.ChatCompletionNewParams, []fantasy.CallWarning, error) {
 	params := &openai.ChatCompletionNewParams{}
-	messages, warnings := toPrompt(call.Prompt)
+	messages, warnings := o.toPromptFunc(call.Prompt, o.provider, o.modelID)
 	if call.TopK != nil {
 		warnings = append(warnings, fantasy.CallWarning{
 			Type:    fantasy.CallWarningTypeUnsupportedSetting,
@@ -633,271 +640,6 @@ func toOpenAiTools(tools []fantasy.Tool, toolChoice *fantasy.ToolChoice) (openAi
 		}
 	}
 	return openAiTools, openAiToolChoice, warnings
-}
-
-func toPrompt(prompt fantasy.Prompt) ([]openai.ChatCompletionMessageParamUnion, []fantasy.CallWarning) {
-	var messages []openai.ChatCompletionMessageParamUnion
-	var warnings []fantasy.CallWarning
-	for _, msg := range prompt {
-		switch msg.Role {
-		case fantasy.MessageRoleSystem:
-			var systemPromptParts []string
-			for _, c := range msg.Content {
-				if c.GetType() != fantasy.ContentTypeText {
-					warnings = append(warnings, fantasy.CallWarning{
-						Type:    fantasy.CallWarningTypeOther,
-						Message: "system prompt can only have text content",
-					})
-					continue
-				}
-				textPart, ok := fantasy.AsContentType[fantasy.TextPart](c)
-				if !ok {
-					warnings = append(warnings, fantasy.CallWarning{
-						Type:    fantasy.CallWarningTypeOther,
-						Message: "system prompt text part does not have the right type",
-					})
-					continue
-				}
-				text := textPart.Text
-				if strings.TrimSpace(text) != "" {
-					systemPromptParts = append(systemPromptParts, textPart.Text)
-				}
-			}
-			if len(systemPromptParts) == 0 {
-				warnings = append(warnings, fantasy.CallWarning{
-					Type:    fantasy.CallWarningTypeOther,
-					Message: "system prompt has no text parts",
-				})
-				continue
-			}
-			messages = append(messages, openai.SystemMessage(strings.Join(systemPromptParts, "\n")))
-		case fantasy.MessageRoleUser:
-			// simple user message just text content
-			if len(msg.Content) == 1 && msg.Content[0].GetType() == fantasy.ContentTypeText {
-				textPart, ok := fantasy.AsContentType[fantasy.TextPart](msg.Content[0])
-				if !ok {
-					warnings = append(warnings, fantasy.CallWarning{
-						Type:    fantasy.CallWarningTypeOther,
-						Message: "user message text part does not have the right type",
-					})
-					continue
-				}
-				messages = append(messages, openai.UserMessage(textPart.Text))
-				continue
-			}
-			// text content and attachments
-			// for now we only support image content later we need to check
-			// TODO: add the supported media types to the language model so we
-			//  can use that to validate the data here.
-			var content []openai.ChatCompletionContentPartUnionParam
-			for _, c := range msg.Content {
-				switch c.GetType() {
-				case fantasy.ContentTypeText:
-					textPart, ok := fantasy.AsContentType[fantasy.TextPart](c)
-					if !ok {
-						warnings = append(warnings, fantasy.CallWarning{
-							Type:    fantasy.CallWarningTypeOther,
-							Message: "user message text part does not have the right type",
-						})
-						continue
-					}
-					content = append(content, openai.ChatCompletionContentPartUnionParam{
-						OfText: &openai.ChatCompletionContentPartTextParam{
-							Text: textPart.Text,
-						},
-					})
-				case fantasy.ContentTypeFile:
-					filePart, ok := fantasy.AsContentType[fantasy.FilePart](c)
-					if !ok {
-						warnings = append(warnings, fantasy.CallWarning{
-							Type:    fantasy.CallWarningTypeOther,
-							Message: "user message file part does not have the right type",
-						})
-						continue
-					}
-
-					switch {
-					case strings.HasPrefix(filePart.MediaType, "image/"):
-						// Handle image files
-						base64Encoded := base64.StdEncoding.EncodeToString(filePart.Data)
-						data := "data:" + filePart.MediaType + ";base64," + base64Encoded
-						imageURL := openai.ChatCompletionContentPartImageImageURLParam{URL: data}
-
-						// Check for provider-specific options like image detail
-						if providerOptions, ok := filePart.ProviderOptions[Name]; ok {
-							if detail, ok := providerOptions.(*ProviderFileOptions); ok {
-								imageURL.Detail = detail.ImageDetail
-							}
-						}
-
-						imageBlock := openai.ChatCompletionContentPartImageParam{ImageURL: imageURL}
-						content = append(content, openai.ChatCompletionContentPartUnionParam{OfImageURL: &imageBlock})
-
-					case filePart.MediaType == "audio/wav":
-						// Handle WAV audio files
-						base64Encoded := base64.StdEncoding.EncodeToString(filePart.Data)
-						audioBlock := openai.ChatCompletionContentPartInputAudioParam{
-							InputAudio: openai.ChatCompletionContentPartInputAudioInputAudioParam{
-								Data:   base64Encoded,
-								Format: "wav",
-							},
-						}
-						content = append(content, openai.ChatCompletionContentPartUnionParam{OfInputAudio: &audioBlock})
-
-					case filePart.MediaType == "audio/mpeg" || filePart.MediaType == "audio/mp3":
-						// Handle MP3 audio files
-						base64Encoded := base64.StdEncoding.EncodeToString(filePart.Data)
-						audioBlock := openai.ChatCompletionContentPartInputAudioParam{
-							InputAudio: openai.ChatCompletionContentPartInputAudioInputAudioParam{
-								Data:   base64Encoded,
-								Format: "mp3",
-							},
-						}
-						content = append(content, openai.ChatCompletionContentPartUnionParam{OfInputAudio: &audioBlock})
-
-					case filePart.MediaType == "application/pdf":
-						// Handle PDF files
-						dataStr := string(filePart.Data)
-
-						// Check if data looks like a file ID (starts with "file-")
-						if strings.HasPrefix(dataStr, "file-") {
-							fileBlock := openai.ChatCompletionContentPartFileParam{
-								File: openai.ChatCompletionContentPartFileFileParam{
-									FileID: param.NewOpt(dataStr),
-								},
-							}
-							content = append(content, openai.ChatCompletionContentPartUnionParam{OfFile: &fileBlock})
-						} else {
-							// Handle as base64 data
-							base64Encoded := base64.StdEncoding.EncodeToString(filePart.Data)
-							data := "data:application/pdf;base64," + base64Encoded
-
-							filename := filePart.Filename
-							if filename == "" {
-								// Generate default filename based on content index
-								filename = fmt.Sprintf("part-%d.pdf", len(content))
-							}
-
-							fileBlock := openai.ChatCompletionContentPartFileParam{
-								File: openai.ChatCompletionContentPartFileFileParam{
-									Filename: param.NewOpt(filename),
-									FileData: param.NewOpt(data),
-								},
-							}
-							content = append(content, openai.ChatCompletionContentPartUnionParam{OfFile: &fileBlock})
-						}
-
-					default:
-						warnings = append(warnings, fantasy.CallWarning{
-							Type:    fantasy.CallWarningTypeOther,
-							Message: fmt.Sprintf("file part media type %s not supported", filePart.MediaType),
-						})
-					}
-				}
-			}
-			messages = append(messages, openai.UserMessage(content))
-		case fantasy.MessageRoleAssistant:
-			// simple assistant message just text content
-			if len(msg.Content) == 1 && msg.Content[0].GetType() == fantasy.ContentTypeText {
-				textPart, ok := fantasy.AsContentType[fantasy.TextPart](msg.Content[0])
-				if !ok {
-					warnings = append(warnings, fantasy.CallWarning{
-						Type:    fantasy.CallWarningTypeOther,
-						Message: "assistant message text part does not have the right type",
-					})
-					continue
-				}
-				messages = append(messages, openai.AssistantMessage(textPart.Text))
-				continue
-			}
-			assistantMsg := openai.ChatCompletionAssistantMessageParam{
-				Role: "assistant",
-			}
-			for _, c := range msg.Content {
-				switch c.GetType() {
-				case fantasy.ContentTypeText:
-					textPart, ok := fantasy.AsContentType[fantasy.TextPart](c)
-					if !ok {
-						warnings = append(warnings, fantasy.CallWarning{
-							Type:    fantasy.CallWarningTypeOther,
-							Message: "assistant message text part does not have the right type",
-						})
-						continue
-					}
-					assistantMsg.Content = openai.ChatCompletionAssistantMessageParamContentUnion{
-						OfString: param.NewOpt(textPart.Text),
-					}
-				case fantasy.ContentTypeToolCall:
-					toolCallPart, ok := fantasy.AsContentType[fantasy.ToolCallPart](c)
-					if !ok {
-						warnings = append(warnings, fantasy.CallWarning{
-							Type:    fantasy.CallWarningTypeOther,
-							Message: "assistant message tool part does not have the right type",
-						})
-						continue
-					}
-					assistantMsg.ToolCalls = append(assistantMsg.ToolCalls,
-						openai.ChatCompletionMessageToolCallUnionParam{
-							OfFunction: &openai.ChatCompletionMessageFunctionToolCallParam{
-								ID:   toolCallPart.ToolCallID,
-								Type: "function",
-								Function: openai.ChatCompletionMessageFunctionToolCallFunctionParam{
-									Name:      toolCallPart.ToolName,
-									Arguments: toolCallPart.Input,
-								},
-							},
-						})
-				}
-			}
-			messages = append(messages, openai.ChatCompletionMessageParamUnion{
-				OfAssistant: &assistantMsg,
-			})
-		case fantasy.MessageRoleTool:
-			for _, c := range msg.Content {
-				if c.GetType() != fantasy.ContentTypeToolResult {
-					warnings = append(warnings, fantasy.CallWarning{
-						Type:    fantasy.CallWarningTypeOther,
-						Message: "tool message can only have tool result content",
-					})
-					continue
-				}
-
-				toolResultPart, ok := fantasy.AsContentType[fantasy.ToolResultPart](c)
-				if !ok {
-					warnings = append(warnings, fantasy.CallWarning{
-						Type:    fantasy.CallWarningTypeOther,
-						Message: "tool message result part does not have the right type",
-					})
-					continue
-				}
-
-				switch toolResultPart.Output.GetType() {
-				case fantasy.ToolResultContentTypeText:
-					output, ok := fantasy.AsToolResultOutputType[fantasy.ToolResultOutputContentText](toolResultPart.Output)
-					if !ok {
-						warnings = append(warnings, fantasy.CallWarning{
-							Type:    fantasy.CallWarningTypeOther,
-							Message: "tool result output does not have the right type",
-						})
-						continue
-					}
-					messages = append(messages, openai.ToolMessage(output.Text, toolResultPart.ToolCallID))
-				case fantasy.ToolResultContentTypeError:
-					// TODO: check if better handling is needed
-					output, ok := fantasy.AsToolResultOutputType[fantasy.ToolResultOutputContentError](toolResultPart.Output)
-					if !ok {
-						warnings = append(warnings, fantasy.CallWarning{
-							Type:    fantasy.CallWarningTypeOther,
-							Message: "tool result output does not have the right type",
-						})
-						continue
-					}
-					messages = append(messages, openai.ToolMessage(output.Error.Error(), toolResultPart.ToolCallID))
-				}
-			}
-		}
-	}
-	return messages, warnings
 }
 
 // parseAnnotationsFromDelta parses annotations from the raw JSON of a delta.

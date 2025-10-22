@@ -30,7 +30,7 @@ func TestToOpenAiPrompt_SystemMessages(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toPrompt(prompt)
+		messages, warnings := DefaultToPrompt(prompt, "openai", "gpt-5")
 
 		require.Empty(t, warnings)
 		require.Len(t, messages, 1)
@@ -50,7 +50,7 @@ func TestToOpenAiPrompt_SystemMessages(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toPrompt(prompt)
+		messages, warnings := DefaultToPrompt(prompt, "openai", "gpt-5")
 
 		require.Len(t, warnings, 1)
 		require.Contains(t, warnings[0].Message, "system prompt has no text parts")
@@ -70,7 +70,7 @@ func TestToOpenAiPrompt_SystemMessages(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toPrompt(prompt)
+		messages, warnings := DefaultToPrompt(prompt, "openai", "gpt-5")
 
 		require.Empty(t, warnings)
 		require.Len(t, messages, 1)
@@ -96,7 +96,7 @@ func TestToOpenAiPrompt_UserMessages(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toPrompt(prompt)
+		messages, warnings := DefaultToPrompt(prompt, "openai", "gpt-5")
 
 		require.Empty(t, warnings)
 		require.Len(t, messages, 1)
@@ -123,7 +123,7 @@ func TestToOpenAiPrompt_UserMessages(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toPrompt(prompt)
+		messages, warnings := DefaultToPrompt(prompt, "openai", "gpt-5")
 
 		require.Empty(t, warnings)
 		require.Len(t, messages, 1)
@@ -165,7 +165,7 @@ func TestToOpenAiPrompt_UserMessages(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toPrompt(prompt)
+		messages, warnings := DefaultToPrompt(prompt, "openai", "gpt-5")
 
 		require.Empty(t, warnings)
 		require.Len(t, messages, 1)
@@ -200,7 +200,7 @@ func TestToOpenAiPrompt_FileParts(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toPrompt(prompt)
+		messages, warnings := DefaultToPrompt(prompt, "openai", "gpt-5")
 
 		require.Len(t, warnings, 1)
 		require.Contains(t, warnings[0].Message, "file part media type application/something not supported")
@@ -223,7 +223,7 @@ func TestToOpenAiPrompt_FileParts(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toPrompt(prompt)
+		messages, warnings := DefaultToPrompt(prompt, "openai", "gpt-5")
 
 		require.Empty(t, warnings)
 		require.Len(t, messages, 1)
@@ -256,7 +256,7 @@ func TestToOpenAiPrompt_FileParts(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toPrompt(prompt)
+		messages, warnings := DefaultToPrompt(prompt, "openai", "gpt-5")
 
 		require.Empty(t, warnings)
 		require.Len(t, messages, 1)
@@ -284,7 +284,7 @@ func TestToOpenAiPrompt_FileParts(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toPrompt(prompt)
+		messages, warnings := DefaultToPrompt(prompt, "openai", "gpt-5")
 
 		require.Empty(t, warnings)
 		require.Len(t, messages, 1)
@@ -313,7 +313,7 @@ func TestToOpenAiPrompt_FileParts(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toPrompt(prompt)
+		messages, warnings := DefaultToPrompt(prompt, "openai", "gpt-5")
 
 		require.Empty(t, warnings)
 		require.Len(t, messages, 1)
@@ -347,7 +347,7 @@ func TestToOpenAiPrompt_FileParts(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toPrompt(prompt)
+		messages, warnings := DefaultToPrompt(prompt, "openai", "gpt-5")
 
 		require.Empty(t, warnings)
 		require.Len(t, messages, 1)
@@ -376,7 +376,7 @@ func TestToOpenAiPrompt_FileParts(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toPrompt(prompt)
+		messages, warnings := DefaultToPrompt(prompt, "openai", "gpt-5")
 
 		require.Empty(t, warnings)
 		require.Len(t, messages, 1)
@@ -406,7 +406,7 @@ func TestToOpenAiPrompt_FileParts(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toPrompt(prompt)
+		messages, warnings := DefaultToPrompt(prompt, "openai", "gpt-5")
 
 		require.Empty(t, warnings)
 		require.Len(t, messages, 1)
@@ -455,7 +455,7 @@ func TestToOpenAiPrompt_ToolCalls(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toPrompt(prompt)
+		messages, warnings := DefaultToPrompt(prompt, "openai", "gpt-5")
 
 		require.Empty(t, warnings)
 		require.Len(t, messages, 2)
@@ -502,7 +502,7 @@ func TestToOpenAiPrompt_ToolCalls(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toPrompt(prompt)
+		messages, warnings := DefaultToPrompt(prompt, "openai", "gpt-5")
 
 		require.Empty(t, warnings)
 		require.Len(t, messages, 2)
@@ -536,7 +536,7 @@ func TestToOpenAiPrompt_AssistantMessages(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toPrompt(prompt)
+		messages, warnings := DefaultToPrompt(prompt, "openai", "gpt-5")
 
 		require.Empty(t, warnings)
 		require.Len(t, messages, 1)
@@ -566,7 +566,7 @@ func TestToOpenAiPrompt_AssistantMessages(t *testing.T) {
 			},
 		}
 
-		messages, warnings := toPrompt(prompt)
+		messages, warnings := DefaultToPrompt(prompt, "openai", "gpt-5")
 
 		require.Empty(t, warnings)
 		require.Len(t, messages, 1)

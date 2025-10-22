@@ -1162,10 +1162,10 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 			}
 
 		case StreamPartTypeReasoningStart:
-			activeReasoningContent[part.ID] = reasoningContent{content: "", options: part.ProviderMetadata}
+			activeReasoningContent[part.ID] = reasoningContent{content: part.Delta, options: part.ProviderMetadata}
 			if opts.OnReasoningStart != nil {
 				content := ReasoningContent{
-					Text:             "",
+					Text:             part.Delta,
 					ProviderMetadata: part.ProviderMetadata,
 				}
 				err := opts.OnReasoningStart(part.ID, content)

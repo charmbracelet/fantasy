@@ -67,7 +67,7 @@ func main() {
 	fmt.Println("\n" + formatText(prompt))
 
 	// Let's go! Ask the agent to generate a response.
-	result, err := agent.Generate(context.Background(), fantasy.AgentCall{Prompt: prompt})
+	result, err := agent.Generate(ctx, fantasy.AgentCall{Prompt: prompt})
 	if err != nil {
 		log.Fatalf("agent generation failed: %v", err)
 	}

@@ -40,28 +40,37 @@ func testAzureThinking(t *testing.T, result *fantasy.AgentResult) {
 }
 
 func builderAzureO4Mini(r *recorder.Recorder) (fantasy.LanguageModel, error) {
-	provider := azure.New(
+	provider, err := azure.New(
 		azure.WithBaseURL(cmp.Or(os.Getenv("FANTASY_AZURE_BASE_URL"), defaultBaseURL)),
 		azure.WithAPIKey(cmp.Or(os.Getenv("FANTASY_AZURE_API_KEY"), "(missing)")),
 		azure.WithHTTPClient(&http.Client{Transport: r}),
 	)
+	if err != nil {
+		return nil, err
+	}
 	return provider.LanguageModel("o4-mini")
 }
 
 func builderAzureGpt5Mini(r *recorder.Recorder) (fantasy.LanguageModel, error) {
-	provider := azure.New(
+	provider, err := azure.New(
 		azure.WithBaseURL(cmp.Or(os.Getenv("FANTASY_AZURE_BASE_URL"), defaultBaseURL)),
 		azure.WithAPIKey(cmp.Or(os.Getenv("FANTASY_AZURE_API_KEY"), "(missing)")),
 		azure.WithHTTPClient(&http.Client{Transport: r}),
 	)
+	if err != nil {
+		return nil, err
+	}
 	return provider.LanguageModel("gpt-5-mini")
 }
 
 func builderAzureGrok3Mini(r *recorder.Recorder) (fantasy.LanguageModel, error) {
-	provider := azure.New(
+	provider, err := azure.New(
 		azure.WithBaseURL(cmp.Or(os.Getenv("FANTASY_AZURE_BASE_URL"), defaultBaseURL)),
 		azure.WithAPIKey(cmp.Or(os.Getenv("FANTASY_AZURE_API_KEY"), "(missing)")),
 		azure.WithHTTPClient(&http.Client{Transport: r}),
 	)
+	if err != nil {
+		return nil, err
+	}
 	return provider.LanguageModel("grok-3-mini")
 }

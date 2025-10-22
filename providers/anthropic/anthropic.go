@@ -50,7 +50,7 @@ type provider struct {
 type Option = func(*options)
 
 // New creates a new Anthropic provider with the given options.
-func New(opts ...Option) fantasy.Provider {
+func New(opts ...Option) (fantasy.Provider, error) {
 	providerOptions := options{
 		headers: map[string]string{},
 	}
@@ -60,7 +60,7 @@ func New(opts ...Option) fantasy.Provider {
 
 	providerOptions.baseURL = cmp.Or(providerOptions.baseURL, DefaultURL)
 	providerOptions.name = cmp.Or(providerOptions.name, Name)
-	return &provider{options: providerOptions}
+	return &provider{options: providerOptions}, nil
 }
 
 // WithBaseURL sets the base URL for the Anthropic provider.

@@ -71,21 +71,27 @@ func testGoogleThinking(t *testing.T, result *fantasy.AgentResult) {
 
 func geminiBuilder(model string) builderFunc {
 	return func(r *recorder.Recorder) (fantasy.LanguageModel, error) {
-		provider := google.New(
+		provider, err := google.New(
 			google.WithGeminiAPIKey(cmp.Or(os.Getenv("FANTASY_GEMINI_API_KEY"), "(missing)")),
 			google.WithHTTPClient(&http.Client{Transport: r}),
 		)
+		if err != nil {
+			return nil, err
+		}
 		return provider.LanguageModel(model)
 	}
 }
 
 func vertexBuilder(model string) builderFunc {
 	return func(r *recorder.Recorder) (fantasy.LanguageModel, error) {
-		provider := google.New(
+		provider, err := google.New(
 			google.WithVertex(os.Getenv("FANTASY_VERTEX_PROJECT"), os.Getenv("FANTASY_VERTEX_LOCATION")),
 			google.WithHTTPClient(&http.Client{Transport: r}),
 			google.WithSkipAuth(!r.IsRecording()),
 		)
+		if err != nil {
+			return nil, err
+		}
 		return provider.LanguageModel(model)
 	}
 }

@@ -27,7 +27,7 @@ const (
 type Option = func(*options)
 
 // New creates a new Azure provider with the given options.
-func New(opts ...Option) fantasy.Provider {
+func New(opts ...Option) (fantasy.Provider, error) {
 	o := options{
 		apiVersion: defaultAPIVersion,
 	}

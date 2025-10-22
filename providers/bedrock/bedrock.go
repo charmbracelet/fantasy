@@ -21,7 +21,7 @@ const (
 type Option = func(*options)
 
 // New creates a new Bedrock provider with the given options.
-func New(opts ...Option) fantasy.Provider {
+func New(opts ...Option) (fantasy.Provider, error) {
 	var o options
 	for _, opt := range opts {
 		opt(&o)

@@ -38,7 +38,7 @@ type options struct {
 type Option = func(*options)
 
 // New creates a new OpenAI provider with the given options.
-func New(opts ...Option) fantasy.Provider {
+func New(opts ...Option) (fantasy.Provider, error) {
 	providerOptions := options{
 		headers:              map[string]string{},
 		languageModelOptions: make([]LanguageModelOption, 0),
@@ -57,7 +57,7 @@ func New(opts ...Option) fantasy.Provider {
 		providerOptions.headers["OpenAi-Project"] = providerOptions.project
 	}
 
-	return &provider{options: providerOptions}
+	return &provider{options: providerOptions}, nil
 }
 
 // WithBaseURL sets the base URL for the OpenAI provider.

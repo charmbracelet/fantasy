@@ -16,30 +16,39 @@ import (
 
 func anthropicImageBuilder(model string) builderFunc {
 	return func(r *recorder.Recorder) (fantasy.LanguageModel, error) {
-		provider := anthropic.New(
+		provider, err := anthropic.New(
 			anthropic.WithAPIKey(cmp.Or(os.Getenv("FANTASY_ANTHROPIC_API_KEY"), "(missing)")),
 			anthropic.WithHTTPClient(&http.Client{Transport: r}),
 		)
+		if err != nil {
+			return nil, err
+		}
 		return provider.LanguageModel(model)
 	}
 }
 
 func openAIImageBuilder(model string) builderFunc {
 	return func(r *recorder.Recorder) (fantasy.LanguageModel, error) {
-		provider := openai.New(
+		provider, err := openai.New(
 			openai.WithAPIKey(cmp.Or(os.Getenv("FANTASY_OPENAI_API_KEY"), "(missing)")),
 			openai.WithHTTPClient(&http.Client{Transport: r}),
 		)
+		if err != nil {
+			return nil, err
+		}
 		return provider.LanguageModel(model)
 	}
 }
 
 func geminiImageBuilder(model string) builderFunc {
 	return func(r *recorder.Recorder) (fantasy.LanguageModel, error) {
-		provider := google.New(
+		provider, err := google.New(
 			google.WithGeminiAPIKey(cmp.Or(os.Getenv("FANTASY_GEMINI_API_KEY"), "(missing)")),
 			google.WithHTTPClient(&http.Client{Transport: r}),
 		)
+		if err != nil {
+			return nil, err
+		}
 		return provider.LanguageModel(model)
 	}
 }

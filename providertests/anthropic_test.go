@@ -137,10 +137,13 @@ func testAnthropicThinking(t *testing.T, result *fantasy.AgentResult) {
 
 func anthropicBuilder(model string) builderFunc {
 	return func(r *recorder.Recorder) (fantasy.LanguageModel, error) {
-		provider := anthropic.New(
+		provider, err := anthropic.New(
 			anthropic.WithAPIKey(os.Getenv("FANTASY_ANTHROPIC_API_KEY")),
 			anthropic.WithHTTPClient(&http.Client{Transport: r}),
 		)
+		if err != nil {
+			return nil, err
+		}
 		return provider.LanguageModel(model)
 	}
 }

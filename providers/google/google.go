@@ -41,7 +41,7 @@ type options struct {
 type Option = func(*options)
 
 // New creates a new Google provider with the given options.
-func New(opts ...Option) fantasy.Provider {
+func New(opts ...Option) (fantasy.Provider, error) {
 	options := options{
 		headers: map[string]string{},
 	}
@@ -53,7 +53,7 @@ func New(opts ...Option) fantasy.Provider {
 
 	return &provider{
 		options: options,
-	}
+	}, nil
 }
 
 // WithBaseURL sets the base URL for the Google provider.
@@ -128,11 +128,15 @@ type languageModel struct {
 // LanguageModel implements fantasy.Provider.
 func (a *provider) LanguageModel(modelID string) (fantasy.LanguageModel, error) {
 	if strings.Contains(modelID, "anthropic") || strings.Contains(modelID, "claude") {
-		return anthropic.New(
+		p, err := anthropic.New(
 			anthropic.WithVertex(a.options.project, a.options.location),
 			anthropic.WithHTTPClient(a.options.client),
 			anthropic.WithSkipAuth(a.options.skipAuth),
-		).LanguageModel(modelID)
+		)
+		if err != nil {
+			return nil, err
+		}
+		return p.LanguageModel(modelID)
 	}
 
 	cc := &genai.ClientConfig{

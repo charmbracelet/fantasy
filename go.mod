@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/auth v0.17.0
 	github.com/aws/aws-sdk-go-v2 v1.39.3
 	github.com/aws/smithy-go v1.23.1
-	github.com/charmbracelet/anthropic-sdk-go v0.0.0-20251021163913-d29170d047bf
+	github.com/charmbracelet/anthropic-sdk-go v0.0.0-20251022202715-ec1499142678
 	github.com/charmbracelet/go-genai v0.0.0-20251021165952-9befde14ce97
 	github.com/charmbracelet/x/exp/slice v0.0.0-20250904123553-b4e2667e5ad5
 	github.com/charmbracelet/x/json v0.2.0

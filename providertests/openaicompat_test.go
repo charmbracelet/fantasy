@@ -18,6 +18,7 @@ func TestOpenAICompatibleCommon(t *testing.T) {
 		{"xai-grok-code-fast", builderXAIGrokCodeFast, nil},
 		{"groq-kimi-k2", builderGroq, nil},
 		{"zai-glm-4.5", builderZAIGLM45, nil},
+		{"huggingface-qwen3-coder", builderHuggingFace, nil},
 	})
 }
 
@@ -90,4 +91,13 @@ func builderGroq(r *recorder.Recorder) (fantasy.LanguageModel, error) {
 		openaicompat.WithHTTPClient(&http.Client{Transport: r}),
 	)
 	return provider.LanguageModel("moonshotai/kimi-k2-instruct-0905")
+}
+
+func builderHuggingFace(r *recorder.Recorder) (fantasy.LanguageModel, error) {
+	provider := openaicompat.New(
+		openaicompat.WithBaseURL("https://router.huggingface.co/v1"),
+		openaicompat.WithAPIKey(os.Getenv("FANTASY_HUGGINGFACE_API_KEY")),
+		openaicompat.WithHTTPClient(&http.Client{Transport: r}),
+	)
+	return provider.LanguageModel("Qwen/Qwen3-Coder-480B-A35B-Instruct:cerebras")
 }

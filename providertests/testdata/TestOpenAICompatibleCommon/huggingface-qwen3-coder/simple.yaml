@@ -1,0 +1,32 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 194
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"Say hi in Portuguese","role":"user"}],"model":"Qwen/Qwen3-Coder-480B-A35B-Instruct:cerebras","max_tokens":4000}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://router.huggingface.co/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: '{"id":"chatcmpl-9896e784-1a94-43f8-b06e-e673f36b4d66","choices":[{"finish_reason":"stop","index":0,"message":{"content":"Olá!","role":"assistant"}}],"created":1761070217,"model":"qwen-3-coder-480b","system_fingerprint":"fp_386b539e7b02ce3613b7","object":"chat.completion","usage":{"prompt_tokens":22,"completion_tokens":4,"total_tokens":26,"prompt_tokens_details":{"cached_tokens":0}},"time_info":{"queue_time":0.000123411,"prompt_time":0.002289408,"completion_time":0.00336861,"total_time":0.0072479248046875,"created":1761070217.7655818}}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 663.689958ms

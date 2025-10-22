@@ -36,10 +36,16 @@ func main() {
 	}
 
 	// Specifically, we'll use Claude Haiku 4.5.
-	provider := anthropic.New(anthropic.WithAPIKey(apiKey))
-	model, err := provider.LanguageModel("claude-haiku-4-5-20251001")
+	provider, err := anthropic.New(anthropic.WithAPIKey(apiKey))
 	if err != nil {
-		log.Fatalf("failed to get language model: %v", err)
+		log.Fatalf("could not create Anthropic provider: %v", err)
+	}
+
+	ctx := context.Background()
+
+	model, err := provider.LanguageModel(ctx, "claude-haiku-4-5-20251001")
+	if err != nil {
+		log.Fatalf("could not get language model: %v", err)
 	}
 
 	// Add a moon phase tool.

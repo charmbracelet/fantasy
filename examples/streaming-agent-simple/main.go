@@ -19,10 +19,15 @@ func main() {
 	}
 
 	// Create provider and model
-	provider := openai.New(
-		openai.WithAPIKey(apiKey),
-	)
-	model, err := provider.LanguageModel("gpt-4o-mini")
+	provider, err := openai.New(openai.WithAPIKey(apiKey))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error creating OpenAI provider: %v\n", err)
+		os.Exit(1)
+	}
+
+	ctx := context.Background()
+
+	model, err := provider.LanguageModel(ctx, "gpt-4o-mini")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -47,8 +52,6 @@ func main() {
 		fantasy.WithSystemPrompt("You are a helpful assistant."),
 		fantasy.WithTools(echoTool),
 	)
-
-	ctx := context.Background()
 
 	fmt.Println("Simple Streaming Agent Example")
 	fmt.Println("==============================")

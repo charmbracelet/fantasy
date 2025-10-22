@@ -23,34 +23,46 @@ func TestBedrockBasicAuth(t *testing.T) {
 }
 
 func builderBedrockClaude3Sonnet(r *recorder.Recorder) (fantasy.LanguageModel, error) {
-	provider := bedrock.New(
+	provider, err := bedrock.New(
 		bedrock.WithHTTPClient(&http.Client{Transport: r}),
 		bedrock.WithSkipAuth(!r.IsRecording()),
 	)
+	if err != nil {
+		return nil, err
+	}
 	return provider.LanguageModel("us.anthropic.claude-3-sonnet-20240229-v1:0")
 }
 
 func builderBedrockClaude3Opus(r *recorder.Recorder) (fantasy.LanguageModel, error) {
-	provider := bedrock.New(
+	provider, err := bedrock.New(
 		bedrock.WithHTTPClient(&http.Client{Transport: r}),
 		bedrock.WithSkipAuth(!r.IsRecording()),
 	)
+	if err != nil {
+		return nil, err
+	}
 	return provider.LanguageModel("us.anthropic.claude-3-opus-20240229-v1:0")
 }
 
 func builderBedrockClaude3Haiku(r *recorder.Recorder) (fantasy.LanguageModel, error) {
-	provider := bedrock.New(
+	provider, err := bedrock.New(
 		bedrock.WithHTTPClient(&http.Client{Transport: r}),
 		bedrock.WithSkipAuth(!r.IsRecording()),
 	)
+	if err != nil {
+		return nil, err
+	}
 	return provider.LanguageModel("us.anthropic.claude-3-haiku-20240307-v1:0")
 }
 
 func buildersBedrockBasicAuth(r *recorder.Recorder) (fantasy.LanguageModel, error) {
-	provider := bedrock.New(
+	provider, err := bedrock.New(
 		bedrock.WithHTTPClient(&http.Client{Transport: r}),
 		bedrock.WithAPIKey(os.Getenv("FANTASY_BEDROCK_API_KEY")),
 		bedrock.WithSkipAuth(true),
 	)
+	if err != nil {
+		return nil, err
+	}
 	return provider.LanguageModel("us.anthropic.claude-3-sonnet-20240229-v1:0")
 }

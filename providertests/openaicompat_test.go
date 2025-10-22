@@ -49,55 +49,73 @@ func testOpenAICompatThinking(t *testing.T, result *fantasy.AgentResult) {
 }
 
 func builderXAIGrokCodeFast(r *recorder.Recorder) (fantasy.LanguageModel, error) {
-	provider := openaicompat.New(
+	provider, err := openaicompat.New(
 		openaicompat.WithBaseURL("https://api.x.ai/v1"),
 		openaicompat.WithAPIKey(os.Getenv("FANTASY_XAI_API_KEY")),
 		openaicompat.WithHTTPClient(&http.Client{Transport: r}),
 	)
+	if err != nil {
+		return nil, err
+	}
 	return provider.LanguageModel("grok-code-fast-1")
 }
 
 func builderXAIGrok4Fast(r *recorder.Recorder) (fantasy.LanguageModel, error) {
-	provider := openaicompat.New(
+	provider, err := openaicompat.New(
 		openaicompat.WithBaseURL("https://api.x.ai/v1"),
 		openaicompat.WithAPIKey(os.Getenv("FANTASY_XAI_API_KEY")),
 		openaicompat.WithHTTPClient(&http.Client{Transport: r}),
 	)
+	if err != nil {
+		return nil, err
+	}
 	return provider.LanguageModel("grok-4-fast")
 }
 
 func builderXAIGrok3Mini(r *recorder.Recorder) (fantasy.LanguageModel, error) {
-	provider := openaicompat.New(
+	provider, err := openaicompat.New(
 		openaicompat.WithBaseURL("https://api.x.ai/v1"),
 		openaicompat.WithAPIKey(os.Getenv("FANTASY_XAI_API_KEY")),
 		openaicompat.WithHTTPClient(&http.Client{Transport: r}),
 	)
+	if err != nil {
+		return nil, err
+	}
 	return provider.LanguageModel("grok-3-mini")
 }
 
 func builderZAIGLM45(r *recorder.Recorder) (fantasy.LanguageModel, error) {
-	provider := openaicompat.New(
+	provider, err := openaicompat.New(
 		openaicompat.WithBaseURL("https://api.z.ai/api/coding/paas/v4"),
 		openaicompat.WithAPIKey(os.Getenv("FANTASY_ZAI_API_KEY")),
 		openaicompat.WithHTTPClient(&http.Client{Transport: r}),
 	)
+	if err != nil {
+		return nil, err
+	}
 	return provider.LanguageModel("glm-4.5")
 }
 
 func builderGroq(r *recorder.Recorder) (fantasy.LanguageModel, error) {
-	provider := openaicompat.New(
+	provider, err := openaicompat.New(
 		openaicompat.WithBaseURL("https://api.groq.com/openai/v1"),
 		openaicompat.WithAPIKey(os.Getenv("FANTASY_GROQ_API_KEY")),
 		openaicompat.WithHTTPClient(&http.Client{Transport: r}),
 	)
+	if err != nil {
+		return nil, err
+	}
 	return provider.LanguageModel("moonshotai/kimi-k2-instruct-0905")
 }
 
 func builderHuggingFace(r *recorder.Recorder) (fantasy.LanguageModel, error) {
-	provider := openaicompat.New(
+	provider, err := openaicompat.New(
 		openaicompat.WithBaseURL("https://router.huggingface.co/v1"),
 		openaicompat.WithAPIKey(os.Getenv("FANTASY_HUGGINGFACE_API_KEY")),
 		openaicompat.WithHTTPClient(&http.Client{Transport: r}),
 	)
+	if err != nil {
+		return nil, err
+	}
 	return provider.LanguageModel("Qwen/Qwen3-Coder-480B-A35B-Instruct:cerebras")
 }

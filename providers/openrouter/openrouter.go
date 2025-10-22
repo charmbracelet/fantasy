@@ -25,7 +25,7 @@ const (
 type Option = func(*options)
 
 // New creates a new OpenRouter provider with the given options.
-func New(opts ...Option) fantasy.Provider {
+func New(opts ...Option) (fantasy.Provider, error) {
 	providerOptions := options{
 		openaiOptions: []openai.Option{
 			openai.WithName(Name),

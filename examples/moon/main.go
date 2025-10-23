@@ -1,7 +1,8 @@
 package main
 
 // This example demonstrates how to create an agent with a tool that can
-// provide moon phase information for a given date, defaulting to today.
+// provide moon phase information for a given date, defaulting to today using
+// an HTTP tool call.
 
 import (
 	"context"

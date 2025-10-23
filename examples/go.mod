@@ -29,7 +29,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.26.4 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.30.3 // indirect
 	github.com/aws/smithy-go v1.23.1 // indirect
-	github.com/charmbracelet/anthropic-sdk-go v0.0.0-20251021163913-d29170d047bf // indirect
+	github.com/charmbracelet/anthropic-sdk-go v0.0.0-20251022202715-ec1499142678 // indirect
 	github.com/charmbracelet/colorprofile v0.3.2 // indirect
 	github.com/charmbracelet/ultraviolet v0.0.0-20250915111650-81d4262876ef // indirect
 	github.com/charmbracelet/x/ansi v0.10.2 // indirect

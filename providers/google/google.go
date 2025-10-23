@@ -122,7 +122,6 @@ func WithHTTPClient(client *http.Client) Option {
 }
 
 // WithToolCallIDFunc sets the function that generates a tool call ID.
-// WithToolCallIDFunc sets the function that generates a tool call ID.
 func WithToolCallIDFunc(f ToolCallIDFunc) Option {
 	return func(o *options) {
 		o.generateID = f

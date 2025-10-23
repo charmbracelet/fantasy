@@ -37,7 +37,11 @@ if err != nil {
 }
 
 // Make your own tools.
-cuteDogTool := fantasy.NewAgentTool("cute_dog_tool", "Provide up-to-date info on cute dogs.", fetchCuteDogInfo)
+cuteDogTool := fantasy.NewAgentTool(
+  "cute_dog_tool",
+  "Provide up-to-date info on cute dogs.",
+  fetchCuteDogInfoFunc,
+)
 
 // Equip your agent.
 agent := fantasy.NewAgent(model, fantasy.WithTools(cuteDogTool))

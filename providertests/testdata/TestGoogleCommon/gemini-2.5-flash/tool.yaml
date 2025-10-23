@@ -14,7 +14,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.23.0 gl-go/go1.25.1
+      - google-genai-sdk/1.29.0 gl-go/go1.25.1
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
     method: POST
   response:
@@ -36,50 +36,51 @@ interactions:
                       "location": "Florence,Italy"
                     }
                   },
-                  "thoughtSignature": "CoQCAdHtim/RXh2BurmfhDAIWuDZaECZhw96eMGy0JrHOvouNR43xVQZdtrsPVDRc9XlaGzzZMpiBeJ90773lWhO96qMygspNDBUXQLCnl73AjXpkroRFxcupqHe0xjcZq1WwTLqmq+1JOcdZ4EY9MQl2LkBccWIM38fZFW0bV76uuGAikuhRw8huaD7EjP/8819+E7WVVGKjmaYr2lchfYv36/1OJU4Y2cqwgO6aNTEyVBYmbs61vN4SaNhj+ogcJ6orbgNLiq0Q2nfLL2LPLBxW3MfefywSvaq147G6NmA6HCfno10SEBA5tmrNfmFMvfdOcppyRB8rfDU0QXcyDnJEhUNfrQ="
+                  "thoughtSignature": "CsMCAdHtim+uYau1mVPfH8R9PL5i1xcfKhCoZGjQW7IUiQ8dA9KpWY0mAFee99ioZ3/5S4fZoD0mcw/nvze3xYt4UahAfMfJeJMAMhJkfzUVZA5YM8k3VbM+BO9TkejslffdHcCIHPNFVzvi+giIezk5cfXDQBnuqSRsuEfmfCpJtgGCUJLwRS5TdSsgH7hjzpi3LmhROSLr/MCth/6+uQUGHXZFDyMM4YglT2xeSGO4Cvt8HnA9Y7KmTffUWBmEhY/PDq/8S3Rj7S54o7WWDkq3B084UR2vFA4YcjdWIj6fFR1vKIBzAwIYECBe43oVwZg1TbxZ0rYk6QrXahJpeO3Od52oMwMYIQpgCODTWtcg7NvoI6wJAEhomHMRvVWI5dXAZBHLiyEKifnX0bqK78gaEMBcMdKxtE10PVqsGQe06IkGV9U="
                 }
               ],
               "role": "model"
             },
             "finishReason": "STOP",
-            "index": 0
+            "index": 0,
+            "finishMessage": "Model generated function call(s)."
           }
         ],
         "usageMetadata": {
           "promptTokenCount": 54,
           "candidatesTokenCount": 15,
-          "totalTokenCount": 122,
+          "totalTokenCount": 137,
           "promptTokensDetails": [
             {
               "modality": "TEXT",
               "tokenCount": 54
             }
           ],
-          "thoughtsTokenCount": 53
+          "thoughtsTokenCount": 68
         },
         "modelVersion": "gemini-2.5-flash",
-        "responseId": "43LWaMOULuH6nsEP-JagUA"
+        "responseId": "D835aPLFGsahxN8P5c69gQc"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 926.95325ms
+    duration: 1.543015083s
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 734
+    content_length: 792
     host: generativelanguage.googleapis.com
     body: |
-      {"contents":[{"parts":[{"text":"What's the weather in Florence,Italy?"}],"role":"user"},{"parts":[{"functionCall":{"args":{"location":"Florence,Italy"},"id":"weather","name":"weather"}}],"role":"model"},{"parts":[{"functionResponse":{"id":"weather","name":"weather","response":{"result":"40 C"}}}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}
+      {"contents":[{"parts":[{"text":"What's the weather in Florence,Italy?"}],"role":"user"},{"parts":[{"functionCall":{"args":{"location":"Florence,Italy"},"id":"e4decb00-d8a4-4ba0-aabd-1a4d5be5bc41","name":"weather"}}],"role":"model"},{"parts":[{"functionResponse":{"id":"e4decb00-d8a4-4ba0-aabd-1a4d5be5bc41","name":"weather","response":{"result":"40 C"}}}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}
     headers:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.23.0 gl-go/go1.25.1
+      - google-genai-sdk/1.29.0 gl-go/go1.25.1
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
     method: POST
   response:
@@ -116,11 +117,11 @@ interactions:
           ]
         },
         "modelVersion": "gemini-2.5-flash",
-        "responseId": "5HLWaP7VKJS9kdUP1JnEcA"
+        "responseId": "EM35aPGEFtqr28oPs7WJuQM"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 906.09475ms
+    duration: 1.308024792s

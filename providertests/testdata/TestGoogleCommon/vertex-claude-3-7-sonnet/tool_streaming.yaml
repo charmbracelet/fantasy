@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - Anthropic/Go 1.13.0
+      - Anthropic/Go 1.14.0
     url: https://us-east5-aiplatform.googleapis.com/v1/projects/fantasy-playground-472418/locations/us-east5/publishers/anthropic/models/claude-3-7-sonnet@20250219:streamRawPredict
     method: POST
   response:
@@ -26,154 +26,55 @@ interactions:
     uncompressed: true
     body: |+
       event: message_start
-      data: {"type":"message_start","message":{"id":"msg_vrtx_01MtpPXF7gH6SFEyKNTJLWEw","type":"message","role":"assistant","model":"claude-3-7-sonnet-20250219","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":394,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":3}}      }
+      data: {"type":"message_start","message":{"model":"claude-3-7-sonnet-20250219","id":"msg_vrtx_01MxixNwfeZnYajJEteJLkR7","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":394,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":1}}}
 
       event: ping
       data: {"type": "ping"}
 
       event: content_block_start
-      data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}   }
+      data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}             }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"I'll check"}       }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"I"}          }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" the current weather in"}          }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"'ll"}               }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" Florence, Italy for you"}      }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" get the current weather information"} }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"."}       }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" for Florence, Italy for"}            }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" you."}         }
 
       event: content_block_stop
-      data: {"type":"content_block_stop","index":0              }
+      data: {"type":"content_block_stop","index":0}
 
       event: content_block_start
-      data: {"type":"content_block_start","index":1,"content_block":{"type":"tool_use","id":"toolu_vrtx_01Tj3azsUbpPDwNvW3itTJ3L","name":"weather","input":{}}          }
+      data: {"type":"content_block_start","index":1,"content_block":{"type":"tool_use","id":"toolu_vrtx_013x6uAhnAaWjx8Kx8xL8qCK","name":"weather","input":{}}    }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":""}   }
+      data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":""}             }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"{\"locatio"}   }
+      data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"{\"location"}              }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"n\": \"Fl"}             }
+      data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"\": \"Flo"}}
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"ore"}}
+      data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"rence,Ital"}    }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"nce,Italy\"}"}             }
+      data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"y\"}"}   }
 
       event: content_block_stop
-      data: {"type":"content_block_stop","index":1  }
+      data: {"type":"content_block_stop","index":1   }
 
       event: message_delta
-      data: {"type":"message_delta","delta":{"stop_reason":"tool_use","stop_sequence":null},"usage":{"output_tokens":67}            }
-
-      event: message_stop
-      data: {"type":"message_stop"  }
-
-    headers:
-      Content-Type:
-      - text/event-stream; charset=utf-8
-    status: 200 OK
-    code: 200
-    duration: 790.875833ms
-- id: 1
-  request:
-    proto: HTTP/1.1
-    proto_major: 1
-    proto_minor: 1
-    content_length: 895
-    host: ""
-    body: '{"max_tokens":4000,"messages":[{"content":[{"text":"What''s the weather in Florence,Italy?","type":"text"}],"role":"user"},{"content":[{"text":"I''ll check the current weather in Florence, Italy for you.","type":"text"},{"id":"toolu_vrtx_01Tj3azsUbpPDwNvW3itTJ3L","input":{"location":"Florence,Italy"},"name":"weather","type":"tool_use"}],"role":"assistant"},{"content":[{"tool_use_id":"toolu_vrtx_01Tj3azsUbpPDwNvW3itTJ3L","content":[{"text":"40 C","type":"text"}],"type":"tool_result"}],"role":"user"}],"system":[{"text":"You are a helpful assistant","type":"text"}],"tool_choice":{"disable_parallel_tool_use":false,"type":"auto"},"tools":[{"input_schema":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location"}],"stream":true,"anthropic_version":"vertex-2023-10-16"}'
-    headers:
-      Accept:
-      - application/json
-      Content-Type:
-      - application/json
-      User-Agent:
-      - Anthropic/Go 1.13.0
-    url: https://us-east5-aiplatform.googleapis.com/v1/projects/fantasy-playground-472418/locations/us-east5/publishers/anthropic/models/claude-3-7-sonnet@20250219:streamRawPredict
-    method: POST
-  response:
-    proto: HTTP/2.0
-    proto_major: 2
-    proto_minor: 0
-    content_length: -1
-    uncompressed: true
-    body: |+
-      event: message_start
-      data: {"type":"message_start","message":{"id":"msg_vrtx_0164AzFzxtcpgGX36csNs7ch","type":"message","role":"assistant","model":"claude-3-7-sonnet-20250219","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":475,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":2}}         }
-
-      event: ping
-      data: {"type": "ping"}
-
-      event: content_block_start
-      data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}  }
-
-      event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"The"}            }
-
-      event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" current temperature in Florence,"} }
-
-      event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" Italy is 40°"}      }
-
-      event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"C (104°F"}}
-
-      event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"),"}             }
-
-      event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" which is very hot."}              }
-
-      event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" If"}    }
-
-      event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" you're there"}           }
-
-      event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" or"}}
-
-      event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" planning to"}              }
-
-      event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" visit, make"}            }
-
-      event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" sure to stay hydrate"}      }
-
-      event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"d and try"}            }
-
-      event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" to avoi"}             }
-
-      event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"d extende"}              }
-
-      event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"d exposure to the sun during"}           }
-
-      event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" the hottest parts of"}         }
-
-      event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" the day."}       }
-
-      event: content_block_stop
-      data: {"type":"content_block_stop","index":0   }
-
-      event: message_delta
-      data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"output_tokens":59}    }
+      data: {"type":"message_delta","delta":{"stop_reason":"tool_use","stop_sequence":null},"usage":{"output_tokens":68}       }
 
       event: message_stop
       data: {"type":"message_stop"           }
@@ -183,4 +84,112 @@ interactions:
       - text/event-stream; charset=utf-8
     status: 200 OK
     code: 200
-    duration: 1.460643125s
+    duration: 815.614959ms
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 906
+    host: ""
+    body: '{"max_tokens":4000,"messages":[{"content":[{"text":"What''s the weather in Florence,Italy?","type":"text"}],"role":"user"},{"content":[{"text":"I''ll get the current weather information for Florence, Italy for you.","type":"text"},{"id":"toolu_vrtx_013x6uAhnAaWjx8Kx8xL8qCK","input":{"location":"Florence,Italy"},"name":"weather","type":"tool_use"}],"role":"assistant"},{"content":[{"tool_use_id":"toolu_vrtx_013x6uAhnAaWjx8Kx8xL8qCK","content":[{"text":"40 C","type":"text"}],"type":"tool_result"}],"role":"user"}],"system":[{"text":"You are a helpful assistant","type":"text"}],"tool_choice":{"disable_parallel_tool_use":false,"type":"auto"},"tools":[{"input_schema":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location"}],"stream":true,"anthropic_version":"vertex-2023-10-16"}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Anthropic/Go 1.14.0
+    url: https://us-east5-aiplatform.googleapis.com/v1/projects/fantasy-playground-472418/locations/us-east5/publishers/anthropic/models/claude-3-7-sonnet@20250219:streamRawPredict
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: |+
+      event: message_start
+      data: {"type":"message_start","message":{"model":"claude-3-7-sonnet-20250219","id":"msg_vrtx_01LHDBWakVsStHFBYodAnDF6","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":476,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":2}}     }
+
+      event: ping
+      data: {"type": "ping"}
+
+      event: content_block_start
+      data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}       }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"The"}               }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" current temperature in Florence,"}          }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" Italy is 40°"}      }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"C (104°F"}   }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"),"}    }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" which is extremely"} }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" hot. Make"}            }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" sure to stay hydrate"} }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"d,"}               }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" seek"}  }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" shade when possible, an"}          }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"d take appropriate"}     }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" precautions if you"} }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"'re"}             }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" in"}             }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" the"}              }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" area"}   }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" or"}             }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" planning to visit soon"}         }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"."}    }
+
+      event: content_block_stop
+      data: {"type":"content_block_stop","index":0  }
+
+      event: message_delta
+      data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"output_tokens":56}    }
+
+      event: message_stop
+      data: {"type":"message_stop"     }
+
+    headers:
+      Content-Type:
+      - text/event-stream; charset=utf-8
+    status: 200 OK
+    code: 200
+    duration: 1.597800792s

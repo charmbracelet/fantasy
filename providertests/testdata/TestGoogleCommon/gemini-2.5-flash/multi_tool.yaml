@@ -14,7 +14,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.23.0 gl-go/go1.25.1
+      - google-genai-sdk/1.29.0 gl-go/go1.25.1
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
     method: POST
   response:
@@ -37,7 +37,7 @@ interactions:
                       "b": 3
                     }
                   },
-                  "thoughtSignature": "Cr4BAdHtim9LvttVUIQ0QpEtexErSfMWokWFxdJCGfdh4M6N0YBwqI+kBhIbVJOwQonI1GmBaw8lfUzjvYYW2ScSRvYAUJoBWMRuLzcaafC/2FnOcLPR9hyaC9499fBWocLFbnCRO/0bzA+Z4uAS81EL/zTqCsZuO5OS5KwvLe9OIbPXrMc65pKhED6D80UaJe9+9OfeIKsTf53yxXUk7elFlA//EukpULLiadHrHKMVFu9FKnHwFBQ+BsY9lALcSg=="
+                  "thoughtSignature": "Cr4BAdHtim+A5JGim4+w5VYGe8TJVXPJj1AvMi9sOcJIryLoujT3zeb31871MXUtiC6FAxxtOICHDVqKWZtThxHQ3SdoWwDgD5KVzCylPz0bCmBzb1m7oGPk2o+hOc3UQ/aYXu3q2AFwy+Hiq7tG5Bt/ZnKTXbpUOrGG58UDRN987pmVpeH+VkqJDsxz96JOT2KlLJdCVr2ulwihl6qxJ/pD2dv8+JS3zlEuPqtZ1alRUvQ9FG6uN+GWQDCog6XPjA=="
                 },
                 {
                   "functionCall": {
@@ -52,7 +52,8 @@ interactions:
               "role": "model"
             },
             "finishReason": "STOP",
-            "index": 0
+            "index": 0,
+            "finishMessage": "Model generated function call(s)."
           }
         ],
         "usageMetadata": {
@@ -68,28 +69,28 @@ interactions:
           "thoughtsTokenCount": 39
         },
         "modelVersion": "gemini-2.5-flash",
-        "responseId": "53LWaN-ZF8_l7M8Pt4CxmQE"
+        "responseId": "FM35aMnkN5TkxN8P7Jv2oAk"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 1.153815667s
+    duration: 947.313583ms
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 1173
+    content_length: 1295
     host: generativelanguage.googleapis.com
     body: |
-      {"contents":[{"parts":[{"text":"Add and multiply the number 2 and 3"}],"role":"user"},{"parts":[{"functionCall":{"args":{"a":2,"b":3},"id":"add","name":"add"}},{"functionCall":{"args":{"a":2,"b":3},"id":"multiply","name":"multiply"}}],"role":"model"},{"parts":[{"functionResponse":{"id":"add","name":"add","response":{"result":"5"}}},{"functionResponse":{"id":"multiply","name":"multiply","response":{"result":"6"}}}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000},"systemInstruction":{"parts":[{"text":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS."}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Add two numbers","name":"add","parameters":{"properties":{"a":{"description":"first number","type":"INTEGER"},"b":{"description":"second number","type":"INTEGER"}},"required":["a","b"],"type":"OBJECT"}},{"description":"Multiply two numbers","name":"multiply","parameters":{"properties":{"a":{"description":"first number","type":"INTEGER"},"b":{"description":"second number","type":"INTEGER"}},"required":["a","b"],"type":"OBJECT"}}]}]}
+      {"contents":[{"parts":[{"text":"Add and multiply the number 2 and 3"}],"role":"user"},{"parts":[{"functionCall":{"args":{"a":2,"b":3},"id":"4dcee51b-1ec2-45b3-a142-2fd08a994915","name":"add"}},{"functionCall":{"args":{"a":2,"b":3},"id":"031cd133-a203-4074-8fef-c5b0b792fa84","name":"multiply"}}],"role":"model"},{"parts":[{"functionResponse":{"id":"4dcee51b-1ec2-45b3-a142-2fd08a994915","name":"add","response":{"result":"5"}}},{"functionResponse":{"id":"031cd133-a203-4074-8fef-c5b0b792fa84","name":"multiply","response":{"result":"6"}}}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000},"systemInstruction":{"parts":[{"text":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS."}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Add two numbers","name":"add","parameters":{"properties":{"a":{"description":"first number","type":"INTEGER"},"b":{"description":"second number","type":"INTEGER"}},"required":["a","b"],"type":"OBJECT"}},{"description":"Multiply two numbers","name":"multiply","parameters":{"properties":{"a":{"description":"first number","type":"INTEGER"},"b":{"description":"second number","type":"INTEGER"}},"required":["a","b"],"type":"OBJECT"}}]}]}
     headers:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.23.0 gl-go/go1.25.1
+      - google-genai-sdk/1.29.0 gl-go/go1.25.1
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
     method: POST
   response:
@@ -105,7 +106,7 @@ interactions:
             "content": {
               "parts": [
                 {
-                  "text": "The sum of 2 and 3 is 5. The product of 2 and 3 is 6."
+                  "text": "The result of adding 2 and 3 is 5. The result of multiplying 2 and 3 is 6."
                 }
               ],
               "role": "model"
@@ -116,8 +117,8 @@ interactions:
         ],
         "usageMetadata": {
           "promptTokenCount": 185,
-          "candidatesTokenCount": 24,
-          "totalTokenCount": 209,
+          "candidatesTokenCount": 26,
+          "totalTokenCount": 211,
           "promptTokensDetails": [
             {
               "modality": "TEXT",
@@ -126,11 +127,11 @@ interactions:
           ]
         },
         "modelVersion": "gemini-2.5-flash",
-        "responseId": "53LWaPLjL-Li7M8P1p-bsAs"
+        "responseId": "Fc35aJWJKMnzxs0Pr7LuyQg"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 401.486666ms
+    duration: 854.52725ms

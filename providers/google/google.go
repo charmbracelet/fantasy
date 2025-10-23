@@ -631,7 +631,7 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 							}
 						}
 
-						toolCallID := cmp.Or(part.FunctionCall.ID, part.FunctionCall.Name, uuid.NewString())
+						toolCallID := cmp.Or(part.FunctionCall.ID, uuid.NewString())
 
 						args, err := json.Marshal(part.FunctionCall.Args)
 						if err != nil {
@@ -898,7 +898,7 @@ func mapResponse(response *genai.GenerateContentResponse, warnings []fantasy.Cal
 			if err != nil {
 				return nil, err
 			}
-			toolCallID := cmp.Or(part.FunctionCall.ID, part.FunctionCall.Name, uuid.NewString())
+			toolCallID := cmp.Or(part.FunctionCall.ID, uuid.NewString())
 			content = append(content, fantasy.ToolCallContent{
 				ToolCallID:       toolCallID,
 				ToolName:         part.FunctionCall.Name,

@@ -16,11 +16,24 @@ const (
 // Option configures the Cerebras provider via OpenAI-compatible options.
 type Option = openaicompat.Option
 
+var (
+	// WithBaseURL is an alias for openaicompat.WithBaseURL.
+	WithBaseURL = openaicompat.WithBaseURL
+	// WithAPIKey is an alias for openaicompat.WithAPIKey.
+	WithAPIKey = openaicompat.WithAPIKey
+	// WithHeaders is an alias for openaicompat.WithHeaders.
+	WithHeaders = openaicompat.WithHeaders
+	// WithHTTPClient is an alias for openaicompat.WithHTTPClient.
+	WithHTTPClient = openaicompat.WithHTTPClient
+	// WithSDKOptions is an alias for openaicompat.WithSDKOptions.
+	WithSDKOptions = openaicompat.WithSDKOptions
+)
+
 // New creates a new Cerebras provider using OpenAI-compatible transport/options.
 func New(opts ...Option) (fantasy.Provider, error) {
 	options := []Option{
 		openaicompat.WithName(Name),
-		openaicompat.WithBaseURL(BaseURL),
+		WithBaseURL(BaseURL),
 	}
 	options = append(options, opts...)
 	return openaicompat.New(options...)

@@ -7,7 +7,6 @@ import (
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/providers/huggingface"
-	"charm.land/fantasy/providers/openaicompat"
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )
 
@@ -19,8 +18,8 @@ func TestHuggingFaceCommon(t *testing.T) {
 
 func builderHuggingFaceProvider(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
 	provider, err := huggingface.New(
-		openaicompat.WithAPIKey(os.Getenv("FANTASY_HUGGINGFACE_API_KEY")),
-		openaicompat.WithHTTPClient(&http.Client{Transport: r}),
+		huggingface.WithAPIKey(os.Getenv("FANTASY_HUGGINGFACE_API_KEY")),
+		huggingface.WithHTTPClient(&http.Client{Transport: r}),
 	)
 	if err != nil {
 		return nil, err

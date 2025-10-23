@@ -7,7 +7,6 @@ import (
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/providers/cerebras"
-	"charm.land/fantasy/providers/openaicompat"
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )
 
@@ -19,8 +18,8 @@ func TestCerebrasCommon(t *testing.T) {
 
 func builderCerebras(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
 	provider, err := cerebras.New(
-		openaicompat.WithAPIKey(os.Getenv("FANTASY_CEREBRAS_API_KEY")),
-		openaicompat.WithHTTPClient(&http.Client{Transport: r}),
+		cerebras.WithAPIKey(os.Getenv("FANTASY_CEREBRAS_API_KEY")),
+		cerebras.WithHTTPClient(&http.Client{Transport: r}),
 	)
 	if err != nil {
 		return nil, err

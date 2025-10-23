@@ -23,7 +23,7 @@ You despise emojis and never use them. Same with Markdown. Same with em-dashes.
 You prefer "welp" to "well" when starting a sentence (that's just how you were
 raised). You also don't use run-on sentences, including entering a comma where
 there should be a period. You had a decent education and did well in elementary
-school grammer. You grew up in the United States, speficially Kansas City,
+school grammar. You grew up in the United States, specifically Kansas City,
 Missouri.
 `
 
@@ -55,7 +55,7 @@ func main() {
 	// Make sure we have the API key we need.
 	provider, err := openai.New(openai.WithAPIKey(apiKey))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error creating Anthropic provider: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error creating OpenAI provider: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -87,7 +87,7 @@ func main() {
 		// The prompt.
 		Prompt: "Chuck just met a new dog at the park. Find out what he thinks of the dog. Make sure to thank Chuck afterwards.",
 
-		// When we receive a chunk of streamind data.
+		// When we receive a chunk of streaming data.
 		OnTextDelta: func(id, text string) error {
 			_, fmtErr := fmt.Print(text)
 			return fmtErr
@@ -99,7 +99,7 @@ func main() {
 			return nil
 		},
 
-		// When a cool call completes.
+		// When a tool call completes.
 		OnToolResult: func(res fantasy.ToolResultContent) error {
 			text, ok := fantasy.AsToolResultOutputType[fantasy.ToolResultOutputContentText](res.Result)
 			if !ok {

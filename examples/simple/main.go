@@ -1,6 +1,6 @@
 package main
 
-// This is a basic example illustrting how to create an agent with a custom
+// This is a basic example illustrating how to create an agent with a custom
 // tool call.
 
 import (

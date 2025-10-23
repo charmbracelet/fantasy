@@ -29,16 +29,16 @@ type provider struct {
 type ToolCallIDFunc = func() string
 
 type options struct {
-	apiKey     string
-	name       string
-	baseURL    string
-	headers    map[string]string
-	client     *http.Client
-	backend    genai.Backend
-	project    string
-	location   string
-	skipAuth   bool
-	generateID ToolCallIDFunc
+	apiKey         string
+	name           string
+	baseURL        string
+	headers        map[string]string
+	client         *http.Client
+	backend        genai.Backend
+	project        string
+	location       string
+	skipAuth       bool
+	toolCallIDFunc ToolCallIDFunc
 }
 
 // Option defines a function that configures Google provider options.
@@ -48,7 +48,7 @@ type Option = func(*options)
 func New(opts ...Option) (fantasy.Provider, error) {
 	options := options{
 		headers: map[string]string{},
-		generateID: func() string {
+		toolCallIDFunc: func() string {
 			return uuid.NewString()
 		},
 	}
@@ -124,7 +124,7 @@ func WithHTTPClient(client *http.Client) Option {
 // WithToolCallIDFunc sets the function that generates a tool call ID.
 func WithToolCallIDFunc(f ToolCallIDFunc) Option {
 	return func(o *options) {
-		o.generateID = f
+		o.toolCallIDFunc = f
 	}
 }
 
@@ -681,7 +681,7 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 							}
 						}
 
-						toolCallID := cmp.Or(part.FunctionCall.ID, g.providerOptions.generateID())
+						toolCallID := cmp.Or(part.FunctionCall.ID, g.providerOptions.toolCallIDFunc())
 
 						args, err := json.Marshal(part.FunctionCall.Args)
 						if err != nil {
@@ -959,7 +959,7 @@ func (g languageModel) mapResponse(response *genai.GenerateContentResponse, warn
 			if err != nil {
 				return nil, err
 			}
-			toolCallID := cmp.Or(part.FunctionCall.ID, g.providerOptions.generateID())
+			toolCallID := cmp.Or(part.FunctionCall.ID, g.providerOptions.toolCallIDFunc())
 			content = append(content, fantasy.ToolCallContent{
 				ToolCallID:       toolCallID,
 				ToolName:         part.FunctionCall.Name,

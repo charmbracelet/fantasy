@@ -25,16 +25,19 @@ type provider struct {
 	options options
 }
 
+type GoogleToolCallIDFunc = func() string
+
 type options struct {
-	apiKey   string
-	name     string
-	baseURL  string
-	headers  map[string]string
-	client   *http.Client
-	backend  genai.Backend
-	project  string
-	location string
-	skipAuth bool
+	apiKey     string
+	name       string
+	baseURL    string
+	headers    map[string]string
+	client     *http.Client
+	backend    genai.Backend
+	project    string
+	location   string
+	skipAuth   bool
+	generateID GoogleToolCallIDFunc
 }
 
 // Option defines a function that configures Google provider options.
@@ -44,6 +47,9 @@ type Option = func(*options)
 func New(opts ...Option) (fantasy.Provider, error) {
 	options := options{
 		headers: map[string]string{},
+		generateID: func() string {
+			return uuid.NewString()
+		},
 	}
 	for _, o := range opts {
 		o(&options)
@@ -111,6 +117,12 @@ func WithHeaders(headers map[string]string) Option {
 func WithHTTPClient(client *http.Client) Option {
 	return func(o *options) {
 		o.client = client
+	}
+}
+
+func WithToolCallIDFunc(f GoogleToolCallIDFunc) Option {
+	return func(o *options) {
+		o.generateID = f
 	}
 }
 
@@ -476,7 +488,7 @@ func (g *languageModel) Generate(ctx context.Context, call fantasy.Call) (*fanta
 		return nil, err
 	}
 
-	return mapResponse(response, warnings)
+	return g.mapResponse(response, warnings)
 }
 
 // Model implements fantasy.LanguageModel.
@@ -631,7 +643,7 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 							}
 						}
 
-						toolCallID := cmp.Or(part.FunctionCall.ID, uuid.NewString())
+						toolCallID := cmp.Or(part.FunctionCall.ID, g.providerOptions.generateID())
 
 						args, err := json.Marshal(part.FunctionCall.Args)
 						if err != nil {
@@ -873,7 +885,7 @@ func mapJSONTypeToGoogle(jsonType string) genai.Type {
 	}
 }
 
-func mapResponse(response *genai.GenerateContentResponse, warnings []fantasy.CallWarning) (*fantasy.Response, error) {
+func (g languageModel) mapResponse(response *genai.GenerateContentResponse, warnings []fantasy.CallWarning) (*fantasy.Response, error) {
 	if len(response.Candidates) == 0 || response.Candidates[0].Content == nil {
 		return nil, errors.New("no response from model")
 	}
@@ -898,7 +910,7 @@ func mapResponse(response *genai.GenerateContentResponse, warnings []fantasy.Cal
 			if err != nil {
 				return nil, err
 			}
-			toolCallID := cmp.Or(part.FunctionCall.ID, uuid.NewString())
+			toolCallID := cmp.Or(part.FunctionCall.ID, g.providerOptions.generateID())
 			content = append(content, fantasy.ToolCallContent{
 				ToolCallID:       toolCallID,
 				ToolName:         part.FunctionCall.Name,

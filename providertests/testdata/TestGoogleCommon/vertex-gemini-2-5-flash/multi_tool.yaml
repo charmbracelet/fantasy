@@ -34,11 +34,11 @@ interactions:
                   "functionCall": {
                     "name": "add",
                     "args": {
-                      "a": 2,
-                      "b": 3
+                      "b": 3,
+                      "a": 2
                     }
                   },
-                  "thoughtSignature": "Cp8CAePx/14bCkbDEmZW01F5CRRrRtuLucIY1CRRMflrQTruwYXmBsGuk2t4xRU7xmRtti9Ijsa8+RIbJYYO9zK3lH/VTFwxFIVq4wJpyi8VfTcsGsTIzsLQTORitv/ldfqUUEYRlGWNGl+xvaUvDdf/0vTDPCvadXrrcyQcN42YVuqdM/1X4KJMLFNFC9qC3bDZT3Ty/N2qulS6VlvVDwxZpNSWiS/oVI6UW+5s7fEQSYbkYGryBJL5hrI6LNcfy+/2zYzp3EJyj+Riuc3b6MEHesYiJ7wUUcAT1s2rVhZ8O6eTUW/QT640YjO2g8ndTyTcvHjdFE1ugGBrWvKgs8lxgf8lSa1h5TMXJHURNkq/w0kiwdfCP0p8iu/uc/+ojsg="
+                  "thoughtSignature": "CuACAePx/153kf8ikIzjnbSUf9jLxFZAf53a2GQYy4mUIqUl077OLhKwcyMd2YnG1/umJQZK8aqE6kdtgJG7sqpuDFZuFmEOqjgc1O3MxE4S+TaBZSa5wS/KAA05t4aGvS8TpkEttdy3u6wfIv6y8LM8A7LHn04qC9gswllmAiZ9iQn72RDWDgS7o2/ciprExjiDQMkU+m5yk3eRkXm1ovs9oNDNoDqlTTJnN0jtu2YgYtsxB/mwKBdA3MjSKwsiuIVc5fJj8970xQrfEmsA94QSGUQ9MNCUkB6kAUsFt3wQQ07X/Q3bYmfyud0OP/dB9HIM4xyVkayDrrVkbAOKD/1u8nKMGkPA5G/0+DaDVU4ZAqhCRGQAtHYRWYhwUZ4DICXJAqhBk9iTLIHvglDMaw4sKDZHqIlVRNnjvsx4nOoirR2S2Wpm3mKoEmCPnFGcQwRV9yJNY5/JwDquRAcwU9q1ug=="
                 },
                 {
                   "functionCall": {
@@ -52,13 +52,13 @@ interactions:
               ]
             },
             "finishReason": "STOP",
-            "avgLogprobs": -1.072265911102295
+            "avgLogprobs": -1.9749752044677735
           }
         ],
         "usageMetadata": {
           "promptTokenCount": 60,
           "candidatesTokenCount": 10,
-          "totalTokenCount": 135,
+          "totalTokenCount": 146,
           "trafficType": "ON_DEMAND",
           "promptTokensDetails": [
             {
@@ -72,27 +72,27 @@ interactions:
               "tokenCount": 10
             }
           ],
-          "thoughtsTokenCount": 65
+          "thoughtsTokenCount": 76
         },
         "modelVersion": "gemini-2.5-flash",
-        "createTime": "2025-10-23T06:38:07.928016Z",
-        "responseId": "T835aJDSOPLEptQP_MqZuAw"
+        "createTime": "2025-10-23T06:56:24.603477Z",
+        "responseId": "mNH5aNXqJMHDptQPtJigwQc"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 876.6875ms
+    duration: 1.215592042s
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 1295
+    content_length: 1155
     host: us-east5-aiplatform.googleapis.com
     body: |
-      {"contents":[{"parts":[{"text":"Add and multiply the number 2 and 3"}],"role":"user"},{"parts":[{"functionCall":{"args":{"a":2,"b":3},"id":"60097453-afb7-41a4-ae6f-2a9d0e4dba77","name":"add"}},{"functionCall":{"args":{"a":2,"b":3},"id":"f8f29909-d221-4d60-8a61-68db18dfd571","name":"multiply"}}],"role":"model"},{"parts":[{"functionResponse":{"id":"60097453-afb7-41a4-ae6f-2a9d0e4dba77","name":"add","response":{"result":"5"}}},{"functionResponse":{"id":"f8f29909-d221-4d60-8a61-68db18dfd571","name":"multiply","response":{"result":"6"}}}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000},"systemInstruction":{"parts":[{"text":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS."}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Add two numbers","name":"add","parameters":{"properties":{"a":{"description":"first number","type":"INTEGER"},"b":{"description":"second number","type":"INTEGER"}},"required":["a","b"],"type":"OBJECT"}},{"description":"Multiply two numbers","name":"multiply","parameters":{"properties":{"a":{"description":"first number","type":"INTEGER"},"b":{"description":"second number","type":"INTEGER"}},"required":["a","b"],"type":"OBJECT"}}]}]}
+      {"contents":[{"parts":[{"text":"Add and multiply the number 2 and 3"}],"role":"user"},{"parts":[{"functionCall":{"args":{"a":2,"b":3},"id":"1","name":"add"}},{"functionCall":{"args":{"a":2,"b":3},"id":"2","name":"multiply"}}],"role":"model"},{"parts":[{"functionResponse":{"id":"1","name":"add","response":{"result":"5"}}},{"functionResponse":{"id":"2","name":"multiply","response":{"result":"6"}}}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000},"systemInstruction":{"parts":[{"text":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS."}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Add two numbers","name":"add","parameters":{"properties":{"a":{"description":"first number","type":"INTEGER"},"b":{"description":"second number","type":"INTEGER"}},"required":["a","b"],"type":"OBJECT"}},{"description":"Multiply two numbers","name":"multiply","parameters":{"properties":{"a":{"description":"first number","type":"INTEGER"},"b":{"description":"second number","type":"INTEGER"}},"required":["a","b"],"type":"OBJECT"}}]}]}
     headers:
       Content-Type:
       - application/json
@@ -114,18 +114,19 @@ interactions:
               "role": "model",
               "parts": [
                 {
-                  "text": "The sum of 2 and 3 is 5.\nThe product of 2 and 3 is 6."
+                  "text": "2 + 3 = 5\n2 * 3 = 6",
+                  "thoughtSignature": "CsoBAePx/154N3gpceO1Pxh1IXX13o0HK5ftN5BUuyjfGfQi/778zwB+y0XPP47mlVhcC8YrYbdY9OCdsch6wLFdr8GW2Q/X0G7wvo5uCO+rxBCPgj0EJaQ36dnavIrM78MnwNT8JTFuNiifUYDO2Eek5//VNoFkZsbTfR0u6pHlX8odsl2zTqkihtwNkeun9UVCAkOE1J2royE0NUdFe5YQk6cMn/LboPV2NKVDWZxjvV6hlwV27nBoFqiH0r6zRT9AiKi55oTDlvwADA=="
                 }
               ]
             },
             "finishReason": "STOP",
-            "avgLogprobs": -0.13108351707458496
+            "avgLogprobs": -0.83015022277832029
           }
         ],
         "usageMetadata": {
           "promptTokenCount": 76,
-          "candidatesTokenCount": 25,
-          "totalTokenCount": 101,
+          "candidatesTokenCount": 15,
+          "totalTokenCount": 136,
           "trafficType": "ON_DEMAND",
           "promptTokensDetails": [
             {
@@ -136,17 +137,18 @@ interactions:
           "candidatesTokensDetails": [
             {
               "modality": "TEXT",
-              "tokenCount": 25
+              "tokenCount": 15
             }
-          ]
+          ],
+          "thoughtsTokenCount": 45
         },
         "modelVersion": "gemini-2.5-flash",
-        "createTime": "2025-10-23T06:38:08.816854Z",
-        "responseId": "UM35aNbtMbHEptQP-Ob28Ak"
+        "createTime": "2025-10-23T06:56:25.801186Z",
+        "responseId": "mdH5aKLzMMqZptQPrcWIuQM"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 659.965958ms
+    duration: 1.129055042s

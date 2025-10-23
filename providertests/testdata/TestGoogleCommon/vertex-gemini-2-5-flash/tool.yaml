@@ -37,18 +37,18 @@ interactions:
                       "location": "Florence,Italy"
                     }
                   },
-                  "thoughtSignature": "CoUCAePx/144ldNpf2WL18U5adkhc8ZXAwEJTS88rbe6Yxpri98gKFPYE0z1vw41PSwsK7N7FjcDJ6tXMN/peMYvuHmRShOdck/V0iaLr4fh6nT8CQLNhS/WXOOcmQEChXHwqTYMh0u8Jgn4Y4576Z57uBE1UlDdMi/DhUQyv8dVa2CJn0RF3OkRuU/9UC5Wns91Rjs3xPqudcJzxyc5iN+Ugb0pdORTAvAITaliE95zuvKzM1jqp5hKzAodi8aQ/lR+wV1ryp3f8/gBv20v6Kp/gNwSspZY6LOcPwQshlicht8lGAshnPzY0lJ1Ywfx4FLQtuqAjMVWpgU4CWqh5JPNuRXv8WMA"
+                  "thoughtSignature": "CsICAePx/14z2/Y1LwOZuOEfW+8h7yERSI5lsHY/AqynX6oLR1OiF3GZPJApHAIv7Z1RJZJszK371HXJVUnVWQIM3RW5uHNhwqD5iiMhJKgEkC5R5b4LC4EzCzHSQKGXEuFEJKUhIjy36IZKGS8aChOGVs4Cx1g+wgYICstMVtF2Ny86IuYHKfE+KL9BAc6TYN8d5yQySsuPRmPKCHTMC5q/ZaL5muk+Y+2KBMNOb2pI0tM3JiJyl3m/iYn9ENTMOCtPW8WVnR/43SCjF8ECpJH4Ot19VC0DQarwkgj6G1Hb/kw+kypGLm+SXsjWB/nnfOrvjbysSPNKPWL2GJtjTI1aMt6VOE4m8FPTlOQXze4jr3XeiHcylNOoRvWF9t8hesLdmy8xnyKrwSKCH+nAn21yTHPhoYgc69k5gquSB7jztgU/mQ=="
                 }
               ]
             },
             "finishReason": "STOP",
-            "avgLogprobs": -1.0891868591308593
+            "avgLogprobs": -2.8889617919921875
           }
         ],
         "usageMetadata": {
           "promptTokenCount": 28,
           "candidatesTokenCount": 5,
-          "totalTokenCount": 87,
+          "totalTokenCount": 101,
           "trafficType": "ON_DEMAND",
           "promptTokensDetails": [
             {
@@ -62,27 +62,27 @@ interactions:
               "tokenCount": 5
             }
           ],
-          "thoughtsTokenCount": 54
+          "thoughtsTokenCount": 68
         },
         "modelVersion": "gemini-2.5-flash",
-        "createTime": "2025-10-23T06:38:03.582524Z",
-        "responseId": "S835aPzGI_LEptQP_MqZuAw"
+        "createTime": "2025-10-23T06:56:20.673204Z",
+        "responseId": "lNH5aLSLKbHEptQP-Ob28Ak"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 818.058875ms
+    duration: 835.350042ms
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 792
+    content_length: 722
     host: us-east5-aiplatform.googleapis.com
     body: |
-      {"contents":[{"parts":[{"text":"What's the weather in Florence,Italy?"}],"role":"user"},{"parts":[{"functionCall":{"args":{"location":"Florence,Italy"},"id":"5a6dc3b9-fdbf-4c34-9ac5-6b58155ecfeb","name":"weather"}}],"role":"model"},{"parts":[{"functionResponse":{"id":"5a6dc3b9-fdbf-4c34-9ac5-6b58155ecfeb","name":"weather","response":{"result":"40 C"}}}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}
+      {"contents":[{"parts":[{"text":"What's the weather in Florence,Italy?"}],"role":"user"},{"parts":[{"functionCall":{"args":{"location":"Florence,Italy"},"id":"1","name":"weather"}}],"role":"model"},{"parts":[{"functionResponse":{"id":"1","name":"weather","response":{"result":"40 C"}}}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}
     headers:
       Content-Type:
       - application/json
@@ -131,12 +131,12 @@ interactions:
           ]
         },
         "modelVersion": "gemini-2.5-flash",
-        "createTime": "2025-10-23T06:38:04.405206Z",
-        "responseId": "TM35aNbdGKD5ptQPsI7YiQ0"
+        "createTime": "2025-10-23T06:56:21.509020Z",
+        "responseId": "ldH5aNyIH6D5ptQPsI7YiQ0"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 646.722542ms
+    duration: 1.159554792s

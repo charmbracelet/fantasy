@@ -30,7 +30,7 @@ interactions:
             "content": {
               "parts": [
                 {
-                  "text": "**Getting the Weather in Florence**\n\nOkay, so I'm thinking about getting the weather. The user has asked specifically about \"Florence, Italy,\" which I can translate directly into a call to my `weather.get_weather` function. I just need to get the weather for that location, it's pretty straightforward. And it looks like the function is expecting a 'location' parameter, and the user's provided \"Florence, Italy,\" so that should work perfectly.\n",
+                  "text": "**Analyzing the User's Weather Request**\n\nOkay, so I see the user wants the weather, specifically for Florence, Italy. That's a clear-cut case for the `weather.get_weather` function. It's designed for exactly this kind of query. The user's input, \"Florence, Italy,\" directly satisfies the function's requirement for a `location` parameter. There's no ambiguity here; I can immediately map the user's intent to the correct API call.\n",
                   "thought": true
                 },
                 {
@@ -40,7 +40,7 @@ interactions:
                       "location": "Florence, Italy"
                     }
                   },
-                  "thoughtSignature": "CpUCAdHtim/JSI0l5pO25fH4gaxIKzzT9JiebvUtNToeNbh6ZirlR4H/lOPL9kOVeVJNK+UU+iAvpNkEBBYv4faxZZQEuObRqKclO+mz35t0jpsMo63R6PD3Fs+GeqdIkcha3FvVaM9GJHx0QC/v+X/Si+DjEDb726Z+bbYkAtpC3CrHVkWIl2s8Aj2qVkdgZP/5R92ikXLEfudSyRzy0W1vBaUgLjqrwDkfWRWMSIb0apK9yTW8cMVjubyOltr0gUwIrEEY/HsnMcL4B8KtcUkn39XU6JkUIZH9Ko2ppXO3I156xPeBNugA7Ds4q0+0LXEZUW1CaTrrnEYEHnZ4dw1PADu9Pz8jqCSEe8i3as75VVdvrJDGaQ=="
+                  "thoughtSignature": "CpUCAdHtim/vdKUq5fmVPYG+WPdBcdIVBRW46sBr8SJD/ibk8aeoM86bdfIvPYV6bLjWY5jHrSIQ80pGWidzrix8E9y24930+h4hQlw0Plp1ZOBPIjdzKnC2Td1hbNzTLSZXExT4bgpjqQmJ2H+7tZE9R8KDhHtgq2uJAtllmlTht9YXoF0Y9dznqA+Oc3EpCSMOm4FXUdzCQWKAH+vzmjuUG8ddguim1xaYslRQIF3dlRmLLdBrWyNfSl7zTftHYymTXG6Rzaqn0pyclyYTtxUSv2Gq94DhxXNsbFGIHRJKh6f3G9p0vXyfbxqDtqFPZZO7FHIiz3dsqHGaxWeSoebbCBpE+RV6rvL6FYiB64T9KfubiQfWoQ=="
                 }
               ],
               "role": "model"
@@ -63,23 +63,23 @@ interactions:
           "thoughtsTokenCount": 64
         },
         "modelVersion": "gemini-2.5-pro",
-        "responseId": "mM35aO7QNMG7vdIPzvzf-QQ"
+        "responseId": "2tH5aNeMIt-_nsEP4LeaiAs"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 3.681101584s
+    duration: 3.63236375s
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 834
+    content_length: 764
     host: generativelanguage.googleapis.com
     body: |
-      {"contents":[{"parts":[{"text":"What's the weather in Florence, Italy?"}],"role":"user"},{"parts":[{"functionCall":{"args":{"location":"Florence, Italy"},"id":"3bd880e6-257b-46b2-9210-8e124407ae78","name":"weather"}}],"role":"model"},{"parts":[{"functionResponse":{"id":"3bd880e6-257b-46b2-9210-8e124407ae78","name":"weather","response":{"result":"40 C"}}}],"role":"user"}],"generationConfig":{"thinkingConfig":{"includeThoughts":true,"thinkingBudget":128}},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}
+      {"contents":[{"parts":[{"text":"What's the weather in Florence, Italy?"}],"role":"user"},{"parts":[{"functionCall":{"args":{"location":"Florence, Italy"},"id":"1","name":"weather"}}],"role":"model"},{"parts":[{"functionResponse":{"id":"1","name":"weather","response":{"result":"40 C"}}}],"role":"user"}],"generationConfig":{"thinkingConfig":{"includeThoughts":true,"thinkingBudget":128}},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}
     headers:
       Content-Type:
       - application/json
@@ -100,7 +100,7 @@ interactions:
             "content": {
               "parts": [
                 {
-                  "text": "The weather in Florence, Italy is 40 C. \n"
+                  "text": "The weather in Florence, Italy is 40 C."
                 }
               ],
               "role": "model"
@@ -121,11 +121,11 @@ interactions:
           ]
         },
         "modelVersion": "gemini-2.5-pro",
-        "responseId": "ms35aO7ZLojjvdIPpI6IiAU"
+        "responseId": "3NH5aPSyMMeynsEPqKSSmAs"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 1.296459584s
+    duration: 2.047851375s

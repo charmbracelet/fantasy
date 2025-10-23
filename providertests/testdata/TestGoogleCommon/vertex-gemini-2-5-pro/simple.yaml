@@ -14,7 +14,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.29.0 gl-go/go1.25.0
+      - google-genai-sdk/1.29.0 gl-go/go1.25.1
     url: https://us-east5-aiplatform.googleapis.com/v1beta1/projects/fantasy-playground-472418/locations/us-east5/publishers/google/models/gemini-2.5-pro:generateContent
     method: POST
   response:
@@ -31,18 +31,18 @@ interactions:
               "role": "model",
               "parts": [
                 {
-                  "text": "Of course!\n\nThe most common ways to say \"hi\" in Portuguese are:\n\n*   **Olá!** (This is the direct translation of \"hello\" and can be used in any situation, formal or informal.)\n*   **Oi!** (This is more informal, like \"hi,\" and is extremely common, especially in Brazil.)\n\nYou can also use greetings that change with the time of day:\n\n*   **Bom dia** (Good morning)\n*   **Boa tarde** (Good afternoon)\n*   **Boa noite** (Good evening / Good night)"
+                  "text": "Of course!\n\nThe most common way to say \"hi\" in Portuguese is:\n\n**Oi**\n\nYou can also use:\n\n**Olá** (which is like \"hello\")"
                 }
               ]
             },
             "finishReason": "STOP",
-            "avgLogprobs": -1.9789696365106302
+            "avgLogprobs": -2.3780706305252877
           }
         ],
         "usageMetadata": {
           "promptTokenCount": 9,
-          "candidatesTokenCount": 122,
-          "totalTokenCount": 1356,
+          "candidatesTokenCount": 38,
+          "totalTokenCount": 720,
           "trafficType": "ON_DEMAND",
           "promptTokensDetails": [
             {
@@ -53,18 +53,18 @@ interactions:
           "candidatesTokensDetails": [
             {
               "modality": "TEXT",
-              "tokenCount": 122
+              "tokenCount": 38
             }
           ],
-          "thoughtsTokenCount": 1225
+          "thoughtsTokenCount": 673
         },
         "modelVersion": "gemini-2.5-pro",
-        "createTime": "2025-10-10T17:53:37.635488Z",
-        "responseId": "IUjpaODkJunqr9wPkPmEqQc"
+        "createTime": "2025-10-23T06:56:29.134156Z",
+        "responseId": "ndH5aIyYCLHEptQP-Ob28Ak"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 14.255680041s
+    duration: 7.471405083s

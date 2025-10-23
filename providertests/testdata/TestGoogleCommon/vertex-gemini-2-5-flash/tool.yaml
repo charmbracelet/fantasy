@@ -14,7 +14,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.29.0 gl-go/go1.25.0
+      - google-genai-sdk/1.29.0 gl-go/go1.25.1
     url: https://us-east5-aiplatform.googleapis.com/v1beta1/projects/fantasy-playground-472418/locations/us-east5/publishers/google/models/gemini-2.5-flash:generateContent
     method: POST
   response:
@@ -37,18 +37,18 @@ interactions:
                       "location": "Florence,Italy"
                     }
                   },
-                  "thoughtSignature": "CvoBAR/MhbYk0qvoO1yRgdHDwwyxH/IbvJEJWkExyjhCp5q/0S0Zf9zBcxa2OWwWdQJR8+Z0JMwJ0PLQnf58ln2HT24wU1p3Nr2gMxAVoZUaB4Uxo/g5rq5C5sFVqfrdzeMXIDxhtrC0Q8OzSEcQy2XIjrrmu0XZLF3BVU58ewt4Ok4/HRGzoworbz23/JLZxUEmB4Jz3TmQD3+tCNhENGIko9zcXctE/R06mFmVF/WaihIM1ibpNichDjYZqmHq5NGSE36wpBaxwJgfxxNwspek3hjVT4EsDn97FJsMeL5I3W1j0Tu8XjF7BX92tWcmP9jZO4iF5O2nda6bbQ=="
+                  "thoughtSignature": "CsICAePx/14z2/Y1LwOZuOEfW+8h7yERSI5lsHY/AqynX6oLR1OiF3GZPJApHAIv7Z1RJZJszK371HXJVUnVWQIM3RW5uHNhwqD5iiMhJKgEkC5R5b4LC4EzCzHSQKGXEuFEJKUhIjy36IZKGS8aChOGVs4Cx1g+wgYICstMVtF2Ny86IuYHKfE+KL9BAc6TYN8d5yQySsuPRmPKCHTMC5q/ZaL5muk+Y+2KBMNOb2pI0tM3JiJyl3m/iYn9ENTMOCtPW8WVnR/43SCjF8ECpJH4Ot19VC0DQarwkgj6G1Hb/kw+kypGLm+SXsjWB/nnfOrvjbysSPNKPWL2GJtjTI1aMt6VOE4m8FPTlOQXze4jr3XeiHcylNOoRvWF9t8hesLdmy8xnyKrwSKCH+nAn21yTHPhoYgc69k5gquSB7jztgU/mQ=="
                 }
               ]
             },
             "finishReason": "STOP",
-            "avgLogprobs": -1.0515016555786132
+            "avgLogprobs": -2.8889617919921875
           }
         ],
         "usageMetadata": {
           "promptTokenCount": 28,
           "candidatesTokenCount": 5,
-          "totalTokenCount": 84,
+          "totalTokenCount": 101,
           "trafficType": "ON_DEMAND",
           "promptTokensDetails": [
             {
@@ -62,32 +62,32 @@ interactions:
               "tokenCount": 5
             }
           ],
-          "thoughtsTokenCount": 51
+          "thoughtsTokenCount": 68
         },
         "modelVersion": "gemini-2.5-flash",
-        "createTime": "2025-10-10T17:53:30.097682Z",
-        "responseId": "GkjpaJL7BYXg1tEPj-il0Ak"
+        "createTime": "2025-10-23T06:56:20.673204Z",
+        "responseId": "lNH5aLSLKbHEptQP-Ob28Ak"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 765.1515ms
+    duration: 835.350042ms
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 734
+    content_length: 722
     host: us-east5-aiplatform.googleapis.com
     body: |
-      {"contents":[{"parts":[{"text":"What's the weather in Florence,Italy?"}],"role":"user"},{"parts":[{"functionCall":{"args":{"location":"Florence,Italy"},"id":"weather","name":"weather"}}],"role":"model"},{"parts":[{"functionResponse":{"id":"weather","name":"weather","response":{"result":"40 C"}}}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}
+      {"contents":[{"parts":[{"text":"What's the weather in Florence,Italy?"}],"role":"user"},{"parts":[{"functionCall":{"args":{"location":"Florence,Italy"},"id":"1","name":"weather"}}],"role":"model"},{"parts":[{"functionResponse":{"id":"1","name":"weather","response":{"result":"40 C"}}}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}
     headers:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.29.0 gl-go/go1.25.0
+      - google-genai-sdk/1.29.0 gl-go/go1.25.1
     url: https://us-east5-aiplatform.googleapis.com/v1beta1/projects/fantasy-playground-472418/locations/us-east5/publishers/google/models/gemini-2.5-flash:generateContent
     method: POST
   response:
@@ -131,12 +131,12 @@ interactions:
           ]
         },
         "modelVersion": "gemini-2.5-flash",
-        "createTime": "2025-10-10T17:53:30.858865Z",
-        "responseId": "GkjpaPG1NOnqr9wPkPmEqQc"
+        "createTime": "2025-10-23T06:56:21.509020Z",
+        "responseId": "ldH5aNyIH6D5ptQPsI7YiQ0"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 613.84925ms
+    duration: 1.159554792s

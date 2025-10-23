@@ -14,7 +14,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.23.0 gl-go/go1.25.1
+      - google-genai-sdk/1.29.0 gl-go/go1.25.1
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent
     method: POST
   response:
@@ -30,7 +30,7 @@ interactions:
             "content": {
               "parts": [
                 {
-                  "text": "**Getting the Weather in Florence**\n\nOkay, so I'm trying to figure out the weather in Florence, Italy. That's straightforward, really. My immediate thought is, \"I need to use that `weather.get_weather` function.\" It's designed for this kind of query. All I have to do is plug in \"Florence, Italy\" as the `location` parameter, and I should have the information I need. Easy peasy.\n",
+                  "text": "**Getting the Weather in Florence**\n\nOkay, so I'm thinking about the weather, specifically in Florence, Italy. That immediately clicks - I know I've got a function, `weather.get_weather`, that's designed for exactly this kind of query. It takes a `location` parameter, which is perfect.  Therefore, I'll set that `location` parameter to \"Florence, Italy\", and that should be all I need to get the forecast.\n",
                   "thought": true
                 },
                 {
@@ -40,13 +40,14 @@ interactions:
                       "location": "Florence, Italy"
                     }
                   },
-                  "thoughtSignature": "CpwCADAxMjOrBS23pWMtbykG2/HxS9zDAprusCU0aR/qeI4cMnnfJCAl4n2UOC6oNCFeNyL3anLH6D2mEwiah92877DeEAig/Rm9u98ApqtJ6mu9vaKXr92/xyQ3EOwYzdXtPEb8LS4qK0SQGWG4zB4KUTVliondCRp6EgYlmlArjj0zbbvNYE1YHtQ6jzR6FpLphhFY8jDP73M0JkwANtjZf+dv9aFNX9pNAK5XYfZCIPEzzWoJpV6zQ5v8dwdj7nSXUqWsd06MR5sRwrfVmtpGrKaDzdDwVcxg2GiWWfYggDbC9EpUidRpCcZt2rKOM486MLgrK1/yIRUCC4jdueC3rkzgihndxJqFNKZw4I1+0Ob+XCw8wanXc9lb314="
+                  "thoughtSignature": "Cp4CAdHtim8JgCsNhv84SCzZ8bo/kRaAn5bY0cEQ0mfo7nl3GCS7sRlN2T7G4P/Epnwc7/9wbdFzcvcdaqNgWk1flXACXm4QluykEizpys7U+TyP8I2vaUUDIl4Tii0yBZNwjaJxmYp0yb5E9LjpsuEFolG0Ao2vqoJar/0XgY5bzViogURnnUHqVzP2euy5PJEdAd+rOqz1hnK4lCumsNfF5vrkx8aeyGL99C1Eu1/ZETTU7TSnVht+z+4qlysMOlhx4ko0anJ5MWzjewwrZBFkMPgzzw0zVmsHZg9d4t0Hnhmk6Ft7Ge6JOhvI54NgL8MkiviZNvIYT6iHNRqSd71uYeCdCdiw9UJCwASXvbRIv/ktz6OZKrlGld61RP1BXw=="
                 }
               ],
               "role": "model"
             },
             "finishReason": "STOP",
-            "index": 0
+            "index": 0,
+            "finishMessage": "Model generated function call(s)."
           }
         ],
         "usageMetadata": {
@@ -62,28 +63,28 @@ interactions:
           "thoughtsTokenCount": 66
         },
         "modelVersion": "gemini-2.5-pro",
-        "responseId": "vHXWaNC4EY7ivdIPg5bG-QM"
+        "responseId": "29n5aPKhFJrivdIPhYnAuQE"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 4.127855167s
+    duration: 3.824523542s
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 776
+    content_length: 764
     host: generativelanguage.googleapis.com
     body: |
-      {"contents":[{"parts":[{"text":"What's the weather in Florence, Italy?"}],"role":"user"},{"parts":[{"functionCall":{"args":{"location":"Florence, Italy"},"id":"weather","name":"weather"}}],"role":"model"},{"parts":[{"functionResponse":{"id":"weather","name":"weather","response":{"result":"40 C"}}}],"role":"user"}],"generationConfig":{"thinkingConfig":{"includeThoughts":true,"thinkingBudget":128}},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}
+      {"contents":[{"parts":[{"text":"What's the weather in Florence, Italy?"}],"role":"user"},{"parts":[{"functionCall":{"args":{"location":"Florence, Italy"},"id":"1","name":"weather"}}],"role":"model"},{"parts":[{"functionResponse":{"id":"1","name":"weather","response":{"result":"40 C"}}}],"role":"user"}],"generationConfig":{"thinkingConfig":{"includeThoughts":true,"thinkingBudget":128}},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}
     headers:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.23.0 gl-go/go1.25.1
+      - google-genai-sdk/1.29.0 gl-go/go1.25.1
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent
     method: POST
   response:
@@ -99,7 +100,7 @@ interactions:
             "content": {
               "parts": [
                 {
-                  "text": "The weather in Florence, Italy is 40 degrees Celsius. \n"
+                  "text": "The weather in Florence, Italy is 40 C. \n"
                 }
               ],
               "role": "model"
@@ -110,8 +111,8 @@ interactions:
         ],
         "usageMetadata": {
           "promptTokenCount": 84,
-          "candidatesTokenCount": 13,
-          "totalTokenCount": 97,
+          "candidatesTokenCount": 12,
+          "totalTokenCount": 96,
           "promptTokensDetails": [
             {
               "modality": "TEXT",
@@ -120,11 +121,11 @@ interactions:
           ]
         },
         "modelVersion": "gemini-2.5-pro",
-        "responseId": "vXXWaNC2HOqLxN8P_pmomQM"
+        "responseId": "3Nn5aMLPIMahxN8P5c69gQc"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 1.178061334s
+    duration: 1.228113333s

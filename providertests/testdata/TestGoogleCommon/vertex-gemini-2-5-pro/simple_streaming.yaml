@@ -17,7 +17,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.29.0 gl-go/go1.25.0
+      - google-genai-sdk/1.29.0 gl-go/go1.25.1
     url: https://us-east5-aiplatform.googleapis.com/v1beta1/projects/fantasy-playground-472418/locations/us-east5/publishers/google/models/gemini-2.5-pro:streamGenerateContent?alt=sse
     method: POST
   response:
@@ -25,10 +25,10 @@ interactions:
     proto_major: 2
     proto_minor: 0
     content_length: -1
-    body: "data: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"text\": \"Of course! Here are a few ways to say \\\"hi\\\" in Portuguese, from the most common to other useful greetings.\\n\\nThe most common ways are:\\n\\n*   **Olá** (oh-LAH) - This is the direct translation of \\\"hello\\\" and can be used in any situation, formal or informal.\\n*\"}]}}],\"usageMetadata\": {\"trafficType\": \"ON_DEMAND\"},\"modelVersion\": \"gemini-2.5-pro\",\"createTime\": \"2025-10-10T17:53:52.753834Z\",\"responseId\": \"MEjpaKqBLuWJ0ekP4czIwAs\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"text\": \"   **Oi** (oy) - This is the most common, casual way to say \\\"hi,\\\" especially in Brazil. It's friendly and used everywhere.\\n\\nYou can also use these common greetings:\\n\\n*   **Tudo bem?** (TOO-doo beng?) - Means \\\"How are you?\\\" or\"}]}}],\"usageMetadata\": {\"trafficType\": \"ON_DEMAND\"},\"modelVersion\": \"gemini-2.5-pro\",\"createTime\": \"2025-10-10T17:53:52.753834Z\",\"responseId\": \"MEjpaKqBLuWJ0ekP4czIwAs\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"text\": \" \\\"Is everything well?\\\" and is often used as a greeting on its own.\\n*   **Bom dia** (bong JEE-ah) - \\\"Good morning.\\\"\\n*   **Boa tarde** (BOH-ah TARD-jay) - \\\"Good afternoon.\\\"\\n*   **Boa noite** (B\"}]}}],\"usageMetadata\": {\"trafficType\": \"ON_DEMAND\"},\"modelVersion\": \"gemini-2.5-pro\",\"createTime\": \"2025-10-10T17:53:52.753834Z\",\"responseId\": \"MEjpaKqBLuWJ0ekP4czIwAs\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"text\": \"OH-ah NOY-tchee) - \\\"Good evening\\\" or \\\"Good night.\\\"\\n\\nSo, a simple **\\\"Olá\\\"** or **\\\"Oi\\\"** is perfect\"}]},\"finishReason\": \"STOP\"}],\"usageMetadata\": {\"promptTokenCount\": 9,\"candidatesTokenCount\": 233,\"totalTokenCount\": 946,\"trafficType\": \"ON_DEMAND\",\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 9}],\"candidatesTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 233}],\"thoughtsTokenCount\": 704},\"modelVersion\": \"gemini-2.5-pro\",\"createTime\": \"2025-10-10T17:53:52.753834Z\",\"responseId\": \"MEjpaKqBLuWJ0ekP4czIwAs\"}\r\n\r\n"
+    body: "data: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"text\": \"Of course!\\n\\nThe most common way is:\\n\\n*   **Oi**\\n\\nYou can also say:\\n\\n*   **Olá** (This is slightly more formal, like \\\"hello\\\")\\n\\nOften, you'll hear them combined with \\\"how are you?\\\":\\n\\n*   **Oi, tudo bem?** (\"}]}}],\"usageMetadata\": {\"trafficType\": \"ON_DEMAND\"},\"modelVersion\": \"gemini-2.5-pro\",\"createTime\": \"2025-10-23T06:56:36.845945Z\",\"responseId\": \"pNH5aPnQM4XwptQPy7WwqA0\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"text\": \"Hi, how are you?)\"}]},\"finishReason\": \"STOP\"}],\"usageMetadata\": {\"promptTokenCount\": 9,\"candidatesTokenCount\": 72,\"totalTokenCount\": 890,\"trafficType\": \"ON_DEMAND\",\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 9}],\"candidatesTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 72}],\"thoughtsTokenCount\": 809},\"modelVersion\": \"gemini-2.5-pro\",\"createTime\": \"2025-10-23T06:56:36.845945Z\",\"responseId\": \"pNH5aPnQM4XwptQPy7WwqA0\"}\r\n\r\n"
     headers:
       Content-Type:
       - text/event-stream
     status: 200 OK
     code: 200
-    duration: 8.862185916s
+    duration: 9.024153875s

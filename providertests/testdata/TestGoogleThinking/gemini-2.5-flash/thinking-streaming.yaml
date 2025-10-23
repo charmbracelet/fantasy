@@ -17,7 +17,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.23.0 gl-go/go1.25.1
+      - google-genai-sdk/1.29.0 gl-go/go1.25.1
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse
     method: POST
   response:
@@ -25,22 +25,22 @@ interactions:
     proto_major: 2
     proto_minor: 0
     content_length: -1
-    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"**Querying Weather Data**\\n\\nI've determined that the user's request can be fulfilled by using the `weather` tool. It's clear that I need to specify the `location` parameter, and I'll populate this with \\\"Florence, Italy\\\". I am ready to call the tool now.\\n\\n\\n\",\"thought\": true}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 54,\"totalTokenCount\": 106,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 54}],\"thoughtsTokenCount\": 52},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"FHPWaN7CN6S9kdUPhISBeQ\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"functionCall\": {\"name\": \"weather\",\"args\": {\"location\": \"Florence, Italy\"}},\"thoughtSignature\": \"CiQB0e2Kb191ccXCh0JJt9w3ri7G1OxNATmQ9chokxNfPmwGWSEKZwHR7Ypv5Jovjiqc+ZR/5pEskMvrvcGHTOLGfXr/LUvTM4wq1+Euk8qjznH4X9T6lY+lTiZDual4jaePvaBznDiNLYZ+2DDTahydIuPCh528oYH8Rtdf7TrGszGZ8ImYVcNOZwUBG4UKtwEB0e2Kbx+F1dXr9HLWeMb7GEBhHd3APs8Poy8p+RKC1CkkWn99WMBa4gplxjUH6lPgozGGxph9L4aT9RSqJbZZ+Q1oF83pzqW6SuhL1ieu7RNODnrnq9Gju4J6GBhky8ORO7Ewxts2NKJ530In1RCoR2Ps9oF4XsYv9gl8Fm+4FPfTIn4oure9n4LzuciGoikx3+DRB0oAdIA+TKyjsPbrCXxI8SSk8Nz21Jhl3Mj8Oyn7Zq8hljs=\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 54,\"candidatesTokenCount\": 14,\"totalTokenCount\": 120,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 54}],\"thoughtsTokenCount\": 52},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"FHPWaN7CN6S9kdUPhISBeQ\"}\r\n\r\n"
+    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"**Querying Weather Data**\\n\\nI'm ready to query the weather tool now. My plan is to input \\\"Florence, Italy\\\" as the location, based on the user's request. I'll pass that location to the tool and expect weather data in response.\\n\\n\\n\",\"thought\": true}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 54,\"totalTokenCount\": 105,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 54}],\"thoughtsTokenCount\": 51},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"kNn5aN2wEczXvdIP053f0AE\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"functionCall\": {\"name\": \"weather\",\"args\": {\"location\": \"Florence, Italy\"}},\"thoughtSignature\": \"CikB0e2Kb4LhbEW+bno+g0avcBVT72K/jrl7SHLNSzpvehMq0dFuukNMSApwAdHtim9oE+9UuZVsIfU7F0iJ2uDjbyQ4/n7iBhOK0DglXXf0NaMXZ55kajoo7qPGExtaignwaxA5BeypkEvGBa5pPT4hdnlnLKLiUuDq51OHryjhVr365l31xL6b6DgQcSJ1Wh8dacD/4ZEiY1SHLwqmAQHR7Ypv/W6j/0drQh5idhsZVVbwxE8wM1dVOtfJnpyjAqV4TJPkbmuXBB6+1HL0x/BY6UAgk8Apbyf7yvjC2Les3AFP5wsc9TPIqRpPAmqlSsL+CT31kh5jXwVYHLeMlj0+kvbT9N7jzPSxzrIfiGDt+JjPBuhou6aUWf1NUqd6jowxfewjfoKh/ku5engRpQNF6KBCZTXztf7+pE72NnByHM0ocpY=\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0,\"finishMessage\": \"Model generated function call(s).\"}],\"usageMetadata\": {\"promptTokenCount\": 54,\"candidatesTokenCount\": 14,\"totalTokenCount\": 119,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 54}],\"thoughtsTokenCount\": 51},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"kNn5aN2wEczXvdIP053f0AE\"}\r\n\r\n"
     headers:
       Content-Type:
       - text/event-stream
     status: 200 OK
     code: 200
-    duration: 1.302133666s
+    duration: 1.633302125s
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 776
+    content_length: 1222
     host: generativelanguage.googleapis.com
     body: |
-      {"contents":[{"parts":[{"text":"What's the weather in Florence, Italy?"}],"role":"user"},{"parts":[{"functionCall":{"args":{"location":"Florence, Italy"},"id":"weather","name":"weather"}}],"role":"model"},{"parts":[{"functionResponse":{"id":"weather","name":"weather","response":{"result":"40 C"}}}],"role":"user"}],"generationConfig":{"thinkingConfig":{"includeThoughts":true,"thinkingBudget":128}},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}
+      {"contents":[{"parts":[{"text":"What's the weather in Florence, Italy?"}],"role":"user"},{"parts":[{"functionCall":{"args":{"location":"Florence, Italy"},"id":"1","name":"weather"},"thoughtSignature":"CikB0e2Kb4LhbEW+bno+g0avcBVT72K/jrl7SHLNSzpvehMq0dFuukNMSApwAdHtim9oE+9UuZVsIfU7F0iJ2uDjbyQ4/n7iBhOK0DglXXf0NaMXZ55kajoo7qPGExtaignwaxA5BeypkEvGBa5pPT4hdnlnLKLiUuDq51OHryjhVr365l31xL6b6DgQcSJ1Wh8dacD/4ZEiY1SHLwqmAQHR7Ypv/W6j/0drQh5idhsZVVbwxE8wM1dVOtfJnpyjAqV4TJPkbmuXBB6+1HL0x/BY6UAgk8Apbyf7yvjC2Les3AFP5wsc9TPIqRpPAmqlSsL+CT31kh5jXwVYHLeMlj0+kvbT9N7jzPSxzrIfiGDt+JjPBuhou6aUWf1NUqd6jowxfewjfoKh/ku5engRpQNF6KBCZTXztf7+pE72NnByHM0ocpY="}],"role":"model"},{"parts":[{"functionResponse":{"id":"1","name":"weather","response":{"result":"40 C"}}}],"role":"user"}],"generationConfig":{"thinkingConfig":{"includeThoughts":true,"thinkingBudget":128}},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}
     form:
       alt:
       - sse
@@ -48,7 +48,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.23.0 gl-go/go1.25.1
+      - google-genai-sdk/1.29.0 gl-go/go1.25.1
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse
     method: POST
   response:
@@ -56,10 +56,10 @@ interactions:
     proto_major: 2
     proto_minor: 0
     content_length: -1
-    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"The\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 84,\"candidatesTokenCount\": 1,\"totalTokenCount\": 85,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 84}]},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"FnPWaM3ZJpXdnsEP5qn1eQ\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \" weather in Florence, Italy is 40 degrees Celsius.\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 84,\"candidatesTokenCount\": 13,\"totalTokenCount\": 97,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 84}]},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"FnPWaM3ZJpXdnsEP5qn1eQ\"}\r\n\r\n"
+    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"The\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 133,\"candidatesTokenCount\": 1,\"totalTokenCount\": 134,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 133}]},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"kdn5aJTAOb6V28oP0uCC8QI\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \" weather in Florence, Italy is 40 C.\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 133,\"candidatesTokenCount\": 12,\"totalTokenCount\": 145,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 133}]},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"kdn5aJTAOb6V28oP0uCC8QI\"}\r\n\r\n"
     headers:
       Content-Type:
       - text/event-stream
     status: 200 OK
     code: 200
-    duration: 665.085208ms
+    duration: 715.224792ms

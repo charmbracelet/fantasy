@@ -2,6 +2,7 @@ package providertests
 
 import (
 	"cmp"
+	"fmt"
 	"net/http"
 	"os"
 	"testing"
@@ -69,11 +70,20 @@ func testGoogleThinking(t *testing.T, result *fantasy.AgentResult) {
 	require.Greater(t, reasoningContentCount, 0)
 }
 
+func generateIDMock() google.ToolCallIDFunc {
+	id := 0
+	return func() string {
+		id++
+		return fmt.Sprintf("%d", id)
+	}
+}
+
 func geminiBuilder(model string) builderFunc {
 	return func(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
 		provider, err := google.New(
 			google.WithGeminiAPIKey(cmp.Or(os.Getenv("FANTASY_GEMINI_API_KEY"), "(missing)")),
 			google.WithHTTPClient(&http.Client{Transport: r}),
+			google.WithToolCallIDFunc(generateIDMock()),
 		)
 		if err != nil {
 			return nil, err
@@ -88,6 +98,7 @@ func vertexBuilder(model string) builderFunc {
 			google.WithVertex(os.Getenv("FANTASY_VERTEX_PROJECT"), os.Getenv("FANTASY_VERTEX_LOCATION")),
 			google.WithHTTPClient(&http.Client{Transport: r}),
 			google.WithSkipAuth(!r.IsRecording()),
+			google.WithToolCallIDFunc(generateIDMock()),
 		)
 		if err != nil {
 			return nil, err

@@ -14,7 +14,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.23.0 gl-go/go1.25.1
+      - google-genai-sdk/1.29.0 gl-go/go1.25.1
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
     method: POST
   response:
@@ -30,7 +30,7 @@ interactions:
             "content": {
               "parts": [
                 {
-                  "text": "Olá!\n\nIn Portuguese, \"hi\" or \"hello\" is **\"Olá\"**."
+                  "text": "Olá!"
                 }
               ],
               "role": "model"
@@ -41,22 +41,22 @@ interactions:
         ],
         "usageMetadata": {
           "promptTokenCount": 11,
-          "candidatesTokenCount": 19,
-          "totalTokenCount": 54,
+          "candidatesTokenCount": 2,
+          "totalTokenCount": 51,
           "promptTokensDetails": [
             {
               "modality": "TEXT",
               "tokenCount": 11
             }
           ],
-          "thoughtsTokenCount": 24
+          "thoughtsTokenCount": 38
         },
         "modelVersion": "gemini-2.5-flash",
-        "responseId": "4nLWaKeCGN-ynsEPsYS_iAs"
+        "responseId": "VNH5aLz3OsyinsEP1JWGwAY"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 831.958458ms
+    duration: 1.251824334s

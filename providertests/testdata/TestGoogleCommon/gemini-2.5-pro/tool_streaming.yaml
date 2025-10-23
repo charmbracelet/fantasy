@@ -17,7 +17,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.23.0 gl-go/go1.25.1
+      - google-genai-sdk/1.29.0 gl-go/go1.25.1
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:streamGenerateContent?alt=sse
     method: POST
   response:
@@ -25,22 +25,22 @@ interactions:
     proto_major: 2
     proto_minor: 0
     content_length: -1
-    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"functionCall\": {\"name\": \"weather\",\"args\": {\"location\": \"Florence, Italy\"}},\"thoughtSignature\": \"CiIAMDEyMwwMJJqiCKz4VzG3qJA7LTurT7NRFfJD5RbIGkyKCmcAMDEyMylbN4M9IorKIgnOaeKSZLO+Dmdc3CN8Ykr/J85vASu1ewoQzxWXSaGyvblIjXsuD/O+5bQK6JovlFpSOdr4DInlXATtkMTtxZNtZdKBscb7H/ZfhlDQVuPzRcriIRflrk1nCocBADAxMjOR8UCtfaH+TNsdgdU5M81Ytdcw1B9wWslWPBJoy+ol+fHoQWWxGKxFMFr85j8CP8Y3ABWH8ys1Q27jJN1Zol3zYGeLM89G/0yHxOjuHmTpbVVOU21czJQqBNyOHjIh/me1SJeaYFmdNyoYjp0p3rOmo61aWdpMBy8K4hFR1CIIEZfVCoABADAxMjOprlT85BY4gsIO4TrKV/YnfpwDJyTG6LFoefZucUiQG1e5DqGWqS7kQExDzHxXN6hiexCUiGlG8wZ+8F8+FtkYfkz0e4JmDB61z3bQCd16mrg+hv8dfoAhEOZFDtsfwQ9qBrS7hka4RJN0gT6mGzztfd98zQiQXpy61L8KhAEAMDEyM10gRA4BgbBVpr3JZ5Qp0/Mjdfbkoyq6nZNhPfTMfILNA1QAvzvGmLMnVMnJdvwTSUGTfFuh2+f2eSB6pmDrFYijitpQs+ZW1VcquhwlekwJxkUm/iR0BnsgRCXb/qMOZ0wXwH/RhEuSjJUDmFJBVZLbRaANk5kAi6RReUfsldUKYgAwMTIzMqLxvuGouzbh55D8UKHRWRquiTQeuTboYdqInp81Z53hsmg10JUicZ4zKTTngH/KEldeldZZ6z/d6+0oQEW7mV+o3+bfQXCDKLlN/nBfMrzH7R0olGEQKgoxBZAm\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 54,\"candidatesTokenCount\": 15,\"totalTokenCount\": 176,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 54}],\"thoughtsTokenCount\": 107},\"modelVersion\": \"gemini-2.5-pro\",\"responseId\": \"AXPWaOOVFs-D7M8PzsSZgAc\"}\r\n\r\n"
+    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"functionCall\": {\"name\": \"weather\",\"args\": {\"location\": \"Florence,Italy\"}},\"thoughtSignature\": \"CiIB0e2Kbz0BLNkrLk7+No9WGlLTJZ+xMx9A1TxMe+Y6NonoCmcB0e2Kb706fnMCgK85NUwapXVlvHLfykeWH8MI5LgoV4MUsEHZYCpYIl727ErZ4RBQjtGmeXlj/azrhRNM/TvHMnk7zJYadvftZaTiGdRl9jKvlQe6/S7M6bSkxPlYp+lQo2ty1L2YCpwBAdHtim8LzZus032fdxYFzNkGGMGKtMP2tUDh99Z03MCvi+wxA8BNAb6TO+WBH9n4w811qYi6vtnx6CSEpNfmu69Gxg0mzzJcy18aftjQsIMI9I6s/Em67I0H5KvvJIIORVUQRJV79WxBxJosXKq6Qp0ouGnHDeu6amYE3gNkPa5avQ6ylcPFYxEFiocnnByI2+T5c/MfX0VMuhfJCn8B0e2Kb5mZWqcXceVRxrUEPnB9hIZ1Z1Fw0LsZu0mtQLIu5wrbKASt8tngqGH/Ih0JKjyhYCMMXQgZv/+SSD9aCrNuHVcuUT70gOAlh1+8GAVExQKK91LNOqzJQzPY3eDWmZeOaZzTClGndGvV5yei98NXpot/WLOSk+0vjOKRCogBAdHtim8NoLk4AU1mmgzvKhGBdd2+k40AXhi5/HdOH25mDEIu1aE2UYzGb5fWDHEBPk9kCLXboACayHmSUL5jn4vZGD6RGOeD8fLWkMZ9QkMHVIHqeJf6/bWWGpXJqyKJuPuVJr4Js942G2j0HuRZhjE/Pp0Juo1nZLPnCpXF/ocgNvajxnChSwp8AdHtim8NRblW7y2ldLbbnvLJxgEdlbXwFdIfCdhh9o/Z9bey8btecUY1RDywFlbieqveGpM7JYL44YqHx49mhiA6xMqNYSlBdjmyDGMCSRe2DqM3Q9tZlJsDU98Ram0r30EaaLbdegYMvxRRJQxfqwyUYWj6sBxnSIePmAo8AdHtim8/Dviufwa51o7mshU5jZE49QI8GXiYtII8ISmrhZp3U6FDPpyvnanR17ZVXQ4n78bmWk2hW6lUCiIB0e2Kb51t7bXCuEJajiqXKq10+LClxmq1MeDkr8I+kQyX\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 54,\"candidatesTokenCount\": 15,\"totalTokenCount\": 197,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 54}],\"thoughtsTokenCount\": 128},\"modelVersion\": \"gemini-2.5-pro\",\"responseId\": \"edH5aJCaLLH6nsEPqZGMqAY\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 54,\"candidatesTokenCount\": 15,\"totalTokenCount\": 197,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 54}],\"thoughtsTokenCount\": 128},\"modelVersion\": \"gemini-2.5-pro\",\"responseId\": \"edH5aJCaLLH6nsEPqZGMqAY\"}\r\n\r\n"
     headers:
       Content-Type:
       - text/event-stream
     status: 200 OK
     code: 200
-    duration: 2.716681667s
+    duration: 3.057425792s
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 735
+    content_length: 722
     host: generativelanguage.googleapis.com
     body: |
-      {"contents":[{"parts":[{"text":"What's the weather in Florence,Italy?"}],"role":"user"},{"parts":[{"functionCall":{"args":{"location":"Florence, Italy"},"id":"weather","name":"weather"}}],"role":"model"},{"parts":[{"functionResponse":{"id":"weather","name":"weather","response":{"result":"40 C"}}}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}
+      {"contents":[{"parts":[{"text":"What's the weather in Florence,Italy?"}],"role":"user"},{"parts":[{"functionCall":{"args":{"location":"Florence,Italy"},"id":"1","name":"weather"}}],"role":"model"},{"parts":[{"functionResponse":{"id":"1","name":"weather","response":{"result":"40 C"}}}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}
     form:
       alt:
       - sse
@@ -48,7 +48,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.23.0 gl-go/go1.25.1
+      - google-genai-sdk/1.29.0 gl-go/go1.25.1
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:streamGenerateContent?alt=sse
     method: POST
   response:
@@ -56,10 +56,10 @@ interactions:
     proto_major: 2
     proto_minor: 0
     content_length: -1
-    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"The\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 84,\"candidatesTokenCount\": 1,\"totalTokenCount\": 85,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 84}]},\"modelVersion\": \"gemini-2.5-pro\",\"responseId\": \"A3PWaIXxEde1nsEPp5-3iQE\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \" weather in Florence, Italy is 40 C. \\n\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 84,\"candidatesTokenCount\": 12,\"totalTokenCount\": 96,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 84}]},\"modelVersion\": \"gemini-2.5-pro\",\"responseId\": \"A3PWaIXxEde1nsEPp5-3iQE\"}\r\n\r\n"
+    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"The weather in Florence, Italy is 40 C.\",\"thoughtSignature\": \"CiIB0e2Kb56sxLRU03mYcZSclEd3sEuDNOhALD62B0KGHxFYCmcB0e2Kb+ghbxMMaV82lqir0eauJgRynLiu4qQd9yj+0pycTZ29YhNIr/WDsrDK/WHOdFO2pMleUHDx0tvOtpGDMkraX/dm4wWmufOU7X7JY/JwAzzJzyCWTWHl5VdSM5sBMeyzYayMCpwBAdHtim/sqOq26orx9LidxeQIl6psi5DopqlHlNiDzoMhQ9cElW01aJRwICHbhJVyuSeq4ZAIzgKZ9F5VVd27PsG+jfZu5nvsLVBiD3kNKx9EYoVNqiXBwyRD9z41ws45gFrgJDkb72kwZ3RWdVKhnIdd+AmKM0VeLHlrbCoDMS4s+s9qJOs7X1n5Q2kj3cr+Ac3ywIShC1GqdOpDCogBAdHtim+wjJ/Lt9GNO+nzU/A5kaePMu33H2JkvOjtJ2AO5vFBLtZozd/HN96L1mm8ci23VVhAyqeE4Fi5dHRRnnjMnjYJUAv+iGdotc3D0GglNNWzwF2AhWti3n4km100P+2/iNnGMwRnGc9yj1nHyeAUKeATFKlQn6kryoQ0AAP7y4Is5mu+ggqJAQHR7Ypv3wuCUWpQID2FttoYAxSX3+mj68ub92sx37TbBx1BnhP7xRsjhKRAgKe0jwBg1F65JRm93gC12kuhFY9HNYzJbkHp7uPbOwlu09x0reJ/ADZ8y0x3CQ1GUhtMn8TviCwqd0xhvWQBSN/LcX7xFrXJC863Go2Rc5X6ma/0fHFZNu9UYbkjCooBAdHtim8lf0ESA2Me6z3tLwXWw/FqoHM8toRP8dQkZbS5Tzt1c6x2eY8Jld1WEj1f358ZHGwClBx8KZ/CzQ3l1Qzr8xICaZIQ0euAhwPNqVCpAc4KzchVKt/09rrBj4FLQIUuc4YKL0qPSby13rg+9/v2GdccX+8ccpj6X8lQLIzwBI69E8hPWp+2CpgBAdHtim+sFWjG461P9CnczGAuQT1Tqg0XbVlyBdCpBlo6e30BaurGIeWCEOcbKui+LBVuu3GKtp+pqv+dUbUbT4DlwmDVyFqvDaM0mCAQecnErppQsc5C+YE6z1LWReheyriSrMn5Rdn7lL7WVfeGdZr/6fxTj3BlOgYb1m9ERNtgSXV2B/f7A3XUCvmhWtDjYBPiOjuVhg4KkwEB0e2Kb4rxYmYh+1JyBXYoTVKzbbDVntF9MhF1QnHw5SOPX8K35PDaJz40KHGxb57DTdYNnNClx7IAmLMCL5qDw/2wG6+uAP+3e0216KXHGeXQcTpZiZGuYGZUAgHoOD7gQa/1jfjsL0San5ukiW/UrTujI/uSM5SLlOfMdxLY6ljEHRaEJUA+Q/Qb2ixJek+RJjQKrQEB0e2Kb9cOXvEsHsB3FJemhDMqLpjaJfN2RxCNhotj8vvRx/s0LoT9pptx8uFT381mHFd4TYAujDWWuhm3pmYEultrifsvzmI/4tMsiIp9d2p2Gd+EfoYFZM6bCrwzOz3c/vARCDiQMBrXnhVtqt/Cm+F6xrY+EoAob7STNlrfxVDYNmvi6I9LvV8dQb+30ljuamBEe5lB4LZqYXz7z5UOctskS1BqkwZJzMNC2gqAAQHR7YpvAtO00MWKSEJ11C0llAJpdzfKY14sPFgXAWoBpJKes3OElywBKNH91m8Kzi6zQO9UVVYWGga/IGJIII9fzfUXVnTXAswMkMTr9xAIj8Z4v4znxZ5dI6QYLUbuh7P8ufb+Lbwrlp1C7qBELl3FqHptJ3HWZs58GPmyN6jSCicB0e2Kbxwoui+FrdfG/ptxdQpa/AzB+NRjqab1gKpMlOPSFZ2SdF8=\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 84,\"candidatesTokenCount\": 12,\"totalTokenCount\": 321,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 84}],\"thoughtsTokenCount\": 225},\"modelVersion\": \"gemini-2.5-pro\",\"responseId\": \"fNH5aPmlPNWsnsEPvpnKoAs\"}\r\n\r\n"
     headers:
       Content-Type:
       - text/event-stream
     status: 200 OK
     code: 200
-    duration: 792.75425ms
+    duration: 4.537089792s

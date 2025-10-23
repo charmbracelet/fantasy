@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - Anthropic/Go 1.13.0
+      - Anthropic/Go 1.14.0
     url: https://us-east5-aiplatform.googleapis.com/v1/projects/fantasy-playground-472418/locations/us-east5/publishers/anthropic/models/claude-3-7-sonnet@20250219:rawPredict
     method: POST
   response:
@@ -24,10 +24,10 @@ interactions:
     proto_minor: 0
     content_length: -1
     uncompressed: true
-    body: '{"id":"msg_vrtx_01JoBtryoxdRxCJ4GfXam6Yu","type":"message","role":"assistant","model":"claude-3-7-sonnet-20250219","content":[{"type":"text","text":"Olá! That''s \"hi\" in Portuguese. I can also say \"Oi\" which is a more casual greeting in Portuguese."}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":16,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":33}}'
+    body: '{"model":"claude-3-7-sonnet-20250219","id":"msg_vrtx_01RTPizSndQfkUH6eWrcFtk8","type":"message","role":"assistant","content":[{"type":"text","text":"Olá! Como você está? (This means \"Hi! How are you?\" in Portuguese.)"}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":16,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":24}}'
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 1.987505375s
+    duration: 2.138460417s

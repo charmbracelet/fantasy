@@ -11,7 +11,7 @@ Build AI agents with Go. Multi-provider, multi-model, one API.
 
 1. Choose a model and provider
 2. Add some tools
-3. Compile to bytecode and let it rip
+3. Compile to native machine code and let it rip
 
 > [!NOTE]
 > Fantasy is currently a preview. Expect API changes.

@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 822
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"}],"model":"qwen-3-coder-480b","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://api.cerebras.ai/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"id":"chatcmpl-739954f9-329a-4ea3-9b99-e835f50133fa","choices":[{"finish_reason":"tool_calls","index":0,"message":{"tool_calls":[{"id":"c35d15b73","type":"function","function":{"name":"add","arguments":"{\"a\": 2, \"b\": 3}"}},{"id":"c5e304cf7","type":"function","function":{"name":"multiply","arguments":"{\"a\": 2, \"b\": 3}"}}],"role":"assistant"}}],"created":1761231235,"model":"qwen-3-coder-480b","system_fingerprint":"fp_386b539e7b02ce3613b7","object":"chat.completion","usage":{"prompt_tokens":412,"completion_tokens":59,"total_tokens":471,"prompt_tokens_details":{"cached_tokens":0}},"time_info":{"queue_time":0.000109541,"prompt_time":0.017644706,"completion_time":0.030188646,"total_time":0.04938220977783203,"created":1761231235.6652448}}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 334.105209ms
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1173
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"tool_calls":[{"id":"c35d15b73","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"add"},"type":"function"},{"id":"c5e304cf7","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"c35d15b73","role":"tool"},{"content":"6","tool_call_id":"c5e304cf7","role":"tool"}],"model":"qwen-3-coder-480b","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://api.cerebras.ai/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"id":"chatcmpl-fd0232dd-90ed-48b4-ad5d-07d8c3ae6ace","choices":[{"finish_reason":"stop","index":0,"message":{"content":"The sum of 2 and 3 is 5, and the product of 2 and 3 is 6.","role":"assistant"}}],"created":1761231236,"model":"qwen-3-coder-480b","system_fingerprint":"fp_386b539e7b02ce3613b7","object":"chat.completion","usage":{"prompt_tokens":492,"completion_tokens":26,"total_tokens":518,"prompt_tokens_details":{"cached_tokens":0}},"time_info":{"queue_time":0.000347472,"prompt_time":0.00566039,"completion_time":0.009885108,"total_time":0.017212629318237305,"created":1761231236.0040975}}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 365.325167ms

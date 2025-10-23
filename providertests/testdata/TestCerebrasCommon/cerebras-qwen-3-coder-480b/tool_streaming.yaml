@@ -1,0 +1,99 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 513
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"}],"model":"qwen-3-coder-480b","max_tokens":4000,"stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://api.cerebras.ai/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"chatcmpl-e0347bac-7067-402a-90b0-de824b22e28d","choices":[{"delta":{"role":"assistant"},"index":0}],"created":1761231232,"model":"qwen-3-coder-480b","system_fingerprint":"fp_386b539e7b02ce3613b7","object":"chat.completion.chunk"}
+
+      data: {"id":"chatcmpl-e0347bac-7067-402a-90b0-de824b22e28d","choices":[{"delta":{"tool_calls":[{"function":{"name":"weather","arguments":"{\"location\": \"Florence,Italy\"}"},"type":"function","id":"27781e665","index":0}]},"index":0}],"created":1761231232,"model":"qwen-3-coder-480b","system_fingerprint":"fp_386b539e7b02ce3613b7","object":"chat.completion.chunk"}
+
+      data: {"id":"chatcmpl-e0347bac-7067-402a-90b0-de824b22e28d","choices":[{"delta":{},"finish_reason":"tool_calls","index":0}],"created":1761231232,"model":"qwen-3-coder-480b","system_fingerprint":"fp_386b539e7b02ce3613b7","object":"chat.completion.chunk","usage":{"prompt_tokens":277,"completion_tokens":25,"total_tokens":302,"prompt_tokens_details":{"cached_tokens":0}},"time_info":{"queue_time":0.00023776,"prompt_time":0.01277883,"completion_time":0.017435801,"total_time":0.03246140480041504,"created":1761231232.1930194}}
+
+    headers:
+      Content-Type:
+      - text/event-stream; charset=utf-8
+    status: 200 OK
+    code: 200
+    duration: 554.299125ms
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 725
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"27781e665","function":{"arguments":"{\"location\": \"Florence,Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"27781e665","role":"tool"}],"model":"qwen-3-coder-480b","max_tokens":4000,"stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://api.cerebras.ai/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"chatcmpl-3f2608fe-2a08-45b1-a2d7-647546bca09b","choices":[{"delta":{"role":"assistant"},"index":0}],"created":1761231235,"model":"qwen-3-coder-480b","system_fingerprint":"fp_386b539e7b02ce3613b7","object":"chat.completion.chunk"}
+
+      data: {"id":"chatcmpl-3f2608fe-2a08-45b1-a2d7-647546bca09b","choices":[{"delta":{"content":"The"},"index":0}],"created":1761231235,"model":"qwen-3-coder-480b","system_fingerprint":"fp_386b539e7b02ce3613b7","object":"chat.completion.chunk"}
+
+      data: {"id":"chatcmpl-3f2608fe-2a08-45b1-a2d7-647546bca09b","choices":[{"delta":{"content":" weather"},"index":0}],"created":1761231235,"model":"qwen-3-coder-480b","system_fingerprint":"fp_386b539e7b02ce3613b7","object":"chat.completion.chunk"}
+
+      data: {"id":"chatcmpl-3f2608fe-2a08-45b1-a2d7-647546bca09b","choices":[{"delta":{"content":" in"},"index":0}],"created":1761231235,"model":"qwen-3-coder-480b","system_fingerprint":"fp_386b539e7b02ce3613b7","object":"chat.completion.chunk"}
+
+      data: {"id":"chatcmpl-3f2608fe-2a08-45b1-a2d7-647546bca09b","choices":[{"delta":{"content":" Florence"},"index":0}],"created":1761231235,"model":"qwen-3-coder-480b","system_fingerprint":"fp_386b539e7b02ce3613b7","object":"chat.completion.chunk"}
+
+      data: {"id":"chatcmpl-3f2608fe-2a08-45b1-a2d7-647546bca09b","choices":[{"delta":{"content":","},"index":0}],"created":1761231235,"model":"qwen-3-coder-480b","system_fingerprint":"fp_386b539e7b02ce3613b7","object":"chat.completion.chunk"}
+
+      data: {"id":"chatcmpl-3f2608fe-2a08-45b1-a2d7-647546bca09b","choices":[{"delta":{"content":" Italy"},"index":0}],"created":1761231235,"model":"qwen-3-coder-480b","system_fingerprint":"fp_386b539e7b02ce3613b7","object":"chat.completion.chunk"}
+
+      data: {"id":"chatcmpl-3f2608fe-2a08-45b1-a2d7-647546bca09b","choices":[{"delta":{"content":" is"},"index":0}],"created":1761231235,"model":"qwen-3-coder-480b","system_fingerprint":"fp_386b539e7b02ce3613b7","object":"chat.completion.chunk"}
+
+      data: {"id":"chatcmpl-3f2608fe-2a08-45b1-a2d7-647546bca09b","choices":[{"delta":{"content":" currently"},"index":0}],"created":1761231235,"model":"qwen-3-coder-480b","system_fingerprint":"fp_386b539e7b02ce3613b7","object":"chat.completion.chunk"}
+
+      data: {"id":"chatcmpl-3f2608fe-2a08-45b1-a2d7-647546bca09b","choices":[{"delta":{"content":" "},"index":0}],"created":1761231235,"model":"qwen-3-coder-480b","system_fingerprint":"fp_386b539e7b02ce3613b7","object":"chat.completion.chunk"}
+
+      data: {"id":"chatcmpl-3f2608fe-2a08-45b1-a2d7-647546bca09b","choices":[{"delta":{"content":"4"},"index":0}],"created":1761231235,"model":"qwen-3-coder-480b","system_fingerprint":"fp_386b539e7b02ce3613b7","object":"chat.completion.chunk"}
+
+      data: {"id":"chatcmpl-3f2608fe-2a08-45b1-a2d7-647546bca09b","choices":[{"delta":{"content":"0"},"index":0}],"created":1761231235,"model":"qwen-3-coder-480b","system_fingerprint":"fp_386b539e7b02ce3613b7","object":"chat.completion.chunk"}
+
+      data: {"id":"chatcmpl-3f2608fe-2a08-45b1-a2d7-647546bca09b","choices":[{"delta":{"content":"°C"},"index":0}],"created":1761231235,"model":"qwen-3-coder-480b","system_fingerprint":"fp_386b539e7b02ce3613b7","object":"chat.completion.chunk"}
+
+      data: {"id":"chatcmpl-3f2608fe-2a08-45b1-a2d7-647546bca09b","choices":[{"delta":{"content":"."},"index":0}],"created":1761231235,"model":"qwen-3-coder-480b","system_fingerprint":"fp_386b539e7b02ce3613b7","object":"chat.completion.chunk"}
+
+      data: {"id":"chatcmpl-3f2608fe-2a08-45b1-a2d7-647546bca09b","choices":[{"delta":{},"index":0}],"created":1761231235,"model":"qwen-3-coder-480b","system_fingerprint":"fp_386b539e7b02ce3613b7","object":"chat.completion.chunk"}
+
+      data: {"id":"chatcmpl-3f2608fe-2a08-45b1-a2d7-647546bca09b","choices":[{"delta":{},"finish_reason":"stop","index":0}],"created":1761231235,"model":"qwen-3-coder-480b","system_fingerprint":"fp_386b539e7b02ce3613b7","object":"chat.completion.chunk","usage":{"prompt_tokens":319,"completion_tokens":14,"total_tokens":333,"prompt_tokens_details":{"cached_tokens":0}},"time_info":{"queue_time":0.000132691,"prompt_time":0.011949852,"completion_time":0.007288454,"total_time":0.02104043960571289,"created":1761231235.267821}}
+
+    headers:
+      Content-Type:
+      - text/event-stream; charset=utf-8
+    status: 200 OK
+    code: 200
+    duration: 406.379209ms

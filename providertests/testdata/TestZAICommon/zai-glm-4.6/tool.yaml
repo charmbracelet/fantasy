@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 449
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"}],"model":"glm-4.6","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://api.z.ai/api/coding/paas/v4/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"choices":[{"finish_reason":"tool_calls","index":0,"message":{"reasoning_content":"The user is asking for weather information for Florence, Italy. I need to use the weather function to get this information. The required parameter is \"location\" and the user has specified \"Florence,Italy\". I should use exactly this location as provided.","role":"assistant","tool_calls":[{"function":{"arguments":"{\"location\":\"Florence,Italy\"}","name":"weather"},"id":"call_-8223349338831929811","index":0,"type":"function"}]}}],"created":1761231588,"id":"2025102322594663828723f48b468f","model":"glm-4.6","request_id":"2025102322594663828723f48b468f","usage":{"completion_tokens":84,"prompt_tokens":179,"prompt_tokens_details":{"cached_tokens":43},"total_tokens":263}}'
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+    status: 200 OK
+    code: 200
+    duration: 2.504388291s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 692
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"call_-8223349338831929811","function":{"arguments":"{\"location\":\"Florence,Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"call_-8223349338831929811","role":"tool"}],"model":"glm-4.6","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://api.z.ai/api/coding/paas/v4/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"choices":[{"finish_reason":"stop","index":0,"message":{"content":"\n\nThe current weather in Florence, Italy is 40°C (104°F). That''s quite hot! Make sure to stay hydrated and seek shade if you''re out and about.","reasoning_content":"The weather function returned 40 C for Florence, Italy. This is quite hot - 40 degrees Celsius is 104 degrees Fahrenheit. I should present this information clearly to the user.","role":"assistant"}}],"created":1761231591,"id":"202510232259498597c96d998a46dc","model":"glm-4.6","request_id":"202510232259498597c96d998a46dc","usage":{"completion_tokens":77,"prompt_tokens":207,"prompt_tokens_details":{"cached_tokens":43},"total_tokens":284}}'
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+    status: 200 OK
+    code: 200
+    duration: 2.576039583s

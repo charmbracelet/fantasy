@@ -20,12 +20,20 @@ Build AI agents with Go. Multi-provider, multi-model, one API.
 import "charm.land/fantasy"
 import "charm.land/fantasy/providers/openrouter"
 
-// Choose your fave provider-model combo.
-provider := openrouter.New(openrouter.WithAPIKey(myHotKey))
-model, err := provider.LanguageModel("moonshotai/kimi-k2")
+// Choose your fave provider.
+provider, err := openrouter.New(openrouter.WithAPIKey(myHotKey))
 if err != nil {
-    fmt.Fprintln(os.Stderr, "Dang:", err)
-    os.Exit(1)
+	fmt.Fprintln(os.Stderr, "Whoops:", err)
+	os.Exit(1)
+}
+
+ctx := context.Background()
+
+// Pick your fave model.
+model, err := provider.LanguageModel(ctx, "moonshotai/kimi-k2")
+if err != nil {
+	fmt.Fprintln(os.Stderr, "Dang:", err)
+	os.Exit(1)
 }
 
 // Make your own tools.
@@ -40,11 +48,11 @@ result, err := agent.Generate(context.Background(), fantasy.AgentCall{Prompt: pr
 if err != nil {
     fmt.Fprintln(os.Stderr, "Oof:", err)
     os.Exit(1)
-}	
+}
 fmt.Println(result.Response.Content.Text())
 ```
 
-🍔 Hungry for more? [See the examples](https://github.com/charmbracelet/fantasy/tree/main/examples).
+🍔 For the full implementation and more [see the examples directory](https://github.com/charmbracelet/fantasy/tree/main/examples).
 
 ## Multi-model? Multi-provider?
 

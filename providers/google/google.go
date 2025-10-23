@@ -25,7 +25,8 @@ type provider struct {
 	options options
 }
 
-type GoogleToolCallIDFunc = func() string
+// ToolCallIDFunc defines a function that generates a tool call ID.
+type ToolCallIDFunc = func() string
 
 type options struct {
 	apiKey     string
@@ -37,7 +38,7 @@ type options struct {
 	project    string
 	location   string
 	skipAuth   bool
-	generateID GoogleToolCallIDFunc
+	generateID ToolCallIDFunc
 }
 
 // Option defines a function that configures Google provider options.
@@ -120,7 +121,9 @@ func WithHTTPClient(client *http.Client) Option {
 	}
 }
 
-func WithToolCallIDFunc(f GoogleToolCallIDFunc) Option {
+// WithToolCallIDFunc sets the function that generates a tool call ID.
+// WithToolCallIDFunc sets the function that generates a tool call ID.
+func WithToolCallIDFunc(f ToolCallIDFunc) Option {
 	return func(o *options) {
 		o.generateID = f
 	}
@@ -392,7 +395,7 @@ func toGooglePrompt(prompt fantasy.Prompt) (*genai.Content, []*genai.Content, []
 							Name: toolCall.ToolName,
 							Args: result,
 						},
-						ThoughtSignature: []byte(signature),
+						ThoughtSignature: signature,
 					})
 					// reset
 					signature = nil
@@ -413,7 +416,6 @@ func toGooglePrompt(prompt fantasy.Prompt) (*genai.Content, []*genai.Content, []
 						continue
 					}
 					signature = []byte(reasoningMetadata.Signature)
-
 				}
 			}
 			if len(parts) > 0 {
@@ -744,7 +746,6 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 					usage.ReasoningTokens += currentUsage.ReasoningTokens
 					usage.CacheReadTokens += currentUsage.CacheReadTokens
 				}
-
 			}
 
 			if len(resp.Candidates) > 0 && resp.Candidates[0].FinishReason != "" {

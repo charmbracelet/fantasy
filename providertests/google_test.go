@@ -70,7 +70,7 @@ func testGoogleThinking(t *testing.T, result *fantasy.AgentResult) {
 	require.Greater(t, reasoningContentCount, 0)
 }
 
-func generateIDMock() google.GoogleToolCallIDFunc {
+func generateIDMock() google.ToolCallIDFunc {
 	id := 0
 	return func() string {
 		id++

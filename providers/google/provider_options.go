@@ -9,6 +9,12 @@ type ThinkingConfig struct {
 	IncludeThoughts *bool  `json:"include_thoughts"`
 }
 
+type ReasoningMetadata struct {
+	Signature string `json:"signature"`
+}
+
+func (m *ReasoningMetadata) Options() {}
+
 // SafetySetting represents safety settings for the Google provider.
 type SafetySetting struct {
 	// 'HARM_CATEGORY_UNSPECIFIED',

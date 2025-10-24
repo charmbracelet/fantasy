@@ -30,7 +30,7 @@ func builderBedrockClaude3Sonnet(t *testing.T, r *recorder.Recorder) (fantasy.La
 	if err != nil {
 		return nil, err
 	}
-	return provider.LanguageModel(t.Context(), "us.anthropic.claude-3-sonnet-20240229-v1:0")
+	return provider.LanguageModel(t.Context(), "anthropic.claude-3-sonnet-20240229-v1:0")
 }
 
 func builderBedrockClaude3Opus(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
@@ -41,7 +41,7 @@ func builderBedrockClaude3Opus(t *testing.T, r *recorder.Recorder) (fantasy.Lang
 	if err != nil {
 		return nil, err
 	}
-	return provider.LanguageModel(t.Context(), "us.anthropic.claude-3-opus-20240229-v1:0")
+	return provider.LanguageModel(t.Context(), "anthropic.claude-3-opus-20240229-v1:0")
 }
 
 func builderBedrockClaude3Haiku(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
@@ -52,7 +52,7 @@ func builderBedrockClaude3Haiku(t *testing.T, r *recorder.Recorder) (fantasy.Lan
 	if err != nil {
 		return nil, err
 	}
-	return provider.LanguageModel(t.Context(), "us.anthropic.claude-3-haiku-20240307-v1:0")
+	return provider.LanguageModel(t.Context(), "anthropic.claude-3-haiku-20240307-v1:0")
 }
 
 func buildersBedrockBasicAuth(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
@@ -64,5 +64,5 @@ func buildersBedrockBasicAuth(t *testing.T, r *recorder.Recorder) (fantasy.Langu
 	if err != nil {
 		return nil, err
 	}
-	return provider.LanguageModel(t.Context(), "us.anthropic.claude-3-sonnet-20240229-v1:0")
+	return provider.LanguageModel(t.Context(), "anthropic.claude-3-sonnet-20240229-v1:0")
 }

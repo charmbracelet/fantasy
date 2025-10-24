@@ -157,6 +157,8 @@ func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.L
 		)
 	}
 	if a.options.useBedrock {
+		modelID = bedrockPrefixModelWithRegion(modelID)
+
 		if a.options.skipAuth || a.options.apiKey != "" {
 			clientOptions = append(
 				clientOptions,

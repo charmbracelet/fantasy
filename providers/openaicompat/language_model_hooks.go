@@ -41,6 +41,12 @@ func PrepareCallFunc(_ fantasy.LanguageModel, params *openaisdk.ChatCompletionNe
 	if providerOptions.User != nil {
 		params.User = param.NewOpt(*providerOptions.User)
 	}
+
+	// Apply extra fields for custom OpenAI-compatible APIs (e.g., Z.AI GLM thinking mode)
+	if providerOptions.ExtraFields != nil && len(providerOptions.ExtraFields) > 0 {
+		params.SetExtraFields(providerOptions.ExtraFields)
+	}
+
 	return nil, nil
 }
 

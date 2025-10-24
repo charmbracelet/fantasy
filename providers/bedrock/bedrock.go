@@ -8,7 +8,6 @@ import (
 )
 
 type options struct {
-	skipAuth         bool
 	anthropicOptions []anthropic.Option
 }
 
@@ -31,7 +30,6 @@ func New(opts ...Option) (fantasy.Provider, error) {
 			o.anthropicOptions,
 			anthropic.WithName(Name),
 			anthropic.WithBedrock(),
-			anthropic.WithSkipAuth(o.skipAuth),
 		)...,
 	)
 }

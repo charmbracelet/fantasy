@@ -39,7 +39,6 @@ type options struct {
 
 	vertexProject  string
 	vertexLocation string
-	skipAuth       bool
 
 	useBedrock bool
 }
@@ -87,13 +86,6 @@ func WithVertex(project, location string) Option {
 	}
 }
 
-// WithSkipAuth configures whether to skip authentication for the Anthropic provider.
-func WithSkipAuth(skip bool) Option {
-	return func(o *options) {
-		o.skipAuth = skip
-	}
-}
-
 // WithBedrock configures the Anthropic provider to use AWS Bedrock with default config.
 func WithBedrock() Option {
 	return func(o *options) {
@@ -137,15 +129,9 @@ func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.L
 		clientOptions = append(clientOptions, option.WithHTTPClient(a.options.client))
 	}
 	if a.options.vertexProject != "" && a.options.vertexLocation != "" {
-		var credentials *google.Credentials
-		if a.options.skipAuth {
-			credentials = &google.Credentials{TokenSource: &googleDummyTokenSource{}}
-		} else {
-			var err error
-			credentials, err = google.FindDefaultCredentials(ctx)
-			if err != nil {
-				return nil, err
-			}
+		credentials, err := google.FindDefaultCredentials(ctx)
+		if err != nil {
+			return nil, err
 		}
 
 		clientOptions = append(

@@ -12,10 +12,9 @@ import (
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/providers/anthropic"
-	"cloud.google.com/go/auth"
-	"github.com/charmbracelet/go-genai"
 	"github.com/charmbracelet/x/exp/slice"
 	"github.com/google/uuid"
+	"google.golang.org/genai"
 )
 
 // Name is the name of the Google provider.
@@ -37,7 +36,6 @@ type options struct {
 	backend        genai.Backend
 	project        string
 	location       string
-	skipAuth       bool
 	toolCallIDFunc ToolCallIDFunc
 }
 
@@ -93,13 +91,6 @@ func WithVertex(project, location string) Option {
 	}
 }
 
-// WithSkipAuth configures whether to skip authentication for the Google provider.
-func WithSkipAuth(skipAuth bool) Option {
-	return func(o *options) {
-		o.skipAuth = skipAuth
-	}
-}
-
 // WithName sets the name for the Google provider.
 func WithName(name string) Option {
 	return func(o *options) {
@@ -145,7 +136,6 @@ func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.L
 		p, err := anthropic.New(
 			anthropic.WithVertex(a.options.project, a.options.location),
 			anthropic.WithHTTPClient(a.options.client),
-			anthropic.WithSkipAuth(a.options.skipAuth),
 		)
 		if err != nil {
 			return nil, err
@@ -159,9 +149,6 @@ func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.L
 		APIKey:     a.options.apiKey,
 		Project:    a.options.project,
 		Location:   a.options.location,
-	}
-	if a.options.skipAuth {
-		cc.Credentials = &auth.Credentials{TokenProvider: dummyTokenProvider{}}
 	}
 
 	if a.options.baseURL != "" || len(a.options.headers) > 0 {

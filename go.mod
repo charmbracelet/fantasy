@@ -3,10 +3,8 @@ module charm.land/fantasy
 go 1.24.5
 
 require (
-	cloud.google.com/go/auth v0.17.0
 	github.com/anthropics/anthropic-sdk-go v1.14.0
 	github.com/aws/aws-sdk-go-v2/config v1.27.27
-	github.com/charmbracelet/go-genai v0.0.0-20251021165952-9befde14ce97
 	github.com/charmbracelet/x/exp/slice v0.0.0-20250904123553-b4e2667e5ad5
 	github.com/charmbracelet/x/json v0.2.0
 	github.com/go-viper/mapstructure/v2 v2.4.0
@@ -18,11 +16,13 @@ require (
 	github.com/tidwall/sjson v1.2.5
 	go.yaml.in/yaml/v4 v4.0.0-rc.2
 	golang.org/x/oauth2 v0.32.0
+	google.golang.org/genai v1.32.0
 	gopkg.in/dnaeon/go-vcr.v4 v4.0.6-0.20250923044825-7b4892dd3117
 )
 
 require (
 	cloud.google.com/go v0.116.0 // indirect
+	cloud.google.com/go/auth v0.17.0 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.8 // indirect
 	cloud.google.com/go/compute/metadata v0.8.0 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.17.0 // indirect

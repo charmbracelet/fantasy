@@ -30,8 +30,6 @@ func TestGoogleCommon(t *testing.T) {
 		pairs = append(pairs, builderPair{m.name, geminiBuilder(m.model), nil, nil})
 	}
 	for _, m := range vertexTestModels {
-		// TODO: fixme
-		continue
 		pairs = append(pairs, builderPair{m.name, vertexBuilder(m.model), nil, nil})
 	}
 	testCommon(t, pairs)
@@ -99,7 +97,6 @@ func vertexBuilder(model string) builderFunc {
 		provider, err := google.New(
 			google.WithVertex(os.Getenv("FANTASY_VERTEX_PROJECT"), os.Getenv("FANTASY_VERTEX_LOCATION")),
 			google.WithHTTPClient(&http.Client{Transport: r}),
-			google.WithSkipAuth(!r.IsRecording()),
 			google.WithToolCallIDFunc(generateIDMock()),
 		)
 		if err != nil {

@@ -94,8 +94,10 @@ func geminiBuilder(model string) builderFunc {
 
 func vertexBuilder(model string) builderFunc {
 	return func(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
+		project := cmp.Or(os.Getenv("FANTASY_VERTEX_PROJECT"), "fantasy")
+		location := cmp.Or(os.Getenv("FANTASY_VERTEX_LOCATION"), "us-east5")
 		provider, err := google.New(
-			google.WithVertex(os.Getenv("FANTASY_VERTEX_PROJECT"), os.Getenv("FANTASY_VERTEX_LOCATION")),
+			google.WithVertex(project, location),
 			google.WithHTTPClient(&http.Client{Transport: r}),
 			google.WithToolCallIDFunc(generateIDMock()),
 		)

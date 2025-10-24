@@ -15,47 +15,47 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - Anthropic/Go 1.13.0
+      - Anthropic/Go 1.14.0
     url: https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-3-haiku-20240307-v1%3A0/invoke
     method: POST
   response:
     proto: HTTP/2.0
     proto_major: 2
     proto_minor: 0
-    content_length: 337
-    body: '{"id":"msg_bdrk_012EK8eom7ArLnbCQErFKxPY","type":"message","role":"assistant","model":"claude-3-haiku-20240307","content":[{"type":"tool_use","id":"toolu_bdrk_018RFU2HzCBzsTUssfjW6HQP","name":"weather","input":{"location":"Florence, Italy"}}],"stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":345,"output_tokens":53}}'
+    content_length: 412
+    body: '{"id":"msg_bdrk_01LvnLYKS9CmbrQasuCps5n9","type":"message","role":"assistant","model":"claude-3-haiku-20240307","content":[{"type":"text","text":"Okay, let''s check the weather in Florence, Italy:"},{"type":"tool_use","id":"toolu_bdrk_01UCzWEMPacuRsjHYNzMy7Ha","name":"weather","input":{"location":"Florence, Italy"}}],"stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":345,"output_tokens":67}}'
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 1.068856584s
+    duration: 1.350938666s
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 765
+    content_length: 840
     host: ""
-    body: '{"max_tokens":4000,"messages":[{"content":[{"text":"What''s the weather in Florence,Italy?","type":"text"}],"role":"user"},{"content":[{"id":"toolu_bdrk_018RFU2HzCBzsTUssfjW6HQP","input":{"location":"Florence, Italy"},"name":"weather","type":"tool_use"}],"role":"assistant"},{"content":[{"tool_use_id":"toolu_bdrk_018RFU2HzCBzsTUssfjW6HQP","content":[{"text":"40 C","type":"text"}],"type":"tool_result"}],"role":"user"}],"system":[{"text":"You are a helpful assistant","type":"text"}],"tool_choice":{"type":"auto"},"tools":[{"input_schema":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location"}],"anthropic_version":"bedrock-2023-05-31"}'
+    body: '{"max_tokens":4000,"messages":[{"content":[{"text":"What''s the weather in Florence,Italy?","type":"text"}],"role":"user"},{"content":[{"text":"Okay, let''s check the weather in Florence, Italy:","type":"text"},{"id":"toolu_bdrk_01UCzWEMPacuRsjHYNzMy7Ha","input":{"location":"Florence, Italy"},"name":"weather","type":"tool_use"}],"role":"assistant"},{"content":[{"tool_use_id":"toolu_bdrk_01UCzWEMPacuRsjHYNzMy7Ha","content":[{"text":"40 C","type":"text"}],"type":"tool_result"}],"role":"user"}],"system":[{"text":"You are a helpful assistant","type":"text"}],"tool_choice":{"type":"auto"},"tools":[{"input_schema":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location"}],"anthropic_version":"bedrock-2023-05-31"}'
     headers:
       Accept:
       - application/json
       Content-Type:
       - application/json
       User-Agent:
-      - Anthropic/Go 1.13.0
+      - Anthropic/Go 1.14.0
     url: https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-3-haiku-20240307-v1%3A0/invoke
     method: POST
   response:
     proto: HTTP/2.0
     proto_major: 2
     proto_minor: 0
-    content_length: 284
-    body: '{"id":"msg_bdrk_0158zRRWfj852Wxa71rG33PN","type":"message","role":"assistant","model":"claude-3-haiku-20240307","content":[{"type":"text","text":"The weather in Florence, Italy is 40°C."}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":413,"output_tokens":16}}'
+    content_length: 364
+    body: '{"id":"msg_bdrk_016n2ZdKWy3y1fqj6qxXNmoD","type":"message","role":"assistant","model":"claude-3-haiku-20240307","content":[{"type":"text","text":"Based on the information provided by the weather tool, the current temperature in Florence, Italy is 40 degrees Celsius."}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":426,"output_tokens":29}}'
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 1.069127458s
+    duration: 1.025493583s

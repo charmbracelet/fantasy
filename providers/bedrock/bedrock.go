@@ -56,10 +56,3 @@ func WithHTTPClient(client option.HTTPClient) Option {
 		o.anthropicOptions = append(o.anthropicOptions, anthropic.WithHTTPClient(client))
 	}
 }
-
-// WithSkipAuth configures whether to skip authentication for the Bedrock provider.
-func WithSkipAuth(skipAuth bool) Option {
-	return func(o *options) {
-		o.skipAuth = skipAuth
-	}
-}

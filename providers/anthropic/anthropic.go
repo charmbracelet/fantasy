@@ -9,15 +9,17 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"maps"
 	"strings"
 
 	"charm.land/fantasy"
-	"github.com/charmbracelet/anthropic-sdk-go"
-	"github.com/charmbracelet/anthropic-sdk-go/bedrock"
-	"github.com/charmbracelet/anthropic-sdk-go/option"
-	"github.com/charmbracelet/anthropic-sdk-go/packages/param"
-	"github.com/charmbracelet/anthropic-sdk-go/vertex"
+	"github.com/anthropics/anthropic-sdk-go"
+	"github.com/anthropics/anthropic-sdk-go/bedrock"
+	"github.com/anthropics/anthropic-sdk-go/option"
+	"github.com/anthropics/anthropic-sdk-go/packages/param"
+	"github.com/anthropics/anthropic-sdk-go/vertex"
+	"github.com/aws/aws-sdk-go-v2/config"
 	"golang.org/x/oauth2/google"
 )
 
@@ -92,7 +94,7 @@ func WithSkipAuth(skip bool) Option {
 	}
 }
 
-// WithBedrock configures the Anthropic provider to use AWS Bedrock.
+// WithBedrock configures the Anthropic provider to use AWS Bedrock with default config.
 func WithBedrock() Option {
 	return func(o *options) {
 		o.useBedrock = true
@@ -157,10 +159,21 @@ func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.L
 		)
 	}
 	if a.options.useBedrock {
-		if a.options.skipAuth || a.options.apiKey != "" {
+		region := "us-east-1"
+		// Load the AWS configuration
+		cfg, err := config.LoadDefaultConfig(ctx)
+		if err == nil {
+			region = cfg.Region
+			slog.Info(fmt.Sprintf("Found Region %s", region))
+		}
+		regionPrefix := region[:2]
+		modelName := modelID
+		modelID = fmt.Sprintf("%s.%s", regionPrefix, modelName)
+		if a.options.apiKey != "" {
 			clientOptions = append(
 				clientOptions,
-				bedrock.WithConfig(bedrockBasicAuthConfig(a.options.apiKey)),
+				option.WithBaseURL(fmt.Sprintf("https://bedrock-runtime.%s.amazonaws.com", region)),
+				option.WithMiddleware(bedrockMiddleware(a.options.apiKey)),
 			)
 		} else {
 			clientOptions = append(

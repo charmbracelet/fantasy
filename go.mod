@@ -6,20 +6,22 @@ require (
 	cloud.google.com/go/auth v0.17.0
 	github.com/aws/aws-sdk-go-v2 v1.39.4
 	github.com/aws/smithy-go v1.23.1
-	github.com/charmbracelet/anthropic-sdk-go 7fbe034f7454
-	github.com/charmbracelet/go-genai a075d35ad44a
-	github.com/charmbracelet/x/exp/slice f594ac034d6b
+	github.com/charmbracelet/anthropic-sdk-go v0.0.0-20251022202715-ec1499142678
+	github.com/charmbracelet/go-genai v0.0.0-20250923194548-a075d35ad44a
+	github.com/charmbracelet/x/exp/slice v0.0.0-20251023181713-f594ac034d6b
 	github.com/charmbracelet/x/json v0.2.0
 	github.com/go-viper/mapstructure/v2 v2.4.0
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/openai/openai-go/v2 v2.7.1
-	github.com/openai/openai-go/v3 v3.6.1
 	github.com/stretchr/testify v1.11.1
 	go.yaml.in/yaml/v4 v4.0.0-rc.2
 	golang.org/x/oauth2 v0.32.0
 	gopkg.in/dnaeon/go-vcr.v4 v4.0.6-0.20250926081054-3f654157e4a1
 )
+
+// Replace directives for Charmbracelet forks with upstream module paths
+replace github.com/charmbracelet/go-genai => google.golang.org/genai v0.0.0-20250923194548-a075d35ad44a
 
 require (
 	cloud.google.com/go v0.116.0 // indirect
@@ -66,6 +68,7 @@ require (
 	golang.org/x/text v0.28.0 // indirect
 	golang.org/x/time v0.12.0 // indirect
 	google.golang.org/api v0.239.0 // indirect
+	google.golang.org/genai v1.32.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250603155806-513f23925822 // indirect
 	google.golang.org/grpc v1.74.2 // indirect
 	google.golang.org/protobuf v1.36.7 // indirect

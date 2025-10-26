@@ -52,7 +52,7 @@ variables:
 build-with-private-modules:
   extends: .go_private_modules_setup
   stage: build
-  image: golang:1.23
+  image: golang:1.24
   script:
     - echo "Downloading dependencies..."
     - go mod download
@@ -70,7 +70,7 @@ build-with-private-modules:
 test-with-private-modules:
   extends: .go_private_modules_setup
   stage: test
-  image: golang:1.23
+  image: golang:1.24
   script:
     - echo "Downloading dependencies..."
     - go mod download
@@ -91,7 +91,7 @@ test-with-private-modules:
 renovate-build:
   extends: .go_private_modules_setup
   stage: build
-  image: golang:1.23
+  image: golang:1.24
   script:
     - echo "RenovateBot dependency update validation"
     - go mod download
@@ -106,7 +106,7 @@ renovate-build:
 go-mod-verify:
   extends: .go_private_modules_setup
   stage: test
-  image: golang:1.23
+  image: golang:1.24
   script:
     - go mod download
     - go mod verify
@@ -128,7 +128,7 @@ go-mod-verify:
 gosec-scan:
   extends: .go_private_modules_setup
   stage: test
-  image: golang:1.23
+  image: golang:1.24
   before_script:
     - !reference [.go_private_modules_setup, before_script]
     - go install github.com/securego/gosec/v2/cmd/gosec@latest

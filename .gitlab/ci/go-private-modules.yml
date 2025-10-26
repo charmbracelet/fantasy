@@ -105,7 +105,7 @@ renovate-build:
 # Verify go.mod and go.sum are in sync
 go-mod-verify:
   extends: .go_private_modules_setup
-  stage: validate
+  stage: test
   image: golang:1.23
   script:
     - go mod download

@@ -60,12 +60,23 @@
       "automerge": false
     },
     {
-      "description": "Go module minor and patch updates",
+      "description": "Go module digest updates - auto-merge when CI passes",
+      "matchDatasources": ["go"],
+      "matchUpdateTypes": ["digest"],
+      "labels": ["golang", "digest-update", "auto-merge"],
+      "automerge": true,
+      "commitMessagePrefix": "chore(deps):",
+      "semanticCommitType": "chore",
+      "semanticCommitScope": "deps"
+    },
+    {
+      "description": "Go module minor and patch updates - auto-merge when CI passes",
       "matchDatasources": ["go"],
       "matchUpdateTypes": ["minor", "patch"],
-      "labels": ["golang", "minor-update"],
+      "labels": ["golang", "minor-update", "auto-merge"],
       "groupName": "go dependencies (non-major)",
-      "rangeStrategy": "bump"
+      "rangeStrategy": "bump",
+      "automerge": true
     },
     {
       "description": "Go module major updates - requires careful review",

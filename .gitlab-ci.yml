@@ -1,18 +1,90 @@
-# You can override the included template(s) by including variable overrides
-# SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
-# Secret Detection customization: https://docs.gitlab.com/user/application_security/secret_detection/pipeline/configure
-# Dependency Scanning customization: https://docs.gitlab.com/ee/user/application_security/dependency_scanning/#customizing-the-dependency-scanning-settings
-# Container Scanning customization: https://docs.gitlab.com/ee/user/application_security/container_scanning/#customizing-the-container-scanning-settings
-# Note that environment variables can be set in several places
-# See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
-stages:
-- test
-- secret-detection
-sast:
-  stage: test
 include:
-- template: Security/Secret-Detection.gitlab-ci.yml
+  - local: '.gitlab/ci/go-private-modules.yml'
+
+stages:
+  - sync
+  - maintain
+  - build
+  - test
+
 variables:
-  SECRET_DETECTION_ENABLED: 'true'
-secret_detection:
-  stage: secret-detection
+  GO_VERSION: "1.24"
+
+# Renovatebot dependency updates
+renovate:
+  stage: maintain
+  image: renovate/renovate:latest
+  script:
+    - renovate --platform=gitlab --token=$RENOVATE_TOKEN
+  variables:
+    RENOVATE_PLATFORM: gitlab
+    RENOVATE_ENDPOINT: https://gitlab.com/api/v4
+    RENOVATE_AUTODISCOVER: "false"
+    RENOVATE_BASE_DIR: $CI_PROJECT_DIR
+    LOG_LEVEL: debug
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule" && $SCHEDULE_TYPE == "renovate"
+      when: always
+
+# Sync upstream main branch from charmbracelet/fantasy
+sync-upstream-main:
+  stage: sync
+  image: alpine/git:latest
+  before_script:
+    - git config --global user.name "GitLab CI"
+    - git config --global user.email "ci@tinyland.ai"
+    - git remote add charmbracelet https://github.com/charmbracelet/fantasy.git || true
+  script:
+    - git fetch charmbracelet main
+    - SYNC_DATE=$(date +%Y%m%d-%H%M)
+    - BRANCH_NAME="sync/upstream-main-$SYNC_DATE"
+    - git checkout -b $BRANCH_NAME
+    - git merge charmbracelet/main --no-edit || (echo "Merge conflict detected" && exit 1)
+    - git push https://oauth2:${GITLAB_TOKEN}@gitlab.com/${CI_PROJECT_PATH}.git $BRANCH_NAME
+    - |
+      curl --request POST \
+        --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+        --header "Content-Type: application/json" \
+        --data "{
+          \"source_branch\": \"$BRANCH_NAME\",
+          \"target_branch\": \"main\",
+          \"title\": \"chore: Sync upstream main ($SYNC_DATE)\",
+          \"description\": \"🔄 Automated sync from charmbracelet/fantasy main branch\\n\\n**Review Checklist:**\\n- [ ] Check for breaking API changes\\n- [ ] Validate Go version compatibility\\n- [ ] Review new providers or features\\n- [ ] Test downstream compatibility (Crush)\",
+          \"labels\": \"upstream-sync,charmbracelet\"
+        }" \
+        "https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/merge_requests"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule" && $SCHEDULE_TYPE == "sync-main"
+      when: always
+    - when: manual
+  allow_failure: true
+
+# Build job
+build:
+  extends: .go_private_modules_setup
+  stage: build
+  image: golang:${GO_VERSION}
+  script:
+    - go mod download
+    - go build -v ./...
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+
+# Test job
+test:
+  extends: .go_private_modules_setup
+  stage: test
+  image: golang:${GO_VERSION}
+  script:
+    - go mod download
+    - go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+  coverage: '/coverage: \d+.\d+% of statements/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.txt
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"

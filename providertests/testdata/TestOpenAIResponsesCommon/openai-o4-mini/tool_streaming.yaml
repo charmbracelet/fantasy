@@ -1,0 +1,169 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 502
+    host: ""
+    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":"You are a helpful assistant","role":"developer"},{"content":[{"text":"What''s the weather in Florence,Italy?","type":"input_text"}],"role":"user"}],"model":"o4-mini","tool_choice":"auto","tools":[{"strict":false,"parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location","type":"function"}],"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.3.0
+    url: https://api.openai.com/v1/responses
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      event: response.created
+      data: {"type":"response.created","sequence_number":0,"response":{"id":"resp_0fff4a7c1f563e500168f2381ad21c819e8d405acd7b5d620a","object":"response","created_at":1760704538,"status":"in_progress","background":false,"error":null,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"o4-mini-2025-04-16","output":[],"parallel_tool_calls":true,"previous_response_id":null,"prompt_cache_key":null,"reasoning":{"effort":"medium","summary":null},"safety_identifier":null,"service_tier":"auto","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"function","description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"strict":false}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":null,"user":null,"metadata":{}}}
+
+      event: response.in_progress
+      data: {"type":"response.in_progress","sequence_number":1,"response":{"id":"resp_0fff4a7c1f563e500168f2381ad21c819e8d405acd7b5d620a","object":"response","created_at":1760704538,"status":"in_progress","background":false,"error":null,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"o4-mini-2025-04-16","output":[],"parallel_tool_calls":true,"previous_response_id":null,"prompt_cache_key":null,"reasoning":{"effort":"medium","summary":null},"safety_identifier":null,"service_tier":"auto","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"function","description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"strict":false}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":null,"user":null,"metadata":{}}}
+
+      event: response.output_item.added
+      data: {"type":"response.output_item.added","sequence_number":2,"output_index":0,"item":{"id":"rs_0fff4a7c1f563e500168f2381b32b0819ead0ce19c5404dec1","type":"reasoning","summary":[]}}
+
+      event: response.output_item.done
+      data: {"type":"response.output_item.done","sequence_number":3,"output_index":0,"item":{"id":"rs_0fff4a7c1f563e500168f2381b32b0819ead0ce19c5404dec1","type":"reasoning","summary":[]}}
+
+      event: response.output_item.added
+      data: {"type":"response.output_item.added","sequence_number":4,"output_index":1,"item":{"id":"fc_0fff4a7c1f563e500168f2381c9e38819e9f1631fafe9b714d","type":"function_call","status":"in_progress","arguments":"","call_id":"call_UszlYsP9zWWt4KA9WuQwyxdm","name":"weather"}}
+
+      event: response.function_call_arguments.delta
+      data: {"type":"response.function_call_arguments.delta","sequence_number":5,"item_id":"fc_0fff4a7c1f563e500168f2381c9e38819e9f1631fafe9b714d","output_index":1,"delta":"{\"","obfuscation":"0VOTJGynsRMloj"}
+
+      event: response.function_call_arguments.delta
+      data: {"type":"response.function_call_arguments.delta","sequence_number":6,"item_id":"fc_0fff4a7c1f563e500168f2381c9e38819e9f1631fafe9b714d","output_index":1,"delta":"location","obfuscation":"43dCYsDX"}
+
+      event: response.function_call_arguments.delta
+      data: {"type":"response.function_call_arguments.delta","sequence_number":7,"item_id":"fc_0fff4a7c1f563e500168f2381c9e38819e9f1631fafe9b714d","output_index":1,"delta":"\":\"","obfuscation":"rc3sKD04Npkkf"}
+
+      event: response.function_call_arguments.delta
+      data: {"type":"response.function_call_arguments.delta","sequence_number":8,"item_id":"fc_0fff4a7c1f563e500168f2381c9e38819e9f1631fafe9b714d","output_index":1,"delta":"Flor","obfuscation":"s3bnH4WQP4Cb"}
+
+      event: response.function_call_arguments.delta
+      data: {"type":"response.function_call_arguments.delta","sequence_number":9,"item_id":"fc_0fff4a7c1f563e500168f2381c9e38819e9f1631fafe9b714d","output_index":1,"delta":"ence","obfuscation":"y9JNPlQMT6YX"}
+
+      event: response.function_call_arguments.delta
+      data: {"type":"response.function_call_arguments.delta","sequence_number":10,"item_id":"fc_0fff4a7c1f563e500168f2381c9e38819e9f1631fafe9b714d","output_index":1,"delta":",","obfuscation":"w8Zt7ULkOyHEuSK"}
+
+      event: response.function_call_arguments.delta
+      data: {"type":"response.function_call_arguments.delta","sequence_number":11,"item_id":"fc_0fff4a7c1f563e500168f2381c9e38819e9f1631fafe9b714d","output_index":1,"delta":" Italy","obfuscation":"6GaIjNSMTu"}
+
+      event: response.function_call_arguments.delta
+      data: {"type":"response.function_call_arguments.delta","sequence_number":12,"item_id":"fc_0fff4a7c1f563e500168f2381c9e38819e9f1631fafe9b714d","output_index":1,"delta":"\"}","obfuscation":"4eavzEAMPbOXlx"}
+
+      event: response.function_call_arguments.done
+      data: {"type":"response.function_call_arguments.done","sequence_number":13,"item_id":"fc_0fff4a7c1f563e500168f2381c9e38819e9f1631fafe9b714d","output_index":1,"arguments":"{\"location\":\"Florence, Italy\"}"}
+
+      event: response.output_item.done
+      data: {"type":"response.output_item.done","sequence_number":14,"output_index":1,"item":{"id":"fc_0fff4a7c1f563e500168f2381c9e38819e9f1631fafe9b714d","type":"function_call","status":"completed","arguments":"{\"location\":\"Florence, Italy\"}","call_id":"call_UszlYsP9zWWt4KA9WuQwyxdm","name":"weather"}}
+
+      event: response.completed
+      data: {"type":"response.completed","sequence_number":15,"response":{"id":"resp_0fff4a7c1f563e500168f2381ad21c819e8d405acd7b5d620a","object":"response","created_at":1760704538,"status":"completed","background":false,"error":null,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"o4-mini-2025-04-16","output":[{"id":"rs_0fff4a7c1f563e500168f2381b32b0819ead0ce19c5404dec1","type":"reasoning","summary":[]},{"id":"fc_0fff4a7c1f563e500168f2381c9e38819e9f1631fafe9b714d","type":"function_call","status":"completed","arguments":"{\"location\":\"Florence, Italy\"}","call_id":"call_UszlYsP9zWWt4KA9WuQwyxdm","name":"weather"}],"parallel_tool_calls":true,"previous_response_id":null,"prompt_cache_key":null,"reasoning":{"effort":"medium","summary":null},"safety_identifier":null,"service_tier":"default","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"function","description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"strict":false}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":{"input_tokens":60,"input_tokens_details":{"cached_tokens":0},"output_tokens":150,"output_tokens_details":{"reasoning_tokens":128},"total_tokens":210},"user":null,"metadata":{}}}
+
+    headers:
+      Content-Type:
+      - text/event-stream; charset=utf-8
+    status: 200 OK
+    code: 200
+    duration: 241.611625ms
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 737
+    host: ""
+    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":"You are a helpful assistant","role":"developer"},{"content":[{"text":"What''s the weather in Florence,Italy?","type":"input_text"}],"role":"user"},{"arguments":"\"{\\\"location\\\":\\\"Florence, Italy\\\"}\"","call_id":"call_UszlYsP9zWWt4KA9WuQwyxdm","name":"weather","type":"function_call"},{"call_id":"call_UszlYsP9zWWt4KA9WuQwyxdm","output":"40 C","type":"function_call_output"}],"model":"o4-mini","tool_choice":"auto","tools":[{"strict":false,"parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location","type":"function"}],"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.3.0
+    url: https://api.openai.com/v1/responses
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      event: response.created
+      data: {"type":"response.created","sequence_number":0,"response":{"id":"resp_0dcc08c733ff71550168f2381d2a1081a2846a305f27bbc863","object":"response","created_at":1760704541,"status":"in_progress","background":false,"error":null,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"o4-mini-2025-04-16","output":[],"parallel_tool_calls":true,"previous_response_id":null,"prompt_cache_key":null,"reasoning":{"effort":"medium","summary":null},"safety_identifier":null,"service_tier":"auto","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"function","description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"strict":false}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":null,"user":null,"metadata":{}}}
+
+      event: response.in_progress
+      data: {"type":"response.in_progress","sequence_number":1,"response":{"id":"resp_0dcc08c733ff71550168f2381d2a1081a2846a305f27bbc863","object":"response","created_at":1760704541,"status":"in_progress","background":false,"error":null,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"o4-mini-2025-04-16","output":[],"parallel_tool_calls":true,"previous_response_id":null,"prompt_cache_key":null,"reasoning":{"effort":"medium","summary":null},"safety_identifier":null,"service_tier":"auto","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"function","description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"strict":false}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":null,"user":null,"metadata":{}}}
+
+      event: response.output_item.added
+      data: {"type":"response.output_item.added","sequence_number":2,"output_index":0,"item":{"id":"msg_0dcc08c733ff71550168f2381d703881a280ee31f3e6de9bdc","type":"message","status":"in_progress","content":[],"role":"assistant"}}
+
+      event: response.content_part.added
+      data: {"type":"response.content_part.added","sequence_number":3,"item_id":"msg_0dcc08c733ff71550168f2381d703881a280ee31f3e6de9bdc","output_index":0,"content_index":0,"part":{"type":"output_text","annotations":[],"logprobs":[],"text":""}}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":4,"item_id":"msg_0dcc08c733ff71550168f2381d703881a280ee31f3e6de9bdc","output_index":0,"content_index":0,"delta":"The","logprobs":[],"obfuscation":"eyjSsgALEwhaq"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":5,"item_id":"msg_0dcc08c733ff71550168f2381d703881a280ee31f3e6de9bdc","output_index":0,"content_index":0,"delta":" current","logprobs":[],"obfuscation":"8lINdioG"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":6,"item_id":"msg_0dcc08c733ff71550168f2381d703881a280ee31f3e6de9bdc","output_index":0,"content_index":0,"delta":" temperature","logprobs":[],"obfuscation":"iz5j"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":7,"item_id":"msg_0dcc08c733ff71550168f2381d703881a280ee31f3e6de9bdc","output_index":0,"content_index":0,"delta":" in","logprobs":[],"obfuscation":"tJkN0FEyXaK8s"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":8,"item_id":"msg_0dcc08c733ff71550168f2381d703881a280ee31f3e6de9bdc","output_index":0,"content_index":0,"delta":" Florence","logprobs":[],"obfuscation":"n0EpdRL"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":9,"item_id":"msg_0dcc08c733ff71550168f2381d703881a280ee31f3e6de9bdc","output_index":0,"content_index":0,"delta":",","logprobs":[],"obfuscation":"xAWfObum6kfDhuQ"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":10,"item_id":"msg_0dcc08c733ff71550168f2381d703881a280ee31f3e6de9bdc","output_index":0,"content_index":0,"delta":" Italy","logprobs":[],"obfuscation":"SJOq4btOnE"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":11,"item_id":"msg_0dcc08c733ff71550168f2381d703881a280ee31f3e6de9bdc","output_index":0,"content_index":0,"delta":" is","logprobs":[],"obfuscation":"8HoJkvOcK3Jsc"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":12,"item_id":"msg_0dcc08c733ff71550168f2381d703881a280ee31f3e6de9bdc","output_index":0,"content_index":0,"delta":" ","logprobs":[],"obfuscation":"51n6LMmqmV5C73I"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":13,"item_id":"msg_0dcc08c733ff71550168f2381d703881a280ee31f3e6de9bdc","output_index":0,"content_index":0,"delta":"40","logprobs":[],"obfuscation":"MPplkcPECUV7Pv"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":14,"item_id":"msg_0dcc08c733ff71550168f2381d703881a280ee31f3e6de9bdc","output_index":0,"content_index":0,"delta":"°C","logprobs":[],"obfuscation":"MiSC5pzAiiBwR4"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":15,"item_id":"msg_0dcc08c733ff71550168f2381d703881a280ee31f3e6de9bdc","output_index":0,"content_index":0,"delta":".","logprobs":[],"obfuscation":"H2yQ4qGmNmJhbhZ"}
+
+      event: response.output_text.done
+      data: {"type":"response.output_text.done","sequence_number":16,"item_id":"msg_0dcc08c733ff71550168f2381d703881a280ee31f3e6de9bdc","output_index":0,"content_index":0,"text":"The current temperature in Florence, Italy is 40°C.","logprobs":[]}
+
+      event: response.content_part.done
+      data: {"type":"response.content_part.done","sequence_number":17,"item_id":"msg_0dcc08c733ff71550168f2381d703881a280ee31f3e6de9bdc","output_index":0,"content_index":0,"part":{"type":"output_text","annotations":[],"logprobs":[],"text":"The current temperature in Florence, Italy is 40°C."}}
+
+      event: response.output_item.done
+      data: {"type":"response.output_item.done","sequence_number":18,"output_index":0,"item":{"id":"msg_0dcc08c733ff71550168f2381d703881a280ee31f3e6de9bdc","type":"message","status":"completed","content":[{"type":"output_text","annotations":[],"logprobs":[],"text":"The current temperature in Florence, Italy is 40°C."}],"role":"assistant"}}
+
+      event: response.completed
+      data: {"type":"response.completed","sequence_number":19,"response":{"id":"resp_0dcc08c733ff71550168f2381d2a1081a2846a305f27bbc863","object":"response","created_at":1760704541,"status":"completed","background":false,"error":null,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"o4-mini-2025-04-16","output":[{"id":"msg_0dcc08c733ff71550168f2381d703881a280ee31f3e6de9bdc","type":"message","status":"completed","content":[{"type":"output_text","annotations":[],"logprobs":[],"text":"The current temperature in Florence, Italy is 40°C."}],"role":"assistant"}],"parallel_tool_calls":true,"previous_response_id":null,"prompt_cache_key":null,"reasoning":{"effort":"medium","summary":null},"safety_identifier":null,"service_tier":"default","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"function","description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"strict":false}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":{"input_tokens":91,"input_tokens_details":{"cached_tokens":0},"output_tokens":16,"output_tokens_details":{"reasoning_tokens":0},"total_tokens":107},"user":null,"metadata":{}}}
+
+    headers:
+      Content-Type:
+      - text/event-stream; charset=utf-8
+    status: 200 OK
+    code: 200
+    duration: 235.374ms

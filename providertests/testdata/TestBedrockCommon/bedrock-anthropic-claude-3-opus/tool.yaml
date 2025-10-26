@@ -1,0 +1,61 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 468
+    host: ""
+    body: '{"max_tokens":4000,"messages":[{"content":[{"text":"What''s the weather in Florence,Italy?","type":"text"}],"role":"user"}],"system":[{"text":"You are a helpful assistant","type":"text"}],"tool_choice":{"type":"auto"},"tools":[{"input_schema":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location"}],"anthropic_version":"bedrock-2023-05-31"}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Anthropic/Go 1.13.0
+    url: https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-3-opus-20240229-v1%3A0/invoke
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: 815
+    body: '{"id":"msg_bdrk_01CEbaoBED7NgBWRnBAajncY","type":"message","role":"assistant","model":"claude-3-opus-20240229","content":[{"type":"text","text":"<thinking>\nThe weather tool is relevant for answering this request, as the user is asking for weather information for a specific location.\n\nThe weather tool requires one parameter:\n- location (string): This is provided directly by the user as \"Florence, Italy\"\n\nSince the required location parameter is present, we can proceed with calling the weather tool to get the current weather for Florence, Italy. No other tools are needed.\n</thinking>"},{"type":"tool_use","id":"toolu_bdrk_011Dt2H7KtvCCYp7J4peboKa","name":"weather","input":{"location":"Florence, Italy"}}],"stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":614,"output_tokens":143}}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 7.551935583s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1263
+    host: ""
+    body: '{"max_tokens":4000,"messages":[{"content":[{"text":"What''s the weather in Florence,Italy?","type":"text"}],"role":"user"},{"content":[{"text":"\u003cthinking\u003e\nThe weather tool is relevant for answering this request, as the user is asking for weather information for a specific location.\n\nThe weather tool requires one parameter:\n- location (string): This is provided directly by the user as \"Florence, Italy\"\n\nSince the required location parameter is present, we can proceed with calling the weather tool to get the current weather for Florence, Italy. No other tools are needed.\n\u003c/thinking\u003e","type":"text"},{"id":"toolu_bdrk_011Dt2H7KtvCCYp7J4peboKa","input":{"location":"Florence, Italy"},"name":"weather","type":"tool_use"}],"role":"assistant"},{"content":[{"tool_use_id":"toolu_bdrk_011Dt2H7KtvCCYp7J4peboKa","content":[{"text":"40 C","type":"text"}],"type":"tool_result"}],"role":"user"}],"system":[{"text":"You are a helpful assistant","type":"text"}],"tool_choice":{"type":"auto"},"tools":[{"input_schema":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location"}],"anthropic_version":"bedrock-2023-05-31"}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Anthropic/Go 1.13.0
+    url: https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-3-opus-20240229-v1%3A0/invoke
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: 716
+    body: '{"id":"msg_bdrk_01MqUoomGzEKtaeBmJgxooMM","type":"message","role":"assistant","model":"claude-3-opus-20240229","content":[{"type":"text","text":"With a temperature of 40°C (104°F), Florence is currently experiencing very hot weather and a heatwave. To summarize:\n- The current temperature in Florence, Italy is 40°C (104°F) \n- This is considered very hot and indicates a heatwave is occurring\n\nIf you will be in Florence, be sure to stay hydrated, avoid strenuous outdoor activity during the hottest parts of the day, and seek out air conditioning when possible. Let me know if you need any other information!"}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":771,"output_tokens":117}}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 6.374604291s

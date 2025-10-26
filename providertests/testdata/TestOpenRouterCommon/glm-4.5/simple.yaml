@@ -1,0 +1,33 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 187
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"Say hi in Portuguese","role":"user"}],"model":"z-ai/glm-4.5","max_tokens":4000,"usage":{"include":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1761054159-WMu3LlZsFNnSnGGMLRdI\",\"provider\":\"Z.AI\",\"model\":\"z-ai/glm-4.5\",\"object\":\"chat.completion\",\"created\":1761054159,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"stop\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"In Portuguese, you can say \\\"hi\\\" as:\\n\\n\\\"Oi!\\\" (informal, commonly used among friends and in casual situations)\\n\\nor \\n\\n\\\"Olá!\\\" (more formal, but still commonly used in various contexts)\\n\\nBoth are common greetings in Portuguese-speaking countries like Brazil and Portugal.\",\"refusal\":null,\"reasoning\":\"\\nThe user is asking me to say \\\"hi\\\" in Portuguese. I'll provide the translation and maybe a brief explanation.\\n\\nIn Portuguese, \\\"hi\\\" is typically translated as \\\"oi\\\" (informal) or \\\"olá\\\" (more formal). Both are common greetings in Portuguese.\\n\\nI'll provide both options with a brief explanation of when each might be used.\",\"reasoning_details\":[{\"type\":\"reasoning.text\",\"text\":\"\\nThe user is asking me to say \\\"hi\\\" in Portuguese. I'll provide the translation and maybe a brief explanation.\\n\\nIn Portuguese, \\\"hi\\\" is typically translated as \\\"oi\\\" (informal) or \\\"olá\\\" (more formal). Both are common greetings in Portuguese.\\n\\nI'll provide both options with a brief explanation of when each might be used.\",\"format\":\"unknown\",\"index\":0}]}}],\"usage\":{\"prompt_tokens\":16,\"completion_tokens\":135,\"total_tokens\":151,\"cost\":0.00030317,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":7,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.00000617,\"upstream_inference_completions_cost\":0.000297},\"completion_tokens_details\":{\"reasoning_tokens\":84,\"image_tokens\":0}}}"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 577.011208ms

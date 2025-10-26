@@ -1,0 +1,42 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 248
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"Say hi in Portuguese","role":"user"}],"model":"Qwen/Qwen3-Coder-480B-A35B-Instruct:cerebras","max_tokens":4000,"stream_options":{"include_usage":true},"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://router.huggingface.co/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"chatcmpl-6ee1d665-644a-4dda-81c6-7f6590a4fc84","choices":[{"delta":{"role":"assistant"},"index":0}],"created":1761070218,"model":"qwen-3-coder-480b","system_fingerprint":"fp_386b539e7b02ce3613b7","object":"chat.completion.chunk"}
+
+      data: {"id":"chatcmpl-6ee1d665-644a-4dda-81c6-7f6590a4fc84","choices":[{"delta":{"content":"Oi"},"index":0}],"created":1761070218,"model":"qwen-3-coder-480b","system_fingerprint":"fp_386b539e7b02ce3613b7","object":"chat.completion.chunk"}
+
+      data: {"id":"chatcmpl-6ee1d665-644a-4dda-81c6-7f6590a4fc84","choices":[{"delta":{"content":"!"},"index":0}],"created":1761070218,"model":"qwen-3-coder-480b","system_fingerprint":"fp_386b539e7b02ce3613b7","object":"chat.completion.chunk"}
+
+      data: {"id":"chatcmpl-6ee1d665-644a-4dda-81c6-7f6590a4fc84","choices":[{"delta":{},"index":0}],"created":1761070218,"model":"qwen-3-coder-480b","system_fingerprint":"fp_386b539e7b02ce3613b7","object":"chat.completion.chunk"}
+
+      data: {"id":"chatcmpl-6ee1d665-644a-4dda-81c6-7f6590a4fc84","choices":[{"delta":{},"finish_reason":"stop","index":0}],"created":1761070218,"model":"qwen-3-coder-480b","system_fingerprint":"fp_386b539e7b02ce3613b7","object":"chat.completion.chunk","usage":{"prompt_tokens":22,"completion_tokens":3,"total_tokens":25,"prompt_tokens_details":{"cached_tokens":0}},"time_info":{"queue_time":0.0001041,"prompt_time":0.002245652,"completion_time":0.003623067,"total_time":0.008143901824951172,"created":1761070218.1551065}}
+
+    headers:
+      Content-Type:
+      - text/event-stream; charset=utf-8
+    status: 200 OK
+    code: 200
+    duration: 371.201333ms

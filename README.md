@@ -1,93 +1,94 @@
-# fuzzy-fantasy
+# Fantasy
 
+<p>
+  <img width="475" alt="The Charm Fantasy logo" src="https://github.com/user-attachments/assets/b22c5862-792a-44c1-bc98-55a2e46c8fb9" /><br>
+  <a href="https://github.com/charmbracelet/fantasy/releases"><img src="https://img.shields.io/github/release/charmbracelet/fantasy.svg" alt="Latest Release"></a>
+  <a href="https://pkg.go.dev/charm.land/fantasy?tab=doc"><img src="https://godoc.org/charm.land/fantasy?status.svg" alt="GoDoc"></a>
+  <a href="https://github.com/charmbracelet/fantasy/actions"><img src="https://github.com/charmbracelet/fantasy/actions/workflows/build.yml/badge.svg?branch=main" alt="Build Status"></a>
+</p>
 
+Build AI agents with Go. Multi-provider, multi-model, one API.
 
-## Getting started
+1. Choose a model and provider
+2. Add some tools
+3. Compile to native machine code and let it rip
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+> [!NOTE]
+> Fantasy is currently a preview. Expect API changes.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+```go
+import "charm.land/fantasy"
+import "charm.land/fantasy/providers/openrouter"
 
-## Add your files
+// Choose your fave provider.
+provider, err := openrouter.New(openrouter.WithAPIKey(myHotKey))
+if err != nil {
+	fmt.Fprintln(os.Stderr, "Whoops:", err)
+	os.Exit(1)
+}
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+ctx := context.Background()
 
+// Pick your fave model.
+model, err := provider.LanguageModel(ctx, "moonshotai/kimi-k2")
+if err != nil {
+	fmt.Fprintln(os.Stderr, "Dang:", err)
+	os.Exit(1)
+}
+
+// Make your own tools.
+cuteDogTool := fantasy.NewAgentTool(
+  "cute_dog_tool",
+  "Provide up-to-date info on cute dogs.",
+  fetchCuteDogInfoFunc,
+)
+
+// Equip your agent.
+agent := fantasy.NewAgent(model, fantasy.WithTools(cuteDogTool))
+
+// Put that agent to work!
+const prompt = "Find all the cute dogs in Silver Lake, Los Angeles."
+result, err := agent.Generate(context.Background(), fantasy.AgentCall{Prompt: prompt})
+if err != nil {
+    fmt.Fprintln(os.Stderr, "Oof:", err)
+    os.Exit(1)
+}
+fmt.Println(result.Response.Content.Text())
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/tinyland/ai/fuzzy-fantasy.git
-git branch -M main
-git push -uf origin main
-```
 
-## Integrate with your tools
+🍔 For the full implementation and more [see the examples directory](https://github.com/charmbracelet/fantasy/tree/main/examples).
 
-- [ ] [Set up project integrations](https://gitlab.com/tinyland/ai/fuzzy-fantasy/-/settings/integrations)
+## Multi-model? Multi-provider?
 
-## Collaborate with your team
+Yeah! Fantasy is designed to support a wide variety of providers and models under a single API. While many providers such as Microsoft Azure, Amazon Bedrock, and OpenRouter have dedicated package, many other work just fine with `openaicompat`, the generic OpenAI-compatible layer. That said, if you find a provider that’s not compatible and needs special treatment, please let us know in an issue (or open a PR).
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+## Work in Progress
 
-## Test and Deploy
+We built Fantasy to power [Crush](https://github.com/charmbracelet/crush), a hot coding agent for glamourously invincible development. Given that, Fantasy does not yet support things like:
 
-Use the built-in continuous integration in GitLab.
+- Image models
+- Audio models
+- PDF uploads
+- Provider tools (e.g. web_search)
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+For things you’d like to see supported, PRs are welcome.
 
-***
+## Whatcha think?
 
-# Editing this README
+We’d love to hear your thoughts on this project. Need help? We gotchu. You can find us on:
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+- [Slack](https://charm.land/slack)
+- [Discord][discord]
+- [Twitter](https://twitter.com/charmcli)
+- [The Fediverse](https://mastodon.social/@charmcli)
+- [Bluesky](https://bsky.app/profile/charm.land)
 
-## Suggestions for a good README
+[discord]: https://charm.land/discord
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+---
 
-## Name
-Choose a self-explaining name for your project.
+Part of [Charm](https://charm.land).
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+<a href="https://charm.land/"><img alt="The Charm logo" src="https://stuff.charm.sh/charm-banner-next.jpg" width="400"></a>
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+Charm热爱开源 • Charm loves open source

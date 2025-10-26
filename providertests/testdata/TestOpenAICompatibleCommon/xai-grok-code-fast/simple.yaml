@@ -1,0 +1,33 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 166
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"Say hi in Portuguese","role":"user"}],"model":"grok-code-fast-1","max_tokens":4000}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.3.0
+    url: https://api.x.ai/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"id":"0407413d-194d-4ba1-8a87-d2f902eedffc_us-east-1","object":"chat.completion","created":1758884716,"model":"grok-code-fast-1","choices":[{"index":0,"message":{"role":"assistant","content":"Oi! (That''s \"hi\" in Portuguese. In Brazil, it''s common, while in Portugal, \"Olá\" is more formal.)","refusal":null},"finish_reason":"stop"}],"usage":{"prompt_tokens":213,"completion_tokens":27,"total_tokens":411,"prompt_tokens_details":{"text_tokens":213,"audio_tokens":0,"image_tokens":0,"cached_tokens":192},"completion_tokens_details":{"reasoning_tokens":171,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0},"num_sources_used":0},"system_fingerprint":"fp_10f00c862d"}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 2.174340667s

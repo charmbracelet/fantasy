@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 853
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"}],"model":"openai/gpt-5","max_completion_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1761054256-qNjLnEZH5TGQX6wRWdm5\",\"provider\":\"OpenAI\",\"model\":\"openai/gpt-5\",\"object\":\"chat.completion\",\"created\":1761054256,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"native_finish_reason\":\"completed\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"refusal\":null,\"reasoning\":\"**Preparing to present results**\\n\\nI’m thinking we should present the results once the tool responds. Usually, they’ll come back fine, so we can focus on producing the outputs. I want to keep formatting light, maybe allowing bullet lists but staying concise overall. The user is specifically interested in the sum and product, so I need to make sure we extract that information clearly. Let’s get ready to call the parallel tool for this!\",\"tool_calls\":[{\"id\":\"call_nfjtVc7votxNeL9vtmslg8fI\",\"index\":0,\"type\":\"function\",\"function\":{\"name\":\"add\",\"arguments\":\"{\\\"a\\\":2,\\\"b\\\":3}\"}},{\"id\":\"call_NnAs1Vwlp5n0aRXy7qPUiuUO\",\"index\":1,\"type\":\"function\",\"function\":{\"name\":\"multiply\",\"arguments\":\"{\\\"a\\\":2,\\\"b\\\":3}\"}}],\"reasoning_details\":[{\"type\":\"reasoning.summary\",\"summary\":\"**Preparing to present results**\\n\\nI’m thinking we should present the results once the tool responds. Usually, they’ll come back fine, so we can focus on producing the outputs. I want to keep formatting light, maybe allowing bullet lists but staying concise overall. The user is specifically interested in the sum and product, so I need to make sure we extract that information clearly. Let’s get ready to call the parallel tool for this!\",\"format\":\"openai-responses-v1\",\"index\":0},{\"type\":\"reasoning.encrypted\",\"data\":\"gAAAAABo9443EZrFJ8d7iSNnTSGApMH69Swn59Payx4rS-LHMK3GbL7fVGTfAE3qqy5ArAV0YW4FW6LWv4kyK6euhCk8_D7ttOcWuGAO0QmbLfxAmfO2T-dQc_zKwr1P6MsRyVmoagCUNbkXcNWeJX-vgRBtqrzW32zUw5axDrF0y-h5Y6r2vkHt-FkRtCdwCJ5juwZnzkQLOdp4FofMWMlsJiMl0g1mnmsDymtKOLZ4cUugWauiwgpkUlRis0Ro70bVObA1MwYofIs0XaTCRA5Ztp-SO6J9neqel-nydRH5-D6WKpIpLiuE2oUCAdMLYUKkUcnHm3Q428wwqbUzoSfTxwGFg3JXzY8_wBPLLrJSTYzXTsxLOKXLBTFe6XfCzt8bnBTMD65hJOSxfA4N1zbJ8n_uG8Unb8Xt9OwTpqhOvSrLnVriqMg1pP9TjCJxBf0NXweWkdmG9WjnL2scnqsQjLOdclhBmESWScCqQpx0KB5ZKPYx_6yNsIGhl1Fxrxcj-1aNhgSnAeIGE05ZM6lVMYs0BV6aa_C_ZeVl_MyRguMp_6ilaG05VqxTYpGqSnbwlLkpG48_zOQAVtFxkD3Rb9CJJJIuORiGiTV1JBGR8S-vMStfTy-1f6vvfJjahAmJ7PiHfBJ9a8a3DMIiZaygOXnPrr_duMlk3FKdOX_N-7PByXwDfz6TS4sGsTnzQ3D1Q6hFpCq3wdzBlUPio1JRvRNLWp2VNGfrJp4tXsBUlsvVXR7kYsxRPsZdzA6RQzT2azx5OwIw6VGiCBwJmaNzq1DpvxlevjM_PgCDFkurTMNR6ip_CSEEgyFJBGwZ-UA56DimJZxZIPCiAQglMSc9HrPyHtREiVcJm6EYyA8hbtCYYbo59jJZwVO8uAJ4S9Ko8WgKy12YdFwoUzUSpc9m7ejvV-IjvZpeeEnKVEXpZQ6MWdx8HIpW708yi2qcY1E4P72anaXUzCkI5ycHjktiNV9A3pfMc6CmaQO-0tWiSjQNvHv0UG8DKGU8BVd_8kW9X7oouXJVZcGuNLeZA1GLwuUJgdT27yl93gd9VsjwLKHXmnTKsuj0CN_GwlXKtoLfCwvdud42U7ZVGij7pQDDEHUiHXw09zOx7r6tyHyT1zGCK-A2O_qeBq6G3FqgIevbD3IG4mhhs87R2SEkWjWK_6xI-bj8ILvKIaGR2Yo4QQZ_Dl_eW8bKpa6jV8DEY5OdRF4O6UmOS4YXcJ9imoVFQ-EZgkS1A-DTD-aYfjh07__H429Z9ISFMZXhA28NjPgQ1FkhTxUAtGgQW1uOWX7TxGzmAKlOxC1Xh4LliAtQhFTGuN-NGSYlIEpk9cAtmx96kHjN1PaoA0EE9JePuOJvA986qwwcg7_Twoj_WiXHrKvtXuq1WPYRzwr2whun70g4tlmxvZUeBiizg6GClzyhaeSBsDYdY239MyfH11QPIY7jJQP5VjuQSWrog09dZ-0fjoA2kVHfswgRY3PYNykni3v9eULwSN7cU-Y6o89lsJursd1oaUzqnVEVanwKaeFMFboyY-GPG5qsYpHelbqOgoM2iX4PacsVrhwNDESO_NgxrIA9LKL0k-x32JXLEg_SWvWP2HqQPOALoBdpjL5QbvDOOdHRj1hSiZpNhZP9QkUq2qY99ia_AbGcUC4cPXz0RzNfuGg8tdNrJMQQem-4aNSsiRFRW4NJGNqTCjH52AgAd5fU8eS-CRc6YVIOah0_LpscMXyouRrr0Yf3uyjnQx0IVZ-W7A8kNg6ankc3ipqjar02eFEG0thBRjkzyDQZXDUAFSBKxkzRtdhgtAkLz2HgdGg46207M7aed6BmZBWDbAnRLZmHbfIki4lqeU8bhO4bFy8WoeZpCcGfSIIuQl3y0dx3L6OCskhP5i5NK-kffLyGdQTZJv4pjSHDl3SmSNr_k-txP4b8Kf9s2QieVsCpbA12iXC21i9nTxWRlu9JTvDgq-Ss4QVjEXClKkAI26OgwmamAGODhejWJp_sOFWihc5cpQ0qbp-K_59k7VODgOU97ncdjb9yCA8GJccewcsfefwr1NDid4sW1G1wOLCJNOHIvYWLoAT3u-iX6hjAK7nzVPqIMM9X3iXG_ksXQiVuZ4Q7tADi9EGFfLpRoXyQ2ncPsXaJznJ6AiWNfYHy0ROwgn5GTbVa2jBflaAhwLUbYe1zyILp71jxY72wRMEuxbKoGpzHqdZiFR6V0WqVHR80DdWULM9_Q0wBOjUuFiWEIpcka9nTuLmiTOGnGhh1p5Gucyf6p16etqbzfg7ONOPtuwv0k-Bm2ZIfPpV65PDmmwCw74P_CwAydzOSE9n_SSW7ZBDtvDEH-QTYIvu185kIeGkJDLkz-P3evhLu7v9oJd4HHc4N7Nsi6pBSzyOuvUxCkDvonjSipK1C4zSS197fmiTbm1QWGNBX5vPm3FhFPgIcnZ8un4iw8Bcs6K00hxvt68tQmWzlqSLB3xz-PmRgxBA-FuEzktIBZ2E8F2X2ZPngua7X7A96WuqHUh_usG7ELeqv2VmXC2id1AXMSMzXkDU=\",\"id\":\"rs_059ba3bb134ec3cc0168f78e31f7a481938a88f8e8343ed302\",\"format\":\"openai-responses-v1\",\"index\":0}]}}],\"usage\":{\"prompt_tokens\":58,\"completion_tokens\":312,\"total_tokens\":370,\"cost\":0.0031925,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.0000725,\"upstream_inference_completions_cost\":0.00312},\"completion_tokens_details\":{\"reasoning_tokens\":256,\"image_tokens\":0}}}"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 830.848ms
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 4523
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"tool_calls":[{"id":"call_nfjtVc7votxNeL9vtmslg8fI","function":{"arguments":"{\"a\":2,\"b\":3}","name":"add"},"type":"function"},{"id":"call_NnAs1Vwlp5n0aRXy7qPUiuUO","function":{"arguments":"{\"a\":2,\"b\":3}","name":"multiply"},"type":"function"}],"role":"assistant","reasoning_details":[{"format":"openai-responses-v1","index":0,"summary":"**Preparing to present results**\n\nI’m thinking we should present the results once the tool responds. Usually, they’ll come back fine, so we can focus on producing the outputs. I want to keep formatting light, maybe allowing bullet lists but staying concise overall. The user is specifically interested in the sum and product, so I need to make sure we extract that information clearly. Let’s get ready to call the parallel tool for this!","type":"reasoning.summary"},{"data":"gAAAAABo9443EZrFJ8d7iSNnTSGApMH69Swn59Payx4rS-LHMK3GbL7fVGTfAE3qqy5ArAV0YW4FW6LWv4kyK6euhCk8_D7ttOcWuGAO0QmbLfxAmfO2T-dQc_zKwr1P6MsRyVmoagCUNbkXcNWeJX-vgRBtqrzW32zUw5axDrF0y-h5Y6r2vkHt-FkRtCdwCJ5juwZnzkQLOdp4FofMWMlsJiMl0g1mnmsDymtKOLZ4cUugWauiwgpkUlRis0Ro70bVObA1MwYofIs0XaTCRA5Ztp-SO6J9neqel-nydRH5-D6WKpIpLiuE2oUCAdMLYUKkUcnHm3Q428wwqbUzoSfTxwGFg3JXzY8_wBPLLrJSTYzXTsxLOKXLBTFe6XfCzt8bnBTMD65hJOSxfA4N1zbJ8n_uG8Unb8Xt9OwTpqhOvSrLnVriqMg1pP9TjCJxBf0NXweWkdmG9WjnL2scnqsQjLOdclhBmESWScCqQpx0KB5ZKPYx_6yNsIGhl1Fxrxcj-1aNhgSnAeIGE05ZM6lVMYs0BV6aa_C_ZeVl_MyRguMp_6ilaG05VqxTYpGqSnbwlLkpG48_zOQAVtFxkD3Rb9CJJJIuORiGiTV1JBGR8S-vMStfTy-1f6vvfJjahAmJ7PiHfBJ9a8a3DMIiZaygOXnPrr_duMlk3FKdOX_N-7PByXwDfz6TS4sGsTnzQ3D1Q6hFpCq3wdzBlUPio1JRvRNLWp2VNGfrJp4tXsBUlsvVXR7kYsxRPsZdzA6RQzT2azx5OwIw6VGiCBwJmaNzq1DpvxlevjM_PgCDFkurTMNR6ip_CSEEgyFJBGwZ-UA56DimJZxZIPCiAQglMSc9HrPyHtREiVcJm6EYyA8hbtCYYbo59jJZwVO8uAJ4S9Ko8WgKy12YdFwoUzUSpc9m7ejvV-IjvZpeeEnKVEXpZQ6MWdx8HIpW708yi2qcY1E4P72anaXUzCkI5ycHjktiNV9A3pfMc6CmaQO-0tWiSjQNvHv0UG8DKGU8BVd_8kW9X7oouXJVZcGuNLeZA1GLwuUJgdT27yl93gd9VsjwLKHXmnTKsuj0CN_GwlXKtoLfCwvdud42U7ZVGij7pQDDEHUiHXw09zOx7r6tyHyT1zGCK-A2O_qeBq6G3FqgIevbD3IG4mhhs87R2SEkWjWK_6xI-bj8ILvKIaGR2Yo4QQZ_Dl_eW8bKpa6jV8DEY5OdRF4O6UmOS4YXcJ9imoVFQ-EZgkS1A-DTD-aYfjh07__H429Z9ISFMZXhA28NjPgQ1FkhTxUAtGgQW1uOWX7TxGzmAKlOxC1Xh4LliAtQhFTGuN-NGSYlIEpk9cAtmx96kHjN1PaoA0EE9JePuOJvA986qwwcg7_Twoj_WiXHrKvtXuq1WPYRzwr2whun70g4tlmxvZUeBiizg6GClzyhaeSBsDYdY239MyfH11QPIY7jJQP5VjuQSWrog09dZ-0fjoA2kVHfswgRY3PYNykni3v9eULwSN7cU-Y6o89lsJursd1oaUzqnVEVanwKaeFMFboyY-GPG5qsYpHelbqOgoM2iX4PacsVrhwNDESO_NgxrIA9LKL0k-x32JXLEg_SWvWP2HqQPOALoBdpjL5QbvDOOdHRj1hSiZpNhZP9QkUq2qY99ia_AbGcUC4cPXz0RzNfuGg8tdNrJMQQem-4aNSsiRFRW4NJGNqTCjH52AgAd5fU8eS-CRc6YVIOah0_LpscMXyouRrr0Yf3uyjnQx0IVZ-W7A8kNg6ankc3ipqjar02eFEG0thBRjkzyDQZXDUAFSBKxkzRtdhgtAkLz2HgdGg46207M7aed6BmZBWDbAnRLZmHbfIki4lqeU8bhO4bFy8WoeZpCcGfSIIuQl3y0dx3L6OCskhP5i5NK-kffLyGdQTZJv4pjSHDl3SmSNr_k-txP4b8Kf9s2QieVsCpbA12iXC21i9nTxWRlu9JTvDgq-Ss4QVjEXClKkAI26OgwmamAGODhejWJp_sOFWihc5cpQ0qbp-K_59k7VODgOU97ncdjb9yCA8GJccewcsfefwr1NDid4sW1G1wOLCJNOHIvYWLoAT3u-iX6hjAK7nzVPqIMM9X3iXG_ksXQiVuZ4Q7tADi9EGFfLpRoXyQ2ncPsXaJznJ6AiWNfYHy0ROwgn5GTbVa2jBflaAhwLUbYe1zyILp71jxY72wRMEuxbKoGpzHqdZiFR6V0WqVHR80DdWULM9_Q0wBOjUuFiWEIpcka9nTuLmiTOGnGhh1p5Gucyf6p16etqbzfg7ONOPtuwv0k-Bm2ZIfPpV65PDmmwCw74P_CwAydzOSE9n_SSW7ZBDtvDEH-QTYIvu185kIeGkJDLkz-P3evhLu7v9oJd4HHc4N7Nsi6pBSzyOuvUxCkDvonjSipK1C4zSS197fmiTbm1QWGNBX5vPm3FhFPgIcnZ8un4iw8Bcs6K00hxvt68tQmWzlqSLB3xz-PmRgxBA-FuEzktIBZ2E8F2X2ZPngua7X7A96WuqHUh_usG7ELeqv2VmXC2id1AXMSMzXkDU=","format":"openai-responses-v1","id":"rs_059ba3bb134ec3cc0168f78e31f7a481938a88f8e8343ed302","index":0,"type":"reasoning.encrypted"}]},{"content":"5","tool_call_id":"call_nfjtVc7votxNeL9vtmslg8fI","role":"tool"},{"content":"6","tool_call_id":"call_NnAs1Vwlp5n0aRXy7qPUiuUO","role":"tool"}],"model":"openai/gpt-5","max_completion_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "\n         \n\n         \n{\"id\":\"gen-1761054264-Y4ejQT0Sw5FGzgJjsWWy\",\"provider\":\"OpenAI\",\"model\":\"openai/gpt-5\",\"object\":\"chat.completion\",\"created\":1761054264,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"completed\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"- Sum (2 + 3) = 5\\n- Product (2 × 3) = 6\",\"refusal\":null,\"reasoning\":null}}],\"usage\":{\"prompt_tokens\":442,\"completion_tokens\":27,\"total_tokens\":469,\"cost\":0.0008225,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.0005525,\"upstream_inference_completions_cost\":0.00027},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0}}}"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 568.905458ms

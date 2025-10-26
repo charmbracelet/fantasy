@@ -1,0 +1,27 @@
+version: "3"
+
+tasks:
+  fmt:
+    desc: Run gofumpt for all packages
+    cmds:
+      - gofmt -s -w .
+
+  modernize:
+    desc: Run modernize for all packages
+    cmds:
+      - modernize -fix ./...
+
+  lint:
+    desc: Run base linters for all packages
+    cmds:
+      - golangci-lint run
+
+  lint:fix:
+    desc: Run base linters for all packages and applies fixes if possible
+    cmds:
+      - golangci-lint run --fix
+
+  test:
+    desc: Run tests for all packages
+    cmds:
+      - go test ./... -count=1 {{.CLI_ARGS}}

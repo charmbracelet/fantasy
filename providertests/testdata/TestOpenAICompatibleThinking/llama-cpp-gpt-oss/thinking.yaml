@@ -1,0 +1,61 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 469
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence, Italy?","role":"user"}],"model":"openai/gpt-oss-20b","reasoning_effort":"high","tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: http://localhost:8080/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 905
+    body: '{"choices":[{"finish_reason":"tool_calls","index":0,"message":{"role":"assistant","reasoning_content":"User asks: \"What''s the weather in Florence, Italy?\" We have a tool \"weather\" to get weather information. We should call it.","content":null,"tool_calls":[{"type":"function","function":{"name":"weather","arguments":"{\"location\":\"Florence, Italy\"}"},"id":"u36jVf07R9qUqfK2POEsHz6i6DUtUlrb"}]}}],"created":1761672726,"model":"openai/gpt-oss-20b","system_fingerprint":"b6865-1c1409e13","object":"chat.completion","usage":{"completion_tokens":55,"prompt_tokens":139,"total_tokens":194},"id":"chatcmpl-4kIkhSfHyNWuEKyYA5E7TAJXPd43t4TA","timings":{"cache_n":134,"prompt_n":5,"prompt_ms":2466.686,"prompt_per_token_ms":493.33720000000005,"prompt_per_second":2.027011139642419,"predicted_n":55,"predicted_ms":758.656,"predicted_per_token_ms":13.793745454545453,"predicted_per_second":72.49662561160791}}'
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+    status: 200 OK
+    code: 200
+    duration: 3.241207416s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 727
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence, Italy?","role":"user"},{"tool_calls":[{"id":"u36jVf07R9qUqfK2POEsHz6i6DUtUlrb","function":{"arguments":"{\"location\":\"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"u36jVf07R9qUqfK2POEsHz6i6DUtUlrb","role":"tool"}],"model":"openai/gpt-oss-20b","reasoning_effort":"high","tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: http://localhost:8080/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1115
+    body: '{"choices":[{"finish_reason":"stop","index":0,"message":{"role":"assistant","reasoning_content":"We received a response from the weather function: \"40 C\". That''s presumably the temperature. We need to respond to the user. We should confirm the weather: maybe mention temperature and any other relevant details? The function returned only a string \"40 C\". We might need to parse that. We should respond politely: \"It’s 40°C in Florence today.\" Maybe mention if it''s sunny/hot. But we only have temperature. So reply with that.","content":"The current temperature in Florence, Italy is **40 °C**."}}],"created":1761672728,"model":"openai/gpt-oss-20b","system_fingerprint":"b6865-1c1409e13","object":"chat.completion","usage":{"completion_tokens":116,"prompt_tokens":175,"total_tokens":291},"id":"chatcmpl-re0qUJQS09pH36j3sVdLXNuWuV2n3xV6","timings":{"cache_n":82,"prompt_n":93,"prompt_ms":354.988,"prompt_per_token_ms":3.8170752688172045,"prompt_per_second":261.98068667109874,"predicted_n":116,"predicted_ms":1614.389,"predicted_per_token_ms":13.917146551724137,"predicted_per_second":71.85380970757359}}'
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+    status: 200 OK
+    code: 200
+    duration: 1.972542708s

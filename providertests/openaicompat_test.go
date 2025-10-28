@@ -19,6 +19,7 @@ func TestOpenAICompatibleCommon(t *testing.T) {
 		{"groq-kimi-k2", builderGroq, nil, nil},
 		{"zai-glm-4.5", builderZAIGLM45, nil, nil},
 		{"huggingface-qwen3-coder", builderHuggingFace, nil, nil},
+		{"llama-cpp-gpt-oss", builderLlamaCppGptOss, nil, nil},
 	})
 }
 
@@ -31,6 +32,7 @@ func TestOpenAICompatibleThinking(t *testing.T) {
 	testThinking(t, []builderPair{
 		{"xai-grok-3-mini", builderXAIGrok3Mini, opts, nil},
 		{"zai-glm-4.5", builderZAIGLM45, opts, nil},
+		{"llama-cpp-gpt-oss", builderLlamaCppGptOss, opts, nil},
 	}, testOpenAICompatThinking)
 }
 
@@ -118,4 +120,15 @@ func builderHuggingFace(t *testing.T, r *recorder.Recorder) (fantasy.LanguageMod
 		return nil, err
 	}
 	return provider.LanguageModel(t.Context(), "Qwen/Qwen3-Coder-480B-A35B-Instruct:cerebras")
+}
+
+func builderLlamaCppGptOss(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
+	provider, err := openaicompat.New(
+		openaicompat.WithBaseURL("http://localhost:8080/v1"),
+		openaicompat.WithHTTPClient(&http.Client{Transport: r}),
+	)
+	if err != nil {
+		return nil, err
+	}
+	return provider.LanguageModel(t.Context(), "openai/gpt-oss-20b")
 }

@@ -1,0 +1,32 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 179
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"Say hi in Portuguese","role":"user"}],"model":"openai/gpt-oss-20b","max_completion_tokens":4000}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: http://localhost:8080/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 780
+    body: '{"choices":[{"finish_reason":"stop","index":0,"message":{"role":"assistant","reasoning_content":"User says: \"Say hi in Portuguese\". So just respond with \"Olá!\" Possibly also \"Oi!\" Should I reply in Portuguese? Likely just \"Olá!\". Use friendly tone.","content":"Olá!"}}],"created":1761672364,"model":"openai/gpt-oss-20b","system_fingerprint":"b6865-1c1409e13","object":"chat.completion","usage":{"completion_tokens":49,"prompt_tokens":84,"total_tokens":133},"id":"chatcmpl-e6UiQRCWY30H3zRV5s6NwP6whRuauvgL","timings":{"cache_n":62,"prompt_n":22,"prompt_ms":3021.023,"prompt_per_token_ms":137.3192272727273,"prompt_per_second":7.282301392607735,"predicted_n":49,"predicted_ms":676.643,"predicted_per_token_ms":13.809040816326531,"predicted_per_second":72.41632589120111}}'
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+    status: 200 OK
+    code: 200
+    duration: 3.946099125s

@@ -676,7 +676,6 @@ func (a *agent) executeTools(ctx context.Context, allTools []AgentTool, toolCall
 				ClientMetadata:   toolResult.Metadata,
 				ProviderExecuted: false,
 			}
-			results = append(results, result)
 			if toolResultCallback != nil {
 				if cbErr := toolResultCallback(result); cbErr != nil {
 					return nil, cbErr

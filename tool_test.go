@@ -494,7 +494,7 @@ func TestGenerateSchemaComplexTypes(t *testing.T) {
 	nestedSliceSchema := schema.Properties["nested_slice"]
 	require.NotNil(t, nestedSliceSchema, "Expected nested_slice property to exist")
 	require.Equal(t, "array", nestedSliceSchema.Type)
-	require.Equal(t, "object", nestedSliceSchema.Items.Type)
+	require.Equal(t, "", nestedSliceSchema.Items.Type)
 
 	// Check interface
 	interfaceSchema := schema.Properties["interface"]

@@ -182,6 +182,9 @@ func testMultiTool(t *testing.T, pair builderPair) {
 	if strings.Contains(pair.name, "openai") && strings.Contains(pair.name, "o4-mini") {
 		t.Skip("skipping multi-tool tests for openai o4-mini it for some reason is not doing parallel tool calls even if asked")
 	}
+	if strings.Contains(pair.name, "llama-cpp") && strings.Contains(pair.name, "gpt-oss") {
+		t.Skip("skipping multi-tool tests for llama-cpp gpt-oss as it does not support parallel multi-tool calls")
+	}
 
 	type CalculatorInput struct {
 		A int `json:"a" description:"first number"`

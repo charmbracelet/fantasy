@@ -48,7 +48,7 @@ agent := fantasy.NewAgent(model, fantasy.WithTools(cuteDogTool))
 
 // Put that agent to work!
 const prompt = "Find all the cute dogs in Silver Lake, Los Angeles."
-result, err := agent.Generate(context.Background(), fantasy.AgentCall{Prompt: prompt})
+result, err := agent.Generate(ctx, fantasy.AgentCall{Prompt: prompt})
 if err != nil {
     fmt.Fprintln(os.Stderr, "Oof:", err)
     os.Exit(1)

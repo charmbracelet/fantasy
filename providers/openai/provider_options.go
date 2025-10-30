@@ -47,6 +47,9 @@ type ProviderOptions struct {
 	SafetyIdentifier    *string          `json:"safety_identifier"`
 	ServiceTier         *string          `json:"service_tier"`
 	StructuredOutputs   *bool            `json:"structured_outputs"`
+	// ExtraFields allows passing arbitrary additional parameters to OpenAI-compatible APIs
+	// that require custom fields not part of the standard OpenAI API specification.
+	ExtraFields map[string]any `json:"extra_fields,omitempty"`
 }
 
 // Options implements the ProviderOptions interface.

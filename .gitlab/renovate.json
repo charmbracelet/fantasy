@@ -1,0 +1,94 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "platformAutomerge": false,
+  "baseBranches": ["main"],
+  "labels": ["dependencies", "renovate"],
+  "assignees": ["@jesssullivan"],
+  "reviewers": ["@jesssullivan"],
+  "timezone": "America/New_York",
+  "schedule": ["before 5am on monday"],
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 2,
+  "dependencyDashboard": true,
+  "dependencyDashboardTitle": "🤖 Dependency Updates Dashboard",
+  "dependencyDashboardHeader": "This issue lists all pending dependency updates for Fantasy SDK institutional fork.",
+  "dependencyDashboardLabels": ["dependencies", "renovate-dashboard"],
+  "packageRules": [
+    {
+      "description": "Charmbracelet ecosystem packages",
+      "matchPackagePatterns": [
+        "^github.com/charmbracelet/"
+      ],
+      "labels": ["charmbracelet", "ecosystem"],
+      "groupName": "charmbracelet packages",
+      "automerge": false,
+      "commitMessagePrefix": "chore(deps):",
+      "semanticCommitType": "chore",
+      "semanticCommitScope": "deps"
+    },
+    {
+      "description": "OpenAI SDK updates",
+      "matchPackagePatterns": ["github.com/openai/openai-go"],
+      "labels": ["openai", "sdk", "provider"],
+      "automerge": false,
+      "minimumReleaseAge": "3 days",
+      "prBodyNotes": ["🔍 Test provider compatibility after upgrade"]
+    },
+    {
+      "description": "Anthropic SDK updates",
+      "matchPackagePatterns": ["github.com/charmbracelet/anthropic-sdk-go"],
+      "labels": ["anthropic", "sdk", "provider"],
+      "automerge": false,
+      "minimumReleaseAge": "3 days",
+      "prBodyNotes": ["🔍 Test provider compatibility after upgrade"]
+    },
+    {
+      "description": "AWS SDK updates",
+      "matchPackagePatterns": ["^github.com/aws/"],
+      "labels": ["aws", "sdk", "provider"],
+      "groupName": "aws sdk",
+      "automerge": false
+    },
+    {
+      "description": "Google Cloud SDK updates",
+      "matchPackagePatterns": ["^cloud.google.com/"],
+      "labels": ["gcp", "sdk", "provider"],
+      "groupName": "gcp sdk",
+      "automerge": false
+    },
+    {
+      "description": "Go module minor and patch updates",
+      "matchDatasources": ["go"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "labels": ["golang", "minor-update"],
+      "groupName": "go dependencies (non-major)",
+      "rangeStrategy": "bump"
+    },
+    {
+      "description": "Go module major updates - requires careful review",
+      "matchDatasources": ["go"],
+      "matchUpdateTypes": ["major"],
+      "labels": ["golang", "major-update", "needs-review"],
+      "automerge": false
+    }
+  ],
+  "golang": {
+    "enabled": true
+  },
+  "postUpgradeTasks": {
+    "commands": [
+      "go mod tidy",
+      "go build ./...",
+      "go test ./..."
+    ],
+    "fileFilters": ["go.mod", "go.sum"],
+    "executionMode": "branch"
+  },
+  "commitMessageAction": "Update",
+  "commitMessageTopic": "{{depName}}",
+  "commitMessageExtra": "to {{newVersion}}",
+  "branchPrefix": "renovate/"
+}

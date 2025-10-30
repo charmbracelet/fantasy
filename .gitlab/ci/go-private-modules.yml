@@ -1,0 +1,174 @@
+# GitLab CI Configuration for Go Projects with Private Modules
+# =============================================================
+#
+# This template configures Go builds to access private GitLab modules
+# from the tinyland namespace.
+#
+# Add this to your .gitlab-ci.yml:
+#
+# include:
+#   - local: '.gitlab/ci/go-private-modules.yml'
+
+# Variables for Go private module access
+variables:
+  # Configure Go to treat tinyland modules as private
+  GOPRIVATE: "gitlab.com/tinyland/*"
+  GONOSUMDB: "gitlab.com/tinyland/*"
+  GONOPROXY: "gitlab.com/tinyland/*"
+
+  # Use Go module proxy for public modules
+  GOPROXY: "https://proxy.golang.org,direct"
+
+# Before script template for Go jobs needing private module access
+.go_private_modules_setup:
+  before_script:
+    - |
+      echo "Setting up Go private module access..."
+
+      # Configure Git to use GitLab CI token for private repos
+      git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/".insteadOf "https://gitlab.com/"
+
+      # Alternative: Use project/group access token if CI_JOB_TOKEN doesn't have access
+      # Uncomment and set GITLAB_PRIVATE_TOKEN in CI/CD variables:
+      # git config --global url."https://oauth2:${GITLAB_PRIVATE_TOKEN}@gitlab.com/".insteadOf "https://gitlab.com/"
+
+      # Configure netrc for Go module downloads
+      cat > ~/.netrc <<EOF
+      machine gitlab.com
+      login gitlab-ci-token
+      password ${CI_JOB_TOKEN}
+      EOF
+      chmod 600 ~/.netrc
+
+      # Verify Go configuration
+      echo "Go environment:"
+      go env GOPRIVATE
+      go env GONOSUMDB
+      go env GONOPROXY
+
+      echo "Private module access configured"
+
+# Build job with private module support
+build-with-private-modules:
+  extends: .go_private_modules_setup
+  stage: build
+  image: golang:1.23
+  script:
+    - echo "Downloading dependencies..."
+    - go mod download
+    - echo "Building..."
+    - go build -v ./...
+  artifacts:
+    paths:
+      - crush  # or fantasy, or other binary name
+    expire_in: 1 week
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+# Test job with private module support
+test-with-private-modules:
+  extends: .go_private_modules_setup
+  stage: test
+  image: golang:1.23
+  script:
+    - echo "Downloading dependencies..."
+    - go mod download
+    - echo "Running tests..."
+    - go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+  coverage: '/coverage: \d+.\d+% of statements/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.txt
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+# RenovateBot-compatible build job
+# This job is triggered by RenovateBot MRs to validate dependency updates
+renovate-build:
+  extends: .go_private_modules_setup
+  stage: build
+  image: golang:1.23
+  script:
+    - echo "RenovateBot dependency update validation"
+    - go mod download
+    - go mod tidy
+    - go build -v ./...
+    - go test -v ./...
+  rules:
+    - if: '$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ /^renovate\//'
+      when: always
+
+# Verify go.mod and go.sum are in sync
+go-mod-verify:
+  extends: .go_private_modules_setup
+  stage: validate
+  image: golang:1.23
+  script:
+    - go mod download
+    - go mod verify
+    - go mod tidy
+    - |
+      if [ -n "$(git status --porcelain go.mod go.sum)" ]; then
+        echo "Error: go.mod or go.sum is out of sync"
+        git diff go.mod go.sum
+        exit 1
+      fi
+    - echo "go.mod and go.sum are in sync"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - go.mod
+        - go.sum
+
+# Security scanning with private module support
+gosec-scan:
+  extends: .go_private_modules_setup
+  stage: test
+  image: golang:1.23
+  before_script:
+    - !reference [.go_private_modules_setup, before_script]
+    - go install github.com/securego/gosec/v2/cmd/gosec@latest
+  script:
+    - gosec -fmt json -out gosec-report.json -no-fail ./...
+  artifacts:
+    reports:
+      sast: gosec-report.json
+    paths:
+      - gosec-report.json
+    expire_in: 1 week
+  allow_failure: true
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+# Example: Using group/project access token instead of CI_JOB_TOKEN
+# -------------------------------------------------------------------
+# If CI_JOB_TOKEN doesn't have access to your private modules, use a
+# project/group access token:
+#
+# 1. Create token at: Settings > Access Tokens
+# 2. Scopes: read_repository, read_api
+# 3. Add to CI/CD variables: GITLAB_PRIVATE_TOKEN
+# 4. Uncomment the alternative git config line in .go_private_modules_setup
+
+# Example: SSH-based authentication
+# ----------------------------------
+# If you prefer SSH over HTTPS:
+#
+# 1. Add deploy key to private module repos
+# 2. Add private key to CI/CD variables: SSH_PRIVATE_KEY
+# 3. Use this before_script instead:
+#
+# .go_private_modules_ssh_setup:
+#   before_script:
+#     - |
+#       eval $(ssh-agent -s)
+#       echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+#       mkdir -p ~/.ssh
+#       chmod 700 ~/.ssh
+#       ssh-keyscan gitlab.com >> ~/.ssh/known_hosts
+#       git config --global url."git@gitlab.com:".insteadOf "https://gitlab.com/"

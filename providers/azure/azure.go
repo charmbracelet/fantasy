@@ -3,6 +3,7 @@ package azure
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 
 	"charm.land/fantasy"
@@ -24,6 +25,16 @@ const (
 	Name = "azure"
 	// defaultAPIVersion is the default API version for Azure.
 	defaultAPIVersion = "2025-01-01-preview"
+)
+
+var (
+	// azureURLPattern matches Azure OpenAI endpoint URLs in various formats:
+	// - https://resource-id.openai.azure.com
+	// - https://resource-id.openai.azure.com/
+	// - https://resource-id.cognitiveservices.azure.com
+	// - https://resource-id.services.ai.azure.com/api/projects/project-name
+	// - resource-id.openai.azure.com
+	azureURLPattern = regexp.MustCompile(`^(?:https?://)?([a-zA-Z0-9-]+)\.(?:openai|cognitiveservices|services\.ai)\.azure\.com(?:/.*)?$`)
 )
 
 // Option defines a function that configures Azure provider options.
@@ -52,18 +63,24 @@ func New(opts ...Option) (fantasy.Provider, error) {
 // WithBaseURL sets the base URL for the Azure provider.
 func WithBaseURL(baseURL string) Option {
 	return func(o *options) {
-		// This tries to find the resource ID and make sure we use the correct URL
-		//  azure gives the user multiple urls for different endpoints we make sure to use the correct one
-		baseURL = strings.TrimPrefix(baseURL, "https://")
-		parts := strings.Split(baseURL, ".")
-		if len(parts) >= 2 {
-			resourceID := parts[0]
-			o.baseURL = fmt.Sprintf("https://%s.openai.azure.com/openai/v1", resourceID)
-			return
-		}
-		// fallback to use the provided url
-		o.baseURL = baseURL
+		o.baseURL = parseAzureURL(baseURL)
 	}
+}
+
+// parseAzureURL extracts the resource ID from various Azure URL formats
+// and returns the standardized OpenAI-compatible endpoint URL.
+// If the URL doesn't match known Azure patterns, it returns the original URL.
+func parseAzureURL(baseURL string) string {
+	matches := azureURLPattern.FindStringSubmatch(baseURL)
+	if len(matches) >= 2 {
+		resourceID := matches[1]
+		return fmt.Sprintf("https://%s.openai.azure.com/openai/v1", resourceID)
+	}
+	// fallback to use the provided url
+	if !strings.HasPrefix(baseURL, "http://") && !strings.HasPrefix(baseURL, "https://") {
+		return "https://" + baseURL
+	}
+	return baseURL
 }
 
 // WithAPIKey sets the API key for the Azure provider.

@@ -13,7 +13,7 @@ import (
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )
 
-const defaultBaseURL = "https://fantasy-playground-resource.services.ai.azure.com/"
+const defaultBaseURL = "https://fantasy-playground-resource.openai.azure.com"
 
 func TestAzureCommon(t *testing.T) {
 	testCommon(t, []builderPair{
@@ -26,7 +26,7 @@ func TestAzureCommon(t *testing.T) {
 func TestAzureThinking(t *testing.T) {
 	opts := fantasy.ProviderOptions{
 		openai.Name: &openai.ProviderOptions{
-			ReasoningEffort: openai.ReasoningEffortOption(openai.ReasoningEffortLow),
+			ReasoningEffort: openai.ReasoningEffortOption(openai.ReasoningEffortHigh),
 		},
 	}
 	testThinking(t, []builderPair{

@@ -1,0 +1,245 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 556
+    host: ""
+    body: '{"store":false,"include":["reasoning.encrypted_content"],"input":[{"content":"You are a helpful assistant","role":"developer"},{"content":[{"text":"What''s the weather in Florence, Italy?","type":"input_text"}],"role":"user"}],"model":"gpt-5-mini","reasoning":{"effort":"high","summary":"auto"},"tool_choice":"auto","tools":[{"strict":false,"parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location","type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://fantasy-playground-resource.openai.azure.com/openai/v1/responses
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: 3590
+    body: |-
+      {
+        "id": "resp_08e75323d01317c301690399f6df988190bbb2d99c071619c6",
+        "object": "response",
+        "created_at": 1761843702,
+        "status": "completed",
+        "background": false,
+        "content_filters": null,
+        "error": null,
+        "incomplete_details": null,
+        "instructions": null,
+        "max_output_tokens": null,
+        "max_tool_calls": null,
+        "model": "gpt-5-mini",
+        "output": [
+          {
+            "id": "rs_08e75323d01317c301690399f759088190a37f017516202cb2",
+            "type": "reasoning",
+            "encrypted_content": "gAAAAABpA5n8UjdGuSzFx6uvW1lDRxxYfY3gisRCV-3fmThjXt28KBNtZygO2FLKsTDYK4GGvbbqBGkaDynHzJFsQBMjvIyjkiLCdu8peexsbHa9xfp_cWzTgMxBsqQK2CDGxcXqokVV1V4u71ZWHvcV7RzevmhbxOn48CoA7FjOZBvyk2C9uCUh2NJs-GQeWP1zXFjDTcJS-_jZOUNxAw4COewYXTv0FHblhMbM9B61tnoflu6S4Xm_7qrWAuBtP9KSqEJQNCRCkRUtVfVThnG7u33pTQJGnd1YcPehJDKkOOMCliIgIaJLyg5gUeLLma2fcecXmM5Y-mjtIvmwgS84ym08-jhj_hYr2P4YpsGIzT1cIsm83Uq9xtfeo4J1r-OUQ7FxE_syhAjvbFxMuhHQ36wr-kx5JLL7RsyaxXmeWVrG26-c5hgS_pzR-XtSConurdr-kr3KeqUhXYjhebrajzZaVh-fmT38K1iB3r7gJF_YNOONQlJyiw4i6vTOWRNIuhQNL10ujSL5UXB3a8i0CZLPO6kQ4ICflbRE-E-Bhi4iehyL28mCE00CNLr2iJkrmwHeYhn2zDCqKHk_sj2BgWmyTsXLdGwNPIG0LI0KTC1CY41PimKaVKOVruI_OaJe0XAu5YLPuCS3cvSSGFDzhLJkANUMr8rzfCNKyb_tHQbyT8FlC5Cga2Un5iNHThjxCN1kiiWbyT53kHghqWRwFcMZrWWt6KF8WYhMF31YXON7ZetPwK4AP2MQyOng7_UY4-jT3G0k0CPSz8EU87dfaWpZDrtuqsTNF3C2fzHyyXYreIC_K7g1Io3pVKoHGx3kzTrZ8SqjMgl3U1bUlt1swDqFf9rozlv-qxLCGPZcwLRv6ZlgU6Cy78B9bliMXz9O-GmSUEzOsEdDrxBXDzNkQ5LZwgTIIdulV3Ti2YpKMWltkgF_ugV-Nlx8BmXto13n6qqGWvKWNrO7cVXKBeXmF4_OnVk8eHTqBzO2DJWl6jaMuWGiyIhqG7TOSi9G97k0tB5LWWFcyWQodr6iBqbZ5Kf0ERpXd20URrHpyumjhV2bH_w1sDiBFFtliUhJPX69LxHPn_23xIZAn6mJsLxptH_RawP87M2m0Hs91cysbWePBmio8JeUI3bdxalBCnl4cRJhNMQ4yoaEkLe-BIWKxcDUXfbBWovyMYnVzK1tUNMKXBKVtiE=",
+            "summary": [
+              {
+                "type": "summary_text",
+                "text": "**Checking weather in Florence**\n\nThe user is asking about the weather in Florence, Italy, which is a common request. I know I can use the weather tool directly, specifically with the location string \"Florence, Italy.\" There's no need to complicate things with multiple tools for this task. I'll just call the functions.weather tool and then present the result to the user. It's straightforward!"
+              }
+            ]
+          },
+          {
+            "id": "fc_08e75323d01317c301690399fc62bc8190b80c10a99849920f",
+            "type": "function_call",
+            "status": "completed",
+            "arguments": "{\"location\":\"Florence, Italy\"}",
+            "call_id": "call_Frvkxe2RXaW1CTvkYPyl0U68",
+            "name": "weather"
+          }
+        ],
+        "parallel_tool_calls": true,
+        "previous_response_id": null,
+        "prompt_cache_key": null,
+        "reasoning": {
+          "effort": "high",
+          "summary": "detailed"
+        },
+        "safety_identifier": null,
+        "service_tier": "default",
+        "store": false,
+        "temperature": 1.0,
+        "text": {
+          "format": {
+            "type": "text"
+          },
+          "verbosity": "medium"
+        },
+        "tool_choice": "auto",
+        "tools": [
+          {
+            "type": "function",
+            "description": "Get weather information for a location",
+            "name": "weather",
+            "parameters": {
+              "properties": {
+                "location": {
+                  "description": "the city",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "location"
+              ],
+              "type": "object"
+            },
+            "strict": false
+          }
+        ],
+        "top_logprobs": 0,
+        "top_p": 1.0,
+        "truncation": "disabled",
+        "usage": {
+          "input_tokens": 63,
+          "input_tokens_details": {
+            "cached_tokens": 0
+          },
+          "output_tokens": 22,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 85
+        },
+        "user": null,
+        "metadata": {}
+      }
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 6.70119525s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 2549
+    host: ""
+    body: '{"store":false,"include":["reasoning.encrypted_content"],"input":[{"content":"You are a helpful assistant","role":"developer"},{"content":[{"text":"What''s the weather in Florence, Italy?","type":"input_text"}],"role":"user"},{"id":"rs_08e75323d01317c301690399f759088190a37f017516202cb2","summary":[{"text":"**Checking weather in Florence**\n\nThe user is asking about the weather in Florence, Italy, which is a common request. I know I can use the weather tool directly, specifically with the location string \"Florence, Italy.\" There''s no need to complicate things with multiple tools for this task. I''ll just call the functions.weather tool and then present the result to the user. It''s straightforward!","type":"summary_text"}],"encrypted_content":"gAAAAABpA5n8UjdGuSzFx6uvW1lDRxxYfY3gisRCV-3fmThjXt28KBNtZygO2FLKsTDYK4GGvbbqBGkaDynHzJFsQBMjvIyjkiLCdu8peexsbHa9xfp_cWzTgMxBsqQK2CDGxcXqokVV1V4u71ZWHvcV7RzevmhbxOn48CoA7FjOZBvyk2C9uCUh2NJs-GQeWP1zXFjDTcJS-_jZOUNxAw4COewYXTv0FHblhMbM9B61tnoflu6S4Xm_7qrWAuBtP9KSqEJQNCRCkRUtVfVThnG7u33pTQJGnd1YcPehJDKkOOMCliIgIaJLyg5gUeLLma2fcecXmM5Y-mjtIvmwgS84ym08-jhj_hYr2P4YpsGIzT1cIsm83Uq9xtfeo4J1r-OUQ7FxE_syhAjvbFxMuhHQ36wr-kx5JLL7RsyaxXmeWVrG26-c5hgS_pzR-XtSConurdr-kr3KeqUhXYjhebrajzZaVh-fmT38K1iB3r7gJF_YNOONQlJyiw4i6vTOWRNIuhQNL10ujSL5UXB3a8i0CZLPO6kQ4ICflbRE-E-Bhi4iehyL28mCE00CNLr2iJkrmwHeYhn2zDCqKHk_sj2BgWmyTsXLdGwNPIG0LI0KTC1CY41PimKaVKOVruI_OaJe0XAu5YLPuCS3cvSSGFDzhLJkANUMr8rzfCNKyb_tHQbyT8FlC5Cga2Un5iNHThjxCN1kiiWbyT53kHghqWRwFcMZrWWt6KF8WYhMF31YXON7ZetPwK4AP2MQyOng7_UY4-jT3G0k0CPSz8EU87dfaWpZDrtuqsTNF3C2fzHyyXYreIC_K7g1Io3pVKoHGx3kzTrZ8SqjMgl3U1bUlt1swDqFf9rozlv-qxLCGPZcwLRv6ZlgU6Cy78B9bliMXz9O-GmSUEzOsEdDrxBXDzNkQ5LZwgTIIdulV3Ti2YpKMWltkgF_ugV-Nlx8BmXto13n6qqGWvKWNrO7cVXKBeXmF4_OnVk8eHTqBzO2DJWl6jaMuWGiyIhqG7TOSi9G97k0tB5LWWFcyWQodr6iBqbZ5Kf0ERpXd20URrHpyumjhV2bH_w1sDiBFFtliUhJPX69LxHPn_23xIZAn6mJsLxptH_RawP87M2m0Hs91cysbWePBmio8JeUI3bdxalBCnl4cRJhNMQ4yoaEkLe-BIWKxcDUXfbBWovyMYnVzK1tUNMKXBKVtiE=","type":"reasoning"},{"arguments":"\"{\\\"location\\\":\\\"Florence, Italy\\\"}\"","call_id":"call_Frvkxe2RXaW1CTvkYPyl0U68","name":"weather","type":"function_call"},{"call_id":"call_Frvkxe2RXaW1CTvkYPyl0U68","output":"40 C","type":"function_call_output"}],"model":"gpt-5-mini","reasoning":{"effort":"high","summary":"auto"},"tool_choice":"auto","tools":[{"strict":false,"parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location","type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://fantasy-playground-resource.openai.azure.com/openai/v1/responses
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: 5385
+    body: |-
+      {
+        "id": "resp_08e75323d01317c301690399fcde608190a0fecfea7cd36d21",
+        "object": "response",
+        "created_at": 1761843708,
+        "status": "completed",
+        "background": false,
+        "content_filters": null,
+        "error": null,
+        "incomplete_details": null,
+        "instructions": null,
+        "max_output_tokens": null,
+        "max_tool_calls": null,
+        "model": "gpt-5-mini",
+        "output": [
+          {
+            "id": "rs_08e75323d01317c301690399fd3850819098dd485846bdffdb",
+            "type": "reasoning",
+            "encrypted_content": "gAAAAABpA5oG_ll7ThMwW-18Yqi-ei4hs-px3XUGHH6dTl3eCweNP0omlO0V4VGombiAXb7GT_ScFOlhCGpQOY75MRsi2MvZrQ7HyAezH7dgX6YHPxYf_x9ryT028XZh82ZCjgnGj0xV6b2AhLZCo1sVIh3swqeNGgb8mnh5Ia1IByHnHXUEX7rZ525mvIUYhnwFh-AyE_cRbwC48d4dY8LwW_DBAjaHwkFKrL0Xc8Fwh6E9I8J2dDorTV6lbyNmhedpKcEUv9fHXQabANFFkubpOCDALvLPDsrDDRaTiGQw4WyePEPB531bqVZ0DXtlLsO6pyT-Cll4MM3WqMhEAIiEasnfbaidPeXXQzugFagSs--PBcoJ4Y616lc-kMELAuo27Gm2C1gNPWxGHePry7zCMj6gxouUZsxuOpCozOg1XRFlT2BctxSdGOU36swqyW4jjpyDDH0I21iSeRI6HY-wkjMrq-iaQRkrZm_WmVj8yInYLMb_g6THvjgzTeUWIxrFJYUk3NhOT4OaZ_b6NcLp0GatfLDQb_aXyPu1vjLX2oJhHjb7TWSrQYZiYmRR4qoTd9o3TMquC-M85vgsz-DkHlHN0fJUs3CXtwEzPPbupl0Wiyu4CF4EPvF3vxSYQf2tCLkbybVnJrdfPmmFPSzgeYFtf6T-M_Z26hUjJD2eRQ8qeMJurvDPE2TL_w6XSJPyFj0Tlzl_BcHVjkt3BvWP6SgKd4xxhde6O1cfU_gOlL91w879D-Z3OHDYCpkhN1f9GfdnH-CAGkmcLfAXcvPh5lHvLzpY1k2TXWeDwEsI0lj_ravjBNBjoXBIEZl3DG4VoWPrpLib-vhavHxNtwm-TEM8NOvy-fYtucz_yGMKFxhwWkcMcSNM9UpWrXcpp7iaSiXcbgZZgmuFXEqhaSQEKEeMOATMH_6CYzAh6wuRKRVisGOn6ZHsFvit0dMQxTPGc8zh1R-69kepkTNjLKC7U4cs1geqBQQyaO-A9hgUQX89zGXTdkmPRSfjOgShS3LQo90s7UGkUMlOBwCMESliwfjY_lwS8dSJ0t-qkYahcYAVzNqGkUh92eSuwwk94WDYGXTBZvKUUQKKJWb7xP2tyLCXflv4BGtO19_44tyLG68YmU-r82b-z_U_Rj77m1Wsz8TIuYY2fX4DrqSE5aV3Wbn2AYbAHAmNRz_UI3rEezN6wERgb9fyvcmzl4EV5YmsZuh_D28paVc8w56Qhki3VfnFQvPrGlCqdukBIWCByU2NhjUYix_n6-Iv2BfMmZTANDQH49m4eEOs0rxvy0hNBaa-wrAMCPBDJU6NF7FnaV7DYzXChz2dv8f8p3MndlD_e0JvCq3EnQdPIF0dmwK-gka_WZf45QrIX8gMlQLeeeDj-7uA1DpzjZsV44bK8mshVJJ_wz1WMTF23bxhJ3ADdpQPOWUJD9Ol3qUurBrA0NbtF1clZt2tdiuVOUMwEcs5jLy0Y8PUql_-9Uw8izYzwGWnwqLb8VBPfLTVnoRMnMVEP07Nhno3_L4yHJFPEWLKdawNBk6cDusX-lk0V-BdkYygJN7tPq04PP3puq5UccHkxh8ECBxwscKXtCUiBjYtGAVy3gcW2xgDBvkm42Aij9Z3ICftjlJIZLp5TFFGtb_PwpgCDSVSl31untlw3O2HkyVaj1IqWBx7Yvy3g7SMhRvtEZCzwIMFNAy7xnYOcvXjOgYk2btpt5vjrp8vnjkRsSx7VaIMRQsAKLIINDkqXgXjt0AkU90mF8__p_str-PfI1MyTyKE4E_VzlFSKcARe9v5oSVjBH39gwVd6PZW0E7hBcYybeasmnvWRoIfkqbagIumUHg5aCdDpqOrU4gisyw6r5b6ezBSP7lh4KceR-NNVdDcPI3vn3k7MiElIwEfUjwwh9AmsPCloh1et8d9uepGCFP6ehEtGUKvRbil17TZcUOq8DDGCfXAGKSRui8W_GU5hhOJBrDpjxZGvmH-29hfviPHZGtPNTi6zQWqcCxSpxDRyeNWmvp5IMf8Kz7ej6Ve6wHahVOBm_wM-8zwZI5yEazSWZRTYqaWY5vnPs--SsnS2R0lOd1oLHybGZTKW0-YXmqWDrIcnrA0fq7UsCkuNBgzew_9fZg2NIGvukMfBAtBTq-FQ9DM2-mnDPlNXvMRswTga-uV_Z2UQNjvEnY8xn_7ZnUGeGpVWjbHg4GXW5zV9f5aAdtV452YKqQ55JzvR5yJ47lg3EphgHR-5_vOvr-Bl-kEm40oEo8zvNquBcxJ9mvZ478WGGbvGzhOK065YN-nZD91JNUQcALSO_hF_FE4Tk_VvZmFztcRU3nOnF3mHXWe-wJ30UCzKuLNkL9keemUUiAylMvkec0_gR-SxmPyzYvI9XuYc8TYV1xrEWx37wI89fihJeXfS5fmUJEPkPpFq-W704mdXqdG873I15fr-HGx_hcqH1QA6x-8-JtwN-5Se9Pi-iq4UN10T5K95XVgadJbeehLim4Fjxf_SZSyb0rYVnP57h-u1Orh-mwlNNLcf4J_5OQ1h7MWE5DV_gQKhv4Myr3zHVmN6mweUx22fwW6H9AMwfpaEwA5B5feOz8Op94hSgQvmmA6mk5I2CuRZ3H2d0i1b4su4oCcVnW7",
+            "summary": [
+              {
+                "type": "summary_text",
+                "text": "**Crafting weather update**\n\nI want to offer the user a gentle choice: \"Would you like the forecast or hourly updates?\" I think a good response could be: \"Right now it's 40\u00b0C (104\u00b0F) in Florence, Italy \u2014 quite hot!\" I should advise them to stay hydrated, limit outdoor activities during peak sun, wear light clothing, and seek shade or air conditioning. I\u2019ll ask if they want a 7-day forecast or hourly temperatures. Keeping it concise is key!"
+              }
+            ]
+          },
+          {
+            "id": "msg_08e75323d01317c30169039a058e308190a79d0f0c4e834ad2",
+            "type": "message",
+            "status": "completed",
+            "content": [
+              {
+                "type": "output_text",
+                "annotations": [],
+                "logprobs": [],
+                "text": "Right now it\u2019s 40 \u00b0C (104 \u00b0F) in Florence, Italy \u2014 very hot. Stay hydrated, avoid strenuous outdoor activity during midday, wear light clothing and use sun protection. Would you like an hourly forecast or a multi-day outlook?"
+              }
+            ],
+            "role": "assistant"
+          }
+        ],
+        "parallel_tool_calls": true,
+        "previous_response_id": null,
+        "prompt_cache_key": null,
+        "reasoning": {
+          "effort": "high",
+          "summary": "detailed"
+        },
+        "safety_identifier": null,
+        "service_tier": "default",
+        "store": false,
+        "temperature": 1.0,
+        "text": {
+          "format": {
+            "type": "text"
+          },
+          "verbosity": "medium"
+        },
+        "tool_choice": "auto",
+        "tools": [
+          {
+            "type": "function",
+            "description": "Get weather information for a location",
+            "name": "weather",
+            "parameters": {
+              "properties": {
+                "location": {
+                  "description": "the city",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "location"
+              ],
+              "type": "object"
+            },
+            "strict": false
+          }
+        ],
+        "top_logprobs": 0,
+        "top_p": 1.0,
+        "truncation": "disabled",
+        "usage": {
+          "input_tokens": 159,
+          "input_tokens_details": {
+            "cached_tokens": 0
+          },
+          "output_tokens": 313,
+          "output_tokens_details": {
+            "reasoning_tokens": 256
+          },
+          "total_tokens": 472
+        },
+        "user": null,
+        "metadata": {}
+      }
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 9.847531375s

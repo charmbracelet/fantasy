@@ -27,15 +27,13 @@ const (
 	defaultAPIVersion = "2025-01-01-preview"
 )
 
-var (
-	// azureURLPattern matches Azure OpenAI endpoint URLs in various formats:
-	// - https://resource-id.openai.azure.com
-	// - https://resource-id.openai.azure.com/
-	// - https://resource-id.cognitiveservices.azure.com
-	// - https://resource-id.services.ai.azure.com/api/projects/project-name
-	// - resource-id.openai.azure.com
-	azureURLPattern = regexp.MustCompile(`^(?:https?://)?([a-zA-Z0-9-]+)\.(?:openai|cognitiveservices|services\.ai)\.azure\.com(?:/.*)?$`)
-)
+// azureURLPattern matches Azure OpenAI endpoint URLs in various formats:
+// * https://resource-id.openai.azure.com;
+// * https://resource-id.openai.azure.com/;
+// * https://resource-id.cognitiveservices.azure.com;
+// * https://resource-id.services.ai.azure.com/api/projects/project-name;
+// * resource-id.openai.azure.com.
+var azureURLPattern = regexp.MustCompile(`^(?:https?://)?([a-zA-Z0-9-]+)\.(?:openai|cognitiveservices|services\.ai)\.azure\.com(?:/.*)?$`)
 
 // Option defines a function that configures Azure provider options.
 type Option = func(*options)

@@ -75,7 +75,6 @@ func TestImageUploadAgent(t *testing.T) {
 	file := fantasy.FilePart{Filename: "wish.png", Data: img, MediaType: "image/png"}
 
 	for _, pair := range pairs {
-		pair := pair
 		t.Run(pair.name, func(t *testing.T) {
 			r := newRecorder(t)
 
@@ -122,7 +121,6 @@ func TestImageUploadAgentStreaming(t *testing.T) {
 	file := fantasy.FilePart{Filename: "wish.png", Data: img, MediaType: "image/png"}
 
 	for _, pair := range pairs {
-		pair := pair
 		t.Run(pair.name+"-stream", func(t *testing.T) {
 			r := newRecorder(t)
 

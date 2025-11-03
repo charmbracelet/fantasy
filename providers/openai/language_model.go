@@ -27,6 +27,7 @@ type languageModel struct {
 	streamExtraFunc            LanguageModelStreamExtraFunc
 	streamProviderMetadataFunc LanguageModelStreamProviderMetadataFunc
 	toPromptFunc               LanguageModelToPromptFunc
+	onRawResponseFunc          LanguageModelOnRawResponseFunc
 }
 
 // LanguageModelOption is a function that configures a languageModel.
@@ -78,6 +79,14 @@ func WithLanguageModelStreamUsageFunc(fn LanguageModelStreamUsageFunc) LanguageM
 func WithLanguageModelToPromptFunc(fn LanguageModelToPromptFunc) LanguageModelOption {
 	return func(l *languageModel) {
 		l.toPromptFunc = fn
+	}
+}
+
+// WithLanguageModelOnRawResponseFunc sets the on raw response function for the language model.
+// This function is called before parsing the response content, allowing custom pre-processing.
+func WithLanguageModelOnRawResponseFunc(fn LanguageModelOnRawResponseFunc) LanguageModelOption {
+	return func(l *languageModel) {
+		l.onRawResponseFunc = fn
 	}
 }
 
@@ -262,8 +271,18 @@ func (o languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantas
 		return nil, errors.New("no response generated")
 	}
 	choice := response.Choices[0]
-	content := make([]fantasy.Content, 0, 1+len(choice.Message.ToolCalls)+len(choice.Message.Annotations))
+	
+	// Apply raw response hook if set
 	text := choice.Message.Content
+	if text != "" && o.onRawResponseFunc != nil {
+		processedText, err := o.onRawResponseFunc(text)
+		if err != nil {
+			return nil, err
+		}
+		text = processedText
+	}
+	
+	content := make([]fantasy.Content, 0, 1+len(choice.Message.ToolCalls)+len(choice.Message.Annotations))
 	if text != "" {
 		content = append(content, fantasy.TextContent{
 			Text: text,

@@ -35,6 +35,10 @@ type LanguageModelStreamProviderMetadataFunc = func(choice openai.ChatCompletion
 // LanguageModelToPromptFunc is a function that handles converting fantasy prompts to openai sdk messages.
 type LanguageModelToPromptFunc = func(prompt fantasy.Prompt, provider, model string) ([]openai.ChatCompletionMessageParamUnion, []fantasy.CallWarning)
 
+// LanguageModelOnRawResponseFunc is a function that processes raw response content before parsing.
+// This allows custom pre-processing of LLM responses, such as converting non-standard tool call formats.
+type LanguageModelOnRawResponseFunc = func(content string) (string, error)
+
 // DefaultPrepareCallFunc is the default implementation for preparing a call to the language model.
 func DefaultPrepareCallFunc(model fantasy.LanguageModel, params *openai.ChatCompletionNewParams, call fantasy.Call) ([]fantasy.CallWarning, error) {
 	if call.ProviderOptions == nil {

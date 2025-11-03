@@ -14,7 +14,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.29.0 gl-go/go1.25.1
+      - google-genai-sdk/1.33.0 gl-go/go1.25.0
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
     method: POST
   response:
@@ -37,7 +37,7 @@ interactions:
                       "b": 3
                     }
                   },
-                  "thoughtSignature": "CrwBAdHtim/FP8KqTMIQ2DVD+5BAiIXjN0k+ERNVFbVGtenSKcR/G6MtoIcIE/2nxX2ysKRnwClCPnq5+/KJSzS8uFjvU0577RF+LrP7bRIXSNoufBoAJV0aKusqd1DtXQBZif76FBAMtgiG42NALcM0+Jxs2JaKOhFof+1GhNOi8Zbnj+S/YYkU34CvqANixzHQCFkLpFpHbOmsqfYaiMol4juPFMVOJg2w1WZMS/0mE36gP5C8i8p3B0njO9E="
+                  "thoughtSignature": "CrwBAdHtim+wl6784Zk4lDQyf935vvgPxSmTr5FU84nEUq8ijt+y5Ajfd9AXfYybZQjoWoSaAORt4/EsHJNCd45DrAwz8UZYKIvpGgw9k5aKjLYYgw5GkRc2Cgs6uy4AlHHRIkyWMQfaxIcyV2a0Mm4aiT419RVlLd5vIVxEVHlUVawR/9Sds+EuksQP/EKQfuNaAAFXhunEQmJJiMdyGWKMhXYF+L2jMBTN9DxGpoXBiNeu4w/a32l1OTtxdog="
                 },
                 {
                   "functionCall": {
@@ -69,14 +69,14 @@ interactions:
           "thoughtsTokenCount": 40
         },
         "modelVersion": "gemini-2.5-flash",
-        "responseId": "WtH5aJy3I4K0nsEPiZnbmQs"
+        "responseId": "9AcJad7SDPSGz7IPjsKs6A0"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 1.046624584s
+    duration: 3.031359958s
 - id: 1
   request:
     proto: HTTP/1.1
@@ -90,7 +90,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.29.0 gl-go/go1.25.1
+      - google-genai-sdk/1.33.0 gl-go/go1.25.0
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
     method: POST
   response:
@@ -106,7 +106,7 @@ interactions:
             "content": {
               "parts": [
                 {
-                  "text": "The sum of 2 and 3 is 5. The product of 2 and 3 is 6."
+                  "text": "The sum is 5 and the product is 6."
                 }
               ],
               "role": "model"
@@ -117,8 +117,8 @@ interactions:
         ],
         "usageMetadata": {
           "promptTokenCount": 185,
-          "candidatesTokenCount": 24,
-          "totalTokenCount": 209,
+          "candidatesTokenCount": 12,
+          "totalTokenCount": 197,
           "promptTokensDetails": [
             {
               "modality": "TEXT",
@@ -127,11 +127,11 @@ interactions:
           ]
         },
         "modelVersion": "gemini-2.5-flash",
-        "responseId": "W9H5aO2FIdbj7M8Pjvyl8QI"
+        "responseId": "9QcJaYSCJPSGz7IPhcKs6A0"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 1.09843275s
+    duration: 1.487203542s

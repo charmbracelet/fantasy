@@ -14,7 +14,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.29.0 gl-go/go1.25.1
+      - google-genai-sdk/1.33.0 gl-go/go1.25.0
     url: https://us-east5-aiplatform.googleapis.com/v1beta1/projects/fantasy-playground-472418/locations/us-east5/publishers/google/models/gemini-2.5-flash:generateContent
     method: POST
   response:
@@ -31,18 +31,18 @@ interactions:
               "role": "model",
               "parts": [
                 {
-                  "text": "Olá! (Oh-lah!)"
+                  "text": "Olá!"
                 }
               ]
             },
             "finishReason": "STOP",
-            "avgLogprobs": -1.2647225516183036
+            "avgLogprobs": -2.3644888401031494
           }
         ],
         "usageMetadata": {
           "promptTokenCount": 9,
-          "candidatesTokenCount": 7,
-          "totalTokenCount": 43,
+          "candidatesTokenCount": 2,
+          "totalTokenCount": 38,
           "trafficType": "ON_DEMAND",
           "promptTokensDetails": [
             {
@@ -53,18 +53,18 @@ interactions:
           "candidatesTokensDetails": [
             {
               "modality": "TEXT",
-              "tokenCount": 7
+              "tokenCount": 2
             }
           ],
           "thoughtsTokenCount": 27
         },
         "modelVersion": "gemini-2.5-flash",
-        "createTime": "2025-10-23T06:56:18.469078Z",
-        "responseId": "ktH5aNbQHOn1ptQPkf36wAU"
+        "createTime": "2025-11-03T19:52:49.131611Z",
+        "responseId": "EQgJaZuECPfyptQPiO7F0Qw"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 1.883201042s
+    duration: 1.398007208s

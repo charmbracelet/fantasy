@@ -17,7 +17,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.29.0 gl-go/go1.25.1
+      - google-genai-sdk/1.33.0 gl-go/go1.25.0
     url: https://us-east5-aiplatform.googleapis.com/v1beta1/projects/fantasy-playground-472418/locations/us-east5/publishers/google/models/gemini-2.5-pro:streamGenerateContent?alt=sse
     method: POST
   response:
@@ -25,10 +25,10 @@ interactions:
     proto_major: 2
     proto_minor: 0
     content_length: -1
-    body: "data: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"text\": \"Of course!\\n\\nThe most common way is:\\n\\n*   **Oi**\\n\\nYou can also say:\\n\\n*   **Olá** (This is slightly more formal, like \\\"hello\\\")\\n\\nOften, you'll hear them combined with \\\"how are you?\\\":\\n\\n*   **Oi, tudo bem?** (\"}]}}],\"usageMetadata\": {\"trafficType\": \"ON_DEMAND\"},\"modelVersion\": \"gemini-2.5-pro\",\"createTime\": \"2025-10-23T06:56:36.845945Z\",\"responseId\": \"pNH5aPnQM4XwptQPy7WwqA0\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"text\": \"Hi, how are you?)\"}]},\"finishReason\": \"STOP\"}],\"usageMetadata\": {\"promptTokenCount\": 9,\"candidatesTokenCount\": 72,\"totalTokenCount\": 890,\"trafficType\": \"ON_DEMAND\",\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 9}],\"candidatesTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 72}],\"thoughtsTokenCount\": 809},\"modelVersion\": \"gemini-2.5-pro\",\"createTime\": \"2025-10-23T06:56:36.845945Z\",\"responseId\": \"pNH5aPnQM4XwptQPy7WwqA0\"}\r\n\r\n"
+    body: "data: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"text\": \"Of course! The most common ways to say \\\"hi\\\" in Portuguese are:\\n\\n*   **Oi** (more informal, like \\\"hi\\\")\\n*   **Olá** (a bit more formal, like \\\"hello\\\")\\n\\nYou might also hear people greet each other with **Tudo bem?**, which means \\\"How\"}]}}],\"usageMetadata\": {\"trafficType\": \"ON_DEMAND\"},\"modelVersion\": \"gemini-2.5-pro\",\"createTime\": \"2025-11-03T19:53:10.259251Z\",\"responseId\": \"JggJabPpD9KK0ekP6b_N-Q0\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"text\": \" are you?\\\" or \\\"Is everything well?\\\".\"}]},\"finishReason\": \"STOP\"}],\"usageMetadata\": {\"promptTokenCount\": 9,\"candidatesTokenCount\": 74,\"totalTokenCount\": 733,\"trafficType\": \"ON_DEMAND\",\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 9}],\"candidatesTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 74}],\"thoughtsTokenCount\": 650},\"modelVersion\": \"gemini-2.5-pro\",\"createTime\": \"2025-11-03T19:53:10.259251Z\",\"responseId\": \"JggJabPpD9KK0ekP6b_N-Q0\"}\r\n\r\n"
     headers:
       Content-Type:
       - text/event-stream
     status: 200 OK
     code: 200
-    duration: 9.024153875s
+    duration: 7.995516459s

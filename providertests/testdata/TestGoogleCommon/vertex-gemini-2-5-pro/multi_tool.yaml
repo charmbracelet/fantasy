@@ -14,7 +14,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.29.0 gl-go/go1.25.1
+      - google-genai-sdk/1.33.0 gl-go/go1.25.0
     url: https://us-east5-aiplatform.googleapis.com/v1beta1/projects/fantasy-playground-472418/locations/us-east5/publishers/google/models/gemini-2.5-pro:generateContent
     method: POST
   response:
@@ -38,27 +38,27 @@ interactions:
                       "b": 3
                     }
                   },
-                  "thoughtSignature": "CvIGAePx/14SkHhFE9nSX3tF/UUvEyMSIydpEPiedFizUyl12h1UWiXnKK/2KRCeTzCPnlf63nU3gkBYSR4VK3AcDgWD2P8wffTD09sY4ofwSBsb6ryX7/h66mtf0s/K+AVm9bT7/u4vT2nBrghELUoq+Oc1xbYXUfbS61L17gseMmc5mxrjJTwqWrV1oc0XkyzBad6LEDp8rZBuQP7yj4mGeaJyY6SchHJBKPfPVK1tweHnkrvxLpLlDzyNL0iYeYhKXtsdeCa94KlMpH/yU9FoGemcSUHH4gaOoDBPP3E70eHCi/bgLvd9ktEaY7Mvv/GD167aEpuWN+hyXgKvRAQLcuuXVrH9I+nDEaZ9H9jVTvZjMnGT8GrooMWBvOrVp9gDPZBT+qXqAfh+v8VK2olKLy8wpc+y1SNUEJpC3HmlAkLLwFlT6CpG7qYvYX4fios1YYlnNMAI5m/GRGgy8uvxNLQtTXckzduT5uB2LtMyymbhNohbP16yveBu7SZcWHxyC6SjQuB9ztNY1t9dvXJmBxrj/jNZ9t1s5BtAX9WmRnIvyRA9ZnyxEtqvRuT1yxmfSN0JCTtrnAuZxm+tm3PfSXeXtQuaAqY7sZ8SSkzfxf51H8FjymvZzVTr4CmPHZlxqouLD0WUrvR4m+f1QWhENMvMfes0N+9PCwUmjr7sdfcwMlKXppLAhZu3i5sXb8NrOyP/IaQh1Z45De1Q1RIGRJjb7SXOaZza39jbunGVX2GneRoFG0cYbOTwFiDHJ/m9+zN2aXBDmOkPuhBVP35Gq4W6RyQmaFLfrNhV6hQTKLRr3Cqc83V1UxjdR096ZPKlyhgZ2Jm6J+nKiMYlBmPssUJONHRvfHlFNPCUlyDXezzslqfAmuhabeQAVrwk7BhWkluO8DpjWyr7fy+qdW+j2Q50d8CIFOZS+vH4BnmGEKUBDq/6LlEGpLHMrQ6p9domxkFWCUzh0AkeNASc/RXqsi3tGbkWlw8dTaCIEnxdTOeKjrggttp/Bj7rIbHMJIMwhJn0l5gV22eUuv2fmtJhZr2pzOi8RWPI+SRPiIz8WXeLFheeZCJc2WYzAF+Hf7P4vZREZu9T+Cyiiqa8aZV41vE/w73R1Jyi0Na08pwZUbEyxZzkCAeT9FykRHe/NPSVpSflslaarfMgPMfEPg+9cib+"
+                  "thoughtSignature": "CvQCAePx/14NVLo2aFENXN4pX/kIk4bZ+IIn9SuGEcAodTztmaxrh2n1PlLJ2/ahqKl6yf4+5ePV1sDDDPThVhBFNHHlpI4V64pGAIpFRkpvz/Xr9FNvIf/6q6sCfpEOv0YAZs0tbFI9uWJkENhgaTd7iJBKIxlKCyWxIMtIez4bV7QTk0I7sQriQojCQgN+IK0Gmuy5GI5OUSyrfjjz6FOnNc4fNAy+05QgKHKuCBCXSeu5pB15zKV5XQFC5JhwL46h0nvW+h21F8OzQnKLMyRZoZauHd7xJXStNn3Hs0KTSgeuDgzEG9KbMd+xUHQST0mI3Ve2Uj25yVmSp/na4/LhuVM/k7ad2IkmDfhPDbZKiF6rKb1ScPgAFp6FxOyLATAWg3kv1sVF+LdeeS6Of+4xJpS/gB/DGNhfvupvaIxo6N/UTKys0NdIIVUcQiVO8zsfQ9MlUhhzxN01qOVis1gnmEw1ou+S30yHwlSe2F15fX/5crr1"
                 },
                 {
                   "functionCall": {
                     "name": "multiply",
                     "args": {
-                      "b": 3,
-                      "a": 2
+                      "a": 2,
+                      "b": 3
                     }
                   }
                 }
               ]
             },
             "finishReason": "STOP",
-            "avgLogprobs": -0.68308839797973631
+            "avgLogprobs": -0.84448261260986324
           }
         ],
         "usageMetadata": {
           "promptTokenCount": 60,
           "candidatesTokenCount": 10,
-          "totalTokenCount": 300,
+          "totalTokenCount": 163,
           "trafficType": "ON_DEMAND",
           "promptTokensDetails": [
             {
@@ -72,18 +72,18 @@ interactions:
               "tokenCount": 10
             }
           ],
-          "thoughtsTokenCount": 230
+          "thoughtsTokenCount": 93
         },
         "modelVersion": "gemini-2.5-pro",
-        "createTime": "2025-10-23T06:56:55.716370Z",
-        "responseId": "t9H5aNLcK6ryptQP-_6vMQ"
+        "createTime": "2025-11-03T19:53:25.624359Z",
+        "responseId": "NQgJaeeNJsKN0ekP4f-yiAg"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 4.090130167s
+    duration: 2.020324083s
 - id: 1
   request:
     proto: HTTP/1.1
@@ -97,7 +97,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.29.0 gl-go/go1.25.1
+      - google-genai-sdk/1.33.0 gl-go/go1.25.0
     url: https://us-east5-aiplatform.googleapis.com/v1beta1/projects/fantasy-playground-472418/locations/us-east5/publishers/google/models/gemini-2.5-pro:generateContent
     method: POST
   response:
@@ -115,18 +115,18 @@ interactions:
               "parts": [
                 {
                   "text": "The sum of 2 and 3 is 5, and the product is 6.",
-                  "thoughtSignature": "CtsIAePx/154bFPH9VHqinXcUV/n+fOBQz6u2MwnVRN+B0rYpcxkRaES1pXRfXkG2PomQeDzSqc4MXjv7eDsfJksXytwk8qxnvcGnkB/BkRXTKTNuageqAfft5yp+Jag2TDHqIUS8vthxuzFZf59t1TuTdB2NfOv3Of1DU6i7fafJ12ZWFq0PQJVtscAKYIDx3NhoAE7Q+vyGEQAKSDYKU3qxgvMXNE478pLsDr2nr6PpWva+uzFUQMlqUT4ye87x+WVkZ8nvYv4wwDwh+jfDbYH0xng6C5Um1BF27IY9H3PxV9BP46Og76rP62TsoLk4sl/vGYaz84XLu1Rg9WcO+Bc5RxEl5HLpPO7pxp5Nu1DR5aT199QYqb1vuMcaR3mLoHTPEHWpkL4lQivbwWJOPWXGxO8DLTmsrO9d3G1xidSavJ5x4JM980KIHMUvhAwNI3J3PnPWG1W66o8FTOEcNkdCv5uGFlYJVRxUpFy9EuQTytduTBdni2MNkRDlcwZTXZ+hTdH28Kfrs+VpXusYk4I4pLYS6f2JX2cCWWSE1o8rzZWqNOQpR/aKmxS2w1fV98OVSFyoF9ixedITXCBgWPigt1PsrXCsBaZAZLDQmJ3SxosPYAHvCuwfxA5VicxYdXCFga/So8pSqlDkv+48UNegPPC4FW5h9TBW7ejN/lNj0/6OfENpJQfHC7Rz+3GvU+OZiPKUL3JL1ayDot+aWsTZsM/PH/6ieO0EvSeW4FAyYML5Nux0VXnyIyvuRn66OBCbCkwZFOn+7nBzpmqi1LO0goAJJ6/hVyEtxtvTEDS/9C+d6KNamEQ+MC3Sao2OL8Ml+2LgvemMznqCOPoo/yO0hD3UVIhSyT4yI8HpBVbYtv+ikKK7+iVKGNYE74BDfeLUzWKm3eEnxPlfASiCtzF3oHtgoPn/cDQO4RW1uKUY8gKTtTLlhixk3Uk+0FkelkN0poolzVuunRpmY18UvpUytIZo8jIFj9hwnXIINPWSXU7lndZqgkdWhak3emm1lqmKHBBCXawd3wTO3YIQPhzPvTJZAcRQwMaaI2U/xgzdIN4bcYEeGPSj/+H0+m2ogW+BA6PF+nBp5vgH5naPsQJzuaRMnHx9axZRL9aeJvQXr9qF8XWCtAX1dTeA56UDyJNceML7wFPh5UxNEAAIrFZcLNuGh4L4XY9J9T0gtX45rWXHBV+qFvODJZ8V8eNI/oB6kKf1H+aw+P15nrg1Whn+8seKpherWhmmFTT+nozfz56slDbZ0vMCoLvXn8WDcsq/2Cn5/NC0ayoxznzXGBeN7oSgL5OEmt9ZIWOjmQ0h1j49Bmnovf+i4jPNfsNRxSWY0XntMmrH/X+4kUypK+AxHUn83+2wYsU06zNlgnViMuR2W3Qu6lvtFFVBSj/k34XMfsYx/p6bqN4NPtgB/rhYvb6EkHx4Z2LBFFF+R+dVl6pK5jsaP66vX8i6imoAjzUpzpZYLZcJCTjDLY="
+                  "thoughtSignature": "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"
                 }
               ]
             },
             "finishReason": "STOP",
-            "avgLogprobs": -1.6167781227513363
+            "avgLogprobs": -1.8039343984503495
           }
         ],
         "usageMetadata": {
           "promptTokenCount": 76,
           "candidatesTokenCount": 19,
-          "totalTokenCount": 396,
+          "totalTokenCount": 573,
           "trafficType": "ON_DEMAND",
           "promptTokensDetails": [
             {
@@ -140,15 +140,15 @@ interactions:
               "tokenCount": 19
             }
           ],
-          "thoughtsTokenCount": 301
+          "thoughtsTokenCount": 478
         },
         "modelVersion": "gemini-2.5-pro",
-        "createTime": "2025-10-23T06:56:59.999110Z",
-        "responseId": "u9H5aMb9PKD5ptQPsI7YiQ0"
+        "createTime": "2025-11-03T19:53:27.675592Z",
+        "responseId": "NwgJaYieKbGC0ekP-bXkSA"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 5.075507708s
+    duration: 6.285962458s

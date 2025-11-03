@@ -13,9 +13,9 @@ import (
 	"charm.land/fantasy"
 	"charm.land/fantasy/providers/anthropic"
 	"cloud.google.com/go/auth"
-	"github.com/charmbracelet/go-genai"
 	"github.com/charmbracelet/x/exp/slice"
 	"github.com/google/uuid"
+	"google.golang.org/genai"
 )
 
 // Name is the name of the Google provider.
@@ -162,6 +162,10 @@ func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.L
 	}
 	if a.options.skipAuth {
 		cc.Credentials = &auth.Credentials{TokenProvider: dummyTokenProvider{}}
+	} else if cc.Backend == genai.BackendVertexAI {
+		if err := cc.UseDefaultCredentials(); err != nil {
+			return nil, err
+		}
 	}
 
 	if a.options.baseURL != "" || len(a.options.headers) > 0 {

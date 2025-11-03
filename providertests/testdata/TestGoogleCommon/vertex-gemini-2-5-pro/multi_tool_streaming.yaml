@@ -17,7 +17,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.29.0 gl-go/go1.25.1
+      - google-genai-sdk/1.33.0 gl-go/go1.25.0
     url: https://us-east5-aiplatform.googleapis.com/v1beta1/projects/fantasy-playground-472418/locations/us-east5/publishers/google/models/gemini-2.5-pro:streamGenerateContent?alt=sse
     method: POST
   response:
@@ -25,13 +25,13 @@ interactions:
     proto_major: 2
     proto_minor: 0
     content_length: -1
-    body: "data: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"functionCall\": {\"name\": \"add\",\"args\": {\"a\": 2,\"b\": 3}},\"thoughtSignature\": \"CiQB4/H/XgQAcXu85WneoGBRKOpeHj0vTklm62USpUddzxZPPLoKXgHj8f9eRUdyVNG1O8Vp4mjOWASvJe/hnO2R7E419QoQB9wL0mqpFa3bC0Ms9zWWHp7S4un46VSIbmd3W/jopqwPDev4hQxsMvhlwbPNZ5eF5bIIKKaOMVv5vcmvFWoKawHj8f9eUrqUzNrwVAJzpRGt+Z7cav1doL0DCW59c06QmgXdcDmTdIX436bdU8yG/Jn8gLfaA7mAOKR+C40/rsjaXpkN+SsQZfL/PU7UCCQvFX+utGUqBwDMGskTfSRZvvQjQTiGldElpP4oCocBAePx/17J+F3vQacIiy1DFbbLNVOstVJEBAnO5z+pniBktLDZOKW1n/8llyTjgSfu9p5t+AzitLEsdb4gdDs5kzRFeglMheIcyLq3+jeOkBklhYkg30b0XZ42c+NUKPj3MN7OkhIyGiYHS5QfLsnXKEeN/h/+EixGq3iKoFMWZDuAsBewbIBDCqgBAePx/17PxUt1XslgsF3qwthx62owqkHzGOYLYy07mGOcXLsFhsu0SxNowKP8X9BFHpfPy7f/5/TPzKS4EDRiwVQeNcW7ngB726QS54Kmlp1wVc0fozejv2CiMCGSPkCFX2CSKrWpb6WY25FbJC7G/6TpC7bg9Hl6sswf/UGlx1/bYoFs0qsMjuPJawOLEaV/5i8SiqXoNvwwqdI/9CoAkt0vMpTabUx8CtgBAePx/14VIfF1svGPHCOsnNOiECbcYfyXvW0hH2myrxAihs8wh++yOaa5Qd16rJyOmVsALu0utjvJuJbDbauY0WOVPGrvHvvAqNSX7CImrlPXjo+uM9TJRlnfk4fS+LgHjEm/3WevSgNALvQSVNwxR9OFqHzGrclY1dyQX1KopfO+Np+Q6lq0UWQrrXTx5iSdScz6mqfNeGT8Htcti/L8t/y1//TS6GAONi71KIr3sHuWYGjFQKAVf9EsKowOANdJcmqiWCp9+aFzpX+DRA1t0A+Y/5YylAQXCkIB4/H/Xt4MOLiYgKHOwz8wYMLC1aWabrDS13VEoVz8mGPnvpbFsEvshPcb0GZS1e1fcIkvgaLBhcFRDYwBFlxBQL0=\"},{\"functionCall\": {\"name\": \"multiply\",\"args\": {\"a\": 2,\"b\": 3}}}]},\"finishReason\": \"STOP\"}],\"usageMetadata\": {\"promptTokenCount\": 57,\"candidatesTokenCount\": 10,\"totalTokenCount\": 236,\"trafficType\": \"ON_DEMAND\",\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 57}],\"candidatesTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 10}],\"thoughtsTokenCount\": 169},\"modelVersion\": \"gemini-2.5-pro\",\"createTime\": \"2025-10-23T06:57:05.167720Z\",\"responseId\": \"wdH5aKieCrHEptQP-Ob28Ak\"}\r\n\r\n"
+    body: "data: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"functionCall\": {\"name\": \"add\",\"args\": {\"a\": 2,\"b\": 3}},\"thoughtSignature\": \"CiQB4/H/XlX6NEE2oZemlkg67NxoKoJB5NoayjE5vi7trpqjHVUKXgHj8f9eB6K+z0Pl4dvATaGSyM3TPl0Ss2E68unSJJBQZlzT3epePny9LoODM1eSIS30esNvQYFWw8+AKSL4Dh7TrAF/wAXObu0B5EAxiisuNdpDpSNvoEmPYL8XwWEKawHj8f9ePJLfhHJqWosCkZwiGo/yuq3rNlyAYM+RpSTaT8sZ6TqgG5pqp8tzahjrBVMe8zc1I303Xj0fNeYyIK4GyXzva+kUzYv/Itnc/EEDDFHb9CnOsb7Q9UDiVIvbyn6Q0BIHHWtoJ8pWCocBAePx/14/qMNWbsiLE2J6ETDqka11adZo0yr8opBcpZqrrXLW0LCllKWrOucvFDJR2MrF+gO4RBZaR0xqT1bUPacWsYCD9fym+k2O/6mTQQCZr0dQv2z4ebrTpIJ3B3EgS90RToimlDHmUi6mv3sco9MHSOu+Cw/hFR5RCYodgJLNqsg5Bu/ECisB4/H/XqsC8CxNVguMHOF29sfs0UjX7aXTUL2oH5fq9qd3jukcEs2WH04x\"},{\"functionCall\": {\"name\": \"multiply\",\"args\": {\"a\": 2,\"b\": 3}}}]},\"finishReason\": \"STOP\"}],\"usageMetadata\": {\"promptTokenCount\": 57,\"candidatesTokenCount\": 10,\"totalTokenCount\": 145,\"trafficType\": \"ON_DEMAND\",\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 57}],\"candidatesTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 10}],\"thoughtsTokenCount\": 78},\"modelVersion\": \"gemini-2.5-pro\",\"createTime\": \"2025-11-03T19:53:34.206944Z\",\"responseId\": \"PggJaeDQDNOM0ekPpsvo4Qk\"}\r\n\r\n"
     headers:
       Content-Type:
       - text/event-stream
     status: 200 OK
     code: 200
-    duration: 3.020269292s
+    duration: 1.962946083s
 - id: 1
   request:
     proto: HTTP/1.1
@@ -48,7 +48,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.29.0 gl-go/go1.25.1
+      - google-genai-sdk/1.33.0 gl-go/go1.25.0
     url: https://us-east5-aiplatform.googleapis.com/v1beta1/projects/fantasy-playground-472418/locations/us-east5/publishers/google/models/gemini-2.5-pro:streamGenerateContent?alt=sse
     method: POST
   response:
@@ -56,10 +56,10 @@ interactions:
     proto_major: 2
     proto_minor: 0
     content_length: -1
-    body: "data: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"text\": \"The sum of 2 and 3 is 5, and the product is 6.\",\"thoughtSignature\": \"CiIB4/H/XuqOIBIeEbsjSAQFNssL8DW8i38s/pGkh/wrji/6CmMB4/H/Xtr2CkY2+DgKDRCXzRSyIiViWVfzPYzWFvFZjklzwLs7z/RitrewOTYnv7yelrs+ut2Y+FuI6RvDNRYlN7SG8OVBDyyDeCwumyZsW2maZGfq79JOV87NszIzszwdndQKbwHj8f9eQbg0MvA96ZIAwWu+z++vKamUeAx2AaLoBzTnCqdxQQax2RL+/w3iRrR7+dQ4A1cjsoQ/JcMF1NJs66JBP3kvmMcTejiCsv3gyaG2psBpyRN3TjWGMAH+P6EHbYB4iwcfpTY+8xjp34MpAQqdAQHj8f9e759GLlCPcBfF3B7udebCaTL1DFnQdpd0GYpvoVaksBKX+NRoSfumOVP7wuyj9qq96WHXizD2Te1U/l3+wnal73r8ONKWSha/QEwII63Nel3m2um7wAZLRFTLHtJQSkINYNtpRXFQ+5F/Dep9Uh/l4kiv/1LCW+glX6YNkzWOYwHaOLKxucACRs3LHeskm+sqCqCmAfBWMUIKlAEB4/H/XvwLk0os758loEMT/aLUkdOgHx3YURoMD+lIC4aHroU0gajMAD+1D/C5b//pAT/nKGp8JcFnNKwDYU8Ckf1KJS+xqQdckhlJWwQGZOOlpCKVzwZ5YW3vRXUQ20cbXIXtdbI48gJmH/K639Ptjh2+G33vJP+YVTHEdo6PwZf1Ypq9r4YyrotKX139iCAW2MjYCt4BAePx/14FAEqPjY5o+hFp2wrlj9xyLihYAXE+u8xbbH9sCFc6lY2vtGjoWR3nEe9/83oyNoUM9piM2V9LQsznmYTB+GsVFIkUCqVmQwBe6lgFHhR3pLGiggel42Ou9JQfhjROHZsv30pmn74+uWzlb/IhZ1g7F6CRNCpKXyIcucFek9qYiNTarqxZhvb+BD7t8GT2sC6xJTAEh3x2Q67AjM/QOGLoO+HgjVWMmcRld5U4pxcR9BRytmthym5gd0DcknQEl8SbNjmiB9RYluCmrRD90ZLbJ9IrB5rV1sfECrIBAePx/17U61rja323csLvLACgx6DDNUS1nT/vq0Sw2JFhZ8cs58kKA38hYAldyMFZU/UlXV/kAsdxkVL4NxUg1cplYKd94mRN85ACsEjDWLTkrgSmt3NO1dq6A2FwT0tVly0/fdZO+DrZ3Qrn4Kgv8dIe6PQXOWieiVazxs7eBEtD9ZX2Os7cj2Jmnd9QO2hv1Z7IVCUxWKeU5wf4RTl5JiRn1athzRVpsgfAHfOkdWsaKwqpAQHj8f9edkr6y9NB31IBu8UqU83M/ssH3yqoluC+iJrP19OkZIGVRiDliKBFCW5z2wRhoj9OnqrtfeiIAchcZNfUBWxALRIZotgiemozDTl9lHY7r/wst5tnlrMoNCGhjxLIJ8AbFwtCpED/OaMxisop8QTnRftghOJsDJ8rqprgpOOHq82buKUoVqO8ie2vcxkyW++/VjEOnselrYAHjqA9HR2ZPSH7SSc=\"}]},\"finishReason\": \"STOP\"}],\"usageMetadata\": {\"promptTokenCount\": 73,\"candidatesTokenCount\": 19,\"totalTokenCount\": 328,\"trafficType\": \"ON_DEMAND\",\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 73}],\"candidatesTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 19}],\"thoughtsTokenCount\": 236},\"modelVersion\": \"gemini-2.5-pro\",\"createTime\": \"2025-10-23T06:57:08.169231Z\",\"responseId\": \"xNH5aI-qCoXwptQPy7WwqA0\"}\r\n\r\n"
+    body: "data: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"text\": \"The sum of 2 and 3 is 5, and the product is 6.\",\"thoughtSignature\": \"CiIB4/H/XkgskiftxblvQtKnaPUHwvpnvRtARLh1flSf7S2BCl8B4/H/Xkgf7tGXREzzma36SRJHlASZky6tFTEZfTo04rNp3O304Z4XJKxvetB9Apc4LJlnPR4kLT3Hq04gT1iI7WQTAY2JuYBzy2brHXtjxJz0KudJW4/N1hqXWRL+QwpxAePx/14hN0ASU+jC3AIyPntWG7uCSqldtzR1LcaoiDZinJI9wWVAn35Xp2fncHkXwNw1evHWVBz0YpiCN480PTCDoc0UNUb1VBWuGsWEIf6fpZEtnV8/GICelQcKKLar6OGrFoVdLL4jz2sBuK9jr6YKowEB4/H/Xto+8y0rvZp0VUCldJa/91+1OuLOFzut+CXNb5M62mCr5AJB65XVbO21IABwGOFDl3dPDP38ZcAceJpkmpAX/7WeucrqmoFffvuC477sQDEmHVBLzxKruLsjqAYLoqBM8n1KnY8CZX8P3ZrTvT/oIXJ1LQFjnT2x4tK9V37cCdL/Lawvyy7fCeIk7tWRD8zXRrOg28Q00ML0W5jthnXTClwB4/H/XgOmDHX55PIa/4SMObXQ4OEckzh9abY8hlOro32dOQ15cW0Qfeosx7ObdN/adp4/VSs6wg65b3rh/PXEZlyVnIeI44o0YwQIXwHQkrEqqrlBUf9N0wC9HQryAQHj8f9ewEmxVrUbCU9E761sRSfvV7/XNV/cid6fx9wwpaYK2kc3eK0r2aLIq2L6EwiGf9pFb8hNJnhn7/vnfGagzjadqVxFt8n3/dKh84IFkkZgTOcn7SqBf77pnHtn3SUpmf/r4ggmG++SlPaOsEQjVZvc+2Y7PHQ0keXv0tE8hs8ZpTvDC00cq8xdc7tImJu/z2G0bwYv4x0kndllQZVlqcNQs0mGHJr+5Zilxf5xh0RDCNs8WvyqZiFTbnWu76tHM1wO2XtB6TXdEs3RReOXX8qmdQAM2NLVhjvaCEVmTmBp0HRCwx+eMPVRa1zYxrpwCucBAePx/148F/6p2sv6iMgFQBXFqLOA+OE5FUNm4eUqZWNZYStFTQbI4A6ANxXPvbcbAv7DtY61cHZDhPyrkp9zLSo5zGA7fols0Dk9tz6C6SwdzcGWOkG4SSyNQsgmJmSYY7S4mm5e+hXmPg4N/yjyIUMa6kDPxfrPpDIqMtvXh6dVt4IVrWdjC7unM/9vB0OW4s2TMuyyK089iPonII2TxR0bx8aYH0GU3tjFWlszfdEQUQYuoMPlMAovvj7nPiE9cUV+706GXcRNvYesvq/dACB3aWoBGmT3l42D+JlCWc9vWcwFCamxCvIBAePx/17Noj7zoFFWRobA84QHd65l4kLllJB9IAzxynk/2eYYoJe5ybYGCLaWzw/vuEnOQ4/y9dBLRgqxEfo+a3QEWPXWS4snWJX9tG5f0ZuODH77uEqTV3saT25LN4Y0K9b0/tQBBheR+ohkG5r/DJKALIMNGSKfYetMssNOtx4up03sNJymzp2ehf/kj//G5Yq975i3VHerCihiPwq0jNzXLx04giKUkiaM9D9kvSmbp0UnBaQGZvWg+/YXzcx1T+5wur1GURYRX4T+sO0h0JMtHzz3loL4DCdMgIknHkG//knFjSjOuYA4O9r+4gLmslQ=\"}]},\"finishReason\": \"STOP\"}],\"usageMetadata\": {\"promptTokenCount\": 73,\"candidatesTokenCount\": 19,\"totalTokenCount\": 345,\"trafficType\": \"ON_DEMAND\",\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 73}],\"candidatesTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 19}],\"thoughtsTokenCount\": 253},\"modelVersion\": \"gemini-2.5-pro\",\"createTime\": \"2025-11-03T19:53:36.159221Z\",\"responseId\": \"QAgJafXbCeGA0ekPtcmwmA0\"}\r\n\r\n"
     headers:
       Content-Type:
       - text/event-stream
     status: 200 OK
     code: 200
-    duration: 3.008985s
+    duration: 3.375502417s

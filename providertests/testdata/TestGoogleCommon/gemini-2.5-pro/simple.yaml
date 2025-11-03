@@ -14,7 +14,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.29.0 gl-go/go1.25.1
+      - google-genai-sdk/1.33.0 gl-go/go1.25.0
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent
     method: POST
   response:
@@ -30,7 +30,7 @@ interactions:
             "content": {
               "parts": [
                 {
-                  "text": "Of course!\n\nThe most common ways to say \"hi\" in Portuguese are:\n\n*   **Olá** (This is like \"hello\" and works in any situation, formal or informal.)\n*   **Oi** (This is more like \"hi\" and is very common and informal, especially in Brazil.)\n\nYou can also use a friendly greeting like:\n\n*   **Tudo bem?** (Literally \"All good?\" but used to mean \"How are you?\")"
+                  "text": "Of course!\n\nThe most common ways to say \"hi\" in Portuguese are:\n\n*   **Olá** (This is the standard \"hello,\" and it works in any situation.)\n*   **Oi** (This is a more informal and very common \"hi,\" especially in Brazil.)\n\nYou might also hear people greet each other with:\n\n*   **Tudo bem?** (Which means \"How are you?\" or \"Is everything okay?\")"
                 }
               ],
               "role": "model"
@@ -41,22 +41,22 @@ interactions:
         ],
         "usageMetadata": {
           "promptTokenCount": 11,
-          "candidatesTokenCount": 100,
-          "totalTokenCount": 893,
+          "candidatesTokenCount": 94,
+          "totalTokenCount": 802,
           "promptTokensDetails": [
             {
               "modality": "TEXT",
               "tokenCount": 11
             }
           ],
-          "thoughtsTokenCount": 782
+          "thoughtsTokenCount": 697
         },
         "modelVersion": "gemini-2.5-pro",
-        "responseId": "Z9H5aM_PPKKBkdUP-OO7oAM"
+        "responseId": "AQgJabbjM5rQz7IPgq_yiAc"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 10.457368166s
+    duration: 8.976729125s

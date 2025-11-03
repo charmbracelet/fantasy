@@ -14,7 +14,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.29.0 gl-go/go1.25.1
+      - google-genai-sdk/1.33.0 gl-go/go1.25.0
     url: https://us-east5-aiplatform.googleapis.com/v1beta1/projects/fantasy-playground-472418/locations/us-east5/publishers/google/models/gemini-2.5-pro:generateContent
     method: POST
   response:
@@ -31,18 +31,18 @@ interactions:
               "role": "model",
               "parts": [
                 {
-                  "text": "Of course!\n\nThe most common way to say \"hi\" in Portuguese is:\n\n**Oi**\n\nYou can also use:\n\n**Olá** (which is like \"hello\")"
+                  "text": "Of course! Here are the most common ways:\n\n*   **Oi** (This is the most common and informal, like \"hi\")\n*   **Olá** (This is like \"hello\" and can be used in both formal and informal situations)\n\nYou can also combine them with \"how are you?\":\n\n*   **Oi, tudo bem?** (Hi, how are you?)"
                 }
               ]
             },
             "finishReason": "STOP",
-            "avgLogprobs": -2.3780706305252877
+            "avgLogprobs": -1.3811639073383377
           }
         ],
         "usageMetadata": {
           "promptTokenCount": 9,
-          "candidatesTokenCount": 38,
-          "totalTokenCount": 720,
+          "candidatesTokenCount": 83,
+          "totalTokenCount": 811,
           "trafficType": "ON_DEMAND",
           "promptTokensDetails": [
             {
@@ -53,18 +53,18 @@ interactions:
           "candidatesTokensDetails": [
             {
               "modality": "TEXT",
-              "tokenCount": 38
+              "tokenCount": 83
             }
           ],
-          "thoughtsTokenCount": 673
+          "thoughtsTokenCount": 719
         },
         "modelVersion": "gemini-2.5-pro",
-        "createTime": "2025-10-23T06:56:29.134156Z",
-        "responseId": "ndH5aIyYCLHEptQP-Ob28Ak"
+        "createTime": "2025-11-03T19:52:59.997761Z",
+        "responseId": "GwgJaYHzPNnEptQP9fCJyQY"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 7.471405083s
+    duration: 9.378146209s

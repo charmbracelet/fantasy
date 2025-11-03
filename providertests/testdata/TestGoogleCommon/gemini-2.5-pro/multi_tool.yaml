@@ -14,7 +14,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.29.0 gl-go/go1.25.1
+      - google-genai-sdk/1.33.0 gl-go/go1.25.0
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent
     method: POST
   response:
@@ -37,14 +37,14 @@ interactions:
                       "b": 3
                     }
                   },
-                  "thoughtSignature": "CsoFAdHtim+KBwj8VhhtWPwHBKgsH6dtIfSN4UcLG1h1wVl+dlvTMhaJM6YG/Kk6nkH9eFwqxegt0E36kNDU0Bpvqu9I8HBczBdrHD88KH0J1dfJFlmAOPrpNQo9wCsGFYPNcMxWd4daJem3NseOfDV+M5dsbhjGT8HQ+g8ZAe02xHjPnaogeq5ehnVDwK1iEqTkhZ01916zrjpqkCI0g4Shecz5CMLXO9KWGv4uGqTPPtw8qr+WEUdz86jVsmIfehGL3wZYvu87BoUfAdapQMJKhl+jHf1NUHGTIrXpx+4ytQuI966SvC36SRj5SgfMiFHYz6Whf/dtD6733w2DfOD1V8ks8yp/r8qNQkXjZHQUXypbEBnW/snrtbNuRRF+l0V1vz9FaKcHL5QhVwLDsH9H//hVmtFs+UA79DPSJL/kqtdhyAewQ15MOU4IpeoUhoofGSEaT7zmji5/Tr2RT3bTIW0o6itpcKKHft9+jYWkAzXO4JN97ceWwJbA/wRTF9DrqPERbUDxsAZdLfPjJRwm+Cg6sjtZA8sPhdlHKVJrnM6LnyAVr9jGtgjNRcJRa0M3IrP64JJ1JHp+6Cpdi/jU6JdJ0s/awYgDg5OpEX8STUSMjqOoWCVBOsLEFj0VzRpa3ABbidMYj/enEdZ4jCGAVGxrXLAYxWf5CO+DXN6flUMAPMcD+LkaMhdROa6+q9Oe0uCLOGL2DT2xZof2FWw0vks2DzkVHGr/QQVWNZQdhIEQinGrQBaqgfw3jtxnZs+LYWAD5s2Hev+2BY/MqPCw3/yxxTbU+FFoA44AkbfW6eKlCHvoXXVaijZ/+M0t4pAtEkqKzEnk5HVi7aXcSj2nNR4DvpHifDOQ7zOZBumDU6EHYnFT9nJh/GjvUUKK0daXTc9IPwfxyeIn/0hAExQlWIlErjHoHtk8UU9OwLcNIpy7bH+VYDaFxNkb"
+                  "thoughtSignature": "CpECAdHtim+6+kabSNJ55G1aHXgyrJEt4/hov4uGHkcSqzlgfBd4clna+c9UpSL1rvSqMOb2E8NohfunKGm4ZHHOX9X+dBKww0ekyLz+83CF28LbsOzDHrPtIiRYoDaL/75h/HzhboaPK+aunAUglNLxM/b5yrr2tT0jKvz4LzuymTYHCpzBCcoIecoeuT0RO/WaUsjB8CMRGxnigv2XtuFkBxxzk2OWPmhSM6KTeIQTVe0d3T4HjKe2L76XG1WeaV3weeMxeCyrqX4ycxH2fJ1h5cG5EONLNxqA9eHREWu/j5ABiOGxZv2ih6xU/xyo5apwpLAwVSYtyDKXiTH4T6Wp/V7t8E7Urj4smOABFupCATUl"
                 },
                 {
                   "functionCall": {
                     "name": "multiply",
                     "args": {
-                      "b": 3,
-                      "a": 2
+                      "a": 2,
+                      "b": 3
                     }
                   }
                 }
@@ -59,24 +59,24 @@ interactions:
         "usageMetadata": {
           "promptTokenCount": 125,
           "candidatesTokenCount": 36,
-          "totalTokenCount": 347,
+          "totalTokenCount": 234,
           "promptTokensDetails": [
             {
               "modality": "TEXT",
               "tokenCount": 125
             }
           ],
-          "thoughtsTokenCount": 186
+          "thoughtsTokenCount": 73
         },
         "modelVersion": "gemini-2.5-pro",
-        "responseId": "hNH5aIqjLcjz7M8PsbmN8AI"
+        "responseId": "DQkJadesHOWzqtsP98mO8Ao"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 5.258761542s
+    duration: 2.444643917s
 - id: 1
   request:
     proto: HTTP/1.1
@@ -90,7 +90,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.29.0 gl-go/go1.25.1
+      - google-genai-sdk/1.33.0 gl-go/go1.25.0
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent
     method: POST
   response:
@@ -106,7 +106,7 @@ interactions:
             "content": {
               "parts": [
                 {
-                  "text": "The sum is 5 and the product is 6.\n"
+                  "text": "The sum is 5 and the product is 6. \n"
                 }
               ],
               "role": "model"
@@ -127,11 +127,11 @@ interactions:
           ]
         },
         "modelVersion": "gemini-2.5-pro",
-        "responseId": "h9H5aKLELY7gnsEP56C2iAs"
+        "responseId": "DwkJadePAt-kqtsP1JHw4Qo"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 3.176918083s
+    duration: 1.534345s

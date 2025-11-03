@@ -24,21 +24,21 @@ interactions:
     proto_minor: 0
     content_length: -1
     uncompressed: true
-    body: '{"model":"claude-3-7-sonnet-20250219","id":"msg_vrtx_01HMPWEJiA8uwFGoNxfXG78Z","type":"message","role":"assistant","content":[{"type":"text","text":"I''ll check the current weather in Florence, Italy for you."},{"type":"tool_use","id":"toolu_vrtx_017DkoRKzJJVLa8p4HV1RdJp","name":"weather","input":{"location":"Florence,Italy"}}],"stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":394,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":67}}'
+    body: '{"model":"claude-3-7-sonnet-20250219","id":"msg_vrtx_013DoXQqRt9hn5cxD1GPCcbj","type":"message","role":"assistant","content":[{"type":"text","text":"I''ll get the current weather information for Florence, Italy for you."},{"type":"tool_use","id":"toolu_vrtx_01AbaFbEuoSmuk9UyZaC4byG","name":"weather","input":{"location":"Florence,Italy"}}],"stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":394,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":68}}'
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 1.494068458s
+    duration: 1.495076667s
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 881
+    content_length: 892
     host: ""
-    body: '{"max_tokens":4000,"messages":[{"content":[{"text":"What''s the weather in Florence,Italy?","type":"text"}],"role":"user"},{"content":[{"text":"I''ll check the current weather in Florence, Italy for you.","type":"text"},{"id":"toolu_vrtx_017DkoRKzJJVLa8p4HV1RdJp","input":{"location":"Florence,Italy"},"name":"weather","type":"tool_use"}],"role":"assistant"},{"content":[{"tool_use_id":"toolu_vrtx_017DkoRKzJJVLa8p4HV1RdJp","content":[{"text":"40 C","type":"text"}],"type":"tool_result"}],"role":"user"}],"system":[{"text":"You are a helpful assistant","type":"text"}],"tool_choice":{"disable_parallel_tool_use":false,"type":"auto"},"tools":[{"input_schema":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location"}],"anthropic_version":"vertex-2023-10-16"}'
+    body: '{"max_tokens":4000,"messages":[{"content":[{"text":"What''s the weather in Florence,Italy?","type":"text"}],"role":"user"},{"content":[{"text":"I''ll get the current weather information for Florence, Italy for you.","type":"text"},{"id":"toolu_vrtx_01AbaFbEuoSmuk9UyZaC4byG","input":{"location":"Florence,Italy"},"name":"weather","type":"tool_use"}],"role":"assistant"},{"content":[{"tool_use_id":"toolu_vrtx_01AbaFbEuoSmuk9UyZaC4byG","content":[{"text":"40 C","type":"text"}],"type":"tool_result"}],"role":"user"}],"system":[{"text":"You are a helpful assistant","type":"text"}],"tool_choice":{"disable_parallel_tool_use":false,"type":"auto"},"tools":[{"input_schema":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location"}],"anthropic_version":"vertex-2023-10-16"}'
     headers:
       Accept:
       - application/json
@@ -54,10 +54,10 @@ interactions:
     proto_minor: 0
     content_length: -1
     uncompressed: true
-    body: '{"model":"claude-3-7-sonnet-20250219","id":"msg_vrtx_01BJEBEdTy82Hb4nNAn5b1GE","type":"message","role":"assistant","content":[{"type":"text","text":"It''s currently 40°C (104°F) in Florence, Italy. That''s very hot! Make sure to stay hydrated and try to avoid being outside during the hottest parts of the day if possible."}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":475,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":49}}'
+    body: '{"model":"claude-3-7-sonnet-20250219","id":"msg_vrtx_01MrnUMp85dMAcyhkjGeX2we","type":"message","role":"assistant","content":[{"type":"text","text":"The current temperature in Florence, Italy is 40°C (104°F), which is quite hot. If you''re planning to be outdoors, I recommend staying hydrated, wearing light clothing, and seeking shade when possible."}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":476,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":51}}'
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 1.508433666s
+    duration: 1.353360875s

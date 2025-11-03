@@ -14,7 +14,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.29.0 gl-go/go1.25.1
+      - google-genai-sdk/1.33.0 gl-go/go1.25.0
     url: https://us-east5-aiplatform.googleapis.com/v1beta1/projects/fantasy-playground-472418/locations/us-east5/publishers/google/models/gemini-2.5-flash:generateContent
     method: POST
   response:
@@ -34,11 +34,11 @@ interactions:
                   "functionCall": {
                     "name": "add",
                     "args": {
-                      "b": 3,
-                      "a": 2
+                      "a": 2,
+                      "b": 3
                     }
                   },
-                  "thoughtSignature": "CuACAePx/153kf8ikIzjnbSUf9jLxFZAf53a2GQYy4mUIqUl077OLhKwcyMd2YnG1/umJQZK8aqE6kdtgJG7sqpuDFZuFmEOqjgc1O3MxE4S+TaBZSa5wS/KAA05t4aGvS8TpkEttdy3u6wfIv6y8LM8A7LHn04qC9gswllmAiZ9iQn72RDWDgS7o2/ciprExjiDQMkU+m5yk3eRkXm1ovs9oNDNoDqlTTJnN0jtu2YgYtsxB/mwKBdA3MjSKwsiuIVc5fJj8970xQrfEmsA94QSGUQ9MNCUkB6kAUsFt3wQQ07X/Q3bYmfyud0OP/dB9HIM4xyVkayDrrVkbAOKD/1u8nKMGkPA5G/0+DaDVU4ZAqhCRGQAtHYRWYhwUZ4DICXJAqhBk9iTLIHvglDMaw4sKDZHqIlVRNnjvsx4nOoirR2S2Wpm3mKoEmCPnFGcQwRV9yJNY5/JwDquRAcwU9q1ug=="
+                  "thoughtSignature": "CqECAePx/16hu6jpQBsua/6D0znPjMbbAuwTIAxACow0BHlZjpuJ2bAGyr7Wo7paE6FNx84jcAd1AMLIJAWscUNukGCRiDORASgswHP16BSSB6jN5dLjTJ0UpUoxESXEW4U0iyrruAkortreKykTPMnW63wWjao8KQESbO/Q7g7WOQPGUzpmOCw9cvKt6I/DRZLjiJ1S8BmgEbc8ix2C4YBguza0iJ28V3ggewHiXumC3RxijchXLLkLx9Y5ww3XoJk1QaaWN3puEeWyVpEOQQJHa0pQVLYIp+IkQ0t0oe3jKDI05FBjn+h1lvbHoPuImyLtjUZFAMBqh76BWHQAYsfVUEzzSWplygLX0RP+NABj/9jDMK22/+DjBnBpEL1dv0lXvQ=="
                 },
                 {
                   "functionCall": {
@@ -52,13 +52,13 @@ interactions:
               ]
             },
             "finishReason": "STOP",
-            "avgLogprobs": -1.9749752044677735
+            "avgLogprobs": -0.99647712707519531
           }
         ],
         "usageMetadata": {
           "promptTokenCount": 60,
           "candidatesTokenCount": 10,
-          "totalTokenCount": 146,
+          "totalTokenCount": 140,
           "trafficType": "ON_DEMAND",
           "promptTokensDetails": [
             {
@@ -72,18 +72,18 @@ interactions:
               "tokenCount": 10
             }
           ],
-          "thoughtsTokenCount": 76
+          "thoughtsTokenCount": 70
         },
         "modelVersion": "gemini-2.5-flash",
-        "createTime": "2025-10-23T06:56:24.603477Z",
-        "responseId": "mNH5aNXqJMHDptQPtJigwQc"
+        "createTime": "2025-11-03T19:52:55.484773Z",
+        "responseId": "FwgJaaXLHe2iptQP__zTsAs"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 1.215592042s
+    duration: 1.145860833s
 - id: 1
   request:
     proto: HTTP/1.1
@@ -97,7 +97,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.29.0 gl-go/go1.25.1
+      - google-genai-sdk/1.33.0 gl-go/go1.25.0
     url: https://us-east5-aiplatform.googleapis.com/v1beta1/projects/fantasy-playground-472418/locations/us-east5/publishers/google/models/gemini-2.5-flash:generateContent
     method: POST
   response:
@@ -114,19 +114,18 @@ interactions:
               "role": "model",
               "parts": [
                 {
-                  "text": "2 + 3 = 5\n2 * 3 = 6",
-                  "thoughtSignature": "CsoBAePx/154N3gpceO1Pxh1IXX13o0HK5ftN5BUuyjfGfQi/778zwB+y0XPP47mlVhcC8YrYbdY9OCdsch6wLFdr8GW2Q/X0G7wvo5uCO+rxBCPgj0EJaQ36dnavIrM78MnwNT8JTFuNiifUYDO2Eek5//VNoFkZsbTfR0u6pHlX8odsl2zTqkihtwNkeun9UVCAkOE1J2royE0NUdFe5YQk6cMn/LboPV2NKVDWZxjvV6hlwV27nBoFqiH0r6zRT9AiKi55oTDlvwADA=="
+                  "text": "The sum of 2 and 3 is 5. The product of 2 and 3 is 6."
                 }
               ]
             },
             "finishReason": "STOP",
-            "avgLogprobs": -0.83015022277832029
+            "avgLogprobs": -0.047055284182230629
           }
         ],
         "usageMetadata": {
           "promptTokenCount": 76,
-          "candidatesTokenCount": 15,
-          "totalTokenCount": 136,
+          "candidatesTokenCount": 24,
+          "totalTokenCount": 100,
           "trafficType": "ON_DEMAND",
           "promptTokensDetails": [
             {
@@ -137,18 +136,17 @@ interactions:
           "candidatesTokensDetails": [
             {
               "modality": "TEXT",
-              "tokenCount": 15
+              "tokenCount": 24
             }
-          ],
-          "thoughtsTokenCount": 45
+          ]
         },
         "modelVersion": "gemini-2.5-flash",
-        "createTime": "2025-10-23T06:56:25.801186Z",
-        "responseId": "mdH5aKLzMMqZptQPrcWIuQM"
+        "createTime": "2025-11-03T19:52:56.654104Z",
+        "responseId": "GAgJaZj2J4jK5OMPiMqt0Qg"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 1.129055042s
+    duration: 714.085958ms

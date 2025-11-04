@@ -17,7 +17,7 @@ require (
 	go.yaml.in/yaml/v4 v4.0.0-rc.2
 	golang.org/x/oauth2 v0.32.0
 	google.golang.org/genai v0.0.0-20250923194548-a075d35ad44a
-	gopkg.in/dnaeon/go-vcr.v4 v4.0.6-0.20250923044825-7b4892dd3117
+	gopkg.in/dnaeon/go-vcr.v4 v4.0.6-0.20250926081054-3f654157e4a1
 )
 
 require (

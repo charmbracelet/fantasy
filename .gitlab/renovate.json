@@ -3,7 +3,9 @@
   "extends": [
     "config:recommended"
   ],
-  "platformAutomerge": false,
+  "platformAutomerge": true,
+  "automergeType": "pr",
+  "automergeStrategy": "auto-commit",
   "baseBranches": ["main"],
   "labels": ["dependencies", "renovate"],
   "assignees": ["@jesssullivan"],
@@ -65,6 +67,8 @@
       "matchUpdateTypes": ["digest"],
       "labels": ["golang", "digest-update", "auto-merge"],
       "automerge": true,
+      "automergeComment": "Auto-merging digest update after CI passes",
+      "requiredStatusChecks": ["go-test"],
       "commitMessagePrefix": "chore(deps):",
       "semanticCommitType": "chore",
       "semanticCommitScope": "deps"

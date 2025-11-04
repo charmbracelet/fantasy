@@ -7,7 +7,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.39.5
 	github.com/aws/smithy-go v1.23.1
 	github.com/charmbracelet/anthropic-sdk-go v0.0.0-20251024181547-21d6f3d9a904
-	github.com/charmbracelet/x/exp/slice v0.0.0-20251023181713-f594ac034d6b
+	github.com/charmbracelet/x/exp/slice v0.0.0-20251103210727-681bf553bc2e
 	github.com/charmbracelet/x/json v0.2.0
 	github.com/go-viper/mapstructure/v2 v2.4.0
 	github.com/google/uuid v1.6.0

@@ -11,7 +11,6 @@ var markerSymbol = "fantasy.error"
 
 // AIError is a custom error type for AI SDK related errors.
 type AIError struct {
-	Name    string
 	Message string
 	Cause   error
 	marker  string
@@ -28,9 +27,8 @@ func (e *AIError) Unwrap() error {
 }
 
 // NewAIError creates a new AI SDK Error.
-func NewAIError(name, message string, cause error) *AIError {
+func NewAIError(message string, cause error) *AIError {
 	return &AIError{
-		Name:    name,
 		Message: message,
 		Cause:   cause,
 		marker:  markerSymbol,
@@ -61,7 +59,7 @@ func NewAPICallError(message, url string, requestDump string, statusCode int, re
 	}
 
 	return &APICallError{
-		AIError:         NewAIError("AI_APICallError", message, cause),
+		AIError:         NewAIError(message, cause),
 		URL:             url,
 		RequestDump:     requestDump,
 		StatusCode:      statusCode,
@@ -80,7 +78,7 @@ type InvalidArgumentError struct {
 // NewInvalidArgumentError creates a new invalid argument error.
 func NewInvalidArgumentError(argument, message string, cause error) *InvalidArgumentError {
 	return &InvalidArgumentError{
-		AIError:  NewAIError("AI_InvalidArgumentError", message, cause),
+		AIError:  NewAIError(message, cause),
 		Argument: argument,
 	}
 }
@@ -94,7 +92,7 @@ type InvalidPromptError struct {
 // NewInvalidPromptError creates a new invalid prompt error.
 func NewInvalidPromptError(prompt any, message string, cause error) *InvalidPromptError {
 	return &InvalidPromptError{
-		AIError: NewAIError("AI_InvalidPromptError", fmt.Sprintf("Invalid prompt: %s", message), cause),
+		AIError: NewAIError(fmt.Sprintf("Invalid prompt: %s", message), cause),
 		Prompt:  prompt,
 	}
 }
@@ -112,7 +110,7 @@ func NewInvalidResponseDataError(data any, message string) *InvalidResponseDataE
 		message = fmt.Sprintf("Invalid response data: %s.", string(dataJSON))
 	}
 	return &InvalidResponseDataError{
-		AIError: NewAIError("AI_InvalidResponseDataError", message, nil),
+		AIError: NewAIError(message, nil),
 		Data:    data,
 	}
 }
@@ -129,7 +127,7 @@ func NewUnsupportedFunctionalityError(functionality, message string) *Unsupporte
 		message = fmt.Sprintf("'%s' functionality not supported.", functionality)
 	}
 	return &UnsupportedFunctionalityError{
-		AIError:       NewAIError("AI_UnsupportedFunctionalityError", message, nil),
+		AIError:       NewAIError(message, nil),
 		Functionality: functionality,
 	}
 }

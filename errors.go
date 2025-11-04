@@ -6,14 +6,10 @@ import (
 	"fmt"
 )
 
-// markerSymbol is used for identifying AI SDK Error instances.
-var markerSymbol = "fantasy.error"
-
 // AIError is a custom error type for AI SDK related errors.
 type AIError struct {
 	Message string
 	Cause   error
-	marker  string
 }
 
 // Error implements the error interface.
@@ -31,14 +27,13 @@ func NewAIError(message string, cause error) *AIError {
 	return &AIError{
 		Message: message,
 		Cause:   cause,
-		marker:  markerSymbol,
 	}
 }
 
 // IsAIError checks if the given error is an AI SDK Error.
 func IsAIError(err error) bool {
 	var sdkErr *AIError
-	return errors.As(err, &sdkErr) && sdkErr.marker == markerSymbol
+	return errors.As(err, &sdkErr)
 }
 
 // APICallError represents an error from an API call.

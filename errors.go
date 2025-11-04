@@ -133,11 +133,3 @@ func NewUnsupportedFunctionalityError(functionality, message string) *Unsupporte
 		Functionality: functionality,
 	}
 }
-
-// GetErrorMessage extracts a message from an error.
-func GetErrorMessage(err error) string {
-	if err == nil {
-		return "unknown error"
-	}
-	return err.Error()
-}

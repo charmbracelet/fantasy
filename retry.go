@@ -129,13 +129,13 @@ func retryWithExponentialBackoff[T any](ctx context.Context, fn RetryFn[T], opti
 		return zero, err // don't wrap the error when retries are disabled
 	}
 
-	errorMessage := GetErrorMessage(err)
+	errorMessage := err.Error()
 	newErrors := append(allErrors, err)
 	tryNumber := len(newErrors)
 
 	if tryNumber > options.MaxRetries {
 		return zero, NewRetryError(
-			fmt.Sprintf("Failed after %d attempts. Last error: %s", tryNumber, errorMessage),
+			fmt.Sprintf("Failed after %d attempts. Last error: %v", tryNumber, errorMessage),
 			RetryReasonMaxRetriesExceeded,
 			newErrors,
 		)
@@ -166,7 +166,7 @@ func retryWithExponentialBackoff[T any](ctx context.Context, fn RetryFn[T], opti
 	}
 
 	return zero, NewRetryError(
-		fmt.Sprintf("Failed after %d attempts with non-retryable error: '%s'", tryNumber, errorMessage),
+		fmt.Sprintf("Failed after %d attempts with non-retryable error: %v", tryNumber, errorMessage),
 		RetryReasonErrorNotRetryable,
 		newErrors,
 	)

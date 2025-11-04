@@ -5,7 +5,7 @@ go 1.24.5
 require (
 	cloud.google.com/go/auth v0.17.0
 	github.com/aws/aws-sdk-go-v2 v1.39.5
-	github.com/aws/smithy-go v1.23.1
+	github.com/aws/smithy-go v1.23.2
 	github.com/charmbracelet/anthropic-sdk-go v0.0.0-20251024181547-21d6f3d9a904
 	github.com/charmbracelet/x/exp/slice v0.0.0-20251103210727-681bf553bc2e
 	github.com/charmbracelet/x/json v0.2.0

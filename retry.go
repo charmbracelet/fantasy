@@ -34,7 +34,7 @@ type RetryError struct {
 // NewRetryError creates a new retry error.
 func NewRetryError(message string, reason RetryReason, errors []error) *RetryError {
 	return &RetryError{
-		AIError: NewAIError("AI_RetryError", message, nil),
+		AIError: NewAIError(message, nil),
 		Reason:  reason,
 		Errors:  errors,
 	}

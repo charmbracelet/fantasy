@@ -180,7 +180,7 @@ func languageModelStreamExtra(chunk openaisdk.ChatCompletionChunk, yield func(fa
 	if err != nil {
 		yield(fantasy.StreamPart{
 			Type:  fantasy.StreamPartTypeError,
-			Error: fantasy.NewAIError("Unexpected", "error unmarshalling delta", err),
+			Error: fantasy.NewAIError("error unmarshalling delta", err),
 		})
 		return ctx, false
 	}

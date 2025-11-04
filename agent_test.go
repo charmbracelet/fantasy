@@ -522,13 +522,38 @@ func TestAgent_Generate_EmptyPrompt(t *testing.T) {
 	model := &mockLanguageModel{}
 	agent := NewAgent(model)
 
-	result, err := agent.Generate(context.Background(), AgentCall{
-		Prompt: "", // Empty prompt should cause error
+	t.Run("fails without historical messages", func(t *testing.T) {
+		result, err := agent.Generate(context.Background(), AgentCall{
+			Prompt: "",
+		})
+		require.Error(t, err)
+		require.Nil(t, result)
+		require.Contains(t, err.Error(), "invalid argument: prompt can't be empty")
 	})
 
-	require.Error(t, err)
-	require.Nil(t, result)
-	require.Contains(t, err.Error(), "invalid argument: prompt can't be empty")
+	t.Run("fails when there are files even with historical messages", func(t *testing.T) {
+		result, err := agent.Generate(context.Background(), AgentCall{
+			Prompt: "",
+			Messages: []Message{
+				{Role: MessageRoleUser, Content: []MessagePart{TextPart{Text: "hello"}}},
+			},
+			Files: []FilePart{{Filename: "test.txt", Data: []byte("test"), MediaType: "text/plain"}},
+		})
+		require.Error(t, err)
+		require.Nil(t, result)
+		require.Contains(t, err.Error(), "invalid argument: prompt can't be empty")
+	})
+
+	t.Run("succeeds if there are historical messages and no files", func(t *testing.T) {
+		result, err := agent.Generate(context.Background(), AgentCall{
+			Prompt: "",
+			Messages: []Message{
+				{Role: MessageRoleUser, Content: []MessagePart{TextPart{Text: "hello"}}},
+			},
+		})
+		require.NoError(t, err)
+		require.NotNil(t, result)
+	})
 }
 
 // Test with system prompt

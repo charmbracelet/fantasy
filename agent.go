@@ -970,7 +970,8 @@ func (a *agent) validateToolCall(toolCall ToolCallContent, availableTools []Agen
 }
 
 func (a *agent) createPrompt(system, prompt string, messages []Message, files ...FilePart) (Prompt, error) {
-	if prompt == "" {
+	// Prompt can't be empty if either a) there are no historical messages or b) there are files to handle.
+	if (len(messages) == 0 || len(files) > 0) && prompt == "" {
 		return nil, &Error{Title: "invalid argument", Message: "prompt can't be empty"}
 	}
 
@@ -980,7 +981,9 @@ func (a *agent) createPrompt(system, prompt string, messages []Message, files ..
 		preparedPrompt = append(preparedPrompt, NewSystemMessage(system))
 	}
 	preparedPrompt = append(preparedPrompt, messages...)
-	preparedPrompt = append(preparedPrompt, NewUserMessage(prompt, files...))
+	if prompt != "" {
+		preparedPrompt = append(preparedPrompt, NewUserMessage(prompt, files...))
+	}
 	return preparedPrompt, nil
 }
 

@@ -202,7 +202,7 @@ func (a languageModel) prepareParams(call fantasy.Call) (*anthropic.MessageNewPa
 	if v, ok := call.ProviderOptions[Name]; ok {
 		providerOptions, ok = v.(*ProviderOptions)
 		if !ok {
-			return nil, nil, fantasy.NewInvalidArgumentError("providerOptions", "anthropic provider options should be *anthropic.ProviderOptions", nil)
+			return nil, nil, &fantasy.Error{Title: "invalid argument", Message: "anthropic provider options should be *anthropic.ProviderOptions"}
 		}
 	}
 	sendReasoning := true
@@ -251,7 +251,7 @@ func (a languageModel) prepareParams(call fantasy.Call) (*anthropic.MessageNewPa
 	}
 	if isThinking {
 		if thinkingBudget == 0 {
-			return nil, nil, fantasy.NewUnsupportedFunctionalityError("thinking requires budget", "")
+			return nil, nil, &fantasy.Error{Title: "no budget", Message: "thinking requires budget"}
 		}
 		params.Thinking = anthropic.ThinkingConfigParamOfEnabled(thinkingBudget)
 		if call.Temperature != nil {
@@ -700,16 +700,16 @@ func (a languageModel) handleError(err error) error {
 			v := h[len(h)-1]
 			headers[strings.ToLower(k)] = v
 		}
-		return fantasy.NewAPICallError(
-			apiErr.Error(),
-			apiErr.Request.URL.String(),
-			string(requestDump),
-			apiErr.StatusCode,
-			headers,
-			string(responseDump),
-			apiErr,
-			false,
-		)
+		return &fantasy.ProviderError{
+			Title:           "provider request failed",
+			Message:         apiErr.Error(),
+			Cause:           apiErr,
+			URL:             apiErr.Request.URL.String(),
+			StatusCode:      apiErr.StatusCode,
+			RequestBody:     requestDump,
+			ResponseHeaders: headers,
+			ResponseBody:    responseDump,
+		}
 	}
 	return err
 }

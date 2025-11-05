@@ -659,16 +659,16 @@ func (o responsesLanguageModel) handleError(err error) error {
 			v := h[len(h)-1]
 			headers[strings.ToLower(k)] = v
 		}
-		return fantasy.NewAPICallError(
-			apiErr.Message,
-			apiErr.Request.URL.String(),
-			string(requestDump),
-			apiErr.StatusCode,
-			headers,
-			string(responseDump),
-			apiErr,
-			false,
-		)
+		return &fantasy.ProviderError{
+			Title:           "provider request failed",
+			Message:         apiErr.Message,
+			Cause:           apiErr,
+			URL:             apiErr.Request.URL.String(),
+			StatusCode:      apiErr.StatusCode,
+			RequestBody:     requestDump,
+			ResponseHeaders: headers,
+			ResponseBody:    responseDump,
+		}
 	}
 	return err
 }

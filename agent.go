@@ -971,7 +971,7 @@ func (a *agent) validateToolCall(toolCall ToolCallContent, availableTools []Agen
 
 func (a *agent) createPrompt(system, prompt string, messages []Message, files ...FilePart) (Prompt, error) {
 	if prompt == "" {
-		return nil, NewInvalidPromptError(prompt, "Prompt can't be empty", nil)
+		return nil, &Error{Title: "invalid argument", Message: "prompt can't be empty"}
 	}
 
 	var preparedPrompt Prompt

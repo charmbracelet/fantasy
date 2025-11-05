@@ -233,16 +233,16 @@ func (o languageModel) handleError(err error) error {
 			v := h[len(h)-1]
 			headers[strings.ToLower(k)] = v
 		}
-		return fantasy.NewAPICallError(
-			apiErr.Message,
-			apiErr.Request.URL.String(),
-			string(requestDump),
-			apiErr.StatusCode,
-			headers,
-			string(responseDump),
-			apiErr,
-			false,
-		)
+		return &fantasy.ProviderError{
+			Title:           "provider request failed",
+			Message:         apiErr.Message,
+			Cause:           apiErr,
+			URL:             apiErr.Request.URL.String(),
+			StatusCode:      apiErr.StatusCode,
+			RequestBody:     requestDump,
+			ResponseHeaders: headers,
+			ResponseBody:    responseDump,
+		}
 	}
 	return err
 }
@@ -422,13 +422,13 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 							// Does not exist
 							var err error
 							if toolCallDelta.Type != "function" {
-								err = fantasy.NewInvalidResponseDataError(toolCallDelta, "Expected 'function' type.")
+								err = &fantasy.Error{Title: "invalid provider response", Message: "expected 'function' type."}
 							}
 							if toolCallDelta.ID == "" {
-								err = fantasy.NewInvalidResponseDataError(toolCallDelta, "Expected 'id' to be a string.")
+								err = &fantasy.Error{Title: "invalid provider response", Message: "expected 'id' to be a string."}
 							}
 							if toolCallDelta.Function.Name == "" {
-								err = fantasy.NewInvalidResponseDataError(toolCallDelta, "Expected 'function.name' to be a string.")
+								err = &fantasy.Error{Title: "invalid provider response", Message: "expected 'function.name' to be a string."}
 							}
 							if err != nil {
 								yield(fantasy.StreamPart{

@@ -3,7 +3,6 @@ package fantasy
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strconv"
 	"time"
 )
@@ -14,40 +13,14 @@ type RetryFn[T any] func() (T, error)
 // RetryFunction is a function that retries another function.
 type RetryFunction[T any] func(ctx context.Context, fn RetryFn[T]) (T, error)
 
-// RetryReason represents the reason why a retry operation failed.
-type RetryReason string
-
-const (
-	// RetryReasonMaxRetriesExceeded indicates the maximum number of retries was exceeded.
-	RetryReasonMaxRetriesExceeded RetryReason = "maxRetriesExceeded"
-	// RetryReasonErrorNotRetryable indicates the error is not retryable.
-	RetryReasonErrorNotRetryable RetryReason = "errorNotRetryable"
-)
-
-// RetryError represents an error that occurred during retry operations.
-type RetryError struct {
-	*AIError
-	Reason RetryReason
-	Errors []error
-}
-
-// NewRetryError creates a new retry error.
-func NewRetryError(message string, reason RetryReason, errors []error) *RetryError {
-	return &RetryError{
-		AIError: NewAIError(message, nil),
-		Reason:  reason,
-		Errors:  errors,
-	}
-}
-
 // getRetryDelayInMs calculates the retry delay based on error headers and exponential backoff.
 func getRetryDelayInMs(err error, exponentialBackoffDelay time.Duration) time.Duration {
-	var apiErr *APICallError
-	if !errors.As(err, &apiErr) || apiErr.ResponseHeaders == nil {
+	var providerErr *ProviderError
+	if !errors.As(err, &providerErr) || providerErr.ResponseHeaders == nil {
 		return exponentialBackoffDelay
 	}
 
-	headers := apiErr.ResponseHeaders
+	headers := providerErr.ResponseHeaders
 	var ms time.Duration
 
 	// retry-ms is more precise than retry-after and used by e.g. OpenAI
@@ -101,7 +74,7 @@ type RetryOptions struct {
 }
 
 // OnRetryCallback defines a function that is called when a retry occurs.
-type OnRetryCallback = func(err *APICallError, delay time.Duration)
+type OnRetryCallback = func(err *ProviderError, delay time.Duration)
 
 // DefaultRetryOptions returns the default retry options.
 // DefaultRetryOptions returns the default retry options.
@@ -129,23 +102,18 @@ func retryWithExponentialBackoff[T any](ctx context.Context, fn RetryFn[T], opti
 		return zero, err // don't wrap the error when retries are disabled
 	}
 
-	errorMessage := err.Error()
 	newErrors := append(allErrors, err)
 	tryNumber := len(newErrors)
 
 	if tryNumber > options.MaxRetries {
-		return zero, NewRetryError(
-			fmt.Sprintf("Failed after %d attempts. Last error: %v", tryNumber, errorMessage),
-			RetryReasonMaxRetriesExceeded,
-			newErrors,
-		)
+		return zero, &RetryError{newErrors}
 	}
 
-	var apiErr *APICallError
-	if errors.As(err, &apiErr) && apiErr.IsRetryable && tryNumber <= options.MaxRetries {
+	var providerErr *ProviderError
+	if errors.As(err, &providerErr) && providerErr.IsRetryable() && tryNumber <= options.MaxRetries {
 		delay := getRetryDelayInMs(err, options.InitialDelayIn)
 		if options.OnRetry != nil {
-			options.OnRetry(apiErr, delay)
+			options.OnRetry(providerErr, delay)
 		}
 
 		select {
@@ -165,9 +133,5 @@ func retryWithExponentialBackoff[T any](ctx context.Context, fn RetryFn[T], opti
 		return zero, err // don't wrap the error when a non-retryable error occurs on the first try
 	}
 
-	return zero, NewRetryError(
-		fmt.Sprintf("Failed after %d attempts with non-retryable error: %v", tryNumber, errorMessage),
-		RetryReasonErrorNotRetryable,
-		newErrors,
-	)
+	return zero, &RetryError{newErrors}
 }

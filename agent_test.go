@@ -528,7 +528,7 @@ func TestAgent_Generate_EmptyPrompt(t *testing.T) {
 
 	require.Error(t, err)
 	require.Nil(t, result)
-	require.Contains(t, err.Error(), "Prompt can't be empty")
+	require.Contains(t, err.Error(), "invalid argument: prompt can't be empty")
 }
 
 // Test with system prompt

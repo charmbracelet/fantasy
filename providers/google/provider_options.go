@@ -9,7 +9,8 @@ import (
 
 // Global type identifiers for Google-specific provider data.
 const (
-	TypeProviderOptions = Name + ".options"
+	TypeProviderOptions   = Name + ".options"
+	TypeReasoningMetadata = Name + ".reasoning_metadata"
 )
 
 // ThinkingConfig represents thinking configuration for the Google provider.
@@ -25,6 +26,34 @@ type ReasoningMetadata struct {
 
 // Options implements the ProviderOptionsData interface for ReasoningMetadata.
 func (m *ReasoningMetadata) Options() {}
+
+// MarshalJSON implements custom JSON marshaling with type info for ReasoningMetadata.
+func (m ReasoningMetadata) MarshalJSON() ([]byte, error) {
+	type plain ReasoningMetadata
+	raw, err := json.Marshal(plain(m))
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(struct {
+		Type string          `json:"type"`
+		Data json.RawMessage `json:"data"`
+	}{
+		Type: TypeReasoningMetadata,
+		Data: raw,
+	})
+}
+
+// UnmarshalJSON implements custom JSON unmarshaling with type info for ReasoningMetadata.
+func (m *ReasoningMetadata) UnmarshalJSON(data []byte) error {
+	type plain ReasoningMetadata
+	var rm plain
+	err := json.Unmarshal(data, &rm)
+	if err != nil {
+		return err
+	}
+	*m = ReasoningMetadata(rm)
+	return nil
+}
 
 // SafetySetting represents safety settings for the Google provider.
 type SafetySetting struct {
@@ -109,6 +138,13 @@ func ParseOptions(data map[string]any) (*ProviderOptions, error) {
 func init() {
 	fantasy.RegisterProviderType(TypeProviderOptions, func(data []byte) (fantasy.ProviderOptionsData, error) {
 		var v ProviderOptions
+		if err := json.Unmarshal(data, &v); err != nil {
+			return nil, err
+		}
+		return &v, nil
+	})
+	fantasy.RegisterProviderType(TypeReasoningMetadata, func(data []byte) (fantasy.ProviderOptionsData, error) {
+		var v ReasoningMetadata
 		if err := json.Unmarshal(data, &v); err != nil {
 			return nil, err
 		}

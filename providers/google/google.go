@@ -514,7 +514,7 @@ func (g *languageModel) Generate(ctx context.Context, call fantasy.Call) (*fanta
 
 	response, err := chat.SendMessage(ctx, depointerSlice(lastMessage.Parts)...)
 	if err != nil {
-		return nil, err
+		return nil, toProviderErr(err)
 	}
 
 	return g.mapResponse(response, warnings)
@@ -571,7 +571,7 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 			if err != nil {
 				yield(fantasy.StreamPart{
 					Type:  fantasy.StreamPartTypeError,
-					Error: err,
+					Error: toProviderErr(err),
 				})
 				return
 			}

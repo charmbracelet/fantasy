@@ -122,6 +122,8 @@ func WithHTTPClient(client option.HTTPClient) Option {
 
 func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.LanguageModel, error) {
 	clientOptions := make([]option.RequestOption, 0, 5+len(a.options.headers))
+	clientOptions = append(clientOptions, option.WithMaxRetries(0))
+
 	if a.options.apiKey != "" && !a.options.useBedrock {
 		clientOptions = append(clientOptions, option.WithAPIKey(a.options.apiKey))
 	}

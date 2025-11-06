@@ -134,6 +134,7 @@ func WithUseResponsesAPI() Option {
 // LanguageModel implements fantasy.Provider.
 func (o *provider) LanguageModel(_ context.Context, modelID string) (fantasy.LanguageModel, error) {
 	openaiClientOptions := make([]option.RequestOption, 0, 5+len(o.options.headers)+len(o.options.sdkOptions))
+	openaiClientOptions = append(openaiClientOptions, option.WithMaxRetries(0))
 
 	if o.options.apiKey != "" {
 		openaiClientOptions = append(openaiClientOptions, option.WithAPIKey(o.options.apiKey))

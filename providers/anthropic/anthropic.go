@@ -50,7 +50,7 @@ type provider struct {
 type Option = func(*options)
 
 // New creates a new Anthropic provider with the given options.
-func New(opts ...Option) fantasy.Provider {
+func New(opts ...Option) (fantasy.Provider, error) {
 	providerOptions := options{
 		headers: map[string]string{},
 	}
@@ -60,7 +60,7 @@ func New(opts ...Option) fantasy.Provider {
 
 	providerOptions.baseURL = cmp.Or(providerOptions.baseURL, DefaultURL)
 	providerOptions.name = cmp.Or(providerOptions.name, Name)
-	return &provider{options: providerOptions}
+	return &provider{options: providerOptions}, nil
 }
 
 // WithBaseURL sets the base URL for the Anthropic provider.
@@ -120,7 +120,7 @@ func WithHTTPClient(client option.HTTPClient) Option {
 	}
 }
 
-func (a *provider) LanguageModel(modelID string) (fantasy.LanguageModel, error) {
+func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.LanguageModel, error) {
 	clientOptions := make([]option.RequestOption, 0, 5+len(a.options.headers))
 	if a.options.apiKey != "" && !a.options.useBedrock {
 		clientOptions = append(clientOptions, option.WithAPIKey(a.options.apiKey))
@@ -140,7 +140,7 @@ func (a *provider) LanguageModel(modelID string) (fantasy.LanguageModel, error) 
 			credentials = &google.Credentials{TokenSource: &googleDummyTokenSource{}}
 		} else {
 			var err error
-			credentials, err = google.FindDefaultCredentials(context.TODO())
+			credentials, err = google.FindDefaultCredentials(ctx)
 			if err != nil {
 				return nil, err
 			}
@@ -149,7 +149,7 @@ func (a *provider) LanguageModel(modelID string) (fantasy.LanguageModel, error) 
 		clientOptions = append(
 			clientOptions,
 			vertex.WithCredentials(
-				context.TODO(),
+				ctx,
 				a.options.vertexLocation,
 				a.options.vertexProject,
 				credentials,
@@ -157,6 +157,8 @@ func (a *provider) LanguageModel(modelID string) (fantasy.LanguageModel, error) 
 		)
 	}
 	if a.options.useBedrock {
+		modelID = bedrockPrefixModelWithRegion(modelID)
+
 		if a.options.skipAuth || a.options.apiKey != "" {
 			clientOptions = append(
 				clientOptions,
@@ -165,7 +167,7 @@ func (a *provider) LanguageModel(modelID string) (fantasy.LanguageModel, error) 
 		} else {
 			clientOptions = append(
 				clientOptions,
-				bedrock.WithLoadDefaultConfig(context.TODO()),
+				bedrock.WithLoadDefaultConfig(ctx),
 			)
 		}
 	}

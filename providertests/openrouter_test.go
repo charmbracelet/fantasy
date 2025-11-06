@@ -115,11 +115,14 @@ func testOpenrouterThinking(t *testing.T, result *fantasy.AgentResult) {
 }
 
 func openrouterBuilder(model string) builderFunc {
-	return func(r *recorder.Recorder) (fantasy.LanguageModel, error) {
-		provider := openrouter.New(
+	return func(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
+		provider, err := openrouter.New(
 			openrouter.WithAPIKey(os.Getenv("FANTASY_OPENROUTER_API_KEY")),
 			openrouter.WithHTTPClient(&http.Client{Transport: r}),
 		)
-		return provider.LanguageModel(model)
+		if err != nil {
+			return nil, err
+		}
+		return provider.LanguageModel(t.Context(), model)
 	}
 }

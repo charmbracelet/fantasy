@@ -262,6 +262,9 @@ func DefaultStreamUsageFunc(chunk openai.ChatCompletionChunk, _ map[string]any, 
 
 // DefaultStreamProviderMetadataFunc is the default implementation for handling stream provider metadata.
 func DefaultStreamProviderMetadataFunc(choice openai.ChatCompletionChoice, metadata fantasy.ProviderMetadata) fantasy.ProviderMetadata {
+	if metadata == nil {
+		metadata = fantasy.ProviderMetadata{}
+	}
 	streamProviderMetadata, ok := metadata[Name]
 	if !ok {
 		streamProviderMetadata = &ProviderMetadata{}

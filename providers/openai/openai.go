@@ -3,6 +3,7 @@ package openai
 
 import (
 	"cmp"
+	"context"
 	"maps"
 
 	"charm.land/fantasy"
@@ -38,7 +39,7 @@ type options struct {
 type Option = func(*options)
 
 // New creates a new OpenAI provider with the given options.
-func New(opts ...Option) fantasy.Provider {
+func New(opts ...Option) (fantasy.Provider, error) {
 	providerOptions := options{
 		headers:              map[string]string{},
 		languageModelOptions: make([]LanguageModelOption, 0),
@@ -57,7 +58,7 @@ func New(opts ...Option) fantasy.Provider {
 		providerOptions.headers["OpenAi-Project"] = providerOptions.project
 	}
 
-	return &provider{options: providerOptions}
+	return &provider{options: providerOptions}, nil
 }
 
 // WithBaseURL sets the base URL for the OpenAI provider.
@@ -131,7 +132,7 @@ func WithUseResponsesAPI() Option {
 }
 
 // LanguageModel implements fantasy.Provider.
-func (o *provider) LanguageModel(modelID string) (fantasy.LanguageModel, error) {
+func (o *provider) LanguageModel(_ context.Context, modelID string) (fantasy.LanguageModel, error) {
 	openaiClientOptions := make([]option.RequestOption, 0, 5+len(o.options.headers)+len(o.options.sdkOptions))
 
 	if o.options.apiKey != "" {

@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"maps"
 	"slices"
-	"sync"
 )
 
 // StepResult represents the result of a single step in an agent execution.
@@ -619,126 +618,99 @@ func (a *agent) executeTools(ctx context.Context, allTools []AgentTool, toolCall
 		toolMap[tool.Info().Name] = tool
 	}
 
-	// Execute all tool calls in parallel
-	results := make([]ToolResultContent, len(toolCalls))
-	executeErrors := make([]error, len(toolCalls))
+	// Execute all tool calls sequentially in order
+	results := make([]ToolResultContent, 0, len(toolCalls))
 
-	var wg sync.WaitGroup
-
-	for i, toolCall := range toolCalls {
-		wg.Add(1)
-		go func(index int, call ToolCallContent) {
-			defer wg.Done()
-
-			// Skip invalid tool calls - create error result
-			if call.Invalid {
-				results[index] = ToolResultContent{
-					ToolCallID: call.ToolCallID,
-					ToolName:   call.ToolName,
-					Result: ToolResultOutputContentError{
-						Error: call.ValidationError,
-					},
-					ProviderExecuted: false,
-				}
-				if toolResultCallback != nil {
-					err := toolResultCallback(results[index])
-					if err != nil {
-						executeErrors[index] = err
-					}
-				}
-
-				return
+	for _, toolCall := range toolCalls {
+		// Skip invalid tool calls - create error result
+		if toolCall.Invalid {
+			result := ToolResultContent{
+				ToolCallID: toolCall.ToolCallID,
+				ToolName:   toolCall.ToolName,
+				Result: ToolResultOutputContentError{
+					Error: toolCall.ValidationError,
+				},
+				ProviderExecuted: false,
 			}
-
-			tool, exists := toolMap[call.ToolName]
-			if !exists {
-				results[index] = ToolResultContent{
-					ToolCallID: call.ToolCallID,
-					ToolName:   call.ToolName,
-					Result: ToolResultOutputContentError{
-						Error: errors.New("Error: Tool not found: " + call.ToolName),
-					},
-					ProviderExecuted: false,
-				}
-
-				if toolResultCallback != nil {
-					err := toolResultCallback(results[index])
-					if err != nil {
-						executeErrors[index] = err
-					}
-				}
-				return
-			}
-
-			// Execute the tool
-			result, err := tool.Run(ctx, ToolCall{
-				ID:    call.ToolCallID,
-				Name:  call.ToolName,
-				Input: call.Input,
-			})
-			if err != nil {
-				results[index] = ToolResultContent{
-					ToolCallID: call.ToolCallID,
-					ToolName:   call.ToolName,
-					Result: ToolResultOutputContentError{
-						Error: err,
-					},
-					ClientMetadata:   result.Metadata,
-					ProviderExecuted: false,
-				}
-				if toolResultCallback != nil {
-					cbErr := toolResultCallback(results[index])
-					if cbErr != nil {
-						executeErrors[index] = cbErr
-					}
-				}
-				executeErrors[index] = err
-				return
-			}
-
-			if result.IsError {
-				results[index] = ToolResultContent{
-					ToolCallID: call.ToolCallID,
-					ToolName:   call.ToolName,
-					Result: ToolResultOutputContentError{
-						Error: errors.New(result.Content),
-					},
-					ClientMetadata:   result.Metadata,
-					ProviderExecuted: false,
-				}
-
-				if toolResultCallback != nil {
-					err := toolResultCallback(results[index])
-					if err != nil {
-						executeErrors[index] = err
-					}
-				}
-			} else {
-				results[index] = ToolResultContent{
-					ToolCallID: call.ToolCallID,
-					ToolName:   toolCall.ToolName,
-					Result: ToolResultOutputContentText{
-						Text: result.Content,
-					},
-					ClientMetadata:   result.Metadata,
-					ProviderExecuted: false,
-				}
-				if toolResultCallback != nil {
-					err := toolResultCallback(results[index])
-					if err != nil {
-						executeErrors[index] = err
-					}
+			results = append(results, result)
+			if toolResultCallback != nil {
+				if err := toolResultCallback(result); err != nil {
+					return nil, err
 				}
 			}
-		}(i, toolCall)
-	}
+			continue
+		}
 
-	// Wait for all tool executions to complete
-	wg.Wait()
+		tool, exists := toolMap[toolCall.ToolName]
+		if !exists {
+			result := ToolResultContent{
+				ToolCallID: toolCall.ToolCallID,
+				ToolName:   toolCall.ToolName,
+				Result: ToolResultOutputContentError{
+					Error: errors.New("Error: Tool not found: " + toolCall.ToolName),
+				},
+				ProviderExecuted: false,
+			}
+			results = append(results, result)
+			if toolResultCallback != nil {
+				if err := toolResultCallback(result); err != nil {
+					return nil, err
+				}
+			}
+			continue
+		}
 
-	for _, err := range executeErrors {
+		// Execute the tool
+		toolResult, err := tool.Run(ctx, ToolCall{
+			ID:    toolCall.ToolCallID,
+			Name:  toolCall.ToolName,
+			Input: toolCall.Input,
+		})
 		if err != nil {
+			result := ToolResultContent{
+				ToolCallID: toolCall.ToolCallID,
+				ToolName:   toolCall.ToolName,
+				Result: ToolResultOutputContentError{
+					Error: err,
+				},
+				ClientMetadata:   toolResult.Metadata,
+				ProviderExecuted: false,
+			}
+			if toolResultCallback != nil {
+				if cbErr := toolResultCallback(result); cbErr != nil {
+					return nil, cbErr
+				}
+			}
 			return nil, err
+		}
+
+		var result ToolResultContent
+		if toolResult.IsError {
+			result = ToolResultContent{
+				ToolCallID: toolCall.ToolCallID,
+				ToolName:   toolCall.ToolName,
+				Result: ToolResultOutputContentError{
+					Error: errors.New(toolResult.Content),
+				},
+				ClientMetadata:   toolResult.Metadata,
+				ProviderExecuted: false,
+			}
+		} else {
+			result = ToolResultContent{
+				ToolCallID: toolCall.ToolCallID,
+				ToolName:   toolCall.ToolName,
+				Result: ToolResultOutputContentText{
+					Text: toolResult.Content,
+				},
+				ClientMetadata:   toolResult.Metadata,
+				ProviderExecuted: false,
+			}
+		}
+		results = append(results, result)
+		if toolResultCallback != nil {
+			if err := toolResultCallback(result); err != nil {
+				return nil, err
+			}
 		}
 	}
 

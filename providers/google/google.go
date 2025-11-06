@@ -13,9 +13,9 @@ import (
 	"charm.land/fantasy"
 	"charm.land/fantasy/providers/anthropic"
 	"cloud.google.com/go/auth"
-	"github.com/charmbracelet/go-genai"
 	"github.com/charmbracelet/x/exp/slice"
 	"github.com/google/uuid"
+	"google.golang.org/genai"
 )
 
 // Name is the name of the Google provider.
@@ -25,25 +25,32 @@ type provider struct {
 	options options
 }
 
+// ToolCallIDFunc defines a function that generates a tool call ID.
+type ToolCallIDFunc = func() string
+
 type options struct {
-	apiKey   string
-	name     string
-	baseURL  string
-	headers  map[string]string
-	client   *http.Client
-	backend  genai.Backend
-	project  string
-	location string
-	skipAuth bool
+	apiKey         string
+	name           string
+	baseURL        string
+	headers        map[string]string
+	client         *http.Client
+	backend        genai.Backend
+	project        string
+	location       string
+	skipAuth       bool
+	toolCallIDFunc ToolCallIDFunc
 }
 
 // Option defines a function that configures Google provider options.
 type Option = func(*options)
 
 // New creates a new Google provider with the given options.
-func New(opts ...Option) fantasy.Provider {
+func New(opts ...Option) (fantasy.Provider, error) {
 	options := options{
 		headers: map[string]string{},
+		toolCallIDFunc: func() string {
+			return uuid.NewString()
+		},
 	}
 	for _, o := range opts {
 		o(&options)
@@ -53,7 +60,7 @@ func New(opts ...Option) fantasy.Provider {
 
 	return &provider{
 		options: options,
-	}
+	}, nil
 }
 
 // WithBaseURL sets the base URL for the Google provider.
@@ -114,6 +121,13 @@ func WithHTTPClient(client *http.Client) Option {
 	}
 }
 
+// WithToolCallIDFunc sets the function that generates a tool call ID.
+func WithToolCallIDFunc(f ToolCallIDFunc) Option {
+	return func(o *options) {
+		o.toolCallIDFunc = f
+	}
+}
+
 func (*provider) Name() string {
 	return Name
 }
@@ -126,13 +140,17 @@ type languageModel struct {
 }
 
 // LanguageModel implements fantasy.Provider.
-func (a *provider) LanguageModel(modelID string) (fantasy.LanguageModel, error) {
+func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.LanguageModel, error) {
 	if strings.Contains(modelID, "anthropic") || strings.Contains(modelID, "claude") {
-		return anthropic.New(
+		p, err := anthropic.New(
 			anthropic.WithVertex(a.options.project, a.options.location),
 			anthropic.WithHTTPClient(a.options.client),
 			anthropic.WithSkipAuth(a.options.skipAuth),
-		).LanguageModel(modelID)
+		)
+		if err != nil {
+			return nil, err
+		}
+		return p.LanguageModel(ctx, modelID)
 	}
 
 	cc := &genai.ClientConfig{
@@ -144,6 +162,10 @@ func (a *provider) LanguageModel(modelID string) (fantasy.LanguageModel, error) 
 	}
 	if a.options.skipAuth {
 		cc.Credentials = &auth.Credentials{TokenProvider: dummyTokenProvider{}}
+	} else if cc.Backend == genai.BackendVertexAI {
+		if err := cc.UseDefaultCredentials(); err != nil {
+			return nil, err
+		}
 	}
 
 	if a.options.baseURL != "" || len(a.options.headers) > 0 {
@@ -156,7 +178,7 @@ func (a *provider) LanguageModel(modelID string) (fantasy.LanguageModel, error) 
 			Headers: headers,
 		}
 	}
-	client, err := genai.NewClient(context.Background(), cc)
+	client, err := genai.NewClient(ctx, cc)
 	if err != nil {
 		return nil, err
 	}
@@ -346,6 +368,9 @@ func toGooglePrompt(prompt fantasy.Prompt) (*genai.Content, []*genai.Content, []
 			}
 		case fantasy.MessageRoleAssistant:
 			var parts []*genai.Part
+			// INFO: (kujtim) this is kind of a hacky way to include thinking for google
+			// weirdly thinking needs to be included in a function call
+			var signature []byte
 			for _, part := range msg.Content {
 				switch part.GetType() {
 				case fantasy.ContentTypeText:
@@ -373,7 +398,27 @@ func toGooglePrompt(prompt fantasy.Prompt) (*genai.Content, []*genai.Content, []
 							Name: toolCall.ToolName,
 							Args: result,
 						},
+						ThoughtSignature: signature,
 					})
+					// reset
+					signature = nil
+				case fantasy.ContentTypeReasoning:
+					reasoning, ok := fantasy.AsMessagePart[fantasy.ReasoningPart](part)
+					if !ok {
+						continue
+					}
+					metadata, ok := reasoning.ProviderOptions[Name]
+					if !ok {
+						continue
+					}
+					reasoningMetadata, ok := metadata.(*ReasoningMetadata)
+					if !ok {
+						continue
+					}
+					if !ok || reasoningMetadata.Signature == "" {
+						continue
+					}
+					signature = []byte(reasoningMetadata.Signature)
 				}
 			}
 			if len(parts) > 0 {
@@ -472,7 +517,7 @@ func (g *languageModel) Generate(ctx context.Context, call fantasy.Call) (*fanta
 		return nil, err
 	}
 
-	return mapResponse(response, warnings)
+	return g.mapResponse(response, warnings)
 }
 
 // Model implements fantasy.LanguageModel.
@@ -519,7 +564,7 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 		var blockCounter int
 		var currentTextBlockID string
 		var currentReasoningBlockID string
-		var usage fantasy.Usage
+		var usage *fantasy.Usage
 		var lastFinishReason fantasy.FinishReason
 
 		for resp, err := range chat.SendMessageStream(ctx, depointerSlice(lastMessage.Parts)...) {
@@ -575,9 +620,15 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 								// End any active reasoning block before starting text
 								if isActiveReasoning {
 									isActiveReasoning = false
+									metadata := &ReasoningMetadata{
+										Signature: string(part.ThoughtSignature),
+									}
 									if !yield(fantasy.StreamPart{
 										Type: fantasy.StreamPartTypeReasoningEnd,
 										ID:   currentReasoningBlockID,
+										ProviderMetadata: fantasy.ProviderMetadata{
+											Name: metadata,
+										},
 									}) {
 										return
 									}
@@ -619,15 +670,22 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 						}
 						if isActiveReasoning {
 							isActiveReasoning = false
+
+							metadata := &ReasoningMetadata{
+								Signature: string(part.ThoughtSignature),
+							}
 							if !yield(fantasy.StreamPart{
 								Type: fantasy.StreamPartTypeReasoningEnd,
 								ID:   currentReasoningBlockID,
+								ProviderMetadata: fantasy.ProviderMetadata{
+									Name: metadata,
+								},
 							}) {
 								return
 							}
 						}
 
-						toolCallID := cmp.Or(part.FunctionCall.ID, part.FunctionCall.Name, uuid.NewString())
+						toolCallID := cmp.Or(part.FunctionCall.ID, g.providerOptions.toolCallIDFunc())
 
 						args, err := json.Marshal(part.FunctionCall.Args)
 						if err != nil {
@@ -682,7 +740,15 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 			}
 
 			if resp.UsageMetadata != nil {
-				usage = mapUsage(resp.UsageMetadata)
+				currentUsage := mapUsage(resp.UsageMetadata)
+				// if first usage chunk
+				if usage == nil {
+					usage = &currentUsage
+				} else {
+					usage.OutputTokens += currentUsage.OutputTokens
+					usage.ReasoningTokens += currentUsage.ReasoningTokens
+					usage.CacheReadTokens += currentUsage.CacheReadTokens
+				}
 			}
 
 			if len(resp.Candidates) > 0 && resp.Candidates[0].FinishReason != "" {
@@ -717,7 +783,7 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 
 		yield(fantasy.StreamPart{
 			Type:         fantasy.StreamPartTypeFinish,
-			Usage:        usage,
+			Usage:        *usage,
 			FinishReason: finishReason,
 		})
 	}, nil
@@ -869,7 +935,7 @@ func mapJSONTypeToGoogle(jsonType string) genai.Type {
 	}
 }
 
-func mapResponse(response *genai.GenerateContentResponse, warnings []fantasy.CallWarning) (*fantasy.Response, error) {
+func (g languageModel) mapResponse(response *genai.GenerateContentResponse, warnings []fantasy.CallWarning) (*fantasy.Response, error) {
 	if len(response.Candidates) == 0 || response.Candidates[0].Content == nil {
 		return nil, errors.New("no response from model")
 	}
@@ -885,7 +951,10 @@ func mapResponse(response *genai.GenerateContentResponse, warnings []fantasy.Cal
 		switch {
 		case part.Text != "":
 			if part.Thought {
-				content = append(content, fantasy.ReasoningContent{Text: part.Text})
+				metadata := &ReasoningMetadata{
+					Signature: string(part.ThoughtSignature),
+				}
+				content = append(content, fantasy.ReasoningContent{Text: part.Text, ProviderMetadata: fantasy.ProviderMetadata{Name: metadata}})
 			} else {
 				content = append(content, fantasy.TextContent{Text: part.Text})
 			}
@@ -894,7 +963,7 @@ func mapResponse(response *genai.GenerateContentResponse, warnings []fantasy.Cal
 			if err != nil {
 				return nil, err
 			}
-			toolCallID := cmp.Or(part.FunctionCall.ID, part.FunctionCall.Name, uuid.NewString())
+			toolCallID := cmp.Or(part.FunctionCall.ID, g.providerOptions.toolCallIDFunc())
 			content = append(content, fantasy.ToolCallContent{
 				ToolCallID:       toolCallID,
 				ToolName:         part.FunctionCall.Name,
@@ -947,11 +1016,11 @@ func mapFinishReason(reason genai.FinishReason) fantasy.FinishReason {
 
 func mapUsage(usage *genai.GenerateContentResponseUsageMetadata) fantasy.Usage {
 	return fantasy.Usage{
-		InputTokens:         int64(usage.ToolUsePromptTokenCount),
+		InputTokens:         int64(usage.PromptTokenCount),
 		OutputTokens:        int64(usage.CandidatesTokenCount),
 		TotalTokens:         int64(usage.TotalTokenCount),
 		ReasoningTokens:     int64(usage.ThoughtsTokenCount),
-		CacheCreationTokens: int64(usage.CachedContentTokenCount),
-		CacheReadTokens:     0,
+		CacheCreationTokens: 0,
+		CacheReadTokens:     int64(usage.CachedContentTokenCount),
 	}
 }

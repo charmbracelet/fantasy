@@ -9,17 +9,14 @@ interactions:
     content_length: 168
     host: ""
     body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"Say hi in Portuguese","role":"user"}],"model":"o4-mini","max_completion_tokens":4000}'
-    form:
-      api-version:
-      - 2025-01-01-preview
     headers:
       Accept:
       - application/json
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
-    url: https://fantasy-playground-resource.services.ai.azure.com/openai/deployments/o4-mini/chat/completions?api-version=2025-01-01-preview
+      - OpenAI/Go 2.7.1
+    url: https://fantasy-playground-resource.openai.azure.com/openai/v1/chat/completions
     method: POST
   response:
     proto: HTTP/2.0
@@ -27,10 +24,10 @@ interactions:
     proto_minor: 0
     content_length: 1203
     body: |
-      {"choices":[{"content_filter_results":{"hate":{"filtered":false,"severity":"safe"},"protected_material_code":{"filtered":false,"detected":false},"protected_material_text":{"filtered":false,"detected":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}},"finish_reason":"stop","index":0,"logprobs":null,"message":{"annotations":[],"content":"Oi!","refusal":null,"role":"assistant"}}],"created":1759350253,"id":"chatcmpl-CLxev07r9j5iDQEikbr8SFbCMkqRu","model":"o4-mini-2025-04-16","object":"chat.completion","prompt_filter_results":[{"prompt_index":0,"content_filter_results":{"hate":{"filtered":false,"severity":"safe"},"jailbreak":{"filtered":false,"detected":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}}}],"system_fingerprint":null,"usage":{"completion_tokens":149,"completion_tokens_details":{"accepted_prediction_tokens":0,"audio_tokens":0,"reasoning_tokens":128,"rejected_prediction_tokens":0},"prompt_tokens":19,"prompt_tokens_details":{"audio_tokens":0,"cached_tokens":0},"total_tokens":168}}
+      {"choices":[{"content_filter_results":{"hate":{"filtered":false,"severity":"safe"},"protected_material_code":{"filtered":false,"detected":false},"protected_material_text":{"filtered":false,"detected":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}},"finish_reason":"stop","index":0,"logprobs":null,"message":{"annotations":[],"content":"Olá!","refusal":null,"role":"assistant"}}],"created":1761842947,"id":"chatcmpl-CWQ7f0bwWRBA8LDoImC3K2wezY8Ye","model":"o4-mini-2025-04-16","object":"chat.completion","prompt_filter_results":[{"prompt_index":0,"content_filter_results":{"hate":{"filtered":false,"severity":"safe"},"jailbreak":{"filtered":false,"detected":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}}}],"system_fingerprint":null,"usage":{"completion_tokens":85,"completion_tokens_details":{"accepted_prediction_tokens":0,"audio_tokens":0,"reasoning_tokens":64,"rejected_prediction_tokens":0},"prompt_tokens":19,"prompt_tokens_details":{"audio_tokens":0,"cached_tokens":0},"total_tokens":104}}
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 2.734755709s
+    duration: 2.380277667s

@@ -27,7 +27,7 @@ type testModel struct {
 	reasoning bool
 }
 
-type builderFunc func(r *recorder.Recorder) (fantasy.LanguageModel, error)
+type builderFunc func(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error)
 
 type builderPair struct {
 	name            string
@@ -56,7 +56,7 @@ func testSimple(t *testing.T, pair builderPair) {
 	t.Run("simple", func(t *testing.T) {
 		r := newRecorder(t)
 
-		languageModel, err := pair.builder(r)
+		languageModel, err := pair.builder(t, r)
 		require.NoError(t, err, "failed to build language model")
 
 		agent := fantasy.NewAgent(
@@ -75,7 +75,7 @@ func testSimple(t *testing.T, pair builderPair) {
 	t.Run("simple streaming", func(t *testing.T) {
 		r := newRecorder(t)
 
-		languageModel, err := pair.builder(r)
+		languageModel, err := pair.builder(t, r)
 		require.NoError(t, err, "failed to build language model")
 
 		agent := fantasy.NewAgent(
@@ -129,7 +129,7 @@ func testTool(t *testing.T, pair builderPair) {
 	t.Run("tool", func(t *testing.T) {
 		r := newRecorder(t)
 
-		languageModel, err := pair.builder(r)
+		languageModel, err := pair.builder(t, r)
 		require.NoError(t, err, "failed to build language model")
 
 		agent := fantasy.NewAgent(
@@ -149,7 +149,7 @@ func testTool(t *testing.T, pair builderPair) {
 	t.Run("tool streaming", func(t *testing.T) {
 		r := newRecorder(t)
 
-		languageModel, err := pair.builder(r)
+		languageModel, err := pair.builder(t, r)
 		require.NoError(t, err, "failed to build language model")
 
 		agent := fantasy.NewAgent(
@@ -181,6 +181,9 @@ func testMultiTool(t *testing.T, pair builderPair) {
 	}
 	if strings.Contains(pair.name, "openai") && strings.Contains(pair.name, "o4-mini") {
 		t.Skip("skipping multi-tool tests for openai o4-mini it for some reason is not doing parallel tool calls even if asked")
+	}
+	if strings.Contains(pair.name, "llama-cpp") && strings.Contains(pair.name, "gpt-oss") {
+		t.Skip("skipping multi-tool tests for llama-cpp gpt-oss as it does not support parallel multi-tool calls")
 	}
 
 	type CalculatorInput struct {
@@ -226,7 +229,7 @@ func testMultiTool(t *testing.T, pair builderPair) {
 	t.Run("multi tool", func(t *testing.T) {
 		r := newRecorder(t)
 
-		languageModel, err := pair.builder(r)
+		languageModel, err := pair.builder(t, r)
 		require.NoError(t, err, "failed to build language model")
 
 		agent := fantasy.NewAgent(
@@ -247,7 +250,7 @@ func testMultiTool(t *testing.T, pair builderPair) {
 	t.Run("multi tool streaming", func(t *testing.T) {
 		r := newRecorder(t)
 
-		languageModel, err := pair.builder(r)
+		languageModel, err := pair.builder(t, r)
 		require.NoError(t, err, "failed to build language model")
 
 		agent := fantasy.NewAgent(
@@ -273,7 +276,7 @@ func testThinking(t *testing.T, pairs []builderPair, thinkChecks func(*testing.T
 			t.Run("thinking", func(t *testing.T) {
 				r := newRecorder(t)
 
-				languageModel, err := pair.builder(r)
+				languageModel, err := pair.builder(t, r)
 				require.NoError(t, err, "failed to build language model")
 
 				type WeatherInput struct {
@@ -310,7 +313,7 @@ func testThinking(t *testing.T, pairs []builderPair, thinkChecks func(*testing.T
 			t.Run("thinking-streaming", func(t *testing.T) {
 				r := newRecorder(t)
 
-				languageModel, err := pair.builder(r)
+				languageModel, err := pair.builder(t, r)
 				require.NoError(t, err, "failed to build language model")
 
 				type WeatherInput struct {

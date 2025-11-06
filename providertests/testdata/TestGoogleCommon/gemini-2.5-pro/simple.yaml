@@ -14,7 +14,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.23.0 gl-go/go1.25.1
+      - google-genai-sdk/1.33.0 gl-go/go1.25.0
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent
     method: POST
   response:
@@ -30,7 +30,7 @@ interactions:
             "content": {
               "parts": [
                 {
-                  "text": "Of course!\n\nThe most common ways to say \"hi\" in Portuguese are:\n\n*   **Olá** (A bit more formal, like \"hello\")\n*   **Oi** (Very common and casual, like \"hi\")"
+                  "text": "Of course!\n\nThe most common ways to say \"hi\" in Portuguese are:\n\n*   **Olá** (This is the standard \"hello,\" and it works in any situation.)\n*   **Oi** (This is a more informal and very common \"hi,\" especially in Brazil.)\n\nYou might also hear people greet each other with:\n\n*   **Tudo bem?** (Which means \"How are you?\" or \"Is everything okay?\")"
                 }
               ],
               "role": "model"
@@ -41,22 +41,22 @@ interactions:
         ],
         "usageMetadata": {
           "promptTokenCount": 11,
-          "candidatesTokenCount": 49,
-          "totalTokenCount": 677,
+          "candidatesTokenCount": 94,
+          "totalTokenCount": 802,
           "promptTokensDetails": [
             {
               "modality": "TEXT",
               "tokenCount": 11
             }
           ],
-          "thoughtsTokenCount": 617
+          "thoughtsTokenCount": 697
         },
         "modelVersion": "gemini-2.5-pro",
-        "responseId": "8HLWaNeEFcqpkdUPnej7cA"
+        "responseId": "AQgJabbjM5rQz7IPgq_yiAc"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 7.315723791s
+    duration: 8.976729125s

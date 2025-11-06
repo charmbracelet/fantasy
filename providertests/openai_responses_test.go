@@ -20,13 +20,16 @@ func TestOpenAIResponsesCommon(t *testing.T) {
 }
 
 func openAIReasoningBuilder(model string) builderFunc {
-	return func(r *recorder.Recorder) (fantasy.LanguageModel, error) {
-		provider := openai.New(
+	return func(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
+		provider, err := openai.New(
 			openai.WithAPIKey(os.Getenv("FANTASY_OPENAI_API_KEY")),
 			openai.WithHTTPClient(&http.Client{Transport: r}),
 			openai.WithUseResponsesAPI(),
 		)
-		return provider.LanguageModel(model)
+		if err != nil {
+			return nil, err
+		}
+		return provider.LanguageModel(t.Context(), model)
 	}
 }
 

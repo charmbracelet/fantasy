@@ -13,7 +13,7 @@ import (
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )
 
-const defaultBaseURL = "https://fantasy-playground-resource.services.ai.azure.com/"
+const defaultBaseURL = "https://fantasy-playground-resource.openai.azure.com"
 
 func TestAzureCommon(t *testing.T) {
 	testCommon(t, []builderPair{
@@ -26,7 +26,7 @@ func TestAzureCommon(t *testing.T) {
 func TestAzureThinking(t *testing.T) {
 	opts := fantasy.ProviderOptions{
 		openai.Name: &openai.ProviderOptions{
-			ReasoningEffort: openai.ReasoningEffortOption(openai.ReasoningEffortLow),
+			ReasoningEffort: openai.ReasoningEffortOption(openai.ReasoningEffortHigh),
 		},
 	}
 	testThinking(t, []builderPair{
@@ -39,29 +39,38 @@ func testAzureThinking(t *testing.T, result *fantasy.AgentResult) {
 	require.Greater(t, result.Response.Usage.ReasoningTokens, int64(0), "expected reasoning tokens, got none")
 }
 
-func builderAzureO4Mini(r *recorder.Recorder) (fantasy.LanguageModel, error) {
-	provider := azure.New(
+func builderAzureO4Mini(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
+	provider, err := azure.New(
 		azure.WithBaseURL(cmp.Or(os.Getenv("FANTASY_AZURE_BASE_URL"), defaultBaseURL)),
 		azure.WithAPIKey(cmp.Or(os.Getenv("FANTASY_AZURE_API_KEY"), "(missing)")),
 		azure.WithHTTPClient(&http.Client{Transport: r}),
 	)
-	return provider.LanguageModel("o4-mini")
+	if err != nil {
+		return nil, err
+	}
+	return provider.LanguageModel(t.Context(), "o4-mini")
 }
 
-func builderAzureGpt5Mini(r *recorder.Recorder) (fantasy.LanguageModel, error) {
-	provider := azure.New(
+func builderAzureGpt5Mini(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
+	provider, err := azure.New(
 		azure.WithBaseURL(cmp.Or(os.Getenv("FANTASY_AZURE_BASE_URL"), defaultBaseURL)),
 		azure.WithAPIKey(cmp.Or(os.Getenv("FANTASY_AZURE_API_KEY"), "(missing)")),
 		azure.WithHTTPClient(&http.Client{Transport: r}),
 	)
-	return provider.LanguageModel("gpt-5-mini")
+	if err != nil {
+		return nil, err
+	}
+	return provider.LanguageModel(t.Context(), "gpt-5-mini")
 }
 
-func builderAzureGrok3Mini(r *recorder.Recorder) (fantasy.LanguageModel, error) {
-	provider := azure.New(
+func builderAzureGrok3Mini(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
+	provider, err := azure.New(
 		azure.WithBaseURL(cmp.Or(os.Getenv("FANTASY_AZURE_BASE_URL"), defaultBaseURL)),
 		azure.WithAPIKey(cmp.Or(os.Getenv("FANTASY_AZURE_API_KEY"), "(missing)")),
 		azure.WithHTTPClient(&http.Client{Transport: r}),
 	)
-	return provider.LanguageModel("grok-3-mini")
+	if err != nil {
+		return nil, err
+	}
+	return provider.LanguageModel(t.Context(), "grok-3-mini")
 }

@@ -15,32 +15,41 @@ import (
 )
 
 func anthropicImageBuilder(model string) builderFunc {
-	return func(r *recorder.Recorder) (fantasy.LanguageModel, error) {
-		provider := anthropic.New(
+	return func(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
+		provider, err := anthropic.New(
 			anthropic.WithAPIKey(cmp.Or(os.Getenv("FANTASY_ANTHROPIC_API_KEY"), "(missing)")),
 			anthropic.WithHTTPClient(&http.Client{Transport: r}),
 		)
-		return provider.LanguageModel(model)
+		if err != nil {
+			return nil, err
+		}
+		return provider.LanguageModel(t.Context(), model)
 	}
 }
 
 func openAIImageBuilder(model string) builderFunc {
-	return func(r *recorder.Recorder) (fantasy.LanguageModel, error) {
-		provider := openai.New(
+	return func(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
+		provider, err := openai.New(
 			openai.WithAPIKey(cmp.Or(os.Getenv("FANTASY_OPENAI_API_KEY"), "(missing)")),
 			openai.WithHTTPClient(&http.Client{Transport: r}),
 		)
-		return provider.LanguageModel(model)
+		if err != nil {
+			return nil, err
+		}
+		return provider.LanguageModel(t.Context(), model)
 	}
 }
 
 func geminiImageBuilder(model string) builderFunc {
-	return func(r *recorder.Recorder) (fantasy.LanguageModel, error) {
-		provider := google.New(
+	return func(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
+		provider, err := google.New(
 			google.WithGeminiAPIKey(cmp.Or(os.Getenv("FANTASY_GEMINI_API_KEY"), "(missing)")),
 			google.WithHTTPClient(&http.Client{Transport: r}),
 		)
-		return provider.LanguageModel(model)
+		if err != nil {
+			return nil, err
+		}
+		return provider.LanguageModel(t.Context(), model)
 	}
 }
 
@@ -66,11 +75,10 @@ func TestImageUploadAgent(t *testing.T) {
 	file := fantasy.FilePart{Filename: "wish.png", Data: img, MediaType: "image/png"}
 
 	for _, pair := range pairs {
-		pair := pair
 		t.Run(pair.name, func(t *testing.T) {
 			r := newRecorder(t)
 
-			lm, err := pair.builder(r)
+			lm, err := pair.builder(t, r)
 			require.NoError(t, err)
 
 			agent := fantasy.NewAgent(
@@ -113,11 +121,10 @@ func TestImageUploadAgentStreaming(t *testing.T) {
 	file := fantasy.FilePart{Filename: "wish.png", Data: img, MediaType: "image/png"}
 
 	for _, pair := range pairs {
-		pair := pair
 		t.Run(pair.name+"-stream", func(t *testing.T) {
 			r := newRecorder(t)
 
-			lm, err := pair.builder(r)
+			lm, err := pair.builder(t, r)
 			require.NoError(t, err)
 
 			agent := fantasy.NewAgent(

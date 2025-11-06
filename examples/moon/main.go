@@ -1,7 +1,8 @@
 package main
 
 // This example demonstrates how to create an agent with a tool that can
-// provide moon phase information for a given date, defaulting to today.
+// provide moon phase information for a given date, defaulting to today using
+// an HTTP tool call.
 
 import (
 	"context"
@@ -36,10 +37,17 @@ func main() {
 	}
 
 	// Specifically, we'll use Claude Haiku 4.5.
-	provider := anthropic.New(anthropic.WithAPIKey(apiKey))
-	model, err := provider.LanguageModel("claude-haiku-4-5-20251001")
+	provider, err := anthropic.New(anthropic.WithAPIKey(apiKey))
 	if err != nil {
-		log.Fatalf("failed to get language model: %v", err)
+		log.Fatalf("could not create Anthropic provider: %v", err)
+	}
+
+	ctx := context.Background()
+
+	// Choose the model.
+	model, err := provider.LanguageModel(ctx, "claude-haiku-4-5-20251001")
+	if err != nil {
+		log.Fatalf("could not get language model: %v", err)
 	}
 
 	// Add a moon phase tool.
@@ -57,11 +65,14 @@ func main() {
 	)
 
 	// Here's our prompt.
-	const prompt = "What is the moon phase today? And what will it be on December 31, 2025?"
+	prompt := fmt.Sprintf(
+		"What is the moon phase today? And what will it be on December 31 this year? Today's date is %s.",
+		time.Now().Format("January 2, 2006"),
+	)
 	fmt.Println("\n" + formatText(prompt))
 
 	// Let's go! Ask the agent to generate a response.
-	result, err := agent.Generate(context.Background(), fantasy.AgentCall{Prompt: prompt})
+	result, err := agent.Generate(ctx, fantasy.AgentCall{Prompt: prompt})
 	if err != nil {
 		log.Fatalf("agent generation failed: %v", err)
 	}
@@ -80,12 +91,14 @@ func main() {
 	fmt.Print(lipgloss.NewStyle().MarginLeft(3).Render(t.String()), "\n\n")
 }
 
+// Input for the moon phase tool. The model will provide the date when
+// necessary.
 type moonPhaseInput struct {
 	Date string `json:"date,omitempty" description:"Optional date in YYYY-MM-DD; if omitted, use today"`
 }
 
-// moonPhaseTool queries wttr.in for the moon phase on a given date. If no
-// date is provided, it uses today's date.
+// This is the moon phase tool definition. It queries wttr.in for the moon
+// phase on a given date. If no date is provided, it uses today's date.
 //
 // The date format should be in YYYY-MM-DD format.
 func moonPhaseTool(ctx context.Context, input moonPhaseInput, _ fantasy.ToolCall) (fantasy.ToolResponse, error) {

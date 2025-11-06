@@ -809,11 +809,12 @@ func TestDoGenerate(t *testing.T) {
 			"content": "Hello, World!",
 		})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -841,11 +842,12 @@ func TestDoGenerate(t *testing.T) {
 			},
 		})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -865,13 +867,14 @@ func TestDoGenerate(t *testing.T) {
 
 		server.prepareJSONResponse(map[string]any{})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
-		_, err := model.Generate(context.Background(), fantasy.Call{
+		_, err = model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 		})
 
@@ -905,11 +908,12 @@ func TestDoGenerate(t *testing.T) {
 			},
 		})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -931,11 +935,12 @@ func TestDoGenerate(t *testing.T) {
 			"logprobs": testLogprobs,
 		})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -965,11 +970,12 @@ func TestDoGenerate(t *testing.T) {
 			"finish_reason": "stop",
 		})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -989,11 +995,12 @@ func TestDoGenerate(t *testing.T) {
 			"finish_reason": "eos",
 		})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -1013,13 +1020,14 @@ func TestDoGenerate(t *testing.T) {
 			"content": "",
 		})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
-		_, err := model.Generate(context.Background(), fantasy.Call{
+		_, err = model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 		})
 
@@ -1045,13 +1053,14 @@ func TestDoGenerate(t *testing.T) {
 
 		server.prepareJSONResponse(map[string]any{})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
-		_, err := model.Generate(context.Background(), fantasy.Call{
+		_, err = model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
 				LogitBias: map[string]int64{
@@ -1087,13 +1096,14 @@ func TestDoGenerate(t *testing.T) {
 			"content": "",
 		})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("o1-mini")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "o1-mini")
 
-		_, err := model.Generate(context.Background(), fantasy.Call{
+		_, err = model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(
 				&ProviderOptions{
@@ -1127,13 +1137,14 @@ func TestDoGenerate(t *testing.T) {
 			"content": "",
 		})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("gpt-4o")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-4o")
 
-		_, err := model.Generate(context.Background(), fantasy.Call{
+		_, err = model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
 				TextVerbosity: fantasy.Opt("low"),
@@ -1165,13 +1176,14 @@ func TestDoGenerate(t *testing.T) {
 			"content": "",
 		})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
-		_, err := model.Generate(context.Background(), fantasy.Call{
+		_, err = model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 			Tools: []fantasy.Tool{
 				fantasy.FunctionTool{
@@ -1237,11 +1249,12 @@ func TestDoGenerate(t *testing.T) {
 			},
 		})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -1295,11 +1308,12 @@ func TestDoGenerate(t *testing.T) {
 			},
 		})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -1337,11 +1351,12 @@ func TestDoGenerate(t *testing.T) {
 			},
 		})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("gpt-4o-mini")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-4o-mini")
 
 		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -1372,11 +1387,12 @@ func TestDoGenerate(t *testing.T) {
 			},
 		})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("gpt-4o-mini")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-4o-mini")
 
 		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -1400,11 +1416,12 @@ func TestDoGenerate(t *testing.T) {
 
 		server.prepareJSONResponse(map[string]any{})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("o1-preview")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "o1-preview")
 
 		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt:           testPrompt,
@@ -1448,13 +1465,14 @@ func TestDoGenerate(t *testing.T) {
 
 		server.prepareJSONResponse(map[string]any{})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("o1-preview")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "o1-preview")
 
-		_, err := model.Generate(context.Background(), fantasy.Call{
+		_, err = model.Generate(context.Background(), fantasy.Call{
 			Prompt:          testPrompt,
 			MaxOutputTokens: &[]int64{1000}[0],
 		})
@@ -1492,11 +1510,12 @@ func TestDoGenerate(t *testing.T) {
 			},
 		})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("o1-preview")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "o1-preview")
 
 		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -1519,13 +1538,14 @@ func TestDoGenerate(t *testing.T) {
 			"model": "o1-preview",
 		})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("o1-preview")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "o1-preview")
 
-		_, err := model.Generate(context.Background(), fantasy.Call{
+		_, err = model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
 				MaxCompletionTokens: fantasy.Opt(int64(255)),
@@ -1557,13 +1577,14 @@ func TestDoGenerate(t *testing.T) {
 			"content": "",
 		})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
-		_, err := model.Generate(context.Background(), fantasy.Call{
+		_, err = model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
 				Prediction: map[string]any{
@@ -1601,13 +1622,14 @@ func TestDoGenerate(t *testing.T) {
 			"content": "",
 		})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
-		_, err := model.Generate(context.Background(), fantasy.Call{
+		_, err = model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
 				Store: fantasy.Opt(true),
@@ -1639,13 +1661,14 @@ func TestDoGenerate(t *testing.T) {
 			"content": "",
 		})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
-		_, err := model.Generate(context.Background(), fantasy.Call{
+		_, err = model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
 				Metadata: map[string]any{
@@ -1681,13 +1704,14 @@ func TestDoGenerate(t *testing.T) {
 			"content": "",
 		})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
-		_, err := model.Generate(context.Background(), fantasy.Call{
+		_, err = model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
 				PromptCacheKey: fantasy.Opt("test-cache-key-123"),
@@ -1719,13 +1743,14 @@ func TestDoGenerate(t *testing.T) {
 			"content": "",
 		})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
-		_, err := model.Generate(context.Background(), fantasy.Call{
+		_, err = model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
 				SafetyIdentifier: fantasy.Opt("test-safety-identifier-123"),
@@ -1755,11 +1780,12 @@ func TestDoGenerate(t *testing.T) {
 
 		server.prepareJSONResponse(map[string]any{})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("gpt-4o-search-preview")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-4o-search-preview")
 
 		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt:      testPrompt,
@@ -1789,13 +1815,14 @@ func TestDoGenerate(t *testing.T) {
 			"content": "",
 		})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("o3-mini")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "o3-mini")
 
-		_, err := model.Generate(context.Background(), fantasy.Call{
+		_, err = model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
 				ServiceTier: fantasy.Opt("flex"),
@@ -1825,11 +1852,12 @@ func TestDoGenerate(t *testing.T) {
 
 		server.prepareJSONResponse(map[string]any{})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("gpt-4o-mini")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-4o-mini")
 
 		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -1858,13 +1886,14 @@ func TestDoGenerate(t *testing.T) {
 
 		server.prepareJSONResponse(map[string]any{})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("gpt-4o-mini")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-4o-mini")
 
-		_, err := model.Generate(context.Background(), fantasy.Call{
+		_, err = model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
 				ServiceTier: fantasy.Opt("priority"),
@@ -1894,11 +1923,12 @@ func TestDoGenerate(t *testing.T) {
 
 		server.prepareJSONResponse(map[string]any{})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		result, err := model.Generate(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -2201,11 +2231,12 @@ func TestDoStream(t *testing.T) {
 			"logprobs": testLogprobs,
 		})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		stream, err := model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -2257,11 +2288,12 @@ func TestDoStream(t *testing.T) {
 
 		server.prepareToolStreamResponse()
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		stream, err := model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -2343,11 +2375,12 @@ func TestDoStream(t *testing.T) {
 			},
 		})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		stream, err := model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -2382,11 +2415,12 @@ func TestDoStream(t *testing.T) {
 
 		server.prepareErrorStreamResponse()
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		stream, err := model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -2423,13 +2457,14 @@ func TestDoStream(t *testing.T) {
 			"content": []string{},
 		})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
-		_, err := model.Stream(context.Background(), fantasy.Call{
+		_, err = model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 		})
 
@@ -2471,11 +2506,12 @@ func TestDoStream(t *testing.T) {
 			},
 		})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		stream, err := model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -2521,11 +2557,12 @@ func TestDoStream(t *testing.T) {
 			},
 		})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		stream, err := model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -2564,13 +2601,14 @@ func TestDoStream(t *testing.T) {
 			"content": []string{},
 		})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
-		_, err := model.Stream(context.Background(), fantasy.Call{
+		_, err = model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
 				Store: fantasy.Opt(true),
@@ -2606,13 +2644,14 @@ func TestDoStream(t *testing.T) {
 			"content": []string{},
 		})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("gpt-3.5-turbo")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
-		_, err := model.Stream(context.Background(), fantasy.Call{
+		_, err = model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
 				Metadata: map[string]any{
@@ -2652,13 +2691,14 @@ func TestDoStream(t *testing.T) {
 			"content": []string{},
 		})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("o3-mini")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "o3-mini")
 
-		_, err := model.Stream(context.Background(), fantasy.Call{
+		_, err = model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
 				ServiceTier: fantasy.Opt("flex"),
@@ -2694,13 +2734,14 @@ func TestDoStream(t *testing.T) {
 			"content": []string{},
 		})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("gpt-4o-mini")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-4o-mini")
 
-		_, err := model.Stream(context.Background(), fantasy.Call{
+		_, err = model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
 			ProviderOptions: NewProviderOptions(&ProviderOptions{
 				ServiceTier: fantasy.Opt("priority"),
@@ -2737,11 +2778,12 @@ func TestDoStream(t *testing.T) {
 			"model":   "o1-preview",
 		})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("o1-preview")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "o1-preview")
 
 		stream, err := model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,
@@ -2783,11 +2825,12 @@ func TestDoStream(t *testing.T) {
 			},
 		})
 
-		provider := New(
+		provider, err := New(
 			WithAPIKey("test-api-key"),
 			WithBaseURL(server.server.URL),
 		)
-		model, _ := provider.LanguageModel("o1-preview")
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "o1-preview")
 
 		stream, err := model.Stream(context.Background(), fantasy.Call{
 			Prompt: testPrompt,

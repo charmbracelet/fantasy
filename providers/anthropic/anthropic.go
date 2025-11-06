@@ -690,30 +690,6 @@ func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBl
 	return systemBlocks, messages, warnings
 }
 
-func (a languageModel) handleError(err error) error {
-	var apiErr *anthropic.Error
-	if errors.As(err, &apiErr) {
-		requestDump := apiErr.DumpRequest(true)
-		responseDump := apiErr.DumpResponse(true)
-		headers := map[string]string{}
-		for k, h := range apiErr.Response.Header {
-			v := h[len(h)-1]
-			headers[strings.ToLower(k)] = v
-		}
-		return &fantasy.ProviderError{
-			Title:           "provider request failed",
-			Message:         apiErr.Error(),
-			Cause:           apiErr,
-			URL:             apiErr.Request.URL.String(),
-			StatusCode:      apiErr.StatusCode,
-			RequestBody:     requestDump,
-			ResponseHeaders: headers,
-			ResponseBody:    responseDump,
-		}
-	}
-	return err
-}
-
 func mapFinishReason(finishReason string) fantasy.FinishReason {
 	switch finishReason {
 	case "end_turn", "pause_turn", "stop_sequence":
@@ -735,7 +711,7 @@ func (a languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantas
 	}
 	response, err := a.client.Messages.New(ctx, *params)
 	if err != nil {
-		return nil, a.handleError(err)
+		return nil, toProviderErr(err)
 	}
 
 	var content []fantasy.Content
@@ -968,7 +944,7 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 		} else { //nolint: revive
 			yield(fantasy.StreamPart{
 				Type:  fantasy.StreamPartTypeError,
-				Error: a.handleError(err),
+				Error: toProviderErr(err),
 			})
 			return
 		}

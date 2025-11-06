@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"strings"
 
@@ -649,39 +648,18 @@ func toResponsesTools(tools []fantasy.Tool, toolChoice *fantasy.ToolChoice, opti
 	return openaiTools, openaiToolChoice, warnings
 }
 
-func (o responsesLanguageModel) handleError(err error) error {
-	var apiErr *openai.Error
-	if errors.As(err, &apiErr) {
-		requestDump := apiErr.DumpRequest(true)
-		responseDump := apiErr.DumpResponse(true)
-		headers := map[string]string{}
-		for k, h := range apiErr.Response.Header {
-			v := h[len(h)-1]
-			headers[strings.ToLower(k)] = v
-		}
-		return &fantasy.ProviderError{
-			Title:           "provider request failed",
-			Message:         apiErr.Message,
-			Cause:           apiErr,
-			URL:             apiErr.Request.URL.String(),
-			StatusCode:      apiErr.StatusCode,
-			RequestBody:     requestDump,
-			ResponseHeaders: headers,
-			ResponseBody:    responseDump,
-		}
-	}
-	return err
-}
-
 func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call) (*fantasy.Response, error) {
 	params, warnings := o.prepareParams(call)
 	response, err := o.client.Responses.New(ctx, *params)
 	if err != nil {
-		return nil, o.handleError(err)
+		return nil, toProviderErr(err)
 	}
 
 	if response.Error.Message != "" {
-		return nil, o.handleError(fmt.Errorf("response error: %s (code: %s)", response.Error.Message, response.Error.Code))
+		return nil, &fantasy.Error{
+			Title:   "provider error",
+			Message: fmt.Sprintf("%s (code: %s)", response.Error.Message, response.Error.Code),
+		}
 	}
 
 	var content []fantasy.Content
@@ -1023,7 +1001,7 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 		if err != nil {
 			yield(fantasy.StreamPart{
 				Type:  fantasy.StreamPartTypeError,
-				Error: o.handleError(err),
+				Error: toProviderErr(err),
 			})
 			return
 		}

@@ -1,0 +1,118 @@
+version: '3'
+
+tasks:
+  default:
+    desc: Show available tasks
+    cmds:
+      - task -l
+
+  build:
+    desc: Build all packages
+    cmds:
+      - go build -v ./...
+    silent: true
+
+  test:
+    desc: Run all tests
+    cmds:
+      - go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+    silent: true
+
+  test-verbose:
+    desc: Run tests with verbose output
+    cmds:
+      - go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+
+  test-short:
+    desc: Run short tests
+    cmds:
+      - go test -short -v ./...
+
+  lint:
+    desc: Run linter
+    cmds:
+      - which golangci-lint || (echo "Installing golangci-lint v2..." && go install github.com/golangci/golangci-lint/cmd/golangci-lint@v2.0.0)
+      - golangci-lint run --timeout=10m
+
+  fmt:
+    desc: Format code
+    cmds:
+      - gofmt -s -w .
+      - goimports -w .
+
+  tidy:
+    desc: Clean up modules
+    cmds:
+      - go mod tidy
+      - go mod verify
+
+  ci-verify:
+    desc: Run CI verification locally
+    cmds:
+      - task tidy
+      - task build
+      - task test
+      - task lint
+    silent: true
+
+  install-tools:
+    desc: Install development tools
+    cmds:
+      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@v2.0.0
+      - go install golang.org/x/tools/cmd/goimports@latest
+      - go install github.com/securego/gosec/v2/cmd/gosec@latest
+
+  setup-hooks:
+    desc: Set up git hooks
+    cmds:
+      - echo "Setting up pre-commit hook..."
+      - cp scripts/pre-commit.sh .git/hooks/pre-commit
+      - chmod +x .git/hooks/pre-commit
+      - echo "✓ Pre-commit hook installed"
+
+  coverage:
+    desc: Show coverage report
+    cmds:
+      - "go tool cover -html=coverage.txt -o coverage.html"
+      - "echo 'Coverage report generated: coverage.html'"
+    deps: [test]
+
+  clean:
+    desc: Clean build artifacts
+    cmds:
+      - rm -f coverage.txt coverage.html
+      - rm -f golangci-lint-report.xml
+      - go clean -cache
+
+  deps-update:
+    desc: Update dependencies
+    cmds:
+      - go get -u ./...
+      - go mod tidy
+
+  security-scan:
+    desc: Run security scan
+    cmds:
+      - which gosec || go install github.com/securego/gosec/v2/cmd/gosec@latest
+      - gosec -fmt json -out gosec-report.json ./...
+      - "echo 'Security report generated: gosec-report.json'"
+
+  docker-test:
+    desc: Run tests in Docker (simulates CI)
+    cmds:
+      - docker run --rm -v "{{.PWD}}:/app" -w /app golang:1.24.5 bash -c "go mod download && go test -v -race ./..."
+    ignore_error: true
+
+  pipeline-debug:
+    desc: Debug pipeline issues locally
+    cmds:
+      - echo "=== Checking Go version ==="
+      - go version
+      - echo "=== Checking modules ==="
+      - go mod verify
+      - echo "=== Building ==="
+      - go build -v ./...
+      - echo "=== Testing ==="
+      - go test -v ./... -count=1
+      - echo "=== Checking for changes ==="
+      - git status --porcelain go.mod go.sum || echo "No changes to go.mod/go.sum"

@@ -8,7 +8,7 @@ stages:
   - test
 
 variables:
-  GO_VERSION: "1.24"
+  GO_VERSION: "1.24.5"
 
 # Renovatebot dependency updates
 renovate:
@@ -67,6 +67,41 @@ build:
   script:
     - go mod download
     - go build -v ./...
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+
+# Lint job
+lint:
+  extends: .go_private_modules_setup
+  stage: test
+  image: golang:${GO_VERSION}
+  before_script:
+    - |
+      echo "Setting up Go private module access..."
+      git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/".insteadOf "https://gitlab.com/"
+      cat > ~/.netrc <<EOF
+      machine gitlab.com
+      login gitlab-ci-token
+      password ${CI_JOB_TOKEN}
+      EOF
+      chmod 600 ~/.netrc
+      go env GOPRIVATE
+      go env GONOSUMDB
+      go env GONOPROXY
+    # Install golangci-lint v2
+    - go install github.com/golangci/golangci-lint/cmd/golangci-lint@v2.0.0
+    - export PATH=$PATH:$(go env GOPATH)/bin
+  script:
+    - go mod download
+    - golangci-lint run --timeout=10m
+  artifacts:
+    reports:
+      junit: golangci-lint-report.xml
+    paths:
+      - golangci-lint-report.xml
+    expire_in: 1 week
+  allow_failure: true
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == "main"

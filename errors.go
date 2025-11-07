@@ -3,6 +3,7 @@ package fantasy
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/charmbracelet/x/exp/slice"
 )
@@ -69,19 +70,7 @@ func (e RetryError) Unwrap() error {
 	return nil
 }
 
-var statusCodeToTitle = map[int]string{
-	http.StatusBadRequest:          "bad request",
-	http.StatusUnauthorized:        "authentication failed",
-	http.StatusForbidden:           "permission denied",
-	http.StatusNotFound:            "resource not found",
-	http.StatusTooManyRequests:     "rate limit exceeded",
-	http.StatusInternalServerError: "internal server error",
-	http.StatusBadGateway:          "bad gateway",
-	http.StatusServiceUnavailable:  "service unavailable",
-	http.StatusGatewayTimeout:      "gateway timeout",
-}
-
 // ErrorTitleForStatusCode returns a human-readable title for a given HTTP status code.
 func ErrorTitleForStatusCode(statusCode int) string {
-	return statusCodeToTitle[statusCode]
+	return strings.ToLower(http.StatusText(statusCode))
 }

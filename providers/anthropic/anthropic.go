@@ -122,6 +122,8 @@ func WithHTTPClient(client option.HTTPClient) Option {
 
 func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.LanguageModel, error) {
 	clientOptions := make([]option.RequestOption, 0, 5+len(a.options.headers))
+	clientOptions = append(clientOptions, option.WithMaxRetries(0))
+
 	if a.options.apiKey != "" && !a.options.useBedrock {
 		clientOptions = append(clientOptions, option.WithAPIKey(a.options.apiKey))
 	}
@@ -202,7 +204,7 @@ func (a languageModel) prepareParams(call fantasy.Call) (*anthropic.MessageNewPa
 	if v, ok := call.ProviderOptions[Name]; ok {
 		providerOptions, ok = v.(*ProviderOptions)
 		if !ok {
-			return nil, nil, fantasy.NewInvalidArgumentError("providerOptions", "anthropic provider options should be *anthropic.ProviderOptions", nil)
+			return nil, nil, &fantasy.Error{Title: "invalid argument", Message: "anthropic provider options should be *anthropic.ProviderOptions"}
 		}
 	}
 	sendReasoning := true
@@ -251,7 +253,7 @@ func (a languageModel) prepareParams(call fantasy.Call) (*anthropic.MessageNewPa
 	}
 	if isThinking {
 		if thinkingBudget == 0 {
-			return nil, nil, fantasy.NewUnsupportedFunctionalityError("thinking requires budget", "")
+			return nil, nil, &fantasy.Error{Title: "no budget", Message: "thinking requires budget"}
 		}
 		params.Thinking = anthropic.ThinkingConfigParamOfEnabled(thinkingBudget)
 		if call.Temperature != nil {
@@ -690,30 +692,6 @@ func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBl
 	return systemBlocks, messages, warnings
 }
 
-func (a languageModel) handleError(err error) error {
-	var apiErr *anthropic.Error
-	if errors.As(err, &apiErr) {
-		requestDump := apiErr.DumpRequest(true)
-		responseDump := apiErr.DumpResponse(true)
-		headers := map[string]string{}
-		for k, h := range apiErr.Response.Header {
-			v := h[len(h)-1]
-			headers[strings.ToLower(k)] = v
-		}
-		return fantasy.NewAPICallError(
-			apiErr.Error(),
-			apiErr.Request.URL.String(),
-			string(requestDump),
-			apiErr.StatusCode,
-			headers,
-			string(responseDump),
-			apiErr,
-			false,
-		)
-	}
-	return err
-}
-
 func mapFinishReason(finishReason string) fantasy.FinishReason {
 	switch finishReason {
 	case "end_turn", "pause_turn", "stop_sequence":
@@ -735,7 +713,7 @@ func (a languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantas
 	}
 	response, err := a.client.Messages.New(ctx, *params)
 	if err != nil {
-		return nil, a.handleError(err)
+		return nil, toProviderErr(err)
 	}
 
 	var content []fantasy.Content
@@ -968,7 +946,7 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 		} else { //nolint: revive
 			yield(fantasy.StreamPart{
 				Type:  fantasy.StreamPartTypeError,
-				Error: a.handleError(err),
+				Error: toProviderErr(err),
 			})
 			return
 		}

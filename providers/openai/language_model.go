@@ -223,30 +223,6 @@ func (o languageModel) prepareParams(call fantasy.Call) (*openai.ChatCompletionN
 	return params, warnings, nil
 }
 
-func (o languageModel) handleError(err error) error {
-	var apiErr *openai.Error
-	if errors.As(err, &apiErr) {
-		requestDump := apiErr.DumpRequest(true)
-		responseDump := apiErr.DumpResponse(true)
-		headers := map[string]string{}
-		for k, h := range apiErr.Response.Header {
-			v := h[len(h)-1]
-			headers[strings.ToLower(k)] = v
-		}
-		return fantasy.NewAPICallError(
-			apiErr.Message,
-			apiErr.Request.URL.String(),
-			string(requestDump),
-			apiErr.StatusCode,
-			headers,
-			string(responseDump),
-			apiErr,
-			false,
-		)
-	}
-	return err
-}
-
 // Generate implements fantasy.LanguageModel.
 func (o languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantasy.Response, error) {
 	params, warnings, err := o.prepareParams(call)
@@ -255,11 +231,11 @@ func (o languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantas
 	}
 	response, err := o.client.Chat.Completions.New(ctx, *params)
 	if err != nil {
-		return nil, o.handleError(err)
+		return nil, toProviderErr(err)
 	}
 
 	if len(response.Choices) == 0 {
-		return nil, errors.New("no response generated")
+		return nil, &fantasy.Error{Title: "no response", Message: "no response generated"}
 	}
 	choice := response.Choices[0]
 	content := make([]fantasy.Content, 0, 1+len(choice.Message.ToolCalls)+len(choice.Message.Annotations))
@@ -422,18 +398,18 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 							// Does not exist
 							var err error
 							if toolCallDelta.Type != "function" {
-								err = fantasy.NewInvalidResponseDataError(toolCallDelta, "Expected 'function' type.")
+								err = &fantasy.Error{Title: "invalid provider response", Message: "expected 'function' type."}
 							}
 							if toolCallDelta.ID == "" {
-								err = fantasy.NewInvalidResponseDataError(toolCallDelta, "Expected 'id' to be a string.")
+								err = &fantasy.Error{Title: "invalid provider response", Message: "expected 'id' to be a string."}
 							}
 							if toolCallDelta.Function.Name == "" {
-								err = fantasy.NewInvalidResponseDataError(toolCallDelta, "Expected 'function.name' to be a string.")
+								err = &fantasy.Error{Title: "invalid provider response", Message: "expected 'function.name' to be a string."}
 							}
 							if err != nil {
 								yield(fantasy.StreamPart{
 									Type:  fantasy.StreamPartTypeError,
-									Error: o.handleError(stream.Err()),
+									Error: toProviderErr(stream.Err()),
 								})
 								return
 							}
@@ -563,7 +539,7 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 		} else { //nolint: revive
 			yield(fantasy.StreamPart{
 				Type:  fantasy.StreamPartTypeError,
-				Error: o.handleError(err),
+				Error: toProviderErr(err),
 			})
 			return
 		}

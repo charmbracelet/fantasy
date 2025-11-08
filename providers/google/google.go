@@ -197,7 +197,7 @@ func (g languageModel) prepareParams(call fantasy.Call) (*genai.GenerateContentC
 	if v, ok := call.ProviderOptions[Name]; ok {
 		providerOptions, ok = v.(*ProviderOptions)
 		if !ok {
-			return nil, nil, nil, fantasy.NewInvalidArgumentError("providerOptions", "google provider options should be *google.ProviderOptions", nil)
+			return nil, nil, nil, &fantasy.Error{Title: "invalid argument", Message: "google provider options should be *google.ProviderOptions"}
 		}
 	}
 
@@ -514,7 +514,7 @@ func (g *languageModel) Generate(ctx context.Context, call fantasy.Call) (*fanta
 
 	response, err := chat.SendMessage(ctx, depointerSlice(lastMessage.Parts)...)
 	if err != nil {
-		return nil, err
+		return nil, toProviderErr(err)
 	}
 
 	return g.mapResponse(response, warnings)
@@ -571,7 +571,7 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 			if err != nil {
 				yield(fantasy.StreamPart{
 					Type:  fantasy.StreamPartTypeError,
-					Error: err,
+					Error: toProviderErr(err),
 				})
 				return
 			}

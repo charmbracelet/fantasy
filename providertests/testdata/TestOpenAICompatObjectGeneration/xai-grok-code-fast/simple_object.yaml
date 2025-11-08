@@ -1,0 +1,33 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 631
+    host: ""
+    body: '{"messages":[{"content":"Generate information about a person named Alice who is 30 years old and lives in Paris.","role":"user"}],"model":"grok-code-fast-1","max_tokens":4000,"tool_choice":{"function":{"name":"Person"},"type":"function"},"tools":[{"function":{"name":"Person","strict":false,"description":"A person with name, age, and city","parameters":{"properties":{"age":{"description":"The person''s age","type":"integer"},"city":{"description":"The city where the person lives","type":"string"},"name":{"description":"The person''s name","type":"string"}},"required":["name","age","city"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://api.x.ai/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"id":"8d3d6258-cbe1-f871-55c0-32bd3487f2d7","object":"chat.completion","created":1762637621,"model":"grok-code-fast-1","choices":[{"index":0,"message":{"role":"assistant","content":"","tool_calls":[{"id":"call_38033184","function":{"name":"Person","arguments":"{\"age\":30,\"city\":\"Paris\",\"name\":\"Alice\"}"},"type":"function"}],"refusal":null},"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":429,"completion_tokens":44,"total_tokens":630,"prompt_tokens_details":{"text_tokens":429,"audio_tokens":0,"image_tokens":0,"cached_tokens":320},"completion_tokens_details":{"reasoning_tokens":157,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0},"num_sources_used":0},"system_fingerprint":"fp_10f00c862d"}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 1.615676541s

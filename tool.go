@@ -143,66 +143,81 @@ func (w *funcToolWrapper[TInput]) Run(ctx context.Context, params ToolCall) (Too
 
 // schemaToParameters converts a Schema to the parameters map format expected by ToolInfo.
 func schemaToParameters(schema Schema) map[string]any {
-	if schema.Type != "object" || schema.Properties == nil {
-		return map[string]any{}
+	if schema.Properties == nil {
+		return make(map[string]any)
 	}
 
-	params := make(map[string]any)
+	result := make(map[string]any)
 	for name, propSchema := range schema.Properties {
-		param := map[string]any{
-			"type": propSchema.Type,
-		}
-
-		if propSchema.Description != "" {
-			param["description"] = propSchema.Description
-		}
-
-		if len(propSchema.Enum) > 0 {
-			param["enum"] = propSchema.Enum
-		}
-
-		if propSchema.Format != "" {
-			param["format"] = propSchema.Format
-		}
-
-		if propSchema.Minimum != nil {
-			param["minimum"] = *propSchema.Minimum
-		}
-
-		if propSchema.Maximum != nil {
-			param["maximum"] = *propSchema.Maximum
-		}
-
-		if propSchema.MinLength != nil {
-			param["minLength"] = *propSchema.MinLength
-		}
-
-		if propSchema.MaxLength != nil {
-			param["maxLength"] = *propSchema.MaxLength
-		}
-
-		if propSchema.Items != nil {
-			param["items"] = schemaToParameters(*propSchema.Items)
-		}
-
-		params[name] = param
+		result[name] = SchemaToMap(*propSchema)
 	}
-
-	return params
+	return result
 }
 
-// generateSchema automatically generates a JSON schema from a Go type.
+// SchemaToMap converts a Schema to a map representation suitable for JSON Schema.
+func SchemaToMap(schema Schema) map[string]any {
+	result := make(map[string]any)
+
+	if schema.Type != "" {
+		result["type"] = schema.Type
+	}
+
+	if schema.Description != "" {
+		result["description"] = schema.Description
+	}
+
+	if len(schema.Enum) > 0 {
+		result["enum"] = schema.Enum
+	}
+
+	if schema.Format != "" {
+		result["format"] = schema.Format
+	}
+
+	if schema.Minimum != nil {
+		result["minimum"] = *schema.Minimum
+	}
+
+	if schema.Maximum != nil {
+		result["maximum"] = *schema.Maximum
+	}
+
+	if schema.MinLength != nil {
+		result["minLength"] = *schema.MinLength
+	}
+
+	if schema.MaxLength != nil {
+		result["maxLength"] = *schema.MaxLength
+	}
+
+	if schema.Properties != nil {
+		props := make(map[string]any)
+		for name, propSchema := range schema.Properties {
+			props[name] = SchemaToMap(*propSchema)
+		}
+		result["properties"] = props
+	}
+
+	if len(schema.Required) > 0 {
+		result["required"] = schema.Required
+	}
+
+	if schema.Items != nil {
+		result["items"] = SchemaToMap(*schema.Items)
+	}
+
+	return result
+}
+
 func generateSchema(t reflect.Type) Schema {
 	return generateSchemaRecursive(t, nil, make(map[reflect.Type]bool))
 }
 
 func generateSchemaRecursive(t, parent reflect.Type, visited map[reflect.Type]bool) Schema {
-	// Handle pointers
 	if t.Kind() == reflect.Pointer {
 		t = t.Elem()
 	}
 
-	// Prevent infinite recursion
 	if visited[t] {
 		return Schema{Type: "object"}
 	}
@@ -252,7 +267,6 @@ func generateSchemaRecursive(t, parent reflect.Type, visited map[reflect.Type]bo
 		for i := range t.NumField() {
 			field := t.Field(i)
 
-			// Skip unexported fields
 			if !field.IsExported() {
 				continue
 			}
@@ -265,30 +279,25 @@ func generateSchemaRecursive(t, parent reflect.Type, visited map[reflect.Type]bo
 			fieldName := field.Name
 			required := true
 
-			// Parse JSON tag
 			if jsonTag != "" {
 				parts := strings.Split(jsonTag, ",")
 				if parts[0] != "" {
 					fieldName = parts[0]
 				}
 
-				// Check for omitempty
 				if slices.Contains(parts[1:], "omitempty") {
 					required = false
 				}
 			} else {
-				// Convert field name to snake_case for JSON
 				fieldName = toSnakeCase(fieldName)
 			}
 
 			fieldSchema := generateSchemaRecursive(field.Type, t, visited)
 
-			// Add description from struct tag if available
 			if desc := field.Tag.Get("description"); desc != "" {
 				fieldSchema.Description = desc
 			}
 
-			// Add enum values from struct tag if available
 			if enumTag := field.Tag.Get("enum"); enumTag != "" {
 				enumValues := strings.Split(enumTag, ",")
 				fieldSchema.Enum = make([]any, len(enumValues))
@@ -312,7 +321,6 @@ func generateSchemaRecursive(t, parent reflect.Type, visited map[reflect.Type]bo
 	}
 }
 
-// toSnakeCase converts PascalCase to snake_case.
 func toSnakeCase(s string) string {
 	var result strings.Builder
 	for i, r := range s {

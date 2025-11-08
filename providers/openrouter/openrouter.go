@@ -12,6 +12,7 @@ import (
 type options struct {
 	openaiOptions        []openai.Option
 	languageModelOptions []openai.LanguageModelOption
+	objectMode           fantasy.ObjectMode
 }
 
 const (
@@ -39,12 +40,24 @@ func New(opts ...Option) (fantasy.Provider, error) {
 			openai.WithLanguageModelExtraContentFunc(languageModelExtraContent),
 			openai.WithLanguageModelToPromptFunc(languageModelToPrompt),
 		},
+		objectMode: fantasy.ObjectModeTool, // Default to tool mode for openrouter
 	}
 	for _, o := range opts {
 		o(&providerOptions)
 	}
 
-	providerOptions.openaiOptions = append(providerOptions.openaiOptions, openai.WithLanguageModelOptions(providerOptions.languageModelOptions...))
+	// Handle object mode: convert unsupported modes to tool
+	// OpenRouter doesn't support native JSON mode, so we use tool or text
+	objectMode := providerOptions.objectMode
+	if objectMode == fantasy.ObjectModeAuto || objectMode == fantasy.ObjectModeJSON {
+		objectMode = fantasy.ObjectModeTool
+	}
+
+	providerOptions.openaiOptions = append(
+		providerOptions.openaiOptions,
+		openai.WithLanguageModelOptions(providerOptions.languageModelOptions...),
+		openai.WithObjectMode(objectMode),
+	)
 	return openai.New(providerOptions.openaiOptions...)
 }
 
@@ -73,6 +86,16 @@ func WithHeaders(headers map[string]string) Option {
 func WithHTTPClient(client option.HTTPClient) Option {
 	return func(o *options) {
 		o.openaiOptions = append(o.openaiOptions, openai.WithHTTPClient(client))
+	}
+}
+
+// WithObjectMode sets the object generation mode for the OpenRouter provider.
+// Supported modes: ObjectModeTool, ObjectModeText.
+// ObjectModeAuto and ObjectModeJSON are automatically converted to ObjectModeTool
+// since OpenRouter doesn't support native JSON mode.
+func WithObjectMode(om fantasy.ObjectMode) Option {
+	return func(o *options) {
+		o.objectMode = om
 	}
 }
 

@@ -25,6 +25,14 @@ func TestOpenAICommon(t *testing.T) {
 	testCommon(t, pairs)
 }
 
+func TestOpenAIObjectGeneration(t *testing.T) {
+	var pairs []builderPair
+	for _, m := range openaiTestModels {
+		pairs = append(pairs, builderPair{m.name, openAIBuilder(m.model), nil, nil})
+	}
+	testObjectGeneration(t, pairs)
+}
+
 func openAIBuilder(model string) builderFunc {
 	return func(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
 		provider, err := openai.New(

@@ -99,6 +99,14 @@ func TestAnthropicThinkingWithCacheControl(t *testing.T) {
 	testThinking(t, pairs, testAnthropicThinking)
 }
 
+func TestAnthropicObjectGeneration(t *testing.T) {
+	var pairs []builderPair
+	for _, m := range anthropicTestModels {
+		pairs = append(pairs, builderPair{m.name, anthropicBuilder(m.model), nil, nil})
+	}
+	testObjectGeneration(t, pairs)
+}
+
 func testAnthropicThinking(t *testing.T, result *fantasy.AgentResult) {
 	reasoningContentCount := 0
 	signaturesCount := 0

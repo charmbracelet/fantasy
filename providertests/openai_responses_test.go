@@ -53,6 +53,14 @@ func TestOpenAIResponsesWithSummaryThinking(t *testing.T) {
 	testThinking(t, pairs, testOpenAIResponsesThinkingWithSummaryThinking)
 }
 
+func TestOpenAIResponsesObjectGeneration(t *testing.T) {
+	var pairs []builderPair
+	for _, m := range openaiTestModels {
+		pairs = append(pairs, builderPair{m.name, openAIReasoningBuilder(m.model), nil, nil})
+	}
+	testObjectGeneration(t, pairs)
+}
+
 func testOpenAIResponsesThinkingWithSummaryThinking(t *testing.T, result *fantasy.AgentResult) {
 	reasoningContentCount := 0
 	encryptedData := 0

@@ -10,6 +10,7 @@ import (
 	"os"
 
 	"charm.land/fantasy"
+	"charm.land/fantasy/object"
 	"charm.land/fantasy/providers/openai"
 )
 
@@ -50,7 +51,7 @@ func main() {
 
 	// Ask for a structured recipe. The model will return a Recipe struct
 	// that's been validated against our schema.
-	result, err := fantasy.GenerateObject[Recipe](ctx, model, fantasy.ObjectCall{
+	result, err := object.Generate[Recipe](ctx, model, fantasy.ObjectCall{
 		Prompt: fantasy.Prompt{
 			fantasy.NewUserMessage("Give me a recipe for chocolate chip cookies"),
 		},
@@ -76,7 +77,7 @@ func main() {
 	// Want to see progressive updates as the object builds? Use streaming!
 	fmt.Println("🌊 Now let's try streaming...")
 
-	stream, err := fantasy.StreamObject[Recipe](ctx, model, fantasy.ObjectCall{
+	stream, err := object.Stream[Recipe](ctx, model, fantasy.ObjectCall{
 		Prompt: fantasy.Prompt{
 			fantasy.NewUserMessage("Give me a recipe for banana bread"),
 		},

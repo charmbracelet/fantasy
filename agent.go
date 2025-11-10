@@ -418,6 +418,9 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 		preparedTools := a.prepareTools(a.settings.tools, stepActiveTools, disableAllTools)
 
 		retryOptions := DefaultRetryOptions()
+		if opts.MaxRetries != nil {
+			retryOptions.MaxRetries = *opts.MaxRetries
+		}
 		retryOptions.OnRetry = opts.OnRetry
 		retry := RetryWithExponentialBackoffRespectingRetryHeaders[*Response](retryOptions)
 
@@ -826,8 +829,17 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 			ProviderOptions:  call.ProviderOptions,
 		}
 
-		// Get streaming response
-		stream, err := stepModel.Stream(ctx, streamCall)
+		// Get streaming response with retry logic
+		retryOptions := DefaultRetryOptions()
+		if call.MaxRetries != nil {
+			retryOptions.MaxRetries = *call.MaxRetries
+		}
+		retryOptions.OnRetry = call.OnRetry
+		retry := RetryWithExponentialBackoffRespectingRetryHeaders[StreamResponse](retryOptions)
+
+		stream, err := retry(ctx, func() (StreamResponse, error) {
+			return stepModel.Stream(ctx, streamCall)
+		})
 		if err != nil {
 			if opts.OnError != nil {
 				opts.OnError(err)
@@ -1058,6 +1070,20 @@ func WithPrepareStep(fn PrepareStepFunction) AgentOption {
 func WithRepairToolCall(fn RepairToolCallFunction) AgentOption {
 	return func(s *agentSettings) {
 		s.repairToolCall = fn
+	}
+}
+
+// WithMaxRetries sets the maximum number of retries for the agent.
+func WithMaxRetries(maxRetries int) AgentOption {
+	return func(s *agentSettings) {
+		s.maxRetries = &maxRetries
+	}
+}
+
+// WithOnRetry sets the retry callback for the agent.
+func WithOnRetry(callback OnRetryCallback) AgentOption {
+	return func(s *agentSettings) {
+		s.onRetry = callback
 	}
 }
 

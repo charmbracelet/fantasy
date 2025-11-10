@@ -144,7 +144,9 @@ func (w *funcToolWrapper[TInput]) Run(ctx context.Context, params ToolCall) (Too
 // schemaToParameters converts a Schema to the parameters map format expected by ToolInfo.
 func schemaToParameters(schema Schema) map[string]any {
 	if schema.Type != "object" || schema.Properties == nil {
-		return map[string]any{}
+		return map[string]any{
+			"type": schema.Type,
+		}
 	}
 
 	params := make(map[string]any)

@@ -542,7 +542,9 @@ func TestSchemaToParametersEdgeCases(t *testing.T) {
 			schema: Schema{
 				Type: "string",
 			},
-			expected: map[string]any{},
+			expected: map[string]any{
+				"type": "string",
+			},
 		},
 		{
 			name: "object with no properties",
@@ -550,7 +552,9 @@ func TestSchemaToParametersEdgeCases(t *testing.T) {
 				Type:       "object",
 				Properties: nil,
 			},
-			expected: map[string]any{},
+			expected: map[string]any{
+				"type": "object",
+			},
 		},
 		{
 			name: "object with empty properties",
@@ -597,15 +601,25 @@ func TestSchemaToParametersEdgeCases(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			result := schemaToParameters(tt.schema)
 			require.Len(t, result, len(tt.expected))
+
 			for key, expectedValue := range tt.expected {
 				require.NotNil(t, result[key], "Expected parameter %s to exist", key)
-				// Deep comparison would be complex, so we'll check key properties
-				resultParam := result[key].(map[string]any)
-				expectedParam := expectedValue.(map[string]any)
-				for propKey, propValue := range expectedParam {
-					require.Equal(t, propValue, resultParam[propKey], "Expected %s.%s", key, propKey)
+
+				switch expectedValue.(type) {
+				case string, int, float64:
+					require.Equal(t, expectedValue, result[key], "Expected %s to match", key)
+				case map[string]any:
+					// Deep comparison would be complex, so we'll check key properties
+					resultParam := result[key].(map[string]any)
+					expectedParam := expectedValue.(map[string]any)
+					for propKey, propValue := range expectedParam {
+						require.Equal(t, propValue, resultParam[propKey], "Expected %s.%s", key, propKey)
+					}
+				default:
+					t.Fatalf("Unhandled type for expected value of key %s", key)
 				}
 			}
 		})

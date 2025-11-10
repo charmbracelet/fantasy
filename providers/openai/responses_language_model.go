@@ -9,6 +9,8 @@ import (
 	"strings"
 
 	"charm.land/fantasy"
+	"charm.land/fantasy/object"
+	"charm.land/fantasy/schema"
 	"github.com/google/uuid"
 	"github.com/openai/openai-go/v2"
 	"github.com/openai/openai-go/v2/packages/param"
@@ -1040,9 +1042,9 @@ type reasoningState struct {
 func (o responsesLanguageModel) GenerateObject(ctx context.Context, call fantasy.ObjectCall) (*fantasy.ObjectResponse, error) {
 	switch o.objectMode {
 	case fantasy.ObjectModeText:
-		return fantasy.GenerateObjectWithText(ctx, o, call)
+		return object.GenerateWithText(ctx, o, call)
 	case fantasy.ObjectModeTool:
-		return fantasy.GenerateObjectWithTool(ctx, o, call)
+		return object.GenerateWithTool(ctx, o, call)
 	default:
 		return o.generateObjectWithJSONMode(ctx, call)
 	}
@@ -1052,9 +1054,9 @@ func (o responsesLanguageModel) GenerateObject(ctx context.Context, call fantasy
 func (o responsesLanguageModel) StreamObject(ctx context.Context, call fantasy.ObjectCall) (fantasy.ObjectStreamResponse, error) {
 	switch o.objectMode {
 	case fantasy.ObjectModeTool:
-		return fantasy.StreamObjectWithTool(ctx, o, call)
+		return object.StreamWithTool(ctx, o, call)
 	case fantasy.ObjectModeText:
-		return fantasy.StreamObjectWithText(ctx, o, call)
+		return object.StreamWithText(ctx, o, call)
 	default:
 		return o.streamObjectWithJSONMode(ctx, call)
 	}
@@ -1062,7 +1064,7 @@ func (o responsesLanguageModel) StreamObject(ctx context.Context, call fantasy.O
 
 func (o responsesLanguageModel) generateObjectWithJSONMode(ctx context.Context, call fantasy.ObjectCall) (*fantasy.ObjectResponse, error) {
 	// Convert our Schema to OpenAI's JSON Schema format
-	jsonSchemaMap := fantasy.SchemaToJSONSchema(call.Schema)
+	jsonSchemaMap := schema.ToMap(call.Schema)
 
 	// Add additionalProperties: false recursively for strict mode (OpenAI requirement)
 	addAdditionalPropertiesFalse(jsonSchemaMap)
@@ -1134,9 +1136,9 @@ func (o responsesLanguageModel) generateObjectWithJSONMode(ctx context.Context, 
 	// Parse and validate
 	var obj any
 	if call.RepairText != nil {
-		obj, err = fantasy.ParseAndValidateWithRepair(ctx, jsonText, call.Schema, call.RepairText)
+		obj, err = schema.ParseAndValidateWithRepair(ctx, jsonText, call.Schema, call.RepairText)
 	} else {
-		obj, err = fantasy.ParseAndValidate(jsonText, call.Schema)
+		obj, err = schema.ParseAndValidate(jsonText, call.Schema)
 	}
 
 	usage := fantasy.Usage{
@@ -1173,7 +1175,7 @@ func (o responsesLanguageModel) generateObjectWithJSONMode(ctx context.Context, 
 
 func (o responsesLanguageModel) streamObjectWithJSONMode(ctx context.Context, call fantasy.ObjectCall) (fantasy.ObjectStreamResponse, error) {
 	// Convert our Schema to OpenAI's JSON Schema format
-	jsonSchemaMap := fantasy.SchemaToJSONSchema(call.Schema)
+	jsonSchemaMap := schema.ToMap(call.Schema)
 
 	// Add additionalProperties: false recursively for strict mode (OpenAI requirement)
 	addAdditionalPropertiesFalse(jsonSchemaMap)
@@ -1229,11 +1231,11 @@ func (o responsesLanguageModel) streamObjectWithJSONMode(ctx context.Context, ca
 				accumulated += textDelta.Delta
 
 				// Try to parse the accumulated text
-				obj, state, parseErr := fantasy.ParsePartialJSON(accumulated)
+				obj, state, parseErr := schema.ParsePartialJSON(accumulated)
 
 				// If we successfully parsed, validate and emit
-				if state == fantasy.ParseStateSuccessful || state == fantasy.ParseStateRepaired {
-					if err := fantasy.ValidateAgainstSchema(obj, call.Schema); err == nil {
+				if state == schema.ParseStateSuccessful || state == schema.ParseStateRepaired {
+					if err := schema.ValidateAgainstSchema(obj, call.Schema); err == nil {
 						// Only emit if object is different from last
 						if !reflect.DeepEqual(obj, lastParsedObject) {
 							if !yield(fantasy.ObjectStreamPart{
@@ -1248,12 +1250,12 @@ func (o responsesLanguageModel) streamObjectWithJSONMode(ctx context.Context, ca
 				}
 
 				// If parsing failed and we have a repair function, try it
-				if state == fantasy.ParseStateFailed && call.RepairText != nil {
+				if state == schema.ParseStateFailed && call.RepairText != nil {
 					repairedText, repairErr := call.RepairText(ctx, accumulated, parseErr)
 					if repairErr == nil {
-						obj2, state2, _ := fantasy.ParsePartialJSON(repairedText)
-						if (state2 == fantasy.ParseStateSuccessful || state2 == fantasy.ParseStateRepaired) &&
-							fantasy.ValidateAgainstSchema(obj2, call.Schema) == nil {
+						obj2, state2, _ := schema.ParsePartialJSON(repairedText)
+						if (state2 == schema.ParseStateSuccessful || state2 == schema.ParseStateRepaired) &&
+							schema.ValidateAgainstSchema(obj2, call.Schema) == nil {
 							if !reflect.DeepEqual(obj2, lastParsedObject) {
 								if !yield(fantasy.ObjectStreamPart{
 									Type:   fantasy.ObjectStreamPartTypeObject,

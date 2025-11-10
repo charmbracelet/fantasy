@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"charm.land/fantasy"
+	"charm.land/fantasy/object"
 	"github.com/charmbracelet/anthropic-sdk-go"
 	"github.com/charmbracelet/anthropic-sdk-go/bedrock"
 	"github.com/charmbracelet/anthropic-sdk-go/option"
@@ -971,9 +972,9 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 func (a languageModel) GenerateObject(ctx context.Context, call fantasy.ObjectCall) (*fantasy.ObjectResponse, error) {
 	switch a.options.objectMode {
 	case fantasy.ObjectModeText:
-		return fantasy.GenerateObjectWithText(ctx, a, call)
+		return object.GenerateWithText(ctx, a, call)
 	default:
-		return fantasy.GenerateObjectWithTool(ctx, a, call)
+		return object.GenerateWithTool(ctx, a, call)
 	}
 }
 
@@ -981,8 +982,8 @@ func (a languageModel) GenerateObject(ctx context.Context, call fantasy.ObjectCa
 func (a languageModel) StreamObject(ctx context.Context, call fantasy.ObjectCall) (fantasy.ObjectStreamResponse, error) {
 	switch a.options.objectMode {
 	case fantasy.ObjectModeText:
-		return fantasy.StreamObjectWithText(ctx, a, call)
+		return object.StreamWithText(ctx, a, call)
 	default:
-		return fantasy.StreamObjectWithTool(ctx, a, call)
+		return object.StreamWithTool(ctx, a, call)
 	}
 }

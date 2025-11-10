@@ -12,7 +12,9 @@ import (
 	"strings"
 
 	"charm.land/fantasy"
+	"charm.land/fantasy/object"
 	"charm.land/fantasy/providers/anthropic"
+	"charm.land/fantasy/schema"
 	"cloud.google.com/go/auth"
 	"github.com/charmbracelet/x/exp/slice"
 	"github.com/google/uuid"
@@ -811,9 +813,9 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 func (g *languageModel) GenerateObject(ctx context.Context, call fantasy.ObjectCall) (*fantasy.ObjectResponse, error) {
 	switch g.objectMode {
 	case fantasy.ObjectModeText:
-		return fantasy.GenerateObjectWithText(ctx, g, call)
+		return object.GenerateWithText(ctx, g, call)
 	case fantasy.ObjectModeTool:
-		return fantasy.GenerateObjectWithTool(ctx, g, call)
+		return object.GenerateWithTool(ctx, g, call)
 	default:
 		return g.generateObjectWithJSONMode(ctx, call)
 	}
@@ -823,9 +825,9 @@ func (g *languageModel) GenerateObject(ctx context.Context, call fantasy.ObjectC
 func (g *languageModel) StreamObject(ctx context.Context, call fantasy.ObjectCall) (fantasy.ObjectStreamResponse, error) {
 	switch g.objectMode {
 	case fantasy.ObjectModeTool:
-		return fantasy.StreamObjectWithTool(ctx, g, call)
+		return object.StreamWithTool(ctx, g, call)
 	case fantasy.ObjectModeText:
-		return fantasy.StreamObjectWithText(ctx, g, call)
+		return object.StreamWithText(ctx, g, call)
 	default:
 		return g.streamObjectWithJSONMode(ctx, call)
 	}
@@ -833,7 +835,7 @@ func (g *languageModel) StreamObject(ctx context.Context, call fantasy.ObjectCal
 
 func (g *languageModel) generateObjectWithJSONMode(ctx context.Context, call fantasy.ObjectCall) (*fantasy.ObjectResponse, error) {
 	// Convert our Schema to Google's JSON Schema format
-	jsonSchemaMap := fantasy.SchemaToJSONSchema(call.Schema)
+	jsonSchemaMap := schema.ToMap(call.Schema)
 
 	// Build request using prepareParams
 	fantasyCall := fantasy.Call{
@@ -889,9 +891,9 @@ func (g *languageModel) generateObjectWithJSONMode(ctx context.Context, call fan
 	// Parse and validate
 	var obj any
 	if call.RepairText != nil {
-		obj, err = fantasy.ParseAndValidateWithRepair(ctx, jsonText, call.Schema, call.RepairText)
+		obj, err = schema.ParseAndValidateWithRepair(ctx, jsonText, call.Schema, call.RepairText)
 	} else {
-		obj, err = fantasy.ParseAndValidate(jsonText, call.Schema)
+		obj, err = schema.ParseAndValidate(jsonText, call.Schema)
 	}
 
 	if err != nil {
@@ -915,7 +917,7 @@ func (g *languageModel) generateObjectWithJSONMode(ctx context.Context, call fan
 
 func (g *languageModel) streamObjectWithJSONMode(ctx context.Context, call fantasy.ObjectCall) (fantasy.ObjectStreamResponse, error) {
 	// Convert our Schema to Google's JSON Schema format
-	jsonSchemaMap := fantasy.SchemaToJSONSchema(call.Schema)
+	jsonSchemaMap := schema.ToMap(call.Schema)
 
 	// Build request using prepareParams
 	fantasyCall := fantasy.Call{
@@ -980,11 +982,11 @@ func (g *languageModel) streamObjectWithJSONMode(ctx context.Context, call fanta
 						accumulated += part.Text
 
 						// Try to parse the accumulated text
-						obj, state, parseErr := fantasy.ParsePartialJSON(accumulated)
+						obj, state, parseErr := schema.ParsePartialJSON(accumulated)
 
 						// If we successfully parsed, validate and emit
-						if state == fantasy.ParseStateSuccessful || state == fantasy.ParseStateRepaired {
-							if err := fantasy.ValidateAgainstSchema(obj, call.Schema); err == nil {
+						if state == schema.ParseStateSuccessful || state == schema.ParseStateRepaired {
+							if err := schema.ValidateAgainstSchema(obj, call.Schema); err == nil {
 								// Only emit if object is different from last
 								if !reflect.DeepEqual(obj, lastParsedObject) {
 									if !yield(fantasy.ObjectStreamPart{
@@ -999,12 +1001,12 @@ func (g *languageModel) streamObjectWithJSONMode(ctx context.Context, call fanta
 						}
 
 						// If parsing failed and we have a repair function, try it
-						if state == fantasy.ParseStateFailed && call.RepairText != nil {
+						if state == schema.ParseStateFailed && call.RepairText != nil {
 							repairedText, repairErr := call.RepairText(ctx, accumulated, parseErr)
 							if repairErr == nil {
-								obj2, state2, _ := fantasy.ParsePartialJSON(repairedText)
-								if (state2 == fantasy.ParseStateSuccessful || state2 == fantasy.ParseStateRepaired) &&
-									fantasy.ValidateAgainstSchema(obj2, call.Schema) == nil {
+								obj2, state2, _ := schema.ParsePartialJSON(repairedText)
+								if (state2 == schema.ParseStateSuccessful || state2 == schema.ParseStateRepaired) &&
+									schema.ValidateAgainstSchema(obj2, call.Schema) == nil {
 									if !reflect.DeepEqual(obj2, lastParsedObject) {
 										if !yield(fantasy.ObjectStreamPart{
 											Type:   fantasy.ObjectStreamPartTypeObject,

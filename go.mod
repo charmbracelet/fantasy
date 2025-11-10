@@ -4,8 +4,8 @@ go 1.24.5
 
 require (
 	cloud.google.com/go/auth v0.17.0
-	github.com/aws/aws-sdk-go-v2 v1.39.5
-	github.com/aws/smithy-go v1.23.1
+	github.com/aws/aws-sdk-go-v2 v1.39.6
+	github.com/aws/smithy-go v1.23.2
 	github.com/charmbracelet/anthropic-sdk-go v0.0.0-20251024181547-21d6f3d9a904
 	github.com/charmbracelet/x/exp/slice v0.0.0-20250904123553-b4e2667e5ad5
 	github.com/charmbracelet/x/json v0.2.0
@@ -14,9 +14,9 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/openai/openai-go/v2 v2.7.1
 	github.com/stretchr/testify v1.11.1
-	go.yaml.in/yaml/v4 v4.0.0-rc.2
-	golang.org/x/oauth2 v0.32.0
-	google.golang.org/genai v1.33.1-0.20251103191629-d15baab4f79e
+	go.yaml.in/yaml/v4 v4.0.0-rc.3
+	golang.org/x/oauth2 v0.33.0
+	google.golang.org/genai v1.34.0
 	gopkg.in/dnaeon/go-vcr.v4 v4.0.6-0.20250923044825-7b4892dd3117
 )
 

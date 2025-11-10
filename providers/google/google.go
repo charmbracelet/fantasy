@@ -756,7 +756,8 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 				}
 			}
 
-			if resp.UsageMetadata != nil {
+			// we need to make sure that there is actual tokendata
+			if resp.UsageMetadata != nil && resp.UsageMetadata.TotalTokenCount != 0 {
 				currentUsage := mapUsage(resp.UsageMetadata)
 				// if first usage chunk
 				if usage == nil {
@@ -1020,7 +1021,8 @@ func (g *languageModel) streamObjectWithJSONMode(ctx context.Context, call fanta
 				}
 			}
 
-			if resp.UsageMetadata != nil {
+			// we need to make sure that there is actual tokendata
+			if resp.UsageMetadata != nil && resp.UsageMetadata.TotalTokenCount != 0 {
 				currentUsage := mapUsage(resp.UsageMetadata)
 				if usage == nil {
 					usage = &currentUsage

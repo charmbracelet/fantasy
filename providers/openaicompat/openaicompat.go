@@ -31,6 +31,7 @@ func New(opts ...Option) (fantasy.Provider, error) {
 			openai.WithLanguageModelPrepareCallFunc(PrepareCallFunc),
 			openai.WithLanguageModelStreamExtraFunc(StreamExtraFunc),
 			openai.WithLanguageModelExtraContentFunc(ExtraContentFunc),
+			openai.WithLanguageModelToPromptFunc(ToPromptFunc),
 		},
 	}
 	for _, o := range opts {

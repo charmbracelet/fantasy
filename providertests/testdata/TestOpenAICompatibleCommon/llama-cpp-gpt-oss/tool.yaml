@@ -22,22 +22,22 @@ interactions:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 803
-    body: '{"choices":[{"finish_reason":"tool_calls","index":0,"message":{"role":"assistant","reasoning_content":"We need to call the weather function.","content":null,"tool_calls":[{"type":"function","function":{"name":"weather","arguments":"{\"location\":\"Florence, Italy\"}"},"id":"iSI9CucmKnbtrkxFldJPg3gSXbJ3Eom9"}]}}],"created":1761672366,"model":"openai/gpt-oss-20b","system_fingerprint":"b6865-1c1409e13","object":"chat.completion","usage":{"completion_tokens":34,"prompt_tokens":139,"total_tokens":173},"id":"chatcmpl-5ubBAQ1OuDgakYNl3FcW2ZzxP6PLPfv4","timings":{"cache_n":59,"prompt_n":80,"prompt_ms":292.99,"prompt_per_token_ms":3.662375,"prompt_per_second":273.0468616676337,"predicted_n":34,"predicted_ms":462.897,"predicted_per_token_ms":13.614617647058823,"predicted_per_second":73.45046522228488}}'
+    content_length: 914
+    body: '{"choices":[{"finish_reason":"tool_calls","index":0,"message":{"role":"assistant","reasoning_content":"The user asks: \"What''s the weather in Florence, Italy?\" We have a tool \"functions.weather\" that can get weather information. We should call it.","content":null,"tool_calls":[{"type":"function","function":{"name":"weather","arguments":"{\"location\":\"Florence,Italy\"}"},"id":"mvVq65j66dyGRizURhbdNCEnSO56GhXx"}]}}],"created":1762855699,"model":"openai/gpt-oss-20b","system_fingerprint":"b7010-c27efd2bd","object":"chat.completion","usage":{"completion_tokens":58,"prompt_tokens":139,"total_tokens":197},"id":"chatcmpl-xN1fVcGhqAh4SXLdsus63WtY5KhK0cv8","timings":{"cache_n":59,"prompt_n":80,"prompt_ms":138.363,"prompt_per_token_ms":1.7295375,"prompt_per_second":578.1892557981541,"predicted_n":58,"predicted_ms":483.677,"predicted_per_token_ms":8.339258620689655,"predicted_per_second":119.91473648736657}}'
     headers:
       Content-Type:
       - application/json; charset=utf-8
     status: 200 OK
     code: 200
-    duration: 760.630834ms
+    duration: 625.633ms
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 729
+    content_length: 898
     host: ""
-    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"iSI9CucmKnbtrkxFldJPg3gSXbJ3Eom9","function":{"arguments":"{\"location\":\"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"iSI9CucmKnbtrkxFldJPg3gSXbJ3Eom9","role":"tool"}],"model":"openai/gpt-oss-20b","max_completion_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"mvVq65j66dyGRizURhbdNCEnSO56GhXx","function":{"arguments":"{\"location\":\"Florence,Italy\"}","name":"weather"},"type":"function"}],"role":"assistant","reasoning_content":"The user asks: \"What''s the weather in Florence, Italy?\" We have a tool \"functions.weather\" that can get weather information. We should call it."},{"content":"40 C","tool_call_id":"mvVq65j66dyGRizURhbdNCEnSO56GhXx","role":"tool"}],"model":"openai/gpt-oss-20b","max_completion_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
     headers:
       Accept:
       - application/json
@@ -51,11 +51,11 @@ interactions:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 1240
-    body: '{"choices":[{"finish_reason":"stop","index":0,"message":{"role":"assistant","reasoning_content":"We have a response from the weather function: \"40 C\". The user asked: \"What''s the weather in Florence, Italy?\" The function returned \"40 C\". This is presumably the temperature. The assistant should respond accordingly, maybe confirm the weather. Also check if any other details needed. The user just asked for weather. So answer: \"The current temperature is 40°C.\" Maybe add a note that it''s high. Also can ask if they want more info. Probably just reply with the info.","content":"The current temperature in Florence, Italy is **40 °C**. If you need more details—like humidity, wind speed, or forecast—just let me know!"}}],"created":1761672368,"model":"openai/gpt-oss-20b","system_fingerprint":"b6865-1c1409e13","object":"chat.completion","usage":{"completion_tokens":145,"prompt_tokens":175,"total_tokens":320},"id":"chatcmpl-FBssXUKqLhrUJRe6LEAGJVRpBGrzYITs","timings":{"cache_n":139,"prompt_n":36,"prompt_ms":147.533,"prompt_per_token_ms":4.098138888888888,"prompt_per_second":244.0132038255848,"predicted_n":145,"predicted_ms":2037.608,"predicted_per_token_ms":14.05246896551724,"predicted_per_second":71.16187215597897}}'
+    content_length: 646
+    body: '{"choices":[{"finish_reason":"stop","index":0,"message":{"role":"assistant","content":"The current weather in Florence, Italy is **40 °C**."}}],"created":1762855700,"model":"openai/gpt-oss-20b","system_fingerprint":"b7010-c27efd2bd","object":"chat.completion","usage":{"completion_tokens":18,"prompt_tokens":213,"total_tokens":231},"id":"chatcmpl-mt9KdP2gwDDiYYxdoehItCfCj6J1HNjs","timings":{"cache_n":177,"prompt_n":36,"prompt_ms":79.143,"prompt_per_token_ms":2.1984166666666667,"prompt_per_second":454.8728251393048,"predicted_n":18,"predicted_ms":144.84,"predicted_per_token_ms":8.046666666666667,"predicted_per_second":124.27506213753105}}'
     headers:
       Content-Type:
       - application/json; charset=utf-8
     status: 200 OK
     code: 200
-    duration: 2.186660958s
+    duration: 225.614042ms

@@ -8,10 +8,21 @@ import (
 	"charm.land/fantasy/providers/openai"
 )
 
-// Global type identifiers for OpenRouter-specific provider data.
+// Global type identifiers for OpenAI-compatible provider data.
 const (
 	TypeProviderOptions = Name + ".options"
 )
+
+// Register OpenAI-compatible provider-specific types with the global registry.
+func init() {
+	fantasy.RegisterProviderType(TypeProviderOptions, func(data []byte) (fantasy.ProviderOptionsData, error) {
+		var v ProviderOptions
+		if err := json.Unmarshal(data, &v); err != nil {
+			return nil, err
+		}
+		return &v, nil
+	})
+}
 
 // ProviderOptions represents additional options for the OpenAI-compatible provider.
 type ProviderOptions struct {
@@ -30,28 +41,17 @@ func (*ProviderOptions) Options() {}
 // MarshalJSON implements custom JSON marshaling with type info for ProviderOptions.
 func (o ProviderOptions) MarshalJSON() ([]byte, error) {
 	type plain ProviderOptions
-	raw, err := json.Marshal(plain(o))
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(struct {
-		Type string          `json:"type"`
-		Data json.RawMessage `json:"data"`
-	}{
-		Type: TypeProviderOptions,
-		Data: raw,
-	})
+	return fantasy.MarshalProviderType(TypeProviderOptions, plain(o))
 }
 
 // UnmarshalJSON implements custom JSON unmarshaling with type info for ProviderOptions.
 func (o *ProviderOptions) UnmarshalJSON(data []byte) error {
 	type plain ProviderOptions
-	var oo plain
-	err := json.Unmarshal(data, &oo)
-	if err != nil {
+	var p plain
+	if err := fantasy.UnmarshalProviderType(data, &p); err != nil {
 		return err
 	}
-	*o = ProviderOptions(oo)
+	*o = ProviderOptions(p)
 	return nil
 }
 

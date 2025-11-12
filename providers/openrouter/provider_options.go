@@ -25,6 +25,24 @@ const (
 	TypeProviderMetadata = Name + ".metadata"
 )
 
+// Register OpenRouter provider-specific types with the global registry.
+func init() {
+	fantasy.RegisterProviderType(TypeProviderOptions, func(data []byte) (fantasy.ProviderOptionsData, error) {
+		var v ProviderOptions
+		if err := json.Unmarshal(data, &v); err != nil {
+			return nil, err
+		}
+		return &v, nil
+	})
+	fantasy.RegisterProviderType(TypeProviderMetadata, func(data []byte) (fantasy.ProviderOptionsData, error) {
+		var v ProviderMetadata
+		if err := json.Unmarshal(data, &v); err != nil {
+			return nil, err
+		}
+		return &v, nil
+	})
+}
+
 // PromptTokensDetails represents details about prompt tokens for OpenRouter.
 type PromptTokensDetails struct {
 	CachedTokens int64
@@ -65,28 +83,17 @@ func (*ProviderMetadata) Options() {}
 // MarshalJSON implements custom JSON marshaling with type info for ProviderMetadata.
 func (m ProviderMetadata) MarshalJSON() ([]byte, error) {
 	type plain ProviderMetadata
-	raw, err := json.Marshal(plain(m))
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(struct {
-		Type string          `json:"type"`
-		Data json.RawMessage `json:"data"`
-	}{
-		Type: TypeProviderMetadata,
-		Data: raw,
-	})
+	return fantasy.MarshalProviderType(TypeProviderMetadata, plain(m))
 }
 
 // UnmarshalJSON implements custom JSON unmarshaling with type info for ProviderMetadata.
 func (m *ProviderMetadata) UnmarshalJSON(data []byte) error {
 	type plain ProviderMetadata
-	var pm plain
-	err := json.Unmarshal(data, &pm)
-	if err != nil {
+	var p plain
+	if err := fantasy.UnmarshalProviderType(data, &p); err != nil {
 		return err
 	}
-	*m = ProviderMetadata(pm)
+	*m = ProviderMetadata(p)
 	return nil
 }
 
@@ -149,28 +156,17 @@ func (*ProviderOptions) Options() {}
 // MarshalJSON implements custom JSON marshaling with type info for ProviderOptions.
 func (o ProviderOptions) MarshalJSON() ([]byte, error) {
 	type plain ProviderOptions
-	raw, err := json.Marshal(plain(o))
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(struct {
-		Type string          `json:"type"`
-		Data json.RawMessage `json:"data"`
-	}{
-		Type: TypeProviderOptions,
-		Data: raw,
-	})
+	return fantasy.MarshalProviderType(TypeProviderOptions, plain(o))
 }
 
 // UnmarshalJSON implements custom JSON unmarshaling with type info for ProviderOptions.
 func (o *ProviderOptions) UnmarshalJSON(data []byte) error {
 	type plain ProviderOptions
-	var oo plain
-	err := json.Unmarshal(data, &oo)
-	if err != nil {
+	var p plain
+	if err := fantasy.UnmarshalProviderType(data, &p); err != nil {
 		return err
 	}
-	*o = ProviderOptions(oo)
+	*o = ProviderOptions(p)
 	return nil
 }
 
@@ -211,22 +207,4 @@ func ParseOptions(data map[string]any) (*ProviderOptions, error) {
 		return nil, err
 	}
 	return &options, nil
-}
-
-// Register OpenRouter provider-specific types with the global registry.
-func init() {
-	fantasy.RegisterProviderType(TypeProviderOptions, func(data []byte) (fantasy.ProviderOptionsData, error) {
-		var v ProviderOptions
-		if err := json.Unmarshal(data, &v); err != nil {
-			return nil, err
-		}
-		return &v, nil
-	})
-	fantasy.RegisterProviderType(TypeProviderMetadata, func(data []byte) (fantasy.ProviderOptionsData, error) {
-		var v ProviderMetadata
-		if err := json.Unmarshal(data, &v); err != nil {
-			return nil, err
-		}
-		return &v, nil
-	})
 }

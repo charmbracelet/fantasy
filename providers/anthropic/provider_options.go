@@ -14,6 +14,31 @@ const (
 	TypeProviderCacheControl    = Name + ".cache_control_options"
 )
 
+// Register Anthropic provider-specific types with the global registry.
+func init() {
+	fantasy.RegisterProviderType(TypeProviderOptions, func(data []byte) (fantasy.ProviderOptionsData, error) {
+		var v ProviderOptions
+		if err := json.Unmarshal(data, &v); err != nil {
+			return nil, err
+		}
+		return &v, nil
+	})
+	fantasy.RegisterProviderType(TypeReasoningOptionMetadata, func(data []byte) (fantasy.ProviderOptionsData, error) {
+		var v ReasoningOptionMetadata
+		if err := json.Unmarshal(data, &v); err != nil {
+			return nil, err
+		}
+		return &v, nil
+	})
+	fantasy.RegisterProviderType(TypeProviderCacheControl, func(data []byte) (fantasy.ProviderOptionsData, error) {
+		var v ProviderCacheControlOptions
+		if err := json.Unmarshal(data, &v); err != nil {
+			return nil, err
+		}
+		return &v, nil
+	})
+}
+
 // ProviderOptions represents additional options for the Anthropic provider.
 type ProviderOptions struct {
 	SendReasoning          *bool                   `json:"send_reasoning"`
@@ -27,28 +52,17 @@ func (o *ProviderOptions) Options() {}
 // MarshalJSON implements custom JSON marshaling with type info for ProviderOptions.
 func (o ProviderOptions) MarshalJSON() ([]byte, error) {
 	type plain ProviderOptions
-	raw, err := json.Marshal(plain(o))
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(struct {
-		Type string          `json:"type"`
-		Data json.RawMessage `json:"data"`
-	}{
-		Type: TypeProviderOptions,
-		Data: raw,
-	})
+	return fantasy.MarshalProviderType(TypeProviderOptions, plain(o))
 }
 
 // UnmarshalJSON implements custom JSON unmarshaling with type info for ProviderOptions.
 func (o *ProviderOptions) UnmarshalJSON(data []byte) error {
 	type plain ProviderOptions
-	var oo plain
-	err := json.Unmarshal(data, &oo)
-	if err != nil {
+	var p plain
+	if err := fantasy.UnmarshalProviderType(data, &p); err != nil {
 		return err
 	}
-	*o = ProviderOptions(oo)
+	*o = ProviderOptions(p)
 	return nil
 }
 
@@ -69,28 +83,17 @@ func (*ReasoningOptionMetadata) Options() {}
 // MarshalJSON implements custom JSON marshaling with type info for ReasoningOptionMetadata.
 func (m ReasoningOptionMetadata) MarshalJSON() ([]byte, error) {
 	type plain ReasoningOptionMetadata
-	raw, err := json.Marshal(plain(m))
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(struct {
-		Type string          `json:"type"`
-		Data json.RawMessage `json:"data"`
-	}{
-		Type: TypeReasoningOptionMetadata,
-		Data: raw,
-	})
+	return fantasy.MarshalProviderType(TypeReasoningOptionMetadata, plain(m))
 }
 
 // UnmarshalJSON implements custom JSON unmarshaling with type info for ReasoningOptionMetadata.
 func (m *ReasoningOptionMetadata) UnmarshalJSON(data []byte) error {
 	type plain ReasoningOptionMetadata
-	var rm plain
-	err := json.Unmarshal(data, &rm)
-	if err != nil {
+	var p plain
+	if err := fantasy.UnmarshalProviderType(data, &p); err != nil {
 		return err
 	}
-	*m = ReasoningOptionMetadata(rm)
+	*m = ReasoningOptionMetadata(p)
 	return nil
 }
 
@@ -105,28 +108,17 @@ func (*ProviderCacheControlOptions) Options() {}
 // MarshalJSON implements custom JSON marshaling with type info for ProviderCacheControlOptions.
 func (o ProviderCacheControlOptions) MarshalJSON() ([]byte, error) {
 	type plain ProviderCacheControlOptions
-	raw, err := json.Marshal(plain(o))
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(struct {
-		Type string          `json:"type"`
-		Data json.RawMessage `json:"data"`
-	}{
-		Type: TypeProviderCacheControl,
-		Data: raw,
-	})
+	return fantasy.MarshalProviderType(TypeProviderCacheControl, plain(o))
 }
 
 // UnmarshalJSON implements custom JSON unmarshaling with type info for ProviderCacheControlOptions.
 func (o *ProviderCacheControlOptions) UnmarshalJSON(data []byte) error {
 	type plain ProviderCacheControlOptions
-	var cc plain
-	err := json.Unmarshal(data, &cc)
-	if err != nil {
+	var p plain
+	if err := fantasy.UnmarshalProviderType(data, &p); err != nil {
 		return err
 	}
-	*o = ProviderCacheControlOptions(cc)
+	*o = ProviderCacheControlOptions(p)
 	return nil
 }
 
@@ -156,29 +148,4 @@ func ParseOptions(data map[string]any) (*ProviderOptions, error) {
 		return nil, err
 	}
 	return &options, nil
-}
-
-// Register Anthropic provider-specific types with the global registry.
-func init() {
-	fantasy.RegisterProviderType(TypeProviderOptions, func(data []byte) (fantasy.ProviderOptionsData, error) {
-		var v ProviderOptions
-		if err := json.Unmarshal(data, &v); err != nil {
-			return nil, err
-		}
-		return &v, nil
-	})
-	fantasy.RegisterProviderType(TypeReasoningOptionMetadata, func(data []byte) (fantasy.ProviderOptionsData, error) {
-		var v ReasoningOptionMetadata
-		if err := json.Unmarshal(data, &v); err != nil {
-			return nil, err
-		}
-		return &v, nil
-	})
-	fantasy.RegisterProviderType(TypeProviderCacheControl, func(data []byte) (fantasy.ProviderOptionsData, error) {
-		var v ProviderCacheControlOptions
-		if err := json.Unmarshal(data, &v); err != nil {
-			return nil, err
-		}
-		return &v, nil
-	})
 }

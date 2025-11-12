@@ -15,17 +15,15 @@ type providerDataJSON struct {
 // UnmarshalFunc converts raw JSON into a ProviderOptionsData implementation.
 type UnmarshalFunc func([]byte) (ProviderOptionsData, error)
 
-var (
-	providerRegistry = make(map[string]UnmarshalFunc)
-	registryMutex    sync.RWMutex
-)
+// providerRegistry uses sync.Map for lock-free reads after initialization.
+// All registrations happen in init() functions before concurrent access.
+var providerRegistry sync.Map
 
 // RegisterProviderType registers a provider type ID with its unmarshal function.
 // Type IDs must be globally unique (e.g. "openai.options").
+// This should only be called during package initialization (init functions).
 func RegisterProviderType(typeID string, unmarshalFn UnmarshalFunc) {
-	registryMutex.Lock()
-	defer registryMutex.Unlock()
-	providerRegistry[typeID] = unmarshalFn
+	providerRegistry.Store(typeID, unmarshalFn)
 }
 
 // unmarshalProviderData routes a typed payload to the correct constructor.
@@ -35,14 +33,12 @@ func unmarshalProviderData(data []byte) (ProviderOptionsData, error) {
 		return nil, err
 	}
 
-	registryMutex.RLock()
-	unmarshalFn, exists := providerRegistry[pj.Type]
-	registryMutex.RUnlock()
-
+	val, exists := providerRegistry.Load(pj.Type)
 	if !exists {
 		return nil, fmt.Errorf("unknown provider data type: %s", pj.Type)
 	}
 
+	unmarshalFn := val.(UnmarshalFunc)
 	return unmarshalFn(pj.Data)
 }
 
@@ -67,4 +63,44 @@ func UnmarshalProviderOptions(data map[string]json.RawMessage) (ProviderOptions,
 // UnmarshalProviderMetadata unmarshals a map of provider metadata by type.
 func UnmarshalProviderMetadata(data map[string]json.RawMessage) (ProviderMetadata, error) {
 	return unmarshalProviderDataMap(data)
+}
+
+// MarshalProviderType marshals provider data with a type wrapper using generics.
+// To avoid infinite recursion, use the "type plain T" pattern before calling this.
+//
+// Usage in provider types:
+//
+//	func (o ProviderOptions) MarshalJSON() ([]byte, error) {
+//	    type plain ProviderOptions
+//	    return fantasy.MarshalProviderType(TypeProviderOptions, plain(o))
+//	}
+func MarshalProviderType[T any](typeID string, data T) ([]byte, error) {
+	rawData, err := json.Marshal(data)
+	if err != nil {
+		return nil, err
+	}
+
+	return json.Marshal(providerDataJSON{
+		Type: typeID,
+		Data: json.RawMessage(rawData),
+	})
+}
+
+// UnmarshalProviderType unmarshals provider data without type wrapper using generics.
+// To avoid infinite recursion, unmarshal to a plain type first.
+// Note: This receives the inner 'data' field after type routing by the registry.
+//
+// Usage in provider types:
+//
+//	func (o *ProviderOptions) UnmarshalJSON(data []byte) error {
+//	    type plain ProviderOptions
+//	    var p plain
+//	    if err := fantasy.UnmarshalProviderType(data, &p); err != nil {
+//	        return err
+//	    }
+//	    *o = ProviderOptions(p)
+//	    return nil
+//	}
+func UnmarshalProviderType[T any](data []byte, target *T) error {
+	return json.Unmarshal(data, target)
 }

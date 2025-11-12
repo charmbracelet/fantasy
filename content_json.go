@@ -248,6 +248,11 @@ func (s *SourceContent) UnmarshalJSON(data []byte) error {
 
 // MarshalJSON implements json.Marshaler for ToolCallContent.
 func (t ToolCallContent) MarshalJSON() ([]byte, error) {
+	var validationErrMsg *string
+	if t.ValidationError != nil {
+		msg := t.ValidationError.Error()
+		validationErrMsg = &msg
+	}
 	dataBytes, err := json.Marshal(struct {
 		ToolCallID       string           `json:"tool_call_id"`
 		ToolName         string           `json:"tool_name"`
@@ -255,7 +260,7 @@ func (t ToolCallContent) MarshalJSON() ([]byte, error) {
 		ProviderExecuted bool             `json:"provider_executed"`
 		ProviderMetadata ProviderMetadata `json:"provider_metadata,omitempty"`
 		Invalid          bool             `json:"invalid,omitempty"`
-		ValidationError  error            `json:"validation_error,omitempty"`
+		ValidationError  *string          `json:"validation_error,omitempty"`
 	}{
 		ToolCallID:       t.ToolCallID,
 		ToolName:         t.ToolName,
@@ -263,7 +268,7 @@ func (t ToolCallContent) MarshalJSON() ([]byte, error) {
 		ProviderExecuted: t.ProviderExecuted,
 		ProviderMetadata: t.ProviderMetadata,
 		Invalid:          t.Invalid,
-		ValidationError:  t.ValidationError,
+		ValidationError:  validationErrMsg,
 	})
 	if err != nil {
 		return nil, err
@@ -289,7 +294,7 @@ func (t *ToolCallContent) UnmarshalJSON(data []byte) error {
 		ProviderExecuted bool                       `json:"provider_executed"`
 		ProviderMetadata map[string]json.RawMessage `json:"provider_metadata,omitempty"`
 		Invalid          bool                       `json:"invalid,omitempty"`
-		ValidationError  error                      `json:"validation_error,omitempty"`
+		ValidationError  *string                    `json:"validation_error,omitempty"`
 	}
 
 	if err := json.Unmarshal(cj.Data, &aux); err != nil {
@@ -301,7 +306,9 @@ func (t *ToolCallContent) UnmarshalJSON(data []byte) error {
 	t.Input = aux.Input
 	t.ProviderExecuted = aux.ProviderExecuted
 	t.Invalid = aux.Invalid
-	t.ValidationError = aux.ValidationError
+	if aux.ValidationError != nil {
+		t.ValidationError = errors.New(*aux.ValidationError)
+	}
 
 	if len(aux.ProviderMetadata) > 0 {
 		metadata, err := UnmarshalProviderMetadata(aux.ProviderMetadata)

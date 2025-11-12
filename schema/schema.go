@@ -231,7 +231,6 @@ func ToMap(schema Schema) map[string]any {
 		itemsMap := ToMap(*schema.Items)
 		// Ensure type is always set for items, even if it was blank for llama.cpp compatibility
 		if _, hasType := itemsMap["type"]; !hasType && schema.Items.Type == "" {
-			// If type was omitted (useBlankType), restore it for API compatibility
 			if len(schema.Items.Properties) > 0 {
 				itemsMap["type"] = "object"
 			}

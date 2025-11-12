@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"charm.land/fantasy"
+	"charm.land/x/vcr"
 	"github.com/stretchr/testify/require"
 )
 
@@ -90,7 +91,7 @@ func testSimpleObject(t *testing.T, pair builderPair) {
 	}
 
 	t.Run("simple object", func(t *testing.T) {
-		r := newRecorder(t)
+		r := vcr.NewRecorder(t)
 
 		languageModel, err := pair.builder(t, r)
 		require.NoError(t, err, "failed to build language model")
@@ -113,7 +114,7 @@ func testSimpleObject(t *testing.T, pair builderPair) {
 	})
 
 	t.Run("simple object streaming", func(t *testing.T) {
-		r := newRecorder(t)
+		r := vcr.NewRecorder(t)
 
 		languageModel, err := pair.builder(t, r)
 		require.NoError(t, err, "failed to build language model")
@@ -263,7 +264,7 @@ func testComplexObject(t *testing.T, pair builderPair) {
 	}
 
 	t.Run("complex object", func(t *testing.T) {
-		r := newRecorder(t)
+		r := vcr.NewRecorder(t)
 
 		languageModel, err := pair.builder(t, r)
 		require.NoError(t, err, "failed to build language model")
@@ -286,7 +287,7 @@ func testComplexObject(t *testing.T, pair builderPair) {
 	})
 
 	t.Run("complex object streaming", func(t *testing.T) {
-		r := newRecorder(t)
+		r := vcr.NewRecorder(t)
 
 		languageModel, err := pair.builder(t, r)
 		require.NoError(t, err, "failed to build language model")
@@ -375,7 +376,7 @@ func testObjectWithRepair(t *testing.T, pairs []builderPair) {
 	for _, pair := range pairs {
 		t.Run(pair.name, func(t *testing.T) {
 			t.Run("object with repair", func(t *testing.T) {
-				r := newRecorder(t)
+				r := vcr.NewRecorder(t)
 
 				languageModel, err := pair.builder(t, r)
 				require.NoError(t, err, "failed to build language model")

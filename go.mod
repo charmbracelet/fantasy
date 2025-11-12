@@ -3,6 +3,7 @@ module charm.land/fantasy
 go 1.25
 
 require (
+	charm.land/x/vcr v0.1.0
 	cloud.google.com/go/auth v0.17.0
 	github.com/RealAlexandreAI/json-repair v0.0.14
 	github.com/aws/aws-sdk-go-v2 v1.39.6
@@ -16,10 +17,8 @@ require (
 	github.com/kaptinlin/jsonschema v0.5.2
 	github.com/openai/openai-go/v2 v2.7.1
 	github.com/stretchr/testify v1.11.1
-	go.yaml.in/yaml/v4 v4.0.0-rc.3
 	golang.org/x/oauth2 v0.33.0
 	google.golang.org/genai v1.34.0
-	gopkg.in/dnaeon/go-vcr.v4 v4.0.6-0.20250923044825-7b4892dd3117
 )
 
 require (
@@ -64,6 +63,7 @@ require (
 	go.opentelemetry.io/otel v1.36.0 // indirect
 	go.opentelemetry.io/otel/metric v1.36.0 // indirect
 	go.opentelemetry.io/otel/trace v1.36.0 // indirect
+	go.yaml.in/yaml/v4 v4.0.0-rc.3 // indirect
 	golang.org/x/crypto v0.41.0 // indirect
 	golang.org/x/net v0.43.0 // indirect
 	golang.org/x/sync v0.17.0 // indirect
@@ -74,5 +74,6 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250603155806-513f23925822 // indirect
 	google.golang.org/grpc v1.74.2 // indirect
 	google.golang.org/protobuf v1.36.7 // indirect
+	gopkg.in/dnaeon/go-vcr.v4 v4.0.6-0.20251110073552-01de4eb40290 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

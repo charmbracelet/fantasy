@@ -8,9 +8,9 @@ import (
 	"testing"
 
 	"charm.land/fantasy"
+	"charm.land/x/vcr"
 	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/require"
-	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )
 
 func init() {
@@ -27,7 +27,7 @@ type testModel struct {
 	reasoning bool
 }
 
-type builderFunc func(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error)
+type builderFunc func(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error)
 
 type builderPair struct {
 	name            string
@@ -54,7 +54,7 @@ func testSimple(t *testing.T, pair builderPair) {
 	}
 
 	t.Run("simple", func(t *testing.T) {
-		r := newRecorder(t)
+		r := vcr.NewRecorder(t)
 
 		languageModel, err := pair.builder(t, r)
 		require.NoError(t, err, "failed to build language model")
@@ -73,7 +73,7 @@ func testSimple(t *testing.T, pair builderPair) {
 		checkResult(t, result)
 	})
 	t.Run("simple streaming", func(t *testing.T) {
-		r := newRecorder(t)
+		r := vcr.NewRecorder(t)
 
 		languageModel, err := pair.builder(t, r)
 		require.NoError(t, err, "failed to build language model")
@@ -127,7 +127,7 @@ func testTool(t *testing.T, pair builderPair) {
 	}
 
 	t.Run("tool", func(t *testing.T) {
-		r := newRecorder(t)
+		r := vcr.NewRecorder(t)
 
 		languageModel, err := pair.builder(t, r)
 		require.NoError(t, err, "failed to build language model")
@@ -147,7 +147,7 @@ func testTool(t *testing.T, pair builderPair) {
 		checkResult(t, result)
 	})
 	t.Run("tool streaming", func(t *testing.T) {
-		r := newRecorder(t)
+		r := vcr.NewRecorder(t)
 
 		languageModel, err := pair.builder(t, r)
 		require.NoError(t, err, "failed to build language model")
@@ -227,7 +227,7 @@ func testMultiTool(t *testing.T, pair builderPair) {
 	}
 
 	t.Run("multi tool", func(t *testing.T) {
-		r := newRecorder(t)
+		r := vcr.NewRecorder(t)
 
 		languageModel, err := pair.builder(t, r)
 		require.NoError(t, err, "failed to build language model")
@@ -248,7 +248,7 @@ func testMultiTool(t *testing.T, pair builderPair) {
 		checkResult(t, result)
 	})
 	t.Run("multi tool streaming", func(t *testing.T) {
-		r := newRecorder(t)
+		r := vcr.NewRecorder(t)
 
 		languageModel, err := pair.builder(t, r)
 		require.NoError(t, err, "failed to build language model")
@@ -274,7 +274,7 @@ func testThinking(t *testing.T, pairs []builderPair, thinkChecks func(*testing.T
 	for _, pair := range pairs {
 		t.Run(pair.name, func(t *testing.T) {
 			t.Run("thinking", func(t *testing.T) {
-				r := newRecorder(t)
+				r := vcr.NewRecorder(t)
 
 				languageModel, err := pair.builder(t, r)
 				require.NoError(t, err, "failed to build language model")
@@ -311,7 +311,7 @@ func testThinking(t *testing.T, pairs []builderPair, thinkChecks func(*testing.T
 				thinkChecks(t, result)
 			})
 			t.Run("thinking-streaming", func(t *testing.T) {
-				r := newRecorder(t)
+				r := vcr.NewRecorder(t)
 
 				languageModel, err := pair.builder(t, r)
 				require.NoError(t, err, "failed to build language model")

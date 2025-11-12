@@ -9,8 +9,8 @@ import (
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/providers/google"
+	"charm.land/x/vcr"
 	"github.com/stretchr/testify/require"
-	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )
 
 var geminiTestModels = []testModel{
@@ -95,7 +95,7 @@ func generateIDMock() google.ToolCallIDFunc {
 }
 
 func geminiBuilder(model string) builderFunc {
-	return func(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
+	return func(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
 		provider, err := google.New(
 			google.WithGeminiAPIKey(cmp.Or(os.Getenv("FANTASY_GEMINI_API_KEY"), "(missing)")),
 			google.WithHTTPClient(&http.Client{Transport: r}),
@@ -109,7 +109,7 @@ func geminiBuilder(model string) builderFunc {
 }
 
 func vertexBuilder(model string) builderFunc {
-	return func(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
+	return func(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
 		provider, err := google.New(
 			google.WithVertex(os.Getenv("FANTASY_VERTEX_PROJECT"), os.Getenv("FANTASY_VERTEX_LOCATION")),
 			google.WithHTTPClient(&http.Client{Transport: r}),

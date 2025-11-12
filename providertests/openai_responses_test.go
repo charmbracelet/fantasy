@@ -7,8 +7,8 @@ import (
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/providers/openai"
+	"charm.land/x/vcr"
 	"github.com/stretchr/testify/require"
-	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )
 
 func TestOpenAIResponsesCommon(t *testing.T) {
@@ -20,7 +20,7 @@ func TestOpenAIResponsesCommon(t *testing.T) {
 }
 
 func openAIReasoningBuilder(model string) builderFunc {
-	return func(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
+	return func(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
 		provider, err := openai.New(
 			openai.WithAPIKey(os.Getenv("FANTASY_OPENAI_API_KEY")),
 			openai.WithHTTPClient(&http.Client{Transport: r}),

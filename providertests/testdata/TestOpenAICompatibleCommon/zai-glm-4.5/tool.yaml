@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - OpenAI/Go 2.7.1
     url: https://api.z.ai/api/coding/paas/v4/chat/completions
     method: POST
   response:
@@ -24,28 +24,28 @@ interactions:
     proto_minor: 0
     content_length: -1
     uncompressed: true
-    body: '{"choices":[{"finish_reason":"tool_calls","index":0,"message":{"content":"\n\n","reasoning_content":"The user is asking for the weather in Florence, Italy. I need to use the weather function to get this information. The function requires a \"location\" parameter, and the user has provided \"Florence,Italy\" as the location. I should use this exact value for the location parameter.","role":"assistant","tool_calls":[{"function":{"arguments":"{\"location\": \"Florence,Italy\"}","name":"weather"},"id":"call_-8303649628005950554","index":0,"type":"function"}]}}],"created":1758884753,"id":"20250926190543de74b873b8e04ebc","model":"glm-4.5","request_id":"20250926190543de74b873b8e04ebc","usage":{"completion_tokens":79,"prompt_tokens":179,"prompt_tokens_details":{"cached_tokens":43},"total_tokens":258}}'
+    body: '{"choices":[{"finish_reason":"tool_calls","index":0,"message":{"content":"\n","reasoning_content":"\nThe user is asking for the weather in Florence, Italy. I have access to a weather function that takes a location parameter. The user has specified \"Florence, Italy\" as the location. I should use this exact value for the location parameter.","role":"assistant","tool_calls":[{"function":{"arguments":"{\"location\":\"Florence,Italy\"}","name":"weather"},"id":"call_-8170221349237369383","index":0,"type":"function"}]}}],"created":1762854991,"id":"20251111175629f43492c8ddc74b40","model":"glm-4.5","request_id":"20251111175629f43492c8ddc74b40","usage":{"completion_tokens":70,"prompt_tokens":179,"prompt_tokens_details":{"cached_tokens":44},"total_tokens":249}}'
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 11.165218167s
+    duration: 2.204044625s
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 710
+    content_length: 973
     host: ""
-    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"content":"\n\n","tool_calls":[{"id":"call_-8303649628005950554","function":{"arguments":"{\"location\": \"Florence,Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"call_-8303649628005950554","role":"tool"}],"model":"glm-4.5","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"content":"\n","tool_calls":[{"id":"call_-8170221349237369383","function":{"arguments":"{\"location\":\"Florence,Italy\"}","name":"weather"},"type":"function"}],"role":"assistant","reasoning_content":"\nThe user is asking for the weather in Florence, Italy. I have access to a weather function that takes a location parameter. The user has specified \"Florence, Italy\" as the location. I should use this exact value for the location parameter."},{"content":"40 C","tool_call_id":"call_-8170221349237369383","role":"tool"}],"model":"glm-4.5","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
     headers:
       Accept:
       - application/json
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - OpenAI/Go 2.7.1
     url: https://api.z.ai/api/coding/paas/v4/chat/completions
     method: POST
   response:
@@ -54,10 +54,10 @@ interactions:
     proto_minor: 0
     content_length: -1
     uncompressed: true
-    body: '{"choices":[{"finish_reason":"stop","index":0,"message":{"content":"\n\nThe current weather in Florence, Italy is 40°C (104°F). That''s quite hot! It''s a very warm day there, so if you''re planning to visit, make sure to stay hydrated and seek shade or air conditioning when possible.","reasoning_content":"The weather function returned \"40 C\" for Florence, Italy. This indicates that the current temperature in Florence is 40 degrees Celsius, which is quite hot. I should provide this information to the user in a clear and helpful way.","role":"assistant"}}],"created":1758884757,"id":"2025092619055464ba39f15d9f4c36","model":"glm-4.5","request_id":"2025092619055464ba39f15d9f4c36","usage":{"completion_tokens":102,"prompt_tokens":207,"prompt_tokens_details":{"cached_tokens":43},"total_tokens":309}}'
+    body: '{"choices":[{"finish_reason":"stop","index":0,"message":{"content":"\nThe weather in Florence, Italy is currently 40°C (104°F). That''s quite hot! Make sure to stay hydrated and seek shade if you''re visiting or in the area.","reasoning_content":"\nThe weather function returned that the temperature in Florence, Italy is 40°C. This is quite hot! I should provide this information to the user in a helpful way.","role":"assistant"}}],"created":1762854995,"id":"20251111175631a3e10345eaf44b75","model":"glm-4.5","request_id":"20251111175631a3e10345eaf44b75","usage":{"completion_tokens":76,"prompt_tokens":257,"prompt_tokens_details":{"cached_tokens":43},"total_tokens":333}}'
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 3.454754417s
+    duration: 4.128735209s

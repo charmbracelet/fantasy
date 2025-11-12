@@ -119,7 +119,7 @@ func builderHuggingFace(t *testing.T, r *recorder.Recorder) (fantasy.LanguageMod
 	if err != nil {
 		return nil, err
 	}
-	return provider.LanguageModel(t.Context(), "Qwen/Qwen3-Coder-480B-A35B-Instruct:cerebras")
+	return provider.LanguageModel(t.Context(), "zai-org/GLM-4.6:cerebras")
 }
 
 func builderLlamaCppGptOss(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {

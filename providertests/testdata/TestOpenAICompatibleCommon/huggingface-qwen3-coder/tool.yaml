@@ -6,9 +6,9 @@ interactions:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 486
+    content_length: 466
     host: ""
-    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"}],"model":"Qwen/Qwen3-Coder-480B-A35B-Instruct:cerebras","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"}],"model":"zai-org/GLM-4.6:cerebras","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
     headers:
       Accept:
       - application/json
@@ -23,21 +23,21 @@ interactions:
     proto_major: 2
     proto_minor: 0
     content_length: -1
-    body: '{"id":"chatcmpl-fb490edc-2dc0-436e-83cb-ee109fd3e387","choices":[{"finish_reason":"tool_calls","index":0,"message":{"tool_calls":[{"id":"a937be9d7","type":"function","function":{"name":"weather","arguments":"{\"location\": \"Florence,Italy\"}"}}],"role":"assistant"}}],"created":1761070221,"model":"qwen-3-coder-480b","system_fingerprint":"fp_386b539e7b02ce3613b7","object":"chat.completion","usage":{"prompt_tokens":277,"completion_tokens":25,"total_tokens":302,"prompt_tokens_details":{"cached_tokens":0}},"time_info":{"queue_time":0.000135531,"prompt_time":0.009486813,"completion_time":0.016420409,"total_time":0.027780532836914062,"created":1761070221.021929}}'
+    body: '{"id":"chatcmpl-9ed5d57c-2570-4ccd-8a72-6f22c8577e98","choices":[{"finish_reason":"tool_calls","index":0,"message":{"content":"\nI''ll get the weather information for Florence, Italy for you.\n","reasoning":"The user is asking for weather information for Florence, Italy. I need to use the weather function with the location parameter. The user specified \"Florence,Italy\" which I should use exactly as provided, or I could use just \"Florence\" since that''s the city name. Let me check the function parameters - it requires a \"location\" parameter which is described as \"the city\". I think \"Florence\" would be sufficient, but since they specifically included \"Italy\" I should probably use \"Florence,Italy\" to be more precise.","tool_calls":[{"id":"17412c140","type":"function","function":{"name":"weather","arguments":"{\"location\": \"Florence,Italy\"}"}}],"role":"assistant"}}],"created":1762855222,"model":"zai-glm-4.6","system_fingerprint":"fp_b78e4418d824cdcd64e8","object":"chat.completion","usage":{"total_tokens":331,"completion_tokens":144,"prompt_tokens":187},"time_info":{"queue_time":0.005854158,"prompt_time":0.008443714,"completion_time":0.295474428,"total_time":0.3114504814147949,"created":1762855222.3435056}}'
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 401.073917ms
+    duration: 688.961166ms
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 698
+    content_length: 756
     host: ""
-    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"a937be9d7","function":{"arguments":"{\"location\": \"Florence,Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"a937be9d7","role":"tool"}],"model":"Qwen/Qwen3-Coder-480B-A35B-Instruct:cerebras","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"content":"\nI''ll get the weather information for Florence, Italy for you.\n","tool_calls":[{"id":"17412c140","function":{"arguments":"{\"location\": \"Florence,Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"17412c140","role":"tool"}],"model":"zai-org/GLM-4.6:cerebras","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
     headers:
       Accept:
       - application/json
@@ -52,10 +52,10 @@ interactions:
     proto_major: 2
     proto_minor: 0
     content_length: -1
-    body: '{"id":"chatcmpl-e3575be7-5855-4bfb-b911-1e1c7cd30faf","choices":[{"finish_reason":"stop","index":0,"message":{"content":"The current weather in Florence, Italy is 40°C.","role":"assistant"}}],"created":1761070221,"model":"qwen-3-coder-480b","system_fingerprint":"fp_386b539e7b02ce3613b7","object":"chat.completion","usage":{"prompt_tokens":319,"completion_tokens":14,"total_tokens":333,"prompt_tokens_details":{"cached_tokens":0}},"time_info":{"queue_time":0.000320512,"prompt_time":0.01004831,"completion_time":0.008558245,"total_time":0.02015233039855957,"created":1761070221.4201767}}'
+    body: '{"id":"chatcmpl-6e9e46c1-c111-4fc0-8648-8dffcbf32a72","choices":[{"finish_reason":"stop","index":0,"message":{"content":"\nThe weather in Florence, Italy is currently 40°C (which is quite hot - about 104°F). This is very warm weather, so if you''re planning to be outdoors there, you''ll want to stay hydrated and seek shade when possible.","role":"assistant"}}],"created":1762855242,"model":"zai-glm-4.6","system_fingerprint":"fp_b78e4418d824cdcd64e8","object":"chat.completion","usage":{"total_tokens":282,"completion_tokens":54,"prompt_tokens":228},"time_info":{"queue_time":0.004272864,"prompt_time":0.004543828,"completion_time":0.094835176,"total_time":0.105194091796875,"created":1762855242.5629983}}'
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 382.941875ms
+    duration: 20.019286708s

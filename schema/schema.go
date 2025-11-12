@@ -114,9 +114,6 @@ func generateSchemaRecursive(t, parent reflect.Type, visited map[reflect.Type]bo
 					"*": &valueSchema,
 				},
 			}
-			if useBlankType(parent) {
-				schema.Type = ""
-			}
 			return schema
 		}
 		return Schema{Type: "object"}
@@ -125,10 +122,6 @@ func generateSchemaRecursive(t, parent reflect.Type, visited map[reflect.Type]bo
 			Type:       "object",
 			Properties: make(map[string]*Schema),
 		}
-		if useBlankType(parent) {
-			schema.Type = ""
-		}
-
 		for i := range t.NumField() {
 			field := t.Field(i)
 
@@ -235,7 +228,15 @@ func ToMap(schema Schema) map[string]any {
 	}
 
 	if schema.Items != nil {
-		result["items"] = ToMap(*schema.Items)
+		itemsMap := ToMap(*schema.Items)
+		// Ensure type is always set for items, even if it was blank for llama.cpp compatibility
+		if _, hasType := itemsMap["type"]; !hasType && schema.Items.Type == "" {
+			// If type was omitted (useBlankType), restore it for API compatibility
+			if len(schema.Items.Properties) > 0 {
+				itemsMap["type"] = "object"
+			}
+		}
+		result["items"] = itemsMap
 	}
 
 	return result
@@ -400,20 +401,4 @@ func toSnakeCase(s string) string {
 		result.WriteRune(r)
 	}
 	return strings.ToLower(result.String())
-}
-
-// NOTE(@andreynering): This is a hacky workaround for llama.cpp.
-
-// Ideally, we should always output `type: object` for objects, but
-// llama.cpp complains if we do for arrays of objects.
-func useBlankType(parent reflect.Type) bool {
-	if parent == nil {
-		return false
-	}
-	switch parent.Kind() {
-	case reflect.Slice, reflect.Array:
-		return true
-	default:
-		return false
-	}
 }

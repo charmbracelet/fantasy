@@ -1,6 +1,7 @@
 package fantasy
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -73,4 +74,31 @@ func (e RetryError) Unwrap() error {
 // ErrorTitleForStatusCode returns a human-readable title for a given HTTP status code.
 func ErrorTitleForStatusCode(statusCode int) string {
 	return strings.ToLower(http.StatusText(statusCode))
+}
+
+// NoObjectGeneratedError is returned when object generation fails
+// due to parsing errors, validation errors, or model failures.
+type NoObjectGeneratedError struct {
+	RawText         string
+	ParseError      error
+	ValidationError error
+	Usage           Usage
+	FinishReason    FinishReason
+}
+
+// Error implements the error interface.
+func (e *NoObjectGeneratedError) Error() string {
+	if e.ValidationError != nil {
+		return fmt.Sprintf("object validation failed: %v", e.ValidationError)
+	}
+	if e.ParseError != nil {
+		return fmt.Sprintf("failed to parse object: %v", e.ParseError)
+	}
+	return "failed to generate object"
+}
+
+// IsNoObjectGeneratedError checks if an error is of type NoObjectGeneratedError.
+func IsNoObjectGeneratedError(err error) bool {
+	var target *NoObjectGeneratedError
+	return errors.As(err, &target)
 }

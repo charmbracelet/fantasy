@@ -1,0 +1,33 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 978
+    host: ""
+    body: '{"max_tokens":4000,"messages":[{"content":[{"text":"Generate information about ''The Lord of the Rings'' book by J.R.R. Tolkien, including genres like fantasy and adventure, and its publication year (1954).","type":"text"}],"role":"user"}],"tool_choice":{"name":"Book","disable_parallel_tool_use":false,"type":"tool"},"tools":[{"input_schema":{"properties":{"author":{"properties":{"name":{"description":"Author''s name","type":"string"},"nationality":{"description":"Author''s nationality","type":"string"}},"required":["name","nationality"],"type":"object"},"genres":{"description":"List of genres","items":{"type":"string"},"type":"array"},"published_year":{"description":"Year the book was published","type":"integer"},"title":{"description":"The book title","type":"string"}},"required":["title","author","genres","published_year"],"type":"object"},"name":"Book","description":"A book with title, author, genres, and publication year"}],"anthropic_version":"vertex-2023-10-16"}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Anthropic/Go 1.14.0
+    url: https://us-east5-aiplatform.googleapis.com/v1/projects/fantasy-playground-472418/locations/us-east5/publishers/anthropic/models/claude-3-7-sonnet@20250219:rawPredict
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"model":"claude-3-7-sonnet-20250219","id":"msg_vrtx_01UAjss8kpXQotMqUWtjP8Vd","type":"message","role":"assistant","content":[{"type":"tool_use","id":"toolu_vrtx_01UqmeUWH5fBpvtZE1jx4knQ","name":"Book","input":{"title":"The Lord of the Rings","author":{"name":"J.R.R. Tolkien","nationality":"British"},"genres":["Fantasy","Adventure","Epic","High fantasy"],"published_year":1954}}],"stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":548,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":132}}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 2.867918541s

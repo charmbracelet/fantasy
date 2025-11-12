@@ -220,7 +220,6 @@ type Call struct {
 }
 
 // CallWarningType represents the type of call warning.
-// CallWarningType represents the type of call warning.
 type CallWarningType string
 
 const (
@@ -247,6 +246,9 @@ type CallWarning struct {
 type LanguageModel interface {
 	Generate(context.Context, Call) (*Response, error)
 	Stream(context.Context, Call) (StreamResponse, error)
+
+	GenerateObject(context.Context, ObjectCall) (*ObjectResponse, error)
+	StreamObject(context.Context, ObjectCall) (ObjectStreamResponse, error)
 
 	Provider() string
 	Model() string

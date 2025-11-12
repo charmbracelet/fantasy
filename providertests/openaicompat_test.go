@@ -23,6 +23,14 @@ func TestOpenAICompatibleCommon(t *testing.T) {
 	})
 }
 
+func TestOpenAICompatObjectGeneration(t *testing.T) {
+	testObjectGeneration(t, []builderPair{
+		{"xai-grok-4-fast", builderXAIGrok4Fast, nil, nil},
+		{"xai-grok-code-fast", builderXAIGrokCodeFast, nil, nil},
+		{"zai-glm-4.5", builderZAIGLM45, nil, nil},
+	})
+}
+
 func TestOpenAICompatibleThinking(t *testing.T) {
 	opts := fantasy.ProviderOptions{
 		openaicompat.Name: &openaicompat.ProviderOptions{

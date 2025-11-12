@@ -1,0 +1,154 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 909
+    host: ""
+    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":[{"text":"Generate information about ''The Lord of the Rings'' book by J.R.R. Tolkien, including genres like fantasy and adventure, and its publication year (1954).","type":"input_text"}],"role":"user"}],"model":"gpt-5","text":{"format":{"name":"Book","schema":{"additionalProperties":false,"properties":{"author":{"additionalProperties":false,"properties":{"name":{"description":"Author''s name","type":"string"},"nationality":{"description":"Author''s nationality","type":"string"}},"required":["name","nationality"],"type":"object"},"genres":{"description":"List of genres","items":{"type":"string"},"type":"array"},"published_year":{"description":"Year the book was published","type":"integer"},"title":{"description":"The book title","type":"string"}},"required":["title","author","genres","published_year"],"type":"object"},"type":"json_schema"}}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://api.openai.com/v1/responses
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: |-
+      {
+        "id": "resp_0d7efb113168df8301690fb603c0f881a1a5ecec45f910e875",
+        "object": "response",
+        "created_at": 1762637315,
+        "status": "completed",
+        "background": false,
+        "billing": {
+          "payer": "developer"
+        },
+        "error": null,
+        "incomplete_details": null,
+        "instructions": null,
+        "max_output_tokens": 4000,
+        "max_tool_calls": null,
+        "model": "gpt-5-2025-08-07",
+        "output": [
+          {
+            "id": "rs_0d7efb113168df8301690fb6041bb881a198a6e417f00bba70",
+            "type": "reasoning",
+            "summary": []
+          },
+          {
+            "id": "msg_0d7efb113168df8301690fb610bf2881a1be28a4885c1876ac",
+            "type": "message",
+            "status": "completed",
+            "content": [
+              {
+                "type": "output_text",
+                "annotations": [],
+                "logprobs": [],
+                "text": "{\"author\":{\"name\":\"J.R.R. Tolkien\",\"nationality\":\"British\"},\"genres\":[\"Fantasy\",\"Adventure\",\"Epic fantasy\",\"High fantasy\"],\"published_year\":1954,\"title\":\"The Lord of the Rings\"}"
+              }
+            ],
+            "role": "assistant"
+          }
+        ],
+        "parallel_tool_calls": true,
+        "previous_response_id": null,
+        "prompt_cache_key": null,
+        "prompt_cache_retention": null,
+        "reasoning": {
+          "effort": "medium",
+          "summary": null
+        },
+        "safety_identifier": null,
+        "service_tier": "default",
+        "store": false,
+        "temperature": 1.0,
+        "text": {
+          "format": {
+            "type": "json_schema",
+            "description": null,
+            "name": "Book",
+            "schema": {
+              "additionalProperties": false,
+              "properties": {
+                "author": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "name": {
+                      "description": "Author's name",
+                      "type": "string"
+                    },
+                    "nationality": {
+                      "description": "Author's nationality",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "nationality"
+                  ],
+                  "type": "object"
+                },
+                "genres": {
+                  "description": "List of genres",
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "published_year": {
+                  "description": "Year the book was published",
+                  "type": "integer"
+                },
+                "title": {
+                  "description": "The book title",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "title",
+                "author",
+                "genres",
+                "published_year"
+              ],
+              "type": "object"
+            },
+            "strict": true
+          },
+          "verbosity": "medium"
+        },
+        "tool_choice": "auto",
+        "tools": [],
+        "top_logprobs": 0,
+        "top_p": 1.0,
+        "truncation": "disabled",
+        "usage": {
+          "input_tokens": 138,
+          "input_tokens_details": {
+            "cached_tokens": 0
+          },
+          "output_tokens": 885,
+          "output_tokens_details": {
+            "reasoning_tokens": 832
+          },
+          "total_tokens": 1023
+        },
+        "user": null,
+        "metadata": {}
+      }
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 13.745367625s

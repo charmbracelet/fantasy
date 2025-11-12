@@ -55,6 +55,22 @@ func TestGoogleThinking(t *testing.T) {
 	testThinking(t, pairs, testGoogleThinking)
 }
 
+func TestGoogleObjectGeneration(t *testing.T) {
+	var pairs []builderPair
+	for _, m := range geminiTestModels {
+		pairs = append(pairs, builderPair{m.name, geminiBuilder(m.model), nil, nil})
+	}
+	testObjectGeneration(t, pairs)
+}
+
+func TestGoogleVertexObjectGeneration(t *testing.T) {
+	var pairs []builderPair
+	for _, m := range vertexTestModels {
+		pairs = append(pairs, builderPair{m.name, vertexBuilder(m.model), nil, nil})
+	}
+	testObjectGeneration(t, pairs)
+}
+
 func testGoogleThinking(t *testing.T, result *fantasy.AgentResult) {
 	reasoningContentCount := 0
 	// Test if we got the signature

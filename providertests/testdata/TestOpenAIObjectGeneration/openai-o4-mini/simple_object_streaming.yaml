@@ -1,0 +1,66 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 662
+    host: ""
+    body: '{"messages":[{"content":"Generate information about a person named Alice who is 30 years old and lives in Paris.","role":"user"}],"model":"o4-mini","max_completion_tokens":4000,"stream_options":{"include_usage":true},"response_format":{"json_schema":{"name":"Person","strict":true,"description":"A person with name, age, and city","schema":{"additionalProperties":false,"properties":{"age":{"description":"The person''s age","type":"integer"},"city":{"description":"The city where the person lives","type":"string"},"name":{"description":"The person''s name","type":"string"}},"required":["name","age","city"],"type":"object"}},"type":"json_schema"},"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://api.openai.com/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"chatcmpl-CZki1J9qrKifHLYfd83Fec01s4z8D","object":"chat.completion.chunk","created":1762637065,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"role":"assistant","content":"","refusal":null},"finish_reason":null}],"usage":null,"obfuscation":"1u4UMeKG"}
+
+      data: {"id":"chatcmpl-CZki1J9qrKifHLYfd83Fec01s4z8D","object":"chat.completion.chunk","created":1762637065,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":"{\""},"finish_reason":null}],"usage":null,"obfuscation":"Q5UxGax"}
+
+      data: {"id":"chatcmpl-CZki1J9qrKifHLYfd83Fec01s4z8D","object":"chat.completion.chunk","created":1762637065,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":"age"},"finish_reason":null}],"usage":null,"obfuscation":"PC0HaNl"}
+
+      data: {"id":"chatcmpl-CZki1J9qrKifHLYfd83Fec01s4z8D","object":"chat.completion.chunk","created":1762637065,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":"\":"},"finish_reason":null}],"usage":null,"obfuscation":"lsI4acg"}
+
+      data: {"id":"chatcmpl-CZki1J9qrKifHLYfd83Fec01s4z8D","object":"chat.completion.chunk","created":1762637065,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":"30"},"finish_reason":null}],"usage":null,"obfuscation":"tcdcmfbK"}
+
+      data: {"id":"chatcmpl-CZki1J9qrKifHLYfd83Fec01s4z8D","object":"chat.completion.chunk","created":1762637065,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":",\""},"finish_reason":null}],"usage":null,"obfuscation":"TD1rpZS"}
+
+      data: {"id":"chatcmpl-CZki1J9qrKifHLYfd83Fec01s4z8D","object":"chat.completion.chunk","created":1762637065,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":"city"},"finish_reason":null}],"usage":null,"obfuscation":"IaOcwg"}
+
+      data: {"id":"chatcmpl-CZki1J9qrKifHLYfd83Fec01s4z8D","object":"chat.completion.chunk","created":1762637065,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":"\":\""},"finish_reason":null}],"usage":null,"obfuscation":"6cUFm"}
+
+      data: {"id":"chatcmpl-CZki1J9qrKifHLYfd83Fec01s4z8D","object":"chat.completion.chunk","created":1762637065,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":"Paris"},"finish_reason":null}],"usage":null,"obfuscation":"2yZjs"}
+
+      data: {"id":"chatcmpl-CZki1J9qrKifHLYfd83Fec01s4z8D","object":"chat.completion.chunk","created":1762637065,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":"\",\""},"finish_reason":null}],"usage":null,"obfuscation":"Q37jl"}
+
+      data: {"id":"chatcmpl-CZki1J9qrKifHLYfd83Fec01s4z8D","object":"chat.completion.chunk","created":1762637065,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":"name"},"finish_reason":null}],"usage":null,"obfuscation":"kT7Jci"}
+
+      data: {"id":"chatcmpl-CZki1J9qrKifHLYfd83Fec01s4z8D","object":"chat.completion.chunk","created":1762637065,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":"\":\""},"finish_reason":null}],"usage":null,"obfuscation":"ou5VZ"}
+
+      data: {"id":"chatcmpl-CZki1J9qrKifHLYfd83Fec01s4z8D","object":"chat.completion.chunk","created":1762637065,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":"Alice"},"finish_reason":null}],"usage":null,"obfuscation":"AMhVx"}
+
+      data: {"id":"chatcmpl-CZki1J9qrKifHLYfd83Fec01s4z8D","object":"chat.completion.chunk","created":1762637065,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":"\"}"},"finish_reason":null}],"usage":null,"obfuscation":"ZDFb7mY"}
+
+      data: {"id":"chatcmpl-CZki1J9qrKifHLYfd83Fec01s4z8D","object":"chat.completion.chunk","created":1762637065,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"usage":null,"obfuscation":"AQhR"}
+
+      data: {"id":"chatcmpl-CZki1J9qrKifHLYfd83Fec01s4z8D","object":"chat.completion.chunk","created":1762637065,"model":"o4-mini-2025-04-16","service_tier":"default","system_fingerprint":null,"choices":[],"usage":{"prompt_tokens":95,"completion_tokens":290,"total_tokens":385,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"completion_tokens_details":{"reasoning_tokens":256,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0}},"obfuscation":"xEKhD"}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream; charset=utf-8
+    status: 200 OK
+    code: 200
+    duration: 3.874454375s

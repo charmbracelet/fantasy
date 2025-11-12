@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"charm.land/fantasy"
+	"charm.land/fantasy/object"
 	"github.com/charmbracelet/anthropic-sdk-go"
 	"github.com/charmbracelet/anthropic-sdk-go/bedrock"
 	"github.com/charmbracelet/anthropic-sdk-go/option"
@@ -40,6 +41,8 @@ type options struct {
 	skipAuth       bool
 
 	useBedrock bool
+
+	objectMode fantasy.ObjectMode
 }
 
 type provider struct {
@@ -52,7 +55,8 @@ type Option = func(*options)
 // New creates a new Anthropic provider with the given options.
 func New(opts ...Option) (fantasy.Provider, error) {
 	providerOptions := options{
-		headers: map[string]string{},
+		headers:    map[string]string{},
+		objectMode: fantasy.ObjectModeAuto,
 	}
 	for _, o := range opts {
 		o(&providerOptions)
@@ -117,6 +121,17 @@ func WithHeaders(headers map[string]string) Option {
 func WithHTTPClient(client option.HTTPClient) Option {
 	return func(o *options) {
 		o.client = client
+	}
+}
+
+// WithObjectMode sets the object generation mode.
+func WithObjectMode(om fantasy.ObjectMode) Option {
+	return func(o *options) {
+		// not supported
+		if om == fantasy.ObjectModeJSON {
+			om = fantasy.ObjectModeAuto
+		}
+		o.objectMode = om
 	}
 }
 
@@ -951,4 +966,24 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 			return
 		}
 	}, nil
+}
+
+// GenerateObject implements fantasy.LanguageModel.
+func (a languageModel) GenerateObject(ctx context.Context, call fantasy.ObjectCall) (*fantasy.ObjectResponse, error) {
+	switch a.options.objectMode {
+	case fantasy.ObjectModeText:
+		return object.GenerateWithText(ctx, a, call)
+	default:
+		return object.GenerateWithTool(ctx, a, call)
+	}
+}
+
+// StreamObject implements fantasy.LanguageModel.
+func (a languageModel) StreamObject(ctx context.Context, call fantasy.ObjectCall) (fantasy.ObjectStreamResponse, error) {
+	switch a.options.objectMode {
+	case fantasy.ObjectModeText:
+		return object.StreamWithText(ctx, a, call)
+	default:
+		return object.StreamWithTool(ctx, a, call)
+	}
 }

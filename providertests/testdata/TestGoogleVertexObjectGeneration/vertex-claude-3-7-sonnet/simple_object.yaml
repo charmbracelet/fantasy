@@ -1,0 +1,33 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 642
+    host: ""
+    body: '{"max_tokens":4000,"messages":[{"content":[{"text":"Generate information about a person named Alice who is 30 years old and lives in Paris.","type":"text"}],"role":"user"}],"tool_choice":{"name":"Person","disable_parallel_tool_use":false,"type":"tool"},"tools":[{"input_schema":{"properties":{"age":{"description":"The person''s age","type":"integer"},"city":{"description":"The city where the person lives","type":"string"},"name":{"description":"The person''s name","type":"string"}},"required":["name","age","city"],"type":"object"},"name":"Person","description":"A person with name, age, and city"}],"anthropic_version":"vertex-2023-10-16"}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Anthropic/Go 1.14.0
+    url: https://us-east5-aiplatform.googleapis.com/v1/projects/fantasy-playground-472418/locations/us-east5/publishers/anthropic/models/claude-3-7-sonnet@20250219:rawPredict
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"model":"claude-3-7-sonnet-20250219","id":"msg_vrtx_014VLsXeDXtuC84Nx9V4pBdW","type":"message","role":"assistant","content":[{"type":"tool_use","id":"toolu_vrtx_01TaBaQU6GZpxjApVgvzLfev","name":"Person","input":{"name":"Alice","age":30,"city":"Paris"}}],"stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":453,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":67}}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 1.818802583s

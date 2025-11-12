@@ -5,9 +5,12 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"strings"
 
 	"charm.land/fantasy"
+	"charm.land/fantasy/object"
+	"charm.land/fantasy/schema"
 	"github.com/google/uuid"
 	"github.com/openai/openai-go/v2"
 	"github.com/openai/openai-go/v2/packages/param"
@@ -18,18 +21,20 @@ import (
 const topLogprobsMax = 20
 
 type responsesLanguageModel struct {
-	provider string
-	modelID  string
-	client   openai.Client
+	provider   string
+	modelID    string
+	client     openai.Client
+	objectMode fantasy.ObjectMode
 }
 
 // newResponsesLanguageModel implements a responses api model
 // INFO: (kujtim) currently we do not support stored parameter we default it to false.
-func newResponsesLanguageModel(modelID string, provider string, client openai.Client) responsesLanguageModel {
+func newResponsesLanguageModel(modelID string, provider string, client openai.Client, objectMode fantasy.ObjectMode) responsesLanguageModel {
 	return responsesLanguageModel{
-		modelID:  modelID,
-		provider: provider,
-		client:   client,
+		modelID:    modelID,
+		provider:   provider,
+		client:     client,
+		objectMode: objectMode,
 	}
 }
 
@@ -1031,4 +1036,294 @@ type ongoingToolCall struct {
 
 type reasoningState struct {
 	metadata *ResponsesReasoningMetadata
+}
+
+// GenerateObject implements fantasy.LanguageModel.
+func (o responsesLanguageModel) GenerateObject(ctx context.Context, call fantasy.ObjectCall) (*fantasy.ObjectResponse, error) {
+	switch o.objectMode {
+	case fantasy.ObjectModeText:
+		return object.GenerateWithText(ctx, o, call)
+	case fantasy.ObjectModeTool:
+		return object.GenerateWithTool(ctx, o, call)
+	default:
+		return o.generateObjectWithJSONMode(ctx, call)
+	}
+}
+
+// StreamObject implements fantasy.LanguageModel.
+func (o responsesLanguageModel) StreamObject(ctx context.Context, call fantasy.ObjectCall) (fantasy.ObjectStreamResponse, error) {
+	switch o.objectMode {
+	case fantasy.ObjectModeTool:
+		return object.StreamWithTool(ctx, o, call)
+	case fantasy.ObjectModeText:
+		return object.StreamWithText(ctx, o, call)
+	default:
+		return o.streamObjectWithJSONMode(ctx, call)
+	}
+}
+
+func (o responsesLanguageModel) generateObjectWithJSONMode(ctx context.Context, call fantasy.ObjectCall) (*fantasy.ObjectResponse, error) {
+	// Convert our Schema to OpenAI's JSON Schema format
+	jsonSchemaMap := schema.ToMap(call.Schema)
+
+	// Add additionalProperties: false recursively for strict mode (OpenAI requirement)
+	addAdditionalPropertiesFalse(jsonSchemaMap)
+
+	schemaName := call.SchemaName
+	if schemaName == "" {
+		schemaName = "response"
+	}
+
+	// Build request using prepareParams
+	fantasyCall := fantasy.Call{
+		Prompt:           call.Prompt,
+		MaxOutputTokens:  call.MaxOutputTokens,
+		Temperature:      call.Temperature,
+		TopP:             call.TopP,
+		PresencePenalty:  call.PresencePenalty,
+		FrequencyPenalty: call.FrequencyPenalty,
+		ProviderOptions:  call.ProviderOptions,
+	}
+
+	params, warnings := o.prepareParams(fantasyCall)
+
+	// Add structured output via Text.Format field
+	params.Text = responses.ResponseTextConfigParam{
+		Format: responses.ResponseFormatTextConfigParamOfJSONSchema(schemaName, jsonSchemaMap),
+	}
+
+	// Make request
+	response, err := o.client.Responses.New(ctx, *params)
+	if err != nil {
+		return nil, toProviderErr(err)
+	}
+
+	if response.Error.Message != "" {
+		return nil, &fantasy.Error{
+			Title:   "provider error",
+			Message: fmt.Sprintf("%s (code: %s)", response.Error.Message, response.Error.Code),
+		}
+	}
+
+	// Extract JSON text from response
+	var jsonText string
+	for _, outputItem := range response.Output {
+		if outputItem.Type == "message" {
+			for _, contentPart := range outputItem.Content {
+				if contentPart.Type == "output_text" {
+					jsonText = contentPart.Text
+					break
+				}
+			}
+		}
+	}
+
+	if jsonText == "" {
+		usage := fantasy.Usage{
+			InputTokens:  response.Usage.InputTokens,
+			OutputTokens: response.Usage.OutputTokens,
+			TotalTokens:  response.Usage.InputTokens + response.Usage.OutputTokens,
+		}
+		finishReason := mapResponsesFinishReason(response.IncompleteDetails.Reason, false)
+		return nil, &fantasy.NoObjectGeneratedError{
+			RawText:      "",
+			ParseError:   fmt.Errorf("no text content in response"),
+			Usage:        usage,
+			FinishReason: finishReason,
+		}
+	}
+
+	// Parse and validate
+	var obj any
+	if call.RepairText != nil {
+		obj, err = schema.ParseAndValidateWithRepair(ctx, jsonText, call.Schema, call.RepairText)
+	} else {
+		obj, err = schema.ParseAndValidate(jsonText, call.Schema)
+	}
+
+	usage := fantasy.Usage{
+		InputTokens:  response.Usage.InputTokens,
+		OutputTokens: response.Usage.OutputTokens,
+		TotalTokens:  response.Usage.InputTokens + response.Usage.OutputTokens,
+	}
+	if response.Usage.OutputTokensDetails.ReasoningTokens != 0 {
+		usage.ReasoningTokens = response.Usage.OutputTokensDetails.ReasoningTokens
+	}
+	if response.Usage.InputTokensDetails.CachedTokens != 0 {
+		usage.CacheReadTokens = response.Usage.InputTokensDetails.CachedTokens
+	}
+
+	finishReason := mapResponsesFinishReason(response.IncompleteDetails.Reason, false)
+
+	if err != nil {
+		// Add usage info to error
+		if nogErr, ok := err.(*fantasy.NoObjectGeneratedError); ok {
+			nogErr.Usage = usage
+			nogErr.FinishReason = finishReason
+		}
+		return nil, err
+	}
+
+	return &fantasy.ObjectResponse{
+		Object:       obj,
+		RawText:      jsonText,
+		Usage:        usage,
+		FinishReason: finishReason,
+		Warnings:     warnings,
+	}, nil
+}
+
+func (o responsesLanguageModel) streamObjectWithJSONMode(ctx context.Context, call fantasy.ObjectCall) (fantasy.ObjectStreamResponse, error) {
+	// Convert our Schema to OpenAI's JSON Schema format
+	jsonSchemaMap := schema.ToMap(call.Schema)
+
+	// Add additionalProperties: false recursively for strict mode (OpenAI requirement)
+	addAdditionalPropertiesFalse(jsonSchemaMap)
+
+	schemaName := call.SchemaName
+	if schemaName == "" {
+		schemaName = "response"
+	}
+
+	// Build request using prepareParams
+	fantasyCall := fantasy.Call{
+		Prompt:           call.Prompt,
+		MaxOutputTokens:  call.MaxOutputTokens,
+		Temperature:      call.Temperature,
+		TopP:             call.TopP,
+		PresencePenalty:  call.PresencePenalty,
+		FrequencyPenalty: call.FrequencyPenalty,
+		ProviderOptions:  call.ProviderOptions,
+	}
+
+	params, warnings := o.prepareParams(fantasyCall)
+
+	// Add structured output via Text.Format field
+	params.Text = responses.ResponseTextConfigParam{
+		Format: responses.ResponseFormatTextConfigParamOfJSONSchema(schemaName, jsonSchemaMap),
+	}
+
+	stream := o.client.Responses.NewStreaming(ctx, *params)
+
+	return func(yield func(fantasy.ObjectStreamPart) bool) {
+		if len(warnings) > 0 {
+			if !yield(fantasy.ObjectStreamPart{
+				Type:     fantasy.ObjectStreamPartTypeObject,
+				Warnings: warnings,
+			}) {
+				return
+			}
+		}
+
+		var accumulated string
+		var lastParsedObject any
+		var usage fantasy.Usage
+		var finishReason fantasy.FinishReason
+		var streamErr error
+		hasFunctionCall := false
+
+		for stream.Next() {
+			event := stream.Current()
+
+			switch event.Type {
+			case "response.output_text.delta":
+				textDelta := event.AsResponseOutputTextDelta()
+				accumulated += textDelta.Delta
+
+				// Try to parse the accumulated text
+				obj, state, parseErr := schema.ParsePartialJSON(accumulated)
+
+				// If we successfully parsed, validate and emit
+				if state == schema.ParseStateSuccessful || state == schema.ParseStateRepaired {
+					if err := schema.ValidateAgainstSchema(obj, call.Schema); err == nil {
+						// Only emit if object is different from last
+						if !reflect.DeepEqual(obj, lastParsedObject) {
+							if !yield(fantasy.ObjectStreamPart{
+								Type:   fantasy.ObjectStreamPartTypeObject,
+								Object: obj,
+							}) {
+								return
+							}
+							lastParsedObject = obj
+						}
+					}
+				}
+
+				// If parsing failed and we have a repair function, try it
+				if state == schema.ParseStateFailed && call.RepairText != nil {
+					repairedText, repairErr := call.RepairText(ctx, accumulated, parseErr)
+					if repairErr == nil {
+						obj2, state2, _ := schema.ParsePartialJSON(repairedText)
+						if (state2 == schema.ParseStateSuccessful || state2 == schema.ParseStateRepaired) &&
+							schema.ValidateAgainstSchema(obj2, call.Schema) == nil {
+							if !reflect.DeepEqual(obj2, lastParsedObject) {
+								if !yield(fantasy.ObjectStreamPart{
+									Type:   fantasy.ObjectStreamPartTypeObject,
+									Object: obj2,
+								}) {
+									return
+								}
+								lastParsedObject = obj2
+							}
+						}
+					}
+				}
+
+			case "response.completed", "response.incomplete":
+				completed := event.AsResponseCompleted()
+				finishReason = mapResponsesFinishReason(completed.Response.IncompleteDetails.Reason, hasFunctionCall)
+				usage = fantasy.Usage{
+					InputTokens:  completed.Response.Usage.InputTokens,
+					OutputTokens: completed.Response.Usage.OutputTokens,
+					TotalTokens:  completed.Response.Usage.InputTokens + completed.Response.Usage.OutputTokens,
+				}
+				if completed.Response.Usage.OutputTokensDetails.ReasoningTokens != 0 {
+					usage.ReasoningTokens = completed.Response.Usage.OutputTokensDetails.ReasoningTokens
+				}
+				if completed.Response.Usage.InputTokensDetails.CachedTokens != 0 {
+					usage.CacheReadTokens = completed.Response.Usage.InputTokensDetails.CachedTokens
+				}
+
+			case "error":
+				errorEvent := event.AsError()
+				streamErr = fmt.Errorf("response error: %s (code: %s)", errorEvent.Message, errorEvent.Code)
+				if !yield(fantasy.ObjectStreamPart{
+					Type:  fantasy.ObjectStreamPartTypeError,
+					Error: streamErr,
+				}) {
+					return
+				}
+				return
+			}
+		}
+
+		err := stream.Err()
+		if err != nil {
+			yield(fantasy.ObjectStreamPart{
+				Type:  fantasy.ObjectStreamPartTypeError,
+				Error: toProviderErr(err),
+			})
+			return
+		}
+
+		// Final validation and emit
+		if streamErr == nil && lastParsedObject != nil {
+			yield(fantasy.ObjectStreamPart{
+				Type:         fantasy.ObjectStreamPartTypeFinish,
+				Usage:        usage,
+				FinishReason: finishReason,
+			})
+		} else if streamErr == nil && lastParsedObject == nil {
+			// No object was generated
+			yield(fantasy.ObjectStreamPart{
+				Type: fantasy.ObjectStreamPartTypeError,
+				Error: &fantasy.NoObjectGeneratedError{
+					RawText:      accumulated,
+					ParseError:   fmt.Errorf("no valid object generated in stream"),
+					Usage:        usage,
+					FinishReason: finishReason,
+				},
+			})
+		}
+	}, nil
 }

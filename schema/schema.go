@@ -75,10 +75,10 @@ func ToParameters(s Schema) map[string]any {
 // Generate generates a JSON schema from a reflect.Type.
 // It recursively processes struct fields, arrays, maps, and primitive types.
 func Generate(t reflect.Type) Schema {
-	return generateSchemaRecursive(t, nil, make(map[reflect.Type]bool))
+	return generateSchemaRecursive(t, make(map[reflect.Type]bool))
 }
 
-func generateSchemaRecursive(t, parent reflect.Type, visited map[reflect.Type]bool) Schema {
+func generateSchemaRecursive(t reflect.Type, visited map[reflect.Type]bool) Schema {
 	if t.Kind() == reflect.Pointer {
 		t = t.Elem()
 	}
@@ -100,14 +100,14 @@ func generateSchemaRecursive(t, parent reflect.Type, visited map[reflect.Type]bo
 	case reflect.Bool:
 		return Schema{Type: "boolean"}
 	case reflect.Slice, reflect.Array:
-		itemSchema := generateSchemaRecursive(t.Elem(), t, visited)
+		itemSchema := generateSchemaRecursive(t.Elem(), visited)
 		return Schema{
 			Type:  "array",
 			Items: &itemSchema,
 		}
 	case reflect.Map:
 		if t.Key().Kind() == reflect.String {
-			valueSchema := generateSchemaRecursive(t.Elem(), t, visited)
+			valueSchema := generateSchemaRecursive(t.Elem(), visited)
 			schema := Schema{
 				Type: "object",
 				Properties: map[string]*Schema{
@@ -150,7 +150,7 @@ func generateSchemaRecursive(t, parent reflect.Type, visited map[reflect.Type]bo
 				fieldName = toSnakeCase(fieldName)
 			}
 
-			fieldSchema := generateSchemaRecursive(field.Type, t, visited)
+			fieldSchema := generateSchemaRecursive(field.Type, visited)
 
 			if desc := field.Tag.Get("description"); desc != "" {
 				fieldSchema.Description = desc

@@ -14,10 +14,10 @@ type Schema = schema.Schema
 
 // ToolInfo represents tool metadata, matching the existing pattern.
 type ToolInfo struct {
-	Name        string
-	Description string
-	Parameters  map[string]any
-	Required    []string
+	Name        string         `json:"name"`
+	Description string         `json:"description"`
+	Parameters  map[string]any `json:"parameters"`
+	Required    []string       `json:"required"`
 }
 
 // ToolCall represents a tool invocation, matching the existing pattern.

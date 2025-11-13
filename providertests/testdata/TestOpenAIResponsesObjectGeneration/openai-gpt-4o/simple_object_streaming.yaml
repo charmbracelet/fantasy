@@ -1,0 +1,95 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 579
+    host: ""
+    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":[{"text":"Generate information about a person named Alice who is 30 years old and lives in Paris.","type":"input_text"}],"role":"user"}],"model":"gpt-4o","text":{"format":{"name":"Person","schema":{"additionalProperties":false,"properties":{"age":{"description":"The person''s age","type":"integer"},"city":{"description":"The city where the person lives","type":"string"},"name":{"description":"The person''s name","type":"string"}},"required":["name","age","city"],"type":"object"},"type":"json_schema"}},"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://api.openai.com/v1/responses
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      event: response.created
+      data: {"type":"response.created","sequence_number":0,"response":{"id":"resp_0d165ceb975b9af401690fb5e0e8788192bd9eb948decabbd1","object":"response","created_at":1762637280,"status":"in_progress","background":false,"error":null,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-4o-2024-08-06","output":[],"parallel_tool_calls":true,"previous_response_id":null,"prompt_cache_key":null,"prompt_cache_retention":null,"reasoning":{"effort":null,"summary":null},"safety_identifier":null,"service_tier":"auto","store":false,"temperature":1.0,"text":{"format":{"type":"json_schema","description":null,"name":"Person","schema":{"additionalProperties":false,"properties":{"age":{"description":"The person's age","type":"integer"},"city":{"description":"The city where the person lives","type":"string"},"name":{"description":"The person's name","type":"string"}},"required":["name","age","city"],"type":"object"},"strict":true},"verbosity":"medium"},"tool_choice":"auto","tools":[],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":null,"user":null,"metadata":{}}}
+
+      event: response.in_progress
+      data: {"type":"response.in_progress","sequence_number":1,"response":{"id":"resp_0d165ceb975b9af401690fb5e0e8788192bd9eb948decabbd1","object":"response","created_at":1762637280,"status":"in_progress","background":false,"error":null,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-4o-2024-08-06","output":[],"parallel_tool_calls":true,"previous_response_id":null,"prompt_cache_key":null,"prompt_cache_retention":null,"reasoning":{"effort":null,"summary":null},"safety_identifier":null,"service_tier":"auto","store":false,"temperature":1.0,"text":{"format":{"type":"json_schema","description":null,"name":"Person","schema":{"additionalProperties":false,"properties":{"age":{"description":"The person's age","type":"integer"},"city":{"description":"The city where the person lives","type":"string"},"name":{"description":"The person's name","type":"string"}},"required":["name","age","city"],"type":"object"},"strict":true},"verbosity":"medium"},"tool_choice":"auto","tools":[],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":null,"user":null,"metadata":{}}}
+
+      event: response.output_item.added
+      data: {"type":"response.output_item.added","sequence_number":2,"output_index":0,"item":{"id":"msg_0d165ceb975b9af401690fb5e147e08192981f80e775d1b42a","type":"message","status":"in_progress","content":[],"role":"assistant"}}
+
+      event: response.content_part.added
+      data: {"type":"response.content_part.added","sequence_number":3,"item_id":"msg_0d165ceb975b9af401690fb5e147e08192981f80e775d1b42a","output_index":0,"content_index":0,"part":{"type":"output_text","annotations":[],"logprobs":[],"text":""}}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":4,"item_id":"msg_0d165ceb975b9af401690fb5e147e08192981f80e775d1b42a","output_index":0,"content_index":0,"delta":"{\"","logprobs":[],"obfuscation":"Tp0jZ8gJ4woL9Y"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":5,"item_id":"msg_0d165ceb975b9af401690fb5e147e08192981f80e775d1b42a","output_index":0,"content_index":0,"delta":"age","logprobs":[],"obfuscation":"citwa9boDP9Y2"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":6,"item_id":"msg_0d165ceb975b9af401690fb5e147e08192981f80e775d1b42a","output_index":0,"content_index":0,"delta":"\":","logprobs":[],"obfuscation":"y41U42sTULTK18"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":7,"item_id":"msg_0d165ceb975b9af401690fb5e147e08192981f80e775d1b42a","output_index":0,"content_index":0,"delta":"30","logprobs":[],"obfuscation":"YqlEplTbGy3fsj"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":8,"item_id":"msg_0d165ceb975b9af401690fb5e147e08192981f80e775d1b42a","output_index":0,"content_index":0,"delta":",\"","logprobs":[],"obfuscation":"Sg3V1re96l7ZKF"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":9,"item_id":"msg_0d165ceb975b9af401690fb5e147e08192981f80e775d1b42a","output_index":0,"content_index":0,"delta":"city","logprobs":[],"obfuscation":"x357HhG0WmSG"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":10,"item_id":"msg_0d165ceb975b9af401690fb5e147e08192981f80e775d1b42a","output_index":0,"content_index":0,"delta":"\":\"","logprobs":[],"obfuscation":"y0CAsSO6TE2Wm"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":11,"item_id":"msg_0d165ceb975b9af401690fb5e147e08192981f80e775d1b42a","output_index":0,"content_index":0,"delta":"Paris","logprobs":[],"obfuscation":"B7NTDCRqRbF"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":12,"item_id":"msg_0d165ceb975b9af401690fb5e147e08192981f80e775d1b42a","output_index":0,"content_index":0,"delta":"\",\"","logprobs":[],"obfuscation":"IETmenhLsNCo2"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":13,"item_id":"msg_0d165ceb975b9af401690fb5e147e08192981f80e775d1b42a","output_index":0,"content_index":0,"delta":"name","logprobs":[],"obfuscation":"tN74YVJx0gab"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":14,"item_id":"msg_0d165ceb975b9af401690fb5e147e08192981f80e775d1b42a","output_index":0,"content_index":0,"delta":"\":\"","logprobs":[],"obfuscation":"sFnNvr3rmQHWV"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":15,"item_id":"msg_0d165ceb975b9af401690fb5e147e08192981f80e775d1b42a","output_index":0,"content_index":0,"delta":"Alice","logprobs":[],"obfuscation":"5fQecM4hrZO"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":16,"item_id":"msg_0d165ceb975b9af401690fb5e147e08192981f80e775d1b42a","output_index":0,"content_index":0,"delta":"\"}","logprobs":[],"obfuscation":"jgrv8Q1bo52G7r"}
+
+      event: response.output_text.done
+      data: {"type":"response.output_text.done","sequence_number":17,"item_id":"msg_0d165ceb975b9af401690fb5e147e08192981f80e775d1b42a","output_index":0,"content_index":0,"text":"{\"age\":30,\"city\":\"Paris\",\"name\":\"Alice\"}","logprobs":[]}
+
+      event: response.content_part.done
+      data: {"type":"response.content_part.done","sequence_number":18,"item_id":"msg_0d165ceb975b9af401690fb5e147e08192981f80e775d1b42a","output_index":0,"content_index":0,"part":{"type":"output_text","annotations":[],"logprobs":[],"text":"{\"age\":30,\"city\":\"Paris\",\"name\":\"Alice\"}"}}
+
+      event: response.output_item.done
+      data: {"type":"response.output_item.done","sequence_number":19,"output_index":0,"item":{"id":"msg_0d165ceb975b9af401690fb5e147e08192981f80e775d1b42a","type":"message","status":"completed","content":[{"type":"output_text","annotations":[],"logprobs":[],"text":"{\"age\":30,\"city\":\"Paris\",\"name\":\"Alice\"}"}],"role":"assistant"}}
+
+      event: response.completed
+      data: {"type":"response.completed","sequence_number":20,"response":{"id":"resp_0d165ceb975b9af401690fb5e0e8788192bd9eb948decabbd1","object":"response","created_at":1762637280,"status":"completed","background":false,"error":null,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-4o-2024-08-06","output":[{"id":"msg_0d165ceb975b9af401690fb5e147e08192981f80e775d1b42a","type":"message","status":"completed","content":[{"type":"output_text","annotations":[],"logprobs":[],"text":"{\"age\":30,\"city\":\"Paris\",\"name\":\"Alice\"}"}],"role":"assistant"}],"parallel_tool_calls":true,"previous_response_id":null,"prompt_cache_key":null,"prompt_cache_retention":null,"reasoning":{"effort":null,"summary":null},"safety_identifier":null,"service_tier":"default","store":false,"temperature":1.0,"text":{"format":{"type":"json_schema","description":null,"name":"Person","schema":{"additionalProperties":false,"properties":{"age":{"description":"The person's age","type":"integer"},"city":{"description":"The city where the person lives","type":"string"},"name":{"description":"The person's name","type":"string"}},"required":["name","age","city"],"type":"object"},"strict":true},"verbosity":"medium"},"tool_choice":"auto","tools":[],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":{"input_tokens":82,"input_tokens_details":{"cached_tokens":0},"output_tokens":14,"output_tokens_details":{"reasoning_tokens":0},"total_tokens":96},"user":null,"metadata":{}}}
+
+    headers:
+      Content-Type:
+      - text/event-stream; charset=utf-8
+    status: 200 OK
+    code: 200
+    duration: 229.655875ms

@@ -7,7 +7,7 @@ import (
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/providers/openai"
-	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
+	"charm.land/x/vcr"
 )
 
 var openaiTestModels = []testModel{
@@ -25,8 +25,16 @@ func TestOpenAICommon(t *testing.T) {
 	testCommon(t, pairs)
 }
 
+func TestOpenAIObjectGeneration(t *testing.T) {
+	var pairs []builderPair
+	for _, m := range openaiTestModels {
+		pairs = append(pairs, builderPair{m.name, openAIBuilder(m.model), nil, nil})
+	}
+	testObjectGeneration(t, pairs)
+}
+
 func openAIBuilder(model string) builderFunc {
-	return func(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
+	return func(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
 		provider, err := openai.New(
 			openai.WithAPIKey(os.Getenv("FANTASY_OPENAI_API_KEY")),
 			openai.WithHTTPClient(&http.Client{Transport: r}),

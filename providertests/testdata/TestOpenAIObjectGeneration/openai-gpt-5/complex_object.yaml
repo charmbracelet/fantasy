@@ -1,0 +1,68 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 973
+    host: ""
+    body: '{"messages":[{"content":"Generate information about ''The Lord of the Rings'' book by J.R.R. Tolkien, including genres like fantasy and adventure, and its publication year (1954).","role":"user"}],"model":"gpt-5","max_completion_tokens":4000,"response_format":{"json_schema":{"name":"Book","strict":true,"description":"A book with title, author, genres, and publication year","schema":{"additionalProperties":false,"properties":{"author":{"additionalProperties":false,"properties":{"name":{"description":"Author''s name","type":"string"},"nationality":{"description":"Author''s nationality","type":"string"}},"required":["name","nationality"],"type":"object"},"genres":{"description":"List of genres","items":{"type":"string"},"type":"array"},"published_year":{"description":"Year the book was published","type":"integer"},"title":{"description":"The book title","type":"string"}},"required":["title","author","genres","published_year"],"type":"object"}},"type":"json_schema"}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://api.openai.com/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: |
+      {
+        "id": "chatcmpl-CZkhdPgupBvka4xhGSEPQHw0QQKRf",
+        "object": "chat.completion",
+        "created": 1762637041,
+        "model": "gpt-5-2025-08-07",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "{\"author\":{\"name\":\"J.R.R. Tolkien\",\"nationality\":\"British\"},\"genres\":[\"Fantasy\",\"Adventure\"],\"published_year\":1954,\"title\":\"The Lord of the Rings\"}",
+              "refusal": null,
+              "annotations": []
+            },
+            "finish_reason": "stop"
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 156,
+          "completion_tokens": 370,
+          "total_tokens": 526,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 320,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "service_tier": "default",
+        "system_fingerprint": null
+      }
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 6.754405583s

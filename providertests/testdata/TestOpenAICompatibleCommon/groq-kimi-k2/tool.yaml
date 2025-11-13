@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - OpenAI/Go 2.7.1
     url: https://api.groq.com/openai/v1/chat/completions
     method: POST
   response:
@@ -25,28 +25,28 @@ interactions:
     content_length: -1
     uncompressed: true
     body: |
-      {"id":"chatcmpl-70b14f6a-3fb5-4bf5-8613-7670242afa1e","object":"chat.completion","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","choices":[{"index":0,"message":{"role":"assistant","content":"I'll check the weather in Florence, Italy for you.","tool_calls":[{"id":"functions.weather:0","type":"function","function":{"name":"weather","arguments":"{\"location\":\"Florence,Italy\"}"}}]},"logprobs":null,"finish_reason":"tool_calls"}],"usage":{"queue_time":0.035155911,"prompt_tokens":99,"prompt_time":0.016527326,"completion_tokens":32,"completion_time":0.104014523,"total_tokens":131,"total_time":0.120541849},"usage_breakdown":null,"system_fingerprint":"fp_6e6ff3688b","x_groq":{"id":"req_01k62v694nf5brr8zjscptd96b"},"service_tier":"on_demand"}
+      {"id":"chatcmpl-7822ddc7-c616-45cc-9315-1da4ae05d870","object":"chat.completion","created":1762854974,"model":"moonshotai/kimi-k2-instruct-0905","choices":[{"index":0,"message":{"role":"assistant","tool_calls":[{"id":"functions.weather:0","type":"function","function":{"name":"weather","arguments":"{\"location\":\"Florence,Italy\"}"}}]},"logprobs":null,"finish_reason":"tool_calls"}],"usage":{"queue_time":0.162552698,"prompt_tokens":93,"prompt_time":0.01385344,"completion_tokens":21,"completion_time":0.067437002,"total_tokens":114,"total_time":0.081290442},"usage_breakdown":null,"system_fingerprint":"fp_3312304636","x_groq":{"id":"req_01k9s5gcgyf6ttekbzf8v4fta8"},"service_tier":"on_demand"}
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 214.6305ms
+    duration: 294.483708ms
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 768
+    content_length: 705
     host: ""
-    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"content":"I''ll check the weather in Florence, Italy for you.","tool_calls":[{"id":"functions.weather:0","function":{"arguments":"{\"location\":\"Florence,Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"functions.weather:0","role":"tool"}],"model":"moonshotai/kimi-k2-instruct-0905","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"functions.weather:0","function":{"arguments":"{\"location\":\"Florence,Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"functions.weather:0","role":"tool"}],"model":"moonshotai/kimi-k2-instruct-0905","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
     headers:
       Accept:
       - application/json
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - OpenAI/Go 2.7.1
     url: https://api.groq.com/openai/v1/chat/completions
     method: POST
   response:
@@ -56,10 +56,10 @@ interactions:
     content_length: -1
     uncompressed: true
     body: |
-      {"id":"chatcmpl-c1ce333f-b2e7-46ae-b834-7ab0e4cd55c4","object":"chat.completion","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","choices":[{"index":0,"message":{"role":"assistant","content":"The weather in Florence, Italy is currently 40°C."},"logprobs":null,"finish_reason":"stop"}],"usage":{"queue_time":0.036013582,"prompt_tokens":150,"prompt_time":0.02103005,"completion_tokens":13,"completion_time":0.023271659,"total_tokens":163,"total_time":0.044301709},"usage_breakdown":null,"system_fingerprint":"fp_6e6ff3688b","x_groq":{"id":"req_01k62v69bceejt468zwpw3c7wv"},"service_tier":"on_demand"}
+      {"id":"chatcmpl-97e734c9-073a-48bf-926d-462e1eb23a77","object":"chat.completion","created":1762854974,"model":"moonshotai/kimi-k2-instruct-0905","choices":[{"index":0,"message":{"role":"assistant","content":"It's currently 40°C in Florence, Italy."},"logprobs":null,"finish_reason":"stop"}],"usage":{"queue_time":0.162461202,"prompt_tokens":132,"prompt_time":0.017534991,"completion_tokens":11,"completion_time":0.021573995,"total_tokens":143,"total_time":0.039108986},"usage_breakdown":null,"system_fingerprint":"fp_3312304636","x_groq":{"id":"req_01k9s5gct2fqm9ew59aphgfzdc"},"service_tier":"on_demand"}
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 136.771375ms
+    duration: 248.764041ms

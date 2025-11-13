@@ -10,12 +10,12 @@ import (
 	"charm.land/fantasy/providers/anthropic"
 	"charm.land/fantasy/providers/google"
 	"charm.land/fantasy/providers/openai"
+	"charm.land/x/vcr"
 	"github.com/stretchr/testify/require"
-	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )
 
 func anthropicImageBuilder(model string) builderFunc {
-	return func(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
+	return func(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
 		provider, err := anthropic.New(
 			anthropic.WithAPIKey(cmp.Or(os.Getenv("FANTASY_ANTHROPIC_API_KEY"), "(missing)")),
 			anthropic.WithHTTPClient(&http.Client{Transport: r}),
@@ -28,7 +28,7 @@ func anthropicImageBuilder(model string) builderFunc {
 }
 
 func openAIImageBuilder(model string) builderFunc {
-	return func(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
+	return func(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
 		provider, err := openai.New(
 			openai.WithAPIKey(cmp.Or(os.Getenv("FANTASY_OPENAI_API_KEY"), "(missing)")),
 			openai.WithHTTPClient(&http.Client{Transport: r}),
@@ -41,7 +41,7 @@ func openAIImageBuilder(model string) builderFunc {
 }
 
 func geminiImageBuilder(model string) builderFunc {
-	return func(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
+	return func(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
 		provider, err := google.New(
 			google.WithGeminiAPIKey(cmp.Or(os.Getenv("FANTASY_GEMINI_API_KEY"), "(missing)")),
 			google.WithHTTPClient(&http.Client{Transport: r}),
@@ -76,7 +76,7 @@ func TestImageUploadAgent(t *testing.T) {
 
 	for _, pair := range pairs {
 		t.Run(pair.name, func(t *testing.T) {
-			r := newRecorder(t)
+			r := vcr.NewRecorder(t)
 
 			lm, err := pair.builder(t, r)
 			require.NoError(t, err)
@@ -122,7 +122,7 @@ func TestImageUploadAgentStreaming(t *testing.T) {
 
 	for _, pair := range pairs {
 		t.Run(pair.name+"-stream", func(t *testing.T) {
-			r := newRecorder(t)
+			r := vcr.NewRecorder(t)
 
 			lm, err := pair.builder(t, r)
 			require.NoError(t, err)

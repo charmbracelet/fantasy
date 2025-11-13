@@ -9,8 +9,8 @@ import (
 	"charm.land/fantasy"
 	"charm.land/fantasy/providers/azure"
 	"charm.land/fantasy/providers/openai"
+	"charm.land/x/vcr"
 	"github.com/stretchr/testify/require"
-	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )
 
 const defaultBaseURL = "https://fantasy-playground-resource.openai.azure.com"
@@ -39,7 +39,7 @@ func testAzureThinking(t *testing.T, result *fantasy.AgentResult) {
 	require.Greater(t, result.Response.Usage.ReasoningTokens, int64(0), "expected reasoning tokens, got none")
 }
 
-func builderAzureO4Mini(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
+func builderAzureO4Mini(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
 	provider, err := azure.New(
 		azure.WithBaseURL(cmp.Or(os.Getenv("FANTASY_AZURE_BASE_URL"), defaultBaseURL)),
 		azure.WithAPIKey(cmp.Or(os.Getenv("FANTASY_AZURE_API_KEY"), "(missing)")),
@@ -51,7 +51,7 @@ func builderAzureO4Mini(t *testing.T, r *recorder.Recorder) (fantasy.LanguageMod
 	return provider.LanguageModel(t.Context(), "o4-mini")
 }
 
-func builderAzureGpt5Mini(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
+func builderAzureGpt5Mini(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
 	provider, err := azure.New(
 		azure.WithBaseURL(cmp.Or(os.Getenv("FANTASY_AZURE_BASE_URL"), defaultBaseURL)),
 		azure.WithAPIKey(cmp.Or(os.Getenv("FANTASY_AZURE_API_KEY"), "(missing)")),
@@ -63,7 +63,7 @@ func builderAzureGpt5Mini(t *testing.T, r *recorder.Recorder) (fantasy.LanguageM
 	return provider.LanguageModel(t.Context(), "gpt-5-mini")
 }
 
-func builderAzureGrok3Mini(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
+func builderAzureGrok3Mini(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
 	provider, err := azure.New(
 		azure.WithBaseURL(cmp.Or(os.Getenv("FANTASY_AZURE_BASE_URL"), defaultBaseURL)),
 		azure.WithAPIKey(cmp.Or(os.Getenv("FANTASY_AZURE_API_KEY"), "(missing)")),

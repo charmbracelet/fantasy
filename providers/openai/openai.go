@@ -32,6 +32,7 @@ type options struct {
 	headers              map[string]string
 	client               option.HTTPClient
 	sdkOptions           []option.RequestOption
+	objectMode           fantasy.ObjectMode
 	languageModelOptions []LanguageModelOption
 }
 
@@ -131,6 +132,17 @@ func WithUseResponsesAPI() Option {
 	}
 }
 
+// WithObjectMode sets the object generation mode.
+func WithObjectMode(om fantasy.ObjectMode) Option {
+	return func(o *options) {
+		// not supported
+		if om == fantasy.ObjectModeJSON {
+			om = fantasy.ObjectModeAuto
+		}
+		o.objectMode = om
+	}
+}
+
 // LanguageModel implements fantasy.Provider.
 func (o *provider) LanguageModel(_ context.Context, modelID string) (fantasy.LanguageModel, error) {
 	openaiClientOptions := make([]option.RequestOption, 0, 5+len(o.options.headers)+len(o.options.sdkOptions))
@@ -156,8 +168,15 @@ func (o *provider) LanguageModel(_ context.Context, modelID string) (fantasy.Lan
 	client := openai.NewClient(openaiClientOptions...)
 
 	if o.options.useResponsesAPI && IsResponsesModel(modelID) {
-		return newResponsesLanguageModel(modelID, o.options.name, client), nil
+		// Not supported for responses API
+		objectMode := o.options.objectMode
+		if objectMode == fantasy.ObjectModeJSON {
+			objectMode = fantasy.ObjectModeAuto
+		}
+		return newResponsesLanguageModel(modelID, o.options.name, client, objectMode), nil
 	}
+
+	o.options.languageModelOptions = append(o.options.languageModelOptions, WithLanguageModelObjectMode(o.options.objectMode))
 
 	return newLanguageModel(
 		modelID,

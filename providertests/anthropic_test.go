@@ -8,8 +8,8 @@ import (
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/providers/anthropic"
+	"charm.land/x/vcr"
 	"github.com/stretchr/testify/require"
-	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )
 
 var anthropicTestModels = []testModel{
@@ -99,6 +99,14 @@ func TestAnthropicThinkingWithCacheControl(t *testing.T) {
 	testThinking(t, pairs, testAnthropicThinking)
 }
 
+func TestAnthropicObjectGeneration(t *testing.T) {
+	var pairs []builderPair
+	for _, m := range anthropicTestModels {
+		pairs = append(pairs, builderPair{m.name, anthropicBuilder(m.model), nil, nil})
+	}
+	testObjectGeneration(t, pairs)
+}
+
 func testAnthropicThinking(t *testing.T, result *fantasy.AgentResult) {
 	reasoningContentCount := 0
 	signaturesCount := 0
@@ -136,7 +144,7 @@ func testAnthropicThinking(t *testing.T, result *fantasy.AgentResult) {
 }
 
 func anthropicBuilder(model string) builderFunc {
-	return func(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
+	return func(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
 		provider, err := anthropic.New(
 			anthropic.WithAPIKey(os.Getenv("FANTASY_ANTHROPIC_API_KEY")),
 			anthropic.WithHTTPClient(&http.Client{Transport: r}),

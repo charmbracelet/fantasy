@@ -9,8 +9,8 @@ import (
 	"charm.land/fantasy"
 	"charm.land/fantasy/providers/azure"
 	"charm.land/fantasy/providers/openai"
+	"charm.land/x/vcr"
 	"github.com/stretchr/testify/require"
-	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )
 
 func TestAzureResponsesCommon(t *testing.T) {
@@ -26,7 +26,7 @@ func TestAzureResponsesCommon(t *testing.T) {
 }
 
 func azureReasoningBuilder(model string) builderFunc {
-	return func(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
+	return func(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
 		provider, err := azure.New(
 			azure.WithBaseURL(cmp.Or(os.Getenv("FANTASY_AZURE_BASE_URL"), defaultBaseURL)),
 			azure.WithAPIKey(cmp.Or(os.Getenv("FANTASY_AZURE_API_KEY"), "(missing)")),

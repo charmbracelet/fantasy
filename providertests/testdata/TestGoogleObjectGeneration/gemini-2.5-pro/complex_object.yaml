@@ -1,0 +1,62 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 817
+    host: generativelanguage.googleapis.com
+    body: |
+      {"contents":[{"parts":[{"text":"Generate information about 'The Lord of the Rings' book by J.R.R. Tolkien, including genres like fantasy and adventure, and its publication year (1954)."}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000,"responseJsonSchema":{"properties":{"author":{"properties":{"name":{"description":"Author's name","type":"string"},"nationality":{"description":"Author's nationality","type":"string"}},"required":["name","nationality"],"type":"object"},"genres":{"description":"List of genres","items":{"type":"string"},"type":"array"},"published_year":{"description":"Year the book was published","type":"integer"},"title":{"description":"The book title","type":"string"}},"required":["title","author","genres","published_year"],"type":"object"},"responseMimeType":"application/json"}}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - google-genai-sdk/1.34.0 gl-go/go1.25.0
+    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: |
+      {
+        "candidates": [
+          {
+            "content": {
+              "parts": [
+                {
+                  "text": "{\n  \"author\": {\n    \"name\": \"J.R.R. Tolkien\",\n    \"nationality\": \"British\"\n  },\n  \"genres\": [\n    \"Fantasy\",\n    \"Adventure\"\n  ],\n  \"published_year\": 1954,\n  \"title\": \"The Lord of the Rings\"\n}"
+                }
+              ],
+              "role": "model"
+            },
+            "finishReason": "STOP",
+            "index": 0
+          }
+        ],
+        "usageMetadata": {
+          "promptTokenCount": 38,
+          "candidatesTokenCount": 78,
+          "totalTokenCount": 352,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 38
+            }
+          ],
+          "thoughtsTokenCount": 236
+        },
+        "modelVersion": "gemini-2.5-pro",
+        "responseId": "v9sRad3jAc_7xs0P77zDwQE"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+    status: 200 OK
+    code: 200
+    duration: 4.027611625s

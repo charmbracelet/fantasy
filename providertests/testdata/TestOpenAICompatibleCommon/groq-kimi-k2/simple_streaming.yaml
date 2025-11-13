@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - OpenAI/Go 2.7.1
     url: https://api.groq.com/openai/v1/chat/completions
     method: POST
   response:
@@ -24,15 +24,17 @@ interactions:
     proto_minor: 0
     content_length: -1
     body: |+
-      data: {"id":"chatcmpl-0544364e-cb53-4ca7-abe9-d5fc326e02cf","object":"chat.completion.chunk","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_6e6ff3688b","choices":[{"index":0,"delta":{"role":"assistant","content":""},"logprobs":null,"finish_reason":null}],"x_groq":{"id":"req_01k62v6917eejrqc5hh96eeeyz"}}
+      data: {"id":"chatcmpl-01c5e4bc-e533-4f23-bc74-32b9f2f473b0","object":"chat.completion.chunk","created":1762854973,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"role":"assistant","content":""},"logprobs":null,"finish_reason":null}],"x_groq":{"id":"req_01k9s5gc9mfqk9exgvmtm3gw25"}}
 
-      data: {"id":"chatcmpl-0544364e-cb53-4ca7-abe9-d5fc326e02cf","object":"chat.completion.chunk","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_6e6ff3688b","choices":[{"index":0,"delta":{"content":"Oi"},"logprobs":null,"finish_reason":null}]}
+      data: {"id":"chatcmpl-01c5e4bc-e533-4f23-bc74-32b9f2f473b0","object":"chat.completion.chunk","created":1762854973,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":"Ol"},"logprobs":null,"finish_reason":null}]}
 
-      data: {"id":"chatcmpl-0544364e-cb53-4ca7-abe9-d5fc326e02cf","object":"chat.completion.chunk","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_6e6ff3688b","choices":[{"index":0,"delta":{"content":"!"},"logprobs":null,"finish_reason":null}]}
+      data: {"id":"chatcmpl-01c5e4bc-e533-4f23-bc74-32b9f2f473b0","object":"chat.completion.chunk","created":1762854973,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":"á"},"logprobs":null,"finish_reason":null}]}
 
-      data: {"id":"chatcmpl-0544364e-cb53-4ca7-abe9-d5fc326e02cf","object":"chat.completion.chunk","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_6e6ff3688b","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"stop"}],"x_groq":{"id":"req_01k62v6917eejrqc5hh96eeeyz","usage":{"queue_time":0.035865149,"prompt_tokens":20,"prompt_time":0.009370029,"completion_tokens":3,"completion_time":0.006912131,"total_tokens":23,"total_time":0.01628216}},"usage":{"queue_time":0.035865149,"prompt_tokens":20,"prompt_time":0.009370029,"completion_tokens":3,"completion_time":0.006912131,"total_tokens":23,"total_time":0.01628216}}
+      data: {"id":"chatcmpl-01c5e4bc-e533-4f23-bc74-32b9f2f473b0","object":"chat.completion.chunk","created":1762854973,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":"!"},"logprobs":null,"finish_reason":null}]}
 
-      data: {"id":"chatcmpl-0544364e-cb53-4ca7-abe9-d5fc326e02cf","object":"chat.completion.chunk","created":1758884734,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_6e6ff3688b","choices":[],"usage":{"queue_time":0.035865149,"prompt_tokens":20,"prompt_time":0.009370029,"completion_tokens":3,"completion_time":0.006912131,"total_tokens":23,"total_time":0.01628216},"service_tier":"on_demand"}
+      data: {"id":"chatcmpl-01c5e4bc-e533-4f23-bc74-32b9f2f473b0","object":"chat.completion.chunk","created":1762854973,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"stop"}],"x_groq":{"id":"req_01k9s5gc9mfqk9exgvmtm3gw25","usage":{"queue_time":0.160975287,"prompt_tokens":20,"prompt_time":0.009101728,"completion_tokens":4,"completion_time":0.009250085,"total_tokens":24,"total_time":0.018351813}},"usage":{"queue_time":0.160975287,"prompt_tokens":20,"prompt_time":0.009101728,"completion_tokens":4,"completion_time":0.009250085,"total_tokens":24,"total_time":0.018351813}}
+
+      data: {"id":"chatcmpl-01c5e4bc-e533-4f23-bc74-32b9f2f473b0","object":"chat.completion.chunk","created":1762854973,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[],"usage":{"queue_time":0.160975287,"prompt_tokens":20,"prompt_time":0.009101728,"completion_tokens":4,"completion_time":0.009250085,"total_tokens":24,"total_time":0.018351813},"service_tier":"on_demand"}
 
       data: [DONE]
 
@@ -41,4 +43,4 @@ interactions:
       - text/event-stream
     status: 200 OK
     code: 200
-    duration: 114.54075ms
+    duration: 221.770167ms

@@ -6,9 +6,9 @@ interactions:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 849
+    content_length: 829
     host: ""
-    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"}],"model":"Qwen/Qwen3-Coder-480B-A35B-Instruct:cerebras","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"}],"model":"zai-org/GLM-4.6:cerebras","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
     headers:
       Accept:
       - application/json
@@ -23,21 +23,21 @@ interactions:
     proto_major: 2
     proto_minor: 0
     content_length: -1
-    body: '{"id":"chatcmpl-7903d21a-4ce4-4c3c-80b0-26c4486da856","choices":[{"finish_reason":"tool_calls","index":0,"message":{"tool_calls":[{"id":"636c4f780","type":"function","function":{"name":"add","arguments":"{\"a\": 2, \"b\": 3}"}},{"id":"0e7c8838b","type":"function","function":{"name":"multiply","arguments":"{\"a\": 2, \"b\": 3}"}}],"role":"assistant"}}],"created":1761070222,"model":"qwen-3-coder-480b","system_fingerprint":"fp_386b539e7b02ce3613b7","object":"chat.completion","usage":{"prompt_tokens":412,"completion_tokens":59,"total_tokens":471,"prompt_tokens_details":{"cached_tokens":0}},"time_info":{"queue_time":0.000492824,"prompt_time":0.003602156,"completion_time":0.029433121,"total_time":0.03494548797607422,"created":1761070222.626673}}'
+    body: '{"id":"chatcmpl-7189d22c-3447-47bd-99e5-5e5b509d6373","choices":[{"finish_reason":"tool_calls","index":0,"message":{"content":"\nI''ll add and multiply the numbers 2 and 3 for you.\n","reasoning":"The user wants me to add and multiply the numbers 2 and 3. Looking at the available functions, I have:\n1. add function - to add two numbers\n2. multiply function - to multiply two numbers\n\nI need to call both functions as instructed. Let me call both functions with a=2 and b=3.","tool_calls":[{"id":"4f736900e","type":"function","function":{"name":"add","arguments":"{\"a\": 2, \"b\": 3}"}},{"id":"c69319726","type":"function","function":{"name":"multiply","arguments":"{\"a\": 2, \"b\": 3}"}}],"role":"assistant"}}],"created":1762855260,"model":"zai-glm-4.6","system_fingerprint":"fp_b78e4418d824cdcd64e8","object":"chat.completion","usage":{"total_tokens":430,"completion_tokens":128,"prompt_tokens":302},"time_info":{"queue_time":0.003482136,"prompt_time":0.007521096,"completion_time":0.148015855,"total_time":0.16007018089294434,"created":1762855260.7792244}}'
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 417.164875ms
+    duration: 523.183584ms
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 1200
+    content_length: 1247
     host: ""
-    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"tool_calls":[{"id":"636c4f780","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"add"},"type":"function"},{"id":"0e7c8838b","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"636c4f780","role":"tool"},{"content":"6","tool_call_id":"0e7c8838b","role":"tool"}],"model":"Qwen/Qwen3-Coder-480B-A35B-Instruct:cerebras","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"content":"\nI''ll add and multiply the numbers 2 and 3 for you.\n","tool_calls":[{"id":"4f736900e","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"add"},"type":"function"},{"id":"c69319726","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"4f736900e","role":"tool"},{"content":"6","tool_call_id":"c69319726","role":"tool"}],"model":"zai-org/GLM-4.6:cerebras","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
     headers:
       Accept:
       - application/json
@@ -52,10 +52,10 @@ interactions:
     proto_major: 2
     proto_minor: 0
     content_length: -1
-    body: '{"id":"chatcmpl-11d40720-9356-401e-840c-354c845cc02e","choices":[{"finish_reason":"stop","index":0,"message":{"content":"The sum of 2 and 3 is 5, and the product of 2 and 3 is 6.","role":"assistant"}}],"created":1761070220,"model":"qwen-3-coder-480b","system_fingerprint":"fp_386b539e7b02ce3613b7","object":"chat.completion","usage":{"prompt_tokens":492,"completion_tokens":26,"total_tokens":518,"prompt_tokens_details":{"cached_tokens":0}},"time_info":{"queue_time":0.00014209,"prompt_time":0.005866093,"completion_time":0.009498776,"total_time":0.016791582107543945,"created":1761070220.5671532}}'
+    body: '{"id":"chatcmpl-79f11d7a-dc2b-4e3e-9051-d44712aa2780","choices":[{"finish_reason":"stop","index":0,"message":{"content":"\nThe results are:\n- Addition: 2 + 3 = 5\n- Multiplication: 2 × 3 = 6","role":"assistant"}}],"created":1762855280,"model":"zai-glm-4.6","system_fingerprint":"fp_b78e4418d824cdcd64e8","object":"chat.completion","usage":{"total_tokens":408,"completion_tokens":32,"prompt_tokens":376},"time_info":{"queue_time":0.003082643,"prompt_time":0.008120705,"completion_time":0.030221978,"total_time":0.043164968490600586,"created":1762855280.5628223}}'
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 439.567542ms
+    duration: 19.670645958s

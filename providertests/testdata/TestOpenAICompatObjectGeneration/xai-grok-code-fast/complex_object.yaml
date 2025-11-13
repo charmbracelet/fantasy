@@ -1,0 +1,33 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 967
+    host: ""
+    body: '{"messages":[{"content":"Generate information about ''The Lord of the Rings'' book by J.R.R. Tolkien, including genres like fantasy and adventure, and its publication year (1954).","role":"user"}],"model":"grok-code-fast-1","max_tokens":4000,"tool_choice":{"function":{"name":"Book"},"type":"function"},"tools":[{"function":{"name":"Book","strict":false,"description":"A book with title, author, genres, and publication year","parameters":{"properties":{"author":{"properties":{"name":{"description":"Author''s name","type":"string"},"nationality":{"description":"Author''s nationality","type":"string"}},"required":["name","nationality"],"type":"object"},"genres":{"description":"List of genres","items":{"type":"string"},"type":"array"},"published_year":{"description":"Year the book was published","type":"integer"},"title":{"description":"The book title","type":"string"}},"required":["title","author","genres","published_year"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://api.x.ai/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"id":"2537f822-595e-1e8e-fe59-59c9761c15a1","object":"chat.completion","created":1762637624,"model":"grok-code-fast-1","choices":[{"index":0,"message":{"role":"assistant","content":"","tool_calls":[{"id":"call_05092142","function":{"name":"Book","arguments":"{\"author\":{\"name\":\"J.R.R. Tolkien\",\"nationality\":\"British\"},\"genres\":[\"fantasy\",\"adventure\"],\"published_year\":1954,\"title\":\"The Lord of the Rings\"}"},"type":"function"}],"refusal":null},"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":496,"completion_tokens":81,"total_tokens":820,"prompt_tokens_details":{"text_tokens":496,"audio_tokens":0,"image_tokens":0,"cached_tokens":320},"completion_tokens_details":{"reasoning_tokens":243,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0},"num_sources_used":0},"system_fingerprint":"fp_10f00c862d"}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 2.213765834s

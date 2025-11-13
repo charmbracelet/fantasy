@@ -3,7 +3,7 @@ module charm.land/fantasy
 go 1.25
 
 require (
-	charm.land/x/vcr v0.1.0
+	charm.land/x/vcr v0.1.1
 	cloud.google.com/go/auth v0.17.0
 	github.com/RealAlexandreAI/json-repair v0.0.14
 	github.com/aws/aws-sdk-go-v2 v1.39.6

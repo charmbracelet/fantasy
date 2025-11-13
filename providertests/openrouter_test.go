@@ -8,8 +8,8 @@ import (
 	"charm.land/fantasy"
 	"charm.land/fantasy/providers/anthropic"
 	"charm.land/fantasy/providers/openrouter"
+	"charm.land/x/vcr"
 	"github.com/stretchr/testify/require"
-	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )
 
 var openrouterTestModels = []testModel{
@@ -115,7 +115,7 @@ func testOpenrouterThinking(t *testing.T, result *fantasy.AgentResult) {
 }
 
 func openrouterBuilder(model string) builderFunc {
-	return func(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
+	return func(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
 		provider, err := openrouter.New(
 			openrouter.WithAPIKey(os.Getenv("FANTASY_OPENROUTER_API_KEY")),
 			openrouter.WithHTTPClient(&http.Client{Transport: r}),

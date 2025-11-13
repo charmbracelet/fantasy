@@ -1,0 +1,33 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 637
+    host: ""
+    body: '{"max_tokens":4000,"messages":[{"content":[{"text":"Generate information about a person named Alice who is 30 years old and lives in Paris.","type":"text"}],"role":"user"}],"model":"claude-sonnet-4-20250514","tool_choice":{"name":"Person","disable_parallel_tool_use":false,"type":"tool"},"tools":[{"input_schema":{"properties":{"age":{"description":"The person''s age","type":"integer"},"city":{"description":"The city where the person lives","type":"string"},"name":{"description":"The person''s name","type":"string"}},"required":["name","age","city"],"type":"object"},"name":"Person","description":"A person with name, age, and city"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Anthropic/Go 1.14.0
+    url: https://api.anthropic.com/v1/messages
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"model":"claude-sonnet-4-20250514","id":"msg_01NeodXcmcw7q1AnbSJ8ShV4","type":"message","role":"assistant","content":[{"type":"tool_use","id":"toolu_019sLuNYTpv7VTTJEuGWXzki","name":"Person","input":{"name":"Alice","age":30,"city":"Paris"}}],"stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":454,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":67,"service_tier":"standard"}}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 2.542812416s

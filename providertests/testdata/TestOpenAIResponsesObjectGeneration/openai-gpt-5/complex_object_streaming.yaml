@@ -1,0 +1,191 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 923
+    host: ""
+    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":[{"text":"Generate information about ''The Lord of the Rings'' book by J.R.R. Tolkien, including genres like fantasy and adventure, and its publication year (1954).","type":"input_text"}],"role":"user"}],"model":"gpt-5","text":{"format":{"name":"Book","schema":{"additionalProperties":false,"properties":{"author":{"additionalProperties":false,"properties":{"name":{"description":"Author''s name","type":"string"},"nationality":{"description":"Author''s nationality","type":"string"}},"required":["name","nationality"],"type":"object"},"genres":{"description":"List of genres","items":{"type":"string"},"type":"array"},"published_year":{"description":"Year the book was published","type":"integer"},"title":{"description":"The book title","type":"string"}},"required":["title","author","genres","published_year"],"type":"object"},"type":"json_schema"}},"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://api.openai.com/v1/responses
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      event: response.created
+      data: {"type":"response.created","sequence_number":0,"response":{"id":"resp_0aab0755c068dba601690fb61193ac81a09b187ec6ae118666","object":"response","created_at":1762637329,"status":"in_progress","background":false,"error":null,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-5-2025-08-07","output":[],"parallel_tool_calls":true,"previous_response_id":null,"prompt_cache_key":null,"prompt_cache_retention":null,"reasoning":{"effort":"medium","summary":null},"safety_identifier":null,"service_tier":"auto","store":false,"temperature":1.0,"text":{"format":{"type":"json_schema","description":null,"name":"Book","schema":{"additionalProperties":false,"properties":{"author":{"additionalProperties":false,"properties":{"name":{"description":"Author's name","type":"string"},"nationality":{"description":"Author's nationality","type":"string"}},"required":["name","nationality"],"type":"object"},"genres":{"description":"List of genres","items":{"type":"string"},"type":"array"},"published_year":{"description":"Year the book was published","type":"integer"},"title":{"description":"The book title","type":"string"}},"required":["title","author","genres","published_year"],"type":"object"},"strict":true},"verbosity":"medium"},"tool_choice":"auto","tools":[],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":null,"user":null,"metadata":{}}}
+
+      event: response.in_progress
+      data: {"type":"response.in_progress","sequence_number":1,"response":{"id":"resp_0aab0755c068dba601690fb61193ac81a09b187ec6ae118666","object":"response","created_at":1762637329,"status":"in_progress","background":false,"error":null,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-5-2025-08-07","output":[],"parallel_tool_calls":true,"previous_response_id":null,"prompt_cache_key":null,"prompt_cache_retention":null,"reasoning":{"effort":"medium","summary":null},"safety_identifier":null,"service_tier":"auto","store":false,"temperature":1.0,"text":{"format":{"type":"json_schema","description":null,"name":"Book","schema":{"additionalProperties":false,"properties":{"author":{"additionalProperties":false,"properties":{"name":{"description":"Author's name","type":"string"},"nationality":{"description":"Author's nationality","type":"string"}},"required":["name","nationality"],"type":"object"},"genres":{"description":"List of genres","items":{"type":"string"},"type":"array"},"published_year":{"description":"Year the book was published","type":"integer"},"title":{"description":"The book title","type":"string"}},"required":["title","author","genres","published_year"],"type":"object"},"strict":true},"verbosity":"medium"},"tool_choice":"auto","tools":[],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":null,"user":null,"metadata":{}}}
+
+      event: response.output_item.added
+      data: {"type":"response.output_item.added","sequence_number":2,"output_index":0,"item":{"id":"rs_0aab0755c068dba601690fb611f3ac81a09cdf0bc7455763c3","type":"reasoning","summary":[]}}
+
+      event: response.output_item.done
+      data: {"type":"response.output_item.done","sequence_number":3,"output_index":0,"item":{"id":"rs_0aab0755c068dba601690fb611f3ac81a09cdf0bc7455763c3","type":"reasoning","summary":[]}}
+
+      event: response.output_item.added
+      data: {"type":"response.output_item.added","sequence_number":4,"output_index":1,"item":{"id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","type":"message","status":"in_progress","content":[],"role":"assistant"}}
+
+      event: response.content_part.added
+      data: {"type":"response.content_part.added","sequence_number":5,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"part":{"type":"output_text","annotations":[],"logprobs":[],"text":""}}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":6,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":"{\"","logprobs":[],"obfuscation":"FRSE2Xg4Zlm8ZC"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":7,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":"author","logprobs":[],"obfuscation":"yOVxZwnwPd"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":8,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":"\":{\"","logprobs":[],"obfuscation":"2gdH3UjKn7p9"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":9,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":"name","logprobs":[],"obfuscation":"yC1JPv5XOR2N"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":10,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":"\":\"","logprobs":[],"obfuscation":"tX53HlJF35P9H"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":11,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":"J","logprobs":[],"obfuscation":"EtaQPdRl67MBSep"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":12,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":".R","logprobs":[],"obfuscation":"inIyKyyMrOUvqS"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":13,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":".R","logprobs":[],"obfuscation":"EILjTviSrTF0ld"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":14,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":".","logprobs":[],"obfuscation":"yLLwcS41h3upq9Y"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":15,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":" Tolkien","logprobs":[],"obfuscation":"8exzRdOu"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":16,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":"\",\"","logprobs":[],"obfuscation":"mnj6f7Tx86gFa"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":17,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":"national","logprobs":[],"obfuscation":"kTAXhH1C"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":18,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":"ity","logprobs":[],"obfuscation":"lmCwZO8RmMwd2"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":19,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":"\":\"","logprobs":[],"obfuscation":"mwjZzCk2nZQe9"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":20,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":"British","logprobs":[],"obfuscation":"EyvRvxuBK"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":21,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":"\"}","logprobs":[],"obfuscation":"hfEkZupXjk2638"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":22,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":",\"","logprobs":[],"obfuscation":"IsmwSfSFAcAJcU"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":23,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":"genres","logprobs":[],"obfuscation":"IQtYupB5bm"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":24,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":"\":[\"","logprobs":[],"obfuscation":"9IAahn76FgpL"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":25,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":"Fantasy","logprobs":[],"obfuscation":"OMHBvYUds"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":26,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":"\",\"","logprobs":[],"obfuscation":"HlxU6WDUGwneu"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":27,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":"Adventure","logprobs":[],"obfuscation":"ech2Vhw"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":28,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":"\",\"","logprobs":[],"obfuscation":"AKMMJLmgtycDx"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":29,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":"Epic","logprobs":[],"obfuscation":"t209VHDHFuLF"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":30,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":"\",\"","logprobs":[],"obfuscation":"Cr6RboWi7ioxS"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":31,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":"High","logprobs":[],"obfuscation":"obU3L2eqqyS4"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":32,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":" fantasy","logprobs":[],"obfuscation":"LUcEZc9a"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":33,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":"\"],","logprobs":[],"obfuscation":"mntl6wRF0Z9vj"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":34,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":"\"","logprobs":[],"obfuscation":"i8cTb3WH2EqqLnM"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":35,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":"published","logprobs":[],"obfuscation":"aMJKxsW"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":36,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":"_year","logprobs":[],"obfuscation":"ZXgdO0bgvI8"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":37,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":"\":","logprobs":[],"obfuscation":"oHU9zp2d7ZBE8r"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":38,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":"195","logprobs":[],"obfuscation":"wDjlyAPKySdjw"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":39,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":"4","logprobs":[],"obfuscation":"YhVTDZXJht9Deaa"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":40,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":",\"","logprobs":[],"obfuscation":"uzKH47tBdPXm2n"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":41,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":"title","logprobs":[],"obfuscation":"aXOJbtxSFSA"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":42,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":"\":\"","logprobs":[],"obfuscation":"ni9nsl8eAvHWp"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":43,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":"The","logprobs":[],"obfuscation":"secEK5zivRAr9"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":44,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":" Lord","logprobs":[],"obfuscation":"tTvtm7dHyTk"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":45,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":" of","logprobs":[],"obfuscation":"2LbYZOGAwQHVR"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":46,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":" the","logprobs":[],"obfuscation":"06rgzxqdEmme"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":47,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":" Rings","logprobs":[],"obfuscation":"x7YNUbaBsm"}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","sequence_number":48,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"delta":"\"}","logprobs":[],"obfuscation":"RgRi11lh9YHnhK"}
+
+      event: response.output_text.done
+      data: {"type":"response.output_text.done","sequence_number":49,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"text":"{\"author\":{\"name\":\"J.R.R. Tolkien\",\"nationality\":\"British\"},\"genres\":[\"Fantasy\",\"Adventure\",\"Epic\",\"High fantasy\"],\"published_year\":1954,\"title\":\"The Lord of the Rings\"}","logprobs":[]}
+
+      event: response.content_part.done
+      data: {"type":"response.content_part.done","sequence_number":50,"item_id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","output_index":1,"content_index":0,"part":{"type":"output_text","annotations":[],"logprobs":[],"text":"{\"author\":{\"name\":\"J.R.R. Tolkien\",\"nationality\":\"British\"},\"genres\":[\"Fantasy\",\"Adventure\",\"Epic\",\"High fantasy\"],\"published_year\":1954,\"title\":\"The Lord of the Rings\"}"}}
+
+      event: response.output_item.done
+      data: {"type":"response.output_item.done","sequence_number":51,"output_index":1,"item":{"id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","type":"message","status":"completed","content":[{"type":"output_text","annotations":[],"logprobs":[],"text":"{\"author\":{\"name\":\"J.R.R. Tolkien\",\"nationality\":\"British\"},\"genres\":[\"Fantasy\",\"Adventure\",\"Epic\",\"High fantasy\"],\"published_year\":1954,\"title\":\"The Lord of the Rings\"}"}],"role":"assistant"}}
+
+      event: response.completed
+      data: {"type":"response.completed","sequence_number":52,"response":{"id":"resp_0aab0755c068dba601690fb61193ac81a09b187ec6ae118666","object":"response","created_at":1762637329,"status":"completed","background":false,"error":null,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-5-2025-08-07","output":[{"id":"rs_0aab0755c068dba601690fb611f3ac81a09cdf0bc7455763c3","type":"reasoning","summary":[]},{"id":"msg_0aab0755c068dba601690fb61b054481a08336dd277cca7e31","type":"message","status":"completed","content":[{"type":"output_text","annotations":[],"logprobs":[],"text":"{\"author\":{\"name\":\"J.R.R. Tolkien\",\"nationality\":\"British\"},\"genres\":[\"Fantasy\",\"Adventure\",\"Epic\",\"High fantasy\"],\"published_year\":1954,\"title\":\"The Lord of the Rings\"}"}],"role":"assistant"}],"parallel_tool_calls":true,"previous_response_id":null,"prompt_cache_key":null,"prompt_cache_retention":null,"reasoning":{"effort":"medium","summary":null},"safety_identifier":null,"service_tier":"default","store":false,"temperature":1.0,"text":{"format":{"type":"json_schema","description":null,"name":"Book","schema":{"additionalProperties":false,"properties":{"author":{"additionalProperties":false,"properties":{"name":{"description":"Author's name","type":"string"},"nationality":{"description":"Author's nationality","type":"string"}},"required":["name","nationality"],"type":"object"},"genres":{"description":"List of genres","items":{"type":"string"},"type":"array"},"published_year":{"description":"Year the book was published","type":"integer"},"title":{"description":"The book title","type":"string"}},"required":["title","author","genres","published_year"],"type":"object"},"strict":true},"verbosity":"medium"},"tool_choice":"auto","tools":[],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":{"input_tokens":138,"input_tokens_details":{"cached_tokens":0},"output_tokens":628,"output_tokens_details":{"reasoning_tokens":576},"total_tokens":766},"user":null,"metadata":{}}}
+
+    headers:
+      Content-Type:
+      - text/event-stream; charset=utf-8
+    status: 200 OK
+    code: 200
+    duration: 305.219208ms

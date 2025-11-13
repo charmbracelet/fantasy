@@ -1,0 +1,70 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 817
+    host: us-east5-aiplatform.googleapis.com
+    body: |
+      {"contents":[{"parts":[{"text":"Generate information about 'The Lord of the Rings' book by J.R.R. Tolkien, including genres like fantasy and adventure, and its publication year (1954)."}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000,"responseJsonSchema":{"properties":{"author":{"properties":{"name":{"description":"Author's name","type":"string"},"nationality":{"description":"Author's nationality","type":"string"}},"required":["name","nationality"],"type":"object"},"genres":{"description":"List of genres","items":{"type":"string"},"type":"array"},"published_year":{"description":"Year the book was published","type":"integer"},"title":{"description":"The book title","type":"string"}},"required":["title","author","genres","published_year"],"type":"object"},"responseMimeType":"application/json"}}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - google-genai-sdk/1.34.0 gl-go/go1.25.0
+    url: https://us-east5-aiplatform.googleapis.com/v1beta1/projects/fantasy-playground-472418/locations/us-east5/publishers/google/models/gemini-2.5-flash:generateContent
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: |
+      {
+        "candidates": [
+          {
+            "content": {
+              "role": "model",
+              "parts": [
+                {
+                  "text": "{\n  \"title\": \"The Lord of the Rings\",\n  \"author\": {\n    \"name\": \"J.R.R. Tolkien\",\n    \"nationality\": \"British\"\n  },\n  \"genres\": [\n    \"fantasy\",\n    \"adventure\"\n  ],\n  \"published_year\": 1954\n}"
+                }
+              ]
+            },
+            "finishReason": "STOP",
+            "avgLogprobs": -0.45047834322050018
+          }
+        ],
+        "usageMetadata": {
+          "promptTokenCount": 37,
+          "candidatesTokenCount": 77,
+          "totalTokenCount": 246,
+          "trafficType": "ON_DEMAND",
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 37
+            }
+          ],
+          "candidatesTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 77
+            }
+          ],
+          "thoughtsTokenCount": 132
+        },
+        "modelVersion": "gemini-2.5-flash",
+        "createTime": "2025-11-10T12:36:25.122147Z",
+        "responseId": "SdwRaaO6B9fzptQPk5W9sQ8"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+    status: 200 OK
+    code: 200
+    duration: 1.655407625s

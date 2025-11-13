@@ -45,12 +45,12 @@ func init() {
 
 // PromptTokensDetails represents details about prompt tokens for OpenRouter.
 type PromptTokensDetails struct {
-	CachedTokens int64
+	CachedTokens int64 `json:"cached_tokens"`
 }
 
 // CompletionTokensDetails represents details about completion tokens for OpenRouter.
 type CompletionTokensDetails struct {
-	ReasoningTokens int64
+	ReasoningTokens int64 `json:"reasoning_tokens"`
 }
 
 // CostDetails represents cost details for OpenRouter.

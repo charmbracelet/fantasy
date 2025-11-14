@@ -104,34 +104,34 @@ func (r *Response) UnmarshalJSON(data []byte) error {
 
 // MarshalJSON implements json.Marshaler for StreamPart.
 func (s StreamPart) MarshalJSON() ([]byte, error) {
-	type Alias StreamPart
+	type alias StreamPart
 	aux := struct {
-		Alias
+		alias
 		Error string `json:"error,omitempty"`
 	}{
-		Alias: (Alias)(s),
+		alias: (alias)(s),
 	}
-	
+
 	// Marshal error to string
 	if s.Error != nil {
 		aux.Error = s.Error.Error()
 	}
-	
+
 	// Clear the original Error field to avoid duplicate marshaling
-	aux.Alias.Error = nil
-	
+	aux.alias.Error = nil
+
 	return json.Marshal(aux)
 }
 
 // UnmarshalJSON implements json.Unmarshaler for StreamPart.
 func (s *StreamPart) UnmarshalJSON(data []byte) error {
-	type Alias StreamPart
+	type alias StreamPart
 	aux := struct {
-		*Alias
+		*alias
 		Error            string                     `json:"error"`
 		ProviderMetadata map[string]json.RawMessage `json:"provider_metadata"`
 	}{
-		Alias: (*Alias)(s),
+		alias: (*alias)(s),
 	}
 
 	if err := json.Unmarshal(data, &aux); err != nil {

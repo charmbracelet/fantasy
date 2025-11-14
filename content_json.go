@@ -393,11 +393,8 @@ func (t *ToolResultContent) UnmarshalJSON(data []byte) error {
 
 // MarshalJSON implements json.Marshaler for ToolResultOutputContentText.
 func (t ToolResultOutputContentText) MarshalJSON() ([]byte, error) {
-	dataBytes, err := json.Marshal(struct {
-		Text string `json:"text"`
-	}{
-		Text: t.Text,
-	})
+	type alias ToolResultOutputContentText
+	dataBytes, err := json.Marshal(alias(t))
 	if err != nil {
 		return nil, err
 	}
@@ -415,15 +412,14 @@ func (t *ToolResultOutputContentText) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	var temp struct {
-		Text string `json:"text"`
-	}
+	type alias ToolResultOutputContentText
+	var temp alias
 
 	if err := json.Unmarshal(tr.Data, &temp); err != nil {
 		return err
 	}
 
-	t.Text = temp.Text
+	*t = ToolResultOutputContentText(temp)
 	return nil
 }
 
@@ -470,13 +466,8 @@ func (t *ToolResultOutputContentError) UnmarshalJSON(data []byte) error {
 
 // MarshalJSON implements json.Marshaler for ToolResultOutputContentMedia.
 func (t ToolResultOutputContentMedia) MarshalJSON() ([]byte, error) {
-	dataBytes, err := json.Marshal(struct {
-		Data      string `json:"data"`
-		MediaType string `json:"media_type"`
-	}{
-		Data:      t.Data,
-		MediaType: t.MediaType,
-	})
+	type alias ToolResultOutputContentMedia
+	dataBytes, err := json.Marshal(alias(t))
 	if err != nil {
 		return nil, err
 	}
@@ -494,17 +485,14 @@ func (t *ToolResultOutputContentMedia) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	var temp struct {
-		Data      string `json:"data"`
-		MediaType string `json:"media_type"`
-	}
+	type alias ToolResultOutputContentMedia
+	var temp alias
 
 	if err := json.Unmarshal(tr.Data, &temp); err != nil {
 		return err
 	}
 
-	t.Data = temp.Data
-	t.MediaType = temp.MediaType
+	*t = ToolResultOutputContentMedia(temp)
 	return nil
 }
 
@@ -870,15 +858,8 @@ func (f *FunctionTool) UnmarshalJSON(data []byte) error {
 
 // MarshalJSON implements json.Marshaler for ProviderDefinedTool.
 func (p ProviderDefinedTool) MarshalJSON() ([]byte, error) {
-	dataBytes, err := json.Marshal(struct {
-		ID   string         `json:"id"`
-		Name string         `json:"name"`
-		Args map[string]any `json:"args"`
-	}{
-		ID:   p.ID,
-		Name: p.Name,
-		Args: p.Args,
-	})
+	type alias ProviderDefinedTool
+	dataBytes, err := json.Marshal(alias(p))
 	if err != nil {
 		return nil, err
 	}
@@ -896,19 +877,14 @@ func (p *ProviderDefinedTool) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	var aux struct {
-		ID   string         `json:"id"`
-		Name string         `json:"name"`
-		Args map[string]any `json:"args"`
-	}
+	type alias ProviderDefinedTool
+	var aux alias
 
 	if err := json.Unmarshal(tj.Data, &aux); err != nil {
 		return err
 	}
 
-	p.ID = aux.ID
-	p.Name = aux.Name
-	p.Args = aux.Args
+	*p = ProviderDefinedTool(aux)
 
 	return nil
 }

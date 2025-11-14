@@ -700,4 +700,53 @@ func TestStreamPartErrorSerialization(t *testing.T) {
 			t.Errorf("error message mismatch: got %q, want %q", decoded.Error.Error(), expectedMsg)
 		}
 	})
+
+	t.Run("unmarshal stream part with error from JSON", func(t *testing.T) {
+		// JSON representing a StreamPart with an error
+		jsonData := `{
+			"type": "error",
+			"error": "unauthorized: Incorrect API key provided",
+			"id": "",
+			"tool_call_name": "",
+			"tool_call_input": "",
+			"delta": "",
+			"provider_executed": false,
+			"usage": {
+				"input_tokens": 0,
+				"output_tokens": 0,
+				"total_tokens": 0,
+				"reasoning_tokens": 0,
+				"cache_creation_tokens": 0,
+				"cache_read_tokens": 0
+			},
+			"finish_reason": "",
+			"warnings": null,
+			"source_type": "",
+			"url": "",
+			"title": "",
+			"provider_metadata": null
+		}`
+
+		var streamPart StreamPart
+		err := json.Unmarshal([]byte(jsonData), &streamPart)
+		if err != nil {
+			t.Fatalf("failed to unmarshal stream part: %v", err)
+		}
+
+		// Verify the stream part type
+		if streamPart.Type != StreamPartTypeError {
+			t.Errorf("type mismatch: got %v, want %v", streamPart.Type, StreamPartTypeError)
+		}
+
+		// Verify error exists
+		if streamPart.Error == nil {
+			t.Fatal("expected error to be present, got nil")
+		}
+
+		// Verify error message
+		expectedMsg := "unauthorized: Incorrect API key provided"
+		if streamPart.Error.Error() != expectedMsg {
+			t.Errorf("error message mismatch: got %q, want %q", streamPart.Error.Error(), expectedMsg)
+		}
+	})
 }

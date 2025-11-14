@@ -651,7 +651,7 @@ func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBl
 						}
 						if !sendReasoningData {
 							warnings = append(warnings, fantasy.CallWarning{
-								Type:    "other",
+								Type:    fantasy.CallWarningTypeOther,
 								Message: "sending reasoning content is disabled for this model",
 							})
 							continue
@@ -659,7 +659,7 @@ func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBl
 						reasoningMetadata := GetReasoningMetadata(part.Options())
 						if reasoningMetadata == nil {
 							warnings = append(warnings, fantasy.CallWarning{
-								Type:    "other",
+								Type:    fantasy.CallWarningTypeOther,
 								Message: "unsupported reasoning metadata",
 							})
 							continue
@@ -671,7 +671,7 @@ func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBl
 							anthropicContent = append(anthropicContent, anthropic.NewRedactedThinkingBlock(reasoningMetadata.RedactedData))
 						} else {
 							warnings = append(warnings, fantasy.CallWarning{
-								Type:    "other",
+								Type:    fantasy.CallWarningTypeOther,
 								Message: "unsupported reasoning metadata",
 							})
 							continue

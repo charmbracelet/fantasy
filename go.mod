@@ -13,6 +13,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/openai/openai-go/v2 v2.7.1
+	github.com/openai/openai-go/v3 v3.8.1
 	github.com/stretchr/testify v1.11.1
 	go.yaml.in/yaml/v4 v4.0.0-rc.3
 	golang.org/x/oauth2 v0.33.0

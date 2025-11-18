@@ -102,42 +102,46 @@ func (r *Response) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// MarshalJSON implements json.Marshaler for StreamPart.
+func (s StreamPart) MarshalJSON() ([]byte, error) {
+	type alias StreamPart
+	aux := struct {
+		alias
+		Error string `json:"error,omitempty"`
+	}{
+		alias: (alias)(s),
+	}
+
+	// Marshal error to string
+	if s.Error != nil {
+		aux.Error = s.Error.Error()
+	}
+
+	// Clear the original Error field to avoid duplicate marshaling
+	aux.alias.Error = nil
+
+	return json.Marshal(aux)
+}
+
 // UnmarshalJSON implements json.Unmarshaler for StreamPart.
 func (s *StreamPart) UnmarshalJSON(data []byte) error {
-	var aux struct {
-		Type             StreamPartType             `json:"type"`
-		ID               string                     `json:"id"`
-		ToolCallName     string                     `json:"tool_call_name"`
-		ToolCallInput    string                     `json:"tool_call_input"`
-		Delta            string                     `json:"delta"`
-		ProviderExecuted bool                       `json:"provider_executed"`
-		Usage            Usage                      `json:"usage"`
-		FinishReason     FinishReason               `json:"finish_reason"`
-		Error            error                      `json:"error"`
-		Warnings         []CallWarning              `json:"warnings"`
-		SourceType       SourceType                 `json:"source_type"`
-		URL              string                     `json:"url"`
-		Title            string                     `json:"title"`
+	type alias StreamPart
+	aux := struct {
+		*alias
+		Error            string                     `json:"error"`
 		ProviderMetadata map[string]json.RawMessage `json:"provider_metadata"`
+	}{
+		alias: (*alias)(s),
 	}
 
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
 
-	s.Type = aux.Type
-	s.ID = aux.ID
-	s.ToolCallName = aux.ToolCallName
-	s.ToolCallInput = aux.ToolCallInput
-	s.Delta = aux.Delta
-	s.ProviderExecuted = aux.ProviderExecuted
-	s.Usage = aux.Usage
-	s.FinishReason = aux.FinishReason
-	s.Error = aux.Error
-	s.Warnings = aux.Warnings
-	s.SourceType = aux.SourceType
-	s.URL = aux.URL
-	s.Title = aux.Title
+	// Unmarshal error string back to error type
+	if aux.Error != "" {
+		s.Error = fmt.Errorf("%s", aux.Error)
+	}
 
 	// Unmarshal ProviderMetadata
 	if len(aux.ProviderMetadata) > 0 {

@@ -3,6 +3,7 @@ package openrouter
 
 import (
 	"encoding/json"
+	"net/http"
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/providers/openai"
@@ -53,8 +54,13 @@ func New(opts ...Option) (fantasy.Provider, error) {
 		objectMode = fantasy.ObjectModeTool
 	}
 
+	// Wrap HTTP client with Gemini compatibility layer
+	// This converts "tool" role to "user" role for Gemini models which don't support the "tool" role
 	providerOptions.openaiOptions = append(
 		providerOptions.openaiOptions,
+		openai.WithHTTPClient(&GeminiCompatibilityTransport{
+			Base: http.DefaultClient,
+		}),
 		openai.WithLanguageModelOptions(providerOptions.languageModelOptions...),
 		openai.WithObjectMode(objectMode),
 	)

@@ -17,7 +17,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.33.0 gl-go/go1.25.0
+      - google-genai-sdk/1.34.0 gl-go/go1.25.4
     url: https://us-east5-aiplatform.googleapis.com/v1beta1/projects/fantasy-playground-472418/locations/us-east5/publishers/google/models/gemini-2.5-pro:streamGenerateContent?alt=sse
     method: POST
   response:
@@ -25,10 +25,10 @@ interactions:
     proto_major: 2
     proto_minor: 0
     content_length: -1
-    body: "data: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"text\": \"Of course! The most common ways to say \\\"hi\\\" in Portuguese are:\\n\\n*   **Oi** (more informal, like \\\"hi\\\")\\n*   **Olá** (a bit more formal, like \\\"hello\\\")\\n\\nYou might also hear people greet each other with **Tudo bem?**, which means \\\"How\"}]}}],\"usageMetadata\": {\"trafficType\": \"ON_DEMAND\"},\"modelVersion\": \"gemini-2.5-pro\",\"createTime\": \"2025-11-03T19:53:10.259251Z\",\"responseId\": \"JggJabPpD9KK0ekP6b_N-Q0\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"text\": \" are you?\\\" or \\\"Is everything well?\\\".\"}]},\"finishReason\": \"STOP\"}],\"usageMetadata\": {\"promptTokenCount\": 9,\"candidatesTokenCount\": 74,\"totalTokenCount\": 733,\"trafficType\": \"ON_DEMAND\",\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 9}],\"candidatesTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 74}],\"thoughtsTokenCount\": 650},\"modelVersion\": \"gemini-2.5-pro\",\"createTime\": \"2025-11-03T19:53:10.259251Z\",\"responseId\": \"JggJabPpD9KK0ekP6b_N-Q0\"}\r\n\r\n"
+    body: "data: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"text\": \"Of course! The most common ways to say \\\"hi\\\" in Portuguese are:\\n\\n*   **Olá** (This is the standard \\\"Hello,\\\" and it works in any situation, formal or informal.)\\n*   **Oi** (This is a more informal \\\"Hi,\\\" and it's extremely common, especially\"}]}}],\"usageMetadata\": {\"trafficType\": \"ON_DEMAND\"},\"modelVersion\": \"gemini-2.5-pro\",\"createTime\": \"2025-11-19T11:04:21.427607Z\",\"responseId\": \"NaQdadeMGo6C0ekP1u_dqQs\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"text\": \" in Brazil.)\\n\\nYou might also hear:\\n\\n*   **Bom dia** - Good morning\\n*   **Boa tarde** - Good afternoon\\n*   **Boa noite** - Good evening / Good night\"}]},\"finishReason\": \"STOP\"}],\"usageMetadata\": {\"promptTokenCount\": 9,\"candidatesTokenCount\": 106,\"totalTokenCount\": 815,\"trafficType\": \"ON_DEMAND\",\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 9}],\"candidatesTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 106}],\"thoughtsTokenCount\": 700},\"modelVersion\": \"gemini-2.5-pro\",\"createTime\": \"2025-11-19T11:04:21.427607Z\",\"responseId\": \"NaQdadeMGo6C0ekP1u_dqQs\"}\r\n\r\n"
     headers:
       Content-Type:
       - text/event-stream
     status: 200 OK
     code: 200
-    duration: 7.995516459s
+    duration: 8.8158165s

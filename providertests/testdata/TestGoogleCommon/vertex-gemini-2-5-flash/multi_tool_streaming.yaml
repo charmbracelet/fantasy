@@ -17,7 +17,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.33.0 gl-go/go1.25.0
+      - google-genai-sdk/1.34.0 gl-go/go1.25.4
     url: https://us-east5-aiplatform.googleapis.com/v1beta1/projects/fantasy-playground-472418/locations/us-east5/publishers/google/models/gemini-2.5-flash:streamGenerateContent?alt=sse
     method: POST
   response:
@@ -25,22 +25,22 @@ interactions:
     proto_major: 2
     proto_minor: 0
     content_length: -1
-    body: "data: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"functionCall\": {\"name\": \"add\",\"args\": {\"a\": 2,\"b\": 3}},\"thoughtSignature\": \"Ci8B4/H/Xh0HHuf8Ru7QjMXo2RHOUO+nBLn9rEjliTSTnGhUal/7EJGfeSpbcsz7QwpgAePx/17hV3eTgsKDYi4eoO1k3AOXUaW5mNFggBN8YKwi6Ga/nnj72ASWbUY5cgHWwRNYw8G+7VHS9MxuWQTWZ3xjlxmHNxSLUmisj//l4PBElDRkyR+CPl27hn5Ep9V0Cl0B4/H/XsPIkOqYZ7ohYzyq8m+HL8z7tNQJnIIS+gZJGBoYlIm7BLKAFUCvEeOh4/LMuwo/vKDHkodZCkkWnt3RHJ4FjtOXzSU+/BnFCyd5UzTGlz5LgQP6r6l4fxMKpQEB4/H/Xnzg231l6QUr950FU1uyEo3+dRA2A6MOh9mpgx6oNTfVZG5LX2h9ZGr/SShaCbFMrY1xM8I9qUE6PpvELcN2yO4da8uIcSxtUsOL0qbLXJ3DDg1hta1CRF1ycK9VkcH2KrhQJ4VMcyTnNbBkzCnW+gQQBAL7IDSIYRa5F/m2ucBHeK+/MB3gDWmdHR7GwSpNgcouIQjblRCuo8XYwrqSato=\"},{\"functionCall\": {\"name\": \"multiply\",\"args\": {\"a\": 2,\"b\": 3}}}]},\"finishReason\": \"STOP\"}],\"usageMetadata\": {\"promptTokenCount\": 57,\"candidatesTokenCount\": 10,\"totalTokenCount\": 146,\"trafficType\": \"ON_DEMAND\",\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 57}],\"candidatesTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 10}],\"thoughtsTokenCount\": 79},\"modelVersion\": \"gemini-2.5-flash\",\"createTime\": \"2025-11-03T19:52:57.649973Z\",\"responseId\": \"GQgJafXVJ6rGptQPx7S0-Ag\"}\r\n\r\n"
+    body: "data: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"functionCall\": {\"name\": \"add\",\"args\": {\"a\": 2,\"b\": 3}},\"thoughtSignature\": \"Ci8B4/H/XsVjmQllPB1vwXsit6Cy6bO83UTy/g2xrDRI+kS+lSc5zTqIPp2WuV1dFAphAePx/1778NrXCSJC9DjysS5FDbk2qa2fdkpGT8AKSg3Gb9z6oBbS7lqKRfgAiqvPKXwwxLplcnnJ3Eez3UYC+2NI+JSeeBqOhxEmH6qbFXdcQPyf7IY1BCdynZ37b4wNJApdAePx/1455hKMzvD1Dy3HayN6NX2qyXtP3OC+vwWXrjyA8J8U2TBMgsE2Rer1TmJDLu+LX2o2BX/ECsnXAIOV5CxYGbXhA0pa5PENJvWpKlKDNZhRHLDMFw4f+WZVCqUBAePx/17pAvxLAWqaxXNGe5Z1qiN/FPaqRhvnG4IAVlYbM8yniWCY1P6DLIMBQ7ocubcSFRDMaYW7Oh5/WVwBTQ9wq2Yyg2YaAjdi3h8Si8ujsXbxzSKMqHjYrhEfWmT9nxSnsyztHsPCnLL9SlnBxURfWaNJXG7r6cgf3r/tyRJ5X1ar/iH3dkjp58MubpJJaMx+H022YAPMnWmIvJ4J4vsrwoDJ\"},{\"functionCall\": {\"name\": \"multiply\",\"args\": {\"a\": 2,\"b\": 3}}}]},\"finishReason\": \"STOP\"}],\"usageMetadata\": {\"promptTokenCount\": 57,\"candidatesTokenCount\": 10,\"totalTokenCount\": 147,\"trafficType\": \"ON_DEMAND\",\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 57}],\"candidatesTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 10}],\"thoughtsTokenCount\": 80},\"modelVersion\": \"gemini-2.5-flash\",\"createTime\": \"2025-11-19T11:04:07.904252Z\",\"responseId\": \"J6QdabyYN4qb5OMPr6PXcQ\"}\r\n\r\n"
     headers:
       Content-Type:
       - text/event-stream
     status: 200 OK
     code: 200
-    duration: 1.348630167s
+    duration: 1.012000667s
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 1138
+    content_length: 1708
     host: us-east5-aiplatform.googleapis.com
     body: |
-      {"contents":[{"parts":[{"text":"Add and multiply the number 2 and 3"}],"role":"user"},{"parts":[{"functionCall":{"args":{"a":2,"b":3},"id":"1","name":"add"}},{"functionCall":{"args":{"a":2,"b":3},"id":"2","name":"multiply"}}],"role":"model"},{"parts":[{"functionResponse":{"id":"1","name":"add","response":{"result":"5"}}},{"functionResponse":{"id":"2","name":"multiply","response":{"result":"6"}}}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000},"systemInstruction":{"parts":[{"text":"You are a helpful assistant. Always use both add and multiply at the same time."}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Add two numbers","name":"add","parameters":{"properties":{"a":{"description":"first number","type":"INTEGER"},"b":{"description":"second number","type":"INTEGER"}},"required":["a","b"],"type":"OBJECT"}},{"description":"Multiply two numbers","name":"multiply","parameters":{"properties":{"a":{"description":"first number","type":"INTEGER"},"b":{"description":"second number","type":"INTEGER"}},"required":["a","b"],"type":"OBJECT"}}]}]}
+      {"contents":[{"parts":[{"text":"Add and multiply the number 2 and 3"}],"role":"user"},{"parts":[{"functionCall":{"args":{"a":2,"b":3},"id":"1","name":"add"},"thoughtSignature":"Ci8B4/H/XsVjmQllPB1vwXsit6Cy6bO83UTy/g2xrDRI+kS+lSc5zTqIPp2WuV1dFAphAePx/1778NrXCSJC9DjysS5FDbk2qa2fdkpGT8AKSg3Gb9z6oBbS7lqKRfgAiqvPKXwwxLplcnnJ3Eez3UYC+2NI+JSeeBqOhxEmH6qbFXdcQPyf7IY1BCdynZ37b4wNJApdAePx/1455hKMzvD1Dy3HayN6NX2qyXtP3OC+vwWXrjyA8J8U2TBMgsE2Rer1TmJDLu+LX2o2BX/ECsnXAIOV5CxYGbXhA0pa5PENJvWpKlKDNZhRHLDMFw4f+WZVCqUBAePx/17pAvxLAWqaxXNGe5Z1qiN/FPaqRhvnG4IAVlYbM8yniWCY1P6DLIMBQ7ocubcSFRDMaYW7Oh5/WVwBTQ9wq2Yyg2YaAjdi3h8Si8ujsXbxzSKMqHjYrhEfWmT9nxSnsyztHsPCnLL9SlnBxURfWaNJXG7r6cgf3r/tyRJ5X1ar/iH3dkjp58MubpJJaMx+H022YAPMnWmIvJ4J4vsrwoDJ"},{"functionCall":{"args":{"a":2,"b":3},"id":"2","name":"multiply"}}],"role":"model"},{"parts":[{"functionResponse":{"id":"1","name":"add","response":{"result":"5"}}},{"functionResponse":{"id":"2","name":"multiply","response":{"result":"6"}}}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000},"systemInstruction":{"parts":[{"text":"You are a helpful assistant. Always use both add and multiply at the same time."}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Add two numbers","name":"add","parameters":{"properties":{"a":{"description":"first number","type":"INTEGER"},"b":{"description":"second number","type":"INTEGER"}},"required":["a","b"],"type":"OBJECT"}},{"description":"Multiply two numbers","name":"multiply","parameters":{"properties":{"a":{"description":"first number","type":"INTEGER"},"b":{"description":"second number","type":"INTEGER"}},"required":["a","b"],"type":"OBJECT"}}]}]}
     form:
       alt:
       - sse
@@ -48,7 +48,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.33.0 gl-go/go1.25.0
+      - google-genai-sdk/1.34.0 gl-go/go1.25.4
     url: https://us-east5-aiplatform.googleapis.com/v1beta1/projects/fantasy-playground-472418/locations/us-east5/publishers/google/models/gemini-2.5-flash:streamGenerateContent?alt=sse
     method: POST
   response:
@@ -56,10 +56,10 @@ interactions:
     proto_major: 2
     proto_minor: 0
     content_length: -1
-    body: "data: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"text\": \"The sum of\"}]}}],\"usageMetadata\": {\"trafficType\": \"ON_DEMAND\"},\"modelVersion\": \"gemini-2.5-flash\",\"createTime\": \"2025-11-03T19:52:58.993078Z\",\"responseId\": \"GggJabbOPKDM5OMPxdqygAc\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"text\": \" 2 and 3 is 5.\\nThe product of 2 and 3 is 6\"}]}}],\"usageMetadata\": {\"trafficType\": \"ON_DEMAND\"},\"modelVersion\": \"gemini-2.5-flash\",\"createTime\": \"2025-11-03T19:52:58.993078Z\",\"responseId\": \"GggJabbOPKDM5OMPxdqygAc\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"text\": \".\"}]},\"finishReason\": \"STOP\"}],\"usageMetadata\": {\"promptTokenCount\": 73,\"candidatesTokenCount\": 25,\"totalTokenCount\": 98,\"trafficType\": \"ON_DEMAND\",\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 73}],\"candidatesTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 25}]},\"modelVersion\": \"gemini-2.5-flash\",\"createTime\": \"2025-11-03T19:52:58.993078Z\",\"responseId\": \"GggJabbOPKDM5OMPxdqygAc\"}\r\n\r\n"
+    body: "data: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"text\": \"The sum of 2 and\"}]}}],\"usageMetadata\": {\"trafficType\": \"ON_DEMAND\"},\"modelVersion\": \"gemini-2.5-flash\",\"createTime\": \"2025-11-19T11:04:08.930164Z\",\"responseId\": \"KKQdafTiOKnzptQPke-o4AE\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"text\": \" 3 is 5. The product of 2 and 3 is 6.\"}]},\"finishReason\": \"STOP\"}],\"usageMetadata\": {\"promptTokenCount\": 151,\"candidatesTokenCount\": 24,\"totalTokenCount\": 175,\"trafficType\": \"ON_DEMAND\",\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 151}],\"candidatesTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 24}]},\"modelVersion\": \"gemini-2.5-flash\",\"createTime\": \"2025-11-19T11:04:08.930164Z\",\"responseId\": \"KKQdafTiOKnzptQPke-o4AE\"}\r\n\r\n"
     headers:
       Content-Type:
       - text/event-stream
     status: 200 OK
     code: 200
-    duration: 713.590167ms
+    duration: 550.507042ms

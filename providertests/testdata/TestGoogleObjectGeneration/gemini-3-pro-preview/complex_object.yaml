@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 817
+    host: generativelanguage.googleapis.com
+    body: |
+      {"contents":[{"parts":[{"text":"Generate information about 'The Lord of the Rings' book by J.R.R. Tolkien, including genres like fantasy and adventure, and its publication year (1954)."}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000,"responseJsonSchema":{"properties":{"author":{"properties":{"name":{"description":"Author's name","type":"string"},"nationality":{"description":"Author's nationality","type":"string"}},"required":["name","nationality"],"type":"object"},"genres":{"description":"List of genres","items":{"type":"string"},"type":"array"},"published_year":{"description":"Year the book was published","type":"integer"},"title":{"description":"The book title","type":"string"}},"required":["title","author","genres","published_year"],"type":"object"},"responseMimeType":"application/json"}}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - google-genai-sdk/1.34.0 gl-go/go1.25.4
+    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: |
+      {
+        "candidates": [
+          {
+            "content": {
+              "parts": [
+                {
+                  "text": "{\"author\": {\"name\": \"J.R.R. Tolkien\", \"nationality\": \"British\"}, \"genres\": [\"Fantasy\", \"Adventure\"], \"published_year\": 1954, \"title\": \"The Lord of the Rings\"}",
+                  "thoughtSignature": "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"
+                }
+              ],
+              "role": "model"
+            },
+            "finishReason": "STOP",
+            "index": 0
+          }
+        ],
+        "usageMetadata": {
+          "promptTokenCount": 38,
+          "candidatesTokenCount": 51,
+          "totalTokenCount": 747,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 38
+            }
+          ],
+          "thoughtsTokenCount": 658
+        },
+        "modelVersion": "gemini-3-pro-preview",
+        "responseId": "v6Idae2xKIDXvdIP097RmAg"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+    status: 200 OK
+    code: 200
+    duration: 7.5885605s

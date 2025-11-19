@@ -17,7 +17,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.33.0 gl-go/go1.25.0
+      - google-genai-sdk/1.34.0 gl-go/go1.25.4
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse
     method: POST
   response:
@@ -25,10 +25,10 @@ interactions:
     proto_major: 2
     proto_minor: 0
     content_length: -1
-    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"Olá!\\n\\nIn Portuguese, \\\"hi\\\" is **Olá!**\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 11,\"candidatesTokenCount\": 14,\"totalTokenCount\": 49,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 11}],\"thoughtsTokenCount\": 24},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"6wcJab6wEJucz7IP3f6J4Qk\"}\r\n\r\n"
+    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"Olá! In Portuguese, you can say:\\n\\n**Olá!**\\n\\nIt's a versatile greeting that works for \\\"hi,\\\" \\\"hello,\\\" and even \\\"hey.\\\"\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 11,\"candidatesTokenCount\": 35,\"totalTokenCount\": 78,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 11}],\"thoughtsTokenCount\": 32},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"bqIdacLAGozKvdIP5Nu3oAg\"}\r\n\r\n"
     headers:
       Content-Type:
       - text/event-stream
     status: 200 OK
     code: 200
-    duration: 835.455625ms
+    duration: 733.998792ms

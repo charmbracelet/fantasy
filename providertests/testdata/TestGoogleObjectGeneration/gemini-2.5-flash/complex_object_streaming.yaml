@@ -17,7 +17,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.34.0 gl-go/go1.25.0
+      - google-genai-sdk/1.34.0 gl-go/go1.25.4
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse
     method: POST
   response:
@@ -25,10 +25,10 @@ interactions:
     proto_major: 2
     proto_minor: 0
     content_length: -1
-    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"{\\\"author\\\":{\\\"name\\\":\\\"J.R.R. Tolkien\\\",\\\"nationality\\\":\\\"British\\\"},\\\"genres\\\":[\\\"fantasy\\\",\\\"adventure\\\"],\\\"published_year\\\":1954,\\\"title\\\":\\\"The Lord\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 38,\"candidatesTokenCount\": 37,\"totalTokenCount\": 205,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 38}],\"thoughtsTokenCount\": 130},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"s9sRaeWODKqYvdIP4_6V6Q8\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \" of the Rings\\\"}\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 38,\"candidatesTokenCount\": 41,\"totalTokenCount\": 209,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 38}],\"thoughtsTokenCount\": 130},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"s9sRaeWODKqYvdIP4_6V6Q8\"}\r\n\r\n"
+    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"{\\\"author\\\":{\\\"name\\\":\\\"J.R.R. Tolkien\\\",\\\"nationality\\\":\\\"British\\\"},\\\"genres\\\":[\\\"fantasy\\\",\\\"adventure\\\"],\\\"published_year\\\":1954,\\\"title\\\":\\\"The Lord\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 38,\"candidatesTokenCount\": 37,\"totalTokenCount\": 210,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 38}],\"thoughtsTokenCount\": 135},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"yaIdaYqFMfuDvdIPn_iEyAk\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \" of the Rings\\\"}\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 38,\"candidatesTokenCount\": 41,\"totalTokenCount\": 214,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 38}],\"thoughtsTokenCount\": 135},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"yaIdaYqFMfuDvdIPn_iEyAk\"}\r\n\r\n"
     headers:
       Content-Type:
       - text/event-stream
     status: 200 OK
     code: 200
-    duration: 1.408184334s
+    duration: 1.379188208s

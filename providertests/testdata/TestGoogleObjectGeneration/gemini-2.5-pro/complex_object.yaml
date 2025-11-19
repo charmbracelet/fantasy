@@ -14,7 +14,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.34.0 gl-go/go1.25.0
+      - google-genai-sdk/1.34.0 gl-go/go1.25.4
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent
     method: POST
   response:
@@ -30,7 +30,7 @@ interactions:
             "content": {
               "parts": [
                 {
-                  "text": "{\n  \"author\": {\n    \"name\": \"J.R.R. Tolkien\",\n    \"nationality\": \"British\"\n  },\n  \"genres\": [\n    \"Fantasy\",\n    \"Adventure\"\n  ],\n  \"published_year\": 1954,\n  \"title\": \"The Lord of the Rings\"\n}"
+                  "text": "{\n  \"author\": {\n    \"name\": \"J.R.R. Tolkien\",\n    \"nationality\": \"British\"\n  },\n  \"genres\": [\n    \"Fantasy\",\n    \"Adventure\",\n    \"High fantasy\"\n  ],\n  \"published_year\": 1954,\n  \"title\": \"The Lord of the Rings\"\n}"
                 }
               ],
               "role": "model"
@@ -41,22 +41,22 @@ interactions:
         ],
         "usageMetadata": {
           "promptTokenCount": 38,
-          "candidatesTokenCount": 78,
-          "totalTokenCount": 352,
+          "candidatesTokenCount": 84,
+          "totalTokenCount": 195,
           "promptTokensDetails": [
             {
               "modality": "TEXT",
               "tokenCount": 38
             }
           ],
-          "thoughtsTokenCount": 236
+          "thoughtsTokenCount": 73
         },
         "modelVersion": "gemini-2.5-pro",
-        "responseId": "v9sRad3jAc_7xs0P77zDwQE"
+        "responseId": "0qIdaciCFffPvdIPp-ycyAk"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 4.027611625s
+    duration: 2.813791334s

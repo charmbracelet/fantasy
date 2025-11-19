@@ -1,0 +1,34 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 202
+    host: generativelanguage.googleapis.com
+    body: |
+      {"contents":[{"parts":[{"text":"Say hi in Portuguese"}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"}}
+    form:
+      alt:
+      - sse
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - google-genai-sdk/1.34.0 gl-go/go1.25.4
+    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:streamGenerateContent?alt=sse
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"You can say **\\\"Oi\\\"** or **\\\"Olá\\\"**.\\n\\n*   **Oi** is more informal (like \\\"Hi\\\").\\n*   **Olá** is slightly more formal (like \\\"Hello\\\").\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 11,\"candidatesTokenCount\": 43,\"totalTokenCount\": 361,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 11}],\"thoughtsTokenCount\": 307},\"modelVersion\": \"gemini-3-pro-preview\",\"responseId\": \"XKIdabjbOtH3xN8P5NmBkQk\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"\",\"thoughtSignature\": \"ErkKCrYKAdHtim/DFrUx3uJvLE4jfIqzN3zSWBVxI1G7XuJBmEeNZJO64cM2d2681b4nCpBG1uTmz4sp1T2cNjZNYYav3OngCEWzmvzUbZz5WAYbuZPWdjZ9rn6v9xRynSfQ+kXScHJzG0XUTQzc+2OyG1haLUL62AEGBbFg04lbjPAOoUpTpDHk8BI9cW0dhbeDsdr7UFVvN8vpIA83xPQW/yuky2/J4pl70dIkFEhfJjaU2V/Ie7yRSup66ZDH5KdU+Dl5JQ43I8lPcqqoLXcDfNxUUzg/WuMzQ3PqvnbBpl9ScKNHJlEhg7909xrKrBtjX82r7vNgIaNL+k+DnWF3VowUaAS5g4g48gWfVcYECQCZXABr8UyDqC7eFn/z41eFbRI3DsiEQFozW2bdwQnkj4uZBZDyDWWN6bWgUZ9H5nyO4ah8B15UjMiy+rSrvciGdSfcF2uFUZ+IMh/bsWQrWHIudXyktiAv+/45864l8wmmSmmP/hvK6sC6C0c1xDVVCrX0EJYuTxhqR+s+p4XGXkUqn/FUp/MmImN+UJnM8zYuSKTQw1mCtODBGw3OEVvwXtWT50gG7tfz84S4VwCTlN2SjyvpniNpHDp/2qbrsXmpzywbnWsvRDiqcSj1NcHWeTgIf5zzcL6NyiSIjThhbl621mXJFXg1o2WBPXNE5JCAJ1dVAxpVoAz2FqMPGK4JEmgMDGzK0uHIHkZwHT+afM+H8ruurXQ9qCb7PNO0Js0kL2kbC/38Qoq3q2O0A320bTzeTwCpw7eJhSw5UPsxj1HBUgIiKmUgeC8lcsdqenVsF+WqxkUkpWWdDhIby0ejqZq7Yfn9I4C58AZwMKPsVt+2iHmTTv4VtZ13PFW/v2Khz04Eo5rkw/NZZ4FQUw4y+/9W4hoos5YDXpXKWugm6EfpRSr7KYw3nkVwJP/bIk+9Ex0xWau6cT9l7fwdvYEfDGJOKwH/AJzPNLAcOXhejG4s1FxSOoCesuLKsrQToFb2IWrM5eYL46hMDObTg60sHuFEMIrQu6CY2IYJ+eFtjydoKAMaPyF5evILUN8P6j6wURLakoEdIDq20UIIj6AFjLurOgauZNqHLiqmvlDr4rJubHhbGGYav43Rlpxql2rowEgsu+MSLGIan5VG+WNhAn2Z3ClFW8hqB7B/tTRAJAbgwM+MivX4wn2bua6erXVO8dihpWIVpjjNDhmUcweTHdb7h6M3Q80Gy9Yi+UPUJXWpoMq9TD/Hj4/wnDHKFChyTfGBohzQQa1onlGzg7kx2zHTBEj/9j06Po+OPpWHNpARP7RUEQKmMPkSfJLdsquumxM9w7uNypJ+KsADTfGT300tL3R6NMbQiPleQ8zREvXgq90tEhXP9kWOQJoXkeAtI4+9CuBlDUR8CxrQoz/ADVDYj46NLmGFObrDra7hCFpHgqSfi26ucScFKLFqnCYMaCj2/TbVLiXMnMPHvToiXzuKHPGn/FG/fYFagci8SraaYAUQjQGWenIlKf1zN6MlDJyZBr4QIw+Es0DdQOC7opu3Cdekila7XGENkJlr3tDXu30mjSJ29gPlM10aXwFIwapKpVe7mGMJBzyb64z8W+2ZOLOvBPQykWC55q+6NjLokqnZTh+2edxteBMfKC8IZV5OQgU9x573llLo6+ylCdgDCsZ68doHznPrrExj3zlw3yqvcBBLpVw+wiGRuAR6ZB4AEGMYCucbmJo82RnLQT4xK37zk2teE6sUoIPKEJa0cePMfaouAaRagmUJ+ylNPFFLT0N+B74=\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 11,\"candidatesTokenCount\": 43,\"totalTokenCount\": 361,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 11}],\"thoughtsTokenCount\": 307},\"modelVersion\": \"gemini-3-pro-preview\",\"responseId\": \"XKIdabjbOtH3xN8P5NmBkQk\"}\r\n\r\n"
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 4.484338042s

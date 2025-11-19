@@ -1,0 +1,34 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 817
+    host: generativelanguage.googleapis.com
+    body: |
+      {"contents":[{"parts":[{"text":"Generate information about 'The Lord of the Rings' book by J.R.R. Tolkien, including genres like fantasy and adventure, and its publication year (1954)."}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000,"responseJsonSchema":{"properties":{"author":{"properties":{"name":{"description":"Author's name","type":"string"},"nationality":{"description":"Author's nationality","type":"string"}},"required":["name","nationality"],"type":"object"},"genres":{"description":"List of genres","items":{"type":"string"},"type":"array"},"published_year":{"description":"Year the book was published","type":"integer"},"title":{"description":"The book title","type":"string"}},"required":["title","author","genres","published_year"],"type":"object"},"responseMimeType":"application/json"}}
+    form:
+      alt:
+      - sse
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - google-genai-sdk/1.34.0 gl-go/go1.25.4
+    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:streamGenerateContent?alt=sse
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"{\\n  \\\"author\\\": {\\n    \\\"name\\\": \\\"J.R.R. Tolkien\\\",\\n    \\\"nationality\\\": \\\"British\\\"\\n  },\\n  \\\"genres\\\": [\\n    \\\"Fantasy\\\",\\n    \\\"Adventure\\\"\\n  ],\\n  \\\"\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 38,\"candidatesTokenCount\": 54,\"totalTokenCount\": 564,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 38}],\"thoughtsTokenCount\": 472},\"modelVersion\": \"gemini-3-pro-preview\",\"responseId\": \"xaIdaeu3AtWNvdIPo9-nuA8\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"published_year\\\": 1954,\\n  \\\"title\\\": \\\"The Lord of the Rings\\\"\\n}\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 38,\"candidatesTokenCount\": 78,\"totalTokenCount\": 588,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 38}],\"thoughtsTokenCount\": 472},\"modelVersion\": \"gemini-3-pro-preview\",\"responseId\": \"xaIdaeu3AtWNvdIPo9-nuA8\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"\",\"thoughtSignature\": \"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\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 38,\"candidatesTokenCount\": 78,\"totalTokenCount\": 588,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 38}],\"thoughtsTokenCount\": 472},\"modelVersion\": \"gemini-3-pro-preview\",\"responseId\": \"xaIdaeu3AtWNvdIPo9-nuA8\"}\r\n\r\n"
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 5.357591083s

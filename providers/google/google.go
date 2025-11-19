@@ -387,19 +387,37 @@ func toGooglePrompt(prompt fantasy.Prompt) (*genai.Content, []*genai.Content, []
 			}
 		case fantasy.MessageRoleAssistant:
 			var parts []*genai.Part
-			// INFO: (kujtim) this is kind of a hacky way to include thinking for google
-			// weirdly thinking needs to be included in a function call
-			var signature []byte
+			var currentReasoningMetadata *ReasoningMetadata
 			for _, part := range msg.Content {
 				switch part.GetType() {
+				case fantasy.ContentTypeReasoning:
+					reasoning, ok := fantasy.AsMessagePart[fantasy.ReasoningPart](part)
+					if !ok {
+						continue
+					}
+
+					metadata, ok := reasoning.ProviderOptions[Name]
+					if !ok {
+						continue
+					}
+					reasoningMetadata, ok := metadata.(*ReasoningMetadata)
+					if !ok {
+						continue
+					}
+					currentReasoningMetadata = reasoningMetadata
 				case fantasy.ContentTypeText:
 					text, ok := fantasy.AsMessagePart[fantasy.TextPart](part)
 					if !ok || text.Text == "" {
 						continue
 					}
-					parts = append(parts, &genai.Part{
+					geminiPart := &genai.Part{
 						Text: text.Text,
-					})
+					}
+					if currentReasoningMetadata != nil {
+						geminiPart.ThoughtSignature = []byte(currentReasoningMetadata.Signature)
+						currentReasoningMetadata = nil
+					}
+					parts = append(parts, geminiPart)
 				case fantasy.ContentTypeToolCall:
 					toolCall, ok := fantasy.AsMessagePart[fantasy.ToolCallPart](part)
 					if !ok {
@@ -411,33 +429,18 @@ func toGooglePrompt(prompt fantasy.Prompt) (*genai.Content, []*genai.Content, []
 					if err != nil {
 						continue
 					}
-					parts = append(parts, &genai.Part{
+					geminiPart := &genai.Part{
 						FunctionCall: &genai.FunctionCall{
 							ID:   toolCall.ToolCallID,
 							Name: toolCall.ToolName,
 							Args: result,
 						},
-						ThoughtSignature: signature,
-					})
-					// reset
-					signature = nil
-				case fantasy.ContentTypeReasoning:
-					reasoning, ok := fantasy.AsMessagePart[fantasy.ReasoningPart](part)
-					if !ok {
-						continue
 					}
-					metadata, ok := reasoning.ProviderOptions[Name]
-					if !ok {
-						continue
+					if currentReasoningMetadata != nil {
+						geminiPart.ThoughtSignature = []byte(currentReasoningMetadata.Signature)
+						currentReasoningMetadata = nil
 					}
-					reasoningMetadata, ok := metadata.(*ReasoningMetadata)
-					if !ok {
-						continue
-					}
-					if !ok || reasoningMetadata.Signature == "" {
-						continue
-					}
-					signature = []byte(reasoningMetadata.Signature)
+					parts = append(parts, geminiPart)
 				}
 			}
 			if len(parts) > 0 {
@@ -635,7 +638,18 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 									return
 								}
 							} else {
-								// Regular text part
+								// Start new text block if not already active
+								if !isActiveText {
+									isActiveText = true
+									currentTextBlockID = fmt.Sprintf("%d", blockCounter)
+									blockCounter++
+									if !yield(fantasy.StreamPart{
+										Type: fantasy.StreamPartTypeTextStart,
+										ID:   currentTextBlockID,
+									}) {
+										return
+									}
+								}
 								// End any active reasoning block before starting text
 								if isActiveReasoning {
 									isActiveReasoning = false
@@ -651,16 +665,23 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 									}) {
 										return
 									}
-								}
+								} else if part.ThoughtSignature != nil {
+									metadata := &ReasoningMetadata{
+										Signature: string(part.ThoughtSignature),
+									}
 
-								// Start new text block if not already active
-								if !isActiveText {
-									isActiveText = true
-									currentTextBlockID = fmt.Sprintf("%d", blockCounter)
-									blockCounter++
 									if !yield(fantasy.StreamPart{
-										Type: fantasy.StreamPartTypeTextStart,
-										ID:   currentTextBlockID,
+										Type: fantasy.StreamPartTypeReasoningStart,
+										ID:   currentReasoningBlockID,
+									}) {
+										return
+									}
+									if !yield(fantasy.StreamPart{
+										Type: fantasy.StreamPartTypeReasoningEnd,
+										ID:   currentReasoningBlockID,
+										ProviderMetadata: fantasy.ProviderMetadata{
+											Name: metadata,
+										},
 									}) {
 										return
 									}
@@ -687,11 +708,34 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 								return
 							}
 						}
+						toolCallID := cmp.Or(part.FunctionCall.ID, g.providerOptions.toolCallIDFunc())
+						// End any active reasoning block before starting text
 						if isActiveReasoning {
 							isActiveReasoning = false
-
 							metadata := &ReasoningMetadata{
 								Signature: string(part.ThoughtSignature),
+								ToolID:    toolCallID,
+							}
+							if !yield(fantasy.StreamPart{
+								Type: fantasy.StreamPartTypeReasoningEnd,
+								ID:   currentReasoningBlockID,
+								ProviderMetadata: fantasy.ProviderMetadata{
+									Name: metadata,
+								},
+							}) {
+								return
+							}
+						} else if part.ThoughtSignature != nil {
+							metadata := &ReasoningMetadata{
+								Signature: string(part.ThoughtSignature),
+								ToolID:    toolCallID,
+							}
+
+							if !yield(fantasy.StreamPart{
+								Type: fantasy.StreamPartTypeReasoningStart,
+								ID:   currentReasoningBlockID,
+							}) {
+								return
 							}
 							if !yield(fantasy.StreamPart{
 								Type: fantasy.StreamPartTypeReasoningEnd,
@@ -703,9 +747,6 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 								return
 							}
 						}
-
-						toolCallID := cmp.Or(part.FunctionCall.ID, g.providerOptions.toolCallIDFunc())
-
 						args, err := json.Marshal(part.FunctionCall.Args)
 						if err != nil {
 							yield(fantasy.StreamPart{
@@ -1233,11 +1274,46 @@ func (g languageModel) mapResponse(response *genai.GenerateContentResponse, warn
 		switch {
 		case part.Text != "":
 			if part.Thought {
-				metadata := &ReasoningMetadata{
-					Signature: string(part.ThoughtSignature),
+				reasoningContent := fantasy.ReasoningContent{Text: part.Text}
+				if part.ThoughtSignature != nil {
+					metadata := &ReasoningMetadata{
+						Signature: string(part.ThoughtSignature),
+					}
+					reasoningContent.ProviderMetadata = fantasy.ProviderMetadata{
+						Name: metadata,
+					}
 				}
-				content = append(content, fantasy.ReasoningContent{Text: part.Text, ProviderMetadata: fantasy.ProviderMetadata{Name: metadata}})
+				content = append(content, reasoningContent)
 			} else {
+				foundReasoning := false
+				if part.ThoughtSignature != nil {
+					metadata := &ReasoningMetadata{
+						Signature: string(part.ThoughtSignature),
+					}
+					// find the last reasoning content and add the signature
+					for i := len(content) - 1; i >= 0; i-- {
+						c := content[i]
+						if c.GetType() == fantasy.ContentTypeReasoning {
+							reasoningContent, ok := fantasy.AsContentType[fantasy.ReasoningContent](c)
+							if !ok {
+								continue
+							}
+							reasoningContent.ProviderMetadata = fantasy.ProviderMetadata{
+								Name: metadata,
+							}
+							content[i] = reasoningContent
+							foundReasoning = true
+							break
+						}
+					}
+					if !foundReasoning {
+						content = append(content, fantasy.ReasoningContent{
+							ProviderMetadata: fantasy.ProviderMetadata{
+								Name: metadata,
+							},
+						})
+					}
+				}
 				content = append(content, fantasy.TextContent{Text: part.Text})
 			}
 		case part.FunctionCall != nil:
@@ -1246,6 +1322,36 @@ func (g languageModel) mapResponse(response *genai.GenerateContentResponse, warn
 				return nil, err
 			}
 			toolCallID := cmp.Or(part.FunctionCall.ID, g.providerOptions.toolCallIDFunc())
+			foundReasoning := false
+			if part.ThoughtSignature != nil {
+				metadata := &ReasoningMetadata{
+					Signature: string(part.ThoughtSignature),
+					ToolID:    toolCallID,
+				}
+				// find the last reasoning content and add the signature
+				for i := len(content) - 1; i >= 0; i-- {
+					c := content[i]
+					if c.GetType() == fantasy.ContentTypeReasoning {
+						reasoningContent, ok := fantasy.AsContentType[fantasy.ReasoningContent](c)
+						if !ok {
+							continue
+						}
+						reasoningContent.ProviderMetadata = fantasy.ProviderMetadata{
+							Name: metadata,
+						}
+						content[i] = reasoningContent
+						foundReasoning = true
+						break
+					}
+				}
+				if !foundReasoning {
+					content = append(content, fantasy.ReasoningContent{
+						ProviderMetadata: fantasy.ProviderMetadata{
+							Name: metadata,
+						},
+					})
+				}
+			}
 			content = append(content, fantasy.ToolCallContent{
 				ToolCallID:       toolCallID,
 				ToolName:         part.FunctionCall.Name,
@@ -1271,6 +1377,16 @@ func (g languageModel) mapResponse(response *genai.GenerateContentResponse, warn
 		FinishReason: finishReason,
 		Warnings:     warnings,
 	}, nil
+}
+
+// GetReasoningMetadata extracts reasoning metadata from provider options for google models.
+func GetReasoningMetadata(providerOptions fantasy.ProviderOptions) *ReasoningMetadata {
+	if googleOptions, ok := providerOptions[Name]; ok {
+		if reasoning, ok := googleOptions.(*ReasoningMetadata); ok {
+			return reasoning
+		}
+	}
+	return nil
 }
 
 func mapFinishReason(reason genai.FinishReason) fantasy.FinishReason {

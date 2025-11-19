@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 857
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"}],"model":"google/gemini-3-pro-preview","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1763546723-krpNoMGltmXXMt7QEkBX\",\"provider\":\"Google\",\"model\":\"google/gemini-3-pro-preview\",\"object\":\"chat.completion\",\"created\":1763546723,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"native_finish_reason\":\"STOP\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"refusal\":null,\"reasoning\":\"**Contemplating Dual Operations**\\n\\nI'm now zeroing in on the core requirement: simultaneously executing addition and multiplication on the given numbers, 2 and 3. The key constraint is to invoke both functions in a single go. I'm focusing on the mechanics of achieving this concurrent tool usage.\\n\\n\\n**Refining Concurrent Tool Calls**\\n\\nCurrently, I'm working to consolidate the add and multiply functions into a single step. The task's essential characteristic is the simultaneous use of both tools on the provided inputs, which are 2 and 3. My next iteration will involve generating the necessary tool calls to achieve this concurrent operation.\\n\\n\\n\",\"tool_calls\":[{\"index\":0,\"id\":\"tool_add_Rr5wzukrmPeay1Ei7Ab0\",\"type\":\"function\",\"function\":{\"name\":\"add\",\"arguments\":\"{\\\"a\\\":2,\\\"b\\\":3}\"}},{\"index\":1,\"id\":\"tool_multiply_XXecV033QPQiOE0Pid5S\",\"type\":\"function\",\"function\":{\"name\":\"multiply\",\"arguments\":\"{\\\"a\\\":2,\\\"b\\\":3}\"}}],\"reasoning_details\":[{\"type\":\"reasoning.text\",\"text\":\"**Contemplating Dual Operations**\\n\\nI'm now zeroing in on the core requirement: simultaneously executing addition and multiplication on the given numbers, 2 and 3. The key constraint is to invoke both functions in a single go. I'm focusing on the mechanics of achieving this concurrent tool usage.\\n\\n\\n**Refining Concurrent Tool Calls**\\n\\nCurrently, I'm working to consolidate the add and multiply functions into a single step. The task's essential characteristic is the simultaneous use of both tools on the provided inputs, which are 2 and 3. My next iteration will involve generating the necessary tool calls to achieve this concurrent operation.\\n\\n\\n\",\"format\":\"google-gemini-v1\",\"index\":0},{\"type\":\"reasoning.encrypted\",\"data\":\"CiQB4/H/XgkUpJU4QU+IXqZeUmdE5p7/0hlWhrR4hblxPtdT+FoKdgHj8f9eh5vsZhTaF6ubhhFu/tYEEcc2uRhpehbecLT49gx/k4uXNEMWcVIdnlyUmOWB5mUoL0TCRHLXcs/HdbUgt41TfJiLLFzsIJOu6WLLRD61pEKXNg8lbOqbNiy4QZxvpkO/VQlLtZ8I8AG6t7POSFnSbkcKgQEB4/H/Xhyqc6U/uyqEYFlwSKlzmYP4plvxiZjznGbdk2NT0Y5MDaX5uoswUPa5h/UUJIZmwjetqYrdlaIV/fKL0wYLkhwLz51xSwe69yKSxN1AitfEFr9damnf2jh+YFMUwvyqPqFsf8evKGTk+6+WkRnY0zgqSN0yYtisjd1ZbrEKlwEB4/H/XhaCkzS66UWyWnxYNwislAPQrh1thGB58ALOZYxbWJNrKoXEpt7auCwEDEnZjRV7hAFGX1F2F5oRbAmgeBy1HRmJmE7MmV4KzQlHQlwYGVPNxohvIFu50Jws53+NYzAhMD+UUdXyvwWstIptgJVeTcbuXnALvn4vKn/7AZJeK0NlqY7q7UBxw4dfuz3nDfGdBjhXCm0B4/H/XifuvCQ5OYGkaUmlT1nvCLsMJXtVldGe2kiFTfZ8793EUQ2a4WT9sFP3t9KYr8rgzndHYCLFKJF/lDCM0wCj5YJbWbEGsJGVw1LAAem8tni/PV6UNHYhbqjsINkibaXkIo4L2rpb3xWICiwB4/H/XhQxGpYF/1hitRT9RPbq3fdS67vM/tDkwalkD/0eZiDq089xuJx/FA==\",\"id\":\"tool_add_Rr5wzukrmPeay1Ei7Ab0\",\"format\":\"google-gemini-v1\",\"index\":0}]}}],\"usage\":{\"prompt_tokens\":60,\"completion_tokens\":128,\"total_tokens\":188,\"cost\":0.001656,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0,\"video_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.00012,\"upstream_inference_completions_cost\":0.001536},\"completion_tokens_details\":{\"reasoning_tokens\":110,\"image_tokens\":0}}}"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 2.777893792s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 2966
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"tool_calls":[{"id":"tool_add_Rr5wzukrmPeay1Ei7Ab0","function":{"arguments":"{\"a\":2,\"b\":3}","name":"add"},"type":"function"},{"id":"tool_multiply_XXecV033QPQiOE0Pid5S","function":{"arguments":"{\"a\":2,\"b\":3}","name":"multiply"},"type":"function"}],"role":"assistant","reasoning_details":[{"format":"google-gemini-v1","index":0,"text":"**Contemplating Dual Operations**\n\nI''m now zeroing in on the core requirement: simultaneously executing addition and multiplication on the given numbers, 2 and 3. The key constraint is to invoke both functions in a single go. I''m focusing on the mechanics of achieving this concurrent tool usage.\n\n\n**Refining Concurrent Tool Calls**\n\nCurrently, I''m working to consolidate the add and multiply functions into a single step. The task''s essential characteristic is the simultaneous use of both tools on the provided inputs, which are 2 and 3. My next iteration will involve generating the necessary tool calls to achieve this concurrent operation.\n\n\n","type":"reasoning.text"},{"data":"CiQB4/H/XgkUpJU4QU+IXqZeUmdE5p7/0hlWhrR4hblxPtdT+FoKdgHj8f9eh5vsZhTaF6ubhhFu/tYEEcc2uRhpehbecLT49gx/k4uXNEMWcVIdnlyUmOWB5mUoL0TCRHLXcs/HdbUgt41TfJiLLFzsIJOu6WLLRD61pEKXNg8lbOqbNiy4QZxvpkO/VQlLtZ8I8AG6t7POSFnSbkcKgQEB4/H/Xhyqc6U/uyqEYFlwSKlzmYP4plvxiZjznGbdk2NT0Y5MDaX5uoswUPa5h/UUJIZmwjetqYrdlaIV/fKL0wYLkhwLz51xSwe69yKSxN1AitfEFr9damnf2jh+YFMUwvyqPqFsf8evKGTk+6+WkRnY0zgqSN0yYtisjd1ZbrEKlwEB4/H/XhaCkzS66UWyWnxYNwislAPQrh1thGB58ALOZYxbWJNrKoXEpt7auCwEDEnZjRV7hAFGX1F2F5oRbAmgeBy1HRmJmE7MmV4KzQlHQlwYGVPNxohvIFu50Jws53+NYzAhMD+UUdXyvwWstIptgJVeTcbuXnALvn4vKn/7AZJeK0NlqY7q7UBxw4dfuz3nDfGdBjhXCm0B4/H/XifuvCQ5OYGkaUmlT1nvCLsMJXtVldGe2kiFTfZ8793EUQ2a4WT9sFP3t9KYr8rgzndHYCLFKJF/lDCM0wCj5YJbWbEGsJGVw1LAAem8tni/PV6UNHYhbqjsINkibaXkIo4L2rpb3xWICiwB4/H/XhQxGpYF/1hitRT9RPbq3fdS67vM/tDkwalkD/0eZiDq089xuJx/FA==","format":"google-gemini-v1","id":"tool_add_Rr5wzukrmPeay1Ei7Ab0","index":0,"type":"reasoning.encrypted"}]},{"content":"5","tool_call_id":"tool_add_Rr5wzukrmPeay1Ei7Ab0","role":"tool"},{"content":"6","tool_call_id":"tool_multiply_XXecV033QPQiOE0Pid5S","role":"tool"}],"model":"google/gemini-3-pro-preview","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1763546727-n3yus1LOuR5HXnN0YHRi\",\"provider\":\"Google AI Studio\",\"model\":\"google/gemini-3-pro-preview\",\"object\":\"chat.completion\",\"created\":1763546727,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"STOP\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"The sum of 2 and 3 is 5, and the product of 2 and 3 is 6.\",\"refusal\":null,\"reasoning\":null}}],\"usage\":{\"prompt_tokens\":246,\"completion_tokens\":25,\"total_tokens\":271,\"cost\":0.000792,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0,\"video_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.000492,\"upstream_inference_completions_cost\":0.0003},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0}}}"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 1.828258792s

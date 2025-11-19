@@ -9,6 +9,7 @@ import (
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/providers/anthropic"
+	"charm.land/fantasy/providers/google"
 	"charm.land/fantasy/providers/openai"
 	openaisdk "github.com/openai/openai-go/v2"
 	"github.com/openai/openai-go/v2/packages/param"
@@ -81,9 +82,14 @@ func languageModelExtraContent(choice openaisdk.ChatCompletionChoice) []fantasy.
 		text     string
 		metadata *anthropic.ReasoningOptionMetadata
 	}
+	type googleReasoningBlock struct {
+		text     string
+		metadata *google.ReasoningMetadata
+	}
 
 	responsesReasoningBlocks := make([]openai.ResponsesReasoningMetadata, 0)
 	anthropicReasoningBlocks := make([]anthropicReasoningBlock, 0)
+	googleReasoningBlocks := make([]googleReasoningBlock, 0)
 	otherReasoning := make([]string, 0)
 	for _, detail := range reasoningData.ReasoningDetails {
 		if strings.HasPrefix(detail.Format, "openai-responses") || strings.HasPrefix(detail.Format, "xai-responses") {
@@ -106,6 +112,26 @@ func languageModelExtraContent(choice openaisdk.ChatCompletionChoice) []fantasy.
 			}
 
 			responsesReasoningBlocks[detail.Index] = thinkingBlock
+			continue
+		}
+		if strings.HasPrefix(detail.Format, "google-gemini") {
+			var thinkingBlock googleReasoningBlock
+			if len(googleReasoningBlocks)-1 >= detail.Index {
+				thinkingBlock = googleReasoningBlocks[detail.Index]
+			} else {
+				thinkingBlock = googleReasoningBlock{metadata: &google.ReasoningMetadata{}}
+				googleReasoningBlocks = append(googleReasoningBlocks, thinkingBlock)
+			}
+
+			switch detail.Type {
+			case "reasoning.text":
+				thinkingBlock.text = detail.Text
+			case "reasoning.encrypted":
+				thinkingBlock.metadata.Signature = detail.Data
+				thinkingBlock.metadata.ToolID = detail.ID
+			}
+
+			googleReasoningBlocks[detail.Index] = thinkingBlock
 			continue
 		}
 
@@ -141,6 +167,14 @@ func languageModelExtraContent(choice openaisdk.ChatCompletionChoice) []fantasy.
 			},
 		})
 	}
+	for _, block := range googleReasoningBlocks {
+		content = append(content, fantasy.ReasoningContent{
+			Text: block.text,
+			ProviderMetadata: fantasy.ProviderMetadata{
+				google.Name: block.metadata,
+			},
+		})
+	}
 
 	for _, reasoning := range otherReasoning {
 		content = append(content, fantasy.ReasoningContent{
@@ -151,7 +185,9 @@ func languageModelExtraContent(choice openaisdk.ChatCompletionChoice) []fantasy.
 }
 
 type currentReasoningState struct {
-	metadata *openai.ResponsesReasoningMetadata
+	metadata       *openai.ResponsesReasoningMetadata
+	googleMetadata *google.ReasoningMetadata
+	googleText     string
 }
 
 func extractReasoningContext(ctx map[string]any) *currentReasoningState {
@@ -227,11 +263,43 @@ func languageModelStreamExtra(chunk openaisdk.ChatCompletionChunk, yield func(fa
 			}
 		}
 
+		if strings.HasPrefix(detail.Format, "google-gemini") {
+			// this means there is only encrypted data available start and finish right away
+			if detail.Type == "reasoning.encrypted" {
+				ctx[reasoningStartedCtx] = nil
+				if !yield(fantasy.StreamPart{
+					Type: fantasy.StreamPartTypeReasoningStart,
+					ID:   fmt.Sprintf("%d", inx),
+				}) {
+					return ctx, false
+				}
+				return ctx, yield(fantasy.StreamPart{
+					Type: fantasy.StreamPartTypeReasoningEnd,
+					ID:   fmt.Sprintf("%d", inx),
+					ProviderMetadata: fantasy.ProviderMetadata{
+						google.Name: &google.ReasoningMetadata{
+							Signature: detail.Data,
+							ToolID:    detail.ID,
+						},
+					},
+				})
+			}
+			currentState.googleMetadata = &google.ReasoningMetadata{}
+			currentState.googleText = detail.Text
+			metadata = fantasy.ProviderMetadata{
+				google.Name: currentState.googleMetadata,
+			}
+		}
+
 		ctx[reasoningStartedCtx] = currentState
+		delta := detail.Summary
+		if strings.HasPrefix(detail.Format, "google-gemini") {
+			delta = detail.Text
+		}
 		return ctx, yield(fantasy.StreamPart{
 			Type:             fantasy.StreamPartTypeReasoningStart,
 			ID:               fmt.Sprintf("%d", inx),
-			Delta:            detail.Summary,
+			Delta:            delta,
 			ProviderMetadata: metadata,
 		})
 	}
@@ -311,6 +379,34 @@ func languageModelStreamExtra(chunk openaisdk.ChatCompletionChunk, yield func(fa
 			ID:    fmt.Sprintf("%d", inx),
 			Delta: detail.Text,
 		})
+	}
+
+	if strings.HasPrefix(detail.Format, "google-gemini") {
+		// reasoning.text type - accumulate text
+		if detail.Type == "reasoning.text" {
+			currentState.googleText += detail.Text
+			ctx[reasoningStartedCtx] = currentState
+			return ctx, yield(fantasy.StreamPart{
+				Type:  fantasy.StreamPartTypeReasoningDelta,
+				ID:    fmt.Sprintf("%d", inx),
+				Delta: detail.Text,
+			})
+		}
+
+		// reasoning.encrypted type - end reasoning with signature
+		if detail.Type == "reasoning.encrypted" {
+			currentState.googleMetadata.Signature = detail.Data
+			currentState.googleMetadata.ToolID = detail.ID
+			metadata := fantasy.ProviderMetadata{
+				google.Name: currentState.googleMetadata,
+			}
+			ctx[reasoningStartedCtx] = nil
+			return ctx, yield(fantasy.StreamPart{
+				Type:             fantasy.StreamPartTypeReasoningEnd,
+				ID:               fmt.Sprintf("%d", inx),
+				ProviderMetadata: metadata,
+			})
+		}
 	}
 
 	return ctx, yield(fantasy.StreamPart{
@@ -793,7 +889,38 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 						assistantMsg.SetExtraFields(map[string]any{
 							"reasoning_details": reasoningDetailsMap,
 						})
-
+					case strings.HasPrefix(model, "google/"):
+						metadata := google.GetReasoningMetadata(reasoningPart.Options())
+						if metadata == nil {
+							text := fmt.Sprintf("<thoughts>%s</thoughts>", reasoningPart.Text)
+							if assistantMsg.Content.OfString.Valid() {
+								text = assistantMsg.Content.OfString.Value + "\n" + text
+							}
+							// this reasoning did not come from anthropic just add a text content
+							assistantMsg.Content = openaisdk.ChatCompletionAssistantMessageParamContentUnion{
+								OfString: param.NewOpt(text),
+							}
+							continue
+						}
+						if reasoningPart.Text != "" {
+							reasoningDetails = append(reasoningDetails, ReasoningDetail{
+								Type:   "reasoning.text",
+								Format: "google-gemini-v1",
+								Text:   reasoningPart.Text,
+							})
+						}
+						reasoningDetails = append(reasoningDetails, ReasoningDetail{
+							Type:   "reasoning.encrypted",
+							Format: "google-gemini-v1",
+							Data:   metadata.Signature,
+							ID:     metadata.ToolID,
+						})
+						data, _ := json.Marshal(reasoningDetails)
+						reasoningDetailsMap := []map[string]any{}
+						_ = json.Unmarshal(data, &reasoningDetailsMap)
+						assistantMsg.SetExtraFields(map[string]any{
+							"reasoning_details": reasoningDetailsMap,
+						})
 					default:
 						reasoningDetails = append(reasoningDetails, ReasoningDetail{
 							Type:   "reasoning.text",

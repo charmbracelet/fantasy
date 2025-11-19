@@ -14,7 +14,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.34.0 gl-go/go1.25.0
+      - google-genai-sdk/1.34.0 gl-go/go1.25.4
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
     method: POST
   response:
@@ -30,7 +30,7 @@ interactions:
             "content": {
               "parts": [
                 {
-                  "text": "{\"age\": 30, \"city\": \"Paris\", \"name\": \"Alice\"}"
+                  "text": "{\n\"age\": 30,\n\"city\": \"Paris\",\n\"name\": \"Alice\"\n}"
                 }
               ],
               "role": "model"
@@ -41,7 +41,7 @@ interactions:
         ],
         "usageMetadata": {
           "promptTokenCount": 20,
-          "candidatesTokenCount": 19,
+          "candidatesTokenCount": 25,
           "totalTokenCount": 127,
           "promptTokensDetails": [
             {
@@ -49,14 +49,14 @@ interactions:
               "tokenCount": 20
             }
           ],
-          "thoughtsTokenCount": 88
+          "thoughtsTokenCount": 82
         },
         "modelVersion": "gemini-2.5-flash",
-        "responseId": "r9sRaffqJa-jvdIPwMT46A8"
+        "responseId": "xqIdab_LEP7hxN8PyeLZ6Ac"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 1.129109875s
+    duration: 1.1166025s

@@ -20,6 +20,7 @@ var openrouterTestModels = []testModel{
 	{"deepseek-chat-v3.1-free", "deepseek/deepseek-chat-v3.1:free", false},
 	{"qwen3-235b-a22b-2507", "qwen/qwen3-235b-a22b-2507", false},
 	{"gpt-5", "openai/gpt-5", true},
+	{"gemini-3-pro-preview", "google/gemini-3-pro-preview", true},
 	{"glm-4.5", "z-ai/glm-4.5", false},
 	{"glm-4.6", "z-ai/glm-4.6", true},
 }

@@ -14,7 +14,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.33.0 gl-go/go1.25.0
+      - google-genai-sdk/1.34.0 gl-go/go1.25.4
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent
     method: POST
   response:
@@ -30,7 +30,7 @@ interactions:
             "content": {
               "parts": [
                 {
-                  "text": "Of course!\n\nThe most common ways to say \"hi\" in Portuguese are:\n\n*   **Olá** (This is the standard \"hello,\" and it works in any situation.)\n*   **Oi** (This is a more informal and very common \"hi,\" especially in Brazil.)\n\nYou might also hear people greet each other with:\n\n*   **Tudo bem?** (Which means \"How are you?\" or \"Is everything okay?\")"
+                  "text": "Of course!\n\nThe most common ways to say \"hi\" in Portuguese are:\n\n*   **Olá** (oh-LAH) - This is the direct translation of \"hello\" and can be used in any situation, formal or informal.\n*   **Oi** (oy) - This is more informal and very common, just like \"hi\" in English.\n\nYou can also use:\n\n*   **Tudo bem?** (too-doh beng?) - Which means \"How are you?\" or \"Is everything good?\" and is a very common way to greet someone."
                 }
               ],
               "role": "model"
@@ -41,22 +41,22 @@ interactions:
         ],
         "usageMetadata": {
           "promptTokenCount": 11,
-          "candidatesTokenCount": 94,
-          "totalTokenCount": 802,
+          "candidatesTokenCount": 122,
+          "totalTokenCount": 849,
           "promptTokensDetails": [
             {
               "modality": "TEXT",
               "tokenCount": 11
             }
           ],
-          "thoughtsTokenCount": 697
+          "thoughtsTokenCount": 716
         },
         "modelVersion": "gemini-2.5-pro",
-        "responseId": "AQgJabbjM5rQz7IPgq_yiAc"
+        "responseId": "fqIdabztHPjXxs0P146HoQk"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 8.976729125s
+    duration: 8.426214208s

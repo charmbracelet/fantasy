@@ -14,7 +14,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.33.0 gl-go/go1.25.0
+      - google-genai-sdk/1.34.0 gl-go/go1.25.4
     url: https://us-east5-aiplatform.googleapis.com/v1beta1/projects/fantasy-playground-472418/locations/us-east5/publishers/google/models/gemini-2.5-pro:generateContent
     method: POST
   response:
@@ -31,18 +31,18 @@ interactions:
               "role": "model",
               "parts": [
                 {
-                  "text": "Of course! Here are the most common ways:\n\n*   **Oi** (This is the most common and informal, like \"hi\")\n*   **Olá** (This is like \"hello\" and can be used in both formal and informal situations)\n\nYou can also combine them with \"how are you?\":\n\n*   **Oi, tudo bem?** (Hi, how are you?)"
+                  "text": "Of course! The most common ways to say \"hi\" in Portuguese are:\n\n*   **Olá** (pronounced *oh-LAH*) - This is the direct translation of \"Hello\" and can be used in any situation, formal or informal.\n*   **Oi** (pronounced *OY*) - This is more casual, like \"Hi,\" and is what you'll hear most often in Brazil.\n\nYou can also combine them with \"How are you?\":\n\n*   **Oi, tudo bem?** (Hi, how are you?)"
                 }
               ]
             },
             "finishReason": "STOP",
-            "avgLogprobs": -1.3811639073383377
+            "avgLogprobs": -1.1641908612167626
           }
         ],
         "usageMetadata": {
           "promptTokenCount": 9,
-          "candidatesTokenCount": 83,
-          "totalTokenCount": 811,
+          "candidatesTokenCount": 114,
+          "totalTokenCount": 1001,
           "trafficType": "ON_DEMAND",
           "promptTokensDetails": [
             {
@@ -53,18 +53,18 @@ interactions:
           "candidatesTokensDetails": [
             {
               "modality": "TEXT",
-              "tokenCount": 83
+              "tokenCount": 114
             }
           ],
-          "thoughtsTokenCount": 719
+          "thoughtsTokenCount": 878
         },
         "modelVersion": "gemini-2.5-pro",
-        "createTime": "2025-11-03T19:52:59.997761Z",
-        "responseId": "GwgJaYHzPNnEptQP9fCJyQY"
+        "createTime": "2025-11-19T11:04:09.768454Z",
+        "responseId": "KaQdacbzLpTEptQP6pORgAo"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 9.378146209s
+    duration: 10.878821375s

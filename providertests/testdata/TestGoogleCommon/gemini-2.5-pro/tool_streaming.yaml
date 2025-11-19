@@ -17,7 +17,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.33.0 gl-go/go1.25.0
+      - google-genai-sdk/1.34.0 gl-go/go1.25.4
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:streamGenerateContent?alt=sse
     method: POST
   response:
@@ -25,22 +25,22 @@ interactions:
     proto_major: 2
     proto_minor: 0
     content_length: -1
-    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"functionCall\": {\"name\": \"weather\",\"args\": {\"location\": \"Florence, Italy\"}},\"thoughtSignature\": \"CiIB0e2Kb7ZcJkyUiaPtH3M3XggxlaO8JZtcKU9zLre7wKgQCmcB0e2Kb2HHioOSolufbR8pcO7tHiyzUuAt0Vqb4LlW+Tsams8t8fV+T0AdZB0/DS5Bs+r+HQQ7GmlMZWKnkD5vJ9hsVgwBYCTKNac3MRqX1+dpyLkds0/xz1HSWguzVr3SIRNoAjhjCocBAdHtim82kbjYM3Dq3Qt0NEXxM8EbhYC1KJSlX17jyJxBS1vHRhBntdFDNCI3zUPbGhoarro3rXP12N1scFycrb4Myge6i7GZe0sDjWdRCTSKVADuyilxlenEJfb5AnljkrhQoIFyx818hCCxm7X5mxY3RD3wms+53yj5Oyj/4ew5wEOSbp/LCoABAdHtim91iCFyONBMwXNE3JZlMZdLWjS0eGqZjcEPktz2HnnQBfuAVjqifSQ/lDWa0WRBNEU8JpPyOJ1lQNW7jWkpUwVP1lvAWQ6CgJfhMgjjhs4goAdM+UAA5JB7J07NUzCfhd7Ys5w6e9lETfKxT/mLJFjBTfq8fhuFqrGjPwwKjwEB0e2Kb6yOTeDKt+aXIpxo6OsQ+ZuMc1a7BrfFDWzEGh/OvCZWjZtRaL0tYxZTuJmtc4w7xOS9MCFyCba8Wqh4tUkS2WEt6d+h8YVuxJD7Xjilz4SLZD/pIVVsUZ57NEwEub3HuZ/5CVEmrPpS3l+FnSv9//nqX/VOInF+GEwOL7Q1JJlbcB0ju1a6bXtUPwpfAdHtim/b5wZO5F672H0vefXf7tdKQYVkDWLoDm1YWZL1bEPXl9HoCrjQT+tkGqp6qM9nvgVNIe0ln/zzDx7qo99ySIa8+2JHnCNp52v2g+NHI/O5C8GBCuKZ+9gudFM=\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0,\"finishMessage\": \"Model generated function call(s).\"}],\"usageMetadata\": {\"promptTokenCount\": 54,\"candidatesTokenCount\": 15,\"totalTokenCount\": 181,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 54}],\"thoughtsTokenCount\": 112},\"modelVersion\": \"gemini-2.5-pro\",\"responseId\": \"CAkJabHRHcvwqtsP2KaMkAc\"}\r\n\r\n"
+    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"functionCall\": {\"name\": \"weather\",\"args\": {\"location\": \"Florence, Italy\"}},\"thoughtSignature\": \"CiIB0e2Kb8A87l6fcJFqiyFOsaqJQbuIyvqWWGMyVLlvR5BOCmcB0e2KbzIGGc8QCp2X4zQ5F7dQvkx1zJbHigOjmr6JMhp1opsOUlDm2O34WqYMy1TooaTT5N/h3ufeU3dl5Ss2qP6omWLzzoF4kXUCbwcvIgTiqDayYrPfwHx93XC7rU1nG4aTBIMtCocBAdHtim/dvxkuVr2NRUIhqXz/yVDiYbflnMhp6AqlkPkqChqNrP6BOzT5kw9Vh6cx8NrTCTdd+oqM01fXQC+EuV4nD52dDrViwxVoMmiObnjvL1kdkMN+mlXsdwQMXbbZuZG0KwY5baJR5OKgTlXW7nOgzjYo2iEGk9g5V6jF6F0ZBCKMUWWcCoABAdHtim/3KIej0FWXxbVioSBF/JIkCmmTHOFTT+1/VNK1YKl7nZ6e6OarSZ9Q1Qam4bf5Aw4hg0JmRPI8UpB3SrFva3dkfHceyPIWBbjtmIEawNZaSnCv+oYXJGdQze8bUSZ3bD6HnDhju2eLNqRzVEAkYwCQPD8DjmAbGPdN4j0KhAEB0e2Kb0BS3VRBfKzWnObbM9W8DaK8rHpUWYE/gUfOEHEWQTT4cJe2ilhneXgGffnK24wYtqIbyGnbZnBcpkifQHhTJAz9tEAToRfckSr2qiDdyxlxtmuzLopPgjWLTO4S/hNAKKOrkcZkyvkfQaEPnvoDNutWb5GNLs8RkAkUeXTzlbcKYgHR7YpvgZXPWWUaxQ3ehM2VoAPQ6RV2cQHT+95ahkTE6PzT2PKJ/m5dgAohTAX7NEsG74SOFrdZWtnspq9T23ebHIyyxwyTbsmmzaxsPw/nEI2KpAfc+brA0lvP740peGWC\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0,\"finishMessage\": \"Model generated function call(s).\"}],\"usageMetadata\": {\"promptTokenCount\": 54,\"candidatesTokenCount\": 15,\"totalTokenCount\": 176,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 54}],\"thoughtsTokenCount\": 107},\"modelVersion\": \"gemini-2.5-pro\",\"responseId\": \"i6IdafXaGKePvdIPj5TpsQk\"}\r\n\r\n"
     headers:
       Content-Type:
       - text/event-stream
     status: 200 OK
     code: 200
-    duration: 2.276958458s
+    duration: 1.958855542s
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 723
+    content_length: 1605
     host: generativelanguage.googleapis.com
     body: |
-      {"contents":[{"parts":[{"text":"What's the weather in Florence,Italy?"}],"role":"user"},{"parts":[{"functionCall":{"args":{"location":"Florence, Italy"},"id":"1","name":"weather"}}],"role":"model"},{"parts":[{"functionResponse":{"id":"1","name":"weather","response":{"result":"40 C"}}}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}
+      {"contents":[{"parts":[{"text":"What's the weather in Florence,Italy?"}],"role":"user"},{"parts":[{"functionCall":{"args":{"location":"Florence, Italy"},"id":"1","name":"weather"},"thoughtSignature":"CiIB0e2Kb8A87l6fcJFqiyFOsaqJQbuIyvqWWGMyVLlvR5BOCmcB0e2KbzIGGc8QCp2X4zQ5F7dQvkx1zJbHigOjmr6JMhp1opsOUlDm2O34WqYMy1TooaTT5N/h3ufeU3dl5Ss2qP6omWLzzoF4kXUCbwcvIgTiqDayYrPfwHx93XC7rU1nG4aTBIMtCocBAdHtim/dvxkuVr2NRUIhqXz/yVDiYbflnMhp6AqlkPkqChqNrP6BOzT5kw9Vh6cx8NrTCTdd+oqM01fXQC+EuV4nD52dDrViwxVoMmiObnjvL1kdkMN+mlXsdwQMXbbZuZG0KwY5baJR5OKgTlXW7nOgzjYo2iEGk9g5V6jF6F0ZBCKMUWWcCoABAdHtim/3KIej0FWXxbVioSBF/JIkCmmTHOFTT+1/VNK1YKl7nZ6e6OarSZ9Q1Qam4bf5Aw4hg0JmRPI8UpB3SrFva3dkfHceyPIWBbjtmIEawNZaSnCv+oYXJGdQze8bUSZ3bD6HnDhju2eLNqRzVEAkYwCQPD8DjmAbGPdN4j0KhAEB0e2Kb0BS3VRBfKzWnObbM9W8DaK8rHpUWYE/gUfOEHEWQTT4cJe2ilhneXgGffnK24wYtqIbyGnbZnBcpkifQHhTJAz9tEAToRfckSr2qiDdyxlxtmuzLopPgjWLTO4S/hNAKKOrkcZkyvkfQaEPnvoDNutWb5GNLs8RkAkUeXTzlbcKYgHR7YpvgZXPWWUaxQ3ehM2VoAPQ6RV2cQHT+95ahkTE6PzT2PKJ/m5dgAohTAX7NEsG74SOFrdZWtnspq9T23ebHIyyxwyTbsmmzaxsPw/nEI2KpAfc+brA0lvP740peGWC"}],"role":"model"},{"parts":[{"functionResponse":{"id":"1","name":"weather","response":{"result":"40 C"}}}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}
     form:
       alt:
       - sse
@@ -48,7 +48,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.33.0 gl-go/go1.25.0
+      - google-genai-sdk/1.34.0 gl-go/go1.25.4
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:streamGenerateContent?alt=sse
     method: POST
   response:
@@ -56,10 +56,10 @@ interactions:
     proto_major: 2
     proto_minor: 0
     content_length: -1
-    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"OK\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 84,\"candidatesTokenCount\": 1,\"totalTokenCount\": 85,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 84}]},\"modelVersion\": \"gemini-2.5-pro\",\"responseId\": \"CgkJaaLGNMegqtsPxZji8As\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \". I have the weather for Florence, Italy. The temperature is 40 degrees Celsius.\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 84,\"candidatesTokenCount\": 20,\"totalTokenCount\": 104,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 84}]},\"modelVersion\": \"gemini-2.5-pro\",\"responseId\": \"CgkJaaLGNMegqtsPxZji8As\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \" \\n\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 84,\"candidatesTokenCount\": 20,\"totalTokenCount\": 104,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 84}]},\"modelVersion\": \"gemini-2.5-pro\",\"responseId\": \"CgkJaaLGNMegqtsPxZji8As\"}\r\n\r\n"
+    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"The weather in Florence\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 189,\"candidatesTokenCount\": 4,\"totalTokenCount\": 193,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 189}]},\"modelVersion\": \"gemini-2.5-pro\",\"responseId\": \"jaIdafjSJqTyxs0PnYinqAk\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \", Italy is 40 C. \\n\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 189,\"candidatesTokenCount\": 12,\"totalTokenCount\": 201,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 189}]},\"modelVersion\": \"gemini-2.5-pro\",\"responseId\": \"jaIdafjSJqTyxs0PnYinqAk\"}\r\n\r\n"
     headers:
       Content-Type:
       - text/event-stream
     status: 200 OK
     code: 200
-    duration: 1.4362325s
+    duration: 1.21722675s

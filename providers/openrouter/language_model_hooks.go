@@ -264,6 +264,26 @@ func languageModelStreamExtra(chunk openaisdk.ChatCompletionChunk, yield func(fa
 		}
 
 		if strings.HasPrefix(detail.Format, "google-gemini") {
+			// this means there is only encrypted data available start and finish right away
+			if detail.Type == "reasoning.encrypted" {
+				ctx[reasoningStartedCtx] = nil
+				if !yield(fantasy.StreamPart{
+					Type: fantasy.StreamPartTypeReasoningStart,
+					ID:   fmt.Sprintf("%d", inx),
+				}) {
+					return ctx, false
+				}
+				return ctx, yield(fantasy.StreamPart{
+					Type: fantasy.StreamPartTypeReasoningEnd,
+					ID:   fmt.Sprintf("%d", inx),
+					ProviderMetadata: fantasy.ProviderMetadata{
+						google.Name: &google.ReasoningMetadata{
+							Signature: detail.Data,
+							ToolID:    detail.ID,
+						},
+					},
+				})
+			}
 			currentState.googleMetadata = &google.ReasoningMetadata{}
 			currentState.googleText = detail.Text
 			metadata = fantasy.ProviderMetadata{

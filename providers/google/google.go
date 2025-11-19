@@ -1315,7 +1315,6 @@ func (g languageModel) mapResponse(response *genai.GenerateContentResponse, warn
 					}
 				}
 				content = append(content, fantasy.TextContent{Text: part.Text})
-
 			}
 		case part.FunctionCall != nil:
 			input, err := json.Marshal(part.FunctionCall.Args)
@@ -1380,6 +1379,7 @@ func (g languageModel) mapResponse(response *genai.GenerateContentResponse, warn
 	}, nil
 }
 
+// GetReasoningMetadata extracts reasoning metadata from provider options for google models.
 func GetReasoningMetadata(providerOptions fantasy.ProviderOptions) *ReasoningMetadata {
 	if googleOptions, ok := providerOptions[Name]; ok {
 		if reasoning, ok := googleOptions.(*ReasoningMetadata); ok {

@@ -40,6 +40,7 @@ type ThinkingConfig struct {
 // ReasoningMetadata represents reasoning metadata for the Google provider.
 type ReasoningMetadata struct {
 	Signature string `json:"signature"`
+	ToolID    string `json:"tool_id"`
 }
 
 // Options implements the ProviderOptionsData interface for ReasoningMetadata.

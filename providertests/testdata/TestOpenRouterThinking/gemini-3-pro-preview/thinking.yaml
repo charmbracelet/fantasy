@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 509
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence, Italy?","role":"user"}],"model":"google/gemini-3-pro-preview","tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"reasoning":{"effort":"medium"},"usage":{"include":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1763546487-yFEwYukW5QfhvzEHSekZ\",\"provider\":\"Google AI Studio\",\"model\":\"google/gemini-3-pro-preview\",\"object\":\"chat.completion\",\"created\":1763546488,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"STOP\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"refusal\":null,\"reasoning\":\"**Acquiring Weather Data**\\n\\nI've decided to use the weather tool to get the current forecast for Florence, Italy. The location will be specified as \\\"Florence, Italy\\\" to get the most accurate results. I'm ready to proceed with using the tool and return the information.\\n\\n\\n\",\"tool_calls\":[{\"index\":0,\"id\":\"tool_weather_lYXVFov6DFhVAnGHGzui\",\"type\":\"function\",\"function\":{\"name\":\"weather\",\"arguments\":\"{\\\"location\\\":\\\"Florence, Italy\\\"}\"}}],\"reasoning_details\":[{\"type\":\"reasoning.text\",\"text\":\"**Acquiring Weather Data**\\n\\nI've decided to use the weather tool to get the current forecast for Florence, Italy. The location will be specified as \\\"Florence, Italy\\\" to get the most accurate results. I'm ready to proceed with using the tool and return the information.\\n\\n\\n\",\"format\":\"google-gemini-v1\",\"index\":0},{\"type\":\"reasoning.encrypted\",\"data\":\"Eo4CCosCAdHtim9UBFExPDgDuh8MWbVEkO9w+s9pDzoFBZjc7fdzo6eGpv04hlhBygkMpO6VBAIRKEooegdRQnhJUUWJD/Zrf5cfiahXRK4fWPQvTaBxS7+h1HpDORflVhuy2kDFSGDQkI43qaqvIPdBZLuo6P+KEO7rXnRAUJZ5EBhTqszy6qSDBkBZJofLvV0Hrm2AatVECeqV8ZX1fuVZ0vKgzHcE3ZQJD2CX2Hcu1DHf2zZRL9ghxK12GtxwBQjfHVj0uHafLMvMEMyOA6kRDkWRh7q+EPJ1MjCRKsEbZCEh29oXIUZUT9UI96H8harvQ+88L6WuN8AGv9+CFrHuenGzd7SymIM/C4L+vhge\",\"id\":\"tool_weather_lYXVFov6DFhVAnGHGzui\",\"format\":\"google-gemini-v1\",\"index\":0}]}}],\"usage\":{\"prompt_tokens\":65,\"completion_tokens\":58,\"total_tokens\":123,\"cost\":0.000826,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0,\"video_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.00013,\"upstream_inference_completions_cost\":0.000696},\"completion_tokens_details\":{\"reasoning_tokens\":42,\"image_tokens\":0}}}"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 3.118976208s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1627
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence, Italy?","role":"user"},{"tool_calls":[{"id":"tool_weather_lYXVFov6DFhVAnGHGzui","function":{"arguments":"{\"location\":\"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant","reasoning_details":[{"format":"google-gemini-v1","index":0,"text":"**Acquiring Weather Data**\n\nI''ve decided to use the weather tool to get the current forecast for Florence, Italy. The location will be specified as \"Florence, Italy\" to get the most accurate results. I''m ready to proceed with using the tool and return the information.\n\n\n","type":"reasoning.text"},{"data":"Eo4CCosCAdHtim9UBFExPDgDuh8MWbVEkO9w+s9pDzoFBZjc7fdzo6eGpv04hlhBygkMpO6VBAIRKEooegdRQnhJUUWJD/Zrf5cfiahXRK4fWPQvTaBxS7+h1HpDORflVhuy2kDFSGDQkI43qaqvIPdBZLuo6P+KEO7rXnRAUJZ5EBhTqszy6qSDBkBZJofLvV0Hrm2AatVECeqV8ZX1fuVZ0vKgzHcE3ZQJD2CX2Hcu1DHf2zZRL9ghxK12GtxwBQjfHVj0uHafLMvMEMyOA6kRDkWRh7q+EPJ1MjCRKsEbZCEh29oXIUZUT9UI96H8harvQ+88L6WuN8AGv9+CFrHuenGzd7SymIM/C4L+vhge","format":"google-gemini-v1","id":"tool_weather_lYXVFov6DFhVAnGHGzui","index":0,"type":"reasoning.encrypted"}]},{"content":"40 C","tool_call_id":"tool_weather_lYXVFov6DFhVAnGHGzui","role":"tool"}],"model":"google/gemini-3-pro-preview","tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"reasoning":{"effort":"medium"},"usage":{"include":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1763546490-1xpxTRabcgvGkdsoaObe\",\"provider\":\"Google\",\"model\":\"google/gemini-3-pro-preview\",\"object\":\"chat.completion\",\"created\":1763546490,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"STOP\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"The weather in Florence is currently 40°C.\",\"refusal\":null,\"reasoning\":null}}],\"usage\":{\"prompt_tokens\":54,\"completion_tokens\":12,\"total_tokens\":66,\"cost\":0.000252,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0,\"video_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.000108,\"upstream_inference_completions_cost\":0.000144},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0}}}"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 1.710336083s

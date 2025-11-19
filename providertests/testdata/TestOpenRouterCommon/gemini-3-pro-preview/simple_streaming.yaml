@@ -1,0 +1,44 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 256
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"Say hi in Portuguese","role":"user"}],"model":"google/gemini-3-pro-preview","max_tokens":4000,"stream_options":{"include_usage":true},"usage":{"include":true},"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"gen-1763546708-WlSEiEPr7nn7Uso3yUg7","provider":"Google AI Studio","model":"google/gemini-3-pro-preview","object":"chat.completion.chunk","created":1763546708,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":"**Considering the Greeting**\n\nI've narrowed it down to the essentials: \"Oi\" is the go-to informal greeting in Portuguese, and it's perfect for a casual \"hi.\" No need to overcomplicate things!\n\n\n","reasoning_details":[{"type":"reasoning.text","text":"**Considering the Greeting**\n\nI've narrowed it down to the essentials: \"Oi\" is the go-to informal greeting in Portuguese, and it's perfect for a casual \"hi.\" No need to overcomplicate things!\n\n\n","format":"google-gemini-v1","index":0}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+      data: {"id":"gen-1763546708-WlSEiEPr7nn7Uso3yUg7","provider":"Google AI Studio","model":"google/gemini-3-pro-preview","object":"chat.completion.chunk","created":1763546708,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":"**Refining the Response**\n\nI've decided to include both options: \"Oi\" for \"Hi\" and \"Olá\" for \"Hello.\" I've considered that context is key, but providing both will give a richer response, especially for learners. I've also verified the pronunciation for clarity.\n\n\n","reasoning_details":[{"type":"reasoning.text","text":"**Refining the Response**\n\nI've decided to include both options: \"Oi\" for \"Hi\" and \"Olá\" for \"Hello.\" I've considered that context is key, but providing both will give a richer response, especially for learners. I've also verified the pronunciation for clarity.\n\n\n","format":"google-gemini-v1","index":0}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+      data: {"id":"gen-1763546708-WlSEiEPr7nn7Uso3yUg7","provider":"Google AI Studio","model":"google/gemini-3-pro-preview","object":"chat.completion.chunk","created":1763546708,"choices":[{"index":0,"delta":{"role":"assistant","content":"**Oi**\n\nYou can also say **Olá** (which is more like \"Hello\").","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+      data: {"id":"gen-1763546708-WlSEiEPr7nn7Uso3yUg7","provider":"Google AI Studio","model":"google/gemini-3-pro-preview","object":"chat.completion.chunk","created":1763546708,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":null,"reasoning_details":[{"type":"reasoning.encrypted","data":"ErwJCrkJAdHtim8y6vZPaBmPFxd5WcUQDT37XvDgtHy40D9ssC7Q5sBYDgvpMpDHsKIr9sAd+1fDRUXMgbG7K2vqZu985V9uTI35JWXsj5xAuwToyGe1vRObteKgBxXeORFcBFPL5banYDBJTZ61ggeQGsw67asE5pJMGcxTprujlpCJlvbGoJ9FNJATG2qHMW6XouPgkDLmlwodUjGM2DrV5tBKqJX6DhlA1Ofc/+GdlPtxOeQFsgLBpjFH5E+gvqwpJT5UrC6niF+hcRZGzLADjiJwlNUsYswb60CuVwpXFZ3gf+Zt9d/AzyC8o3xXD9m9haNB1uy+/67YtmB6768175bV/r579EQyQLQVrOANQPP9zQTDqxGM35+zmF17ITgpLzy7wwzGjjEvqsE4qGcfbPV8wGPreIuUa4Ur3unuVxthjrCw53FOpwljSJyep/qH2ibynSYj/dqtsWADwlkJaHaWGJviMTPZnGtuk1HEQkbrZJR1V6+A9eu67DKfCvsmymy0ZAxFQ9doD9gDBsXuGcUQWeG16k3kKzU70CFJEFO3SMtH1g5+yK6kV+zlmdbZRH6Ci32cMBSCUjGKRkyfkHEXQQ1u3Xlxgch3ZVn+0DeER2hCE5JE1PG8dUUs0IuLDvm2ogPCzHyIW3MT/bpamjBrOnlvXmvOVCJxiRHFNX8e/R0ymn/sz1sa8OaI+dJ7MZWUuBWdpQky1Wx9UrqMgMSFeo3PB8BDOp33RHQ4t2Ttx8nnmVt8UvHlizzQm3Xhcm7osn4G+MORhhr2l70sJgTE+Ha1I5e4H2Ul6r084IPcfzfk/QJsg2a8leLudrrq4bi0eNhGhSFvnVgMckXoaAZrE/qIILsJW+TOuvd64/+322HiFg7AWzyrGkfo2Jam1CJRIPBGvjhoLe8NA0vBzD2159i1Bn1rWCgBsk06+usdl59K9Z3Eb/WsZ+TPM5UWNoIBGfvyDNIF6M7iun7dtECLcAMim9f2Gs5sp++MBzWITxrGy2IuIjGinmNCgSbJ0Y6tQi/vgo4LGWOJb0MwAG6jc4/0GdaT7dYz7tiHPyTSB9J2qQAgFbV2E7TVpLs4aVC71Kn+4KXULEt4DPR5XKAb66/y9QZciFGYU0cExkgbGZK5Yabpva/xYln/sEW2mLKVy6xDMrKxPcIBnAHumFL3BBkl1cwCSU2JjgeW47yLvId5oPn/odD98zjOrnE1tn9iUlP5zdmNqVEBE5DRw4GQ+BESrkhlI29cxRvpIR1E9ne2IntlYXYXZ3gltf4lf9CCeSHG3nDi0lmPTX7ucaR4zjLhvF/Stl/KjAEAcQGx+9kPCSYQgRyvXDEJasZB2Jeq0zwRVFuUaU8ZvMtiBE9qSZbAVOt4CgvZlUv88howGleHmoLQGFW9A505/cSoIRRct89KJaC0ZuUj88cEW1BAIKpZyZvARmmzjo2WegHqIMGPlpX71kRr7mecgW5rA2WQMRmfDw8IdSLcM1INhoexL7fc0zxMGuZjZZt/Wp19rACsI6XphlNi+LMh6dfqsAcjalxST7YYHk0kWn6PJ2Qqeexnes/3cuf9GRFJgJUx0OOqFmLFCSJVXwW4F4cIdrclVY6bk0bzp+fg","format":"google-gemini-v1","index":0}]},"finish_reason":"stop","native_finish_reason":"STOP","logprobs":null}]}
+
+      data: {"id":"gen-1763546708-WlSEiEPr7nn7Uso3yUg7","provider":"Google AI Studio","model":"google/gemini-3-pro-preview","object":"chat.completion.chunk","created":1763546708,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"usage":{"prompt_tokens":11,"completion_tokens":281,"total_tokens":292,"cost":0.003394,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.000022,"upstream_inference_completions_cost":0.003372},"completion_tokens_details":{"reasoning_tokens":262,"image_tokens":0}}}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 2.670654208s

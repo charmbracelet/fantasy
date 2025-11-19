@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 494
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"}],"model":"google/gemini-3-pro-preview","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1763546712-oowOHbRdTatTsgOviYVp\",\"provider\":\"Google AI Studio\",\"model\":\"google/gemini-3-pro-preview\",\"object\":\"chat.completion\",\"created\":1763546712,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"STOP\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"refusal\":null,\"reasoning\":\"**Investigating Weather Retrieval**\\n\\nI'm currently focused on the user's request for weather in Florence, Italy. My primary action is to evaluate available tools. The `get_weather` function looks promising, especially since it accepts a `location` parameter. I intend to use this function to provide the user with the information they need. I'm getting ready to use it!\\n\\n\\n**Evaluating Function Application**\\n\\nI've now attempted to apply the `get_weather` function with the specified location: 'Florence, Italy'. I'm expecting this will successfully retrieve the weather data the user is seeking.  The next step is to process and present the received data.\\n\\n\\n\",\"tool_calls\":[{\"index\":0,\"id\":\"tool_weather_j0DpU01anCLITtFWepce\",\"type\":\"function\",\"function\":{\"name\":\"weather\",\"arguments\":\"{\\\"location\\\":\\\"Florence, Italy\\\"}\"}}],\"reasoning_details\":[{\"type\":\"reasoning.text\",\"text\":\"**Investigating Weather Retrieval**\\n\\nI'm currently focused on the user's request for weather in Florence, Italy. My primary action is to evaluate available tools. The `get_weather` function looks promising, especially since it accepts a `location` parameter. I intend to use this function to provide the user with the information they need. I'm getting ready to use it!\\n\\n\\n**Evaluating Function Application**\\n\\nI've now attempted to apply the `get_weather` function with the specified location: 'Florence, Italy'. I'm expecting this will successfully retrieve the weather data the user is seeking.  The next step is to process and present the received data.\\n\\n\\n\",\"format\":\"google-gemini-v1\",\"index\":0},{\"type\":\"reasoning.encrypted\",\"data\":\"EtgDCtUDAdHtim+owmT73Js7vjC7xHBLN2/s4c4jI3o7DgAlJut+e/0MVHbwVhm4Qs1QoUNwVqV2Ny2m7j7qWTwqjuSqma19OdaHD1U2PRkvsPLUV7H8J9XcFMsRZne3U9IEo6RnHXZk0ynhb9EEsdGPwzMD1vu3CNPyPsvbBapGQ5c+G9q0xD0mh7A43k8I4o4uHlHUftH+TGDdEk3veSoUhy3zRESdf1LEJowbsRakH7iaVgfyL44HjKBAkh3elryR1j+FZCDpoI13LofJ5fPUCp3GbzWgitkPHrdYIH0rjsYjJlZF2INPrbDiUd/qpTHY2xi3HwhM0UiYG/QB8vxkQ1oEC2LgRMsMB7dQaG9On3Ww+4n54vEoLdPoNaLi+ZKJlHEf4ukiEufyDPDG063qrXqrq1+rneO0W2Yk4uCH9cYzjTJYk5YurWLEX9vZaHucY0hIfzrhlh32d5JDGvwa6gue5bjase1MSPngiyEAQmTOI8Aw30jozWBlI36VyyKjLoo24tC181vOvLjCmwZX7DDFaxIGVlQzWNAnJm1StcpKrhFuqV/FocTe6hlYuTg9F5UqyVXGmfTTquXHE8jqhOybQ4+G7zKjHaEgXDc23ou19YenEtBx0g==\",\"id\":\"tool_weather_j0DpU01anCLITtFWepce\",\"format\":\"google-gemini-v1\",\"index\":0}]}}],\"usage\":{\"prompt_tokens\":65,\"completion_tokens\":100,\"total_tokens\":165,\"cost\":0.00133,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0,\"video_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.00013,\"upstream_inference_completions_cost\":0.0012},\"completion_tokens_details\":{\"reasoning_tokens\":84,\"image_tokens\":0}}}"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 2.57858475s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 2274
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"tool_weather_j0DpU01anCLITtFWepce","function":{"arguments":"{\"location\":\"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant","reasoning_details":[{"format":"google-gemini-v1","index":0,"text":"**Investigating Weather Retrieval**\n\nI''m currently focused on the user''s request for weather in Florence, Italy. My primary action is to evaluate available tools. The `get_weather` function looks promising, especially since it accepts a `location` parameter. I intend to use this function to provide the user with the information they need. I''m getting ready to use it!\n\n\n**Evaluating Function Application**\n\nI''ve now attempted to apply the `get_weather` function with the specified location: ''Florence, Italy''. I''m expecting this will successfully retrieve the weather data the user is seeking.  The next step is to process and present the received data.\n\n\n","type":"reasoning.text"},{"data":"EtgDCtUDAdHtim+owmT73Js7vjC7xHBLN2/s4c4jI3o7DgAlJut+e/0MVHbwVhm4Qs1QoUNwVqV2Ny2m7j7qWTwqjuSqma19OdaHD1U2PRkvsPLUV7H8J9XcFMsRZne3U9IEo6RnHXZk0ynhb9EEsdGPwzMD1vu3CNPyPsvbBapGQ5c+G9q0xD0mh7A43k8I4o4uHlHUftH+TGDdEk3veSoUhy3zRESdf1LEJowbsRakH7iaVgfyL44HjKBAkh3elryR1j+FZCDpoI13LofJ5fPUCp3GbzWgitkPHrdYIH0rjsYjJlZF2INPrbDiUd/qpTHY2xi3HwhM0UiYG/QB8vxkQ1oEC2LgRMsMB7dQaG9On3Ww+4n54vEoLdPoNaLi+ZKJlHEf4ukiEufyDPDG063qrXqrq1+rneO0W2Yk4uCH9cYzjTJYk5YurWLEX9vZaHucY0hIfzrhlh32d5JDGvwa6gue5bjase1MSPngiyEAQmTOI8Aw30jozWBlI36VyyKjLoo24tC181vOvLjCmwZX7DDFaxIGVlQzWNAnJm1StcpKrhFuqV/FocTe6hlYuTg9F5UqyVXGmfTTquXHE8jqhOybQ4+G7zKjHaEgXDc23ou19YenEtBx0g==","format":"google-gemini-v1","id":"tool_weather_j0DpU01anCLITtFWepce","index":0,"type":"reasoning.encrypted"}]},{"content":"40 C","tool_call_id":"tool_weather_j0DpU01anCLITtFWepce","role":"tool"}],"model":"google/gemini-3-pro-preview","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1763546715-2isSMEAOtYZrJ9E3lrvA\",\"provider\":\"Google AI Studio\",\"model\":\"google/gemini-3-pro-preview\",\"object\":\"chat.completion\",\"created\":1763546715,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"STOP\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"The weather in Florence, Italy is currently 40 degrees Celsius.\",\"refusal\":null,\"reasoning\":\"**Deliver the Answer**\\n\\nI've got the weather data for Florence - it's a scorching 40 degrees Celsius. Now, I'm crafting the response to the user, ensuring the temperature is clearly stated.\\n\\n\\n\",\"reasoning_details\":[{\"type\":\"reasoning.text\",\"text\":\"**Deliver the Answer**\\n\\nI've got the weather data for Florence - it's a scorching 40 degrees Celsius. Now, I'm crafting the response to the user, ensuring the temperature is clearly stated.\\n\\n\\n\",\"format\":\"google-gemini-v1\",\"index\":0},{\"type\":\"reasoning.encrypted\",\"data\":\"Eo4CCosCAdHtim/M+Wv8vjHlzGm/0BnHiNkdjJezGKNj1AC7oH5ExVuvQNPnY51uym511/C6HVjzEeN5C286hYJXgQf6G4uTuoo5azntFo9nK7wER9jf98Amtt/3A6KpQpLzVDwe3Lidp5nHgdUzpIws5IwliAX9VtD6ktPhiI8v4UkFXsRp4sv2bI4Zvf4ORogdHJDN2fcLCTnZXOSVEdw6sZ4OZNI+JGc4tUyCE5cuU0jFWq0R/2eS6qn5N9TkBIx61H+OeXFyZtxX5edxtAykhSHv+kDa81s+wiYuwneBrb0uknwmuqHR3TTxzcn813ELwMnOaORVujw47blm2urGBxS9q7xj62udCT0wMli8\",\"format\":\"google-gemini-v1\",\"index\":0}]}}],\"usage\":{\"prompt_tokens\":193,\"completion_tokens\":55,\"total_tokens\":248,\"cost\":0.001046,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0,\"video_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.000386,\"upstream_inference_completions_cost\":0.00066},\"completion_tokens_details\":{\"reasoning_tokens\":41,\"image_tokens\":0}}}"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 2.627752916s

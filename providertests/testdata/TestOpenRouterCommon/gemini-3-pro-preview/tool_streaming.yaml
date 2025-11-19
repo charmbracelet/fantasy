@@ -1,0 +1,81 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 548
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"}],"model":"google/gemini-3-pro-preview","max_tokens":4000,"stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"usage":{"include":true},"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"gen-1763546718-VolgJ4S2Tix4gqNJ9Pn9","provider":"Google AI Studio","model":"google/gemini-3-pro-preview","object":"chat.completion.chunk","created":1763546718,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":"**Pinpointing the Weather**\n\nI've homed in on using the `weather` tool – a perfect match for the user's request! Now, I'm focusing on obtaining the necessary `location` parameter to make it work. I need to figure out how to parse \"Florence, Italy\" into a format the tool understands. I will need to get a location from a query using an available tool.\n\n\n","reasoning_details":[{"type":"reasoning.text","text":"**Pinpointing the Weather**\n\nI've homed in on using the `weather` tool – a perfect match for the user's request! Now, I'm focusing on obtaining the necessary `location` parameter to make it work. I need to figure out how to parse \"Florence, Italy\" into a format the tool understands. I will need to get a location from a query using an available tool.\n\n\n","format":"google-gemini-v1","index":0}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+      data: {"id":"gen-1763546718-VolgJ4S2Tix4gqNJ9Pn9","provider":"Google AI Studio","model":"google/gemini-3-pro-preview","object":"chat.completion.chunk","created":1763546718,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":"**Deciphering the Location**\n\nI've determined that the user's input directly provides the `location` needed by the weather tool. Specifically, \"Florence, Italy\" can be directly used as the `location` parameter. Thus, I'll execute the `weather` tool with `location='Florence, Italy'` as the argument.\n\n\n","reasoning_details":[{"type":"reasoning.text","text":"**Deciphering the Location**\n\nI've determined that the user's input directly provides the `location` needed by the weather tool. Specifically, \"Florence, Italy\" can be directly used as the `location` parameter. Thus, I'll execute the `weather` tool with `location='Florence, Italy'` as the argument.\n\n\n","format":"google-gemini-v1","index":0}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+      data: {"id":"gen-1763546718-VolgJ4S2Tix4gqNJ9Pn9","provider":"Google AI Studio","model":"google/gemini-3-pro-preview","object":"chat.completion.chunk","created":1763546718,"choices":[{"index":0,"delta":{"role":"assistant","content":null,"reasoning":null,"reasoning_details":[{"id":"tool_weather_ZdFohc8uRXpsZsX3K74b","type":"reasoning.encrypted","data":"EvUDCvIDAdHtim/YGUj5NcE2xF6SC6IYQg3S9nvktXv6CQcy76ZTZdJ+5dFMIlPCXqVXLIrccmk3PX5MWiEM0NB0t4Cie2azaqDdgGgAN2kCKpZuJRIbqFDLWNR+oa0r2D7ShyyrWyAbz6YTjgBHvj8KqduwdA3Ya/9BKE1cuuacK4Sq3kH+cKpLMPXA3m4cZ7s/n02lvHHn2koGbXppEj7BuYxwHdDXOhHKN0JggJ9xzHR1DjL81e3DB3I7FITdUSL5U/DRfTwAErqfuTXfYUlNB2X3YUYHZ1vU0uCSCeliiG/mzmotfHHhb7VuzGmgLquhkQGcHbwoOkqTFVbT7iNBFg6kPtNc5qukvyprufaT3FfEupXH1qBv0djPYLwGyPsTIwDYt4QVsDd7pNb4yDj/1MrO/acvaCfz2vhwglSnTC0GUndMwFYCV991EAcsnLbPWNZcuztCzt8tvMjgUJkSQrRGuXUFUre6JQzv4VHl54NxxpTP/pOaWdKldT/j8Y64sb1tQwXYq1qFdYgKzh+U0ig/l05ZIvq9Mzw+R8p4qoug9wGV1U1cvXDwCIrkhN+k/j7DzcAg6kRgpNM26bUpBWZ7t8jhFgUIv+HyXfrBN9V4Q0Jd2ifN4yW68JBhCNeTe3d+/OokV5V8Y1McC5Moi3HC1Roq","format":"google-gemini-v1","index":0}],"tool_calls":[{"index":0,"id":"tool_weather_ZdFohc8uRXpsZsX3K74b","type":"function","function":{"name":"weather","arguments":"{\"location\":\"Florence, Italy\"}"}}]},"finish_reason":"tool_calls","native_finish_reason":null,"logprobs":null}]}
+
+      data: {"id":"gen-1763546718-VolgJ4S2Tix4gqNJ9Pn9","provider":"Google AI Studio","model":"google/gemini-3-pro-preview","object":"chat.completion.chunk","created":1763546718,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":null,"reasoning_details":[]},"finish_reason":"stop","native_finish_reason":"STOP","logprobs":null}]}
+
+      data: {"id":"gen-1763546718-VolgJ4S2Tix4gqNJ9Pn9","provider":"Google AI Studio","model":"google/gemini-3-pro-preview","object":"chat.completion.chunk","created":1763546718,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"usage":{"prompt_tokens":65,"completion_tokens":104,"total_tokens":169,"cost":0.001378,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.00013,"upstream_inference_completions_cost":0.001248},"completion_tokens_details":{"reasoning_tokens":88,"image_tokens":0}}}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 3.000569167s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 2368
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"tool_weather_ZdFohc8uRXpsZsX3K74b","function":{"arguments":"{\"location\":\"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant","reasoning_details":[{"format":"google-gemini-v1","index":0,"text":"**Pinpointing the Weather**\n\nI''ve homed in on using the `weather` tool – a perfect match for the user''s request! Now, I''m focusing on obtaining the necessary `location` parameter to make it work. I need to figure out how to parse \"Florence, Italy\" into a format the tool understands. I will need to get a location from a query using an available tool.\n\n\n**Deciphering the Location**\n\nI''ve determined that the user''s input directly provides the `location` needed by the weather tool. Specifically, \"Florence, Italy\" can be directly used as the `location` parameter. Thus, I''ll execute the `weather` tool with `location=''Florence, Italy''` as the argument.\n\n\n","type":"reasoning.text"},{"data":"EvUDCvIDAdHtim/YGUj5NcE2xF6SC6IYQg3S9nvktXv6CQcy76ZTZdJ+5dFMIlPCXqVXLIrccmk3PX5MWiEM0NB0t4Cie2azaqDdgGgAN2kCKpZuJRIbqFDLWNR+oa0r2D7ShyyrWyAbz6YTjgBHvj8KqduwdA3Ya/9BKE1cuuacK4Sq3kH+cKpLMPXA3m4cZ7s/n02lvHHn2koGbXppEj7BuYxwHdDXOhHKN0JggJ9xzHR1DjL81e3DB3I7FITdUSL5U/DRfTwAErqfuTXfYUlNB2X3YUYHZ1vU0uCSCeliiG/mzmotfHHhb7VuzGmgLquhkQGcHbwoOkqTFVbT7iNBFg6kPtNc5qukvyprufaT3FfEupXH1qBv0djPYLwGyPsTIwDYt4QVsDd7pNb4yDj/1MrO/acvaCfz2vhwglSnTC0GUndMwFYCV991EAcsnLbPWNZcuztCzt8tvMjgUJkSQrRGuXUFUre6JQzv4VHl54NxxpTP/pOaWdKldT/j8Y64sb1tQwXYq1qFdYgKzh+U0ig/l05ZIvq9Mzw+R8p4qoug9wGV1U1cvXDwCIrkhN+k/j7DzcAg6kRgpNM26bUpBWZ7t8jhFgUIv+HyXfrBN9V4Q0Jd2ifN4yW68JBhCNeTe3d+/OokV5V8Y1McC5Moi3HC1Roq","format":"google-gemini-v1","id":"tool_weather_ZdFohc8uRXpsZsX3K74b","index":0,"type":"reasoning.encrypted"}]},{"content":"40 C","tool_call_id":"tool_weather_ZdFohc8uRXpsZsX3K74b","role":"tool"}],"model":"google/gemini-3-pro-preview","max_tokens":4000,"stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"usage":{"include":true},"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"gen-1763546721-kbEZ3lLMWQc3gbgqRMRp","provider":"Google","model":"google/gemini-3-pro-preview","object":"chat.completion.chunk","created":1763546721,"choices":[{"index":0,"delta":{"role":"assistant","content":"The weather in Florence","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+      data: {"id":"gen-1763546721-kbEZ3lLMWQc3gbgqRMRp","provider":"Google","model":"google/gemini-3-pro-preview","object":"chat.completion.chunk","created":1763546721,"choices":[{"index":0,"delta":{"role":"assistant","content":", Italy is 40°C.","reasoning":null,"reasoning_details":[]},"finish_reason":"stop","native_finish_reason":"STOP","logprobs":null}]}
+
+      data: {"id":"gen-1763546721-kbEZ3lLMWQc3gbgqRMRp","provider":"Google","model":"google/gemini-3-pro-preview","object":"chat.completion.chunk","created":1763546721,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"usage":{"prompt_tokens":56,"completion_tokens":13,"total_tokens":69,"cost":0.000268,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.000112,"upstream_inference_completions_cost":0.000156},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 1.668490333s

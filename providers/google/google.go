@@ -1273,6 +1273,15 @@ func (g languageModel) mapResponse(response *genai.GenerateContentResponse, warn
 	}, nil
 }
 
+func GetReasoningMetadata(providerOptions fantasy.ProviderOptions) *ReasoningMetadata {
+	if googleOptions, ok := providerOptions[Name]; ok {
+		if reasoning, ok := googleOptions.(*ReasoningMetadata); ok {
+			return reasoning
+		}
+	}
+	return nil
+}
+
 func mapFinishReason(reason genai.FinishReason) fantasy.FinishReason {
 	switch reason {
 	case genai.FinishReasonStop:

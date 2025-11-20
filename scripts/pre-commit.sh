@@ -67,9 +67,12 @@ else
 fi
 
 echo "🧪 Running tests..."
-if go test -v ./... -count=1; then
-    print_status "OK" "All tests passed"
+mkdir -p test-results
+if go test -v ./... -count=1 > test-results/pre-commit-test.log 2>&1; then
+    print_status "OK" "All tests passed - see test-results/pre-commit-test.log for details"
 else
+    echo "❌ Test failures:"
+    cat test-results/pre-commit-test.log
     print_status "FAIL" "Tests failed"
     exit 1
 fi
@@ -77,13 +80,16 @@ fi
 # Check if golangci-lint is available
 if command -v golangci-lint &> /dev/null; then
     echo "🔍 Running linter..."
-    if golangci-lint run --timeout=5m; then
-        print_status "OK" "Linting passed"
+    mkdir -p test-results
+    if golangci-lint run --timeout=5m > test-results/lint.log 2>&1; then
+        print_status "OK" "Linting passed - see test-results/lint.log for details"
     else
-        print_status "WARN" "Linting found issues (check output above)"
+        echo "⚠️ Linting issues found:"
+        cat test-results/lint.log
+        print_status "WARN" "Linting found issues (see output above)"
     fi
 else
-    print_status "WARN" "golangci-lint not found - install with: go install github.com/golangci/golangci-lint/cmd/golangci-lint@v2.0.0"
+    print_status "WARN" "golangci-lint not found - install with: go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8"
 fi
 
 echo ""

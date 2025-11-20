@@ -21,11 +21,11 @@ print_status() {
     esac
 }
 
-# Install golangci-lint v2
-echo "📦 Installing golangci-lint v2.0.0..."
+# Install golangci-lint (latest stable)
+echo "📦 Installing golangci-lint..."
 if command -v go &> /dev/null; then
-    go install github.com/golangci/golangci-lint/cmd/golangci-lint@v2.0.0
-    print_status "OK" "golangci-lint v2.0.0 installed"
+    go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+    print_status "OK" "golangci-lint installed"
 else
     print_status "FAIL" "Go not found in PATH"
     exit 1

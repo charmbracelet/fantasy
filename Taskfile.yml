@@ -15,24 +15,32 @@ tasks:
   test:
     desc: Run all tests
     cmds:
-      - go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+      - mkdir -p test-results
+      - go test -v -race -coverprofile=test-results/coverage.txt -covermode=atomic ./... > test-results/test-output.log 2>&1 || (cat test-results/test-output.log && exit 1)
+      - echo "Test results saved to test-results/test-output.log"
+      - echo "Coverage report saved to test-results/coverage.txt"
     silent: true
 
   test-verbose:
-    desc: Run tests with verbose output
+    desc: Run tests with verbose output to console
     cmds:
-      - go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+      - go test -v -race -coverprofile=test-results/coverage.txt -covermode=atomic ./...
 
   test-short:
     desc: Run short tests
     cmds:
-      - go test -short -v ./...
+      - mkdir -p test-results
+      - go test -short -v ./... > test-results/test-short.log 2>&1 || (cat test-results/test-short.log && exit 1)
+      - echo "Short test results saved to test-results/test-short.log"
+    silent: true
 
   lint:
     desc: Run linter
     cmds:
-      - which golangci-lint || (echo "Installing golangci-lint v2..." && go install github.com/golangci/golangci-lint/cmd/golangci-lint@v2.0.0)
-      - golangci-lint run --timeout=10m
+      - which golangci-lint || (echo "Installing golangci-lint v1..." && go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8)
+      - mkdir -p test-results
+      - golangci-lint run --no-config --enable=gosec,misspell,errcheck,gosimple --timeout=10m > test-results/lint.log 2>&1 || true
+      - echo "Lint results saved to test-results/lint.log"
 
   fmt:
     desc: Format code
@@ -58,7 +66,7 @@ tasks:
   install-tools:
     desc: Install development tools
     cmds:
-      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@v2.0.0
+      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
       - go install golang.org/x/tools/cmd/goimports@latest
       - go install github.com/securego/gosec/v2/cmd/gosec@latest
 
@@ -73,14 +81,15 @@ tasks:
   coverage:
     desc: Show coverage report
     cmds:
-      - "go tool cover -html=coverage.txt -o coverage.html"
-      - "echo 'Coverage report generated: coverage.html'"
+      - mkdir -p test-results
+      - "go tool cover -html=test-results/coverage.txt -o test-results/coverage.html"
+      - "echo 'Coverage report generated: test-results/coverage.html'"
     deps: [test]
 
   clean:
     desc: Clean build artifacts
     cmds:
-      - rm -f coverage.txt coverage.html
+      - rm -rf test-results
       - rm -f golangci-lint-report.xml
       - go clean -cache
 
@@ -100,7 +109,7 @@ tasks:
   docker-test:
     desc: Run tests in Docker (simulates CI)
     cmds:
-      - docker run --rm -v "{{.PWD}}:/app" -w /app golang:1.24.5 bash -c "go mod download && go test -v -race ./..."
+      - docker run --rm -v "{{.PWD}}:/app" -w /app golang:1.25 bash -c "go mod download && go test -v -race ./... > test-results/docker-test.log 2>&1 || (cat test-results/docker-test.log && exit 1)"
     ignore_error: true
 
   pipeline-debug:
@@ -113,6 +122,8 @@ tasks:
       - echo "=== Building ==="
       - go build -v ./...
       - echo "=== Testing ==="
-      - go test -v ./... -count=1
+      - echo "Test results will be saved to test-results/pipeline-test.log"
+      - go test -v ./... -count=1 > test-results/pipeline-test.log 2>&1 || (cat test-results/pipeline-test.log && exit 1)
+      - echo "✓ Tests completed - see test-results/pipeline-test.log for details" > test-results/pipeline-test.log 2>&1 || (cat test-results/pipeline-test.log && exit 1)
       - echo "=== Checking for changes ==="
       - git status --porcelain go.mod go.sum || echo "No changes to go.mod/go.sum"

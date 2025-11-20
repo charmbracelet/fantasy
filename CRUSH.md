@@ -2,12 +2,29 @@
 
 ## Build/Test/Lint Commands
 - **Build**: `go build ./...`
-- **Test all**: `task test` or `go test ./... -count=1`
+- **Test all**: `task test` or `go test ./... -count=1` (outputs to `test-results/test-output.log`)
 - **Test single**: `go test -run TestName ./package -v`
 - **Test with args**: `task test -- -v -run TestName`
-- **Lint**: `task lint` or `golangci-lint run`
+- **Test verbose**: `task test-verbose` (outputs to console)
+- **Lint**: `task lint` or `golangci-lint run --no-config --enable=gosec,misspell,errcheck,gosimple` (outputs to `test-results/lint.log`)
 - **Format**: `task fmt` or `gofmt -s -w .`
 - **Modernize**: `task modernize` or `modernize -fix ./...`
+- **Clean artifacts**: `task clean` (removes test-results directory)
+
+## Test Output Management
+- Test results are saved to `test-results/` directory
+- Main tests: `test-results/test-output.log`
+- Pre-commit tests: `test-results/pre-commit-test.log`
+- Lint results: `test-results/lint.log`
+- Coverage: `test-results/coverage.txt` and `test-results/coverage.html`
+- Use `task test-verbose` for console output during development
+
+## CI Pipeline Configuration
+- **GitLab CI** with Go 1.25, golangci-lint v1.64.8
+- **Test output**: Redirected to `test-results/` directory in CI
+- **Lint**: Uses `--no-config` with explicit linters (gosec, misspell, errcheck, gosimple)
+- **Private modules**: Configured for `gitlab.com/tinyland/*`
+- **Artifacts**: Test results and coverage stored for 1 week
 
 ## Code Style Guidelines
 - **Package naming**: lowercase, single word (ai, openai, anthropic, google)
@@ -174,7 +191,7 @@ glab mr note --list {mr_number}
 ### Phase 2: Local Reproduction
 ```bash
 # Replicate CI environment locally
-docker run --rm -v $(pwd):/app -w /app golang:1.24.5 bash -c "
+docker run --rm -v $(pwd):/app -w /app golang:1.25 bash -c "
   go mod download
   go mod verify
   go mod tidy
@@ -184,7 +201,7 @@ docker run --rm -v $(pwd):/app -w /app golang:1.24.5 bash -c "
 
 # Check Go version compatibility
 go version
-go mod edit -go=1.24.5  # if needed
+go mod edit -go=1.25  # if needed
 ```
 
 ### Phase 3: Common CI Issues & Solutions

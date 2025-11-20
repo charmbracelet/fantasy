@@ -15,9 +15,9 @@ import (
 
 func init() {
 	if _, err := os.Stat(".env"); err == nil {
-		godotenv.Load(".env")
+		_ = godotenv.Load(".env")
 	} else {
-		godotenv.Load(".env.sample")
+		_ = godotenv.Load(".env.sample")
 	}
 }
 

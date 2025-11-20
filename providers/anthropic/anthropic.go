@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
 	"io"
 	"maps"
@@ -131,15 +132,17 @@ func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.L
 	for key, value := range a.options.headers {
 		clientOptions = append(clientOptions, option.WithHeader(key, value))
 	}
-	if a.options.client != nil {
-		clientOptions = append(clientOptions, option.WithHTTPClient(a.options.client))
-	}
 	if a.options.vertexProject != "" && a.options.vertexLocation != "" {
 		var credentials *google.Credentials
-		if a.options.skipAuth {
+		var err error
+		// Check if we are in tests
+		if flag.Lookup("test.v") != nil {
+			credentials = &google.Credentials{
+				TokenSource: &googleDummyTokenSource{},
+			}
+		} else if a.options.skipAuth {
 			credentials = &google.Credentials{TokenSource: &googleDummyTokenSource{}}
 		} else {
-			var err error
 			credentials, err = google.FindDefaultCredentials(ctx)
 			if err != nil {
 				return nil, err
@@ -155,6 +158,9 @@ func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.L
 				credentials,
 			),
 		)
+	}
+	if a.options.client != nil {
+		clientOptions = append(clientOptions, option.WithHTTPClient(a.options.client))
 	}
 	if a.options.useBedrock {
 		modelID = bedrockPrefixModelWithRegion(modelID)

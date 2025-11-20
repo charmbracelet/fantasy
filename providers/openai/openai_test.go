@@ -722,7 +722,7 @@ func newMockServer() *mockServer {
 		// Parse request body
 		if r.Body != nil {
 			var body map[string]any
-			json.NewDecoder(r.Body).Decode(&body)
+			_ = json.NewDecoder(r.Body).Decode(&body)
 			call.body = body
 		}
 
@@ -730,7 +730,7 @@ func newMockServer() *mockServer {
 
 		// Return mock response
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(ms.response)
+		_ = json.NewEncoder(w).Encode(ms.response)
 	}))
 
 	return ms
@@ -1978,7 +1978,7 @@ func newStreamingMockServer() *streamingMockServer {
 		// Parse request body
 		if r.Body != nil {
 			var body map[string]any
-			json.NewDecoder(r.Body).Decode(&body)
+			_ = json.NewDecoder(r.Body).Decode(&body)
 			call.body = body
 		}
 
@@ -2007,7 +2007,7 @@ func newStreamingMockServer() *streamingMockServer {
 			if strings.HasPrefix(chunk, "HEADER:") {
 				continue
 			}
-			w.Write([]byte(chunk))
+			_, _ = w.Write([]byte(chunk))
 			if f, ok := w.(http.Flusher); ok {
 				f.Flush()
 			}

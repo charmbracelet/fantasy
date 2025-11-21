@@ -31,8 +31,21 @@ type ProviderOptions struct {
 }
 
 // ReasoningData represents reasoning data for OpenAI-compatible provider.
+// Different providers may use different field names (reasoning_content vs reasoning).
 type ReasoningData struct {
+	// Most common
 	ReasoningContent string `json:"reasoning_content"`
+	// So far, only used by Cerebras specifically for GLM 4.6
+	Reasoning string `json:"reasoning"`
+}
+
+// GetReasoning returns the reasoning content whether it's in `reasoning` or
+// `reasoning_content` JSON fields.
+func (r *ReasoningData) GetReasoning() string {
+	if r.ReasoningContent != "" {
+		return r.ReasoningContent
+	}
+	return r.Reasoning
 }
 
 // Options implements the ProviderOptions interface.

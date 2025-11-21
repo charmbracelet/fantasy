@@ -619,6 +619,13 @@ func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBl
 					}
 				}
 			}
+			if !hasVisibleUserContent(anthropicContent) {
+				warnings = append(warnings, fantasy.CallWarning{
+					Type:    fantasy.CallWarningTypeOther,
+					Message: "dropping empty user message (contains neither user-facing content nor tool results)",
+				})
+				continue
+			}
 			messages = append(messages, anthropic.NewUserMessage(anthropicContent...))
 		case fantasy.MessageRoleAssistant:
 			var anthropicContent []anthropic.ContentBlockParamUnion
@@ -651,7 +658,7 @@ func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBl
 						}
 						if !sendReasoningData {
 							warnings = append(warnings, fantasy.CallWarning{
-								Type:    "other",
+								Type:    fantasy.CallWarningTypeOther,
 								Message: "sending reasoning content is disabled for this model",
 							})
 							continue
@@ -659,7 +666,7 @@ func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBl
 						reasoningMetadata := GetReasoningMetadata(part.Options())
 						if reasoningMetadata == nil {
 							warnings = append(warnings, fantasy.CallWarning{
-								Type:    "other",
+								Type:    fantasy.CallWarningTypeOther,
 								Message: "unsupported reasoning metadata",
 							})
 							continue
@@ -671,7 +678,7 @@ func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBl
 							anthropicContent = append(anthropicContent, anthropic.NewRedactedThinkingBlock(reasoningMetadata.RedactedData))
 						} else {
 							warnings = append(warnings, fantasy.CallWarning{
-								Type:    "other",
+								Type:    fantasy.CallWarningTypeOther,
 								Message: "unsupported reasoning metadata",
 							})
 							continue
@@ -701,10 +708,36 @@ func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBl
 					}
 				}
 			}
+
+			if !hasVisibleAssistantContent(anthropicContent) {
+				warnings = append(warnings, fantasy.CallWarning{
+					Type:    fantasy.CallWarningTypeOther,
+					Message: "dropping empty assistant message (contains neither user-facing content nor tool calls)",
+				})
+				continue
+			}
 			messages = append(messages, anthropic.NewAssistantMessage(anthropicContent...))
 		}
 	}
 	return systemBlocks, messages, warnings
+}
+
+func hasVisibleUserContent(content []anthropic.ContentBlockParamUnion) bool {
+	for _, block := range content {
+		if block.OfText != nil || block.OfImage != nil || block.OfToolResult != nil {
+			return true
+		}
+	}
+	return false
+}
+
+func hasVisibleAssistantContent(content []anthropic.ContentBlockParamUnion) bool {
+	for _, block := range content {
+		if block.OfText != nil || block.OfToolUse != nil {
+			return true
+		}
+	}
+	return false
 }
 
 func mapFinishReason(finishReason string) fantasy.FinishReason {

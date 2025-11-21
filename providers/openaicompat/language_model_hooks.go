@@ -54,9 +54,9 @@ func ExtraContentFunc(choice openaisdk.ChatCompletionChoice) []fantasy.Content {
 	if err != nil {
 		return content
 	}
-	if reasoningData.ReasoningContent != "" {
+	if reasoning := reasoningData.GetReasoning(); reasoning != "" {
 		content = append(content, fantasy.ReasoningContent{
-			Text: reasoningData.ReasoningContent,
+			Text: reasoning,
 		})
 	}
 	return content
@@ -110,11 +110,11 @@ func StreamExtraFunc(chunk openaisdk.ChatCompletionChunk, yield func(fantasy.Str
 				Delta: reasoningContent,
 			})
 		}
-		if reasoningData.ReasoningContent != "" {
+		if reasoning := reasoningData.GetReasoning(); reasoning != "" {
 			if !reasoningStarted {
 				ctx[reasoningStartedCtx] = true
 			}
-			return ctx, emitEvent(reasoningData.ReasoningContent)
+			return ctx, emitEvent(reasoning)
 		}
 		if reasoningStarted && (choice.Delta.Content != "" || len(choice.Delta.ToolCalls) > 0) {
 			ctx[reasoningStartedCtx] = false

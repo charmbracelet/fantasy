@@ -1,0 +1,32 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 165
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"Say hi in Portuguese","role":"user"}],"model":"zai-org/GLM-4.6","max_tokens":4000}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://router.huggingface.co/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: '{"choices":[{"finish_reason":"stop","index":0,"message":{"content":"\nOi!\n\nYou can also use:\n\n**Olá!**\n\n*   **Oi** (oy) is more informal, just like \"Hi.\"\n*   **Olá** (oh-LAH) is a bit more standard, like \"Hello,\" but it''s used in all kinds of situations.","reasoning_content":"1.  **Analyze the user''s request:** The user wants to know how to say \"hi\" in Portuguese. This is a very simple, direct translation request.\n\n2.  **Identify the core task:** Translate the English word \"hi\" into Portuguese.\n\n3.  **Brainstorm Portuguese greetings:**\n    *   \"Hi\" is an informal greeting. What are the common informal greetings in Portuguese?\n    *   \"Oi\" - This is the most direct and common equivalent of \"Hi\". It''s used in both Brazil and Portugal, though perhaps slightly more common in Brazil. It''s universally understood.\n    *   \"Olá\" - This is the equivalent of \"Hello\". It''s slightly more formal than \"Oi\" but can still be used in informal settings. It''s a very safe and standard greeting. It''s used in both Brazil and Portugal.\n    *   \"E aí?\" - This is very informal, like \"What''s up?\" or \"Hey there?\". It''s very common in Brazil, less so in Portugal (where they might say \"Então?\").\n    *   \"Bom dia\" - \"Good morning\". This is a time-specific greeting.\n    *   \"Boa tarde\" - \"Good afternoon\". Time-specific.\n    *   \"Boa noite\" - \"Good evening/night\". Time-specific.\n\n4.  **Select the best answer(s):**\n    *   The user asked for \"hi\". The most direct translation is \"Oi\".\n    *   \"Olá\" is also an excellent answer, as it''s the most common greeting overall, even if it maps more closely to \"Hello\". It''s good to provide it as an alternative.\n    *   It''s helpful to provide context. \"Oi\" is more informal, \"Olá\" is a bit more standard/all-purpose.\n    *   Mentioning the regional differences (Brazil vs. Portugal) is a nice touch, but for a simple \"hi\", it''s not strictly necessary as both \"Oi\" and \"Olá\" work in both places. \"Oi\" is just more common in Brazil.\n\n5.  **Structure the response:**\n    *   Start with the most direct answer. \"Oi!\"\n    *   Provide the slightly more formal but also very common alternative: \"Olá!\"\n    *   Add a brief explanation of the difference in formality/tone.\n        *   \"Oi\" = informal, like \"Hi\".\n        *   \"Olá\" = a bit more standard, like \"Hello\", but still used informally.\n    *   Keep it simple and clear. The user asked a simple question, so the answer should be easy to digest. No need for a long essay on Portuguese grammar.\n\n6.  **Draft the final response:**\n    *   Start with \"Oi!\"\n    *   Then add \"You can also use:\"\n    *   Add \"Olá!\"\n    *   Add a short explanation: \"Oi is more informal, like ''Hi''. Olá is a bit more standard, like ''Hello'', but both are very common.\"\n    *   Maybe add a small pronunciation guide for a non-speaker.\n        *   Oi: like the \"oy\" in \"boy\".\n        *   Olá: oh-LAH.\n    *   This seems complete and helpful without being overwhelming.\n\n7.  **Final Polish:** Review the drafted response. Is it accurate? Is it easy to understand? Does it directly answer the user''s question? Yes. The structure is good: direct answer, alternative, context. The pronunciation guide is a bonus. The response is ready.","role":"assistant"}}],"created":1761231447,"id":"20251023225720c61e89d77cb34b01","model":"glm-4.6","request_id":"20251023225720c61e89d77cb34b01","usage":{"completion_tokens":807,"prompt_tokens":18,"prompt_tokens_details":{"cached_tokens":0},"total_tokens":825}}'
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+    status: 200 OK
+    code: 200
+    duration: 10.341307417s

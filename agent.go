@@ -788,26 +788,19 @@ func (a *agent) executeSingleTool(ctx context.Context, toolMap map[string]AgentT
 		return result, true
 	}
 
-	var result ToolResultContent
+	result := ToolResultContent{
+		ToolCallID:       toolCall.ToolCallID,
+		ToolName:         toolCall.ToolName,
+		ClientMetadata:   toolResult.Metadata,
+		ProviderExecuted: false,
+	}
 	if toolResult.IsError {
-		result = ToolResultContent{
-			ToolCallID: toolCall.ToolCallID,
-			ToolName:   toolCall.ToolName,
-			Result: ToolResultOutputContentError{
-				Error: errors.New(toolResult.Content),
-			},
-			ClientMetadata:   toolResult.Metadata,
-			ProviderExecuted: false,
+		result.Result = ToolResultOutputContentError{
+			Error: errors.New(toolResult.Content),
 		}
 	} else {
-		result = ToolResultContent{
-			ToolCallID: toolCall.ToolCallID,
-			ToolName:   toolCall.ToolName,
-			Result: ToolResultOutputContentText{
-				Text: toolResult.Content,
-			},
-			ClientMetadata:   toolResult.Metadata,
-			ProviderExecuted: false,
+		result.Result = ToolResultOutputContentText{
+			Text: toolResult.Content,
 		}
 	}
 	if toolResultCallback != nil {

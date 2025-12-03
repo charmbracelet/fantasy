@@ -93,11 +93,11 @@ func NewAgentTool[TInput any](
 	}
 }
 
-// WithParallel sets whether the tool can run in parallel with other tools.
-func WithParallel(tool AgentTool, parallel bool) AgentTool {
+// NewParallelAgentTool marks a tool as safe to run in parallel with other tools.
+func NewParallelAgentTool(tool AgentTool) AgentTool {
 	// Try to use the SetParallel method if available
 	if setter, ok := tool.(interface{ SetParallel(bool) }); ok {
-		setter.SetParallel(parallel)
+		setter.SetParallel(true)
 	}
 	return tool
 }

@@ -591,11 +591,19 @@ func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBl
 							if !ok {
 								continue
 							}
-							toolResultBlock.Content = []anthropic.ToolResultBlockParamContentUnion{
+							contentBlocks := []anthropic.ToolResultBlockParamContentUnion{
 								{
 									OfImage: anthropic.NewImageBlockBase64(content.MediaType, content.Data).OfImage,
 								},
 							}
+							if content.Text != "" {
+								contentBlocks = append(contentBlocks, anthropic.ToolResultBlockParamContentUnion{
+									OfText: &anthropic.TextBlockParam{
+										Text: content.Text,
+									},
+								})
+							}
+							toolResultBlock.Content = contentBlocks
 						case fantasy.ToolResultContentTypeError:
 							content, ok := fantasy.AsToolResultOutputType[fantasy.ToolResultOutputContentError](result.Output)
 							if !ok {

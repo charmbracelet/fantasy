@@ -708,7 +708,19 @@ func (a *agent) executeTools(ctx context.Context, allTools []AgentTool, toolCall
 				ClientMetadata:   toolResult.Metadata,
 				ProviderExecuted: false,
 			}
+		} else if toolResult.Type == "image" || toolResult.Type == "media" {
+			result = ToolResultContent{
+				ToolCallID: toolCall.ToolCallID,
+				ToolName:   toolCall.ToolName,
+				Result: ToolResultOutputContentMedia{
+					Data:      string(toolResult.Data),
+					MediaType: toolResult.MediaType,
+					Text:      toolResult.Content,
+				},
+				ProviderExecuted: false,
+			}
 		} else {
+			// Default to text response
 			result = ToolResultContent{
 				ToolCallID: toolCall.ToolCallID,
 				ToolName:   toolCall.ToolName,

@@ -93,8 +93,14 @@ func NewAgentTool[TInput any](
 	}
 }
 
-// NewParallelAgentTool marks a tool as safe to run in parallel with other tools.
-func NewParallelAgentTool(tool AgentTool) AgentTool {
+// NewParallelAgentTool creates a typed tool from a function with automatic schema generation.
+// This also marks a tool as safe to run in parallel with other tools.
+func NewParallelAgentTool[TInput any](
+	name string,
+	description string,
+	fn func(ctx context.Context, input TInput, call ToolCall) (ToolResponse, error),
+) AgentTool {
+	tool := NewAgentTool(name, description, fn)
 	// Try to use the SetParallel method if available
 	if setter, ok := tool.(interface{ SetParallel(bool) }); ok {
 		setter.SetParallel(true)

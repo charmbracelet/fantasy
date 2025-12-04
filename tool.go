@@ -18,6 +18,7 @@ type ToolInfo struct {
 	Description string         `json:"description"`
 	Parameters  map[string]any `json:"parameters"`
 	Required    []string       `json:"required"`
+	Parallel    bool           `json:"parallel"` // Whether this tool can run in parallel with other tools
 }
 
 // ToolCall represents a tool invocation, matching the existing pattern.
@@ -88,7 +89,23 @@ func NewAgentTool[TInput any](
 		description: description,
 		fn:          fn,
 		schema:      schema,
+		parallel:    false, // Default to sequential execution
 	}
+}
+
+// NewParallelAgentTool creates a typed tool from a function with automatic schema generation.
+// This also marks a tool as safe to run in parallel with other tools.
+func NewParallelAgentTool[TInput any](
+	name string,
+	description string,
+	fn func(ctx context.Context, input TInput, call ToolCall) (ToolResponse, error),
+) AgentTool {
+	tool := NewAgentTool(name, description, fn)
+	// Try to use the SetParallel method if available
+	if setter, ok := tool.(interface{ SetParallel(bool) }); ok {
+		setter.SetParallel(true)
+	}
+	return tool
 }
 
 // funcToolWrapper wraps a function to implement the AgentTool interface.
@@ -98,6 +115,7 @@ type funcToolWrapper[TInput any] struct {
 	fn              func(ctx context.Context, input TInput, call ToolCall) (ToolResponse, error)
 	schema          Schema
 	providerOptions ProviderOptions
+	parallel        bool
 }
 
 func (w *funcToolWrapper[TInput]) SetProviderOptions(opts ProviderOptions) {
@@ -106,6 +124,10 @@ func (w *funcToolWrapper[TInput]) SetProviderOptions(opts ProviderOptions) {
 
 func (w *funcToolWrapper[TInput]) ProviderOptions() ProviderOptions {
 	return w.providerOptions
+}
+
+func (w *funcToolWrapper[TInput]) SetParallel(parallel bool) {
+	w.parallel = parallel
 }
 
 func (w *funcToolWrapper[TInput]) Info() ToolInfo {
@@ -117,6 +139,7 @@ func (w *funcToolWrapper[TInput]) Info() ToolInfo {
 		Description: w.description,
 		Parameters:  schema.ToParameters(w.schema),
 		Required:    w.schema.Required,
+		Parallel:    w.parallel,
 	}
 }
 

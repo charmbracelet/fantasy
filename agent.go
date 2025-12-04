@@ -733,15 +733,16 @@ func (a *agent) executeTools(ctx context.Context, allTools []AgentTool, toolCall
 
 // executeSingleTool executes a single tool and returns its result and a critical error flag.
 func (a *agent) executeSingleTool(ctx context.Context, toolMap map[string]AgentTool, toolCall ToolCallContent, toolResultCallback func(result ToolResultContent) error) (ToolResultContent, bool) {
+	result := ToolResultContent{
+		ToolCallID:       toolCall.ToolCallID,
+		ToolName:         toolCall.ToolName,
+		ProviderExecuted: false,
+	}
+
 	// Skip invalid tool calls - create error result (not critical)
 	if toolCall.Invalid {
-		result := ToolResultContent{
-			ToolCallID: toolCall.ToolCallID,
-			ToolName:   toolCall.ToolName,
-			Result: ToolResultOutputContentError{
-				Error: toolCall.ValidationError,
-			},
-			ProviderExecuted: false,
+		result.Result = ToolResultOutputContentError{
+			Error: toolCall.ValidationError,
 		}
 		if toolResultCallback != nil {
 			_ = toolResultCallback(result)
@@ -751,13 +752,8 @@ func (a *agent) executeSingleTool(ctx context.Context, toolMap map[string]AgentT
 
 	tool, exists := toolMap[toolCall.ToolName]
 	if !exists {
-		result := ToolResultContent{
-			ToolCallID: toolCall.ToolCallID,
-			ToolName:   toolCall.ToolName,
-			Result: ToolResultOutputContentError{
-				Error: errors.New("Error: Tool not found: " + toolCall.ToolName),
-			},
-			ProviderExecuted: false,
+		result.Result = ToolResultOutputContentError{
+			Error: errors.New("Error: Tool not found: " + toolCall.ToolName),
 		}
 		if toolResultCallback != nil {
 			_ = toolResultCallback(result)
@@ -772,15 +768,10 @@ func (a *agent) executeSingleTool(ctx context.Context, toolMap map[string]AgentT
 		Input: toolCall.Input,
 	})
 	if err != nil {
-		result := ToolResultContent{
-			ToolCallID: toolCall.ToolCallID,
-			ToolName:   toolCall.ToolName,
-			Result: ToolResultOutputContentError{
-				Error: err,
-			},
-			ClientMetadata:   toolResult.Metadata,
-			ProviderExecuted: false,
+		result.Result = ToolResultOutputContentError{
+			Error: err,
 		}
+		result.ClientMetadata = toolResult.Metadata
 		if toolResultCallback != nil {
 			_ = toolResultCallback(result)
 		}
@@ -788,12 +779,7 @@ func (a *agent) executeSingleTool(ctx context.Context, toolMap map[string]AgentT
 		return result, true
 	}
 
-	result := ToolResultContent{
-		ToolCallID:       toolCall.ToolCallID,
-		ToolName:         toolCall.ToolName,
-		ClientMetadata:   toolResult.Metadata,
-		ProviderExecuted: false,
-	}
+	result.ClientMetadata = toolResult.Metadata
 	if toolResult.IsError {
 		result.Result = ToolResultOutputContentError{
 			Error: errors.New(toolResult.Content),

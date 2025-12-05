@@ -29,9 +29,11 @@ type ToolCall struct {
 
 // ToolResponse represents the response from a tool execution, matching the existing pattern.
 type ToolResponse struct {
-	Type      string `json:"type"`
-	Content   string `json:"content"`
-	Data      []byte `json:"data,omitempty"`
+	Type    string `json:"type"`
+	Content string `json:"content"`
+	// Data contains binary data for image/media responses (e.g., image bytes, audio data).
+	Data []byte `json:"data,omitempty"`
+	// MediaType specifies the MIME type of the media (e.g., "image/png", "audio/wav").
 	MediaType string `json:"media_type,omitempty"`
 	Metadata  string `json:"metadata,omitempty"`
 	IsError   bool   `json:"is_error"`

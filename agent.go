@@ -717,6 +717,7 @@ func (a *agent) executeTools(ctx context.Context, allTools []AgentTool, toolCall
 					MediaType: toolResult.MediaType,
 					Text:      toolResult.Content,
 				},
+				ClientMetadata:   toolResult.Metadata,
 				ProviderExecuted: false,
 			}
 		} else {

@@ -306,8 +306,9 @@ func (t ToolResultOutputContentError) GetType() ToolResultContentType {
 
 // ToolResultOutputContentMedia represents media output content of a tool result.
 type ToolResultOutputContentMedia struct {
-	Data      string `json:"data"`       // for media type (base64)
-	MediaType string `json:"media_type"` // for media type
+	Data      string `json:"data"`           // for media type (base64)
+	MediaType string `json:"media_type"`     // for media type
+	Text      string `json:"text,omitempty"` // optional text content accompanying the media
 }
 
 // GetType returns the type of the tool result output content media.

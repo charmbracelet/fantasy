@@ -554,29 +554,6 @@ func toResponsesPrompt(prompt fantasy.Prompt, systemMessageMode string) (respons
 						continue
 					}
 					outputStr = output.Error.Error()
-				case fantasy.ToolResultContentTypeMedia:
-					output, ok := fantasy.AsToolResultOutputType[fantasy.ToolResultOutputContentMedia](toolResultPart.Output)
-					if !ok {
-						warnings = append(warnings, fantasy.CallWarning{
-							Type:    fantasy.CallWarningTypeOther,
-							Message: "tool result output does not have the right type",
-						})
-						continue
-					}
-					// For media content, encode as JSON with data and media type
-					mediaContent := map[string]string{
-						"data":       output.Data,
-						"media_type": output.MediaType,
-					}
-					jsonBytes, err := json.Marshal(mediaContent)
-					if err != nil {
-						warnings = append(warnings, fantasy.CallWarning{
-							Type:    fantasy.CallWarningTypeOther,
-							Message: fmt.Sprintf("failed to marshal tool result: %v", err),
-						})
-						continue
-					}
-					outputStr = string(jsonBytes)
 				}
 
 				input = append(input, responses.ResponseInputItemParamOfFunctionCallOutput(toolResultPart.ToolCallID, outputStr))

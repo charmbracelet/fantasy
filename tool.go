@@ -30,10 +30,14 @@ type ToolCall struct {
 
 // ToolResponse represents the response from a tool execution, matching the existing pattern.
 type ToolResponse struct {
-	Type     string `json:"type"`
-	Content  string `json:"content"`
-	Metadata string `json:"metadata,omitempty"`
-	IsError  bool   `json:"is_error"`
+	Type    string `json:"type"`
+	Content string `json:"content"`
+	// Data contains binary data for image/media responses (e.g., image bytes, audio data).
+	Data []byte `json:"data,omitempty"`
+	// MediaType specifies the MIME type of the media (e.g., "image/png", "audio/wav").
+	MediaType string `json:"media_type,omitempty"`
+	Metadata  string `json:"metadata,omitempty"`
+	IsError   bool   `json:"is_error"`
 }
 
 // NewTextResponse creates a text response.
@@ -50,6 +54,24 @@ func NewTextErrorResponse(content string) ToolResponse {
 		Type:    "text",
 		Content: content,
 		IsError: true,
+	}
+}
+
+// NewImageResponse creates an image response with binary data.
+func NewImageResponse(data []byte, mediaType string) ToolResponse {
+	return ToolResponse{
+		Type:      "image",
+		Data:      data,
+		MediaType: mediaType,
+	}
+}
+
+// NewMediaResponse creates a media response with binary data (e.g., audio, video).
+func NewMediaResponse(data []byte, mediaType string) ToolResponse {
+	return ToolResponse{
+		Type:      "media",
+		Data:      data,
+		MediaType: mediaType,
 	}
 }
 

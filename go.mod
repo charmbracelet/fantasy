@@ -7,7 +7,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.40.0
 	github.com/aws/smithy-go v1.23.2
 	github.com/charmbracelet/anthropic-sdk-go v0.0.0-20251024181547-21d6f3d9a904
-	github.com/charmbracelet/x/exp/slice v0.0.0-20251118172736-77d017256798
+	github.com/charmbracelet/x/exp/slice v0.0.0-20251124184241-1dbcd821cc13
 	github.com/charmbracelet/x/json v0.2.0
 	github.com/go-viper/mapstructure/v2 v2.4.0
 	github.com/google/uuid v1.6.0
@@ -17,7 +17,7 @@ require (
 	go.yaml.in/yaml/v4 v4.0.0-rc.3
 	golang.org/x/oauth2 v0.33.0
 	google.golang.org/genai v0.0.0-20250923194548-a075d35ad44a
-	gopkg.in/dnaeon/go-vcr.v4 v4.0.6-0.20251110073552-01de4eb40290
+	gopkg.in/dnaeon/go-vcr.v4 v4.0.6
 )
 
 require (

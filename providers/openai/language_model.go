@@ -4,10 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
+	"reflect"
 	"strings"
 
 	"charm.land/fantasy"
+	"charm.land/fantasy/object"
+	"charm.land/fantasy/schema"
 	xjson "github.com/charmbracelet/x/json"
 	"github.com/google/uuid"
 	"github.com/openai/openai-go/v2"
@@ -19,6 +23,7 @@ type languageModel struct {
 	provider                   string
 	modelID                    string
 	client                     openai.Client
+	objectMode                 fantasy.ObjectMode
 	prepareCallFunc            LanguageModelPrepareCallFunc
 	mapFinishReasonFunc        LanguageModelMapFinishReasonFunc
 	extraContentFunc           LanguageModelExtraContentFunc
@@ -81,11 +86,23 @@ func WithLanguageModelToPromptFunc(fn LanguageModelToPromptFunc) LanguageModelOp
 	}
 }
 
+// WithLanguageModelObjectMode sets the object generation mode.
+func WithLanguageModelObjectMode(om fantasy.ObjectMode) LanguageModelOption {
+	return func(l *languageModel) {
+		// not supported
+		if om == fantasy.ObjectModeJSON {
+			om = fantasy.ObjectModeAuto
+		}
+		l.objectMode = om
+	}
+}
+
 func newLanguageModel(modelID string, provider string, client openai.Client, opts ...LanguageModelOption) languageModel {
 	model := languageModel{
 		modelID:                    modelID,
 		provider:                   provider,
 		client:                     client,
+		objectMode:                 fantasy.ObjectModeAuto,
 		prepareCallFunc:            DefaultPrepareCallFunc,
 		mapFinishReasonFunc:        DefaultMapFinishReasonFunc,
 		usageFunc:                  DefaultUsageFunc,
@@ -223,30 +240,6 @@ func (o languageModel) prepareParams(call fantasy.Call) (*openai.ChatCompletionN
 	return params, warnings, nil
 }
 
-func (o languageModel) handleError(err error) error {
-	var apiErr *openai.Error
-	if errors.As(err, &apiErr) {
-		requestDump := apiErr.DumpRequest(true)
-		responseDump := apiErr.DumpResponse(true)
-		headers := map[string]string{}
-		for k, h := range apiErr.Response.Header {
-			v := h[len(h)-1]
-			headers[strings.ToLower(k)] = v
-		}
-		return fantasy.NewAPICallError(
-			apiErr.Message,
-			apiErr.Request.URL.String(),
-			string(requestDump),
-			apiErr.StatusCode,
-			headers,
-			string(responseDump),
-			apiErr,
-			false,
-		)
-	}
-	return err
-}
-
 // Generate implements fantasy.LanguageModel.
 func (o languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantasy.Response, error) {
 	params, warnings, err := o.prepareParams(call)
@@ -255,11 +248,11 @@ func (o languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantas
 	}
 	response, err := o.client.Chat.Completions.New(ctx, *params)
 	if err != nil {
-		return nil, o.handleError(err)
+		return nil, toProviderErr(err)
 	}
 
 	if len(response.Choices) == 0 {
-		return nil, errors.New("no response generated")
+		return nil, &fantasy.Error{Title: "no response", Message: "no response generated"}
 	}
 	choice := response.Choices[0]
 	content := make([]fantasy.Content, 0, 1+len(choice.Message.ToolCalls)+len(choice.Message.Annotations))
@@ -276,13 +269,12 @@ func (o languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantas
 	for _, tc := range choice.Message.ToolCalls {
 		toolCallID := tc.ID
 		content = append(content, fantasy.ToolCallContent{
-			ProviderExecuted: false, // TODO: update when handling other tools
+			ProviderExecuted: false,
 			ToolCallID:       toolCallID,
 			ToolName:         tc.Function.Name,
 			Input:            tc.Function.Arguments,
 		})
 	}
-	// Handle annotations/citations
 	for _, annotation := range choice.Message.Annotations {
 		if annotation.Type == "url_citation" {
 			content = append(content, fantasy.SourceContent{
@@ -326,7 +318,6 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 	isActiveText := false
 	toolCalls := make(map[int64]streamToolCall)
 
-	// Build provider metadata for streaming
 	providerMetadata := fantasy.ProviderMetadata{
 		Name: &ProviderMetadata{},
 	}
@@ -419,21 +410,20 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 								toolCalls[toolCallDelta.Index] = existingToolCall
 							}
 						} else {
-							// Does not exist
 							var err error
 							if toolCallDelta.Type != "function" {
-								err = fantasy.NewInvalidResponseDataError(toolCallDelta, "Expected 'function' type.")
+								err = &fantasy.Error{Title: "invalid provider response", Message: "expected 'function' type."}
 							}
 							if toolCallDelta.ID == "" {
-								err = fantasy.NewInvalidResponseDataError(toolCallDelta, "Expected 'id' to be a string.")
+								err = &fantasy.Error{Title: "invalid provider response", Message: "expected 'id' to be a string."}
 							}
 							if toolCallDelta.Function.Name == "" {
-								err = fantasy.NewInvalidResponseDataError(toolCallDelta, "Expected 'function.name' to be a string.")
+								err = &fantasy.Error{Title: "invalid provider response", Message: "expected 'function.name' to be a string."}
 							}
 							if err != nil {
 								yield(fantasy.StreamPart{
 									Type:  fantasy.StreamPartTypeError,
-									Error: o.handleError(stream.Err()),
+									Error: toProviderErr(stream.Err()),
 								})
 								return
 							}
@@ -494,7 +484,6 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 				}
 			}
 
-			// Check for annotations in the delta's raw JSON
 			for _, choice := range chunk.Choices {
 				if annotations := parseAnnotationsFromDelta(choice.Delta); len(annotations) > 0 {
 					for _, annotation := range annotations {
@@ -515,7 +504,6 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 		}
 		err := stream.Err()
 		if err == nil || errors.Is(err, io.EOF) {
-			// finished
 			if isActiveText {
 				isActiveText = false
 				if !yield(fantasy.StreamPart{
@@ -528,10 +516,8 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 
 			if len(acc.Choices) > 0 {
 				choice := acc.Choices[0]
-				// Add logprobs if available
 				providerMetadata = o.streamProviderMetadataFunc(choice, providerMetadata)
 
-				// Handle annotations/citations from accumulated response
 				for _, annotation := range choice.Message.Annotations {
 					if annotation.Type == "url_citation" {
 						if !yield(fantasy.StreamPart{
@@ -563,7 +549,7 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 		} else { //nolint: revive
 			yield(fantasy.StreamPart{
 				Type:  fantasy.StreamPartTypeError,
-				Error: o.handleError(err),
+				Error: toProviderErr(err),
 			})
 			return
 		}
@@ -571,7 +557,11 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 }
 
 func isReasoningModel(modelID string) bool {
-	return strings.HasPrefix(modelID, "o") || strings.HasPrefix(modelID, "gpt-5") || strings.HasPrefix(modelID, "gpt-5-chat")
+	return strings.HasPrefix(modelID, "o1") || strings.Contains(modelID, "-o1") ||
+		strings.HasPrefix(modelID, "o3") || strings.Contains(modelID, "-o3") ||
+		strings.HasPrefix(modelID, "o4") || strings.Contains(modelID, "-o4") ||
+		strings.HasPrefix(modelID, "oss") || strings.Contains(modelID, "-oss") ||
+		strings.Contains(modelID, "gpt-5") || strings.Contains(modelID, "gpt-5-chat")
 }
 
 func isSearchPreviewModel(modelID string) bool {
@@ -579,13 +569,14 @@ func isSearchPreviewModel(modelID string) bool {
 }
 
 func supportsFlexProcessing(modelID string) bool {
-	return strings.HasPrefix(modelID, "o3") || strings.HasPrefix(modelID, "o4-mini") || strings.HasPrefix(modelID, "gpt-5")
+	return strings.HasPrefix(modelID, "o3") || strings.Contains(modelID, "-o3") ||
+		strings.Contains(modelID, "o4-mini") || strings.Contains(modelID, "gpt-5")
 }
 
 func supportsPriorityProcessing(modelID string) bool {
-	return strings.HasPrefix(modelID, "gpt-4") || strings.HasPrefix(modelID, "gpt-5") ||
-		strings.HasPrefix(modelID, "gpt-5-mini") || strings.HasPrefix(modelID, "o3") ||
-		strings.HasPrefix(modelID, "o4-mini")
+	return strings.Contains(modelID, "gpt-4") || strings.Contains(modelID, "gpt-5") ||
+		strings.Contains(modelID, "gpt-5-mini") || strings.HasPrefix(modelID, "o3") ||
+		strings.Contains(modelID, "-o3") || strings.Contains(modelID, "o4-mini")
 }
 
 func toOpenAiTools(tools []fantasy.Tool, toolChoice *fantasy.ToolChoice) (openAiTools []openai.ChatCompletionToolUnionParam, openAiToolChoice *openai.ChatCompletionToolChoiceOptionUnionParam, warnings []fantasy.CallWarning) {
@@ -609,7 +600,6 @@ func toOpenAiTools(tools []fantasy.Tool, toolChoice *fantasy.ToolChoice) (openAi
 			continue
 		}
 
-		// TODO: handle provider tool calls
 		warnings = append(warnings, fantasy.CallWarning{
 			Type:    fantasy.CallWarningTypeUnsupportedTool,
 			Tool:    tool,
@@ -673,4 +663,278 @@ func parseAnnotationsFromDelta(delta openai.ChatCompletionChunkChoiceDelta) []op
 	}
 
 	return annotations
+}
+
+// GenerateObject implements fantasy.LanguageModel.
+func (o languageModel) GenerateObject(ctx context.Context, call fantasy.ObjectCall) (*fantasy.ObjectResponse, error) {
+	switch o.objectMode {
+	case fantasy.ObjectModeText:
+		return object.GenerateWithText(ctx, o, call)
+	case fantasy.ObjectModeTool:
+		return object.GenerateWithTool(ctx, o, call)
+	default:
+		return o.generateObjectWithJSONMode(ctx, call)
+	}
+}
+
+// StreamObject implements fantasy.LanguageModel.
+func (o languageModel) StreamObject(ctx context.Context, call fantasy.ObjectCall) (fantasy.ObjectStreamResponse, error) {
+	switch o.objectMode {
+	case fantasy.ObjectModeTool:
+		return object.StreamWithTool(ctx, o, call)
+	case fantasy.ObjectModeText:
+		return object.StreamWithText(ctx, o, call)
+	default:
+		return o.streamObjectWithJSONMode(ctx, call)
+	}
+}
+
+func (o languageModel) generateObjectWithJSONMode(ctx context.Context, call fantasy.ObjectCall) (*fantasy.ObjectResponse, error) {
+	jsonSchemaMap := schema.ToMap(call.Schema)
+
+	addAdditionalPropertiesFalse(jsonSchemaMap)
+
+	schemaName := call.SchemaName
+	if schemaName == "" {
+		schemaName = "response"
+	}
+
+	fantasyCall := fantasy.Call{
+		Prompt:           call.Prompt,
+		MaxOutputTokens:  call.MaxOutputTokens,
+		Temperature:      call.Temperature,
+		TopP:             call.TopP,
+		PresencePenalty:  call.PresencePenalty,
+		FrequencyPenalty: call.FrequencyPenalty,
+		ProviderOptions:  call.ProviderOptions,
+	}
+
+	params, warnings, err := o.prepareParams(fantasyCall)
+	if err != nil {
+		return nil, err
+	}
+
+	params.ResponseFormat = openai.ChatCompletionNewParamsResponseFormatUnion{
+		OfJSONSchema: &shared.ResponseFormatJSONSchemaParam{
+			JSONSchema: shared.ResponseFormatJSONSchemaJSONSchemaParam{
+				Name:        schemaName,
+				Description: param.NewOpt(call.SchemaDescription),
+				Schema:      jsonSchemaMap,
+				Strict:      param.NewOpt(true),
+			},
+		},
+	}
+
+	response, err := o.client.Chat.Completions.New(ctx, *params)
+	if err != nil {
+		return nil, toProviderErr(err)
+	}
+
+	if len(response.Choices) == 0 {
+		usage, _ := o.usageFunc(*response)
+		return nil, &fantasy.NoObjectGeneratedError{
+			RawText:      "",
+			ParseError:   fmt.Errorf("no choices in response"),
+			Usage:        usage,
+			FinishReason: fantasy.FinishReasonUnknown,
+		}
+	}
+
+	choice := response.Choices[0]
+	jsonText := choice.Message.Content
+
+	var obj any
+	if call.RepairText != nil {
+		obj, err = schema.ParseAndValidateWithRepair(ctx, jsonText, call.Schema, call.RepairText)
+	} else {
+		obj, err = schema.ParseAndValidate(jsonText, call.Schema)
+	}
+
+	usage, _ := o.usageFunc(*response)
+	finishReason := o.mapFinishReasonFunc(choice.FinishReason)
+
+	if err != nil {
+		if nogErr, ok := err.(*fantasy.NoObjectGeneratedError); ok {
+			nogErr.Usage = usage
+			nogErr.FinishReason = finishReason
+		}
+		return nil, err
+	}
+
+	return &fantasy.ObjectResponse{
+		Object:       obj,
+		RawText:      jsonText,
+		Usage:        usage,
+		FinishReason: finishReason,
+		Warnings:     warnings,
+	}, nil
+}
+
+func (o languageModel) streamObjectWithJSONMode(ctx context.Context, call fantasy.ObjectCall) (fantasy.ObjectStreamResponse, error) {
+	jsonSchemaMap := schema.ToMap(call.Schema)
+
+	addAdditionalPropertiesFalse(jsonSchemaMap)
+
+	schemaName := call.SchemaName
+	if schemaName == "" {
+		schemaName = "response"
+	}
+
+	fantasyCall := fantasy.Call{
+		Prompt:           call.Prompt,
+		MaxOutputTokens:  call.MaxOutputTokens,
+		Temperature:      call.Temperature,
+		TopP:             call.TopP,
+		PresencePenalty:  call.PresencePenalty,
+		FrequencyPenalty: call.FrequencyPenalty,
+		ProviderOptions:  call.ProviderOptions,
+	}
+
+	params, warnings, err := o.prepareParams(fantasyCall)
+	if err != nil {
+		return nil, err
+	}
+
+	params.ResponseFormat = openai.ChatCompletionNewParamsResponseFormatUnion{
+		OfJSONSchema: &shared.ResponseFormatJSONSchemaParam{
+			JSONSchema: shared.ResponseFormatJSONSchemaJSONSchemaParam{
+				Name:        schemaName,
+				Description: param.NewOpt(call.SchemaDescription),
+				Schema:      jsonSchemaMap,
+				Strict:      param.NewOpt(true),
+			},
+		},
+	}
+
+	params.StreamOptions = openai.ChatCompletionStreamOptionsParam{
+		IncludeUsage: openai.Bool(true),
+	}
+
+	stream := o.client.Chat.Completions.NewStreaming(ctx, *params)
+
+	return func(yield func(fantasy.ObjectStreamPart) bool) {
+		if len(warnings) > 0 {
+			if !yield(fantasy.ObjectStreamPart{
+				Type:     fantasy.ObjectStreamPartTypeObject,
+				Warnings: warnings,
+			}) {
+				return
+			}
+		}
+
+		var accumulated string
+		var lastParsedObject any
+		var usage fantasy.Usage
+		var finishReason fantasy.FinishReason
+		var providerMetadata fantasy.ProviderMetadata
+		var streamErr error
+
+		for stream.Next() {
+			chunk := stream.Current()
+
+			// Update usage
+			usage, providerMetadata = o.streamUsageFunc(chunk, make(map[string]any), providerMetadata)
+
+			if len(chunk.Choices) == 0 {
+				continue
+			}
+
+			choice := chunk.Choices[0]
+			if choice.FinishReason != "" {
+				finishReason = o.mapFinishReasonFunc(choice.FinishReason)
+			}
+
+			if choice.Delta.Content != "" {
+				accumulated += choice.Delta.Content
+
+				obj, state, parseErr := schema.ParsePartialJSON(accumulated)
+
+				if state == schema.ParseStateSuccessful || state == schema.ParseStateRepaired {
+					if err := schema.ValidateAgainstSchema(obj, call.Schema); err == nil {
+						if !reflect.DeepEqual(obj, lastParsedObject) {
+							if !yield(fantasy.ObjectStreamPart{
+								Type:   fantasy.ObjectStreamPartTypeObject,
+								Object: obj,
+							}) {
+								return
+							}
+							lastParsedObject = obj
+						}
+					}
+				}
+
+				if state == schema.ParseStateFailed && call.RepairText != nil {
+					repairedText, repairErr := call.RepairText(ctx, accumulated, parseErr)
+					if repairErr == nil {
+						obj2, state2, _ := schema.ParsePartialJSON(repairedText)
+						if (state2 == schema.ParseStateSuccessful || state2 == schema.ParseStateRepaired) &&
+							schema.ValidateAgainstSchema(obj2, call.Schema) == nil {
+							if !reflect.DeepEqual(obj2, lastParsedObject) {
+								if !yield(fantasy.ObjectStreamPart{
+									Type:   fantasy.ObjectStreamPartTypeObject,
+									Object: obj2,
+								}) {
+									return
+								}
+								lastParsedObject = obj2
+							}
+						}
+					}
+				}
+			}
+		}
+
+		err := stream.Err()
+		if err != nil && !errors.Is(err, io.EOF) {
+			streamErr = toProviderErr(err)
+			yield(fantasy.ObjectStreamPart{
+				Type:  fantasy.ObjectStreamPartTypeError,
+				Error: streamErr,
+			})
+			return
+		}
+
+		if lastParsedObject != nil {
+			yield(fantasy.ObjectStreamPart{
+				Type:             fantasy.ObjectStreamPartTypeFinish,
+				Usage:            usage,
+				FinishReason:     finishReason,
+				ProviderMetadata: providerMetadata,
+			})
+		} else {
+			yield(fantasy.ObjectStreamPart{
+				Type: fantasy.ObjectStreamPartTypeError,
+				Error: &fantasy.NoObjectGeneratedError{
+					RawText:      accumulated,
+					ParseError:   fmt.Errorf("no valid object generated in stream"),
+					Usage:        usage,
+					FinishReason: finishReason,
+				},
+			})
+		}
+	}, nil
+}
+
+// addAdditionalPropertiesFalse recursively adds "additionalProperties": false to all object schemas.
+// This is required by OpenAI's strict mode for structured outputs.
+func addAdditionalPropertiesFalse(schema map[string]any) {
+	if schema["type"] == "object" {
+		if _, hasAdditional := schema["additionalProperties"]; !hasAdditional {
+			schema["additionalProperties"] = false
+		}
+
+		// Recursively process nested properties
+		if properties, ok := schema["properties"].(map[string]any); ok {
+			for _, propValue := range properties {
+				if propSchema, ok := propValue.(map[string]any); ok {
+					addAdditionalPropertiesFalse(propSchema)
+				}
+			}
+		}
+	}
+
+	// Handle array items
+	if items, ok := schema["items"].(map[string]any); ok {
+		addAdditionalPropertiesFalse(items)
+	}
 }

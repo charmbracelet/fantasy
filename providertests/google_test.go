@@ -9,11 +9,12 @@ import (
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/providers/google"
+	"charm.land/x/vcr"
 	"github.com/stretchr/testify/require"
-	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )
 
 var geminiTestModels = []testModel{
+	{"gemini-3-pro-preview", "gemini-3-pro-preview", true},
 	{"gemini-2.5-flash", "gemini-2.5-flash", true},
 	{"gemini-2.5-pro", "gemini-2.5-pro", true},
 }
@@ -55,6 +56,22 @@ func TestGoogleThinking(t *testing.T) {
 	testThinking(t, pairs, testGoogleThinking)
 }
 
+func TestGoogleObjectGeneration(t *testing.T) {
+	var pairs []builderPair
+	for _, m := range geminiTestModels {
+		pairs = append(pairs, builderPair{m.name, geminiBuilder(m.model), nil, nil})
+	}
+	testObjectGeneration(t, pairs)
+}
+
+func TestGoogleVertexObjectGeneration(t *testing.T) {
+	var pairs []builderPair
+	for _, m := range vertexTestModels {
+		pairs = append(pairs, builderPair{m.name, vertexBuilder(m.model), nil, nil})
+	}
+	testObjectGeneration(t, pairs)
+}
+
 func testGoogleThinking(t *testing.T, result *fantasy.AgentResult) {
 	reasoningContentCount := 0
 	// Test if we got the signature
@@ -79,7 +96,7 @@ func generateIDMock() google.ToolCallIDFunc {
 }
 
 func geminiBuilder(model string) builderFunc {
-	return func(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
+	return func(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
 		provider, err := google.New(
 			google.WithGeminiAPIKey(cmp.Or(os.Getenv("FANTASY_GEMINI_API_KEY"), "(missing)")),
 			google.WithHTTPClient(&http.Client{Transport: r}),
@@ -93,7 +110,7 @@ func geminiBuilder(model string) builderFunc {
 }
 
 func vertexBuilder(model string) builderFunc {
-	return func(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {
+	return func(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
 		provider, err := google.New(
 			google.WithVertex(os.Getenv("FANTASY_VERTEX_PROJECT"), os.Getenv("FANTASY_VERTEX_LOCATION")),
 			google.WithHTTPClient(&http.Client{Transport: r}),

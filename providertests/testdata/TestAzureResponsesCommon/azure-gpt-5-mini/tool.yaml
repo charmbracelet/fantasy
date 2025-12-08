@@ -1,0 +1,233 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 491
+    host: ""
+    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":"You are a helpful assistant","role":"developer"},{"content":[{"text":"What''s the weather in Florence,Italy?","type":"input_text"}],"role":"user"}],"model":"gpt-5-mini","tool_choice":"auto","tools":[{"strict":false,"parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location","type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://fantasy-playground-resource.openai.azure.com/openai/v1/responses
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: 1866
+    body: |-
+      {
+        "id": "resp_01ac948c31d692b30169039979ab2c819096befaa857fd6bd5",
+        "object": "response",
+        "created_at": 1761843577,
+        "status": "completed",
+        "background": false,
+        "content_filters": null,
+        "error": null,
+        "incomplete_details": null,
+        "instructions": null,
+        "max_output_tokens": 4000,
+        "max_tool_calls": null,
+        "model": "gpt-5-mini",
+        "output": [
+          {
+            "id": "rs_01ac948c31d692b3016903997a0748819094955c49dc9168e3",
+            "type": "reasoning",
+            "summary": []
+          },
+          {
+            "id": "fc_01ac948c31d692b3016903997b1a648190b3e9f6259464edf9",
+            "type": "function_call",
+            "status": "completed",
+            "arguments": "{\"location\":\"Florence, Italy\"}",
+            "call_id": "call_4aipZJRtNzKfQ9VlnBGhI9zH",
+            "name": "weather"
+          }
+        ],
+        "parallel_tool_calls": true,
+        "previous_response_id": null,
+        "prompt_cache_key": null,
+        "reasoning": {
+          "effort": "medium",
+          "summary": null
+        },
+        "safety_identifier": null,
+        "service_tier": "default",
+        "store": false,
+        "temperature": 1.0,
+        "text": {
+          "format": {
+            "type": "text"
+          },
+          "verbosity": "medium"
+        },
+        "tool_choice": "auto",
+        "tools": [
+          {
+            "type": "function",
+            "description": "Get weather information for a location",
+            "name": "weather",
+            "parameters": {
+              "properties": {
+                "location": {
+                  "description": "the city",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "location"
+              ],
+              "type": "object"
+            },
+            "strict": false
+          }
+        ],
+        "top_logprobs": 0,
+        "top_p": 1.0,
+        "truncation": "disabled",
+        "usage": {
+          "input_tokens": 63,
+          "input_tokens_details": {
+            "cached_tokens": 0
+          },
+          "output_tokens": 22,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 85
+        },
+        "user": null,
+        "metadata": {}
+      }
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 2.717185959s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 726
+    host: ""
+    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":"You are a helpful assistant","role":"developer"},{"content":[{"text":"What''s the weather in Florence,Italy?","type":"input_text"}],"role":"user"},{"arguments":"\"{\\\"location\\\":\\\"Florence, Italy\\\"}\"","call_id":"call_4aipZJRtNzKfQ9VlnBGhI9zH","name":"weather","type":"function_call"},{"call_id":"call_4aipZJRtNzKfQ9VlnBGhI9zH","output":"40 C","type":"function_call_output"}],"model":"gpt-5-mini","tool_choice":"auto","tools":[{"strict":false,"parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location","type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://fantasy-playground-resource.openai.azure.com/openai/v1/responses
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: 2085
+    body: |-
+      {
+        "id": "resp_066ab1dbe82e48a5016903997c6398819681f9e88196773871",
+        "object": "response",
+        "created_at": 1761843580,
+        "status": "completed",
+        "background": false,
+        "content_filters": null,
+        "error": null,
+        "incomplete_details": null,
+        "instructions": null,
+        "max_output_tokens": 4000,
+        "max_tool_calls": null,
+        "model": "gpt-5-mini",
+        "output": [
+          {
+            "id": "rs_066ab1dbe82e48a5016903997cc74c8196add4b9db1dde2dfb",
+            "type": "reasoning",
+            "summary": []
+          },
+          {
+            "id": "msg_066ab1dbe82e48a5016903997ec4dc81968c78c2634a2d1a89",
+            "type": "message",
+            "status": "completed",
+            "content": [
+              {
+                "type": "output_text",
+                "annotations": [],
+                "logprobs": [],
+                "text": "Current temperature in Florence, Italy: 40\u00b0C (104\u00b0F).\n\nWant more details (hourly forecast, wind, precipitation) or tips for staying comfortable in the heat?"
+              }
+            ],
+            "role": "assistant"
+          }
+        ],
+        "parallel_tool_calls": true,
+        "previous_response_id": null,
+        "prompt_cache_key": null,
+        "reasoning": {
+          "effort": "medium",
+          "summary": null
+        },
+        "safety_identifier": null,
+        "service_tier": "default",
+        "store": false,
+        "temperature": 1.0,
+        "text": {
+          "format": {
+            "type": "text"
+          },
+          "verbosity": "medium"
+        },
+        "tool_choice": "auto",
+        "tools": [
+          {
+            "type": "function",
+            "description": "Get weather information for a location",
+            "name": "weather",
+            "parameters": {
+              "properties": {
+                "location": {
+                  "description": "the city",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "location"
+              ],
+              "type": "object"
+            },
+            "strict": false
+          }
+        ],
+        "top_logprobs": 0,
+        "top_p": 1.0,
+        "truncation": "disabled",
+        "usage": {
+          "input_tokens": 94,
+          "input_tokens_details": {
+            "cached_tokens": 0
+          },
+          "output_tokens": 169,
+          "output_tokens_details": {
+            "reasoning_tokens": 128
+          },
+          "total_tokens": 263
+        },
+        "user": null,
+        "metadata": {}
+      }
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 3.237920417s

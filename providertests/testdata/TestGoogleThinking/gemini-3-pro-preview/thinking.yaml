@@ -1,0 +1,131 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 550
+    host: generativelanguage.googleapis.com
+    body: |
+      {"contents":[{"parts":[{"text":"What's the weather in Florence, Italy?"}],"role":"user"}],"generationConfig":{"thinkingConfig":{"includeThoughts":true,"thinkingBudget":128}},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - google-genai-sdk/1.34.0 gl-go/go1.25.4
+    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: |
+      {
+        "candidates": [
+          {
+            "content": {
+              "parts": [
+                {
+                  "text": "**Breaking Down the Weather Query**\n\nOkay, here's what I'm processing. A user is asking about the weather in Florence, Italy. That's straightforward enough - they want current weather data. Looking at my toolset, I see the `weather` tool is perfect for this. It's explicitly designed for retrieving weather information based on a location. Easy. This is a classic example of intent recognition and tool selection. My next step would be to formulate the `weather` function call with the correct parameters, specifically the location, \"Florence, Italy\". I'm ready to get this user the information they need.\n\n\n",
+                  "thought": true
+                },
+                {
+                  "functionCall": {
+                    "name": "weather",
+                    "args": {
+                      "location": "Florence, Italy"
+                    }
+                  },
+                  "thoughtSignature": "EtMDCtADAdHtim/Qznjl3jYdbqtczyFkf1sarL7CYPmwkwMTU8qifm7AQe1i21NWqWvbSGT+KG/NkCBhcC0Zc8MusHqgFm2Iw+2TP0Ckp8nL5k+1G7jffxPRKsXcyq/6jvRtGvcxb199vZTNapt2/vYas7tEOZahNr/Xiuic7yVEcEEQD8Vdsp9qgRy8qu4RO1nc8Q5cnbd8fOEKfjusde2ehpTA47PUNhhIWlLBEGeMOowAoaEf9/W7cMxlg21omQYaYiIVgvI1qi2U/4nSOKDBlTA2N0LDuygPTtRsz2ZMwJGC8CIrrCW0apY1X2QcgO+s/9tNurJp/D9tiIFnwRXT8q7V90nAng9dSqHrChr2jvr4n3j5wgbvHnqLJouCKR8ME+leQZUHefdJyHeXNSjv9Rzs7cqiaUgWR7Rn11BQld3Q/myVqq7/r0LI/IchztYQVKDvE0XXbc0o8x4cfQTmtdlSwcAQxE5OG6sLNoRPAJmPfkwlppeHwNGG7ntkCKX/nG/o40w2OyFwk6WnkyNhnqTiA5knDyP51fnOiwKhFYxtDa7f2WdUPsILiJjqT7hDjtYTCnYvuWgTvqkaRtfLWES9QIVVZP63zK6PDFQLtLp8kd0="
+                }
+              ],
+              "role": "model"
+            },
+            "finishReason": "STOP",
+            "index": 0,
+            "finishMessage": "Model generated function call(s)."
+          }
+        ],
+        "usageMetadata": {
+          "promptTokenCount": 65,
+          "candidatesTokenCount": 16,
+          "totalTokenCount": 189,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 65
+            }
+          ],
+          "thoughtsTokenCount": 108
+        },
+        "modelVersion": "gemini-3-pro-preview",
+        "responseId": "mqIdabO3C5S3vdIPuPm34Ak"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+    status: 200 OK
+    code: 200
+    duration: 3.163927334s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1414
+    host: generativelanguage.googleapis.com
+    body: |
+      {"contents":[{"parts":[{"text":"What's the weather in Florence, Italy?"}],"role":"user"},{"parts":[{"functionCall":{"args":{"location":"Florence, Italy"},"id":"1","name":"weather"},"thoughtSignature":"EtMDCtADAdHtim/Qznjl3jYdbqtczyFkf1sarL7CYPmwkwMTU8qifm7AQe1i21NWqWvbSGT+KG/NkCBhcC0Zc8MusHqgFm2Iw+2TP0Ckp8nL5k+1G7jffxPRKsXcyq/6jvRtGvcxb199vZTNapt2/vYas7tEOZahNr/Xiuic7yVEcEEQD8Vdsp9qgRy8qu4RO1nc8Q5cnbd8fOEKfjusde2ehpTA47PUNhhIWlLBEGeMOowAoaEf9/W7cMxlg21omQYaYiIVgvI1qi2U/4nSOKDBlTA2N0LDuygPTtRsz2ZMwJGC8CIrrCW0apY1X2QcgO+s/9tNurJp/D9tiIFnwRXT8q7V90nAng9dSqHrChr2jvr4n3j5wgbvHnqLJouCKR8ME+leQZUHefdJyHeXNSjv9Rzs7cqiaUgWR7Rn11BQld3Q/myVqq7/r0LI/IchztYQVKDvE0XXbc0o8x4cfQTmtdlSwcAQxE5OG6sLNoRPAJmPfkwlppeHwNGG7ntkCKX/nG/o40w2OyFwk6WnkyNhnqTiA5knDyP51fnOiwKhFYxtDa7f2WdUPsILiJjqT7hDjtYTCnYvuWgTvqkaRtfLWES9QIVVZP63zK6PDFQLtLp8kd0="}],"role":"model"},{"parts":[{"functionResponse":{"id":"1","name":"weather","response":{"result":"40 C"}}}],"role":"user"}],"generationConfig":{"thinkingConfig":{"includeThoughts":true,"thinkingBudget":128}},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - google-genai-sdk/1.34.0 gl-go/go1.25.4
+    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: |
+      {
+        "candidates": [
+          {
+            "content": {
+              "parts": [
+                {
+                  "text": "It's currently 40°C (104°F) in Florence, Italy. That is quite hot!"
+                }
+              ],
+              "role": "model"
+            },
+            "finishReason": "STOP",
+            "index": 0
+          }
+        ],
+        "usageMetadata": {
+          "promptTokenCount": 201,
+          "candidatesTokenCount": 26,
+          "totalTokenCount": 227,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 201
+            }
+          ]
+        },
+        "modelVersion": "gemini-3-pro-preview",
+        "responseId": "naIdabjfC4HhvdIPo9CWoAk"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+    status: 200 OK
+    code: 200
+    duration: 3.0175995s

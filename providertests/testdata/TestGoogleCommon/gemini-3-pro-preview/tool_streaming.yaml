@@ -1,0 +1,65 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 509
+    host: generativelanguage.googleapis.com
+    body: |
+      {"contents":[{"parts":[{"text":"What's the weather in Florence,Italy?"}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}
+    form:
+      alt:
+      - sse
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - google-genai-sdk/1.34.0 gl-go/go1.25.4
+    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:streamGenerateContent?alt=sse
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"functionCall\": {\"name\": \"weather\",\"args\": {\"location\": \"Florence, Italy\"}},\"thoughtSignature\": \"EpMECpAEAdHtim8rere5R73M3xFnVzAQ/SWKTJ6rbVa0wbXbF2KEW5iJtgQdfCxBJVRFzwaosCLNPuCRPFlCgwWM6UeGWtT+u6J+7uR4caEUrLLceIrVqOGnsis0sPowTQCatpjN0XMopVvu+o1eNXQUVl0EQmv5aGURtVQG8IRg4LhKFBXa/ZgNe7ODIMdTEYw/XDt/CaOpWsc1AJmbpj4sB0uSdk7d2BfKZUc8dbl8vduiq0LTLW0vWa5TUlgyAMLQqtjKU63YQsm4LHTizrlVNIOc7n0WBxdJkvmUzCoBtKhDkAsc2YQbjlq1PiLbQsL8I1gd6zXe0AZyXq/4ZviOsmE0pzeMgYmjqLE3fuvsQctWIrDzZoNZzydYD/PAXC12GH6W0SJd9Cqo7oia9f+sSHejvWog3ztheMh0Ut60PYSCSkytq6R26Utt9RLp4xZ1gwSjOVY4dX8eEnAYu03Q/OVsVbmRM6po5los4V+ir07w7fvi5X5LoKrO7vNx+SdQDaty0UzWmw8DxET82S/nPgXOQg6nj2VHUJyGICBhwAJjMMOanLPvcS53gNfkkW0znGXjCuyTGBuhN+ngAE/SZKr6kNP1Eq2cGMECe5YyPktrcnskV8ey6Q+OLa0fvVqWhCyqYP11D173JRgqnTvKLCkO6GXM3R2kcOP/nCDqalYfpWLUpeuyRnGaggM2My6NrR84\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 65,\"candidatesTokenCount\": 16,\"totalTokenCount\": 176,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 65}],\"thoughtsTokenCount\": 95},\"modelVersion\": \"gemini-3-pro-preview\",\"responseId\": \"Y6IdafqZF-3Zxs0PsZuluAk\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 65,\"candidatesTokenCount\": 16,\"totalTokenCount\": 176,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 65}],\"thoughtsTokenCount\": 95},\"modelVersion\": \"gemini-3-pro-preview\",\"responseId\": \"Y6IdafqZF-3Zxs0PsZuluAk\"}\r\n\r\n"
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 2.580842917s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1457
+    host: generativelanguage.googleapis.com
+    body: |
+      {"contents":[{"parts":[{"text":"What's the weather in Florence,Italy?"}],"role":"user"},{"parts":[{"functionCall":{"args":{"location":"Florence, Italy"},"id":"1","name":"weather"},"thoughtSignature":"EpMECpAEAdHtim8rere5R73M3xFnVzAQ/SWKTJ6rbVa0wbXbF2KEW5iJtgQdfCxBJVRFzwaosCLNPuCRPFlCgwWM6UeGWtT+u6J+7uR4caEUrLLceIrVqOGnsis0sPowTQCatpjN0XMopVvu+o1eNXQUVl0EQmv5aGURtVQG8IRg4LhKFBXa/ZgNe7ODIMdTEYw/XDt/CaOpWsc1AJmbpj4sB0uSdk7d2BfKZUc8dbl8vduiq0LTLW0vWa5TUlgyAMLQqtjKU63YQsm4LHTizrlVNIOc7n0WBxdJkvmUzCoBtKhDkAsc2YQbjlq1PiLbQsL8I1gd6zXe0AZyXq/4ZviOsmE0pzeMgYmjqLE3fuvsQctWIrDzZoNZzydYD/PAXC12GH6W0SJd9Cqo7oia9f+sSHejvWog3ztheMh0Ut60PYSCSkytq6R26Utt9RLp4xZ1gwSjOVY4dX8eEnAYu03Q/OVsVbmRM6po5los4V+ir07w7fvi5X5LoKrO7vNx+SdQDaty0UzWmw8DxET82S/nPgXOQg6nj2VHUJyGICBhwAJjMMOanLPvcS53gNfkkW0znGXjCuyTGBuhN+ngAE/SZKr6kNP1Eq2cGMECe5YyPktrcnskV8ey6Q+OLa0fvVqWhCyqYP11D173JRgqnTvKLCkO6GXM3R2kcOP/nCDqalYfpWLUpeuyRnGaggM2My6NrR84"}],"role":"model"},{"parts":[{"functionResponse":{"id":"1","name":"weather","response":{"result":"40 C"}}}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}
+    form:
+      alt:
+      - sse
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - google-genai-sdk/1.34.0 gl-go/go1.25.4
+    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:streamGenerateContent?alt=sse
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"The\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 95,\"candidatesTokenCount\": 1,\"totalTokenCount\": 96,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 95}]},\"modelVersion\": \"gemini-3-pro-preview\",\"responseId\": \"ZaIdaeuyDKuP28oPu5_O2Q4\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \" weather in Florence, Italy is currently 40 degrees Celsius.\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 95,\"candidatesTokenCount\": 14,\"totalTokenCount\": 109,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 95}]},\"modelVersion\": \"gemini-3-pro-preview\",\"responseId\": \"ZaIdaeuyDKuP28oPu5_O2Q4\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 188,\"candidatesTokenCount\": 14,\"totalTokenCount\": 202,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 188}]},\"modelVersion\": \"gemini-3-pro-preview\",\"responseId\": \"ZaIdaeuyDKuP28oPu5_O2Q4\"}\r\n\r\n"
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 1.789773542s

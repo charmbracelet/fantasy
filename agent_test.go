@@ -82,6 +82,14 @@ func (m *mockLanguageModel) Model() string {
 	return "mock-model"
 }
 
+func (m *mockLanguageModel) GenerateObject(ctx context.Context, call ObjectCall) (*ObjectResponse, error) {
+	return nil, fmt.Errorf("mock GenerateObject not implemented")
+}
+
+func (m *mockLanguageModel) StreamObject(ctx context.Context, call ObjectCall) (ObjectStreamResponse, error) {
+	return nil, fmt.Errorf("mock StreamObject not implemented")
+}
+
 // Test result.content - comprehensive content types (matches TS test)
 func TestAgent_Generate_ResultContent_AllTypes(t *testing.T) {
 	t.Parallel()
@@ -528,7 +536,7 @@ func TestAgent_Generate_EmptyPrompt(t *testing.T) {
 
 	require.Error(t, err)
 	require.Nil(t, result)
-	require.Contains(t, err.Error(), "Prompt can't be empty")
+	require.Contains(t, err.Error(), "invalid argument: prompt can't be empty")
 }
 
 // Test with system prompt

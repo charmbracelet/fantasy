@@ -44,11 +44,15 @@ cuteDogTool := fantasy.NewAgentTool(
 )
 
 // Equip your agent.
-agent := fantasy.NewAgent(model, fantasy.WithTools(cuteDogTool))
+agent := fantasy.NewAgent(
+  model,
+  fantasy.WithSystemPrompt("You are a moderately helpful, dog-centric assistant."),
+  fantasy.WithTools(cuteDogTool),
+)
 
 // Put that agent to work!
 const prompt = "Find all the cute dogs in Silver Lake, Los Angeles."
-result, err := agent.Generate(context.Background(), fantasy.AgentCall{Prompt: prompt})
+result, err := agent.Generate(ctx, fantasy.AgentCall{Prompt: prompt})
 if err != nil {
     fmt.Fprintln(os.Stderr, "Oof:", err)
     os.Exit(1)
@@ -60,7 +64,7 @@ fmt.Println(result.Response.Content.Text())
 
 ## Multi-model? Multi-provider?
 
-Yeah! Fantasy is designed to support a wide variety of providers and models under a single API. While many providers such as Microsoft Azure, Amazon Bedrock, and OpenRouter have dedicated package, many other work just fine with `openaicompat`, the generic OpenAI-compatible layer. That said, if you find a provider that’s not compatible and needs special treatment, please let us know in an issue (or open a PR).
+Yeah! Fantasy is designed to support a wide variety of providers and models under a single API. While many providers such as Microsoft Azure, Amazon Bedrock, and OpenRouter have dedicated packages in Fantasy, many others work just fine with `openaicompat`, the generic OpenAI-compatible layer. That said, if you find a provider that’s not compatible and needs special treatment, please let us know in an issue (or open a PR).
 
 ## Work in Progress
 

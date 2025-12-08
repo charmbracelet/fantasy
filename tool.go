@@ -5,31 +5,20 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
-	"slices"
-	"strings"
+
+	"charm.land/fantasy/schema"
 )
 
 // Schema represents a JSON schema for tool input validation.
-type Schema struct {
-	Type        string             `json:"type"`
-	Properties  map[string]*Schema `json:"properties,omitempty"`
-	Required    []string           `json:"required,omitempty"`
-	Items       *Schema            `json:"items,omitempty"`
-	Description string             `json:"description,omitempty"`
-	Enum        []any              `json:"enum,omitempty"`
-	Format      string             `json:"format,omitempty"`
-	Minimum     *float64           `json:"minimum,omitempty"`
-	Maximum     *float64           `json:"maximum,omitempty"`
-	MinLength   *int               `json:"minLength,omitempty"`
-	MaxLength   *int               `json:"maxLength,omitempty"`
-}
+type Schema = schema.Schema
 
 // ToolInfo represents tool metadata, matching the existing pattern.
 type ToolInfo struct {
-	Name        string
-	Description string
-	Parameters  map[string]any
-	Required    []string
+	Name        string         `json:"name"`
+	Description string         `json:"description"`
+	Parameters  map[string]any `json:"parameters"`
+	Required    []string       `json:"required"`
+	Parallel    bool           `json:"parallel"` // Whether this tool can run in parallel with other tools
 }
 
 // ToolCall represents a tool invocation, matching the existing pattern.
@@ -93,14 +82,30 @@ func NewAgentTool[TInput any](
 	fn func(ctx context.Context, input TInput, call ToolCall) (ToolResponse, error),
 ) AgentTool {
 	var input TInput
-	schema := generateSchema(reflect.TypeOf(input))
+	schema := schema.Generate(reflect.TypeOf(input))
 
 	return &funcToolWrapper[TInput]{
 		name:        name,
 		description: description,
 		fn:          fn,
 		schema:      schema,
+		parallel:    false, // Default to sequential execution
 	}
+}
+
+// NewParallelAgentTool creates a typed tool from a function with automatic schema generation.
+// This also marks a tool as safe to run in parallel with other tools.
+func NewParallelAgentTool[TInput any](
+	name string,
+	description string,
+	fn func(ctx context.Context, input TInput, call ToolCall) (ToolResponse, error),
+) AgentTool {
+	tool := NewAgentTool(name, description, fn)
+	// Try to use the SetParallel method if available
+	if setter, ok := tool.(interface{ SetParallel(bool) }); ok {
+		setter.SetParallel(true)
+	}
+	return tool
 }
 
 // funcToolWrapper wraps a function to implement the AgentTool interface.
@@ -110,6 +115,7 @@ type funcToolWrapper[TInput any] struct {
 	fn              func(ctx context.Context, input TInput, call ToolCall) (ToolResponse, error)
 	schema          Schema
 	providerOptions ProviderOptions
+	parallel        bool
 }
 
 func (w *funcToolWrapper[TInput]) SetProviderOptions(opts ProviderOptions) {
@@ -120,6 +126,10 @@ func (w *funcToolWrapper[TInput]) ProviderOptions() ProviderOptions {
 	return w.providerOptions
 }
 
+func (w *funcToolWrapper[TInput]) SetParallel(parallel bool) {
+	w.parallel = parallel
+}
+
 func (w *funcToolWrapper[TInput]) Info() ToolInfo {
 	if w.schema.Required == nil {
 		w.schema.Required = []string{}
@@ -127,8 +137,9 @@ func (w *funcToolWrapper[TInput]) Info() ToolInfo {
 	return ToolInfo{
 		Name:        w.name,
 		Description: w.description,
-		Parameters:  schemaToParameters(w.schema),
+		Parameters:  schema.ToParameters(w.schema),
 		Required:    w.schema.Required,
+		Parallel:    w.parallel,
 	}
 }
 
@@ -139,180 +150,4 @@ func (w *funcToolWrapper[TInput]) Run(ctx context.Context, params ToolCall) (Too
 	}
 
 	return w.fn(ctx, input, params)
-}
-
-// schemaToParameters converts a Schema to the parameters map format expected by ToolInfo.
-func schemaToParameters(schema Schema) map[string]any {
-	if schema.Type != "object" || schema.Properties == nil {
-		return map[string]any{}
-	}
-
-	params := make(map[string]any)
-	for name, propSchema := range schema.Properties {
-		param := map[string]any{
-			"type": propSchema.Type,
-		}
-
-		if propSchema.Description != "" {
-			param["description"] = propSchema.Description
-		}
-
-		if len(propSchema.Enum) > 0 {
-			param["enum"] = propSchema.Enum
-		}
-
-		if propSchema.Format != "" {
-			param["format"] = propSchema.Format
-		}
-
-		if propSchema.Minimum != nil {
-			param["minimum"] = *propSchema.Minimum
-		}
-
-		if propSchema.Maximum != nil {
-			param["maximum"] = *propSchema.Maximum
-		}
-
-		if propSchema.MinLength != nil {
-			param["minLength"] = *propSchema.MinLength
-		}
-
-		if propSchema.MaxLength != nil {
-			param["maxLength"] = *propSchema.MaxLength
-		}
-
-		if propSchema.Items != nil {
-			param["items"] = schemaToParameters(*propSchema.Items)
-		}
-
-		params[name] = param
-	}
-
-	return params
-}
-
-// generateSchema automatically generates a JSON schema from a Go type.
-func generateSchema(t reflect.Type) Schema {
-	return generateSchemaRecursive(t, make(map[reflect.Type]bool))
-}
-
-func generateSchemaRecursive(t reflect.Type, visited map[reflect.Type]bool) Schema {
-	// Handle pointers
-	if t.Kind() == reflect.Pointer {
-		t = t.Elem()
-	}
-
-	// Prevent infinite recursion
-	if visited[t] {
-		return Schema{Type: "object"}
-	}
-	visited[t] = true
-	defer delete(visited, t)
-
-	switch t.Kind() {
-	case reflect.String:
-		return Schema{Type: "string"}
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
-		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		return Schema{Type: "integer"}
-	case reflect.Float32, reflect.Float64:
-		return Schema{Type: "number"}
-	case reflect.Bool:
-		return Schema{Type: "boolean"}
-	case reflect.Slice, reflect.Array:
-		itemSchema := generateSchemaRecursive(t.Elem(), visited)
-		return Schema{
-			Type:  "array",
-			Items: &itemSchema,
-		}
-	case reflect.Map:
-		if t.Key().Kind() == reflect.String {
-			valueSchema := generateSchemaRecursive(t.Elem(), visited)
-			return Schema{
-				Type: "object",
-				Properties: map[string]*Schema{
-					"*": &valueSchema,
-				},
-			}
-		}
-		return Schema{Type: "object"}
-	case reflect.Struct:
-		schema := Schema{
-			Type:       "object",
-			Properties: make(map[string]*Schema),
-		}
-
-		for i := range t.NumField() {
-			field := t.Field(i)
-
-			// Skip unexported fields
-			if !field.IsExported() {
-				continue
-			}
-
-			jsonTag := field.Tag.Get("json")
-			if jsonTag == "-" {
-				continue
-			}
-
-			fieldName := field.Name
-			required := true
-
-			// Parse JSON tag
-			if jsonTag != "" {
-				parts := strings.Split(jsonTag, ",")
-				if parts[0] != "" {
-					fieldName = parts[0]
-				}
-
-				// Check for omitempty
-				if slices.Contains(parts[1:], "omitempty") {
-					required = false
-				}
-			} else {
-				// Convert field name to snake_case for JSON
-				fieldName = toSnakeCase(fieldName)
-			}
-
-			fieldSchema := generateSchemaRecursive(field.Type, visited)
-
-			// Add description from struct tag if available
-			if desc := field.Tag.Get("description"); desc != "" {
-				fieldSchema.Description = desc
-			}
-
-			// Add enum values from struct tag if available
-			if enumTag := field.Tag.Get("enum"); enumTag != "" {
-				enumValues := strings.Split(enumTag, ",")
-				fieldSchema.Enum = make([]any, len(enumValues))
-				for i, v := range enumValues {
-					fieldSchema.Enum[i] = strings.TrimSpace(v)
-				}
-			}
-
-			schema.Properties[fieldName] = &fieldSchema
-
-			if required {
-				schema.Required = append(schema.Required, fieldName)
-			}
-		}
-
-		return schema
-	case reflect.Interface:
-		return Schema{Type: "object"}
-	default:
-		return Schema{Type: "object"}
-	}
-}
-
-// toSnakeCase converts PascalCase to snake_case.
-func toSnakeCase(s string) string {
-	var result strings.Builder
-	for i, r := range s {
-		if i > 0 && r >= 'A' && r <= 'Z' {
-			result.WriteByte('_')
-		}
-		result.WriteRune(r)
-	}
-	return strings.ToLower(result.String())
 }

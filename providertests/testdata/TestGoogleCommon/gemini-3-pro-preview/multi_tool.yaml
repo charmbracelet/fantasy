@@ -1,0 +1,137 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 826
+    host: generativelanguage.googleapis.com
+    body: |
+      {"contents":[{"parts":[{"text":"Add and multiply the number 2 and 3"}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000},"systemInstruction":{"parts":[{"text":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS."}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Add two numbers","name":"add","parameters":{"properties":{"a":{"description":"first number","type":"INTEGER"},"b":{"description":"second number","type":"INTEGER"}},"required":["a","b"],"type":"OBJECT"}},{"description":"Multiply two numbers","name":"multiply","parameters":{"properties":{"a":{"description":"first number","type":"INTEGER"},"b":{"description":"second number","type":"INTEGER"}},"required":["a","b"],"type":"OBJECT"}}]}]}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - google-genai-sdk/1.34.0 gl-go/go1.25.4
+    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: |
+      {
+        "candidates": [
+          {
+            "content": {
+              "parts": [
+                {
+                  "functionCall": {
+                    "name": "add",
+                    "args": {
+                      "b": 3,
+                      "a": 2
+                    }
+                  },
+                  "thoughtSignature": "Ep8DCpwDAdHtim9QdO0y9bZ65Rujicbol+wCUJKbtFVKI8R2aVL5g9KNn25HRk9RQTnn6Mf/bHwNDvm17S/NkwMNRHTnsrgsFhCnID3D3UUhs2a0PJAw2qr4I2JkLlDxSarHaYQL8FkzDJCyEfaKHa4wPEFCTQL4DYtVutBbO5/f8meUiUhZxBBuKshtXWlqO0ecRIKJ1UD+wMZ0BlFGdJGYoVVpYFlbk3/MJzmKzy21oDuzYLPSpHFi79QB6QucplXCYu37zxdYlzr6Hq5aGYf2Cw6qKr5j8F85I+zX5S0MPfVdK68nuPC4qb/qYGRUhMHzb05e13X1SotaSS8hZJo+u9pUXhwrSnNbSoVZEBKC+dSqoksI6YHm89pUKA94eC++gJ1ul/HHMHrF49r1wvAKO7EUP0TBCtemyZYtVSrh0TmIkucyU9pUCzNB375Kmox8qbARrUXdlHjCkdisVqJMIZhEn34dfNah7Uc/lQj975ZR5k0zetyhnUHG7E/Blv1Nezo8rB2n4HxhTrKKLyRDXl3dtt2fDSr5UvzzZEBEiQ=="
+                },
+                {
+                  "functionCall": {
+                    "name": "multiply",
+                    "args": {
+                      "a": 2,
+                      "b": 3
+                    }
+                  }
+                }
+              ],
+              "role": "model"
+            },
+            "finishReason": "STOP",
+            "index": 0,
+            "finishMessage": "Model generated function call(s)."
+          }
+        ],
+        "usageMetadata": {
+          "promptTokenCount": 161,
+          "candidatesTokenCount": 32,
+          "totalTokenCount": 289,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 161
+            }
+          ],
+          "thoughtsTokenCount": 96
+        },
+        "modelVersion": "gemini-3-pro-preview",
+        "responseId": "Z6IdadLwMIDXvdIPwbrDyAY"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+    status: 200 OK
+    code: 200
+    duration: 2.545695292s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1737
+    host: generativelanguage.googleapis.com
+    body: |
+      {"contents":[{"parts":[{"text":"Add and multiply the number 2 and 3"}],"role":"user"},{"parts":[{"functionCall":{"args":{"a":2,"b":3},"id":"1","name":"add"},"thoughtSignature":"Ep8DCpwDAdHtim9QdO0y9bZ65Rujicbol+wCUJKbtFVKI8R2aVL5g9KNn25HRk9RQTnn6Mf/bHwNDvm17S/NkwMNRHTnsrgsFhCnID3D3UUhs2a0PJAw2qr4I2JkLlDxSarHaYQL8FkzDJCyEfaKHa4wPEFCTQL4DYtVutBbO5/f8meUiUhZxBBuKshtXWlqO0ecRIKJ1UD+wMZ0BlFGdJGYoVVpYFlbk3/MJzmKzy21oDuzYLPSpHFi79QB6QucplXCYu37zxdYlzr6Hq5aGYf2Cw6qKr5j8F85I+zX5S0MPfVdK68nuPC4qb/qYGRUhMHzb05e13X1SotaSS8hZJo+u9pUXhwrSnNbSoVZEBKC+dSqoksI6YHm89pUKA94eC++gJ1ul/HHMHrF49r1wvAKO7EUP0TBCtemyZYtVSrh0TmIkucyU9pUCzNB375Kmox8qbARrUXdlHjCkdisVqJMIZhEn34dfNah7Uc/lQj975ZR5k0zetyhnUHG7E/Blv1Nezo8rB2n4HxhTrKKLyRDXl3dtt2fDSr5UvzzZEBEiQ=="},{"functionCall":{"args":{"a":2,"b":3},"id":"2","name":"multiply"}}],"role":"model"},{"parts":[{"functionResponse":{"id":"1","name":"add","response":{"result":"5"}}},{"functionResponse":{"id":"2","name":"multiply","response":{"result":"6"}}}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000},"systemInstruction":{"parts":[{"text":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS."}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Add two numbers","name":"add","parameters":{"properties":{"a":{"description":"first number","type":"INTEGER"},"b":{"description":"second number","type":"INTEGER"}},"required":["a","b"],"type":"OBJECT"}},{"description":"Multiply two numbers","name":"multiply","parameters":{"properties":{"a":{"description":"first number","type":"INTEGER"},"b":{"description":"second number","type":"INTEGER"}},"required":["a","b"],"type":"OBJECT"}}]}]}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - google-genai-sdk/1.34.0 gl-go/go1.25.4
+    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: |
+      {
+        "candidates": [
+          {
+            "content": {
+              "parts": [
+                {
+                  "text": "The sum of 2 and 3 is 5, and the product of 2 and 3 is 6."
+                }
+              ],
+              "role": "model"
+            },
+            "finishReason": "STOP",
+            "index": 0
+          }
+        ],
+        "usageMetadata": {
+          "promptTokenCount": 309,
+          "candidatesTokenCount": 25,
+          "totalTokenCount": 334,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 309
+            }
+          ]
+        },
+        "modelVersion": "gemini-3-pro-preview",
+        "responseId": "aaIdadm_HNiCvdIPwrjEkAg"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+    status: 200 OK
+    code: 200
+    duration: 1.649148834s

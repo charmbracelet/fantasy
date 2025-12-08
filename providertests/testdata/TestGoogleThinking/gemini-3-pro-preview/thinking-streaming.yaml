@@ -1,0 +1,65 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 550
+    host: generativelanguage.googleapis.com
+    body: |
+      {"contents":[{"parts":[{"text":"What's the weather in Florence, Italy?"}],"role":"user"}],"generationConfig":{"thinkingConfig":{"includeThoughts":true,"thinkingBudget":128}},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}
+    form:
+      alt:
+      - sse
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - google-genai-sdk/1.34.0 gl-go/go1.25.4
+    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:streamGenerateContent?alt=sse
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"**Examining the Query**\\n\\nI'm currently analyzing the incoming request. The user is clearly seeking current weather information. My primary focus is pinpointing the specific location—Florence, Italy—which is crucial for the function call. I need to formulate the right parameters to obtain the correct weather data.\\n\\n\\n\",\"thought\": true}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 65,\"totalTokenCount\": 65,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 65}]},\"modelVersion\": \"gemini-3-pro-preview\",\"responseId\": \"n6IdafKCLorkvdIPipOBkQk\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"**Exploring Tool Options**\\n\\nI've discovered a tool, aptly named \\\"default\\\\_api:weather,\\\" which is ideal for this task. It seems perfectly suited, with its description explicitly stating its capability to retrieve weather details based on location. I'm now certain this is the appropriate API call to acquire the necessary information. I'm moving forward with confidence.\\n\\n\\n\",\"thought\": true}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 65,\"totalTokenCount\": 65,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 65}]},\"modelVersion\": \"gemini-3-pro-preview\",\"responseId\": \"n6IdafKCLorkvdIPipOBkQk\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"functionCall\": {\"name\": \"weather\",\"args\": {\"location\": \"Florence, Italy\"}},\"thoughtSignature\": \"EoMECoAEAdHtim81mSx3N5M3zd8oz+3yIyyUSy0Gz1XbUZ0/o+D/FVqMu7H+cuRdFB7jIOareNRWH5VZs2W64dxNI6YnvG9VdmYQyucoUMDLOrrEMFosx5QgJRzpKTJ9Kh6QoTZrlDg9WC0Z7JXPc75LN7YR1Y+Sto3FKTAuJ7l93u7Yhfc5Q9q1zi7FK5hELlkQD5Z8/ENCv0ouCmWPi3QK0nnl4t2SxzdP455ujbh8klcm+5F705VhNvD9o55MX7DUx0mIExhCvkIWMjfx0tMmC9mlHH6KuqwBjFzaoUF6l8S0Xb50NYA1t63F/G6sb+OUw3m/5uoxpyHrFihKehsBkOpI7sBtbMgcAOmZHDkp+MxBK7fbBOg8zLCLKP9A64d2Qsx0oEwUTiGDNVdKLu4i6SQc/p/PNUoWG4RQ4oGOxXM/1kVlvws1aRNPZBk7uTPmjVXg3dzXlX1bin4GomZy2aEt5sPzv6kCc0BCZhh05y7SYZGhA0J1uyKdrun5SLaG8DtIhS2Jb+RJBON3ubIUaBZDUa4RVS/QnNPBpAXEDI7q5HBKiz2tuKstpMDsP48rbtR2rh4sG/gnVVDMESMgyJtI291plYuBsZS7+fUuxr8y+9pu4BxvuZwUXuKOSfOZe815ILhKyDNCdcp+1QSuBy6XUrp5DLL1ucH5Hu4tk+bnShA=\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 65,\"candidatesTokenCount\": 16,\"totalTokenCount\": 185,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 65}],\"thoughtsTokenCount\": 104},\"modelVersion\": \"gemini-3-pro-preview\",\"responseId\": \"n6IdafKCLorkvdIPipOBkQk\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 65,\"candidatesTokenCount\": 16,\"totalTokenCount\": 185,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 65}],\"thoughtsTokenCount\": 104},\"modelVersion\": \"gemini-3-pro-preview\",\"responseId\": \"n6IdafKCLorkvdIPipOBkQk\"}\r\n\r\n"
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 2.532721041s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1478
+    host: generativelanguage.googleapis.com
+    body: |
+      {"contents":[{"parts":[{"text":"What's the weather in Florence, Italy?"}],"role":"user"},{"parts":[{"functionCall":{"args":{"location":"Florence, Italy"},"id":"1","name":"weather"},"thoughtSignature":"EoMECoAEAdHtim81mSx3N5M3zd8oz+3yIyyUSy0Gz1XbUZ0/o+D/FVqMu7H+cuRdFB7jIOareNRWH5VZs2W64dxNI6YnvG9VdmYQyucoUMDLOrrEMFosx5QgJRzpKTJ9Kh6QoTZrlDg9WC0Z7JXPc75LN7YR1Y+Sto3FKTAuJ7l93u7Yhfc5Q9q1zi7FK5hELlkQD5Z8/ENCv0ouCmWPi3QK0nnl4t2SxzdP455ujbh8klcm+5F705VhNvD9o55MX7DUx0mIExhCvkIWMjfx0tMmC9mlHH6KuqwBjFzaoUF6l8S0Xb50NYA1t63F/G6sb+OUw3m/5uoxpyHrFihKehsBkOpI7sBtbMgcAOmZHDkp+MxBK7fbBOg8zLCLKP9A64d2Qsx0oEwUTiGDNVdKLu4i6SQc/p/PNUoWG4RQ4oGOxXM/1kVlvws1aRNPZBk7uTPmjVXg3dzXlX1bin4GomZy2aEt5sPzv6kCc0BCZhh05y7SYZGhA0J1uyKdrun5SLaG8DtIhS2Jb+RJBON3ubIUaBZDUa4RVS/QnNPBpAXEDI7q5HBKiz2tuKstpMDsP48rbtR2rh4sG/gnVVDMESMgyJtI291plYuBsZS7+fUuxr8y+9pu4BxvuZwUXuKOSfOZe815ILhKyDNCdcp+1QSuBy6XUrp5DLL1ucH5Hu4tk+bnShA="}],"role":"model"},{"parts":[{"functionResponse":{"id":"1","name":"weather","response":{"result":"40 C"}}}],"role":"user"}],"generationConfig":{"thinkingConfig":{"includeThoughts":true,"thinkingBudget":128}},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}
+    form:
+      alt:
+      - sse
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - google-genai-sdk/1.34.0 gl-go/go1.25.4
+    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:streamGenerateContent?alt=sse
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"It\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 95,\"candidatesTokenCount\": 1,\"totalTokenCount\": 96,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 95}]},\"modelVersion\": \"gemini-3-pro-preview\",\"responseId\": \"oaIdaciSM6HXxN8Ph5ic0Ak\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"'s currently 40 degrees Celsius in Florence, Italy.\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 95,\"candidatesTokenCount\": 14,\"totalTokenCount\": 109,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 95}]},\"modelVersion\": \"gemini-3-pro-preview\",\"responseId\": \"oaIdaciSM6HXxN8Ph5ic0Ak\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 197,\"candidatesTokenCount\": 14,\"totalTokenCount\": 211,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 197}]},\"modelVersion\": \"gemini-3-pro-preview\",\"responseId\": \"oaIdaciSM6HXxN8Ph5ic0Ak\"}\r\n\r\n"
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 1.537615041s

@@ -1,0 +1,77 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 563
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence, Italy?","role":"user"}],"model":"google/gemini-3-pro-preview","stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"reasoning":{"effort":"medium"},"usage":{"include":true},"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"gen-1763546643-6iyR5xZk4FUZDszB0am5","provider":"Google","model":"google/gemini-3-pro-preview","object":"chat.completion.chunk","created":1763546643,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":"**Processing Weather Request**\n\nI've zeroed in on the user's weather query and pinpointed the location as Florence, Italy. The next step involves invoking the `get_weather` function, feeding it the identified location as a parameter. It's a straightforward process, I am ready to move on.\n\n\n","reasoning_details":[{"type":"reasoning.text","text":"**Processing Weather Request**\n\nI've zeroed in on the user's weather query and pinpointed the location as Florence, Italy. The next step involves invoking the `get_weather` function, feeding it the identified location as a parameter. It's a straightforward process, I am ready to move on.\n\n\n","format":"google-gemini-v1","index":0}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+      data: {"id":"gen-1763546643-6iyR5xZk4FUZDszB0am5","provider":"Google","model":"google/gemini-3-pro-preview","object":"chat.completion.chunk","created":1763546643,"choices":[{"index":0,"delta":{"role":"assistant","content":null,"reasoning":null,"reasoning_details":[{"id":"tool_weather_DTRiEM9ZhsGia4wKxtzr","type":"reasoning.encrypted","data":"CiQB4/H/XtQf/t2ivBCPsAJ1IAjit6zgeJbobI/H5w09u43xVM8KZwHj8f9e51jeSFgDf45Pkwo86CrPlD3o8ZyFEE/tLx74kTzrLixqIoG3WAJV4vzbIAAvRRm8HgovZkKLa/qR7XL3QyYKnFSDVbik86ElPf/9E9EbBc18RcBhU30VLLx+QWaL/9w9u/UKaAHj8f9eNB+grvQVrGDcL0BgnNLzSM4mVEAvaPOa6XddLxIi3izFHNpGVtVI1J8ABVPEzAwmZqGcr/NJTJDM+z0pZrnhUEdR5nCMw3/Kk6KH0SoOC+E0E9O8+0uTEZ2aVAIAqdI/cK98CqEBAePx/16FP6yD1/O5En03//g+Ux5rgUEtTKNmAvmlwyFy/62/L4iaDa7V/qSXsh5cjvcuzPGDfNu/E4LF+RrTK23Obdj9sa/CpVR8C//SfsztgPNrnn3DRxf78QYwIVHZeJdWTLsQ7gR97YqqV+p+ljwBkriVJ0hOdxlJzoKSDOqXk5HVLpS95XTVPrclF+TmDww+0YbNFAtIU5jOI465caQ=","format":"google-gemini-v1","index":0}],"tool_calls":[{"index":0,"id":"tool_weather_DTRiEM9ZhsGia4wKxtzr","type":"function","function":{"name":"weather","arguments":"{\"location\":\"Florence, Italy\"}"}}]},"finish_reason":"tool_calls","native_finish_reason":"STOP","logprobs":null}]}
+
+      data: {"id":"gen-1763546643-6iyR5xZk4FUZDszB0am5","provider":"Google","model":"google/gemini-3-pro-preview","object":"chat.completion.chunk","created":1763546643,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"usage":{"prompt_tokens":28,"completion_tokens":73,"total_tokens":101,"cost":0.000932,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.000056,"upstream_inference_completions_cost":0.000876},"completion_tokens_details":{"reasoning_tokens":64,"image_tokens":0}}}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 4.566491625s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1887
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence, Italy?","role":"user"},{"tool_calls":[{"id":"tool_weather_DTRiEM9ZhsGia4wKxtzr","function":{"arguments":"{\"location\":\"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant","reasoning_details":[{"format":"google-gemini-v1","index":0,"text":"**Processing Weather Request**\n\nI''ve zeroed in on the user''s weather query and pinpointed the location as Florence, Italy. The next step involves invoking the `get_weather` function, feeding it the identified location as a parameter. It''s a straightforward process, I am ready to move on.\n\n\n","type":"reasoning.text"},{"data":"CiQB4/H/XtQf/t2ivBCPsAJ1IAjit6zgeJbobI/H5w09u43xVM8KZwHj8f9e51jeSFgDf45Pkwo86CrPlD3o8ZyFEE/tLx74kTzrLixqIoG3WAJV4vzbIAAvRRm8HgovZkKLa/qR7XL3QyYKnFSDVbik86ElPf/9E9EbBc18RcBhU30VLLx+QWaL/9w9u/UKaAHj8f9eNB+grvQVrGDcL0BgnNLzSM4mVEAvaPOa6XddLxIi3izFHNpGVtVI1J8ABVPEzAwmZqGcr/NJTJDM+z0pZrnhUEdR5nCMw3/Kk6KH0SoOC+E0E9O8+0uTEZ2aVAIAqdI/cK98CqEBAePx/16FP6yD1/O5En03//g+Ux5rgUEtTKNmAvmlwyFy/62/L4iaDa7V/qSXsh5cjvcuzPGDfNu/E4LF+RrTK23Obdj9sa/CpVR8C//SfsztgPNrnn3DRxf78QYwIVHZeJdWTLsQ7gR97YqqV+p+ljwBkriVJ0hOdxlJzoKSDOqXk5HVLpS95XTVPrclF+TmDww+0YbNFAtIU5jOI465caQ=","format":"google-gemini-v1","id":"tool_weather_DTRiEM9ZhsGia4wKxtzr","index":0,"type":"reasoning.encrypted"}]},{"content":"40 C","tool_call_id":"tool_weather_DTRiEM9ZhsGia4wKxtzr","role":"tool"}],"model":"google/gemini-3-pro-preview","stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"reasoning":{"effort":"medium"},"usage":{"include":true},"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"gen-1763546647-Tp9ZHwQ3rhhPj6NAdVFO","provider":"Google","model":"google/gemini-3-pro-preview","object":"chat.completion.chunk","created":1763546647,"choices":[{"index":0,"delta":{"role":"assistant","content":"The weather","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+      data: {"id":"gen-1763546647-Tp9ZHwQ3rhhPj6NAdVFO","provider":"Google","model":"google/gemini-3-pro-preview","object":"chat.completion.chunk","created":1763546647,"choices":[{"index":0,"delta":{"role":"assistant","content":" in Florence, Italy is currently 40°C.","reasoning":null,"reasoning_details":[]},"finish_reason":"stop","native_finish_reason":"STOP","logprobs":null}]}
+
+      data: {"id":"gen-1763546647-Tp9ZHwQ3rhhPj6NAdVFO","provider":"Google","model":"google/gemini-3-pro-preview","object":"chat.completion.chunk","created":1763546647,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"usage":{"prompt_tokens":54,"completion_tokens":14,"total_tokens":68,"cost":0.000276,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.000108,"upstream_inference_completions_cost":0.000168},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 1.671475084s

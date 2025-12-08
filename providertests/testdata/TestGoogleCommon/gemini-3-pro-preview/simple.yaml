@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 202
+    host: generativelanguage.googleapis.com
+    body: |
+      {"contents":[{"parts":[{"text":"Say hi in Portuguese"}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"}}
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - google-genai-sdk/1.34.0 gl-go/go1.25.4
+    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: |
+      {
+        "candidates": [
+          {
+            "content": {
+              "parts": [
+                {
+                  "text": "You can say **\"Oi\"** or **\"Olá\"**.",
+                  "thoughtSignature": "Eu0GCuoGAdHtim/zutMjuEtbqFE0m3XHTgdm//ZDW7T5jsfXf8yWoYnJdjR3t52kdvNti1XtYOu1jAkcFlOJFxXFUtkO4rqxHjYAYNZuT6ONqFVaEmdfuYQYc6qk5qMRc24mbbUGM12zKY+JI1HMUV+Wa5YOtHNz96VFcRdI0DrZ7s8uSIrVV7CuV9+FkPRxfWq+tZ4gdqP5802+dBSwciDRAFLFCKCy8ZrpJIzcqmfGQPsbqiVBb3b8qtrlC2sSOHyHQklq+F9Jgkuka25MI2FSBah3IHaSYvtAz4YIXMbEoLVaRINy4+aPKjJvzwKAzva3EzNliJnb8N+fA2O/YdPDFqx2Mt+bb+2hl5buM6Xt7RO6RJ1fL1sSyVClETJGghUtIQd5mBON6Ts7Kpg468/wzU94Y/BMUSISITeZpipEG6BCM/cn7lhLK9DeWzGYRr5sYbUOMCBQhpbAVpzL0g9U4ySEhgTpR/+uVVYlPut77WYA/L9icnoBVf3+FovhSAKzx0C76p6Bp5SGR1abD5vb/2HeOTVaSWrJa9/tIYgiZNzZ777m9ymHUW1XCjjTPGGC97HaGA1jcwcryQ5FtG3IzaJjIIYpgKH6Fi3/yQlMS6xjFvb1ADoM3qz790L5HNUcX+9qfMpw91/aMDOGBTdaldH8poQkRLEB0kZwZ2yPdT2Y4RVaZCTn7MMtcGyp9gx7kuEiB3OfW2Sb6m3yC4n8fdGOfMoNUYeQsjavRpfQ+KzH+Fv9/QyTbMZKcVjfa1/dqJ8uRq9Oq/V6w7arhWLz5iJrtWMmDjwrwbNaOPCeUfBCINspvS+Q2qq5qu84lyd/3m7Bae/Uoz+VN2AlDwllUlMrd3cQ4e6Sp6Ibi+e7TPOF4xaOiCmPuLaqPEErZeNfzvAXQ6/ft8BGPOX835DQngZC70xgZnJqNSajVUl+i5P+hCxK58zFBPLswSCRaQHWd76hC3/Tv0CgsiuyNqfkpcLbT+C8E4TIkrbMsWEk3PZ4WAn/2+r/W3R+ox9pLYge+cx6/lz4oM4WKwCKHfipXmISKxqaTsVJaNJb/PIOdfEt+eVgxBzUill5exqksKQBn4wDDpy+TEQ1E5S1i+80XWumQBVlrDHIdYh3FROkK1n/P2GBS70sy9uScTKS8YJT2kfNcpuXQpnfHaoOpQ=="
+                }
+              ],
+              "role": "model"
+            },
+            "finishReason": "STOP",
+            "index": 0
+          }
+        ],
+        "usageMetadata": {
+          "promptTokenCount": 11,
+          "candidatesTokenCount": 14,
+          "totalTokenCount": 243,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 11
+            }
+          ],
+          "thoughtsTokenCount": 218
+        },
+        "modelVersion": "gemini-3-pro-preview",
+        "responseId": "WKIdaZPHHfXzxs0Pn66hoAk"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+    status: 200 OK
+    code: 200
+    duration: 3.97765625s

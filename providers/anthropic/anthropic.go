@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"charm.land/fantasy"
+	"charm.land/fantasy/object"
 	"github.com/charmbracelet/anthropic-sdk-go"
 	"github.com/charmbracelet/anthropic-sdk-go/bedrock"
 	"github.com/charmbracelet/anthropic-sdk-go/option"
@@ -41,6 +42,8 @@ type options struct {
 	skipAuth       bool
 
 	useBedrock bool
+
+	objectMode fantasy.ObjectMode
 }
 
 type provider struct {
@@ -53,7 +56,8 @@ type Option = func(*options)
 // New creates a new Anthropic provider with the given options.
 func New(opts ...Option) (fantasy.Provider, error) {
 	providerOptions := options{
-		headers: map[string]string{},
+		headers:    map[string]string{},
+		objectMode: fantasy.ObjectModeAuto,
 	}
 	for _, o := range opts {
 		o(&providerOptions)
@@ -121,8 +125,21 @@ func WithHTTPClient(client option.HTTPClient) Option {
 	}
 }
 
+// WithObjectMode sets the object generation mode.
+func WithObjectMode(om fantasy.ObjectMode) Option {
+	return func(o *options) {
+		// not supported
+		if om == fantasy.ObjectModeJSON {
+			om = fantasy.ObjectModeAuto
+		}
+		o.objectMode = om
+	}
+}
+
 func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.LanguageModel, error) {
 	clientOptions := make([]option.RequestOption, 0, 5+len(a.options.headers))
+	clientOptions = append(clientOptions, option.WithMaxRetries(0))
+
 	if a.options.apiKey != "" && !a.options.useBedrock {
 		clientOptions = append(clientOptions, option.WithAPIKey(a.options.apiKey))
 	}
@@ -208,7 +225,7 @@ func (a languageModel) prepareParams(call fantasy.Call) (*anthropic.MessageNewPa
 	if v, ok := call.ProviderOptions[Name]; ok {
 		providerOptions, ok = v.(*ProviderOptions)
 		if !ok {
-			return nil, nil, fantasy.NewInvalidArgumentError("providerOptions", "anthropic provider options should be *anthropic.ProviderOptions", nil)
+			return nil, nil, &fantasy.Error{Title: "invalid argument", Message: "anthropic provider options should be *anthropic.ProviderOptions"}
 		}
 	}
 	sendReasoning := true
@@ -257,7 +274,7 @@ func (a languageModel) prepareParams(call fantasy.Call) (*anthropic.MessageNewPa
 	}
 	if isThinking {
 		if thinkingBudget == 0 {
-			return nil, nil, fantasy.NewUnsupportedFunctionalityError("thinking requires budget", "")
+			return nil, nil, &fantasy.Error{Title: "no budget", Message: "thinking requires budget"}
 		}
 		params.Thinking = anthropic.ThinkingConfigParamOfEnabled(thinkingBudget)
 		if call.Temperature != nil {
@@ -608,6 +625,13 @@ func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBl
 					}
 				}
 			}
+			if !hasVisibleUserContent(anthropicContent) {
+				warnings = append(warnings, fantasy.CallWarning{
+					Type:    fantasy.CallWarningTypeOther,
+					Message: "dropping empty user message (contains neither user-facing content nor tool results)",
+				})
+				continue
+			}
 			messages = append(messages, anthropic.NewUserMessage(anthropicContent...))
 		case fantasy.MessageRoleAssistant:
 			var anthropicContent []anthropic.ContentBlockParamUnion
@@ -640,7 +664,7 @@ func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBl
 						}
 						if !sendReasoningData {
 							warnings = append(warnings, fantasy.CallWarning{
-								Type:    "other",
+								Type:    fantasy.CallWarningTypeOther,
 								Message: "sending reasoning content is disabled for this model",
 							})
 							continue
@@ -648,7 +672,7 @@ func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBl
 						reasoningMetadata := GetReasoningMetadata(part.Options())
 						if reasoningMetadata == nil {
 							warnings = append(warnings, fantasy.CallWarning{
-								Type:    "other",
+								Type:    fantasy.CallWarningTypeOther,
 								Message: "unsupported reasoning metadata",
 							})
 							continue
@@ -660,7 +684,7 @@ func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBl
 							anthropicContent = append(anthropicContent, anthropic.NewRedactedThinkingBlock(reasoningMetadata.RedactedData))
 						} else {
 							warnings = append(warnings, fantasy.CallWarning{
-								Type:    "other",
+								Type:    fantasy.CallWarningTypeOther,
 								Message: "unsupported reasoning metadata",
 							})
 							continue
@@ -690,34 +714,36 @@ func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBl
 					}
 				}
 			}
+
+			if !hasVisibleAssistantContent(anthropicContent) {
+				warnings = append(warnings, fantasy.CallWarning{
+					Type:    fantasy.CallWarningTypeOther,
+					Message: "dropping empty assistant message (contains neither user-facing content nor tool calls)",
+				})
+				continue
+			}
 			messages = append(messages, anthropic.NewAssistantMessage(anthropicContent...))
 		}
 	}
 	return systemBlocks, messages, warnings
 }
 
-func (a languageModel) handleError(err error) error {
-	var apiErr *anthropic.Error
-	if errors.As(err, &apiErr) {
-		requestDump := apiErr.DumpRequest(true)
-		responseDump := apiErr.DumpResponse(true)
-		headers := map[string]string{}
-		for k, h := range apiErr.Response.Header {
-			v := h[len(h)-1]
-			headers[strings.ToLower(k)] = v
+func hasVisibleUserContent(content []anthropic.ContentBlockParamUnion) bool {
+	for _, block := range content {
+		if block.OfText != nil || block.OfImage != nil || block.OfToolResult != nil {
+			return true
 		}
-		return fantasy.NewAPICallError(
-			apiErr.Error(),
-			apiErr.Request.URL.String(),
-			string(requestDump),
-			apiErr.StatusCode,
-			headers,
-			string(responseDump),
-			apiErr,
-			false,
-		)
 	}
-	return err
+	return false
+}
+
+func hasVisibleAssistantContent(content []anthropic.ContentBlockParamUnion) bool {
+	for _, block := range content {
+		if block.OfText != nil || block.OfToolUse != nil {
+			return true
+		}
+	}
+	return false
 }
 
 func mapFinishReason(finishReason string) fantasy.FinishReason {
@@ -741,7 +767,7 @@ func (a languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantas
 	}
 	response, err := a.client.Messages.New(ctx, *params)
 	if err != nil {
-		return nil, a.handleError(err)
+		return nil, toProviderErr(err)
 	}
 
 	var content []fantasy.Content
@@ -974,9 +1000,29 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 		} else { //nolint: revive
 			yield(fantasy.StreamPart{
 				Type:  fantasy.StreamPartTypeError,
-				Error: a.handleError(err),
+				Error: toProviderErr(err),
 			})
 			return
 		}
 	}, nil
+}
+
+// GenerateObject implements fantasy.LanguageModel.
+func (a languageModel) GenerateObject(ctx context.Context, call fantasy.ObjectCall) (*fantasy.ObjectResponse, error) {
+	switch a.options.objectMode {
+	case fantasy.ObjectModeText:
+		return object.GenerateWithText(ctx, a, call)
+	default:
+		return object.GenerateWithTool(ctx, a, call)
+	}
+}
+
+// StreamObject implements fantasy.LanguageModel.
+func (a languageModel) StreamObject(ctx context.Context, call fantasy.ObjectCall) (fantasy.ObjectStreamResponse, error) {
+	switch a.options.objectMode {
+	case fantasy.ObjectModeText:
+		return object.StreamWithText(ctx, a, call)
+	default:
+		return object.StreamWithTool(ctx, a, call)
+	}
 }

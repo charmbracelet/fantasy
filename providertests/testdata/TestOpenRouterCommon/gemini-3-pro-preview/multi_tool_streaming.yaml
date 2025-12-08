@@ -1,0 +1,81 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 894
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"}],"model":"google/gemini-3-pro-preview","max_tokens":4000,"stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true},"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"gen-1763546729-jK1aeMuI8GK43IJd8TkJ","provider":"Google","model":"google/gemini-3-pro-preview","object":"chat.completion.chunk","created":1763546729,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":"**Calculating Simultaneously**\n\nI'm structuring the code to run both operations, addition and multiplication, concurrently. I'm focusing on ensuring the `add` and `multiply` functions are called in parallel, as instructed. My next step will be to verify the parallel execution works as intended and then check the output.\n\n\n","reasoning_details":[{"type":"reasoning.text","text":"**Calculating Simultaneously**\n\nI'm structuring the code to run both operations, addition and multiplication, concurrently. I'm focusing on ensuring the `add` and `multiply` functions are called in parallel, as instructed. My next step will be to verify the parallel execution works as intended and then check the output.\n\n\n","format":"google-gemini-v1","index":0}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+      data: {"id":"gen-1763546729-jK1aeMuI8GK43IJd8TkJ","provider":"Google","model":"google/gemini-3-pro-preview","object":"chat.completion.chunk","created":1763546729,"choices":[{"index":0,"delta":{"role":"assistant","content":null,"reasoning":null,"reasoning_details":[{"id":"tool_add_UUaBEsZzO32E0mTPWBH0","type":"reasoning.encrypted","data":"CiQB4/H/XnAwaObJs/UHDkvpR2+9+jMNYdJYOEGoRvWFcj3rqWsKewHj8f9ec2BXB5/CHJY2tbAF2joRDykTYPX85xh1S7LSKBw/SpSri3Y8qUkQjdDpogRjUYFe4PWCuZXttjwMrQ7LbYZgLsbSWNnCo7ObETXAsb2PcGsPq2nR4sevZXoEA9ZWKZbFaxZ3r8ZOK9wV2MQm+WXbkaGZSMf2pAp4AePx/17Ii4UcjG/22OZT8kNkg2RI8OBuSDp9BHSmPswVuxRjJRWMi/HU9WGRnJi0vYixjChledG6apY+SzEwBqxDz+mHFY3MYGQmn4SUB379vKP8YdyiJdhgqjcB4Q6PtHJic06IMk5FCIueAvUP64Ij37RTTZufCooBAePx/17l/jZE4GbgvXhPqM3E3qtLqJ+WJ+cfTrmuXWyKKQVT4opjvNonxhs4Kwm0xudfVBIM6fFoPCclQx7+E4WD4+1eQqMHnU9mQWBMhfCRS4hliO9zZJrO3txN4uEF5JbaBXwHiX1yu4mvZ5OIkQWOM2xHqjY/TMq5qD+PSNQL0W26r9y8/Nhr","format":"google-gemini-v1","index":0}],"tool_calls":[{"index":0,"id":"tool_add_UUaBEsZzO32E0mTPWBH0","type":"function","function":{"name":"add","arguments":"{\"a\":2,\"b\":3}"}}]},"finish_reason":"tool_calls","native_finish_reason":null,"logprobs":null}]}
+
+      data: {"id":"gen-1763546729-jK1aeMuI8GK43IJd8TkJ","provider":"Google","model":"google/gemini-3-pro-preview","object":"chat.completion.chunk","created":1763546729,"choices":[{"index":0,"delta":{"role":"assistant","content":null,"reasoning":null,"reasoning_details":[],"tool_calls":[{"index":1,"id":"tool_multiply_qxw1ym6Mwm8U9MPesjJJ","type":"function","function":{"name":"multiply","arguments":"{\"a\":2,\"b\":3}"}}]},"finish_reason":"tool_calls","native_finish_reason":"STOP","logprobs":null}]}
+
+      data: {"id":"gen-1763546729-jK1aeMuI8GK43IJd8TkJ","provider":"Google","model":"google/gemini-3-pro-preview","object":"chat.completion.chunk","created":1763546729,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"usage":{"prompt_tokens":57,"completion_tokens":83,"total_tokens":140,"cost":0.00111,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.000114,"upstream_inference_completions_cost":0.000996},"completion_tokens_details":{"reasoning_tokens":65,"image_tokens":0}}}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 4.1319125s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 2438
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"tool_calls":[{"id":"tool_add_UUaBEsZzO32E0mTPWBH0","function":{"arguments":"{\"a\":2,\"b\":3}","name":"add"},"type":"function"},{"id":"tool_multiply_qxw1ym6Mwm8U9MPesjJJ","function":{"arguments":"{\"a\":2,\"b\":3}","name":"multiply"},"type":"function"}],"role":"assistant","reasoning_details":[{"format":"google-gemini-v1","index":0,"text":"**Calculating Simultaneously**\n\nI''m structuring the code to run both operations, addition and multiplication, concurrently. I''m focusing on ensuring the `add` and `multiply` functions are called in parallel, as instructed. My next step will be to verify the parallel execution works as intended and then check the output.\n\n\n","type":"reasoning.text"},{"data":"CiQB4/H/XnAwaObJs/UHDkvpR2+9+jMNYdJYOEGoRvWFcj3rqWsKewHj8f9ec2BXB5/CHJY2tbAF2joRDykTYPX85xh1S7LSKBw/SpSri3Y8qUkQjdDpogRjUYFe4PWCuZXttjwMrQ7LbYZgLsbSWNnCo7ObETXAsb2PcGsPq2nR4sevZXoEA9ZWKZbFaxZ3r8ZOK9wV2MQm+WXbkaGZSMf2pAp4AePx/17Ii4UcjG/22OZT8kNkg2RI8OBuSDp9BHSmPswVuxRjJRWMi/HU9WGRnJi0vYixjChledG6apY+SzEwBqxDz+mHFY3MYGQmn4SUB379vKP8YdyiJdhgqjcB4Q6PtHJic06IMk5FCIueAvUP64Ij37RTTZufCooBAePx/17l/jZE4GbgvXhPqM3E3qtLqJ+WJ+cfTrmuXWyKKQVT4opjvNonxhs4Kwm0xudfVBIM6fFoPCclQx7+E4WD4+1eQqMHnU9mQWBMhfCRS4hliO9zZJrO3txN4uEF5JbaBXwHiX1yu4mvZ5OIkQWOM2xHqjY/TMq5qD+PSNQL0W26r9y8/Nhr","format":"google-gemini-v1","id":"tool_add_UUaBEsZzO32E0mTPWBH0","index":0,"type":"reasoning.encrypted"}]},{"content":"5","tool_call_id":"tool_add_UUaBEsZzO32E0mTPWBH0","role":"tool"},{"content":"6","tool_call_id":"tool_multiply_qxw1ym6Mwm8U9MPesjJJ","role":"tool"}],"model":"google/gemini-3-pro-preview","max_tokens":4000,"stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true},"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"gen-1763546733-tGHMAwoxWJIfDs5dnbLf","provider":"Google","model":"google/gemini-3-pro-preview","object":"chat.completion.chunk","created":1763546733,"choices":[{"index":0,"delta":{"role":"assistant","content":"The","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+      data: {"id":"gen-1763546733-tGHMAwoxWJIfDs5dnbLf","provider":"Google","model":"google/gemini-3-pro-preview","object":"chat.completion.chunk","created":1763546733,"choices":[{"index":0,"delta":{"role":"assistant","content":" result of adding 2 and 3 is 5, and the result of multiplying","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+      data: {"id":"gen-1763546733-tGHMAwoxWJIfDs5dnbLf","provider":"Google","model":"google/gemini-3-pro-preview","object":"chat.completion.chunk","created":1763546733,"choices":[{"index":0,"delta":{"role":"assistant","content":" them is 6.","reasoning":null,"reasoning_details":[]},"finish_reason":"stop","native_finish_reason":"STOP","logprobs":null}]}
+
+      data: {"id":"gen-1763546733-tGHMAwoxWJIfDs5dnbLf","provider":"Google","model":"google/gemini-3-pro-preview","object":"chat.completion.chunk","created":1763546733,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"usage":{"prompt_tokens":108,"completion_tokens":23,"total_tokens":131,"cost":0.000492,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.000216,"upstream_inference_completions_cost":0.000276},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 1.800347541s

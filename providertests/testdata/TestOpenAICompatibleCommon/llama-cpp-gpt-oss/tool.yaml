@@ -1,0 +1,61 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 471
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"}],"model":"openai/gpt-oss-20b","max_completion_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: http://localhost:8080/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 914
+    body: '{"choices":[{"finish_reason":"tool_calls","index":0,"message":{"role":"assistant","reasoning_content":"The user asks: \"What''s the weather in Florence, Italy?\" We have a tool \"functions.weather\" that can get weather information. We should call it.","content":null,"tool_calls":[{"type":"function","function":{"name":"weather","arguments":"{\"location\":\"Florence,Italy\"}"},"id":"mvVq65j66dyGRizURhbdNCEnSO56GhXx"}]}}],"created":1762855699,"model":"openai/gpt-oss-20b","system_fingerprint":"b7010-c27efd2bd","object":"chat.completion","usage":{"completion_tokens":58,"prompt_tokens":139,"total_tokens":197},"id":"chatcmpl-xN1fVcGhqAh4SXLdsus63WtY5KhK0cv8","timings":{"cache_n":59,"prompt_n":80,"prompt_ms":138.363,"prompt_per_token_ms":1.7295375,"prompt_per_second":578.1892557981541,"predicted_n":58,"predicted_ms":483.677,"predicted_per_token_ms":8.339258620689655,"predicted_per_second":119.91473648736657}}'
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+    status: 200 OK
+    code: 200
+    duration: 625.633ms
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 898
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"mvVq65j66dyGRizURhbdNCEnSO56GhXx","function":{"arguments":"{\"location\":\"Florence,Italy\"}","name":"weather"},"type":"function"}],"role":"assistant","reasoning_content":"The user asks: \"What''s the weather in Florence, Italy?\" We have a tool \"functions.weather\" that can get weather information. We should call it."},{"content":"40 C","tool_call_id":"mvVq65j66dyGRizURhbdNCEnSO56GhXx","role":"tool"}],"model":"openai/gpt-oss-20b","max_completion_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: http://localhost:8080/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 646
+    body: '{"choices":[{"finish_reason":"stop","index":0,"message":{"role":"assistant","content":"The current weather in Florence, Italy is **40 °C**."}}],"created":1762855700,"model":"openai/gpt-oss-20b","system_fingerprint":"b7010-c27efd2bd","object":"chat.completion","usage":{"completion_tokens":18,"prompt_tokens":213,"total_tokens":231},"id":"chatcmpl-mt9KdP2gwDDiYYxdoehItCfCj6J1HNjs","timings":{"cache_n":177,"prompt_n":36,"prompt_ms":79.143,"prompt_per_token_ms":2.1984166666666667,"prompt_per_second":454.8728251393048,"predicted_n":18,"predicted_ms":144.84,"predicted_per_token_ms":8.046666666666667,"predicted_per_second":124.27506213753105}}'
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+    status: 200 OK
+    code: 200
+    duration: 225.614042ms

@@ -45,7 +45,7 @@ func DefaultPrepareCallFunc(model fantasy.LanguageModel, params *openai.ChatComp
 	if v, ok := call.ProviderOptions[Name]; ok {
 		providerOptions, ok = v.(*ProviderOptions)
 		if !ok {
-			return nil, fantasy.NewInvalidArgumentError("providerOptions", "openai provider options should be *openai.ProviderOptions", nil)
+			return nil, &fantasy.Error{Title: "invalid argument", Message: "openai provider options should be *openai.ProviderOptions"}
 		}
 	}
 
@@ -267,6 +267,9 @@ func DefaultStreamUsageFunc(chunk openai.ChatCompletionChunk, _ map[string]any, 
 
 // DefaultStreamProviderMetadataFunc is the default implementation for handling stream provider metadata.
 func DefaultStreamProviderMetadataFunc(choice openai.ChatCompletionChoice, metadata fantasy.ProviderMetadata) fantasy.ProviderMetadata {
+	if metadata == nil {
+		metadata = fantasy.ProviderMetadata{}
+	}
 	streamProviderMetadata, ok := metadata[Name]
 	if !ok {
 		streamProviderMetadata = &ProviderMetadata{}

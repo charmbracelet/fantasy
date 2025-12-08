@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - OpenAI/Go 2.7.1
     url: https://api.groq.com/openai/v1/chat/completions
     method: POST
   response:
@@ -25,10 +25,10 @@ interactions:
     content_length: -1
     uncompressed: true
     body: |
-      {"id":"chatcmpl-c41f00a2-68dc-4952-ac9d-a2febf3945b6","object":"chat.completion","created":1758884733,"model":"moonshotai/kimi-k2-instruct-0905","choices":[{"index":0,"message":{"role":"assistant","content":"Olá!"},"logprobs":null,"finish_reason":"stop"}],"usage":{"queue_time":0.036316922,"prompt_tokens":20,"prompt_time":0.017865963,"completion_tokens":4,"completion_time":0.02970344,"total_tokens":24,"total_time":0.047569403},"usage_breakdown":null,"system_fingerprint":"fp_6e6ff3688b","x_groq":{"id":"req_01k62v68w6f5btx1cmv31be5df"},"service_tier":"on_demand"}
+      {"id":"chatcmpl-9d25476d-ffb3-4fc0-8a33-6e84b5ede19c","object":"chat.completion","created":1762854973,"model":"moonshotai/kimi-k2-instruct-0905","choices":[{"index":0,"message":{"role":"assistant","content":"Olá!"},"logprobs":null,"finish_reason":"stop"}],"usage":{"queue_time":0.161356542,"prompt_tokens":20,"prompt_time":0.009083588,"completion_tokens":4,"completion_time":0.008812502,"total_tokens":24,"total_time":0.01789609},"usage_breakdown":null,"system_fingerprint":"fp_5fe129dff6","x_groq":{"id":"req_01k9s5gc22f6m968npajvjx0x0"},"service_tier":"on_demand"}
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 334.810833ms
+    duration: 374.755334ms

@@ -14,7 +14,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.29.0 gl-go/go1.25.1
+      - google-genai-sdk/1.34.0 gl-go/go1.25.4
     url: https://us-east5-aiplatform.googleapis.com/v1beta1/projects/fantasy-playground-472418/locations/us-east5/publishers/google/models/gemini-2.5-flash:generateContent
     method: POST
   response:
@@ -34,11 +34,11 @@ interactions:
                   "functionCall": {
                     "name": "add",
                     "args": {
-                      "b": 3,
-                      "a": 2
+                      "a": 2,
+                      "b": 3
                     }
                   },
-                  "thoughtSignature": "CuACAePx/153kf8ikIzjnbSUf9jLxFZAf53a2GQYy4mUIqUl077OLhKwcyMd2YnG1/umJQZK8aqE6kdtgJG7sqpuDFZuFmEOqjgc1O3MxE4S+TaBZSa5wS/KAA05t4aGvS8TpkEttdy3u6wfIv6y8LM8A7LHn04qC9gswllmAiZ9iQn72RDWDgS7o2/ciprExjiDQMkU+m5yk3eRkXm1ovs9oNDNoDqlTTJnN0jtu2YgYtsxB/mwKBdA3MjSKwsiuIVc5fJj8970xQrfEmsA94QSGUQ9MNCUkB6kAUsFt3wQQ07X/Q3bYmfyud0OP/dB9HIM4xyVkayDrrVkbAOKD/1u8nKMGkPA5G/0+DaDVU4ZAqhCRGQAtHYRWYhwUZ4DICXJAqhBk9iTLIHvglDMaw4sKDZHqIlVRNnjvsx4nOoirR2S2Wpm3mKoEmCPnFGcQwRV9yJNY5/JwDquRAcwU9q1ug=="
+                  "thoughtSignature": "CtQBAePx/16Zez8Umc39OZNkaQcoaJ1i+yLTUes4eYNcobNd2vH2Jza1Q9tqpUP3e9MCA7Az0IRM9hVbj63fFwx8AT9u4FhaQRdazvEkYMqe+jGLiO6yex245G4qobHLIydnzgPJA6OMCVsuxxjHM1QhmT31E5Qg/ZVeh6Fc6ZI3S+q3TC1+tNxGr2EBlWfWyfHIOtr2qsGfZSSVOaB9Wj1jY/alOSKrSFC0PiCGhvmMwnawJWlzYkshIfAssUetPp+bDW5grOJoKWATcF3kTFShItAs6Xc="
                 },
                 {
                   "functionCall": {
@@ -52,13 +52,13 @@ interactions:
               ]
             },
             "finishReason": "STOP",
-            "avgLogprobs": -1.9749752044677735
+            "avgLogprobs": -0.58420848846435547
           }
         ],
         "usageMetadata": {
           "promptTokenCount": 60,
           "candidatesTokenCount": 10,
-          "totalTokenCount": 146,
+          "totalTokenCount": 119,
           "trafficType": "ON_DEMAND",
           "promptTokensDetails": [
             {
@@ -72,32 +72,32 @@ interactions:
               "tokenCount": 10
             }
           ],
-          "thoughtsTokenCount": 76
+          "thoughtsTokenCount": 49
         },
         "modelVersion": "gemini-2.5-flash",
-        "createTime": "2025-10-23T06:56:24.603477Z",
-        "responseId": "mNH5aNXqJMHDptQPtJigwQc"
+        "createTime": "2025-11-19T11:04:06.032691Z",
+        "responseId": "JqQdabP_AfrJptQP15PtmQI"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 1.215592042s
+    duration: 989.592584ms
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 1155
+    content_length: 1465
     host: us-east5-aiplatform.googleapis.com
     body: |
-      {"contents":[{"parts":[{"text":"Add and multiply the number 2 and 3"}],"role":"user"},{"parts":[{"functionCall":{"args":{"a":2,"b":3},"id":"1","name":"add"}},{"functionCall":{"args":{"a":2,"b":3},"id":"2","name":"multiply"}}],"role":"model"},{"parts":[{"functionResponse":{"id":"1","name":"add","response":{"result":"5"}}},{"functionResponse":{"id":"2","name":"multiply","response":{"result":"6"}}}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000},"systemInstruction":{"parts":[{"text":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS."}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Add two numbers","name":"add","parameters":{"properties":{"a":{"description":"first number","type":"INTEGER"},"b":{"description":"second number","type":"INTEGER"}},"required":["a","b"],"type":"OBJECT"}},{"description":"Multiply two numbers","name":"multiply","parameters":{"properties":{"a":{"description":"first number","type":"INTEGER"},"b":{"description":"second number","type":"INTEGER"}},"required":["a","b"],"type":"OBJECT"}}]}]}
+      {"contents":[{"parts":[{"text":"Add and multiply the number 2 and 3"}],"role":"user"},{"parts":[{"functionCall":{"args":{"a":2,"b":3},"id":"1","name":"add"},"thoughtSignature":"CtQBAePx/16Zez8Umc39OZNkaQcoaJ1i+yLTUes4eYNcobNd2vH2Jza1Q9tqpUP3e9MCA7Az0IRM9hVbj63fFwx8AT9u4FhaQRdazvEkYMqe+jGLiO6yex245G4qobHLIydnzgPJA6OMCVsuxxjHM1QhmT31E5Qg/ZVeh6Fc6ZI3S+q3TC1+tNxGr2EBlWfWyfHIOtr2qsGfZSSVOaB9Wj1jY/alOSKrSFC0PiCGhvmMwnawJWlzYkshIfAssUetPp+bDW5grOJoKWATcF3kTFShItAs6Xc="},{"functionCall":{"args":{"a":2,"b":3},"id":"2","name":"multiply"}}],"role":"model"},{"parts":[{"functionResponse":{"id":"1","name":"add","response":{"result":"5"}}},{"functionResponse":{"id":"2","name":"multiply","response":{"result":"6"}}}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000},"systemInstruction":{"parts":[{"text":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS."}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Add two numbers","name":"add","parameters":{"properties":{"a":{"description":"first number","type":"INTEGER"},"b":{"description":"second number","type":"INTEGER"}},"required":["a","b"],"type":"OBJECT"}},{"description":"Multiply two numbers","name":"multiply","parameters":{"properties":{"a":{"description":"first number","type":"INTEGER"},"b":{"description":"second number","type":"INTEGER"}},"required":["a","b"],"type":"OBJECT"}}]}]}
     headers:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.29.0 gl-go/go1.25.1
+      - google-genai-sdk/1.34.0 gl-go/go1.25.4
     url: https://us-east5-aiplatform.googleapis.com/v1beta1/projects/fantasy-playground-472418/locations/us-east5/publishers/google/models/gemini-2.5-flash:generateContent
     method: POST
   response:
@@ -114,41 +114,39 @@ interactions:
               "role": "model",
               "parts": [
                 {
-                  "text": "2 + 3 = 5\n2 * 3 = 6",
-                  "thoughtSignature": "CsoBAePx/154N3gpceO1Pxh1IXX13o0HK5ftN5BUuyjfGfQi/778zwB+y0XPP47mlVhcC8YrYbdY9OCdsch6wLFdr8GW2Q/X0G7wvo5uCO+rxBCPgj0EJaQ36dnavIrM78MnwNT8JTFuNiifUYDO2Eek5//VNoFkZsbTfR0u6pHlX8odsl2zTqkihtwNkeun9UVCAkOE1J2royE0NUdFe5YQk6cMn/LboPV2NKVDWZxjvV6hlwV27nBoFqiH0r6zRT9AiKi55oTDlvwADA=="
+                  "text": "The sum of 2 and 3 is 5. The product of 2 and 3 is 6."
                 }
               ]
             },
             "finishReason": "STOP",
-            "avgLogprobs": -0.83015022277832029
+            "avgLogprobs": -0.038081047435601555
           }
         ],
         "usageMetadata": {
           "promptTokenCount": 76,
-          "candidatesTokenCount": 15,
-          "totalTokenCount": 136,
+          "candidatesTokenCount": 24,
+          "totalTokenCount": 100,
           "trafficType": "ON_DEMAND",
           "promptTokensDetails": [
             {
               "modality": "TEXT",
-              "tokenCount": 76
+              "tokenCount": 123
             }
           ],
           "candidatesTokensDetails": [
             {
               "modality": "TEXT",
-              "tokenCount": 15
+              "tokenCount": 24
             }
-          ],
-          "thoughtsTokenCount": 45
+          ]
         },
         "modelVersion": "gemini-2.5-flash",
-        "createTime": "2025-10-23T06:56:25.801186Z",
-        "responseId": "mdH5aKLzMMqZptQPrcWIuQM"
+        "createTime": "2025-11-19T11:04:07.021113Z",
+        "responseId": "J6QdafmkAeyAptQPvKrv8AI"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 1.129055042s
+    duration: 679.733ms

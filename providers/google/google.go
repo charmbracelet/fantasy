@@ -8,10 +8,13 @@ import (
 	"fmt"
 	"maps"
 	"net/http"
+	"reflect"
 	"strings"
 
 	"charm.land/fantasy"
+	"charm.land/fantasy/object"
 	"charm.land/fantasy/providers/anthropic"
+	"charm.land/fantasy/schema"
 	"cloud.google.com/go/auth"
 	"github.com/charmbracelet/x/exp/slice"
 	"github.com/google/uuid"
@@ -39,6 +42,7 @@ type options struct {
 	location       string
 	skipAuth       bool
 	toolCallIDFunc ToolCallIDFunc
+	objectMode     fantasy.ObjectMode
 }
 
 // Option defines a function that configures Google provider options.
@@ -128,6 +132,13 @@ func WithToolCallIDFunc(f ToolCallIDFunc) Option {
 	}
 }
 
+// WithObjectMode sets the object generation mode for the Google provider.
+func WithObjectMode(om fantasy.ObjectMode) Option {
+	return func(o *options) {
+		o.objectMode = om
+	}
+}
+
 func (*provider) Name() string {
 	return Name
 }
@@ -137,6 +148,7 @@ type languageModel struct {
 	modelID         string
 	client          *genai.Client
 	providerOptions options
+	objectMode      fantasy.ObjectMode
 }
 
 // LanguageModel implements fantasy.Provider.
@@ -162,6 +174,10 @@ func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.L
 	}
 	if a.options.skipAuth {
 		cc.Credentials = &auth.Credentials{TokenProvider: dummyTokenProvider{}}
+	} else if cc.Backend == genai.BackendVertexAI {
+		if err := cc.UseDefaultCredentials(); err != nil {
+			return nil, err
+		}
 	}
 
 	if a.options.baseURL != "" || len(a.options.headers) > 0 {
@@ -178,11 +194,18 @@ func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.L
 	if err != nil {
 		return nil, err
 	}
+
+	objectMode := a.options.objectMode
+	if objectMode == "" {
+		objectMode = fantasy.ObjectModeAuto
+	}
+
 	return &languageModel{
 		modelID:         modelID,
 		provider:        a.options.name,
 		providerOptions: a.options,
 		client:          client,
+		objectMode:      objectMode,
 	}, nil
 }
 
@@ -193,7 +216,7 @@ func (g languageModel) prepareParams(call fantasy.Call) (*genai.GenerateContentC
 	if v, ok := call.ProviderOptions[Name]; ok {
 		providerOptions, ok = v.(*ProviderOptions)
 		if !ok {
-			return nil, nil, nil, fantasy.NewInvalidArgumentError("providerOptions", "google provider options should be *google.ProviderOptions", nil)
+			return nil, nil, nil, &fantasy.Error{Title: "invalid argument", Message: "google provider options should be *google.ProviderOptions"}
 		}
 	}
 
@@ -364,19 +387,37 @@ func toGooglePrompt(prompt fantasy.Prompt) (*genai.Content, []*genai.Content, []
 			}
 		case fantasy.MessageRoleAssistant:
 			var parts []*genai.Part
-			// INFO: (kujtim) this is kind of a hacky way to include thinking for google
-			// weirdly thinking needs to be included in a function call
-			var signature []byte
+			var currentReasoningMetadata *ReasoningMetadata
 			for _, part := range msg.Content {
 				switch part.GetType() {
+				case fantasy.ContentTypeReasoning:
+					reasoning, ok := fantasy.AsMessagePart[fantasy.ReasoningPart](part)
+					if !ok {
+						continue
+					}
+
+					metadata, ok := reasoning.ProviderOptions[Name]
+					if !ok {
+						continue
+					}
+					reasoningMetadata, ok := metadata.(*ReasoningMetadata)
+					if !ok {
+						continue
+					}
+					currentReasoningMetadata = reasoningMetadata
 				case fantasy.ContentTypeText:
 					text, ok := fantasy.AsMessagePart[fantasy.TextPart](part)
 					if !ok || text.Text == "" {
 						continue
 					}
-					parts = append(parts, &genai.Part{
+					geminiPart := &genai.Part{
 						Text: text.Text,
-					})
+					}
+					if currentReasoningMetadata != nil {
+						geminiPart.ThoughtSignature = []byte(currentReasoningMetadata.Signature)
+						currentReasoningMetadata = nil
+					}
+					parts = append(parts, geminiPart)
 				case fantasy.ContentTypeToolCall:
 					toolCall, ok := fantasy.AsMessagePart[fantasy.ToolCallPart](part)
 					if !ok {
@@ -388,33 +429,18 @@ func toGooglePrompt(prompt fantasy.Prompt) (*genai.Content, []*genai.Content, []
 					if err != nil {
 						continue
 					}
-					parts = append(parts, &genai.Part{
+					geminiPart := &genai.Part{
 						FunctionCall: &genai.FunctionCall{
 							ID:   toolCall.ToolCallID,
 							Name: toolCall.ToolName,
 							Args: result,
 						},
-						ThoughtSignature: signature,
-					})
-					// reset
-					signature = nil
-				case fantasy.ContentTypeReasoning:
-					reasoning, ok := fantasy.AsMessagePart[fantasy.ReasoningPart](part)
-					if !ok {
-						continue
 					}
-					metadata, ok := reasoning.ProviderOptions[Name]
-					if !ok {
-						continue
+					if currentReasoningMetadata != nil {
+						geminiPart.ThoughtSignature = []byte(currentReasoningMetadata.Signature)
+						currentReasoningMetadata = nil
 					}
-					reasoningMetadata, ok := metadata.(*ReasoningMetadata)
-					if !ok {
-						continue
-					}
-					if !ok || reasoningMetadata.Signature == "" {
-						continue
-					}
-					signature = []byte(reasoningMetadata.Signature)
+					parts = append(parts, geminiPart)
 				}
 			}
 			if len(parts) > 0 {
@@ -510,7 +536,7 @@ func (g *languageModel) Generate(ctx context.Context, call fantasy.Call) (*fanta
 
 	response, err := chat.SendMessage(ctx, depointerSlice(lastMessage.Parts)...)
 	if err != nil {
-		return nil, err
+		return nil, toProviderErr(err)
 	}
 
 	return g.mapResponse(response, warnings)
@@ -567,7 +593,7 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 			if err != nil {
 				yield(fantasy.StreamPart{
 					Type:  fantasy.StreamPartTypeError,
-					Error: err,
+					Error: toProviderErr(err),
 				})
 				return
 			}
@@ -612,7 +638,18 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 									return
 								}
 							} else {
-								// Regular text part
+								// Start new text block if not already active
+								if !isActiveText {
+									isActiveText = true
+									currentTextBlockID = fmt.Sprintf("%d", blockCounter)
+									blockCounter++
+									if !yield(fantasy.StreamPart{
+										Type: fantasy.StreamPartTypeTextStart,
+										ID:   currentTextBlockID,
+									}) {
+										return
+									}
+								}
 								// End any active reasoning block before starting text
 								if isActiveReasoning {
 									isActiveReasoning = false
@@ -628,16 +665,23 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 									}) {
 										return
 									}
-								}
+								} else if part.ThoughtSignature != nil {
+									metadata := &ReasoningMetadata{
+										Signature: string(part.ThoughtSignature),
+									}
 
-								// Start new text block if not already active
-								if !isActiveText {
-									isActiveText = true
-									currentTextBlockID = fmt.Sprintf("%d", blockCounter)
-									blockCounter++
 									if !yield(fantasy.StreamPart{
-										Type: fantasy.StreamPartTypeTextStart,
-										ID:   currentTextBlockID,
+										Type: fantasy.StreamPartTypeReasoningStart,
+										ID:   currentReasoningBlockID,
+									}) {
+										return
+									}
+									if !yield(fantasy.StreamPart{
+										Type: fantasy.StreamPartTypeReasoningEnd,
+										ID:   currentReasoningBlockID,
+										ProviderMetadata: fantasy.ProviderMetadata{
+											Name: metadata,
+										},
 									}) {
 										return
 									}
@@ -664,11 +708,34 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 								return
 							}
 						}
+						toolCallID := cmp.Or(part.FunctionCall.ID, g.providerOptions.toolCallIDFunc())
+						// End any active reasoning block before starting text
 						if isActiveReasoning {
 							isActiveReasoning = false
-
 							metadata := &ReasoningMetadata{
 								Signature: string(part.ThoughtSignature),
+								ToolID:    toolCallID,
+							}
+							if !yield(fantasy.StreamPart{
+								Type: fantasy.StreamPartTypeReasoningEnd,
+								ID:   currentReasoningBlockID,
+								ProviderMetadata: fantasy.ProviderMetadata{
+									Name: metadata,
+								},
+							}) {
+								return
+							}
+						} else if part.ThoughtSignature != nil {
+							metadata := &ReasoningMetadata{
+								Signature: string(part.ThoughtSignature),
+								ToolID:    toolCallID,
+							}
+
+							if !yield(fantasy.StreamPart{
+								Type: fantasy.StreamPartTypeReasoningStart,
+								ID:   currentReasoningBlockID,
+							}) {
+								return
 							}
 							if !yield(fantasy.StreamPart{
 								Type: fantasy.StreamPartTypeReasoningEnd,
@@ -680,9 +747,6 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 								return
 							}
 						}
-
-						toolCallID := cmp.Or(part.FunctionCall.ID, g.providerOptions.toolCallIDFunc())
-
 						args, err := json.Marshal(part.FunctionCall.Args)
 						if err != nil {
 							yield(fantasy.StreamPart{
@@ -735,7 +799,8 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 				}
 			}
 
-			if resp.UsageMetadata != nil {
+			// we need to make sure that there is actual tokendata
+			if resp.UsageMetadata != nil && resp.UsageMetadata.TotalTokenCount != 0 {
 				currentUsage := mapUsage(resp.UsageMetadata)
 				// if first usage chunk
 				if usage == nil {
@@ -782,6 +847,268 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 			Usage:        *usage,
 			FinishReason: finishReason,
 		})
+	}, nil
+}
+
+// GenerateObject implements fantasy.LanguageModel.
+func (g *languageModel) GenerateObject(ctx context.Context, call fantasy.ObjectCall) (*fantasy.ObjectResponse, error) {
+	switch g.objectMode {
+	case fantasy.ObjectModeText:
+		return object.GenerateWithText(ctx, g, call)
+	case fantasy.ObjectModeTool:
+		return object.GenerateWithTool(ctx, g, call)
+	default:
+		return g.generateObjectWithJSONMode(ctx, call)
+	}
+}
+
+// StreamObject implements fantasy.LanguageModel.
+func (g *languageModel) StreamObject(ctx context.Context, call fantasy.ObjectCall) (fantasy.ObjectStreamResponse, error) {
+	switch g.objectMode {
+	case fantasy.ObjectModeTool:
+		return object.StreamWithTool(ctx, g, call)
+	case fantasy.ObjectModeText:
+		return object.StreamWithText(ctx, g, call)
+	default:
+		return g.streamObjectWithJSONMode(ctx, call)
+	}
+}
+
+func (g *languageModel) generateObjectWithJSONMode(ctx context.Context, call fantasy.ObjectCall) (*fantasy.ObjectResponse, error) {
+	// Convert our Schema to Google's JSON Schema format
+	jsonSchemaMap := schema.ToMap(call.Schema)
+
+	// Build request using prepareParams
+	fantasyCall := fantasy.Call{
+		Prompt:           call.Prompt,
+		MaxOutputTokens:  call.MaxOutputTokens,
+		Temperature:      call.Temperature,
+		TopP:             call.TopP,
+		TopK:             call.TopK,
+		PresencePenalty:  call.PresencePenalty,
+		FrequencyPenalty: call.FrequencyPenalty,
+		ProviderOptions:  call.ProviderOptions,
+	}
+
+	config, contents, warnings, err := g.prepareParams(fantasyCall)
+	if err != nil {
+		return nil, err
+	}
+
+	// Set ResponseMIMEType and ResponseJsonSchema for structured output
+	config.ResponseMIMEType = "application/json"
+	config.ResponseJsonSchema = jsonSchemaMap
+
+	lastMessage, history, ok := slice.Pop(contents)
+	if !ok {
+		return nil, errors.New("no messages to send")
+	}
+
+	chat, err := g.client.Chats.Create(ctx, g.modelID, config, history)
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := chat.SendMessage(ctx, depointerSlice(lastMessage.Parts)...)
+	if err != nil {
+		return nil, toProviderErr(err)
+	}
+
+	mappedResponse, err := g.mapResponse(response, warnings)
+	if err != nil {
+		return nil, err
+	}
+
+	jsonText := mappedResponse.Content.Text()
+	if jsonText == "" {
+		return nil, &fantasy.NoObjectGeneratedError{
+			RawText:      "",
+			ParseError:   fmt.Errorf("no text content in response"),
+			Usage:        mappedResponse.Usage,
+			FinishReason: mappedResponse.FinishReason,
+		}
+	}
+
+	// Parse and validate
+	var obj any
+	if call.RepairText != nil {
+		obj, err = schema.ParseAndValidateWithRepair(ctx, jsonText, call.Schema, call.RepairText)
+	} else {
+		obj, err = schema.ParseAndValidate(jsonText, call.Schema)
+	}
+
+	if err != nil {
+		// Add usage info to error
+		if nogErr, ok := err.(*fantasy.NoObjectGeneratedError); ok {
+			nogErr.Usage = mappedResponse.Usage
+			nogErr.FinishReason = mappedResponse.FinishReason
+		}
+		return nil, err
+	}
+
+	return &fantasy.ObjectResponse{
+		Object:           obj,
+		RawText:          jsonText,
+		Usage:            mappedResponse.Usage,
+		FinishReason:     mappedResponse.FinishReason,
+		Warnings:         warnings,
+		ProviderMetadata: mappedResponse.ProviderMetadata,
+	}, nil
+}
+
+func (g *languageModel) streamObjectWithJSONMode(ctx context.Context, call fantasy.ObjectCall) (fantasy.ObjectStreamResponse, error) {
+	// Convert our Schema to Google's JSON Schema format
+	jsonSchemaMap := schema.ToMap(call.Schema)
+
+	// Build request using prepareParams
+	fantasyCall := fantasy.Call{
+		Prompt:           call.Prompt,
+		MaxOutputTokens:  call.MaxOutputTokens,
+		Temperature:      call.Temperature,
+		TopP:             call.TopP,
+		TopK:             call.TopK,
+		PresencePenalty:  call.PresencePenalty,
+		FrequencyPenalty: call.FrequencyPenalty,
+		ProviderOptions:  call.ProviderOptions,
+	}
+
+	config, contents, warnings, err := g.prepareParams(fantasyCall)
+	if err != nil {
+		return nil, err
+	}
+
+	// Set ResponseMIMEType and ResponseJsonSchema for structured output
+	config.ResponseMIMEType = "application/json"
+	config.ResponseJsonSchema = jsonSchemaMap
+
+	lastMessage, history, ok := slice.Pop(contents)
+	if !ok {
+		return nil, errors.New("no messages to send")
+	}
+
+	chat, err := g.client.Chats.Create(ctx, g.modelID, config, history)
+	if err != nil {
+		return nil, err
+	}
+
+	return func(yield func(fantasy.ObjectStreamPart) bool) {
+		if len(warnings) > 0 {
+			if !yield(fantasy.ObjectStreamPart{
+				Type:     fantasy.ObjectStreamPartTypeObject,
+				Warnings: warnings,
+			}) {
+				return
+			}
+		}
+
+		var accumulated string
+		var lastParsedObject any
+		var usage *fantasy.Usage
+		var lastFinishReason fantasy.FinishReason
+		var streamErr error
+
+		for resp, err := range chat.SendMessageStream(ctx, depointerSlice(lastMessage.Parts)...) {
+			if err != nil {
+				streamErr = toProviderErr(err)
+				yield(fantasy.ObjectStreamPart{
+					Type:  fantasy.ObjectStreamPartTypeError,
+					Error: streamErr,
+				})
+				return
+			}
+
+			if len(resp.Candidates) > 0 && resp.Candidates[0].Content != nil {
+				for _, part := range resp.Candidates[0].Content.Parts {
+					if part.Text != "" && !part.Thought {
+						accumulated += part.Text
+
+						// Try to parse the accumulated text
+						obj, state, parseErr := schema.ParsePartialJSON(accumulated)
+
+						// If we successfully parsed, validate and emit
+						if state == schema.ParseStateSuccessful || state == schema.ParseStateRepaired {
+							if err := schema.ValidateAgainstSchema(obj, call.Schema); err == nil {
+								// Only emit if object is different from last
+								if !reflect.DeepEqual(obj, lastParsedObject) {
+									if !yield(fantasy.ObjectStreamPart{
+										Type:   fantasy.ObjectStreamPartTypeObject,
+										Object: obj,
+									}) {
+										return
+									}
+									lastParsedObject = obj
+								}
+							}
+						}
+
+						// If parsing failed and we have a repair function, try it
+						if state == schema.ParseStateFailed && call.RepairText != nil {
+							repairedText, repairErr := call.RepairText(ctx, accumulated, parseErr)
+							if repairErr == nil {
+								obj2, state2, _ := schema.ParsePartialJSON(repairedText)
+								if (state2 == schema.ParseStateSuccessful || state2 == schema.ParseStateRepaired) &&
+									schema.ValidateAgainstSchema(obj2, call.Schema) == nil {
+									if !reflect.DeepEqual(obj2, lastParsedObject) {
+										if !yield(fantasy.ObjectStreamPart{
+											Type:   fantasy.ObjectStreamPartTypeObject,
+											Object: obj2,
+										}) {
+											return
+										}
+										lastParsedObject = obj2
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
+			// we need to make sure that there is actual tokendata
+			if resp.UsageMetadata != nil && resp.UsageMetadata.TotalTokenCount != 0 {
+				currentUsage := mapUsage(resp.UsageMetadata)
+				if usage == nil {
+					usage = &currentUsage
+				} else {
+					usage.OutputTokens += currentUsage.OutputTokens
+					usage.ReasoningTokens += currentUsage.ReasoningTokens
+					usage.CacheReadTokens += currentUsage.CacheReadTokens
+				}
+			}
+
+			if len(resp.Candidates) > 0 && resp.Candidates[0].FinishReason != "" {
+				lastFinishReason = mapFinishReason(resp.Candidates[0].FinishReason)
+			}
+		}
+
+		// Final validation and emit
+		if streamErr == nil && lastParsedObject != nil {
+			finishReason := lastFinishReason
+			if finishReason == "" {
+				finishReason = fantasy.FinishReasonStop
+			}
+
+			yield(fantasy.ObjectStreamPart{
+				Type:         fantasy.ObjectStreamPartTypeFinish,
+				Usage:        *usage,
+				FinishReason: finishReason,
+			})
+		} else if streamErr == nil && lastParsedObject == nil {
+			// No object was generated
+			finalUsage := fantasy.Usage{}
+			if usage != nil {
+				finalUsage = *usage
+			}
+			yield(fantasy.ObjectStreamPart{
+				Type: fantasy.ObjectStreamPartTypeError,
+				Error: &fantasy.NoObjectGeneratedError{
+					RawText:      accumulated,
+					ParseError:   fmt.Errorf("no valid object generated in stream"),
+					Usage:        finalUsage,
+					FinishReason: lastFinishReason,
+				},
+			})
+		}
 	}, nil
 }
 
@@ -947,11 +1274,46 @@ func (g languageModel) mapResponse(response *genai.GenerateContentResponse, warn
 		switch {
 		case part.Text != "":
 			if part.Thought {
-				metadata := &ReasoningMetadata{
-					Signature: string(part.ThoughtSignature),
+				reasoningContent := fantasy.ReasoningContent{Text: part.Text}
+				if part.ThoughtSignature != nil {
+					metadata := &ReasoningMetadata{
+						Signature: string(part.ThoughtSignature),
+					}
+					reasoningContent.ProviderMetadata = fantasy.ProviderMetadata{
+						Name: metadata,
+					}
 				}
-				content = append(content, fantasy.ReasoningContent{Text: part.Text, ProviderMetadata: fantasy.ProviderMetadata{Name: metadata}})
+				content = append(content, reasoningContent)
 			} else {
+				foundReasoning := false
+				if part.ThoughtSignature != nil {
+					metadata := &ReasoningMetadata{
+						Signature: string(part.ThoughtSignature),
+					}
+					// find the last reasoning content and add the signature
+					for i := len(content) - 1; i >= 0; i-- {
+						c := content[i]
+						if c.GetType() == fantasy.ContentTypeReasoning {
+							reasoningContent, ok := fantasy.AsContentType[fantasy.ReasoningContent](c)
+							if !ok {
+								continue
+							}
+							reasoningContent.ProviderMetadata = fantasy.ProviderMetadata{
+								Name: metadata,
+							}
+							content[i] = reasoningContent
+							foundReasoning = true
+							break
+						}
+					}
+					if !foundReasoning {
+						content = append(content, fantasy.ReasoningContent{
+							ProviderMetadata: fantasy.ProviderMetadata{
+								Name: metadata,
+							},
+						})
+					}
+				}
 				content = append(content, fantasy.TextContent{Text: part.Text})
 			}
 		case part.FunctionCall != nil:
@@ -960,6 +1322,36 @@ func (g languageModel) mapResponse(response *genai.GenerateContentResponse, warn
 				return nil, err
 			}
 			toolCallID := cmp.Or(part.FunctionCall.ID, g.providerOptions.toolCallIDFunc())
+			foundReasoning := false
+			if part.ThoughtSignature != nil {
+				metadata := &ReasoningMetadata{
+					Signature: string(part.ThoughtSignature),
+					ToolID:    toolCallID,
+				}
+				// find the last reasoning content and add the signature
+				for i := len(content) - 1; i >= 0; i-- {
+					c := content[i]
+					if c.GetType() == fantasy.ContentTypeReasoning {
+						reasoningContent, ok := fantasy.AsContentType[fantasy.ReasoningContent](c)
+						if !ok {
+							continue
+						}
+						reasoningContent.ProviderMetadata = fantasy.ProviderMetadata{
+							Name: metadata,
+						}
+						content[i] = reasoningContent
+						foundReasoning = true
+						break
+					}
+				}
+				if !foundReasoning {
+					content = append(content, fantasy.ReasoningContent{
+						ProviderMetadata: fantasy.ProviderMetadata{
+							Name: metadata,
+						},
+					})
+				}
+			}
 			content = append(content, fantasy.ToolCallContent{
 				ToolCallID:       toolCallID,
 				ToolName:         part.FunctionCall.Name,
@@ -985,6 +1377,16 @@ func (g languageModel) mapResponse(response *genai.GenerateContentResponse, warn
 		FinishReason: finishReason,
 		Warnings:     warnings,
 	}, nil
+}
+
+// GetReasoningMetadata extracts reasoning metadata from provider options for google models.
+func GetReasoningMetadata(providerOptions fantasy.ProviderOptions) *ReasoningMetadata {
+	if googleOptions, ok := providerOptions[Name]; ok {
+		if reasoning, ok := googleOptions.(*ReasoningMetadata); ok {
+			return reasoning
+		}
+	}
+	return nil
 }
 
 func mapFinishReason(reason genai.FinishReason) fantasy.FinishReason {

@@ -17,6 +17,12 @@ type StepResult struct {
 	Messages []Message
 }
 
+// stepExecutionResult encapsulates the result of executing a step with stream processing.
+type stepExecutionResult struct {
+	StepResult     StepResult
+	ShouldContinue bool
+}
+
 // StopCondition defines a function that determines when an agent should stop executing.
 type StopCondition = func(steps []StepResult) bool
 
@@ -98,6 +104,7 @@ type PrepareStepResult struct {
 	ToolChoice      *ToolChoice
 	ActiveTools     []string
 	DisableAllTools bool
+	Tools           []AgentTool
 }
 
 // ToolCallRepairOptions contains the options for repairing a tool call.
@@ -371,7 +378,7 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 		stepActiveTools := opts.ActiveTools
 		stepToolChoice := ToolChoiceAuto
 		disableAllTools := false
-
+		stepTools := a.settings.tools
 		if opts.PrepareStep != nil {
 			updatedCtx, prepared, err := opts.PrepareStep(ctx, PrepareStepFunctionOptions{
 				Model:      stepModel,
@@ -402,6 +409,9 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 				stepActiveTools = prepared.ActiveTools
 			}
 			disableAllTools = prepared.DisableAllTools
+			if prepared.Tools != nil {
+				stepTools = prepared.Tools
+			}
 		}
 
 		// Recreate prompt with potentially modified system prompt
@@ -416,9 +426,12 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 			}
 		}
 
-		preparedTools := a.prepareTools(a.settings.tools, stepActiveTools, disableAllTools)
+		preparedTools := a.prepareTools(stepTools, stepActiveTools, disableAllTools)
 
 		retryOptions := DefaultRetryOptions()
+		if opts.MaxRetries != nil {
+			retryOptions.MaxRetries = *opts.MaxRetries
+		}
 		retryOptions.OnRetry = opts.OnRetry
 		retry := RetryWithExponentialBackoffRespectingRetryHeaders[*Response](retryOptions)
 
@@ -449,12 +462,12 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 				}
 
 				// Validate and potentially repair the tool call
-				validatedToolCall := a.validateAndRepairToolCall(ctx, toolCall, a.settings.tools, stepSystemPrompt, stepInputMessages, a.settings.repairToolCall)
+				validatedToolCall := a.validateAndRepairToolCall(ctx, toolCall, stepTools, stepSystemPrompt, stepInputMessages, a.settings.repairToolCall)
 				stepToolCalls = append(stepToolCalls, validatedToolCall)
 			}
 		}
 
-		toolResults, err := a.executeTools(ctx, a.settings.tools, stepToolCalls, nil)
+		toolResults, err := a.executeTools(ctx, stepTools, stepToolCalls, nil)
 
 		// Build step content with validated tool calls and tool results
 		stepContent := []Content{}
@@ -619,130 +632,168 @@ func (a *agent) executeTools(ctx context.Context, allTools []AgentTool, toolCall
 		toolMap[tool.Info().Name] = tool
 	}
 
-	// Execute all tool calls in parallel
-	results := make([]ToolResultContent, len(toolCalls))
-	executeErrors := make([]error, len(toolCalls))
+	// Execute all tool calls sequentially in order
+	results := make([]ToolResultContent, 0, len(toolCalls))
 
-	var wg sync.WaitGroup
-
-	for i, toolCall := range toolCalls {
-		wg.Add(1)
-		go func(index int, call ToolCallContent) {
-			defer wg.Done()
-
-			// Skip invalid tool calls - create error result
-			if call.Invalid {
-				results[index] = ToolResultContent{
-					ToolCallID: call.ToolCallID,
-					ToolName:   call.ToolName,
-					Result: ToolResultOutputContentError{
-						Error: call.ValidationError,
-					},
-					ProviderExecuted: false,
-				}
-				if toolResultCallback != nil {
-					err := toolResultCallback(results[index])
-					if err != nil {
-						executeErrors[index] = err
-					}
-				}
-
-				return
+	for _, toolCall := range toolCalls {
+		// Skip invalid tool calls - create error result
+		if toolCall.Invalid {
+			result := ToolResultContent{
+				ToolCallID: toolCall.ToolCallID,
+				ToolName:   toolCall.ToolName,
+				Result: ToolResultOutputContentError{
+					Error: toolCall.ValidationError,
+				},
+				ProviderExecuted: false,
 			}
-
-			tool, exists := toolMap[call.ToolName]
-			if !exists {
-				results[index] = ToolResultContent{
-					ToolCallID: call.ToolCallID,
-					ToolName:   call.ToolName,
-					Result: ToolResultOutputContentError{
-						Error: errors.New("Error: Tool not found: " + call.ToolName),
-					},
-					ProviderExecuted: false,
-				}
-
-				if toolResultCallback != nil {
-					err := toolResultCallback(results[index])
-					if err != nil {
-						executeErrors[index] = err
-					}
-				}
-				return
-			}
-
-			// Execute the tool
-			result, err := tool.Run(ctx, ToolCall{
-				ID:    call.ToolCallID,
-				Name:  call.ToolName,
-				Input: call.Input,
-			})
-			if err != nil {
-				results[index] = ToolResultContent{
-					ToolCallID: call.ToolCallID,
-					ToolName:   call.ToolName,
-					Result: ToolResultOutputContentError{
-						Error: err,
-					},
-					ClientMetadata:   result.Metadata,
-					ProviderExecuted: false,
-				}
-				if toolResultCallback != nil {
-					cbErr := toolResultCallback(results[index])
-					if cbErr != nil {
-						executeErrors[index] = cbErr
-					}
-				}
-				executeErrors[index] = err
-				return
-			}
-
-			if result.IsError {
-				results[index] = ToolResultContent{
-					ToolCallID: call.ToolCallID,
-					ToolName:   call.ToolName,
-					Result: ToolResultOutputContentError{
-						Error: errors.New(result.Content),
-					},
-					ClientMetadata:   result.Metadata,
-					ProviderExecuted: false,
-				}
-
-				if toolResultCallback != nil {
-					err := toolResultCallback(results[index])
-					if err != nil {
-						executeErrors[index] = err
-					}
-				}
-			} else {
-				results[index] = ToolResultContent{
-					ToolCallID: call.ToolCallID,
-					ToolName:   toolCall.ToolName,
-					Result: ToolResultOutputContentText{
-						Text: result.Content,
-					},
-					ClientMetadata:   result.Metadata,
-					ProviderExecuted: false,
-				}
-				if toolResultCallback != nil {
-					err := toolResultCallback(results[index])
-					if err != nil {
-						executeErrors[index] = err
-					}
+			results = append(results, result)
+			if toolResultCallback != nil {
+				if err := toolResultCallback(result); err != nil {
+					return nil, err
 				}
 			}
-		}(i, toolCall)
-	}
+			continue
+		}
 
-	// Wait for all tool executions to complete
-	wg.Wait()
+		tool, exists := toolMap[toolCall.ToolName]
+		if !exists {
+			result := ToolResultContent{
+				ToolCallID: toolCall.ToolCallID,
+				ToolName:   toolCall.ToolName,
+				Result: ToolResultOutputContentError{
+					Error: errors.New("Error: Tool not found: " + toolCall.ToolName),
+				},
+				ProviderExecuted: false,
+			}
+			results = append(results, result)
+			if toolResultCallback != nil {
+				if err := toolResultCallback(result); err != nil {
+					return nil, err
+				}
+			}
+			continue
+		}
 
-	for _, err := range executeErrors {
+		// Execute the tool
+		toolResult, err := tool.Run(ctx, ToolCall{
+			ID:    toolCall.ToolCallID,
+			Name:  toolCall.ToolName,
+			Input: toolCall.Input,
+		})
 		if err != nil {
+			result := ToolResultContent{
+				ToolCallID: toolCall.ToolCallID,
+				ToolName:   toolCall.ToolName,
+				Result: ToolResultOutputContentError{
+					Error: err,
+				},
+				ClientMetadata:   toolResult.Metadata,
+				ProviderExecuted: false,
+			}
+			if toolResultCallback != nil {
+				if cbErr := toolResultCallback(result); cbErr != nil {
+					return nil, cbErr
+				}
+			}
 			return nil, err
+		}
+
+		var result ToolResultContent
+		if toolResult.IsError {
+			result = ToolResultContent{
+				ToolCallID: toolCall.ToolCallID,
+				ToolName:   toolCall.ToolName,
+				Result: ToolResultOutputContentError{
+					Error: errors.New(toolResult.Content),
+				},
+				ClientMetadata:   toolResult.Metadata,
+				ProviderExecuted: false,
+			}
+		} else {
+			result = ToolResultContent{
+				ToolCallID: toolCall.ToolCallID,
+				ToolName:   toolCall.ToolName,
+				Result: ToolResultOutputContentText{
+					Text: toolResult.Content,
+				},
+				ClientMetadata:   toolResult.Metadata,
+				ProviderExecuted: false,
+			}
+		}
+		results = append(results, result)
+		if toolResultCallback != nil {
+			if err := toolResultCallback(result); err != nil {
+				return nil, err
+			}
 		}
 	}
 
 	return results, nil
+}
+
+// executeSingleTool executes a single tool and returns its result and a critical error flag.
+func (a *agent) executeSingleTool(ctx context.Context, toolMap map[string]AgentTool, toolCall ToolCallContent, toolResultCallback func(result ToolResultContent) error) (ToolResultContent, bool) {
+	result := ToolResultContent{
+		ToolCallID:       toolCall.ToolCallID,
+		ToolName:         toolCall.ToolName,
+		ProviderExecuted: false,
+	}
+
+	// Skip invalid tool calls - create error result (not critical)
+	if toolCall.Invalid {
+		result.Result = ToolResultOutputContentError{
+			Error: toolCall.ValidationError,
+		}
+		if toolResultCallback != nil {
+			_ = toolResultCallback(result)
+		}
+		return result, false
+	}
+
+	tool, exists := toolMap[toolCall.ToolName]
+	if !exists {
+		result.Result = ToolResultOutputContentError{
+			Error: errors.New("Error: Tool not found: " + toolCall.ToolName),
+		}
+		if toolResultCallback != nil {
+			_ = toolResultCallback(result)
+		}
+		return result, false
+	}
+
+	// Execute the tool
+	toolResult, err := tool.Run(ctx, ToolCall{
+		ID:    toolCall.ToolCallID,
+		Name:  toolCall.ToolName,
+		Input: toolCall.Input,
+	})
+	if err != nil {
+		result.Result = ToolResultOutputContentError{
+			Error: err,
+		}
+		result.ClientMetadata = toolResult.Metadata
+		if toolResultCallback != nil {
+			_ = toolResultCallback(result)
+		}
+		// This is a critical error - tool.Run() failed
+		return result, true
+	}
+
+	result.ClientMetadata = toolResult.Metadata
+	if toolResult.IsError {
+		result.Result = ToolResultOutputContentError{
+			Error: errors.New(toolResult.Content),
+		}
+	} else {
+		result.Result = ToolResultOutputContentText{
+			Text: toolResult.Content,
+		}
+	}
+	if toolResultCallback != nil {
+		_ = toolResultCallback(result)
+	}
+	// Not a critical error - tool ran successfully (even if it reported an error state)
+	return result, false
 }
 
 // Stream implements Agent.
@@ -761,6 +812,7 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 		ActiveTools:      opts.ActiveTools,
 		ProviderOptions:  opts.ProviderOptions,
 		MaxRetries:       opts.MaxRetries,
+		OnRetry:          opts.OnRetry,
 		StopWhen:         opts.StopWhen,
 		PrepareStep:      opts.PrepareStep,
 		RepairToolCall:   opts.RepairToolCall,
@@ -789,7 +841,7 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 		stepActiveTools := call.ActiveTools
 		stepToolChoice := ToolChoiceAuto
 		disableAllTools := false
-
+		stepTools := a.settings.tools
 		// Apply step preparation if provided
 		if call.PrepareStep != nil {
 			updatedCtx, prepared, err := call.PrepareStep(ctx, PrepareStepFunctionOptions{
@@ -820,6 +872,9 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 				stepActiveTools = prepared.ActiveTools
 			}
 			disableAllTools = prepared.DisableAllTools
+			if prepared.Tools != nil {
+				stepTools = prepared.Tools
+			}
 		}
 
 		// Recreate prompt with potentially modified system prompt
@@ -833,7 +888,7 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 			}
 		}
 
-		preparedTools := a.prepareTools(a.settings.tools, stepActiveTools, disableAllTools)
+		preparedTools := a.prepareTools(stepTools, stepActiveTools, disableAllTools)
 
 		// Start step stream
 		if opts.OnStepStart != nil {
@@ -854,8 +909,29 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 			ProviderOptions:  call.ProviderOptions,
 		}
 
-		// Get streaming response
-		stream, err := stepModel.Stream(ctx, streamCall)
+		// Execute step with retry logic wrapping both stream creation and processing
+		retryOptions := DefaultRetryOptions()
+		if call.MaxRetries != nil {
+			retryOptions.MaxRetries = *call.MaxRetries
+		}
+		retryOptions.OnRetry = call.OnRetry
+		retry := RetryWithExponentialBackoffRespectingRetryHeaders[stepExecutionResult](retryOptions)
+
+		result, err := retry(ctx, func() (stepExecutionResult, error) {
+			// Create the stream
+			stream, err := stepModel.Stream(ctx, streamCall)
+			if err != nil {
+				return stepExecutionResult{}, err
+			}
+
+			// Process the stream
+			result, err := a.processStepStream(ctx, stream, opts, steps, stepTools)
+			if err != nil {
+				return stepExecutionResult{}, err
+			}
+
+			return result, nil
+		})
 		if err != nil {
 			if opts.OnError != nil {
 				opts.OnError(err)
@@ -863,30 +939,21 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 			return nil, err
 		}
 
-		// Process stream with tool execution
-		stepResult, shouldContinue, err := a.processStepStream(ctx, stream, opts, steps)
-		if err != nil {
-			if opts.OnError != nil {
-				opts.OnError(err)
-			}
-			return nil, err
-		}
-
-		steps = append(steps, stepResult)
-		totalUsage = addUsage(totalUsage, stepResult.Usage)
+		steps = append(steps, result.StepResult)
+		totalUsage = addUsage(totalUsage, result.StepResult.Usage)
 
 		// Call step finished callback
 		if opts.OnStepFinish != nil {
-			_ = opts.OnStepFinish(stepResult)
+			_ = opts.OnStepFinish(result.StepResult)
 		}
 
 		// Add step messages to response messages
-		stepMessages := toResponseMessages(stepResult.Content)
+		stepMessages := toResponseMessages(result.StepResult.Content)
 		responseMessages = append(responseMessages, stepMessages...)
 
 		// Check stop conditions
 		shouldStop := isStopConditionMet(call.StopWhen, steps)
-		if shouldStop || !shouldContinue {
+		if shouldStop || !result.ShouldContinue {
 			break
 		}
 	}
@@ -999,7 +1066,7 @@ func (a *agent) validateToolCall(toolCall ToolCallContent, availableTools []Agen
 
 func (a *agent) createPrompt(system, prompt string, messages []Message, files ...FilePart) (Prompt, error) {
 	if prompt == "" {
-		return nil, NewInvalidPromptError(prompt, "Prompt can't be empty", nil)
+		return nil, &Error{Title: "invalid argument", Message: "prompt can't be empty"}
 	}
 
 	var preparedPrompt Prompt
@@ -1089,8 +1156,22 @@ func WithRepairToolCall(fn RepairToolCallFunction) AgentOption {
 	}
 }
 
+// WithMaxRetries sets the maximum number of retries for the agent.
+func WithMaxRetries(maxRetries int) AgentOption {
+	return func(s *agentSettings) {
+		s.maxRetries = &maxRetries
+	}
+}
+
+// WithOnRetry sets the retry callback for the agent.
+func WithOnRetry(callback OnRetryCallback) AgentOption {
+	return func(s *agentSettings) {
+		s.onRetry = callback
+	}
+}
+
 // processStepStream processes a single step's stream and returns the step result.
-func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, opts AgentStreamCall, _ []StepResult) (StepResult, bool, error) {
+func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, opts AgentStreamCall, _ []StepResult, stepTools []AgentTool) (stepExecutionResult, error) {
 	var stepContent []Content
 	var stepToolCalls []ToolCallContent
 	var stepUsage Usage
@@ -1106,13 +1187,67 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 	}
 	activeReasoningContent := make(map[string]reasoningContent)
 
+	// Set up concurrent tool execution
+	type toolExecutionRequest struct {
+		toolCall ToolCallContent
+		parallel bool
+	}
+	toolChan := make(chan toolExecutionRequest, 10)
+	var toolExecutionWg sync.WaitGroup
+	var toolStateMu sync.Mutex
+	toolResults := make([]ToolResultContent, 0)
+	var toolExecutionErr error
+
+	// Create a map for quick tool lookup
+	toolMap := make(map[string]AgentTool)
+	for _, tool := range stepTools {
+		toolMap[tool.Info().Name] = tool
+	}
+
+	// Semaphores for controlling parallelism
+	parallelSem := make(chan struct{}, 5)
+	var sequentialMu sync.Mutex
+
+	// Single coordinator goroutine that dispatches tools
+	toolExecutionWg.Go(func() {
+		for req := range toolChan {
+			if req.parallel {
+				parallelSem <- struct{}{}
+				toolExecutionWg.Go(func() {
+					defer func() { <-parallelSem }()
+					result, isCriticalError := a.executeSingleTool(ctx, toolMap, req.toolCall, opts.OnToolResult)
+					toolStateMu.Lock()
+					toolResults = append(toolResults, result)
+					if isCriticalError && toolExecutionErr == nil {
+						if errorResult, ok := result.Result.(ToolResultOutputContentError); ok && errorResult.Error != nil {
+							toolExecutionErr = errorResult.Error
+						}
+					}
+					toolStateMu.Unlock()
+				})
+			} else {
+				sequentialMu.Lock()
+				result, isCriticalError := a.executeSingleTool(ctx, toolMap, req.toolCall, opts.OnToolResult)
+				toolStateMu.Lock()
+				toolResults = append(toolResults, result)
+				if isCriticalError && toolExecutionErr == nil {
+					if errorResult, ok := result.Result.(ToolResultOutputContentError); ok && errorResult.Error != nil {
+						toolExecutionErr = errorResult.Error
+					}
+				}
+				toolStateMu.Unlock()
+				sequentialMu.Unlock()
+			}
+		}
+	})
+
 	// Process stream parts
 	for part := range stream {
 		// Forward all parts to chunk callback
 		if opts.OnChunk != nil {
 			err := opts.OnChunk(part)
 			if err != nil {
-				return StepResult{}, false, err
+				return stepExecutionResult{}, err
 			}
 		}
 
@@ -1122,7 +1257,7 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 			if opts.OnWarnings != nil {
 				err := opts.OnWarnings(part.Warnings)
 				if err != nil {
-					return StepResult{}, false, err
+					return stepExecutionResult{}, err
 				}
 			}
 
@@ -1131,7 +1266,7 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 			if opts.OnTextStart != nil {
 				err := opts.OnTextStart(part.ID)
 				if err != nil {
-					return StepResult{}, false, err
+					return stepExecutionResult{}, err
 				}
 			}
 
@@ -1142,7 +1277,7 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 			if opts.OnTextDelta != nil {
 				err := opts.OnTextDelta(part.ID, part.Delta)
 				if err != nil {
-					return StepResult{}, false, err
+					return stepExecutionResult{}, err
 				}
 			}
 
@@ -1157,7 +1292,7 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 			if opts.OnTextEnd != nil {
 				err := opts.OnTextEnd(part.ID)
 				if err != nil {
-					return StepResult{}, false, err
+					return stepExecutionResult{}, err
 				}
 			}
 
@@ -1170,7 +1305,7 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 				}
 				err := opts.OnReasoningStart(part.ID, content)
 				if err != nil {
-					return StepResult{}, false, err
+					return stepExecutionResult{}, err
 				}
 			}
 
@@ -1183,7 +1318,7 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 			if opts.OnReasoningDelta != nil {
 				err := opts.OnReasoningDelta(part.ID, part.Delta)
 				if err != nil {
-					return StepResult{}, false, err
+					return stepExecutionResult{}, err
 				}
 			}
 
@@ -1200,7 +1335,7 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 				if opts.OnReasoningEnd != nil {
 					err := opts.OnReasoningEnd(part.ID, content)
 					if err != nil {
-						return StepResult{}, false, err
+						return stepExecutionResult{}, err
 					}
 				}
 				delete(activeReasoningContent, part.ID)
@@ -1216,7 +1351,7 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 			if opts.OnToolInputStart != nil {
 				err := opts.OnToolInputStart(part.ID, part.ToolCallName)
 				if err != nil {
-					return StepResult{}, false, err
+					return stepExecutionResult{}, err
 				}
 			}
 
@@ -1227,7 +1362,7 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 			if opts.OnToolInputDelta != nil {
 				err := opts.OnToolInputDelta(part.ID, part.Delta)
 				if err != nil {
-					return StepResult{}, false, err
+					return stepExecutionResult{}, err
 				}
 			}
 
@@ -1235,7 +1370,7 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 			if opts.OnToolInputEnd != nil {
 				err := opts.OnToolInputEnd(part.ID)
 				if err != nil {
-					return StepResult{}, false, err
+					return stepExecutionResult{}, err
 				}
 			}
 
@@ -1249,16 +1384,25 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 			}
 
 			// Validate and potentially repair the tool call
-			validatedToolCall := a.validateAndRepairToolCall(ctx, toolCall, a.settings.tools, a.settings.systemPrompt, nil, opts.RepairToolCall)
+			validatedToolCall := a.validateAndRepairToolCall(ctx, toolCall, stepTools, a.settings.systemPrompt, nil, opts.RepairToolCall)
 			stepToolCalls = append(stepToolCalls, validatedToolCall)
 			stepContent = append(stepContent, validatedToolCall)
 
 			if opts.OnToolCall != nil {
 				err := opts.OnToolCall(validatedToolCall)
 				if err != nil {
-					return StepResult{}, false, err
+					return stepExecutionResult{}, err
 				}
 			}
+
+			// Determine if tool can run in parallel
+			isParallel := false
+			if tool, exists := toolMap[validatedToolCall.ToolName]; exists {
+				isParallel = tool.Info().Parallel
+			}
+
+			// Send tool call to execution channel
+			toolChan <- toolExecutionRequest{toolCall: validatedToolCall, parallel: isParallel}
 
 			// Clean up active tool call
 			delete(activeToolCalls, part.ID)
@@ -1275,7 +1419,7 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 			if opts.OnSource != nil {
 				err := opts.OnSource(sourceContent)
 				if err != nil {
-					return StepResult{}, false, err
+					return stepExecutionResult{}, err
 				}
 			}
 
@@ -1286,27 +1430,26 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 			if opts.OnStreamFinish != nil {
 				err := opts.OnStreamFinish(part.Usage, part.FinishReason, part.ProviderMetadata)
 				if err != nil {
-					return StepResult{}, false, err
+					return stepExecutionResult{}, err
 				}
 			}
 
 		case StreamPartTypeError:
-			if opts.OnError != nil {
-				opts.OnError(part.Error)
-			}
-			return StepResult{}, false, part.Error
+			return stepExecutionResult{}, part.Error
 		}
 	}
 
-	// Execute tools if any
-	var toolResults []ToolResultContent
-	if len(stepToolCalls) > 0 {
-		var err error
-		toolResults, err = a.executeTools(ctx, a.settings.tools, stepToolCalls, opts.OnToolResult)
-		if err != nil {
-			return StepResult{}, false, err
-		}
-		// Add tool results to content
+	// Close the tool execution channel and wait for all executions to complete
+	close(toolChan)
+	toolExecutionWg.Wait()
+
+	// Check for tool execution errors
+	if toolExecutionErr != nil {
+		return stepExecutionResult{}, toolExecutionErr
+	}
+
+	// Add tool results to content if any
+	if len(toolResults) > 0 {
 		for _, result := range toolResults {
 			stepContent = append(stepContent, result)
 		}
@@ -1326,7 +1469,10 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 	// Determine if we should continue (has tool calls and not stopped)
 	shouldContinue := len(stepToolCalls) > 0 && stepFinishReason == FinishReasonToolCalls
 
-	return stepResult, shouldContinue, nil
+	return stepExecutionResult{
+		StepResult:     stepResult,
+		ShouldContinue: shouldContinue,
+	}, nil
 }
 
 func addUsage(a, b Usage) Usage {

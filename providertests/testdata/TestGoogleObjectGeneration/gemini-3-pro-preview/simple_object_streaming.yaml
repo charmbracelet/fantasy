@@ -1,0 +1,34 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 499
+    host: generativelanguage.googleapis.com
+    body: |
+      {"contents":[{"parts":[{"text":"Generate information about a person named Alice who is 30 years old and lives in Paris."}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000,"responseJsonSchema":{"properties":{"age":{"description":"The person's age","type":"integer"},"city":{"description":"The city where the person lives","type":"string"},"name":{"description":"The person's name","type":"string"}},"required":["name","age","city"],"type":"object"},"responseMimeType":"application/json"}}
+    form:
+      alt:
+      - sse
+    headers:
+      Content-Type:
+      - application/json
+      User-Agent:
+      - google-genai-sdk/1.34.0 gl-go/go1.25.4
+    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:streamGenerateContent?alt=sse
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"{\\n\\\"age\\\": 30,\\n\\\"city\\\": \\\"Paris\\\",\\n\\\"name\\\": \\\"Alice\\\"\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 20,\"candidatesTokenCount\": 23,\"totalTokenCount\": 426,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 20}],\"thoughtsTokenCount\": 383},\"modelVersion\": \"gemini-3-pro-preview\",\"responseId\": \"uKIdaYWJBMmNvdIP66uD6Ag\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"\\n}\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 20,\"candidatesTokenCount\": 25,\"totalTokenCount\": 428,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 20}],\"thoughtsTokenCount\": 383},\"modelVersion\": \"gemini-3-pro-preview\",\"responseId\": \"uKIdaYWJBMmNvdIP66uD6Ag\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"\",\"thoughtSignature\": \"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\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 20,\"candidatesTokenCount\": 25,\"totalTokenCount\": 428,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 20}],\"thoughtsTokenCount\": 383},\"modelVersion\": \"gemini-3-pro-preview\",\"responseId\": \"uKIdaYWJBMmNvdIP66uD6Ag\"}\r\n\r\n"
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 4.351121s

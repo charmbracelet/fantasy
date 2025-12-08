@@ -636,107 +636,11 @@ func (a *agent) executeTools(ctx context.Context, allTools []AgentTool, toolCall
 	results := make([]ToolResultContent, 0, len(toolCalls))
 
 	for _, toolCall := range toolCalls {
-		// Skip invalid tool calls - create error result
-		if toolCall.Invalid {
-			result := ToolResultContent{
-				ToolCallID: toolCall.ToolCallID,
-				ToolName:   toolCall.ToolName,
-				Result: ToolResultOutputContentError{
-					Error: toolCall.ValidationError,
-				},
-				ProviderExecuted: false,
-			}
-			results = append(results, result)
-			if toolResultCallback != nil {
-				if err := toolResultCallback(result); err != nil {
-					return nil, err
-				}
-			}
-			continue
-		}
-
-		tool, exists := toolMap[toolCall.ToolName]
-		if !exists {
-			result := ToolResultContent{
-				ToolCallID: toolCall.ToolCallID,
-				ToolName:   toolCall.ToolName,
-				Result: ToolResultOutputContentError{
-					Error: errors.New("Error: Tool not found: " + toolCall.ToolName),
-				},
-				ProviderExecuted: false,
-			}
-			results = append(results, result)
-			if toolResultCallback != nil {
-				if err := toolResultCallback(result); err != nil {
-					return nil, err
-				}
-			}
-			continue
-		}
-
-		// Execute the tool
-		toolResult, err := tool.Run(ctx, ToolCall{
-			ID:    toolCall.ToolCallID,
-			Name:  toolCall.ToolName,
-			Input: toolCall.Input,
-		})
-		if err != nil {
-			result := ToolResultContent{
-				ToolCallID: toolCall.ToolCallID,
-				ToolName:   toolCall.ToolName,
-				Result: ToolResultOutputContentError{
-					Error: err,
-				},
-				ClientMetadata:   toolResult.Metadata,
-				ProviderExecuted: false,
-			}
-			if toolResultCallback != nil {
-				if cbErr := toolResultCallback(result); cbErr != nil {
-					return nil, cbErr
-				}
-			}
-			return nil, err
-		}
-
-		var result ToolResultContent
-		if toolResult.IsError {
-			result = ToolResultContent{
-				ToolCallID: toolCall.ToolCallID,
-				ToolName:   toolCall.ToolName,
-				Result: ToolResultOutputContentError{
-					Error: errors.New(toolResult.Content),
-				},
-				ClientMetadata:   toolResult.Metadata,
-				ProviderExecuted: false,
-			}
-		} else if toolResult.Type == "image" || toolResult.Type == "media" {
-			result = ToolResultContent{
-				ToolCallID: toolCall.ToolCallID,
-				ToolName:   toolCall.ToolName,
-				Result: ToolResultOutputContentMedia{
-					Data:      string(toolResult.Data),
-					MediaType: toolResult.MediaType,
-					Text:      toolResult.Content,
-				},
-				ClientMetadata:   toolResult.Metadata,
-				ProviderExecuted: false,
-			}
-		} else {
-			// Default to text response
-			result = ToolResultContent{
-				ToolCallID: toolCall.ToolCallID,
-				ToolName:   toolCall.ToolName,
-				Result: ToolResultOutputContentText{
-					Text: toolResult.Content,
-				},
-				ClientMetadata:   toolResult.Metadata,
-				ProviderExecuted: false,
-			}
-		}
+		result, isCriticalError := a.executeSingleTool(ctx, toolMap, toolCall, toolResultCallback)
 		results = append(results, result)
-		if toolResultCallback != nil {
-			if err := toolResultCallback(result); err != nil {
-				return nil, err
+		if isCriticalError {
+			if errorResult, ok := result.Result.(ToolResultOutputContentError); ok && errorResult.Error != nil {
+				return nil, errorResult.Error
 			}
 		}
 	}
@@ -788,7 +692,6 @@ func (a *agent) executeSingleTool(ctx context.Context, toolMap map[string]AgentT
 		if toolResultCallback != nil {
 			_ = toolResultCallback(result)
 		}
-		// This is a critical error - tool.Run() failed
 		return result, true
 	}
 
@@ -796,6 +699,12 @@ func (a *agent) executeSingleTool(ctx context.Context, toolMap map[string]AgentT
 	if toolResult.IsError {
 		result.Result = ToolResultOutputContentError{
 			Error: errors.New(toolResult.Content),
+		}
+	} else if toolResult.Type == "image" || toolResult.Type == "media" {
+		result.Result = ToolResultOutputContentMedia{
+			Data:      string(toolResult.Data),
+			MediaType: toolResult.MediaType,
+			Text:      toolResult.Content,
 		}
 	} else {
 		result.Result = ToolResultOutputContentText{
@@ -805,7 +714,6 @@ func (a *agent) executeSingleTool(ctx context.Context, toolMap map[string]AgentT
 	if toolResultCallback != nil {
 		_ = toolResultCallback(result)
 	}
-	// Not a critical error - tool ran successfully (even if it reported an error state)
 	return result, false
 }
 

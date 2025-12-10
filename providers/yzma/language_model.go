@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	defaultTemperature       = 0.8
+	defaultTemperature       = 0.1
 	defaultTopK        int32 = 40
 	defaultTopP              = 0.9
 )
@@ -31,8 +31,8 @@ type yzmaModel struct {
 	vocab   llama.Vocab
 }
 
-func newModel(modelID string, modelsPath string) (fantasy.LanguageModel, error) {
-	filePath, err := ensureModelExists(modelID, modelsPath)
+func newModel(ctx context.Context, modelID string, modelsPath string) (fantasy.LanguageModel, error) {
+	filePath, err := ensureModelExists(ctx, modelID, modelsPath)
 	if err != nil {
 		return nil, fmt.Errorf("model file does not exist: %w", err)
 	}
@@ -429,27 +429,19 @@ func (m *yzmaModel) Model() string {
 }
 
 func initSampler(model llama.Model, call fantasy.Call) llama.Sampler {
-	temperature := defaultTemperature
-	if call.Temperature != nil && *call.Temperature > 0 {
-		temperature = *call.Temperature
-	}
-	topK := defaultTopK
-	if call.TopK != nil && *call.TopK > 0 {
-		topK = int32(*call.TopK)
-	}
-
-	minP := 0.1
-
-	topP := defaultTopP
-	if call.TopP != nil && *call.TopP > 0 {
-		topP = *call.TopP
-	}
-
 	sp := llama.DefaultSamplerParams()
-	sp.Temp = float32(temperature)
-	sp.TopK = topK
-	sp.TopP = float32(topP)
-	sp.MinP = float32(minP)
+	if call.Temperature != nil && *call.Temperature > 0 {
+		sp.Temp = float32(*call.Temperature)
+	}
+
+	if call.TopK != nil && *call.TopK > 0 {
+		sp.TopK = int32(*call.TopK)
+	}
+
+	if call.TopP != nil && *call.TopP > 0 {
+		sp.TopP = float32(*call.TopP)
+	}
+
 	sp.Seed = llama.DefaultSeed
 
 	sampler := llama.NewSampler(model, llama.DefaultSamplers, sp)

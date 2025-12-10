@@ -1,6 +1,7 @@
 package yzma
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -45,7 +46,7 @@ func TestEnsureModelExists(t *testing.T) {
 		err := os.WriteFile(modelPath, []byte("fake model content"), 0644)
 		require.NoError(t, err)
 
-		result, err := ensureModelExists(modelPath, "")
+		result, err := ensureModelExists(context.Background(), modelPath, "")
 		require.NoError(t, err)
 		assert.Equal(t, modelPath, result)
 	})
@@ -70,7 +71,7 @@ func TestEnsureModelExists(t *testing.T) {
 		}()
 
 		// Request model by name (not full path)
-		result, err := ensureModelExists(modelName, tmpDir)
+		result, err := ensureModelExists(context.Background(), modelName, tmpDir)
 		require.NoError(t, err)
 		assert.Equal(t, modelPath, result)
 	})
@@ -102,7 +103,7 @@ func TestEnsureModelExists(t *testing.T) {
 		}()
 
 		// Request model by name (not full path)
-		result, err := ensureModelExists(modelName, "")
+		result, err := ensureModelExists(context.Background(), modelName, "")
 		require.NoError(t, err)
 		assert.Equal(t, modelPath, result)
 	})
@@ -118,7 +119,7 @@ func TestEnsureModelExists(t *testing.T) {
 		}()
 
 		// Request a model that doesn't exist and isn't in supported list
-		_, err := ensureModelExists("nonexistent-unsupported-model.gguf", "")
+		_, err := ensureModelExists(context.Background(), "nonexistent-unsupported-model.gguf", "")
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "model file not found")
 	})
@@ -136,7 +137,7 @@ func TestEnsureModelExists(t *testing.T) {
 
 		// Request model with a fake full path (file doesn't exist at this path)
 		fakePath := filepath.Join("/nonexistent/path", modelName)
-		result, err := ensureModelExists(fakePath, tmpDir)
+		result, err := ensureModelExists(context.Background(), fakePath, tmpDir)
 		require.NoError(t, err)
 		assert.Equal(t, modelPath, result)
 	})

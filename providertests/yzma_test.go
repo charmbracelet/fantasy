@@ -11,6 +11,7 @@ import (
 var (
 	yzmaTestModels = []testModel{
 		{"Qwen2.5-VL-3B-Instruct-Q8_0.gguf", "Qwen2.5-VL-3B-Instruct-Q8_0.gguf", false},
+		{"Qwen3VL-2B-Instruct-Q8_0.gguf", "Qwen3VL-2B-Instruct-Q8_0.gguf", false},
 	}
 )
 

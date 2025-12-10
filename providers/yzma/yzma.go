@@ -81,7 +81,7 @@ func (p *yzmaProvider) Name() string {
 
 // LanguageModel implements fantasy.Provider.
 func (p *yzmaProvider) LanguageModel(ctx context.Context, modelID string) (fantasy.LanguageModel, error) {
-	model, err := newModel(modelID, p.options.modelsPath)
+	model, err := newModel(ctx, modelID, p.options.modelsPath)
 	if err != nil {
 		return nil, err
 	}

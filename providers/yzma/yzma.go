@@ -91,6 +91,10 @@ func (p *yzmaProvider) LanguageModel(ctx context.Context, modelID string) (fanta
 // ensureInstalled checks if the required yzma library is installed at the given path,
 // and downloads it if not present.
 func ensureInstalled(libPath string) error {
+	if libPath == "" {
+		return fmt.Errorf("yzma library path not specified")
+	}
+
 	libfile := filepath.Join(libPath, download.LibraryName(runtime.GOOS))
 
 	if _, err := os.Stat(libfile); !os.IsNotExist(err) {

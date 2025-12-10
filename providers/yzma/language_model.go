@@ -166,7 +166,8 @@ func (m *yzmaModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.Stre
 	messages := convertMessageContent(call.Prompt)
 
 	// Convert tools to message format for the prompt
-	if len(call.Tools) > 0 {
+	hasTools := len(call.Tools) > 0
+	if hasTools {
 		toolDefs := buildToolDefinitions(call.Tools)
 		// Prepend tool definitions as a system message
 		messages = append([]message.Message{
@@ -187,23 +188,187 @@ func (m *yzmaModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.Stre
 		tokens := llama.Tokenize(m.vocab, prompt, true, true)
 		batch := llama.BatchGetOne(tokens)
 
-		response := decodeResults(m.context, m.vocab, batch, sampler, int32(*call.MaxOutputTokens))
-		toolCalls := parseToolCalls(response)
+		maxTokens := int32(2048)
+		if call.MaxOutputTokens != nil {
+			maxTokens = int32(*call.MaxOutputTokens)
+		}
 
-		if len(toolCalls) > 0 {
-			// Emit tool calls
-			for i, tc := range toolCalls {
+		// If no tools, stream directly without buffering
+		if !hasTools {
+			if !yield(fantasy.StreamPart{
+				Type: fantasy.StreamPartTypeTextStart,
+				ID:   "0",
+			}) {
+				return
+			}
+
+			for pos := int32(0); pos < maxTokens; pos += batch.NTokens {
+				llama.Decode(m.context, batch)
+				token := llama.SamplerSample(sampler, m.context, -1)
+
+				if llama.VocabIsEOG(m.vocab, token) {
+					break
+				}
+
+				buf := make([]byte, 64)
+				length := llama.TokenToPiece(m.vocab, token, buf, 0, true)
+				delta := string(buf[:length])
+
 				if !yield(fantasy.StreamPart{
-					Type:          fantasy.StreamPartTypeToolCall,
-					ID:            strconv.Itoa(i),
-					ToolCallName:  tc.Name,
-					ToolCallInput: toJSONString(tc.Arguments),
+					Type:  fantasy.StreamPartTypeTextDelta,
+					ID:    "0",
+					Delta: delta,
+				}) {
+					return
+				}
+
+				batch = llama.BatchGetOne([]llama.Token{token})
+			}
+
+			if !yield(fantasy.StreamPart{
+				Type: fantasy.StreamPartTypeTextEnd,
+				ID:   "0",
+			}) {
+				return
+			}
+
+			yield(fantasy.StreamPart{
+				Type:         fantasy.StreamPartTypeFinish,
+				FinishReason: fantasy.FinishReasonStop,
+				Usage:        fantasy.Usage{},
+			})
+			return
+		}
+
+		// With tools: stream but also buffer to detect tool calls
+		// We use a small lookahead buffer to detect JSON start
+		var fullResponse strings.Builder
+		var pendingDeltas []string
+		textStarted := false
+		inPotentialToolCall := false
+
+		for pos := int32(0); pos < maxTokens; pos += batch.NTokens {
+			llama.Decode(m.context, batch)
+			token := llama.SamplerSample(sampler, m.context, -1)
+
+			if llama.VocabIsEOG(m.vocab, token) {
+				break
+			}
+
+			buf := make([]byte, 64)
+			length := llama.TokenToPiece(m.vocab, token, buf, 0, true)
+			delta := string(buf[:length])
+
+			fullResponse.WriteString(delta)
+			currentResponse := fullResponse.String()
+
+			// Check if response looks like it might contain tool calls
+			trimmed := strings.TrimSpace(currentResponse)
+			looksLikeToolCall := strings.HasPrefix(trimmed, "{") &&
+				(strings.Contains(trimmed, "\"name\"") || len(trimmed) < 20)
+
+			if looksLikeToolCall && !textStarted {
+				// Buffer tokens until we know if it's a tool call
+				inPotentialToolCall = true
+				pendingDeltas = append(pendingDeltas, delta)
+			} else if inPotentialToolCall {
+				// Still buffering, check if we can determine yet
+				pendingDeltas = append(pendingDeltas, delta)
+
+				// If we see "arguments", it's definitely a tool call - keep buffering
+				if strings.Contains(trimmed, "\"arguments\"") {
+					continue
+				}
+
+				// If we see enough non-JSON content, it's not a tool call
+				if len(trimmed) > 50 && !strings.Contains(trimmed, "\"name\"") {
+					// Flush pending deltas as text
+					if !textStarted {
+						if !yield(fantasy.StreamPart{
+							Type: fantasy.StreamPartTypeTextStart,
+							ID:   "0",
+						}) {
+							return
+						}
+						textStarted = true
+					}
+					for _, pd := range pendingDeltas {
+						if !yield(fantasy.StreamPart{
+							Type:  fantasy.StreamPartTypeTextDelta,
+							ID:    "0",
+							Delta: pd,
+						}) {
+							return
+						}
+					}
+					pendingDeltas = nil
+					inPotentialToolCall = false
+				}
+			} else {
+				// Normal text streaming
+				if !textStarted {
+					if !yield(fantasy.StreamPart{
+						Type: fantasy.StreamPartTypeTextStart,
+						ID:   "0",
+					}) {
+						return
+					}
+					textStarted = true
+				}
+
+				if !yield(fantasy.StreamPart{
+					Type:  fantasy.StreamPartTypeTextDelta,
+					ID:    "0",
+					Delta: delta,
 				}) {
 					return
 				}
 			}
 
-			// Emit finish with tool_calls reason
+			batch = llama.BatchGetOne([]llama.Token{token})
+		}
+
+		// Generation complete - check if we have tool calls
+		response := fullResponse.String()
+		toolCalls := parseToolCalls(response)
+
+		if len(toolCalls) > 0 {
+			// Emit tool calls (don't emit any text that was buffered)
+			for i, tc := range toolCalls {
+				if !yield(fantasy.StreamPart{
+					Type:         fantasy.StreamPartTypeToolInputStart,
+					ID:           strconv.Itoa(i),
+					ToolCallName: tc.Name,
+				}) {
+					return
+				}
+
+				argsJSON := toJSONString(tc.Arguments)
+				if !yield(fantasy.StreamPart{
+					Type:  fantasy.StreamPartTypeToolInputDelta,
+					ID:    strconv.Itoa(i),
+					Delta: argsJSON,
+				}) {
+					return
+				}
+
+				if !yield(fantasy.StreamPart{
+					Type: fantasy.StreamPartTypeToolInputEnd,
+					ID:   strconv.Itoa(i),
+				}) {
+					return
+				}
+
+				if !yield(fantasy.StreamPart{
+					Type:          fantasy.StreamPartTypeToolCall,
+					ID:            strconv.Itoa(i),
+					ToolCallName:  tc.Name,
+					ToolCallInput: argsJSON,
+				}) {
+					return
+				}
+			}
+
 			yield(fantasy.StreamPart{
 				Type:         fantasy.StreamPartTypeFinish,
 				FinishReason: fantasy.FinishReasonToolCalls,
@@ -212,29 +377,35 @@ func (m *yzmaModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.Stre
 			return
 		}
 
-		// No tool calls - emit text response
-		if !yield(fantasy.StreamPart{
-			Type: fantasy.StreamPartTypeTextStart,
-			ID:   "0",
-		}) {
-			return
-		}
-
-		if response != "" {
-			if !yield(fantasy.StreamPart{
-				Type:  fantasy.StreamPartTypeTextDelta,
-				ID:    "0",
-				Delta: response,
-			}) {
-				return
+		// No tool calls - flush any pending deltas
+		if len(pendingDeltas) > 0 {
+			if !textStarted {
+				if !yield(fantasy.StreamPart{
+					Type: fantasy.StreamPartTypeTextStart,
+					ID:   "0",
+				}) {
+					return
+				}
+				textStarted = true
+			}
+			for _, pd := range pendingDeltas {
+				if !yield(fantasy.StreamPart{
+					Type:  fantasy.StreamPartTypeTextDelta,
+					ID:    "0",
+					Delta: pd,
+				}) {
+					return
+				}
 			}
 		}
 
-		if !yield(fantasy.StreamPart{
-			Type: fantasy.StreamPartTypeTextEnd,
-			ID:   "0",
-		}) {
-			return
+		if textStarted {
+			if !yield(fantasy.StreamPart{
+				Type: fantasy.StreamPartTypeTextEnd,
+				ID:   "0",
+			}) {
+				return
+			}
 		}
 
 		yield(fantasy.StreamPart{

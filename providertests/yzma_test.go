@@ -25,12 +25,12 @@ func TestYzmaCommon(t *testing.T) {
 func yzmaBuilder(t *testing.T, model string) builderFunc {
 	provider, err := yzma.New()
 	if err != nil {
-		panic(err)
+		t.Fatal(err)
 	}
 
 	mdl, err := provider.LanguageModel(t.Context(), model)
 	if err != nil {
-		panic(err)
+		t.Fatal(err)
 	}
 
 	return func(t *testing.T, r *recorder.Recorder) (fantasy.LanguageModel, error) {

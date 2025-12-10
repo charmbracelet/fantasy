@@ -8,7 +8,7 @@ interactions:
     proto_minor: 1
     content_length: 157
     host: ""
-    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"Say hi in Portuguese","role":"user"}],"model":"glm-4.5","max_tokens":4000}'
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"Say hi in Portuguese","role":"user"}],"model":"glm-4.6v","max_tokens":4000}'
     headers:
       Accept:
       - application/json
@@ -16,7 +16,7 @@ interactions:
       - application/json
       User-Agent:
       - OpenAI/Go 2.7.1
-    url: https://api.z.ai/api/coding/paas/v4/chat/completions
+    url: https://api.z.ai/api/paas/v4/chat/completions
     method: POST
   response:
     proto: HTTP/2.0
@@ -24,7 +24,7 @@ interactions:
     proto_minor: 0
     content_length: -1
     uncompressed: true
-    body: '{"choices":[{"finish_reason":"stop","index":0,"message":{"content":"Olá!","reasoning_content":"\nThe user is asking me to say \"hi\" in Portuguese. I''ll provide the Portuguese greeting for \"hi\" or \"hello\".\n\nIn Portuguese, \"hi\" or \"hello\" is typically translated as \"Olá\". This is the common greeting used in both Brazilian and European Portuguese.\n\nI''ll respond with this greeting.","role":"assistant"}}],"created":1762854981,"id":"2025111117561942405e9f6eb547c7","model":"glm-4.5","request_id":"2025111117561942405e9f6eb547c7","usage":{"completion_tokens":72,"prompt_tokens":16,"prompt_tokens_details":{"cached_tokens":7},"total_tokens":88}}'
+    body: '{"choices":[{"finish_reason":"stop","index":0,"message":{"content":"Olá!","reasoning_content":"\nThe user is asking me to say \"hi\" in Portuguese. I''ll provide the Portuguese greeting for \"hi\" or \"hello\".\n\nIn Portuguese, \"hi\" or \"hello\" is typically translated as \"Olá\". This is the common greeting used in both Brazilian and European Portuguese.\n\nI''ll respond with this greeting.","role":"assistant"}}],"created":1762854981,"id":"2025111117561942405e9f6eb547c7","model":"glm-4.6v","request_id":"2025111117561942405e9f6eb547c7","usage":{"completion_tokens":72,"prompt_tokens":16,"prompt_tokens_details":{"cached_tokens":7},"total_tokens":88}}'
     headers:
       Content-Type:
       - application/json; charset=UTF-8

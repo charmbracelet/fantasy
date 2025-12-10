@@ -1,0 +1,33 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 622
+    host: ""
+    body: '{"messages":[{"content":"Generate information about a person named Alice who is 30 years old and lives in Paris.","role":"user"}],"model":"glm-4.5","max_tokens":4000,"tool_choice":{"function":{"name":"Person"},"type":"function"},"tools":[{"function":{"name":"Person","strict":false,"description":"A person with name, age, and city","parameters":{"properties":{"age":{"description":"The person''s age","type":"integer"},"city":{"description":"The city where the person lives","type":"string"},"name":{"description":"The person''s name","type":"string"}},"required":["name","age","city"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://api.z.ai/api/coding/paas/v4/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"choices":[{"finish_reason":"tool_calls","index":0,"message":{"content":"","reasoning_content":"\nThe user is asking me to generate information about a person named Alice who is 30 years old and lives in Paris. Looking at the available function, I have a \"Person\" function that takes three required parameters:\n- name: \"Alice\" \n- age: 30\n- city: \"Paris\"\n\nAll the required parameters are provided, so I can call this function.","role":"assistant","tool_calls":[{"function":{"arguments":"{\"age\": 30, \"city\": \"Paris\", \"name\": \"Alice\"}","name":"Person"},"id":"call_-8178200539482324764","index":0,"type":"function"}]}}],"created":1762637635,"id":"2025110905335254041e69de3b448e","model":"glm-4.5","request_id":"2025110905335254041e69de3b448e","usage":{"completion_tokens":121,"prompt_tokens":230,"prompt_tokens_details":{"cached_tokens":43},"total_tokens":351}}'
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+    status: 200 OK
+    code: 200
+    duration: 6.174196125s

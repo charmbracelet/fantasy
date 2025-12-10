@@ -18,6 +18,8 @@ func TestOpenAICompatibleCommon(t *testing.T) {
 		{"xai-grok-code-fast", builderXAIGrokCodeFast, nil, nil},
 		{"groq-kimi-k2", builderGroq, nil, nil},
 		{"zai-glm-4.5", builderZAIGLM45, nil, nil},
+		{"zai-glm-4.6v", builderZAIGLM46V, nil, nil},
+		{"zai-glm-4.6v-flash", builderZAIGLM46VFlash, nil, nil},
 		{"huggingface-qwen3-coder", builderHuggingFace, nil, nil},
 		{"llama-cpp-gpt-oss", builderLlamaCppGptOss, nil, nil},
 	})
@@ -28,6 +30,8 @@ func TestOpenAICompatObjectGeneration(t *testing.T) {
 		{"xai-grok-4-fast", builderXAIGrok4Fast, nil, nil},
 		{"xai-grok-code-fast", builderXAIGrokCodeFast, nil, nil},
 		{"zai-glm-4.5", builderZAIGLM45, nil, nil},
+		{"zai-glm-4.6v", builderZAIGLM46V, nil, nil},
+		{"zai-glm-4.6v-flash", builderZAIGLM46VFlash, nil, nil},
 	})
 }
 
@@ -40,6 +44,7 @@ func TestOpenAICompatibleThinking(t *testing.T) {
 	testThinking(t, []builderPair{
 		{"xai-grok-3-mini", builderXAIGrok3Mini, opts, nil},
 		{"zai-glm-4.5", builderZAIGLM45, opts, nil},
+		{"zai-glm-4.6v", builderZAIGLM46V, opts, nil},
 		{"llama-cpp-gpt-oss", builderLlamaCppGptOss, opts, nil},
 	}, testOpenAICompatThinking)
 }
@@ -104,6 +109,30 @@ func builderZAIGLM45(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, erro
 		return nil, err
 	}
 	return provider.LanguageModel(t.Context(), "glm-4.5")
+}
+
+func builderZAIGLM46V(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
+	provider, err := openaicompat.New(
+		openaicompat.WithBaseURL("https://api.z.ai/api/paas/v4"),
+		openaicompat.WithAPIKey(os.Getenv("FANTASY_ZAI_API_KEY")),
+		openaicompat.WithHTTPClient(&http.Client{Transport: r}),
+	)
+	if err != nil {
+		return nil, err
+	}
+	return provider.LanguageModel(t.Context(), "glm-4.6v")
+}
+
+func builderZAIGLM46VFlash(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
+	provider, err := openaicompat.New(
+		openaicompat.WithBaseURL("https://api.z.ai/api/paas/v4"),
+		openaicompat.WithAPIKey(os.Getenv("FANTASY_ZAI_API_KEY")),
+		openaicompat.WithHTTPClient(&http.Client{Transport: r}),
+	)
+	if err != nil {
+		return nil, err
+	}
+	return provider.LanguageModel(t.Context(), "glm-4.6v-flash")
 }
 
 func builderGroq(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {

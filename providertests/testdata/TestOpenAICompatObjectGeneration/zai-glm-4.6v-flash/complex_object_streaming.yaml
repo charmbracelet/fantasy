@@ -1,0 +1,446 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1012
+    host: ""
+    body: '{"messages":[{"content":"Generate information about ''The Lord of the Rings'' book by J.R.R. Tolkien, including genres like fantasy and adventure, and its publication year (1954).","role":"user"}],"model":"glm-4.5","max_tokens":4000,"stream_options":{"include_usage":true},"tool_choice":{"function":{"name":"Book"},"type":"function"},"tools":[{"function":{"name":"Book","strict":false,"description":"A book with title, author, genres, and publication year","parameters":{"properties":{"author":{"properties":{"name":{"description":"Author''s name","type":"string"},"nationality":{"description":"Author''s nationality","type":"string"}},"required":["name","nationality"],"type":"object"},"genres":{"description":"List of genres","items":{"type":"string"},"type":"array"},"published_year":{"description":"Year the book was published","type":"integer"},"title":{"description":"The book title","type":"string"}},"required":["title","author","genres","published_year"],"type":"object"}},"type":"function"}],"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://api.z.ai/api/coding/paas/v4/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning_content":"\n"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"The"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" user"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" wants"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" me"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" to"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" generate"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" information"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" about"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" \""}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"The"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" Lord"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" of"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" the"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" Rings"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"\""}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" book"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" by"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" J"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":".R"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":".R"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"."}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" Tolkien"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"."}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" They"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"'ve"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" provided"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" specific"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" details"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":":\n"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"-"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" Title"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":":"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" \""}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"The"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" Lord"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" of"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" the"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" Rings"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"\"\n"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"-"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" Author"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":":"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" J"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":".R"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":".R"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"."}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" Tolkien"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning_content":"\n"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"-"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" Gen"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"res"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":":"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" fantasy"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" and"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" adventure"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning_content":"\n"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"-"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" Publication"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" year"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":":"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning_content":" "}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"195"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"4"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning_content":"\n\n"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"I"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" need"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" to"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" use"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" the"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" Book"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" function"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" to"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" create"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" this"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" information"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"."}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" Let"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" me"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" check"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" the"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" required"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" parameters"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":":\n"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"-"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" title"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":":"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" \""}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"The"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" Lord"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" of"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" the"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" Rings"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"\""}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" ✓"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning_content":"\n"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"-"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" author"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":":"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" This"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" needs"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" to"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" be"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" an"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" object"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" with"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" name"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" and"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" nationality"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"."}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" The"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" user"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" provided"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" \""}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"J"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":".R"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":".R"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"."}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" Tolkien"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"\""}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" as"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" the"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" name"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":","}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" but"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" didn"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"'t"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" specify"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" nationality"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"."}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" I"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" should"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" use"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" a"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" reasonable"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" nationality"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" for"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" Tolkien"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" -"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" he"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" was"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" British"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"/"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"English"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":".\n"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"-"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" genres"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":":"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" [\""}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"fant"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"asy"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"\","}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" \""}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"ad"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"venture"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"\"]"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" ✓"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning_content":"\n"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"-"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" published"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"_year"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":":"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning_content":" "}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"195"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"4"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" ✓"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning_content":"\n\n"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"For"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" the"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" author"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":","}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" I"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" need"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" to"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" create"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" an"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" object"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" with"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" name"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" \""}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"J"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":".R"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":".R"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"."}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" Tolkien"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"\""}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" and"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" nationality"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"."}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" Tolkien"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" was"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" British"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":","}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" so"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" I"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"'ll"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" use"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" \""}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"British"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"\""}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" as"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" the"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":" nationality"}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"."}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"delta":{"tool_calls":[{"id":"call_94b356a0eb5f46da8edc2ac4","index":0,"type":"function","function":{"name":"Book","arguments":"{\"author\":{\"name\": \"J.R.R. Tolkien\", \"nationality\": \"British\"},\"genres\":[\"fantasy\", \"adventure\"],\"published_year\":1954,\"title\":\"The Lord of the Rings\"}"}}]}}]}
+
+      data: {"id":"202511090534097e2c534f7c00470a","created":1762637649,"model":"glm-4.5","choices":[{"index":0,"finish_reason":"tool_calls","delta":{"role":"assistant","content":""}}],"usage":{"prompt_tokens":317,"completion_tokens":272,"total_tokens":589,"prompt_tokens_details":{"cached_tokens":316}}}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream;charset=UTF-8
+    status: 200 OK
+    code: 200
+    duration: 650.778291ms

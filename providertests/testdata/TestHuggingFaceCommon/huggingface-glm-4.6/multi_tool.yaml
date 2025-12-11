@@ -1,0 +1,61 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 820
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"}],"model":"zai-org/GLM-4.6","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://router.huggingface.co/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: '{"choices":[{"finish_reason":"tool_calls","index":0,"message":{"reasoning_content":"The user wants me to add and multiply the numbers 2 and 3. According to the critical instruction, I need to use both add and multiply functions at the same time. \n\nFor add: a=2, b=3\nFor multiply: a=2, b=3\n\nI''ll call both functions.","role":"assistant","tool_calls":[{"function":{"arguments":"{\"a\":2,\"b\":3}","name":"add"},"id":"call_-8223416512122051790","index":0,"type":"function"},{"function":{"arguments":"{\"a\":2,\"b\":3}","name":"multiply"},"id":"call_-8223416512122051789","index":1,"type":"function"}]}}],"created":1761231486,"id":"20251023225801db6b652dc9124c7f","model":"glm-4.6","request_id":"20251023225801db6b652dc9124c7f","usage":{"completion_tokens":126,"prompt_tokens":286,"prompt_tokens_details":{"cached_tokens":43},"total_tokens":412}}'
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+    status: 200 OK
+    code: 200
+    duration: 5.27517675s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1229
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"tool_calls":[{"id":"call_-8223416512122051790","function":{"arguments":"{\"a\":2,\"b\":3}","name":"add"},"type":"function"},{"id":"call_-8223416512122051789","function":{"arguments":"{\"a\":2,\"b\":3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"call_-8223416512122051790","role":"tool"},{"content":"6","tool_call_id":"call_-8223416512122051789","role":"tool"}],"model":"zai-org/GLM-4.6","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://router.huggingface.co/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: '{"choices":[{"finish_reason":"stop","index":0,"message":{"content":"\n\nHere are the results for adding and multiplying 2 and 3:\n\n**Addition:** 2 + 3 = 5\n**Multiplication:** 2 × 3 = 6","reasoning_content":"Perfect! I''ve used both the add and multiply functions as requested. The results show:\n- Adding 2 and 3 gives 5\n- Multiplying 2 and 3 gives 6\n\nI should present these results clearly to the user.","role":"assistant"}}],"created":1761231489,"id":"2025102322580765e2965aefdb4735","model":"glm-4.6","request_id":"2025102322580765e2965aefdb4735","usage":{"completion_tokens":95,"prompt_tokens":345,"prompt_tokens_details":{"cached_tokens":43},"total_tokens":440}}'
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+    status: 200 OK
+    code: 200
+    duration: 3.554623834s

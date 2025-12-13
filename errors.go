@@ -3,7 +3,9 @@ package fantasy
 import (
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/charmbracelet/x/exp/slice"
@@ -53,7 +55,31 @@ func (m *ProviderError) Error() string {
 
 // IsRetryable checks if the error is retryable based on the status code.
 func (m *ProviderError) IsRetryable() bool {
-	return m.StatusCode == http.StatusRequestTimeout || m.StatusCode == http.StatusConflict || m.StatusCode == http.StatusTooManyRequests
+	// We're mostly mimicing the OpenAI's Go SDK here:
+	// https://github.com/openai/openai-go/blob/b9d280a37149430982e9dfeed16c41d27d45cfc5/internal/requestconfig/requestconfig.go#L244
+	if errors.Is(m.Cause, io.ErrUnexpectedEOF) {
+		return true
+	}
+	if m.shouldRetryHeader() {
+		return true
+	}
+	return m.StatusCode == http.StatusRequestTimeout ||
+		m.StatusCode == http.StatusConflict ||
+		m.StatusCode == http.StatusTooManyRequests ||
+		m.StatusCode >= http.StatusInternalServerError
+}
+
+func (m *ProviderError) shouldRetryHeader() (bool) {
+	if m.ResponseHeaders == nil {
+		return false
+	}
+	for k, v := range m.ResponseHeaders {
+		if strings.EqualFold(k, "x-should-retry") {
+			b, _ := strconv.ParseBool(v)
+			return b
+		}
+	}
+	return false
 }
 
 // IsContextTooLarge checks if the error is due to the context exceeding the model's limit.

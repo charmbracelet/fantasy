@@ -287,6 +287,13 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 					}
 				}
 			}
+			if !hasVisibleCompatUserContent(content) {
+				warnings = append(warnings, fantasy.CallWarning{
+					Type:    fantasy.CallWarningTypeOther,
+					Message: "dropping empty user message (contains neither user-facing content nor tool results)",
+				})
+				continue
+			}
 			messages = append(messages, openaisdk.UserMessage(content))
 		case fantasy.MessageRoleAssistant:
 			// simple assistant message just text content
@@ -358,6 +365,13 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 					"reasoning_content": reasoningText,
 				})
 			}
+			if !hasVisibleCompatAssistantContent(&assistantMsg) {
+				warnings = append(warnings, fantasy.CallWarning{
+					Type:    fantasy.CallWarningTypeOther,
+					Message: "dropping empty assistant message (contains neither user-facing content nor tool calls)",
+				})
+				continue
+			}
 			messages = append(messages, openaisdk.ChatCompletionMessageParamUnion{
 				OfAssistant: &assistantMsg,
 			})
@@ -406,4 +420,25 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 		}
 	}
 	return messages, warnings
+}
+
+func hasVisibleCompatUserContent(content []openaisdk.ChatCompletionContentPartUnionParam) bool {
+	for _, part := range content {
+		if part.OfText != nil || part.OfImageURL != nil || part.OfInputAudio != nil || part.OfFile != nil {
+			return true
+		}
+	}
+	return false
+}
+
+func hasVisibleCompatAssistantContent(msg *openaisdk.ChatCompletionAssistantMessageParam) bool {
+	// Check if there's text content
+	if !param.IsOmitted(msg.Content.OfString) || len(msg.Content.OfArrayOfContentParts) > 0 {
+		return true
+	}
+	// Check if there are tool calls
+	if len(msg.ToolCalls) > 0 {
+		return true
+	}
+	return false
 }

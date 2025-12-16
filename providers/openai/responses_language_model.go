@@ -440,9 +440,18 @@ func toResponsesPrompt(prompt fantasy.Prompt, systemMessageMode string) (respons
 				}
 			}
 
+			if !hasVisibleResponsesUserContent(contentParts) {
+				warnings = append(warnings, fantasy.CallWarning{
+					Type:    fantasy.CallWarningTypeOther,
+					Message: "dropping empty user message (contains neither user-facing content nor tool results)",
+				})
+				continue
+			}
+
 			input = append(input, responses.ResponseInputItemParamOfMessage(contentParts, responses.EasyInputMessageRoleUser))
 
 		case fantasy.MessageRoleAssistant:
+			startIdx := len(input)
 			for _, c := range msg.Content {
 				switch c.GetType() {
 				case fantasy.ContentTypeText:
@@ -513,6 +522,16 @@ func toResponsesPrompt(prompt fantasy.Prompt, systemMessageMode string) (respons
 				}
 			}
 
+			if !hasVisibleResponsesAssistantContent(input, startIdx) {
+				warnings = append(warnings, fantasy.CallWarning{
+					Type:    fantasy.CallWarningTypeOther,
+					Message: "dropping empty assistant message (contains neither user-facing content nor tool calls)",
+				})
+				// Remove any items that were added during this iteration
+				input = input[:startIdx]
+				continue
+			}
+
 		case fantasy.MessageRoleTool:
 			for _, c := range msg.Content {
 				if c.GetType() != fantasy.ContentTypeToolResult {
@@ -562,6 +581,20 @@ func toResponsesPrompt(prompt fantasy.Prompt, systemMessageMode string) (respons
 	}
 
 	return input, warnings
+}
+
+func hasVisibleResponsesUserContent(content responses.ResponseInputMessageContentListParam) bool {
+	return len(content) > 0
+}
+
+func hasVisibleResponsesAssistantContent(items []responses.ResponseInputItemUnionParam, startIdx int) bool {
+	// Check if we added any assistant content parts from this message
+	for i := startIdx; i < len(items); i++ {
+		if items[i].OfMessage != nil || items[i].OfFunctionCall != nil {
+			return true
+		}
+	}
+	return false
 }
 
 func toResponsesTools(tools []fantasy.Tool, toolChoice *fantasy.ToolChoice, options *ResponsesProviderOptions) ([]responses.ToolUnionParam, responses.ResponseNewParamsToolChoiceUnion, []fantasy.CallWarning) {

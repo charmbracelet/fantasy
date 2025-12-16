@@ -202,9 +202,10 @@ func TestToOpenAiPrompt_FileParts(t *testing.T) {
 
 		messages, warnings := DefaultToPrompt(prompt, "openai", "gpt-5")
 
-		require.Len(t, warnings, 1)
+		require.Len(t, warnings, 2) // unsupported type + empty message
 		require.Contains(t, warnings[0].Message, "file part media type application/something not supported")
-		require.Len(t, messages, 1) // Message is still created but with empty content array
+		require.Contains(t, warnings[1].Message, "dropping empty user message")
+		require.Empty(t, messages) // Message is now dropped because it's empty
 	})
 
 	t.Run("should add audio content for audio/wav file parts", func(t *testing.T) {
@@ -2855,5 +2856,335 @@ func TestDoStream(t *testing.T) {
 		require.Equal(t, int64(20), finishPart.Usage.OutputTokens)
 		require.Equal(t, int64(35), finishPart.Usage.TotalTokens)
 		require.Equal(t, int64(10), finishPart.Usage.ReasoningTokens)
+	})
+}
+
+func TestDefaultToPrompt_DropsEmptyMessages(t *testing.T) {
+	t.Parallel()
+
+	t.Run("should drop truly empty assistant messages", func(t *testing.T) {
+		t.Parallel()
+
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "Hello"},
+				},
+			},
+			{
+				Role:    fantasy.MessageRoleAssistant,
+				Content: []fantasy.MessagePart{},
+			},
+		}
+
+		messages, warnings := DefaultToPrompt(prompt, "openai", "gpt-4")
+
+		require.Len(t, messages, 1, "should only have user message")
+		require.Len(t, warnings, 1)
+		require.Equal(t, fantasy.CallWarningTypeOther, warnings[0].Type)
+		require.Contains(t, warnings[0].Message, "dropping empty assistant message")
+	})
+
+	t.Run("should keep assistant messages with text content", func(t *testing.T) {
+		t.Parallel()
+
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "Hello"},
+				},
+			},
+			{
+				Role: fantasy.MessageRoleAssistant,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "Hi there!"},
+				},
+			},
+		}
+
+		messages, warnings := DefaultToPrompt(prompt, "openai", "gpt-4")
+
+		require.Len(t, messages, 2, "should have both user and assistant messages")
+		require.Empty(t, warnings)
+	})
+
+	t.Run("should keep assistant messages with tool calls", func(t *testing.T) {
+		t.Parallel()
+
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "What's the weather?"},
+				},
+			},
+			{
+				Role: fantasy.MessageRoleAssistant,
+				Content: []fantasy.MessagePart{
+					fantasy.ToolCallPart{
+						ToolCallID: "call_123",
+						ToolName:   "get_weather",
+						Input:      `{"location":"NYC"}`,
+					},
+				},
+			},
+		}
+
+		messages, warnings := DefaultToPrompt(prompt, "openai", "gpt-4")
+
+		require.Len(t, messages, 2, "should have both user and assistant messages")
+		require.Empty(t, warnings)
+	})
+
+	t.Run("should drop user messages without visible content", func(t *testing.T) {
+		t.Parallel()
+
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.FilePart{
+						Data:      []byte("not supported"),
+						MediaType: "application/unknown",
+					},
+				},
+			},
+		}
+
+		messages, warnings := DefaultToPrompt(prompt, "openai", "gpt-4")
+
+		require.Empty(t, messages)
+		require.Len(t, warnings, 2) // One for unsupported type, one for empty message
+		require.Contains(t, warnings[1].Message, "dropping empty user message")
+	})
+
+	t.Run("should keep user messages with image content", func(t *testing.T) {
+		t.Parallel()
+
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.FilePart{
+						Data:      []byte{0x01, 0x02, 0x03},
+						MediaType: "image/png",
+					},
+				},
+			},
+		}
+
+		messages, warnings := DefaultToPrompt(prompt, "openai", "gpt-4")
+
+		require.Len(t, messages, 1)
+		require.Empty(t, warnings)
+	})
+
+	t.Run("should keep user messages with tool results", func(t *testing.T) {
+		t.Parallel()
+
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleTool,
+				Content: []fantasy.MessagePart{
+					fantasy.ToolResultPart{
+						ToolCallID: "call_123",
+						Output:     fantasy.ToolResultOutputContentText{Text: "done"},
+					},
+				},
+			},
+		}
+
+		messages, warnings := DefaultToPrompt(prompt, "openai", "gpt-4")
+
+		require.Len(t, messages, 1)
+		require.Empty(t, warnings)
+	})
+
+	t.Run("should keep user messages with tool error results", func(t *testing.T) {
+		t.Parallel()
+
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleTool,
+				Content: []fantasy.MessagePart{
+					fantasy.ToolResultPart{
+						ToolCallID: "call_456",
+						Output:     fantasy.ToolResultOutputContentError{Error: errors.New("boom")},
+					},
+				},
+			},
+		}
+
+		messages, warnings := DefaultToPrompt(prompt, "openai", "gpt-4")
+
+		require.Len(t, messages, 1)
+		require.Empty(t, warnings)
+	})
+}
+
+func TestResponsesToPrompt_DropsEmptyMessages(t *testing.T) {
+	t.Parallel()
+
+	t.Run("should drop truly empty assistant messages", func(t *testing.T) {
+		t.Parallel()
+
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "Hello"},
+				},
+			},
+			{
+				Role:    fantasy.MessageRoleAssistant,
+				Content: []fantasy.MessagePart{},
+			},
+		}
+
+		input, warnings := toResponsesPrompt(prompt, "system")
+
+		require.Len(t, input, 1, "should only have user message")
+		require.Len(t, warnings, 1)
+		require.Equal(t, fantasy.CallWarningTypeOther, warnings[0].Type)
+		require.Contains(t, warnings[0].Message, "dropping empty assistant message")
+	})
+
+	t.Run("should keep assistant messages with text content", func(t *testing.T) {
+		t.Parallel()
+
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "Hello"},
+				},
+			},
+			{
+				Role: fantasy.MessageRoleAssistant,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "Hi there!"},
+				},
+			},
+		}
+
+		input, warnings := toResponsesPrompt(prompt, "system")
+
+		require.Len(t, input, 2, "should have both user and assistant messages")
+		require.Empty(t, warnings)
+	})
+
+	t.Run("should keep assistant messages with tool calls", func(t *testing.T) {
+		t.Parallel()
+
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "What's the weather?"},
+				},
+			},
+			{
+				Role: fantasy.MessageRoleAssistant,
+				Content: []fantasy.MessagePart{
+					fantasy.ToolCallPart{
+						ToolCallID: "call_123",
+						ToolName:   "get_weather",
+						Input:      `{"location":"NYC"}`,
+					},
+				},
+			},
+		}
+
+		input, warnings := toResponsesPrompt(prompt, "system")
+
+		require.Len(t, input, 2, "should have both user and assistant messages")
+		require.Empty(t, warnings)
+	})
+
+	t.Run("should drop user messages without visible content", func(t *testing.T) {
+		t.Parallel()
+
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.FilePart{
+						Data:      []byte("not supported"),
+						MediaType: "application/unknown",
+					},
+				},
+			},
+		}
+
+		input, warnings := toResponsesPrompt(prompt, "system")
+
+		require.Empty(t, input)
+		require.Len(t, warnings, 2) // One for unsupported type, one for empty message
+		require.Contains(t, warnings[1].Message, "dropping empty user message")
+	})
+
+	t.Run("should keep user messages with image content", func(t *testing.T) {
+		t.Parallel()
+
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.FilePart{
+						Data:      []byte{0x01, 0x02, 0x03},
+						MediaType: "image/png",
+					},
+				},
+			},
+		}
+
+		input, warnings := toResponsesPrompt(prompt, "system")
+
+		require.Len(t, input, 1)
+		require.Empty(t, warnings)
+	})
+
+	t.Run("should keep user messages with tool results", func(t *testing.T) {
+		t.Parallel()
+
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleTool,
+				Content: []fantasy.MessagePart{
+					fantasy.ToolResultPart{
+						ToolCallID: "call_123",
+						Output:     fantasy.ToolResultOutputContentText{Text: "done"},
+					},
+				},
+			},
+		}
+
+		input, warnings := toResponsesPrompt(prompt, "system")
+
+		require.Len(t, input, 1)
+		require.Empty(t, warnings)
+	})
+
+	t.Run("should keep user messages with tool error results", func(t *testing.T) {
+		t.Parallel()
+
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleTool,
+				Content: []fantasy.MessagePart{
+					fantasy.ToolResultPart{
+						ToolCallID: "call_456",
+						Output:     fantasy.ToolResultOutputContentError{Error: errors.New("boom")},
+					},
+				},
+			},
+		}
+
+		input, warnings := toResponsesPrompt(prompt, "system")
+
+		require.Len(t, input, 1)
+		require.Empty(t, warnings)
 	})
 }

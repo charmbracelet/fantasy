@@ -993,15 +993,17 @@ func (a *agent) createPrompt(system, prompt string, messages []Message, files ..
 	var preparedPrompt Prompt
 
 	var newsystem string
-	if system != "" {
-		newsystem = system
-	}
+	// Check first message for system role
 	if messages[0].Role == MessageRoleSystem {
 		if len(messages[0].Content) > 0 {
 			if tp, ok := messages[0].Content[0].(TextPart); ok {
 				newsystem = tp.Text
 			}
 		}
+	}
+	// Rewrite system role with main role of agent if it exist
+	if system != "" {
+		newsystem = system
 	}
 
 	if newsystem != "" {

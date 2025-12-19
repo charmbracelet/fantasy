@@ -16,6 +16,72 @@ type Error struct {
 	Cause   error
 }
 
+// NewAIError creates a new Error for AI/provider failures.
+func NewAIError(title, message string, cause error) *Error {
+	return &Error{
+		Title:   title,
+		Message: message,
+		Cause:   cause,
+	}
+}
+
+// InvalidArgumentError represents an error caused by invalid input.
+type InvalidArgumentError struct {
+	Argument string
+	Message  string
+	Cause    error
+}
+
+// Error implements the error interface.
+func (err *InvalidArgumentError) Error() string {
+	if err.Argument != "" {
+		return fmt.Sprintf("invalid argument %s: %s", err.Argument, err.Message)
+	}
+	return fmt.Sprintf("invalid argument: %s", err.Message)
+}
+
+// Unwrap returns the underlying cause.
+func (err InvalidArgumentError) Unwrap() error {
+	return err.Cause
+}
+
+// NewInvalidArgumentError constructs an InvalidArgumentError.
+func NewInvalidArgumentError(argument, message string, cause error) error {
+	return &InvalidArgumentError{
+		Argument: argument,
+		Message:  message,
+		Cause:    cause,
+	}
+}
+
+// APICallError represents an error from an API call.
+type APICallError struct {
+	*Error
+	URL             string
+	RequestDump     string
+	StatusCode      int
+	ResponseHeaders map[string]string
+	ResponseDump    string
+	IsRetryable     bool
+}
+
+// NewAPICallError creates a new API call error.
+func NewAPICallError(message, url string, requestDump string, statusCode int, responseHeaders map[string]string, responseDump string, cause error, isRetryable bool) *APICallError {
+	if !isRetryable && statusCode != 0 {
+		isRetryable = statusCode == http.StatusRequestTimeout || statusCode == http.StatusConflict || statusCode == http.StatusTooManyRequests || statusCode >= 500
+	}
+
+	return &APICallError{
+		Error:           NewAIError("AI_APICallError", message, cause),
+		URL:             url,
+		RequestDump:     requestDump,
+		StatusCode:      statusCode,
+		ResponseHeaders: responseHeaders,
+		ResponseDump:    responseDump,
+		IsRetryable:     isRetryable,
+	}
+}
+
 func (err *Error) Error() string {
 	if err.Title == "" {
 		return err.Message

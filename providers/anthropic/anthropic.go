@@ -14,6 +14,7 @@ import (
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/object"
+	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/charmbracelet/anthropic-sdk-go"
 	"github.com/charmbracelet/anthropic-sdk-go/bedrock"
 	"github.com/charmbracelet/anthropic-sdk-go/option"
@@ -182,10 +183,12 @@ func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.L
 				bedrock.WithConfig(bedrockBasicAuthConfig(a.options.apiKey)),
 			)
 		} else {
-			clientOptions = append(
-				clientOptions,
-				bedrock.WithLoadDefaultConfig(ctx),
-			)
+			if cfg, err := config.LoadDefaultConfig(ctx); err == nil {
+				clientOptions = append(
+					clientOptions,
+					bedrock.WithConfig(cfg),
+				)
+			}
 		}
 	}
 	return languageModel{

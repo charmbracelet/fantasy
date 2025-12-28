@@ -52,6 +52,13 @@ func TestNew(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "with thinking enabled",
+			opts: []Option{
+				WithThinking(true),
+			},
+			wantErr: false,
+		},
+		{
 			name: "with all options",
 			opts: []Option{
 				WithBaseURL("https://custom.xiaomi.com/v1"),

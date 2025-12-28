@@ -20,6 +20,7 @@ type options struct {
 	headers    map[string]string
 	httpClient *http.Client
 	extraBody  map[string]any
+	thinking   bool
 }
 
 // Option configures the Xiaomi provider.
@@ -60,6 +61,13 @@ func WithExtraBody(extraBody map[string]any) Option {
 	}
 }
 
+// WithThinking enables or disables thinking mode for the Xiaomi provider.
+func WithThinking(enabled bool) Option {
+	return func(o *options) {
+		o.thinking = enabled
+	}
+}
+
 // New creates a new Xiaomi provider.
 func New(opts ...Option) (fantasy.Provider, error) {
 	o := options{
@@ -86,6 +94,12 @@ func New(opts ...Option) (fantasy.Provider, error) {
 	}
 
 	// Xiaomi thinking logic is handled via extraBody passed to WithSDKOptions
+	if o.thinking {
+		openaiOpts = append(openaiOpts, openaicompat.WithSDKOptions(openaisdk.WithJSONSet("thinking", map[string]any{
+			"type": "enabled",
+		})))
+	}
+
 	for k, v := range o.extraBody {
 		openaiOpts = append(openaiOpts, openaicompat.WithSDKOptions(openaisdk.WithJSONSet(k, v)))
 	}

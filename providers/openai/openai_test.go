@@ -2355,6 +2355,79 @@ func TestDoStream(t *testing.T) {
 		require.Equal(t, `{"value":"Sparkle Day"}`, fullInput)
 	})
 
+	t.Run("should stream tool deltas without type field (devstral-style)", func(t *testing.T) {
+		t.Parallel()
+
+		server := newStreamingMockServer()
+		defer server.close()
+
+		// Simulate devstral-style response: tool_calls without type field, finish_reason in same chunk
+		chunks := []string{
+			`data: {"id":"chatcmpl-abc123","object":"chat.completion.chunk","created":1711357598,"model":"devstral-2512","choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null}]}` + "\n\n",
+			`data: {"id":"chatcmpl-abc123","object":"chat.completion.chunk","created":1711357598,"model":"devstral-2512","choices":[{"index":0,"delta":{"tool_calls":[{"id":"tg7UYnLaz","function":{"name":"grep","arguments":"{\"pattern\": \"devstral\", \"literal_text\": true}"},"index":0}]},"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":14797,"total_tokens":14815,"completion_tokens":18}}` + "\n\n",
+			"data: [DONE]\n\n",
+		}
+		server.chunks = chunks
+
+		provider, err := New(
+			WithAPIKey("test-api-key"),
+			WithBaseURL(server.server.URL),
+		)
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "devstral-2512")
+
+		stream, err := model.Stream(context.Background(), fantasy.Call{
+			Prompt: testPrompt,
+			Tools: []fantasy.Tool{
+				fantasy.FunctionTool{
+					Name: "grep",
+					InputSchema: map[string]any{
+						"type": "object",
+						"properties": map[string]any{
+							"pattern": map[string]any{
+								"type": "string",
+							},
+							"literal_text": map[string]any{
+								"type": "boolean",
+							},
+						},
+						"required":             []string{"pattern"},
+						"additionalProperties": false,
+						"$schema":              "http://json-schema.org/draft-07/schema#",
+					},
+				},
+			},
+		})
+
+		require.NoError(t, err)
+
+		parts, err := collectStreamParts(stream)
+		require.NoError(t, err)
+
+		// Find tool-related parts
+		var toolCall *fantasy.StreamPart
+		var finishPart *fantasy.StreamPart
+
+		for i := range parts {
+			if parts[i].Type == fantasy.StreamPartTypeToolCall {
+				toolCall = &parts[i]
+			}
+			if parts[i].Type == fantasy.StreamPartTypeFinish {
+				finishPart = &parts[i]
+			}
+		}
+
+		// Verify tool call was processed
+		require.NotNil(t, toolCall, "tool call should be present")
+		require.Equal(t, "tg7UYnLaz", toolCall.ID)
+		require.Equal(t, "grep", toolCall.ToolCallName)
+		require.Equal(t, `{"pattern": "devstral", "literal_text": true}`, toolCall.ToolCallInput)
+
+		// Verify finish reason was set correctly
+		require.NotNil(t, finishPart, "finish part should be present")
+		require.Equal(t, fantasy.FinishReasonToolCalls, finishPart.FinishReason)
+	})
+
 	t.Run("should stream annotations/citations", func(t *testing.T) {
 		t.Parallel()
 

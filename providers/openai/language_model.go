@@ -411,7 +411,7 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 							}
 						} else {
 							var err error
-							if toolCallDelta.Type != "function" {
+							if toolCallDelta.Type != "" && toolCallDelta.Type != "function" {
 								err = &fantasy.Error{Title: "invalid provider response", Message: "expected 'function' type."}
 							}
 							if toolCallDelta.ID == "" {

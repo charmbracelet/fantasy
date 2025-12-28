@@ -107,3 +107,11 @@ func WithObjectMode(om fantasy.ObjectMode) Option {
 		o.objectMode = om
 	}
 }
+
+// WithLanguageModelOption adds a custom language model option to the OpenAI-compatible provider.
+// This can be used to override default behaviors like StreamExtraFunc.
+func WithLanguageModelOption(opt openai.LanguageModelOption) Option {
+	return func(o *options) {
+		o.languageModelOptions = append(o.languageModelOptions, opt)
+	}
+}

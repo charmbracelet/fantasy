@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"charm.land/fantasy"
@@ -14,6 +15,61 @@ import (
 )
 
 const reasoningStartedCtx = "reasoning_started"
+
+// normalizeToolCallID normalizes tool call IDs to ensure compatibility with different providers.
+// It converts UUID-style IDs and other formats to a 9-character alphanumeric format
+// that is compatible with providers like Mistral that have specific ID requirements.
+func normalizeToolCallID(id string) string {
+	// Remove all non-alphanumeric characters first
+	re := regexp.MustCompile(`[^a-zA-Z0-9]`)
+	cleaned := re.ReplaceAllString(id, "")
+
+	// If we have at least 9 alphanumeric characters, use the first 9
+	if len(cleaned) >= 9 {
+		return cleaned[:9]
+	}
+
+	// If we have some alphanumeric characters but fewer than 9, pad them
+	if len(cleaned) > 0 {
+		return padToLength(cleaned, 9)
+	}
+
+	// If we have no alphanumeric characters at all, generate a default ID
+	// Use a hash-like approach based on the original string to ensure consistency
+	return generateDefaultID(id)
+}
+
+// padToLength pads a string to the specified length with deterministic alphanumeric characters
+func padToLength(s string, length int) string {
+	if len(s) >= length {
+		return s[:length]
+	}
+
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	result := []byte(s)
+	for i := len(s); i < length; i++ {
+		// Use a simple hash of the input string to ensure deterministic padding
+		result = append(result, charset[(i+len(s))%len(charset)])
+	}
+	return string(result)
+}
+
+// generateDefaultID generates a default 9-character alphanumeric ID for edge cases
+func generateDefaultID(input string) string {
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	result := make([]byte, 9)
+
+	// Use a simple hash of the input string to generate deterministic IDs
+	for i := 0; i < 9; i++ {
+		if i < len(input) {
+			result[i] = charset[int(input[i])%len(charset)]
+		} else {
+			// Pad with a pattern for very short inputs
+			result[i] = charset[(i*7)%len(charset)]
+		}
+	}
+	return string(result)
+}
 
 // PrepareCallFunc prepares the call for the language model.
 func PrepareCallFunc(_ fantasy.LanguageModel, params *openaisdk.ChatCompletionNewParams, call fantasy.Call) ([]fantasy.CallWarning, error) {
@@ -346,10 +402,12 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 						})
 						continue
 					}
-					assistantMsg.ToolCalls = append(assistantMsg.ToolCalls,
+					// Normalize tool call ID to ensure compatibility with different providers
+				normalizedToolCallID := normalizeToolCallID(toolCallPart.ToolCallID)
+				assistantMsg.ToolCalls = append(assistantMsg.ToolCalls,
 						openaisdk.ChatCompletionMessageToolCallUnionParam{
 							OfFunction: &openaisdk.ChatCompletionMessageFunctionToolCallParam{
-								ID:   toolCallPart.ToolCallID,
+								ID:   normalizedToolCallID,
 								Type: "function",
 								Function: openaisdk.ChatCompletionMessageFunctionToolCallFunctionParam{
 									Name:      toolCallPart.ToolName,
@@ -404,7 +462,9 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 						})
 						continue
 					}
-					messages = append(messages, openaisdk.ToolMessage(output.Text, toolResultPart.ToolCallID))
+					// Normalize tool call ID for tool results as well
+					normalizedToolCallID := normalizeToolCallID(toolResultPart.ToolCallID)
+					messages = append(messages, openaisdk.ToolMessage(output.Text, normalizedToolCallID))
 				case fantasy.ToolResultContentTypeError:
 					output, ok := fantasy.AsToolResultOutputType[fantasy.ToolResultOutputContentError](toolResultPart.Output)
 					if !ok {
@@ -414,7 +474,9 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 						})
 						continue
 					}
-					messages = append(messages, openaisdk.ToolMessage(output.Error.Error(), toolResultPart.ToolCallID))
+					// Normalize tool call ID for error results as well
+					normalizedToolCallID := normalizeToolCallID(toolResultPart.ToolCallID)
+					messages = append(messages, openaisdk.ToolMessage(output.Error.Error(), normalizedToolCallID))
 				}
 			}
 		}

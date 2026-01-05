@@ -1,0 +1,158 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 437
+    host: ollama.com
+    body: '{"max_tokens":4000,"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"}],"model":"gpt-oss:20b-cloud","stream":true,"tools":[{"function":{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Content-Type:
+      - application/json
+    url: https://ollama.com/api/chat
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:39.844795985Z","message":{"role":"assistant","content":"","thinking":"We"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:39.851694169Z","message":{"role":"assistant","content":"","thinking":" need"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:39.858258097Z","message":{"role":"assistant","content":"","thinking":" to"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:39.865114365Z","message":{"role":"assistant","content":"","thinking":" call"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:39.871929374Z","message":{"role":"assistant","content":"","thinking":" weather"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:39.878880757Z","message":{"role":"assistant","content":"","thinking":" function"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:39.885913356Z","message":{"role":"assistant","content":"","thinking":" with"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:39.892827394Z","message":{"role":"assistant","content":"","thinking":" location"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:39.899886239Z","message":{"role":"assistant","content":"","thinking":" \""},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:39.90731975Z","message":{"role":"assistant","content":"","thinking":"Flor"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:39.913747504Z","message":{"role":"assistant","content":"","thinking":"ence"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:39.920528356Z","message":{"role":"assistant","content":"","thinking":","},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:39.927337193Z","message":{"role":"assistant","content":"","thinking":" Italy"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:39.93446389Z","message":{"role":"assistant","content":"","thinking":"\"."},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.093767116Z","message":{"role":"assistant","content":"","tool_calls":[{"id":"call_ytevilpe","function":{"index":0,"name":"weather","arguments":{"location":"Florence, Italy"}}}]},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.314474257Z","message":{"role":"assistant","content":""},"done":true,"done_reason":"stop","total_duration":580154958,"prompt_eval_count":142,"eval_count":40}
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 359.197584ms
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 729
+    host: ollama.com
+    body: '{"max_tokens":4000,"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"content":"We need to call weather function with location \"Florence, Italy\".","role":"assistant","tool_calls":[{"function":{"arguments":{"location":"Florence, Italy"},"name":"weather"},"id":"0","type":"function"}]},{"content":"40 C","role":"tool","tool_call_id":"0","tool_name":"weather"}],"model":"gpt-oss:20b-cloud","stream":true,"tools":[{"function":{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Content-Type:
+      - application/json
+    url: https://ollama.com/api/chat
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.688990044Z","message":{"role":"assistant","content":"","thinking":"The"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.695221301Z","message":{"role":"assistant","content":"","thinking":" function"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.701506189Z","message":{"role":"assistant","content":"","thinking":" returned"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.708062215Z","message":{"role":"assistant","content":"","thinking":" a"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.713307658Z","message":{"role":"assistant","content":"","thinking":" simple"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.719609383Z","message":{"role":"assistant","content":"","thinking":" value"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.726400391Z","message":{"role":"assistant","content":"","thinking":" \""},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.732152914Z","message":{"role":"assistant","content":"","thinking":"40"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.73842357Z","message":{"role":"assistant","content":"","thinking":" C"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.744544269Z","message":{"role":"assistant","content":"","thinking":"\","},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.750716224Z","message":{"role":"assistant","content":"","thinking":" presumably"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.756630015Z","message":{"role":"assistant","content":"","thinking":" current"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.762975461Z","message":{"role":"assistant","content":"","thinking":" temperature"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.76913372Z","message":{"role":"assistant","content":"","thinking":"?"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.775040348Z","message":{"role":"assistant","content":"","thinking":" Could"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.781188084Z","message":{"role":"assistant","content":"","thinking":" also"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.787426215Z","message":{"role":"assistant","content":"","thinking":" need"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.793742012Z","message":{"role":"assistant","content":"","thinking":" interpretation"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.799858493Z","message":{"role":"assistant","content":"","thinking":"."},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.805873641Z","message":{"role":"assistant","content":"","thinking":" Provide"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.811929434Z","message":{"role":"assistant","content":"","thinking":" answer"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.817966671Z","message":{"role":"assistant","content":"","thinking":":"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.824010017Z","message":{"role":"assistant","content":"","thinking":" \""},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.830192391Z","message":{"role":"assistant","content":"","thinking":"It's"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.836110421Z","message":{"role":"assistant","content":"","thinking":" currently"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.842609756Z","message":{"role":"assistant","content":"","thinking":" about"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.84872076Z","message":{"role":"assistant","content":"","thinking":" "},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.855120585Z","message":{"role":"assistant","content":"","thinking":"40"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.861108492Z","message":{"role":"assistant","content":"","thinking":"°C"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.867990876Z","message":{"role":"assistant","content":"","thinking":" in"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.873499407Z","message":{"role":"assistant","content":"","thinking":" Florence"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.87939773Z","message":{"role":"assistant","content":"","thinking":".\""},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.885220857Z","message":{"role":"assistant","content":"","thinking":" Also"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.891475583Z","message":{"role":"assistant","content":"","thinking":" mention"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.897902503Z","message":{"role":"assistant","content":"","thinking":" occasional"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.903559529Z","message":{"role":"assistant","content":"","thinking":" details"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.909568367Z","message":{"role":"assistant","content":"","thinking":" maybe"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.915710721Z","message":{"role":"assistant","content":"","thinking":"."},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.958249804Z","message":{"role":"assistant","content":"**"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.964601085Z","message":{"role":"assistant","content":"Flor"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.970864467Z","message":{"role":"assistant","content":"ence"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.976634348Z","message":{"role":"assistant","content":","},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.982627365Z","message":{"role":"assistant","content":" Italy"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.988555546Z","message":{"role":"assistant","content":" ("},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:40.994650363Z","message":{"role":"assistant","content":"today"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.001086177Z","message":{"role":"assistant","content":")**"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.006784494Z","message":{"role":"assistant","content":"  \n"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.066250982Z","message":{"role":"assistant","content":"-"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.073843485Z","message":{"role":"assistant","content":" **"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.080091707Z","message":{"role":"assistant","content":"Temperature"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.08647171Z","message":{"role":"assistant","content":":**"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.092430136Z","message":{"role":"assistant","content":" ~"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.099025659Z","message":{"role":"assistant","content":"40"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.105722776Z","message":{"role":"assistant","content":" "},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.112167539Z","message":{"role":"assistant","content":"°C"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.11993378Z","message":{"role":"assistant","content":" ("},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.12525553Z","message":{"role":"assistant","content":"104"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.13180506Z","message":{"role":"assistant","content":" "},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.139002545Z","message":{"role":"assistant","content":"°F"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.144903639Z","message":{"role":"assistant","content":")"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.151929963Z","message":{"role":"assistant","content":"  \n"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.157697743Z","message":{"role":"assistant","content":"-"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.163990826Z","message":{"role":"assistant","content":" **"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.170786729Z","message":{"role":"assistant","content":"Conditions"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.177296894Z","message":{"role":"assistant","content":":**"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.183963262Z","message":{"role":"assistant","content":" Mostly"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.190607704Z","message":{"role":"assistant","content":" sunny"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.197196394Z","message":{"role":"assistant","content":" with"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.203719351Z","message":{"role":"assistant","content":" a"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.210248434Z","message":{"role":"assistant","content":" light"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.216740281Z","message":{"role":"assistant","content":" breeze"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.223776957Z","message":{"role":"assistant","content":"."},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.229220482Z","message":{"role":"assistant","content":"  \n\n"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.236023153Z","message":{"role":"assistant","content":"If"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.242632829Z","message":{"role":"assistant","content":" you"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.248890326Z","message":{"role":"assistant","content":" need"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.255555613Z","message":{"role":"assistant","content":" more"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.262229426Z","message":{"role":"assistant","content":" detailed"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.268599112Z","message":{"role":"assistant","content":" forecasts"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.274849834Z","message":{"role":"assistant","content":" or"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.280318184Z","message":{"role":"assistant","content":" hourly"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.287333071Z","message":{"role":"assistant","content":" updates"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.29363224Z","message":{"role":"assistant","content":","},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.30025127Z","message":{"role":"assistant","content":" let"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.306679192Z","message":{"role":"assistant","content":" me"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.312846618Z","message":{"role":"assistant","content":" know"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.319384099Z","message":{"role":"assistant","content":"!"},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.325821218Z","message":{"role":"assistant","content":""},"done":false}
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:41.529962388Z","message":{"role":"assistant","content":""},"done":true,"done_reason":"stop","total_duration":966868401,"prompt_eval_count":194,"eval_count":97}
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 369.2365ms

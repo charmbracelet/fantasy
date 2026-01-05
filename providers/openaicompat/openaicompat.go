@@ -107,3 +107,10 @@ func WithObjectMode(om fantasy.ObjectMode) Option {
 		o.objectMode = om
 	}
 }
+
+// WithUseResponsesAPI configures the provider to use the responses API for models that support it.
+func WithUseResponsesAPI() Option {
+	return func(o *options) {
+		o.openaiOptions = append(o.openaiOptions, openai.WithUseResponsesAPI())
+	}
+}

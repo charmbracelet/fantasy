@@ -1,0 +1,209 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 769
+    host: ollama.com
+    body: '{"max_tokens":4000,"messages":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"}],"model":"gpt-oss:120b-cloud","stream":true,"tools":[{"function":{"description":"Add two numbers","name":"add","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"description":"Multiply two numbers","name":"multiply","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Content-Type:
+      - application/json
+    url: https://ollama.com/api/chat
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.076204667Z","message":{"role":"assistant","content":"","thinking":"The"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.081893303Z","message":{"role":"assistant","content":"","thinking":" user"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.087943815Z","message":{"role":"assistant","content":"","thinking":" says"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.093871668Z","message":{"role":"assistant","content":"","thinking":":"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.099675719Z","message":{"role":"assistant","content":"","thinking":" \""},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.105672992Z","message":{"role":"assistant","content":"","thinking":"Add"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.111779476Z","message":{"role":"assistant","content":"","thinking":" and"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.232980405Z","message":{"role":"assistant","content":"","thinking":" multiply"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.232992971Z","message":{"role":"assistant","content":"","thinking":" the"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.23300066Z","message":{"role":"assistant","content":"","thinking":" number"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.233009487Z","message":{"role":"assistant","content":"","thinking":" "},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.233015587Z","message":{"role":"assistant","content":"","thinking":"2"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.233022782Z","message":{"role":"assistant","content":"","thinking":" and"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.233118595Z","message":{"role":"assistant","content":"","thinking":" "},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.233138093Z","message":{"role":"assistant","content":"","thinking":"3"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.233149107Z","message":{"role":"assistant","content":"","thinking":"\"."},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.233157299Z","message":{"role":"assistant","content":"","thinking":" The"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.233165459Z","message":{"role":"assistant","content":"","thinking":" developer"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.233172137Z","message":{"role":"assistant","content":"","thinking":" instruction"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.233180751Z","message":{"role":"assistant","content":"","thinking":" says"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.233187151Z","message":{"role":"assistant","content":"","thinking":":"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.233193851Z","message":{"role":"assistant","content":"","thinking":" \""},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.233201708Z","message":{"role":"assistant","content":"","thinking":"Always"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.244502166Z","message":{"role":"assistant","content":"","thinking":" use"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.244512941Z","message":{"role":"assistant","content":"","thinking":" both"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.244521204Z","message":{"role":"assistant","content":"","thinking":" add"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.244527736Z","message":{"role":"assistant","content":"","thinking":" and"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.244534324Z","message":{"role":"assistant","content":"","thinking":" multiply"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.244540476Z","message":{"role":"assistant","content":"","thinking":" at"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.247380416Z","message":{"role":"assistant","content":"","thinking":" the"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.253656069Z","message":{"role":"assistant","content":"","thinking":" same"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.259313416Z","message":{"role":"assistant","content":"","thinking":" time"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.26548755Z","message":{"role":"assistant","content":"","thinking":".\""},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.271146871Z","message":{"role":"assistant","content":"","thinking":" So"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.277143366Z","message":{"role":"assistant","content":"","thinking":" we"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.283362287Z","message":{"role":"assistant","content":"","thinking":" need"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.289111894Z","message":{"role":"assistant","content":"","thinking":" to"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.294832636Z","message":{"role":"assistant","content":"","thinking":" call"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.301049642Z","message":{"role":"assistant","content":"","thinking":" both"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.306722748Z","message":{"role":"assistant","content":"","thinking":" functions"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.312646704Z","message":{"role":"assistant","content":"","thinking":":"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.318660895Z","message":{"role":"assistant","content":"","thinking":" add"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.32452607Z","message":{"role":"assistant","content":"","thinking":" with"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.401298191Z","message":{"role":"assistant","content":"","thinking":" a"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.401307753Z","message":{"role":"assistant","content":"","thinking":"="},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.401314781Z","message":{"role":"assistant","content":"","thinking":"2"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.401327273Z","message":{"role":"assistant","content":"","thinking":",b"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.401333805Z","message":{"role":"assistant","content":"","thinking":"="},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.401342862Z","message":{"role":"assistant","content":"","thinking":"3"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.401349457Z","message":{"role":"assistant","content":"","thinking":" and"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.401356271Z","message":{"role":"assistant","content":"","thinking":" multiply"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.401364048Z","message":{"role":"assistant","content":"","thinking":" with"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.40136992Z","message":{"role":"assistant","content":"","thinking":" a"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.401375516Z","message":{"role":"assistant","content":"","thinking":"="},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.401381096Z","message":{"role":"assistant","content":"","thinking":"2"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.401592126Z","message":{"role":"assistant","content":"","thinking":",b"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.407491152Z","message":{"role":"assistant","content":"","thinking":"="},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.41351614Z","message":{"role":"assistant","content":"","thinking":"3"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.419046757Z","message":{"role":"assistant","content":"","thinking":"."},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.425050948Z","message":{"role":"assistant","content":"","thinking":" And"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.431231364Z","message":{"role":"assistant","content":"","thinking":" then"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.437041389Z","message":{"role":"assistant","content":"","thinking":" produce"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.44261294Z","message":{"role":"assistant","content":"","thinking":" an"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.448364868Z","message":{"role":"assistant","content":"","thinking":" answer"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.454590413Z","message":{"role":"assistant","content":"","thinking":" including"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.460145272Z","message":{"role":"assistant","content":"","thinking":" both"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.466417513Z","message":{"role":"assistant","content":"","thinking":" results"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.472097959Z","message":{"role":"assistant","content":"","thinking":".\n\n"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.47784738Z","message":{"role":"assistant","content":"","thinking":"Thus"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.483580518Z","message":{"role":"assistant","content":"","thinking":" we"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.489465984Z","message":{"role":"assistant","content":"","thinking":" need"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.495325204Z","message":{"role":"assistant","content":"","thinking":" to"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.501277238Z","message":{"role":"assistant","content":"","thinking":" call"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.507056727Z","message":{"role":"assistant","content":"","thinking":" functions"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.513022641Z","message":{"role":"assistant","content":"","thinking":".add"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.518869921Z","message":{"role":"assistant","content":"","thinking":" and"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.524899607Z","message":{"role":"assistant","content":"","thinking":" functions"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.530770433Z","message":{"role":"assistant","content":"","thinking":".multiply"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.537212921Z","message":{"role":"assistant","content":"","thinking":"."},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.54263113Z","message":{"role":"assistant","content":"","thinking":" Then"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.548647888Z","message":{"role":"assistant","content":"","thinking":" respond"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.554294557Z","message":{"role":"assistant","content":"","thinking":"."},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.759327187Z","message":{"role":"assistant","content":"","tool_calls":[{"id":"call_wsusz1ef","function":{"index":0,"name":"add","arguments":{"a":2,"b":3}}}]},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:13.950784042Z","message":{"role":"assistant","content":""},"done":true,"done_reason":"stop","total_duration":1545102082,"prompt_eval_count":197,"eval_count":116}
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 915.118875ms
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1314
+    host: ollama.com
+    body: '{"max_tokens":4000,"messages":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"content":"The user says: \"Add and multiply the number 2 and 3\". The developer instruction says: \"Always use both add and multiply at the same time.\" So we need to call both functions: add with a=2,b=3 and multiply with a=2,b=3. And then produce an answer including both results.\n\nThus we need to call functions.add and functions.multiply. Then respond.","role":"assistant","tool_calls":[{"function":{"arguments":{"a":2,"b":3},"name":"add"},"id":"0","type":"function"}]},{"content":"5","role":"tool","tool_call_id":"0","tool_name":"add"}],"model":"gpt-oss:120b-cloud","stream":true,"tools":[{"function":{"description":"Add two numbers","name":"add","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"description":"Multiply two numbers","name":"multiply","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Content-Type:
+      - application/json
+    url: https://ollama.com/api/chat
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:14.635488734Z","message":{"role":"assistant","content":"","tool_calls":[{"id":"call_jzq54crd","function":{"index":0,"name":"multiply","arguments":{"a":2,"b":3}}}]},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:14.82567985Z","message":{"role":"assistant","content":""},"done":true,"done_reason":"stop","total_duration":629577887,"prompt_eval_count":317,"eval_count":21}
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 681.563667ms
+- id: 2
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1521
+    host: ollama.com
+    body: '{"max_tokens":4000,"messages":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"content":"The user says: \"Add and multiply the number 2 and 3\". The developer instruction says: \"Always use both add and multiply at the same time.\" So we need to call both functions: add with a=2,b=3 and multiply with a=2,b=3. And then produce an answer including both results.\n\nThus we need to call functions.add and functions.multiply. Then respond.","role":"assistant","tool_calls":[{"function":{"arguments":{"a":2,"b":3},"name":"add"},"id":"0","type":"function"}]},{"content":"5","role":"tool","tool_call_id":"0","tool_name":"add"},{"content":"","role":"assistant","tool_calls":[{"function":{"arguments":{"a":2,"b":3},"name":"multiply"},"id":"0","type":"function"}]},{"content":"6","role":"tool","tool_call_id":"0","tool_name":"multiply"}],"model":"gpt-oss:120b-cloud","stream":true,"tools":[{"function":{"description":"Add two numbers","name":"add","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"description":"Multiply two numbers","name":"multiply","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Content-Type:
+      - application/json
+    url: https://ollama.com/api/chat
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.350452488Z","message":{"role":"assistant","content":"Here"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.357297612Z","message":{"role":"assistant","content":" are"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.363352134Z","message":{"role":"assistant","content":" the"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.369845839Z","message":{"role":"assistant","content":" results"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.376192497Z","message":{"role":"assistant","content":" for"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.382454428Z","message":{"role":"assistant","content":" the"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.388755619Z","message":{"role":"assistant","content":" numbers"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.395552969Z","message":{"role":"assistant","content":" "},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.401924716Z","message":{"role":"assistant","content":"2"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.40839711Z","message":{"role":"assistant","content":" and"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.415035827Z","message":{"role":"assistant","content":" "},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.421420403Z","message":{"role":"assistant","content":"3"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.427672253Z","message":{"role":"assistant","content":":\n\n"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.434710702Z","message":{"role":"assistant","content":"-"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.44074558Z","message":{"role":"assistant","content":" **"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.447215544Z","message":{"role":"assistant","content":"Addition"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.453825848Z","message":{"role":"assistant","content":" ("},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.46017219Z","message":{"role":"assistant","content":"2"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.466620249Z","message":{"role":"assistant","content":" "},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.487949579Z","message":{"role":"assistant","content":"+"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.487958869Z","message":{"role":"assistant","content":" "},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.487966689Z","message":{"role":"assistant","content":"3"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.492173731Z","message":{"role":"assistant","content":")**"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.498729468Z","message":{"role":"assistant","content":" ="},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.505039319Z","message":{"role":"assistant","content":" **"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.51218018Z","message":{"role":"assistant","content":"5"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.51768472Z","message":{"role":"assistant","content":"**"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.524298007Z","message":{"role":"assistant","content":"  \n"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.530681029Z","message":{"role":"assistant","content":"-"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.536621009Z","message":{"role":"assistant","content":" **"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.543847777Z","message":{"role":"assistant","content":"Multip"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.549971524Z","message":{"role":"assistant","content":"lication"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.556381304Z","message":{"role":"assistant","content":" ("},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.562377212Z","message":{"role":"assistant","content":"2"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.568947714Z","message":{"role":"assistant","content":" "},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.575672609Z","message":{"role":"assistant","content":"×"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.581724146Z","message":{"role":"assistant","content":" "},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.588180844Z","message":{"role":"assistant","content":"3"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.595104146Z","message":{"role":"assistant","content":")**"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.601277049Z","message":{"role":"assistant","content":" ="},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.607821329Z","message":{"role":"assistant","content":" **"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.614426765Z","message":{"role":"assistant","content":"6"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.620404337Z","message":{"role":"assistant","content":"**"},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.627572953Z","message":{"role":"assistant","content":""},"done":false}
+      {"model":"gpt-oss:120b","created_at":"2026-01-05T11:28:15.812611327Z","message":{"role":"assistant","content":""},"done":true,"done_reason":"stop","total_duration":740697164,"prompt_eval_count":349,"eval_count":47}
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 522.799667ms

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"iter"
+	"strings"
 )
 
 // Usage represents token usage statistics for a model call.
@@ -57,11 +58,11 @@ func (r ResponseContent) Reasoning() []ReasoningContent {
 
 // ReasoningText returns all reasoning content as a concatenated string.
 func (r ResponseContent) ReasoningText() string {
-	var text string
+	var builder strings.Builder
 	for _, reasoning := range r.Reasoning() {
-		text += reasoning.Text
+		builder.WriteString(reasoning.Text)
 	}
-	return text
+	return builder.String()
 }
 
 // Files returns all file content parts.

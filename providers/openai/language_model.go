@@ -648,14 +648,18 @@ func parseAnnotationsFromDelta(delta openai.ChatCompletionChunkChoiceDelta) []op
 			if annotationMap, ok := annotationData.(map[string]any); ok {
 				if annotationType, ok := annotationMap["type"].(string); ok && annotationType == "url_citation" {
 					if urlCitationData, ok := annotationMap["url_citation"].(map[string]any); ok {
-						annotation := openai.ChatCompletionMessageAnnotation{
-							Type: "url_citation",
-							URLCitation: openai.ChatCompletionMessageAnnotationURLCitation{
-								URL:   urlCitationData["url"].(string),
-								Title: urlCitationData["title"].(string),
-							},
+						url, urlOk := urlCitationData["url"].(string)
+						title, titleOk := urlCitationData["title"].(string)
+						if urlOk && titleOk {
+							annotation := openai.ChatCompletionMessageAnnotation{
+								Type: "url_citation",
+								URLCitation: openai.ChatCompletionMessageAnnotationURLCitation{
+									URL:   url,
+									Title: title,
+								},
+							}
+							annotations = append(annotations, annotation)
 						}
-						annotations = append(annotations, annotation)
 					}
 				}
 			}

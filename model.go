@@ -34,7 +34,9 @@ type ResponseContent []Content
 func (r ResponseContent) Text() string {
 	for _, c := range r {
 		if c.GetType() == ContentTypeText {
-			return c.(TextContent).Text
+			if textContent, ok := AsContentType[TextContent](c); ok {
+				return textContent.Text
+			}
 		}
 	}
 	return ""

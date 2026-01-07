@@ -410,33 +410,47 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 								toolCalls[toolCallDelta.Index] = existingToolCall
 							}
 						} else {
-							var err error
-							if toolCallDelta.Type != "function" {
-								err = &fantasy.Error{Title: "invalid provider response", Message: "expected 'function' type."}
+							// Some OpenAI-compatible providers (e.g., Ollama) may not include
+							// all fields in streaming tool call chunks. We handle this by
+							// using defaults for missing fields while maintaining compatibility
+							// with providers that do include all fields.
+
+							// Default type to "function" if not provided
+							toolType := toolCallDelta.Type
+							if toolType == "" {
+								toolType = "function"
 							}
-							if toolCallDelta.ID == "" {
-								err = &fantasy.Error{Title: "invalid provider response", Message: "expected 'id' to be a string."}
-							}
-							if toolCallDelta.Function.Name == "" {
-								err = &fantasy.Error{Title: "invalid provider response", Message: "expected 'function.name' to be a string."}
-							}
-							if err != nil {
+							if toolType != "function" {
+								// Only error on explicitly wrong type, not missing type
 								yield(fantasy.StreamPart{
 									Type:  fantasy.StreamPartTypeError,
-									Error: toProviderErr(stream.Err()),
+									Error: &fantasy.Error{Title: "invalid provider response", Message: "expected 'function' type."},
 								})
 								return
 							}
 
+							// Generate synthetic ID from index if not provided
+							// This is needed for providers like Ollama that don't include ID
+							toolID := toolCallDelta.ID
+							if toolID == "" {
+								toolID = fmt.Sprintf("tool-call-%d", toolCallDelta.Index)
+							}
+
+							// Some providers may send empty delta chunks. Skip them
+							// but only if they have no useful information at all.
+							if toolCallDelta.Function.Name == "" && toolCallDelta.Function.Arguments == "" {
+								continue
+							}
+
 							if !yield(fantasy.StreamPart{
 								Type:         fantasy.StreamPartTypeToolInputStart,
-								ID:           toolCallDelta.ID,
+								ID:           toolID,
 								ToolCallName: toolCallDelta.Function.Name,
 							}) {
 								return
 							}
 							toolCalls[toolCallDelta.Index] = streamToolCall{
-								id:        toolCallDelta.ID,
+								id:        toolID,
 								name:      toolCallDelta.Function.Name,
 								arguments: toolCallDelta.Function.Arguments,
 							}
@@ -453,7 +467,7 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 								if xjson.IsValid(toolCalls[toolCallDelta.Index].arguments) {
 									if !yield(fantasy.StreamPart{
 										Type: fantasy.StreamPartTypeToolInputEnd,
-										ID:   toolCallDelta.ID,
+										ID:   exTc.id,
 									}) {
 										return
 									}

@@ -1088,10 +1088,7 @@ func (g *languageModel) streamObjectWithJSONMode(ctx context.Context, call fanta
 
 		// Final validation and emit
 		if streamErr == nil && lastParsedObject != nil {
-			finishReason := lastFinishReason
-			if finishReason == "" {
-				finishReason = fantasy.FinishReasonStop
-			}
+			finishReason := cmp.Or(lastFinishReason, fantasy.FinishReasonStop)
 
 			var finalUsage fantasy.Usage
 			if usage != nil {
@@ -1105,7 +1102,7 @@ func (g *languageModel) streamObjectWithJSONMode(ctx context.Context, call fanta
 			})
 		} else if streamErr == nil && lastParsedObject == nil {
 			// No object was generated
-			finalUsage := fantasy.Usage{}
+			var finalUsage fantasy.Usage
 			if usage != nil {
 				finalUsage = *usage
 			}
@@ -1130,7 +1127,7 @@ func toGoogleTools(tools []fantasy.Tool, toolChoice *fantasy.ToolChoice) (google
 				continue
 			}
 
-			required := []string{}
+			var required []string
 			var properties map[string]any
 			if props, ok := ft.InputSchema["properties"]; ok {
 				properties, _ = props.(map[string]any)

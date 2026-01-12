@@ -842,7 +842,7 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 			finishReason = fantasy.FinishReasonStop
 		}
 
-		finalUsage := fantasy.Usage{}
+		var finalUsage fantasy.Usage
 		if usage != nil {
 			finalUsage = *usage
 		}
@@ -1093,7 +1093,7 @@ func (g *languageModel) streamObjectWithJSONMode(ctx context.Context, call fanta
 				finishReason = fantasy.FinishReasonStop
 			}
 
-			finalUsage := fantasy.Usage{}
+			var finalUsage fantasy.Usage
 			if usage != nil {
 				finalUsage = *usage
 			}

@@ -842,9 +842,14 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 			finishReason = fantasy.FinishReasonStop
 		}
 
+		finalUsage := fantasy.Usage{}
+		if usage != nil {
+			finalUsage = *usage
+		}
+
 		yield(fantasy.StreamPart{
 			Type:         fantasy.StreamPartTypeFinish,
-			Usage:        *usage,
+			Usage:        finalUsage,
 			FinishReason: finishReason,
 		})
 	}, nil
@@ -1088,9 +1093,14 @@ func (g *languageModel) streamObjectWithJSONMode(ctx context.Context, call fanta
 				finishReason = fantasy.FinishReasonStop
 			}
 
+			finalUsage := fantasy.Usage{}
+			if usage != nil {
+				finalUsage = *usage
+			}
+
 			yield(fantasy.ObjectStreamPart{
 				Type:         fantasy.ObjectStreamPartTypeFinish,
-				Usage:        *usage,
+				Usage:        finalUsage,
 				FinishReason: finishReason,
 			})
 		} else if streamErr == nil && lastParsedObject == nil {

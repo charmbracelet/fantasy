@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 458
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"}],"model":"grok-code-fast-1","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://api.x.ai/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"id":"7ad9f5dd-dc2b-b27c-9be3-85ef47e7764f_us-east-1","object":"chat.completion","created":1761231385,"model":"grok-code-fast-1","choices":[{"index":0,"message":{"role":"assistant","content":"","tool_calls":[{"id":"call_08419012","function":{"name":"weather","arguments":"{\"location\":\"Florence,Italy\"}"},"type":"function"}],"refusal":null},"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":390,"completion_tokens":26,"total_tokens":519,"prompt_tokens_details":{"text_tokens":390,"audio_tokens":0,"image_tokens":0,"cached_tokens":320},"completion_tokens_details":{"reasoning_tokens":103,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0},"num_sources_used":0},"system_fingerprint":"fp_10f00c862d"}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 1.887691125s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 677
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"call_08419012","function":{"arguments":"{\"location\":\"Florence,Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"call_08419012","role":"tool"}],"model":"grok-code-fast-1","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://api.x.ai/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"id":"00648b3b-d356-70c7-e320-f6950ae00ff2_us-east-1","object":"chat.completion","created":1761231387,"model":"grok-code-fast-1","choices":[{"index":0,"message":{"role":"assistant","content":"The current temperature in Florence, Italy, is 40°C (104°F). For more detailed forecasts, I recommend checking a weather app or site like AccuWeather.","refusal":null},"finish_reason":"stop"}],"usage":{"prompt_tokens":532,"completion_tokens":34,"total_tokens":632,"prompt_tokens_details":{"text_tokens":532,"audio_tokens":0,"image_tokens":0,"cached_tokens":512},"completion_tokens_details":{"reasoning_tokens":66,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0},"num_sources_used":0},"system_fingerprint":"fp_10f00c862d"}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 1.612000209s

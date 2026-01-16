@@ -3,12 +3,14 @@ package bedrock
 import (
 	"context"
 	"encoding/json"
+	"net/http"
 	"testing"
 
 	"charm.land/fantasy"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime/types"
+	"github.com/aws/smithy-go"
 	"pgregory.net/rapid"
 )
 
@@ -866,5 +868,166 @@ func generateSimpleTextCall(t *rapid.T) fantasy.Call {
 	return fantasy.Call{
 		Prompt:          prompt,
 		MaxOutputTokens: &maxTokens,
+	}
+}
+
+// Feature: amazon-nova-bedrock-support, Property 8: Error Conversion Completeness
+// For any AWS SDK error returned by the Converse API, the conversion to fantasy.ProviderError
+// should preserve the error message and include an appropriate status code.
+func TestProperty_ErrorConversionCompleteness(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		// Generate various AWS error codes
+		errorCode := rapid.SampledFrom([]string{
+			// Authentication errors (401)
+			"UnrecognizedClientException",
+			"InvalidSignatureException",
+			"ExpiredTokenException",
+			"InvalidAccessKeyId",
+			"InvalidToken",
+			"AccessDeniedException",
+			// Throttling errors (429)
+			"ThrottlingException",
+			"TooManyRequestsException",
+			"ProvisionedThroughputExceededException",
+			"RequestLimitExceeded",
+			"Throttling",
+			// Validation errors (400)
+			"ValidationException",
+			"InvalidParameterException",
+			"InvalidRequestException",
+			"MissingParameter",
+			"InvalidInput",
+			"BadRequestException",
+			// Service errors (500)
+			"InternalServerError",
+			"ServiceUnavailableException",
+			"InternalFailure",
+			"ServiceException",
+			// Resource not found (404)
+			"ResourceNotFoundException",
+			"ModelNotFoundException",
+			"NotFoundException",
+			// Unknown error
+			"UnknownErrorCode",
+		}).Draw(t, "errorCode")
+
+		errorMessage := rapid.StringN(1, 100, -1).Draw(t, "errorMessage")
+
+		// Create a mock AWS error
+		awsErr := &mockAPIError{
+			code:    errorCode,
+			message: errorMessage,
+		}
+
+		// Convert to fantasy.ProviderError
+		convertedErr := convertAWSError(awsErr)
+
+		// Verify the conversion
+		if convertedErr == nil {
+			t.Fatalf("convertAWSError returned nil for error code: %s", errorCode)
+		}
+
+		// Check if it's a ProviderError
+		providerErr, ok := convertedErr.(*fantasy.ProviderError)
+		if !ok {
+			t.Fatalf("convertAWSError did not return a ProviderError, got: %T", convertedErr)
+		}
+
+		// Verify error message is preserved
+		if providerErr.Message != errorMessage {
+			t.Fatalf("Error message not preserved: expected '%s', got '%s'", errorMessage, providerErr.Message)
+		}
+
+		// Verify status code is appropriate
+		if providerErr.StatusCode == 0 {
+			t.Fatalf("Status code not set for error code: %s", errorCode)
+		}
+
+		// Verify status code mapping
+		expectedStatusCode := getExpectedStatusCode(errorCode)
+		if providerErr.StatusCode != expectedStatusCode {
+			t.Fatalf("Status code mismatch for error code %s: expected %d, got %d",
+				errorCode, expectedStatusCode, providerErr.StatusCode)
+		}
+
+		// Verify title is set
+		if providerErr.Title == "" {
+			t.Fatalf("Title not set for error code: %s", errorCode)
+		}
+
+		// Verify cause is preserved
+		if providerErr.Cause == nil {
+			t.Fatalf("Cause not preserved for error code: %s", errorCode)
+		}
+	})
+}
+
+// mockAPIError is a mock implementation of smithy.APIError for testing.
+type mockAPIError struct {
+	code    string
+	message string
+}
+
+func (e *mockAPIError) Error() string {
+	return e.message
+}
+
+func (e *mockAPIError) ErrorCode() string {
+	return e.code
+}
+
+func (e *mockAPIError) ErrorMessage() string {
+	return e.message
+}
+
+func (e *mockAPIError) ErrorFault() smithy.ErrorFault {
+	return smithy.FaultUnknown
+}
+
+// getExpectedStatusCode returns the expected HTTP status code for a given AWS error code.
+func getExpectedStatusCode(errorCode string) int {
+	switch errorCode {
+	// Authentication errors (401)
+	case "UnrecognizedClientException",
+		"InvalidSignatureException",
+		"ExpiredTokenException",
+		"InvalidAccessKeyId",
+		"InvalidToken",
+		"AccessDeniedException":
+		return http.StatusUnauthorized
+
+	// Throttling errors (429)
+	case "ThrottlingException",
+		"TooManyRequestsException",
+		"ProvisionedThroughputExceededException",
+		"RequestLimitExceeded",
+		"Throttling":
+		return http.StatusTooManyRequests
+
+	// Validation errors (400)
+	case "ValidationException",
+		"InvalidParameterException",
+		"InvalidRequestException",
+		"MissingParameter",
+		"InvalidInput",
+		"BadRequestException":
+		return http.StatusBadRequest
+
+	// Service errors (500)
+	case "InternalServerError",
+		"ServiceUnavailableException",
+		"InternalFailure",
+		"ServiceException":
+		return http.StatusInternalServerError
+
+	// Resource not found (404)
+	case "ResourceNotFoundException",
+		"ModelNotFoundException",
+		"NotFoundException":
+		return http.StatusNotFound
+
+	// Default to 500 for unknown errors
+	default:
+		return http.StatusInternalServerError
 	}
 }

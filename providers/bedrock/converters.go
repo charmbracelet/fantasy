@@ -36,12 +36,15 @@ func (n *novaLanguageModel) prepareConverseRequest(call fantasy.Call) (*bedrockr
 	}
 
 	// Build additional model request fields for top_k
+	// Note: Nova models do not support top_k parameter
 	var additionalFields document.Interface
 	if call.TopK != nil {
-		fieldsMap := map[string]interface{}{
-			"top_k": *call.TopK,
-		}
-		additionalFields = document.NewLazyDocument(fieldsMap)
+		// Add warning that top_k is not supported for Nova models
+		warnings = append(warnings, fantasy.CallWarning{
+			Type:    fantasy.CallWarningTypeUnsupportedSetting,
+			Setting: "top_k",
+			Message: "top_k parameter is not supported by Amazon Nova models and will be ignored",
+		})
 	}
 
 	// Build the request
@@ -481,5 +484,224 @@ func convertStopReason(stopReason types.StopReason) fantasy.FinishReason {
 		return fantasy.FinishReasonContentFilter
 	default:
 		return fantasy.FinishReasonUnknown
+	}
+}
+
+// prepareConverseStreamRequest converts a fantasy.Call to a ConverseStream API request.
+// It returns the request, any warnings, and an error if conversion fails.
+func (n *novaLanguageModel) prepareConverseStreamRequest(call fantasy.Call) (*bedrockruntime.ConverseStreamInput, []fantasy.CallWarning, error) {
+	var warnings []fantasy.CallWarning
+
+	// Convert messages to Converse API format
+	messages, systemBlocks, err := convertMessages(call.Prompt)
+	if err != nil {
+		return nil, warnings, fmt.Errorf("failed to convert messages: %w", err)
+	}
+
+	// Build inference configuration
+	inferenceConfig := &types.InferenceConfiguration{}
+	if call.MaxOutputTokens != nil {
+		inferenceConfig.MaxTokens = aws.Int32(int32(*call.MaxOutputTokens))
+	}
+	if call.Temperature != nil {
+		inferenceConfig.Temperature = aws.Float32(float32(*call.Temperature))
+	}
+	if call.TopP != nil {
+		inferenceConfig.TopP = aws.Float32(float32(*call.TopP))
+	}
+
+	// Build additional model request fields for top_k
+	// Note: Nova models do not support top_k parameter
+	var additionalFields document.Interface
+	if call.TopK != nil {
+		// Add warning that top_k is not supported for Nova models
+		warnings = append(warnings, fantasy.CallWarning{
+			Type:    fantasy.CallWarningTypeUnsupportedSetting,
+			Setting: "top_k",
+			Message: "top_k parameter is not supported by Amazon Nova models and will be ignored",
+		})
+	}
+
+	// Build the request
+	request := &bedrockruntime.ConverseStreamInput{
+		ModelId:                      aws.String(n.modelID),
+		Messages:                     messages,
+		InferenceConfig:              inferenceConfig,
+		AdditionalModelRequestFields: additionalFields,
+	}
+
+	// Add system blocks if present
+	if len(systemBlocks) > 0 {
+		request.System = systemBlocks
+	}
+
+	// Add tool configuration if tools are provided
+	if len(call.Tools) > 0 {
+		toolConfig, toolWarnings := convertTools(call.Tools, call.ToolChoice)
+		request.ToolConfig = toolConfig
+		warnings = append(warnings, toolWarnings...)
+	}
+
+	return request, warnings, nil
+}
+
+// handleConverseStream handles the ConverseStream API response and yields fantasy.StreamPart events.
+func (n *novaLanguageModel) handleConverseStream(output *bedrockruntime.ConverseStreamOutput, warnings []fantasy.CallWarning) fantasy.StreamResponse {
+	return func(yield func(fantasy.StreamPart) bool) {
+		// Yield warnings as first stream part if present
+		if len(warnings) > 0 {
+			if !yield(fantasy.StreamPart{
+				Type:     fantasy.StreamPartTypeWarnings,
+				Warnings: warnings,
+			}) {
+				return
+			}
+		}
+
+		// Track accumulated content for final response
+		var accumulatedText string
+		var accumulatedToolCalls []fantasy.ToolCallContent
+		var currentToolCallID string
+		var currentToolCallName string
+		var currentToolCallInput string
+		var usage fantasy.Usage
+		var finishReason fantasy.FinishReason
+
+		// Get the event stream
+		stream := output.GetStream()
+		if stream == nil {
+			yield(fantasy.StreamPart{
+				Type:  fantasy.StreamPartTypeError,
+				Error: fmt.Errorf("stream is nil"),
+			})
+			return
+		}
+
+		// Iterate over stream events
+		for event := range stream.Events() {
+			switch e := event.(type) {
+			case *types.ConverseStreamOutputMemberContentBlockStart:
+				// Handle content block start
+				if e.Value.Start != nil {
+					switch start := e.Value.Start.(type) {
+					case *types.ContentBlockStartMemberToolUse:
+						// Tool use block started
+						if start.Value.ToolUseId != nil {
+							currentToolCallID = *start.Value.ToolUseId
+						}
+						if start.Value.Name != nil {
+							currentToolCallName = *start.Value.Name
+						}
+						currentToolCallInput = ""
+
+						if !yield(fantasy.StreamPart{
+							Type:         fantasy.StreamPartTypeToolInputStart,
+							ID:           currentToolCallID,
+							ToolCallName: currentToolCallName,
+						}) {
+							return
+						}
+					}
+				}
+
+			case *types.ConverseStreamOutputMemberContentBlockDelta:
+				// Handle content block delta
+				if e.Value.Delta != nil {
+					switch delta := e.Value.Delta.(type) {
+					case *types.ContentBlockDeltaMemberText:
+						// Text delta
+						deltaText := delta.Value
+						accumulatedText += deltaText
+
+						if !yield(fantasy.StreamPart{
+							Type:  fantasy.StreamPartTypeTextDelta,
+							Delta: deltaText,
+						}) {
+							return
+						}
+					case *types.ContentBlockDeltaMemberToolUse:
+						// Tool use input delta
+						if delta.Value.Input != nil {
+							deltaText := *delta.Value.Input
+							currentToolCallInput += deltaText
+
+							if !yield(fantasy.StreamPart{
+								Type:  fantasy.StreamPartTypeToolInputDelta,
+								ID:    currentToolCallID,
+								Delta: deltaText,
+							}) {
+								return
+							}
+						}
+					}
+				}
+
+			case *types.ConverseStreamOutputMemberContentBlockStop:
+				// Handle content block stop
+				if currentToolCallID != "" {
+					// Tool use block ended
+					accumulatedToolCalls = append(accumulatedToolCalls, fantasy.ToolCallContent{
+						ToolCallID: currentToolCallID,
+						ToolName:   currentToolCallName,
+						Input:      currentToolCallInput,
+					})
+
+					if !yield(fantasy.StreamPart{
+						Type:          fantasy.StreamPartTypeToolInputEnd,
+						ID:            currentToolCallID,
+						ToolCallInput: currentToolCallInput,
+					}) {
+						return
+					}
+
+					// Reset tool call tracking
+					currentToolCallID = ""
+					currentToolCallName = ""
+					currentToolCallInput = ""
+				}
+
+			case *types.ConverseStreamOutputMemberMessageStart:
+				// Message started - no action needed for Nova
+
+			case *types.ConverseStreamOutputMemberMessageStop:
+				// Message stopped - extract stop reason
+				if e.Value.StopReason != "" {
+					finishReason = convertStopReason(e.Value.StopReason)
+				}
+
+			case *types.ConverseStreamOutputMemberMetadata:
+				// Metadata event - extract usage statistics
+				if e.Value.Usage != nil {
+					if e.Value.Usage.InputTokens != nil {
+						usage.InputTokens = int64(*e.Value.Usage.InputTokens)
+					}
+					if e.Value.Usage.OutputTokens != nil {
+						usage.OutputTokens = int64(*e.Value.Usage.OutputTokens)
+					}
+					if e.Value.Usage.TotalTokens != nil {
+						usage.TotalTokens = int64(*e.Value.Usage.TotalTokens)
+					}
+				}
+
+			default:
+				// Unknown event type, skip it
+			}
+		}
+
+		// Check for stream errors
+		if err := stream.Err(); err != nil {
+			yield(fantasy.StreamPart{
+				Type:  fantasy.StreamPartTypeError,
+				Error: convertAWSError(err),
+			})
+			return
+		}
+
+		// Yield finish part with usage statistics
+		yield(fantasy.StreamPart{
+			Type:         fantasy.StreamPartTypeFinish,
+			Usage:        usage,
+			FinishReason: finishReason,
+		})
 	}
 }

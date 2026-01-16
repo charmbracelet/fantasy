@@ -54,9 +54,23 @@ func (n *novaLanguageModel) Generate(ctx context.Context, call fantasy.Call) (*f
 }
 
 // Stream implements streaming generation.
-// This is a stub that will be implemented in task 10.
+// It converts the fantasy.Call to a ConverseStream API request, invokes the API,
+// and returns a streaming response handler.
 func (n *novaLanguageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.StreamResponse, error) {
-	return nil, fmt.Errorf("Stream not yet implemented for Nova models")
+	// Prepare the ConverseStream API request
+	request, warnings, err := n.prepareConverseStreamRequest(call)
+	if err != nil {
+		return nil, fmt.Errorf("failed to prepare converse stream request: %w", err)
+	}
+
+	// Invoke the ConverseStream API
+	output, err := n.client.ConverseStream(ctx, request)
+	if err != nil {
+		return nil, convertAWSError(err)
+	}
+
+	// Return streaming response handler
+	return n.handleConverseStream(output, warnings), nil
 }
 
 // GenerateObject implements object generation.

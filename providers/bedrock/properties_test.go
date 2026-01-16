@@ -2,6 +2,7 @@ package bedrock
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
 
 	"charm.land/fantasy"
@@ -410,6 +411,423 @@ func verifyParameterPreservation(t *rapid.T, request *bedrockruntime.ConverseInp
 		}
 		if !foundImage {
 			t.Fatalf("Image attachment not preserved in request")
+		}
+	}
+}
+
+// Feature: amazon-nova-bedrock-support, Property 7: Response Parsing Success
+// For any valid Converse API response, parsing it into a fantasy.Response should succeed
+// and produce a response with valid content, usage statistics, and finish reason.
+func TestProperty_ResponseParsingSuccess(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		// Generate a valid Converse API response
+		output := generateValidConverseOutput(t)
+
+		// Create a nova language model instance
+		cfg, err := config.LoadDefaultConfig(context.Background())
+		if err != nil {
+			t.Skip("AWS configuration not available")
+		}
+
+		client := bedrockruntime.NewFromConfig(cfg)
+		model := &novaLanguageModel{
+			modelID:  "amazon.nova-pro-v1:0",
+			provider: Name,
+			client:   client,
+			options:  options{},
+		}
+
+		// Convert to fantasy.Response
+		response, err := model.convertConverseResponse(output, nil)
+
+		// The conversion should succeed
+		if err != nil {
+			t.Fatalf("convertConverseResponse failed: %v", err)
+		}
+
+		// Validate the response
+		validateFantasyResponse(t, response, output)
+	})
+}
+
+// generateValidConverseOutput generates a valid Converse API output for property testing.
+func generateValidConverseOutput(t *rapid.T) *bedrockruntime.ConverseOutput {
+	// Generate content blocks
+	numBlocks := rapid.IntRange(1, 5).Draw(t, "numBlocks")
+	var contentBlocks []types.ContentBlock
+
+	for i := 0; i < numBlocks; i++ {
+		blockType := rapid.IntRange(0, 2).Draw(t, "blockType")
+		switch blockType {
+		case 0:
+			// Text block
+			contentBlocks = append(contentBlocks, &types.ContentBlockMemberText{
+				Value: rapid.String().Draw(t, "textContent"),
+			})
+		case 1:
+			// Tool use block
+			toolID := rapid.String().Draw(t, "toolID")
+			toolName := rapid.String().Draw(t, "toolName")
+			contentBlocks = append(contentBlocks, &types.ContentBlockMemberToolUse{
+				Value: types.ToolUseBlock{
+					ToolUseId: &toolID,
+					Name:      &toolName,
+					Input:     nil, // simplified for testing
+				},
+			})
+		case 2:
+			// Image block
+			imageData := rapid.SliceOfN(rapid.Byte(), 1, 100).Draw(t, "imageData")
+			format := rapid.SampledFrom([]types.ImageFormat{
+				types.ImageFormatJpeg,
+				types.ImageFormatPng,
+				types.ImageFormatGif,
+				types.ImageFormatWebp,
+			}).Draw(t, "imageFormat")
+			contentBlocks = append(contentBlocks, &types.ContentBlockMemberImage{
+				Value: types.ImageBlock{
+					Format: format,
+					Source: &types.ImageSourceMemberBytes{
+						Value: imageData,
+					},
+				},
+			})
+		}
+	}
+
+	// Generate usage statistics
+	inputTokens := int32(rapid.IntRange(1, 10000).Draw(t, "inputTokens"))
+	outputTokens := int32(rapid.IntRange(1, 10000).Draw(t, "outputTokens"))
+	totalTokens := inputTokens + outputTokens
+
+	// Generate stop reason
+	stopReason := rapid.SampledFrom([]types.StopReason{
+		types.StopReasonEndTurn,
+		types.StopReasonMaxTokens,
+		types.StopReasonStopSequence,
+		types.StopReasonToolUse,
+		types.StopReasonContentFiltered,
+	}).Draw(t, "stopReason")
+
+	return &bedrockruntime.ConverseOutput{
+		Output: &types.ConverseOutputMemberMessage{
+			Value: types.Message{
+				Role:    types.ConversationRoleAssistant,
+				Content: contentBlocks,
+			},
+		},
+		Usage: &types.TokenUsage{
+			InputTokens:  &inputTokens,
+			OutputTokens: &outputTokens,
+			TotalTokens:  &totalTokens,
+		},
+		StopReason: stopReason,
+	}
+}
+
+// validateFantasyResponse validates that a fantasy.Response is properly formatted.
+func validateFantasyResponse(t *rapid.T, response *fantasy.Response, output *bedrockruntime.ConverseOutput) {
+	// Response must not be nil
+	if response == nil {
+		t.Fatalf("Response is nil")
+	}
+
+	// Content must be present
+	if len(response.Content) == 0 {
+		t.Fatalf("Response content is empty")
+	}
+
+	// Usage statistics must be valid
+	if output.Usage != nil {
+		if output.Usage.InputTokens != nil && response.Usage.InputTokens != int64(*output.Usage.InputTokens) {
+			t.Fatalf("InputTokens mismatch: expected %d, got %d", *output.Usage.InputTokens, response.Usage.InputTokens)
+		}
+		if output.Usage.OutputTokens != nil && response.Usage.OutputTokens != int64(*output.Usage.OutputTokens) {
+			t.Fatalf("OutputTokens mismatch: expected %d, got %d", *output.Usage.OutputTokens, response.Usage.OutputTokens)
+		}
+		if output.Usage.TotalTokens != nil && response.Usage.TotalTokens != int64(*output.Usage.TotalTokens) {
+			t.Fatalf("TotalTokens mismatch: expected %d, got %d", *output.Usage.TotalTokens, response.Usage.TotalTokens)
+		}
+	}
+
+	// Finish reason must be valid (not empty)
+	if response.FinishReason == "" {
+		t.Fatalf("FinishReason is empty")
+	}
+
+	// Verify finish reason mapping
+	expectedFinishReason := convertStopReason(output.StopReason)
+	if response.FinishReason != expectedFinishReason {
+		t.Fatalf("FinishReason mismatch: expected %s, got %s", expectedFinishReason, response.FinishReason)
+	}
+}
+
+// Feature: amazon-nova-bedrock-support, Property 10: Finish Reason Mapping Completeness
+// For all possible Converse API stop reasons ("end_turn", "max_tokens", "stop_sequence",
+// "tool_use", "content_filtered"), there should be a corresponding fantasy.FinishReason value.
+func TestProperty_FinishReasonMappingCompleteness(t *testing.T) {
+	// Test all known stop reasons
+	allStopReasons := []types.StopReason{
+		types.StopReasonEndTurn,
+		types.StopReasonMaxTokens,
+		types.StopReasonStopSequence,
+		types.StopReasonToolUse,
+		types.StopReasonContentFiltered,
+	}
+
+	for _, stopReason := range allStopReasons {
+		t.Run(string(stopReason), func(t *testing.T) {
+			finishReason := convertStopReason(stopReason)
+
+			// The finish reason must not be empty
+			if finishReason == "" {
+				t.Fatalf("convertStopReason returned empty string for stop reason: %s", stopReason)
+			}
+
+			// The finish reason must be a valid fantasy.FinishReason
+			validFinishReasons := []fantasy.FinishReason{
+				fantasy.FinishReasonStop,
+				fantasy.FinishReasonLength,
+				fantasy.FinishReasonContentFilter,
+				fantasy.FinishReasonToolCalls,
+				fantasy.FinishReasonError,
+				fantasy.FinishReasonOther,
+				fantasy.FinishReasonUnknown,
+			}
+
+			isValid := false
+			for _, valid := range validFinishReasons {
+				if finishReason == valid {
+					isValid = true
+					break
+				}
+			}
+
+			if !isValid {
+				t.Fatalf("convertStopReason returned invalid finish reason: %s for stop reason: %s", finishReason, stopReason)
+			}
+
+			// Verify specific mappings
+			switch stopReason {
+			case types.StopReasonEndTurn:
+				if finishReason != fantasy.FinishReasonStop {
+					t.Fatalf("Expected FinishReasonStop for EndTurn, got %s", finishReason)
+				}
+			case types.StopReasonMaxTokens:
+				if finishReason != fantasy.FinishReasonLength {
+					t.Fatalf("Expected FinishReasonLength for MaxTokens, got %s", finishReason)
+				}
+			case types.StopReasonStopSequence:
+				if finishReason != fantasy.FinishReasonStop {
+					t.Fatalf("Expected FinishReasonStop for StopSequence, got %s", finishReason)
+				}
+			case types.StopReasonToolUse:
+				if finishReason != fantasy.FinishReasonToolCalls {
+					t.Fatalf("Expected FinishReasonToolCalls for ToolUse, got %s", finishReason)
+				}
+			case types.StopReasonContentFiltered:
+				if finishReason != fantasy.FinishReasonContentFilter {
+					t.Fatalf("Expected FinishReasonContentFilter for ContentFiltered, got %s", finishReason)
+				}
+			}
+		})
+	}
+
+	// Test unknown stop reason
+	t.Run("unknown", func(t *testing.T) {
+		unknownStopReason := types.StopReason("unknown_reason")
+		finishReason := convertStopReason(unknownStopReason)
+
+		if finishReason != fantasy.FinishReasonUnknown {
+			t.Fatalf("Expected FinishReasonUnknown for unknown stop reason, got %s", finishReason)
+		}
+	})
+}
+
+// Feature: amazon-nova-bedrock-support, Property 11: Message Format Round-Trip
+// For any fantasy message (with text, images, tool calls, or tool results), converting it
+// to Converse API format and then back to fantasy format should preserve the essential
+// content and structure.
+func TestProperty_MessageFormatRoundTrip(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		// Generate a fantasy message with various content types
+		message := generateFantasyMessage(t)
+
+		// Create a nova language model instance
+		cfg, err := config.LoadDefaultConfig(context.Background())
+		if err != nil {
+			t.Skip("AWS configuration not available")
+		}
+
+		client := bedrockruntime.NewFromConfig(cfg)
+		model := &novaLanguageModel{
+			modelID:  "amazon.nova-pro-v1:0",
+			provider: Name,
+			client:   client,
+			options:  options{},
+		}
+
+		// Convert fantasy message to Converse API format
+		call := fantasy.Call{
+			Prompt: fantasy.Prompt{message},
+		}
+
+		request, _, err := model.prepareConverseRequest(call)
+		if err != nil {
+			t.Fatalf("prepareConverseRequest failed: %v", err)
+		}
+
+		// Extract the converted message content blocks
+		if len(request.Messages) == 0 {
+			t.Fatalf("No messages in request")
+		}
+
+		converseMessage := request.Messages[0]
+
+		// Convert back to fantasy format by simulating a response
+		var fantasyContent fantasy.ResponseContent
+		for _, block := range converseMessage.Content {
+			content, err := convertContentBlock(block)
+			if err != nil {
+				t.Fatalf("convertContentBlock failed: %v", err)
+			}
+			if content != nil {
+				fantasyContent = append(fantasyContent, content)
+			}
+		}
+
+		// Verify round-trip preservation
+		verifyRoundTripPreservation(t, message, fantasyContent)
+	})
+}
+
+// generateFantasyMessage generates a fantasy message with various content types.
+func generateFantasyMessage(t *rapid.T) fantasy.Message {
+	role := rapid.SampledFrom([]fantasy.MessageRole{
+		fantasy.MessageRoleUser,
+		fantasy.MessageRoleAssistant,
+	}).Draw(t, "role")
+
+	var content []fantasy.MessagePart
+
+	// Always include text
+	content = append(content, fantasy.TextPart{
+		Text: rapid.StringN(1, 100, -1).Draw(t, "text"),
+	})
+
+	// Optionally add image (only for user messages)
+	if role == fantasy.MessageRoleUser && rapid.Bool().Draw(t, "hasImage") {
+		content = append(content, fantasy.FilePart{
+			Data:      rapid.SliceOfN(rapid.Byte(), 10, 100).Draw(t, "imageData"),
+			MediaType: rapid.SampledFrom([]string{"image/jpeg", "image/png", "image/gif", "image/webp"}).Draw(t, "imageType"),
+		})
+	}
+
+	// Optionally add tool call (only for assistant messages)
+	if role == fantasy.MessageRoleAssistant && rapid.Bool().Draw(t, "hasToolCall") {
+		toolInput := map[string]interface{}{
+			"param": rapid.String().Draw(t, "toolParam"),
+		}
+		toolInputJSON, _ := json.Marshal(toolInput)
+
+		content = append(content, fantasy.ToolCallPart{
+			ToolCallID: rapid.String().Draw(t, "toolCallID"),
+			ToolName:   rapid.String().Draw(t, "toolName"),
+			Input:      string(toolInputJSON),
+		})
+	}
+
+	return fantasy.Message{
+		Role:    role,
+		Content: content,
+	}
+}
+
+// verifyRoundTripPreservation verifies that essential content is preserved in round-trip conversion.
+func verifyRoundTripPreservation(t *rapid.T, original fantasy.Message, converted fantasy.ResponseContent) {
+	// Count content types in original
+	originalTextCount := 0
+	originalImageCount := 0
+	originalToolCallCount := 0
+
+	for _, part := range original.Content {
+		switch part.GetType() {
+		case fantasy.ContentTypeText:
+			originalTextCount++
+		case fantasy.ContentTypeFile:
+			if filePart, ok := fantasy.AsMessagePart[fantasy.FilePart](part); ok {
+				if isImageMediaType(filePart.MediaType) {
+					originalImageCount++
+				}
+			}
+		case fantasy.ContentTypeToolCall:
+			originalToolCallCount++
+		}
+	}
+
+	// Count content types in converted
+	convertedTextCount := 0
+	convertedImageCount := 0
+	convertedToolCallCount := 0
+
+	for _, content := range converted {
+		switch content.GetType() {
+		case fantasy.ContentTypeText:
+			convertedTextCount++
+		case fantasy.ContentTypeFile:
+			convertedImageCount++
+		case fantasy.ContentTypeToolCall:
+			convertedToolCallCount++
+		}
+	}
+
+	// Verify counts match
+	if originalTextCount != convertedTextCount {
+		t.Fatalf("Text count mismatch: original %d, converted %d", originalTextCount, convertedTextCount)
+	}
+
+	if originalImageCount != convertedImageCount {
+		t.Fatalf("Image count mismatch: original %d, converted %d", originalImageCount, convertedImageCount)
+	}
+
+	if originalToolCallCount != convertedToolCallCount {
+		t.Fatalf("Tool call count mismatch: original %d, converted %d", originalToolCallCount, convertedToolCallCount)
+	}
+
+	// Verify text content is preserved
+	if originalTextCount > 0 {
+		originalText := ""
+		for _, part := range original.Content {
+			if part.GetType() == fantasy.ContentTypeText {
+				if textPart, ok := fantasy.AsMessagePart[fantasy.TextPart](part); ok {
+					originalText = textPart.Text
+					break
+				}
+			}
+		}
+
+		convertedText := converted.Text()
+		if originalText != convertedText {
+			t.Fatalf("Text content not preserved: original '%s', converted '%s'", originalText, convertedText)
+		}
+	}
+
+	// Verify tool call names are preserved
+	if originalToolCallCount > 0 {
+		originalToolNames := make(map[string]bool)
+		for _, part := range original.Content {
+			if part.GetType() == fantasy.ContentTypeToolCall {
+				if toolCallPart, ok := fantasy.AsMessagePart[fantasy.ToolCallPart](part); ok {
+					originalToolNames[toolCallPart.ToolName] = true
+				}
+			}
+		}
+
+		convertedToolCalls := converted.ToolCalls()
+		for _, toolCall := range convertedToolCalls {
+			if !originalToolNames[toolCall.ToolName] {
+				t.Fatalf("Tool call name not preserved: %s", toolCall.ToolName)
+			}
 		}
 	}
 }

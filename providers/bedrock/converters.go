@@ -356,3 +356,130 @@ func convertTools(tools []fantasy.Tool, toolChoice *fantasy.ToolChoice) (*types.
 
 	return toolConfig, warnings
 }
+
+// convertConverseResponse converts a Converse API response to a fantasy.Response.
+func (n *novaLanguageModel) convertConverseResponse(output *bedrockruntime.ConverseOutput, warnings []fantasy.CallWarning) (*fantasy.Response, error) {
+	if output == nil {
+		return nil, fmt.Errorf("converse output is nil")
+	}
+
+	// Convert content blocks to fantasy content
+	var content fantasy.ResponseContent
+	if output.Output != nil {
+		message := output.Output.(*types.ConverseOutputMemberMessage).Value
+		for _, block := range message.Content {
+			fantasyContent, err := convertContentBlock(block)
+			if err != nil {
+				return nil, fmt.Errorf("failed to convert content block: %w", err)
+			}
+			if fantasyContent != nil {
+				content = append(content, fantasyContent)
+			}
+		}
+	}
+
+	// Convert usage statistics
+	usage := fantasy.Usage{}
+	if output.Usage != nil {
+		if output.Usage.InputTokens != nil {
+			usage.InputTokens = int64(*output.Usage.InputTokens)
+		}
+		if output.Usage.OutputTokens != nil {
+			usage.OutputTokens = int64(*output.Usage.OutputTokens)
+		}
+		if output.Usage.TotalTokens != nil {
+			usage.TotalTokens = int64(*output.Usage.TotalTokens)
+		}
+	}
+
+	// Convert stop reason to finish reason
+	finishReason := convertStopReason(output.StopReason)
+
+	return &fantasy.Response{
+		Content:      content,
+		FinishReason: finishReason,
+		Usage:        usage,
+		Warnings:     warnings,
+	}, nil
+}
+
+// convertContentBlock converts a Converse API content block to fantasy content.
+func convertContentBlock(block types.ContentBlock) (fantasy.Content, error) {
+	switch b := block.(type) {
+	case *types.ContentBlockMemberText:
+		return fantasy.TextContent{
+			Text: b.Value,
+		}, nil
+
+	case *types.ContentBlockMemberToolUse:
+		// Convert tool use to tool call content
+		inputBytes, err := json.Marshal(b.Value.Input)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal tool input: %w", err)
+		}
+
+		toolCallID := ""
+		if b.Value.ToolUseId != nil {
+			toolCallID = *b.Value.ToolUseId
+		}
+		toolName := ""
+		if b.Value.Name != nil {
+			toolName = *b.Value.Name
+		}
+
+		return fantasy.ToolCallContent{
+			ToolCallID: toolCallID,
+			ToolName:   toolName,
+			Input:      string(inputBytes),
+		}, nil
+
+	case *types.ContentBlockMemberImage:
+		// Convert image block to file content
+		var data []byte
+		if imageSource, ok := b.Value.Source.(*types.ImageSourceMemberBytes); ok {
+			data = imageSource.Value
+		}
+
+		// Determine media type from format
+		var mediaType string
+		switch b.Value.Format {
+		case types.ImageFormatJpeg:
+			mediaType = "image/jpeg"
+		case types.ImageFormatPng:
+			mediaType = "image/png"
+		case types.ImageFormatGif:
+			mediaType = "image/gif"
+		case types.ImageFormatWebp:
+			mediaType = "image/webp"
+		default:
+			mediaType = "image/jpeg" // default
+		}
+
+		return fantasy.FileContent{
+			MediaType: mediaType,
+			Data:      data,
+		}, nil
+
+	default:
+		// Unknown content block type, skip it
+		return nil, nil
+	}
+}
+
+// convertStopReason converts a Converse API stop reason to a fantasy.FinishReason.
+func convertStopReason(stopReason types.StopReason) fantasy.FinishReason {
+	switch stopReason {
+	case types.StopReasonEndTurn:
+		return fantasy.FinishReasonStop
+	case types.StopReasonMaxTokens:
+		return fantasy.FinishReasonLength
+	case types.StopReasonStopSequence:
+		return fantasy.FinishReasonStop
+	case types.StopReasonToolUse:
+		return fantasy.FinishReasonToolCalls
+	case types.StopReasonContentFiltered:
+		return fantasy.FinishReasonContentFilter
+	default:
+		return fantasy.FinishReasonUnknown
+	}
+}

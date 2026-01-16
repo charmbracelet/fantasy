@@ -1,0 +1,358 @@
+package bedrock
+
+import (
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
+
+	"charm.land/fantasy"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
+	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime/document"
+	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime/types"
+)
+
+// prepareConverseRequest converts a fantasy.Call to a Converse API request.
+// It returns the request, any warnings, and an error if conversion fails.
+func (n *novaLanguageModel) prepareConverseRequest(call fantasy.Call) (*bedrockruntime.ConverseInput, []fantasy.CallWarning, error) {
+	var warnings []fantasy.CallWarning
+
+	// Convert messages to Converse API format
+	messages, systemBlocks, err := convertMessages(call.Prompt)
+	if err != nil {
+		return nil, warnings, fmt.Errorf("failed to convert messages: %w", err)
+	}
+
+	// Build inference configuration
+	inferenceConfig := &types.InferenceConfiguration{}
+	if call.MaxOutputTokens != nil {
+		inferenceConfig.MaxTokens = aws.Int32(int32(*call.MaxOutputTokens))
+	}
+	if call.Temperature != nil {
+		inferenceConfig.Temperature = aws.Float32(float32(*call.Temperature))
+	}
+	if call.TopP != nil {
+		inferenceConfig.TopP = aws.Float32(float32(*call.TopP))
+	}
+
+	// Build additional model request fields for top_k
+	var additionalFields document.Interface
+	if call.TopK != nil {
+		fieldsMap := map[string]interface{}{
+			"top_k": *call.TopK,
+		}
+		additionalFields = document.NewLazyDocument(fieldsMap)
+	}
+
+	// Build the request
+	request := &bedrockruntime.ConverseInput{
+		ModelId:                      aws.String(n.modelID),
+		Messages:                     messages,
+		InferenceConfig:              inferenceConfig,
+		AdditionalModelRequestFields: additionalFields,
+	}
+
+	// Add system blocks if present
+	if len(systemBlocks) > 0 {
+		request.System = systemBlocks
+	}
+
+	// Add tool configuration if tools are provided
+	if len(call.Tools) > 0 {
+		toolConfig, toolWarnings := convertTools(call.Tools, call.ToolChoice)
+		request.ToolConfig = toolConfig
+		warnings = append(warnings, toolWarnings...)
+	}
+
+	return request, warnings, nil
+}
+
+// convertMessages converts fantasy messages to Converse API messages and system blocks.
+func convertMessages(prompt fantasy.Prompt) ([]types.Message, []types.SystemContentBlock, error) {
+	var messages []types.Message
+	var systemBlocks []types.SystemContentBlock
+
+	for _, msg := range prompt {
+		switch msg.Role {
+		case fantasy.MessageRoleSystem:
+			// Convert system messages to SystemContentBlock
+			for _, part := range msg.Content {
+				if part.GetType() == fantasy.ContentTypeText {
+					if textPart, ok := fantasy.AsMessagePart[fantasy.TextPart](part); ok {
+						systemBlocks = append(systemBlocks, &types.SystemContentBlockMemberText{
+							Value: textPart.Text,
+						})
+					}
+				}
+			}
+
+		case fantasy.MessageRoleUser, fantasy.MessageRoleAssistant:
+			// Convert user and assistant messages
+			contentBlocks, err := convertMessageContent(msg.Content)
+			if err != nil {
+				return nil, nil, fmt.Errorf("failed to convert message content: %w", err)
+			}
+
+			var role types.ConversationRole
+			if msg.Role == fantasy.MessageRoleUser {
+				role = types.ConversationRoleUser
+			} else {
+				role = types.ConversationRoleAssistant
+			}
+
+			messages = append(messages, types.Message{
+				Role:    role,
+				Content: contentBlocks,
+			})
+
+		case fantasy.MessageRoleTool:
+			// Tool results are included in the previous assistant message
+			// or as a separate user message with tool results
+			contentBlocks, err := convertMessageContent(msg.Content)
+			if err != nil {
+				return nil, nil, fmt.Errorf("failed to convert tool message content: %w", err)
+			}
+
+			messages = append(messages, types.Message{
+				Role:    types.ConversationRoleUser,
+				Content: contentBlocks,
+			})
+		}
+	}
+
+	return messages, systemBlocks, nil
+}
+
+// convertMessageContent converts fantasy message parts to Converse API content blocks.
+func convertMessageContent(content []fantasy.MessagePart) ([]types.ContentBlock, error) {
+	var blocks []types.ContentBlock
+
+	for _, part := range content {
+		switch part.GetType() {
+		case fantasy.ContentTypeText:
+			if textPart, ok := fantasy.AsMessagePart[fantasy.TextPart](part); ok {
+				blocks = append(blocks, &types.ContentBlockMemberText{
+					Value: textPart.Text,
+				})
+			}
+
+		case fantasy.ContentTypeFile:
+			if filePart, ok := fantasy.AsMessagePart[fantasy.FilePart](part); ok {
+				// Convert image attachments to Converse image blocks
+				if isImageMediaType(filePart.MediaType) {
+					imageBlock, err := convertImageAttachment(filePart)
+					if err != nil {
+						return nil, fmt.Errorf("failed to convert image attachment: %w", err)
+					}
+					blocks = append(blocks, imageBlock)
+				}
+				// Note: Non-image files are not supported in Converse API
+			}
+
+		case fantasy.ContentTypeToolCall:
+			if toolCallPart, ok := fantasy.AsMessagePart[fantasy.ToolCallPart](part); ok {
+				toolUseBlock, err := convertToolCall(toolCallPart)
+				if err != nil {
+					return nil, fmt.Errorf("failed to convert tool call: %w", err)
+				}
+				blocks = append(blocks, toolUseBlock)
+			}
+
+		case fantasy.ContentTypeToolResult:
+			if toolResultPart, ok := fantasy.AsMessagePart[fantasy.ToolResultPart](part); ok {
+				toolResultBlock, err := convertToolResult(toolResultPart)
+				if err != nil {
+					return nil, fmt.Errorf("failed to convert tool result: %w", err)
+				}
+				blocks = append(blocks, toolResultBlock)
+			}
+		}
+	}
+
+	return blocks, nil
+}
+
+// isImageMediaType checks if a media type is an image type.
+func isImageMediaType(mediaType string) bool {
+	switch mediaType {
+	case "image/jpeg", "image/png", "image/gif", "image/webp":
+		return true
+	default:
+		return false
+	}
+}
+
+// convertImageAttachment converts a fantasy FilePart to a Converse image block.
+func convertImageAttachment(filePart fantasy.FilePart) (types.ContentBlock, error) {
+	// Determine the image format
+	var format types.ImageFormat
+	switch filePart.MediaType {
+	case "image/jpeg", "image/jpg":
+		format = types.ImageFormatJpeg
+	case "image/png":
+		format = types.ImageFormatPng
+	case "image/gif":
+		format = types.ImageFormatGif
+	case "image/webp":
+		format = types.ImageFormatWebp
+	default:
+		return nil, fmt.Errorf("unsupported image media type: %s", filePart.MediaType)
+	}
+
+	// Create image source from bytes
+	imageSource := &types.ImageSourceMemberBytes{
+		Value: filePart.Data,
+	}
+
+	return &types.ContentBlockMemberImage{
+		Value: types.ImageBlock{
+			Format: format,
+			Source: imageSource,
+		},
+	}, nil
+}
+
+// convertToolCall converts a fantasy ToolCallPart to a Converse tool use block.
+func convertToolCall(toolCallPart fantasy.ToolCallPart) (types.ContentBlock, error) {
+	// Parse the input JSON string to a document
+	var inputMap map[string]interface{}
+	if err := json.Unmarshal([]byte(toolCallPart.Input), &inputMap); err != nil {
+		return nil, fmt.Errorf("failed to parse tool call input: %w", err)
+	}
+
+	return &types.ContentBlockMemberToolUse{
+		Value: types.ToolUseBlock{
+			ToolUseId: aws.String(toolCallPart.ToolCallID),
+			Name:      aws.String(toolCallPart.ToolName),
+			Input:     document.NewLazyDocument(inputMap),
+		},
+	}, nil
+}
+
+// convertToolResult converts a fantasy ToolResultPart to a Converse tool result block.
+func convertToolResult(toolResultPart fantasy.ToolResultPart) (types.ContentBlock, error) {
+	var contentBlocks []types.ToolResultContentBlock
+
+	switch output := toolResultPart.Output.(type) {
+	case fantasy.ToolResultOutputContentText:
+		contentBlocks = append(contentBlocks, &types.ToolResultContentBlockMemberText{
+			Value: output.Text,
+		})
+
+	case fantasy.ToolResultOutputContentError:
+		errorText := "Error"
+		if output.Error != nil {
+			errorText = output.Error.Error()
+		}
+		contentBlocks = append(contentBlocks, &types.ToolResultContentBlockMemberText{
+			Value: errorText,
+		})
+
+	case fantasy.ToolResultOutputContentMedia:
+		// For media content, decode base64 and create image block
+		if output.MediaType != "" && isImageMediaType(output.MediaType) {
+			imageData, err := base64.StdEncoding.DecodeString(output.Data)
+			if err != nil {
+				return nil, fmt.Errorf("failed to decode image data: %w", err)
+			}
+
+			var format types.ImageFormat
+			switch output.MediaType {
+			case "image/jpeg", "image/jpg":
+				format = types.ImageFormatJpeg
+			case "image/png":
+				format = types.ImageFormatPng
+			case "image/gif":
+				format = types.ImageFormatGif
+			case "image/webp":
+				format = types.ImageFormatWebp
+			}
+
+			contentBlocks = append(contentBlocks, &types.ToolResultContentBlockMemberImage{
+				Value: types.ImageBlock{
+					Format: format,
+					Source: &types.ImageSourceMemberBytes{
+						Value: imageData,
+					},
+				},
+			})
+		}
+
+		// Add text if present
+		if output.Text != "" {
+			contentBlocks = append(contentBlocks, &types.ToolResultContentBlockMemberText{
+				Value: output.Text,
+			})
+		}
+	}
+
+	return &types.ContentBlockMemberToolResult{
+		Value: types.ToolResultBlock{
+			ToolUseId: aws.String(toolResultPart.ToolCallID),
+			Content:   contentBlocks,
+		},
+	}, nil
+}
+
+// convertTools converts fantasy tools to Converse tool configuration.
+func convertTools(tools []fantasy.Tool, toolChoice *fantasy.ToolChoice) (*types.ToolConfiguration, []fantasy.CallWarning) {
+	var warnings []fantasy.CallWarning
+	var toolSpecs []types.Tool
+
+	for _, tool := range tools {
+		if tool.GetType() == fantasy.ToolTypeFunction {
+			if funcTool, ok := tool.(fantasy.FunctionTool); ok {
+				// Convert input schema to document
+				inputSchema := document.NewLazyDocument(funcTool.InputSchema)
+
+				toolSpecs = append(toolSpecs, &types.ToolMemberToolSpec{
+					Value: types.ToolSpecification{
+						Name:        aws.String(funcTool.Name),
+						Description: aws.String(funcTool.Description),
+						InputSchema: &types.ToolInputSchemaMemberJson{
+							Value: inputSchema,
+						},
+					},
+				})
+			}
+		} else {
+			// Provider-defined tools are not supported
+			warnings = append(warnings, fantasy.CallWarning{
+				Type:    fantasy.CallWarningTypeUnsupportedTool,
+				Tool:    tool,
+				Message: fmt.Sprintf("Provider-defined tools are not supported by Converse API: %s", tool.GetName()),
+			})
+		}
+	}
+
+	toolConfig := &types.ToolConfiguration{
+		Tools: toolSpecs,
+	}
+
+	// Convert tool choice
+	if toolChoice != nil {
+		switch *toolChoice {
+		case fantasy.ToolChoiceAuto:
+			toolConfig.ToolChoice = &types.ToolChoiceMemberAuto{
+				Value: types.AutoToolChoice{},
+			}
+		case fantasy.ToolChoiceRequired:
+			toolConfig.ToolChoice = &types.ToolChoiceMemberAny{
+				Value: types.AnyToolChoice{},
+			}
+		case fantasy.ToolChoiceNone:
+			// No tool choice means don't include tools
+			return nil, warnings
+		default:
+			// Specific tool choice
+			toolName := string(*toolChoice)
+			toolConfig.ToolChoice = &types.ToolChoiceMemberTool{
+				Value: types.SpecificToolChoice{
+					Name: aws.String(toolName),
+				},
+			}
+		}
+	}
+
+	return toolConfig, warnings
+}

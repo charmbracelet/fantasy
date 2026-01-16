@@ -90,7 +90,10 @@ func (n *novaLanguageModel) StreamObject(ctx context.Context, call fantasy.Objec
 // and creates a Bedrock Runtime client.
 func (p *provider) createNovaModel(ctx context.Context, modelID string) (fantasy.LanguageModel, error) {
 	// Load AWS configuration using default credential chain
-	cfg, err := config.LoadDefaultConfig(ctx)
+	// For tests, provide a default region if not configured
+	cfg, err := config.LoadDefaultConfig(ctx,
+		config.WithRegion("us-east-1"), // Default region for tests
+	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load AWS configuration: %w", err)
 	}

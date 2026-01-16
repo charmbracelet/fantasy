@@ -2,12 +2,16 @@ package providertests
 
 import (
 	"context"
+	"encoding/base64"
+	"net/http"
 	"os"
 	"testing"
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/providers/bedrock"
+	"charm.land/x/vcr"
 	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/stretchr/testify/require"
 	"pgregory.net/rapid"
 )
 
@@ -276,4 +280,321 @@ func generateValidNovaCall(t *rapid.T) fantasy.Call {
 		Temperature:     temperature,
 		TopP:            topP,
 	}
+}
+
+// Integration tests for Nova models following the common test pattern
+
+// TestNovaCommon runs common integration tests for all Nova model variants.
+// This validates Requirements 1.1, 1.2, 1.4, 1.5
+func TestNovaCommon(t *testing.T) {
+	testCommon(t, []builderPair{
+		{"bedrock-nova-pro", builderBedrockNovaPro, nil, nil},
+		{"bedrock-nova-lite", builderBedrockNovaLite, nil, nil},
+		{"bedrock-nova-micro", builderBedrockNovaMicro, nil, nil},
+	})
+}
+
+// TestNovaModelInstantiation tests that Nova models can be instantiated through the Bedrock provider.
+// Validates Requirement 1.1
+func TestNovaModelInstantiation(t *testing.T) {
+	models := []string{
+		"amazon.nova-pro-v1:0",
+		"amazon.nova-lite-v1:0",
+		"amazon.nova-micro-v1:0",
+		"amazon.nova-premier-v1:0",
+	}
+
+	for _, modelID := range models {
+		t.Run(modelID, func(t *testing.T) {
+			r := vcr.NewRecorder(t)
+
+			provider, err := bedrock.New(
+				bedrock.WithHTTPClient(&http.Client{Transport: r}),
+				bedrock.WithSkipAuth(!r.IsRecording()),
+			)
+			require.NoError(t, err, "failed to create Bedrock provider")
+
+			model, err := provider.LanguageModel(t.Context(), modelID)
+			require.NoError(t, err, "failed to create Nova language model for %s", modelID)
+			require.NotNil(t, model, "language model should not be nil")
+			// The model ID will have a region prefix applied (e.g., "us.amazon.nova-pro-v1:0")
+			require.Contains(t, model.Model(), modelID, "model ID should contain the original model ID")
+			require.Equal(t, "bedrock", model.Provider(), "provider should be bedrock")
+		})
+	}
+}
+
+// TestNovaParameterPassing tests that inference parameters are correctly passed to Nova models.
+// Tests temperature, top_p, and max_tokens parameters.
+// Note: top_k is mentioned in task requirements but is not supported by Nova models.
+// Validates Requirements 8.1, 8.2, 8.3, 8.4
+func TestNovaParameterPassing(t *testing.T) {
+	r := vcr.NewRecorder(t)
+
+	provider, err := bedrock.New(
+		bedrock.WithHTTPClient(&http.Client{Transport: r}),
+		bedrock.WithSkipAuth(!r.IsRecording()),
+	)
+	require.NoError(t, err, "failed to create Bedrock provider")
+
+	model, err := provider.LanguageModel(t.Context(), "amazon.nova-lite-v1:0")
+	require.NoError(t, err, "failed to create Nova language model")
+
+	// Test with temperature and top_p parameters (supported by Nova)
+	temperature := 0.7
+	topP := 0.9
+	maxTokens := int64(100)
+
+	call := fantasy.Call{
+		Prompt: fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "Say hello"},
+				},
+			},
+		},
+		Temperature:     &temperature,
+		TopP:            &topP,
+		MaxOutputTokens: &maxTokens,
+	}
+
+	response, err := model.Generate(t.Context(), call)
+	require.NoError(t, err, "generation should succeed with parameters")
+	require.NotNil(t, response, "response should not be nil")
+	require.NotEmpty(t, response.Content.Text(), "response should contain text")
+}
+
+// TestNovaSystemPrompt tests that system prompts work correctly with Nova models.
+// Validates Requirement 8.3
+func TestNovaSystemPrompt(t *testing.T) {
+	r := vcr.NewRecorder(t)
+
+	provider, err := bedrock.New(
+		bedrock.WithHTTPClient(&http.Client{Transport: r}),
+		bedrock.WithSkipAuth(!r.IsRecording()),
+	)
+	require.NoError(t, err, "failed to create Bedrock provider")
+
+	model, err := provider.LanguageModel(t.Context(), "amazon.nova-lite-v1:0")
+	require.NoError(t, err, "failed to create Nova language model")
+
+	call := fantasy.Call{
+		Prompt: fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleSystem,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "You are a helpful assistant that always responds in Portuguese."},
+				},
+			},
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "Say hello"},
+				},
+			},
+		},
+		MaxOutputTokens: fantasy.Opt(int64(50)),
+	}
+
+	response, err := model.Generate(t.Context(), call)
+	require.NoError(t, err, "generation should succeed with system prompt")
+	require.NotNil(t, response, "response should not be nil")
+	require.NotEmpty(t, response.Content.Text(), "response should contain text")
+}
+
+// TestNovaMultiTurnConversation tests multi-turn conversations with Nova models.
+// Validates Requirement 8.4
+func TestNovaMultiTurnConversation(t *testing.T) {
+	r := vcr.NewRecorder(t)
+
+	provider, err := bedrock.New(
+		bedrock.WithHTTPClient(&http.Client{Transport: r}),
+		bedrock.WithSkipAuth(!r.IsRecording()),
+	)
+	require.NoError(t, err, "failed to create Bedrock provider")
+
+	model, err := provider.LanguageModel(t.Context(), "amazon.nova-lite-v1:0")
+	require.NoError(t, err, "failed to create Nova language model")
+
+	call := fantasy.Call{
+		Prompt: fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "My name is Alice."},
+				},
+			},
+			{
+				Role: fantasy.MessageRoleAssistant,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "Hello Alice! Nice to meet you."},
+				},
+			},
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "What is my name?"},
+				},
+			},
+		},
+		MaxOutputTokens: fantasy.Opt(int64(50)),
+	}
+
+	response, err := model.Generate(t.Context(), call)
+	require.NoError(t, err, "generation should succeed with multi-turn conversation")
+	require.NotNil(t, response, "response should not be nil")
+	require.NotEmpty(t, response.Content.Text(), "response should contain text")
+}
+
+// TestNovaStreaming tests streaming generation with Nova models.
+// Validates Requirement 1.4
+func TestNovaStreaming(t *testing.T) {
+	r := vcr.NewRecorder(t)
+
+	provider, err := bedrock.New(
+		bedrock.WithHTTPClient(&http.Client{Transport: r}),
+		bedrock.WithSkipAuth(!r.IsRecording()),
+	)
+	require.NoError(t, err, "failed to create Bedrock provider")
+
+	model, err := provider.LanguageModel(t.Context(), "amazon.nova-lite-v1:0")
+	require.NoError(t, err, "failed to create Nova language model")
+
+	call := fantasy.Call{
+		Prompt: fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "Count from 1 to 5"},
+				},
+			},
+		},
+		MaxOutputTokens: fantasy.Opt(int64(100)),
+	}
+
+	streamResponse, err := model.Stream(t.Context(), call)
+	require.NoError(t, err, "streaming should succeed")
+
+	var accumulatedText string
+	foundFinish := false
+
+	for part := range streamResponse {
+		if part.Type == fantasy.StreamPartTypeError {
+			t.Fatalf("stream error: %v", part.Error)
+		}
+
+		if part.Type == fantasy.StreamPartTypeTextDelta {
+			accumulatedText += part.Delta
+		}
+
+		if part.Type == fantasy.StreamPartTypeFinish {
+			foundFinish = true
+			require.Greater(t, part.Usage.InputTokens, int64(0), "input tokens should be positive")
+			require.Greater(t, part.Usage.OutputTokens, int64(0), "output tokens should be positive")
+			require.NotEmpty(t, part.FinishReason, "finish reason should not be empty")
+		}
+	}
+
+	require.True(t, foundFinish, "stream should yield a finish part")
+	require.NotEmpty(t, accumulatedText, "accumulated text should not be empty")
+}
+
+// TestNovaImageAttachments tests image attachment support with Nova models.
+// Validates Requirement 8.5
+// Note: This test uses a simple base64-encoded 1x1 pixel PNG for testing
+func TestNovaImageAttachments(t *testing.T) {
+	// Only test with models that support attachments (pro, lite, premier)
+	models := []string{
+		"amazon.nova-pro-v1:0",
+		"amazon.nova-lite-v1:0",
+	}
+
+	// Simple 1x1 red pixel PNG (base64 encoded)
+	testImageDataBase64 := "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg=="
+	testImageData, err := base64.StdEncoding.DecodeString(testImageDataBase64)
+	require.NoError(t, err, "failed to decode test image data")
+
+	for _, modelID := range models {
+		t.Run(modelID, func(t *testing.T) {
+			r := vcr.NewRecorder(t)
+
+			provider, err := bedrock.New(
+				bedrock.WithHTTPClient(&http.Client{Transport: r}),
+				bedrock.WithSkipAuth(!r.IsRecording()),
+			)
+			require.NoError(t, err, "failed to create Bedrock provider")
+
+			model, err := provider.LanguageModel(t.Context(), modelID)
+			require.NoError(t, err, "failed to create Nova language model")
+
+			call := fantasy.Call{
+				Prompt: fantasy.Prompt{
+					{
+						Role: fantasy.MessageRoleUser,
+						Content: []fantasy.MessagePart{
+							fantasy.FilePart{
+								Filename:  "test.png",
+								MediaType: "image/png",
+								Data:      testImageData,
+							},
+							fantasy.TextPart{Text: "What color is this image?"},
+						},
+					},
+				},
+				MaxOutputTokens: fantasy.Opt(int64(100)),
+			}
+
+			response, err := model.Generate(t.Context(), call)
+			require.NoError(t, err, "generation with image should succeed")
+			require.NotNil(t, response, "response should not be nil")
+			require.NotEmpty(t, response.Content.Text(), "response should contain text")
+		})
+	}
+}
+
+// Builder functions for Nova model variants
+
+func builderBedrockNovaPro(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
+	provider, err := bedrock.New(
+		bedrock.WithHTTPClient(&http.Client{Transport: r}),
+		bedrock.WithSkipAuth(!r.IsRecording()),
+	)
+	if err != nil {
+		return nil, err
+	}
+	return provider.LanguageModel(t.Context(), "amazon.nova-pro-v1:0")
+}
+
+func builderBedrockNovaLite(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
+	provider, err := bedrock.New(
+		bedrock.WithHTTPClient(&http.Client{Transport: r}),
+		bedrock.WithSkipAuth(!r.IsRecording()),
+	)
+	if err != nil {
+		return nil, err
+	}
+	return provider.LanguageModel(t.Context(), "amazon.nova-lite-v1:0")
+}
+
+func builderBedrockNovaMicro(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
+	provider, err := bedrock.New(
+		bedrock.WithHTTPClient(&http.Client{Transport: r}),
+		bedrock.WithSkipAuth(!r.IsRecording()),
+	)
+	if err != nil {
+		return nil, err
+	}
+	return provider.LanguageModel(t.Context(), "amazon.nova-micro-v1:0")
+}
+
+func builderBedrockNovaPremier(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
+	provider, err := bedrock.New(
+		bedrock.WithHTTPClient(&http.Client{Transport: r}),
+		bedrock.WithSkipAuth(!r.IsRecording()),
+	)
+	if err != nil {
+		return nil, err
+	}
+	return provider.LanguageModel(t.Context(), "amazon.nova-premier-v1:0")
 }

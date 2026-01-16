@@ -29,9 +29,28 @@ func (n *novaLanguageModel) Provider() string {
 }
 
 // Generate implements non-streaming generation.
-// This is a stub that will be implemented in task 8.
+// It converts the fantasy.Call to a Converse API request, invokes the API,
+// and converts the response back to fantasy.Response format.
 func (n *novaLanguageModel) Generate(ctx context.Context, call fantasy.Call) (*fantasy.Response, error) {
-	return nil, fmt.Errorf("Generate not yet implemented for Nova models")
+	// Prepare the Converse API request
+	request, warnings, err := n.prepareConverseRequest(call)
+	if err != nil {
+		return nil, fmt.Errorf("failed to prepare converse request: %w", err)
+	}
+
+	// Invoke the Converse API
+	output, err := n.client.Converse(ctx, request)
+	if err != nil {
+		return nil, convertAWSError(err)
+	}
+
+	// Convert the response to fantasy.Response
+	response, err := n.convertConverseResponse(output, warnings)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert converse response: %w", err)
+	}
+
+	return response, nil
 }
 
 // Stream implements streaming generation.

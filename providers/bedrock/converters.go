@@ -36,9 +36,15 @@ func (n *novaLanguageModel) prepareConverseRequest(call fantasy.Call) (*bedrockr
 	}
 
 	// Build additional model request fields for top_k
-	// Note: Nova models do not support top_k parameter
+	// Note: Nova models do not support top_k parameter, but we still set it in additional fields
 	var additionalFields document.Interface
 	if call.TopK != nil {
+		// Set top_k in additional fields (even though Nova doesn't support it)
+		additionalFieldsMap := map[string]interface{}{
+			"top_k": *call.TopK,
+		}
+		additionalFields = document.NewLazyDocument(additionalFieldsMap)
+
 		// Add warning that top_k is not supported for Nova models
 		warnings = append(warnings, fantasy.CallWarning{
 			Type:    fantasy.CallWarningTypeUnsupportedSetting,
@@ -511,9 +517,15 @@ func (n *novaLanguageModel) prepareConverseStreamRequest(call fantasy.Call) (*be
 	}
 
 	// Build additional model request fields for top_k
-	// Note: Nova models do not support top_k parameter
+	// Note: Nova models do not support top_k parameter, but we still set it in additional fields
 	var additionalFields document.Interface
 	if call.TopK != nil {
+		// Set top_k in additional fields (even though Nova doesn't support it)
+		additionalFieldsMap := map[string]interface{}{
+			"top_k": *call.TopK,
+		}
+		additionalFields = document.NewLazyDocument(additionalFieldsMap)
+
 		// Add warning that top_k is not supported for Nova models
 		warnings = append(warnings, fantasy.CallWarning{
 			Type:    fantasy.CallWarningTypeUnsupportedSetting,

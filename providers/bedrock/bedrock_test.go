@@ -37,11 +37,14 @@ func TestProperty_SDKRoutingCorrectness(t *testing.T) {
 				require.NotContains(t, err.Error(), "unsupported model prefix")
 			}
 		} else if strings.HasPrefix(modelID, "amazon.") {
-			// Should route to Nova implementation (currently a stub)
-			// Should return "Nova model support not yet implemented" error
-			require.Error(t, err)
-			require.Contains(t, err.Error(), "Nova model support not yet implemented")
-			require.Nil(t, model)
+			// Should route to Nova implementation
+			// Should succeed in creating a model instance
+			require.NoError(t, err, "Nova model creation should succeed for: %s", modelID)
+			require.NotNil(t, model, "Model should not be nil for: %s", modelID)
+
+			// Verify it's a valid language model
+			require.Equal(t, Name, model.Provider())
+			require.NotEmpty(t, model.Model())
 		} else {
 			// Should return unsupported prefix error
 			require.Error(t, err)
@@ -163,10 +166,13 @@ func TestLanguageModel_AmazonModels_RoutesToNova(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			model, err := provider.LanguageModel(ctx, tc.modelID)
 
-			// Should route to Nova implementation (currently a stub)
-			require.Error(t, err)
-			require.Contains(t, err.Error(), "Nova model support not yet implemented")
-			require.Nil(t, model)
+			// Should route to Nova implementation and succeed
+			require.NoError(t, err, "Nova model creation should succeed for: %s", tc.modelID)
+			require.NotNil(t, model, "Model should not be nil for: %s", tc.modelID)
+
+			// Verify it's a valid language model
+			require.Equal(t, Name, model.Provider())
+			require.NotEmpty(t, model.Model())
 		})
 	}
 }
@@ -212,5 +218,46 @@ func TestNew_WithOptions(t *testing.T) {
 		)
 		require.NoError(t, err)
 		require.NotNil(t, provider)
+	})
+}
+
+// Feature: amazon-nova-bedrock-support, Property 1: Model Instantiation Success
+// Validates: Requirements 1.1
+func TestProperty_ModelInstantiationSuccess(t *testing.T) {
+	t.Parallel()
+
+	rapid.Check(t, func(t *rapid.T) {
+		// Generate valid Nova model identifiers
+		modelVariant := rapid.SampledFrom([]string{
+			"amazon.nova-pro-v1:0",
+			"amazon.nova-lite-v1:0",
+			"amazon.nova-micro-v1:0",
+			"amazon.nova-premier-v1:0",
+		}).Draw(t, "modelVariant")
+
+		// Create provider
+		provider, err := New()
+		require.NoError(t, err)
+		require.NotNil(t, provider)
+
+		// Call LanguageModel with Nova model ID
+		ctx := context.Background()
+		model, err := provider.LanguageModel(ctx, modelVariant)
+
+		// For any valid Nova model identifier, LanguageModel() should return
+		// a non-nil language model instance without error
+		require.NoError(t, err, "LanguageModel should succeed for valid Nova model: %s", modelVariant)
+		require.NotNil(t, model, "LanguageModel should return non-nil model for: %s", modelVariant)
+
+		// Verify the model implements the interface correctly
+		require.Equal(t, Name, model.Provider(), "Provider should be 'bedrock'")
+		require.NotEmpty(t, model.Model(), "Model ID should not be empty")
+
+		// Verify the model ID has a region prefix applied
+		modelID := model.Model()
+		require.Contains(t, modelID, ".", "Model ID should contain region prefix")
+		// The model ID should start with a 2-letter region code followed by a dot
+		require.True(t, len(modelID) >= 3 && modelID[2] == '.',
+			"Model ID should have region prefix format (e.g., 'us.amazon.nova-pro-v1:0')")
 	})
 }

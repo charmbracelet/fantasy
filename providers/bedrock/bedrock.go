@@ -74,12 +74,6 @@ func (p *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.L
 	return nil, fmt.Errorf("unsupported model prefix for Bedrock: %s", modelID)
 }
 
-// createNovaModel creates a language model instance for Nova models.
-// This is a stub that will be implemented in task 5.
-func (p *provider) createNovaModel(ctx context.Context, modelID string) (fantasy.LanguageModel, error) {
-	return nil, fmt.Errorf("Nova model support not yet implemented")
-}
-
 // WithAPIKey sets the access token for the Bedrock provider.
 func WithAPIKey(apiKey string) Option {
 	return func(o *options) {

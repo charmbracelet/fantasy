@@ -92,7 +92,7 @@ func TestConvertImageAttachment(t *testing.T) {
 func TestConvertToolCall(t *testing.T) {
 	model := createTestModel(t)
 
-	toolInput := map[string]interface{}{
+	toolInput := map[string]any{
 		"query": "test query",
 		"limit": 10,
 	}

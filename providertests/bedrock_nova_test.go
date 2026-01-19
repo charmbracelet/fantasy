@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"net/http"
 	"os"
+	"strings"
 	"testing"
 
 	"charm.land/fantasy"
@@ -147,7 +148,7 @@ func TestNovaStreamingAccumulationConsistency(t *testing.T) {
 		}
 
 		// Accumulate content from stream
-		var streamedText string
+		var streamedText strings.Builder
 		var streamUsage fantasy.Usage
 		var streamFinishReason fantasy.FinishReason
 
@@ -157,7 +158,7 @@ func TestNovaStreamingAccumulationConsistency(t *testing.T) {
 			}
 
 			if part.Type == fantasy.StreamPartTypeTextDelta {
-				streamedText += part.Delta
+				streamedText.WriteString(part.Delta)
 			}
 
 			if part.Type == fantasy.StreamPartTypeFinish {
@@ -177,7 +178,7 @@ func TestNovaStreamingAccumulationConsistency(t *testing.T) {
 
 		// The texts should be similar (allowing for minor variations due to sampling)
 		// We check that both are non-empty and have similar lengths
-		if streamedText == "" {
+		if streamedText.String() == "" {
 			t.Fatalf("Streamed text is empty")
 		}
 
@@ -238,7 +239,7 @@ func generateValidNovaCall(t *rapid.T) fantasy.Call {
 	}
 
 	// Add user/assistant messages
-	for i := 0; i < numMessages; i++ {
+	for i := range numMessages {
 		role := fantasy.MessageRoleUser
 		if i%2 == 1 {
 			role = fantasy.MessageRoleAssistant
@@ -476,7 +477,7 @@ func TestNovaStreaming(t *testing.T) {
 	streamResponse, err := model.Stream(t.Context(), call)
 	require.NoError(t, err, "streaming should succeed")
 
-	var accumulatedText string
+	var accumulatedText strings.Builder
 	foundFinish := false
 
 	for part := range streamResponse {
@@ -485,7 +486,7 @@ func TestNovaStreaming(t *testing.T) {
 		}
 
 		if part.Type == fantasy.StreamPartTypeTextDelta {
-			accumulatedText += part.Delta
+			accumulatedText.WriteString(part.Delta)
 		}
 
 		if part.Type == fantasy.StreamPartTypeFinish {
@@ -497,7 +498,7 @@ func TestNovaStreaming(t *testing.T) {
 	}
 
 	require.True(t, foundFinish, "stream should yield a finish part")
-	require.NotEmpty(t, accumulatedText, "accumulated text should not be empty")
+	require.NotEmpty(t, accumulatedText.String(), "accumulated text should not be empty")
 }
 
 // TestNovaImageAttachments tests image attachment support with Nova models.

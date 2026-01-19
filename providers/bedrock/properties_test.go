@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"slices"
 	"testing"
 
 	"charm.land/fantasy"
@@ -69,7 +70,7 @@ func generateValidCall(t *rapid.T) fantasy.Call {
 	}
 
 	// Add user/assistant messages
-	for i := 0; i < numMessages; i++ {
+	for i := range numMessages {
 		role := fantasy.MessageRoleUser
 		if i%2 == 1 {
 			role = fantasy.MessageRoleAssistant
@@ -462,7 +463,7 @@ func generateValidConverseOutput(t *rapid.T) *bedrockruntime.ConverseOutput {
 	numBlocks := rapid.IntRange(1, 5).Draw(t, "numBlocks")
 	var contentBlocks []types.ContentBlock
 
-	for i := 0; i < numBlocks; i++ {
+	for range numBlocks {
 		blockType := rapid.IntRange(0, 2).Draw(t, "blockType")
 		switch blockType {
 		case 0:
@@ -601,13 +602,7 @@ func TestProperty_FinishReasonMappingCompleteness(t *testing.T) {
 				fantasy.FinishReasonUnknown,
 			}
 
-			isValid := false
-			for _, valid := range validFinishReasons {
-				if finishReason == valid {
-					isValid = true
-					break
-				}
-			}
+			isValid := slices.Contains(validFinishReasons, finishReason)
 
 			if !isValid {
 				t.Fatalf("convertStopReason returned invalid finish reason: %s for stop reason: %s", finishReason, stopReason)
@@ -731,7 +726,7 @@ func generateFantasyMessage(t *rapid.T) fantasy.Message {
 
 	// Optionally add tool call (only for assistant messages)
 	if role == fantasy.MessageRoleAssistant && rapid.Bool().Draw(t, "hasToolCall") {
-		toolInput := map[string]interface{}{
+		toolInput := map[string]any{
 			"param": rapid.String().Draw(t, "toolParam"),
 		}
 		toolInputJSON, _ := json.Marshal(toolInput)

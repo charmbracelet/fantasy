@@ -2348,11 +2348,11 @@ func TestDoStream(t *testing.T) {
 		require.NotEqual(t, -1, toolCall)
 
 		// Verify tool deltas combine to form the complete input
-		fullInput := ""
+		var fullInput strings.Builder
 		for _, delta := range toolDeltas {
-			fullInput += delta
+			fullInput.WriteString(delta)
 		}
-		require.Equal(t, `{"value":"Sparkle Day"}`, fullInput)
+		require.Equal(t, `{"value":"Sparkle Day"}`, fullInput.String())
 	})
 
 	t.Run("should stream annotations/citations", func(t *testing.T) {

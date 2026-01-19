@@ -15,7 +15,7 @@ func TestEnumSupport(t *testing.T) {
 		Format   string `json:"format,omitempty" enum:"json,xml,text"`
 	}
 
-	schema := Generate(reflect.TypeOf(WeatherInput{}))
+	schema := Generate(reflect.TypeFor[WeatherInput]())
 
 	require.Equal(t, "object", schema.Type)
 
@@ -300,7 +300,7 @@ func TestGenerateSchemaPointerTypes(t *testing.T) {
 		Age  *int    `json:"age"`
 	}
 
-	schema := Generate(reflect.TypeOf(StructWithPointers{}))
+	schema := Generate(reflect.TypeFor[StructWithPointers]())
 
 	require.Equal(t, "object", schema.Type)
 
@@ -324,7 +324,7 @@ func TestGenerateSchemaNestedStructs(t *testing.T) {
 		Address Address `json:"address"`
 	}
 
-	schema := Generate(reflect.TypeOf(Person{}))
+	schema := Generate(reflect.TypeFor[Person]())
 
 	require.Equal(t, "object", schema.Type)
 
@@ -345,7 +345,7 @@ func TestGenerateSchemaRecursiveStructs(t *testing.T) {
 		Next  *Node  `json:"next,omitempty"`
 	}
 
-	schema := Generate(reflect.TypeOf(Node{}))
+	schema := Generate(reflect.TypeFor[Node]())
 
 	require.Equal(t, "object", schema.Type)
 
@@ -367,7 +367,7 @@ func TestGenerateSchemaWithEnumTags(t *testing.T) {
 		Optional string `json:"optional,omitempty" enum:"a,b,c"`
 	}
 
-	schema := Generate(reflect.TypeOf(ConfigInput{}))
+	schema := Generate(reflect.TypeFor[ConfigInput]())
 
 	// Check level field
 	levelSchema := schema.Properties["level"]
@@ -398,7 +398,7 @@ func TestGenerateSchemaComplexTypes(t *testing.T) {
 		Interface   any                 `json:"interface"`
 	}
 
-	schema := Generate(reflect.TypeOf(ComplexInput{}))
+	schema := Generate(reflect.TypeFor[ComplexInput]())
 
 	// Check string slice
 	stringSliceSchema := schema.Properties["string_slice"]

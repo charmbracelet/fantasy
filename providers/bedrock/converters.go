@@ -40,7 +40,7 @@ func (n *novaLanguageModel) prepareConverseRequest(call fantasy.Call) (*bedrockr
 	var additionalFields document.Interface
 	if call.TopK != nil {
 		// Set top_k in additional fields (even though Nova doesn't support it)
-		additionalFieldsMap := map[string]interface{}{
+		additionalFieldsMap := map[string]any{
 			"top_k": *call.TopK,
 		}
 		additionalFields = document.NewLazyDocument(additionalFieldsMap)
@@ -224,7 +224,7 @@ func convertImageAttachment(filePart fantasy.FilePart) (types.ContentBlock, erro
 // convertToolCall converts a fantasy ToolCallPart to a Converse tool use block.
 func convertToolCall(toolCallPart fantasy.ToolCallPart) (types.ContentBlock, error) {
 	// Parse the input JSON string to a document
-	var inputMap map[string]interface{}
+	var inputMap map[string]any
 	if err := json.Unmarshal([]byte(toolCallPart.Input), &inputMap); err != nil {
 		return nil, fmt.Errorf("failed to parse tool call input: %w", err)
 	}
@@ -521,7 +521,7 @@ func (n *novaLanguageModel) prepareConverseStreamRequest(call fantasy.Call) (*be
 	var additionalFields document.Interface
 	if call.TopK != nil {
 		// Set top_k in additional fields (even though Nova doesn't support it)
-		additionalFieldsMap := map[string]interface{}{
+		additionalFieldsMap := map[string]any{
 			"top_k": *call.TopK,
 		}
 		additionalFields = document.NewLazyDocument(additionalFieldsMap)

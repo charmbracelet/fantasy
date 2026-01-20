@@ -19,7 +19,7 @@ type LanguageModelMapFinishReasonFunc func(finishReason string) fantasy.FinishRe
 type LanguageModelToPromptFunc func(prompt fantasy.Prompt, provider, modelID string) ([]model.D, []fantasy.CallWarning)
 
 // DefaultPrepareCallFunc is the default implementation for preparing a call to the language model.
-func DefaultPrepareCallFunc(lm fantasy.LanguageModel, d model.D, call fantasy.Call) ([]fantasy.CallWarning, error) {
+func DefaultPrepareCallFunc(_ fantasy.LanguageModel, d model.D, call fantasy.Call) ([]fantasy.CallWarning, error) {
 	if call.ProviderOptions == nil {
 		return nil, nil
 	}
@@ -78,7 +78,7 @@ func DefaultMapFinishReasonFunc(finishReason string) fantasy.FinishReason {
 }
 
 // DefaultToPrompt is the default implementation for converting fantasy prompts to Kronk SDK messages.
-func DefaultToPrompt(prompt fantasy.Prompt, provider, modelID string) ([]model.D, []fantasy.CallWarning) {
+func DefaultToPrompt(prompt fantasy.Prompt, _ string, _ string) ([]model.D, []fantasy.CallWarning) {
 	var messages []model.D
 	var warnings []fantasy.CallWarning
 

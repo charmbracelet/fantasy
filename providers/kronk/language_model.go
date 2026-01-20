@@ -214,7 +214,7 @@ func (l *languageModel) Generate(ctx context.Context, call fantasy.Call) (*fanta
 		ReasoningTokens: int64(lastResponse.Usage.ReasoningTokens),
 	}
 
-	mappedFinishReason := l.mapFinishReasonFunc(string(choice.FinishReason))
+	mappedFinishReason := l.mapFinishReasonFunc(choice.FinishReason)
 	if len(choice.Delta.ToolCalls) > 0 {
 		mappedFinishReason = fantasy.FinishReasonToolCalls
 	}
@@ -308,7 +308,7 @@ func (l *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 			}
 
 			if choice.FinishReason != "" {
-				finishReason = string(choice.FinishReason)
+				finishReason = choice.FinishReason
 			}
 
 			switch choice.FinishReason {

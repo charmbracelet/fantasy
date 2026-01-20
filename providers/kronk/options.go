@@ -66,7 +66,7 @@ func WithObjectMode(om fantasy.ObjectMode) Option {
 }
 
 // FmtLogger is a simple logger that prints to stdout using fmt.Printf.
-func FmtLogger(ctx context.Context, msg string, args ...any) {
+func FmtLogger(_ context.Context, msg string, args ...any) {
 	fmt.Printf("%s:", msg)
 
 	for i := 0; i < len(args); i += 2 {

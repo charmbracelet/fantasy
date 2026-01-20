@@ -4,9 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
-	"os"
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/object"
@@ -15,8 +13,6 @@ import (
 	xjson "github.com/charmbracelet/x/json"
 	"github.com/google/uuid"
 )
-
-var debugStream = os.Getenv("FANTASY_DEBUG_STREAM") != ""
 
 type languageModel struct {
 	provider            string
@@ -271,27 +267,10 @@ func (l *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 		toolIndex := 0
 		for resp := range ch {
 			if len(resp.Choice) == 0 {
-				if debugStream {
-					fmt.Fprintf(os.Stderr, "[DEBUG] Empty choices in response\n")
-				}
 				continue
 			}
 
 			choice := resp.Choice[0]
-
-			if debugStream {
-				fmt.Fprintf(os.Stderr, "[DEBUG] FinishReason=%q Content=%q Reasoning=%q ToolCalls=%d\n",
-					choice.FinishReason,
-					truncate(choice.Delta.Content, 50),
-					truncate(choice.Delta.Reasoning, 50),
-					len(choice.Delta.ToolCalls))
-
-				if len(choice.Delta.ToolCalls) > 0 {
-					for i, tc := range choice.Delta.ToolCalls {
-						fmt.Fprintf(os.Stderr, "[DEBUG]   ToolCall[%d]: ID=%q Name=%q Args=%v\n", i, tc.ID, tc.Name, tc.Arguments)
-					}
-				}
-			}
 
 			usage = fantasy.Usage{
 				InputTokens:     int64(resp.Usage.PromptTokens),

@@ -57,10 +57,25 @@ func (o *ProviderOptions) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// ReasoningEffort represents the reasoning effort level for Nova models.
+type ReasoningEffort string
+
+const (
+	ReasoningEffortLow    ReasoningEffort = "low"
+	ReasoningEffortMedium ReasoningEffort = "medium"
+	ReasoningEffortHigh   ReasoningEffort = "high"
+)
+
 // ThinkingProviderOption represents thinking options for the Bedrock provider.
 type ThinkingProviderOption struct {
-	// BudgetTokens sets the maximum number of tokens for reasoning output.
-	BudgetTokens int64 `json:"budget_tokens"`
+	// ReasoningEffort sets the reasoning effort level for Nova models (low/medium/high).
+	// If not set, defaults to "medium" when thinking is enabled.
+	ReasoningEffort ReasoningEffort `json:"reasoning_effort,omitempty"`
+
+	// BudgetTokens is deprecated for Nova models but kept for compatibility.
+	// Nova uses ReasoningEffort instead. If only BudgetTokens is set,
+	// it will be mapped to an effort level.
+	BudgetTokens int64 `json:"budget_tokens,omitempty"`
 }
 
 // ReasoningOptionMetadata represents reasoning metadata for the Bedrock provider.

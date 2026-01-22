@@ -17,6 +17,14 @@ import (
 func (n *novaLanguageModel) prepareConverseRequest(call fantasy.Call) (*bedrockruntime.ConverseInput, []fantasy.CallWarning, error) {
 	var warnings []fantasy.CallWarning
 
+	// Extract provider options
+	providerOptions := &ProviderOptions{}
+	if v, ok := call.ProviderOptions[Name]; ok {
+		if opts, ok := v.(*ProviderOptions); ok {
+			providerOptions = opts
+		}
+	}
+
 	// Convert messages to Converse API format
 	messages, systemBlocks, err := convertMessages(call.Prompt)
 	if err != nil {
@@ -35,22 +43,47 @@ func (n *novaLanguageModel) prepareConverseRequest(call fantasy.Call) (*bedrockr
 		inferenceConfig.TopP = aws.Float32(float32(*call.TopP))
 	}
 
-	// Build additional model request fields for top_k
-	// Note: Nova models do not support top_k parameter, but we still set it in additional fields
-	var additionalFields document.Interface
-	if call.TopK != nil {
-		// Set top_k in additional fields (even though Nova doesn't support it)
-		additionalFieldsMap := map[string]any{
-			"top_k": *call.TopK,
-		}
-		additionalFields = document.NewLazyDocument(additionalFieldsMap)
+	// Build additional model request fields
+	additionalFieldsMap := make(map[string]interface{})
 
-		// Add warning that top_k is not supported for Nova models
+	// Add thinking configuration if enabled (Nova uses reasoningConfig)
+	if providerOptions.Thinking != nil {
+		effort := providerOptions.Thinking.ReasoningEffort
+		// If no effort set but budget tokens provided, map to effort level
+		if effort == "" && providerOptions.Thinking.BudgetTokens > 0 {
+			switch {
+			case providerOptions.Thinking.BudgetTokens < 5000:
+				effort = ReasoningEffortLow
+			case providerOptions.Thinking.BudgetTokens < 15000:
+				effort = ReasoningEffortMedium
+			default:
+				effort = ReasoningEffortHigh
+			}
+		}
+		// Default to medium if thinking is enabled but no effort specified
+		if effort == "" {
+			effort = ReasoningEffortMedium
+		}
+		additionalFieldsMap["reasoningConfig"] = map[string]interface{}{
+			"type":               "enabled",
+			"maxReasoningEffort": string(effort),
+		}
+	}
+
+	// Add top_k if specified (though Nova doesn't support it)
+	if call.TopK != nil {
+		additionalFieldsMap["top_k"] = *call.TopK
 		warnings = append(warnings, fantasy.CallWarning{
 			Type:    fantasy.CallWarningTypeUnsupportedSetting,
 			Setting: "top_k",
 			Message: "top_k parameter is not supported by Amazon Nova models and will be ignored",
 		})
+	}
+
+	// Create additional fields document if we have any
+	var additionalFields document.Interface
+	if len(additionalFieldsMap) > 0 {
+		additionalFields = document.NewLazyDocument(additionalFieldsMap)
 	}
 
 	// Build the request
@@ -498,6 +531,14 @@ func convertStopReason(stopReason types.StopReason) fantasy.FinishReason {
 func (n *novaLanguageModel) prepareConverseStreamRequest(call fantasy.Call) (*bedrockruntime.ConverseStreamInput, []fantasy.CallWarning, error) {
 	var warnings []fantasy.CallWarning
 
+	// Extract provider options
+	providerOptions := &ProviderOptions{}
+	if v, ok := call.ProviderOptions[Name]; ok {
+		if opts, ok := v.(*ProviderOptions); ok {
+			providerOptions = opts
+		}
+	}
+
 	// Convert messages to Converse API format
 	messages, systemBlocks, err := convertMessages(call.Prompt)
 	if err != nil {
@@ -516,22 +557,47 @@ func (n *novaLanguageModel) prepareConverseStreamRequest(call fantasy.Call) (*be
 		inferenceConfig.TopP = aws.Float32(float32(*call.TopP))
 	}
 
-	// Build additional model request fields for top_k
-	// Note: Nova models do not support top_k parameter, but we still set it in additional fields
-	var additionalFields document.Interface
-	if call.TopK != nil {
-		// Set top_k in additional fields (even though Nova doesn't support it)
-		additionalFieldsMap := map[string]any{
-			"top_k": *call.TopK,
-		}
-		additionalFields = document.NewLazyDocument(additionalFieldsMap)
+	// Build additional model request fields
+	additionalFieldsMap := make(map[string]interface{})
 
-		// Add warning that top_k is not supported for Nova models
+	// Add thinking configuration if enabled (Nova uses reasoningConfig)
+	if providerOptions.Thinking != nil {
+		effort := providerOptions.Thinking.ReasoningEffort
+		// If no effort set but budget tokens provided, map to effort level
+		if effort == "" && providerOptions.Thinking.BudgetTokens > 0 {
+			switch {
+			case providerOptions.Thinking.BudgetTokens < 5000:
+				effort = ReasoningEffortLow
+			case providerOptions.Thinking.BudgetTokens < 15000:
+				effort = ReasoningEffortMedium
+			default:
+				effort = ReasoningEffortHigh
+			}
+		}
+		// Default to medium if thinking is enabled but no effort specified
+		if effort == "" {
+			effort = ReasoningEffortMedium
+		}
+		additionalFieldsMap["reasoningConfig"] = map[string]interface{}{
+			"type":               "enabled",
+			"maxReasoningEffort": string(effort),
+		}
+	}
+
+	// Add top_k if specified (though Nova doesn't support it)
+	if call.TopK != nil {
+		additionalFieldsMap["top_k"] = *call.TopK
 		warnings = append(warnings, fantasy.CallWarning{
 			Type:    fantasy.CallWarningTypeUnsupportedSetting,
 			Setting: "top_k",
 			Message: "top_k parameter is not supported by Amazon Nova models and will be ignored",
 		})
+	}
+
+	// Create additional fields document if we have any
+	var additionalFields document.Interface
+	if len(additionalFieldsMap) > 0 {
+		additionalFields = document.NewLazyDocument(additionalFieldsMap)
 	}
 
 	// Build the request

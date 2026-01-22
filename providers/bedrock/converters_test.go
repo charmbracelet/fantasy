@@ -472,7 +472,8 @@ func TestHandleConverseStream_ToolUse(t *testing.T) {
 	// 1. Tool use start should yield StreamPartTypeToolInputStart
 	// 2. Tool use delta should yield StreamPartTypeToolInputDelta
 	// 3. Tool use stop should yield StreamPartTypeToolInputEnd
-	// 4. Tool call input should be accumulated correctly
+	// 4. Tool use stop should also yield StreamPartTypeToolCall for agent execution
+	// 5. Tool call input should be accumulated correctly
 }
 
 // TestHandleConverseStream_FinishPart tests that finish part is always yielded.

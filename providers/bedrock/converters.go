@@ -666,6 +666,16 @@ func (n *novaLanguageModel) handleConverseStream(output *bedrockruntime.Converse
 						return
 					}
 
+					// Yield the completed tool call for agent execution
+					if !yield(fantasy.StreamPart{
+						Type:          fantasy.StreamPartTypeToolCall,
+						ID:            currentToolCallID,
+						ToolCallName:  currentToolCallName,
+						ToolCallInput: currentToolCallInput,
+					}) {
+						return
+					}
+
 					// Reset tool call tracking
 					currentToolCallID = ""
 					currentToolCallName = ""

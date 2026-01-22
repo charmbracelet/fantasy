@@ -579,6 +579,11 @@ func (n *novaLanguageModel) handleConverseStream(output *bedrockruntime.Converse
 		var usage fantasy.Usage
 		var finishReason fantasy.FinishReason
 
+		// Track reasoning block state
+		var reasoningBlockIndex int
+		var inReasoningBlock bool
+		var accumulatedReasoningText string
+
 		// Get the event stream
 		stream := output.GetStream()
 		if stream == nil {
@@ -645,6 +650,65 @@ func (n *novaLanguageModel) handleConverseStream(output *bedrockruntime.Converse
 								return
 							}
 						}
+					case *types.ContentBlockDeltaMemberReasoningContent:
+						// Reasoning content delta
+						reasoningDelta := delta.Value
+						reasoningID := fmt.Sprintf("reasoning-%d", reasoningBlockIndex)
+
+						switch rd := reasoningDelta.(type) {
+						case *types.ReasoningContentBlockDeltaMemberText:
+							// First reasoning delta starts the block
+							if !inReasoningBlock {
+								inReasoningBlock = true
+								if !yield(fantasy.StreamPart{
+									Type: fantasy.StreamPartTypeReasoningStart,
+									ID:   reasoningID,
+								}) {
+									return
+								}
+							}
+
+							// Emit reasoning text delta
+							accumulatedReasoningText += rd.Value
+							if !yield(fantasy.StreamPart{
+								Type:  fantasy.StreamPartTypeReasoningDelta,
+								ID:    reasoningID,
+								Delta: rd.Value,
+							}) {
+								return
+							}
+
+						case *types.ReasoningContentBlockDeltaMemberSignature:
+							// Signature delta - emit as reasoning delta with metadata
+							if !yield(fantasy.StreamPart{
+								Type: fantasy.StreamPartTypeReasoningDelta,
+								ID:   reasoningID,
+								ProviderMetadata: fantasy.ProviderMetadata{
+									Name: &ReasoningOptionMetadata{
+										Signature: rd.Value,
+									},
+								},
+							}) {
+								return
+							}
+
+						case *types.ReasoningContentBlockDeltaMemberRedactedContent:
+							// Redacted content - emit as reasoning delta with metadata
+							if !inReasoningBlock {
+								inReasoningBlock = true
+								if !yield(fantasy.StreamPart{
+									Type: fantasy.StreamPartTypeReasoningStart,
+									ID:   reasoningID,
+									ProviderMetadata: fantasy.ProviderMetadata{
+										Name: &ReasoningOptionMetadata{
+											RedactedData: string(rd.Value),
+										},
+									},
+								}) {
+									return
+								}
+							}
+						}
 					}
 				}
 
@@ -680,6 +744,20 @@ func (n *novaLanguageModel) handleConverseStream(output *bedrockruntime.Converse
 					currentToolCallID = ""
 					currentToolCallName = ""
 					currentToolCallInput = ""
+				} else if inReasoningBlock {
+					// Reasoning block ended
+					reasoningID := fmt.Sprintf("reasoning-%d", reasoningBlockIndex)
+					if !yield(fantasy.StreamPart{
+						Type: fantasy.StreamPartTypeReasoningEnd,
+						ID:   reasoningID,
+					}) {
+						return
+					}
+
+					// Reset reasoning tracking and increment index for next block
+					inReasoningBlock = false
+					accumulatedReasoningText = ""
+					reasoningBlockIndex++
 				}
 
 			case *types.ConverseStreamOutputMemberMessageStart:

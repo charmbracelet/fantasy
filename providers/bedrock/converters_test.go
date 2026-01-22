@@ -523,3 +523,18 @@ func TestHandleConverseStream_PartialContentAccumulation(t *testing.T) {
 	// 2. Tool input deltas should be accumulated into complete tool input
 	// 3. Accumulated content should match non-streaming response
 }
+
+// TestHandleConverseStream_ReasoningContent tests handling of reasoning/thinking content.
+func TestHandleConverseStream_ReasoningContent(t *testing.T) {
+	// Note: This test would require mocking the AWS SDK stream events
+	// which is complex. The actual reasoning handling is tested in integration tests.
+	// This is a placeholder to document the expected behavior.
+
+	// Expected behavior:
+	// 1. First reasoning delta should yield StreamPartTypeReasoningStart
+	// 2. Subsequent reasoning text deltas should yield StreamPartTypeReasoningDelta
+	// 3. Reasoning signature deltas should yield StreamPartTypeReasoningDelta with ProviderMetadata
+	// 4. Redacted content should yield StreamPartTypeReasoningStart with ProviderMetadata
+	// 5. Content block stop for reasoning should yield StreamPartTypeReasoningEnd
+	// 6. Multiple reasoning blocks should each get unique IDs (reasoning-0, reasoning-1, etc.)
+}

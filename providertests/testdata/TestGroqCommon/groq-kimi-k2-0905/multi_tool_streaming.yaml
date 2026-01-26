@@ -1,0 +1,179 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 874
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"}],"model":"moonshotai/kimi-k2-instruct-0905","max_tokens":4000,"stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://api.groq.com/openai/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"chatcmpl-e0ee82dc-f97f-453e-94fc-c466bc702e1f","object":"chat.completion.chunk","created":1761231347,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_05df423bab","choices":[{"index":0,"delta":{"role":"assistant","content":""},"logprobs":null,"finish_reason":null}],"x_groq":{"id":"req_01k88s37gyfaqa5ckqj4t7mrg8"}}
+
+      data: {"id":"chatcmpl-e0ee82dc-f97f-453e-94fc-c466bc702e1f","object":"chat.completion.chunk","created":1761231347,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_05df423bab","choices":[{"index":0,"delta":{"content":"I'll"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-e0ee82dc-f97f-453e-94fc-c466bc702e1f","object":"chat.completion.chunk","created":1761231347,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_05df423bab","choices":[{"index":0,"delta":{"content":" help"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-e0ee82dc-f97f-453e-94fc-c466bc702e1f","object":"chat.completion.chunk","created":1761231347,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_05df423bab","choices":[{"index":0,"delta":{"content":" you"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-e0ee82dc-f97f-453e-94fc-c466bc702e1f","object":"chat.completion.chunk","created":1761231347,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_05df423bab","choices":[{"index":0,"delta":{"content":" add"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-e0ee82dc-f97f-453e-94fc-c466bc702e1f","object":"chat.completion.chunk","created":1761231347,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_05df423bab","choices":[{"index":0,"delta":{"content":" and"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-e0ee82dc-f97f-453e-94fc-c466bc702e1f","object":"chat.completion.chunk","created":1761231347,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_05df423bab","choices":[{"index":0,"delta":{"content":" multiply"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-e0ee82dc-f97f-453e-94fc-c466bc702e1f","object":"chat.completion.chunk","created":1761231347,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_05df423bab","choices":[{"index":0,"delta":{"content":" the"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-e0ee82dc-f97f-453e-94fc-c466bc702e1f","object":"chat.completion.chunk","created":1761231347,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_05df423bab","choices":[{"index":0,"delta":{"content":" numbers"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-e0ee82dc-f97f-453e-94fc-c466bc702e1f","object":"chat.completion.chunk","created":1761231347,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_05df423bab","choices":[{"index":0,"delta":{"content":" "},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-e0ee82dc-f97f-453e-94fc-c466bc702e1f","object":"chat.completion.chunk","created":1761231347,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_05df423bab","choices":[{"index":0,"delta":{"content":"2"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-e0ee82dc-f97f-453e-94fc-c466bc702e1f","object":"chat.completion.chunk","created":1761231347,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_05df423bab","choices":[{"index":0,"delta":{"content":" and"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-e0ee82dc-f97f-453e-94fc-c466bc702e1f","object":"chat.completion.chunk","created":1761231347,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_05df423bab","choices":[{"index":0,"delta":{"content":" "},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-e0ee82dc-f97f-453e-94fc-c466bc702e1f","object":"chat.completion.chunk","created":1761231347,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_05df423bab","choices":[{"index":0,"delta":{"content":"3"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-e0ee82dc-f97f-453e-94fc-c466bc702e1f","object":"chat.completion.chunk","created":1761231347,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_05df423bab","choices":[{"index":0,"delta":{"content":"."},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-e0ee82dc-f97f-453e-94fc-c466bc702e1f","object":"chat.completion.chunk","created":1761231347,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_05df423bab","choices":[{"index":0,"delta":{"content":" Let"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-e0ee82dc-f97f-453e-94fc-c466bc702e1f","object":"chat.completion.chunk","created":1761231347,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_05df423bab","choices":[{"index":0,"delta":{"content":" me"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-e0ee82dc-f97f-453e-94fc-c466bc702e1f","object":"chat.completion.chunk","created":1761231347,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_05df423bab","choices":[{"index":0,"delta":{"content":" use"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-e0ee82dc-f97f-453e-94fc-c466bc702e1f","object":"chat.completion.chunk","created":1761231347,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_05df423bab","choices":[{"index":0,"delta":{"content":" both"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-e0ee82dc-f97f-453e-94fc-c466bc702e1f","object":"chat.completion.chunk","created":1761231347,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_05df423bab","choices":[{"index":0,"delta":{"content":" operations"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-e0ee82dc-f97f-453e-94fc-c466bc702e1f","object":"chat.completion.chunk","created":1761231347,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_05df423bab","choices":[{"index":0,"delta":{"content":":"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-e0ee82dc-f97f-453e-94fc-c466bc702e1f","object":"chat.completion.chunk","created":1761231347,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_05df423bab","choices":[{"index":0,"delta":{"tool_calls":[{"id":"functions.add:0","type":"function","function":{"name":"add","arguments":"{\"a\":2,\"b\":3}"},"index":0}]},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-e0ee82dc-f97f-453e-94fc-c466bc702e1f","object":"chat.completion.chunk","created":1761231347,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_05df423bab","choices":[{"index":0,"delta":{"tool_calls":[{"id":"functions.multiply:1","type":"function","function":{"name":"multiply","arguments":"{\"a\":2,\"b\":3}"},"index":1}]},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-e0ee82dc-f97f-453e-94fc-c466bc702e1f","object":"chat.completion.chunk","created":1761231347,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_05df423bab","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}],"x_groq":{"id":"req_01k88s37gyfaqa5ckqj4t7mrg8","usage":{"queue_time":0.19017122,"prompt_tokens":201,"prompt_time":0.021080836,"completion_tokens":61,"completion_time":0.201014516,"total_tokens":262,"total_time":0.222095352}},"usage":{"queue_time":0.19017122,"prompt_tokens":201,"prompt_time":0.021080836,"completion_tokens":61,"completion_time":0.201014516,"total_tokens":262,"total_time":0.222095352}}
+
+      data: {"id":"chatcmpl-e0ee82dc-f97f-453e-94fc-c466bc702e1f","object":"chat.completion.chunk","created":1761231347,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_05df423bab","choices":[],"usage":{"queue_time":0.19017122,"prompt_tokens":201,"prompt_time":0.021080836,"completion_tokens":61,"completion_time":0.201014516,"total_tokens":262,"total_time":0.222095352},"service_tier":"on_demand"}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 365.150042ms
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1345
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"content":"I''ll help you add and multiply the numbers 2 and 3. Let me use both operations:","tool_calls":[{"id":"functions.add:0","function":{"arguments":"{\"a\":2,\"b\":3}","name":"add"},"type":"function"},{"id":"functions.multiply:1","function":{"arguments":"{\"a\":2,\"b\":3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"functions.add:0","role":"tool"},{"content":"6","tool_call_id":"functions.multiply:1","role":"tool"}],"model":"moonshotai/kimi-k2-instruct-0905","max_tokens":4000,"stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://api.groq.com/openai/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"chatcmpl-892bb41f-5e78-4908-ae34-bc316457bd35","object":"chat.completion.chunk","created":1761231348,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"role":"assistant","content":""},"logprobs":null,"finish_reason":null}],"x_groq":{"id":"req_01k88s385bete86206z5e7616n"}}
+
+      data: {"id":"chatcmpl-892bb41f-5e78-4908-ae34-bc316457bd35","object":"chat.completion.chunk","created":1761231348,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":"Here"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-892bb41f-5e78-4908-ae34-bc316457bd35","object":"chat.completion.chunk","created":1761231348,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":" are"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-892bb41f-5e78-4908-ae34-bc316457bd35","object":"chat.completion.chunk","created":1761231348,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":" the"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-892bb41f-5e78-4908-ae34-bc316457bd35","object":"chat.completion.chunk","created":1761231348,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":" results"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-892bb41f-5e78-4908-ae34-bc316457bd35","object":"chat.completion.chunk","created":1761231348,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":":\n"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-892bb41f-5e78-4908-ae34-bc316457bd35","object":"chat.completion.chunk","created":1761231348,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":"-"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-892bb41f-5e78-4908-ae34-bc316457bd35","object":"chat.completion.chunk","created":1761231348,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":" Addition"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-892bb41f-5e78-4908-ae34-bc316457bd35","object":"chat.completion.chunk","created":1761231348,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":":"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-892bb41f-5e78-4908-ae34-bc316457bd35","object":"chat.completion.chunk","created":1761231348,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":" "},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-892bb41f-5e78-4908-ae34-bc316457bd35","object":"chat.completion.chunk","created":1761231348,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":"2"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-892bb41f-5e78-4908-ae34-bc316457bd35","object":"chat.completion.chunk","created":1761231348,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":" +"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-892bb41f-5e78-4908-ae34-bc316457bd35","object":"chat.completion.chunk","created":1761231348,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":" "},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-892bb41f-5e78-4908-ae34-bc316457bd35","object":"chat.completion.chunk","created":1761231348,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":"3"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-892bb41f-5e78-4908-ae34-bc316457bd35","object":"chat.completion.chunk","created":1761231348,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":" ="},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-892bb41f-5e78-4908-ae34-bc316457bd35","object":"chat.completion.chunk","created":1761231348,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":" "},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-892bb41f-5e78-4908-ae34-bc316457bd35","object":"chat.completion.chunk","created":1761231348,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":"5"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-892bb41f-5e78-4908-ae34-bc316457bd35","object":"chat.completion.chunk","created":1761231348,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":"\n"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-892bb41f-5e78-4908-ae34-bc316457bd35","object":"chat.completion.chunk","created":1761231348,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":"-"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-892bb41f-5e78-4908-ae34-bc316457bd35","object":"chat.completion.chunk","created":1761231348,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":" Multi"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-892bb41f-5e78-4908-ae34-bc316457bd35","object":"chat.completion.chunk","created":1761231348,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":"plication"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-892bb41f-5e78-4908-ae34-bc316457bd35","object":"chat.completion.chunk","created":1761231348,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":":"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-892bb41f-5e78-4908-ae34-bc316457bd35","object":"chat.completion.chunk","created":1761231348,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":" "},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-892bb41f-5e78-4908-ae34-bc316457bd35","object":"chat.completion.chunk","created":1761231348,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":"2"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-892bb41f-5e78-4908-ae34-bc316457bd35","object":"chat.completion.chunk","created":1761231348,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":" ×"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-892bb41f-5e78-4908-ae34-bc316457bd35","object":"chat.completion.chunk","created":1761231348,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":" "},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-892bb41f-5e78-4908-ae34-bc316457bd35","object":"chat.completion.chunk","created":1761231348,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":"3"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-892bb41f-5e78-4908-ae34-bc316457bd35","object":"chat.completion.chunk","created":1761231348,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":" ="},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-892bb41f-5e78-4908-ae34-bc316457bd35","object":"chat.completion.chunk","created":1761231348,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":" "},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-892bb41f-5e78-4908-ae34-bc316457bd35","object":"chat.completion.chunk","created":1761231348,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":"6"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-892bb41f-5e78-4908-ae34-bc316457bd35","object":"chat.completion.chunk","created":1761231348,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"stop"}],"x_groq":{"id":"req_01k88s385bete86206z5e7616n","usage":{"queue_time":0.161108553,"prompt_tokens":299,"prompt_time":0.030321043,"completion_tokens":30,"completion_time":0.064738989,"total_tokens":329,"total_time":0.095060032}},"usage":{"queue_time":0.161108553,"prompt_tokens":299,"prompt_time":0.030321043,"completion_tokens":30,"completion_time":0.064738989,"total_tokens":329,"total_time":0.095060032}}
+
+      data: {"id":"chatcmpl-892bb41f-5e78-4908-ae34-bc316457bd35","object":"chat.completion.chunk","created":1761231348,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[],"usage":{"queue_time":0.161108553,"prompt_tokens":299,"prompt_time":0.030321043,"completion_tokens":30,"completion_time":0.064738989,"total_tokens":329,"total_time":0.095060032},"service_tier":"on_demand"}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 432.309709ms

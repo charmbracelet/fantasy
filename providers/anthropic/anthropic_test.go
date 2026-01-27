@@ -341,3 +341,63 @@ func TestToPrompt_DropsEmptyMessages(t *testing.T) {
 		require.Empty(t, warnings)
 	})
 }
+
+func TestParseContextTooLargeError(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		message  string
+		wantErr  bool
+		wantUsed int
+		wantMax  int
+	}{
+		{
+			name:     "matches anthropic format",
+			message:  "prompt is too long: 202630 tokens > 200000 maximum",
+			wantErr:  true,
+			wantUsed: 202630,
+			wantMax:  200000,
+		},
+		{
+			name:     "matches with different numbers",
+			message:  "prompt is too long: 150000 tokens > 128000 maximum",
+			wantErr:  true,
+			wantUsed: 150000,
+			wantMax:  128000,
+		},
+		{
+			name:     "matches with extra whitespace",
+			message:  "prompt is too long:  202630  tokens  >  200000  maximum",
+			wantErr:  true,
+			wantUsed: 202630,
+			wantMax:  200000,
+		},
+		{
+			name:    "does not match unrelated error",
+			message: "invalid api key",
+			wantErr: false,
+		},
+		{
+			name:    "does not match rate limit error",
+			message: "rate limit exceeded",
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			providerErr := &fantasy.ProviderError{Message: tt.message}
+			parseContextTooLargeError(tt.message, providerErr)
+
+			if tt.wantErr {
+				require.True(t, providerErr.IsContextTooLarge())
+				require.Equal(t, tt.wantUsed, providerErr.ContextUsedTokens)
+				require.Equal(t, tt.wantMax, providerErr.ContextMaxTokens)
+			} else {
+				require.False(t, providerErr.IsContextTooLarge())
+			}
+		})
+	}
+}

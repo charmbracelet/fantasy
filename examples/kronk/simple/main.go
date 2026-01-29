@@ -11,9 +11,10 @@ import (
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/providers/kronk"
+	"github.com/ardanlabs/kronk/sdk/kronk/model"
 )
 
-const modelURL = "https://huggingface.co/Qwen/Qwen3-8B-GGUF/resolve/main/Qwen3-8B-Q8_0.gguf"
+const modelURL = "Qwen/Qwen3-8B-GGUF/Qwen3-8B-Q8_0.gguf"
 
 func main() {
 	if err := run(); err != nil {
@@ -30,6 +31,11 @@ func run() error {
 	provider, err := kronk.New(
 		kronk.WithName("kronk"),
 		kronk.WithLogger(kronk.FmtLogger),
+		kronk.WithModelConfig(model.Config{
+			CacheTypeK: model.GGMLTypeQ8_0,
+			CacheTypeV: model.GGMLTypeQ8_0,
+			NSeqMax:    1,
+		}),
 	)
 	if err != nil {
 		return fmt.Errorf("unable to create provider: %w", err)
@@ -75,6 +81,10 @@ func run() error {
 	agent := fantasy.NewAgent(model,
 		fantasy.WithSystemPrompt("You are a moderately helpful, dog-centric assistant."),
 		fantasy.WithTools(cuteDogTool),
+		fantasy.WithMaxOutputTokens(2048),
+		fantasy.WithTemperature(0.7),
+		fantasy.WithTopP(0.8),
+		fantasy.WithTopK(20),
 	)
 
 	// Put that agent to work!

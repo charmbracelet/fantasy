@@ -173,6 +173,11 @@ func (l *languageModel) Generate(ctx context.Context, call fantasy.Call) (*fanta
 			case model.FinishReasonError:
 				return nil, &fantasy.Error{Title: "model error", Message: resp.Choice[0].Delta.Content}
 
+			case model.FinishReasonStop, model.FinishReasonTool:
+				// Final response already contains full accumulated content in Delta.Content,
+				// so we use it directly instead of continuing to accumulate.
+				fullContent = resp.Choice[0].Delta.Content
+
 			default:
 				fullContent += resp.Choice[0].Delta.Content
 			}
@@ -193,7 +198,9 @@ func (l *languageModel) Generate(ctx context.Context, call fantasy.Call) (*fanta
 	}
 
 	for _, tc := range choice.Delta.ToolCalls {
-		argsJSON, _ := json.Marshal(tc.Function.Arguments)
+		// Marshal the underlying map directly, not the ToolCallArguments type
+		// which has a custom MarshalJSON that double-encodes to a JSON string.
+		argsJSON, _ := json.Marshal(map[string]any(tc.Function.Arguments))
 
 		content = append(content, fantasy.ToolCallContent{
 			ProviderExecuted: false,
@@ -272,17 +279,19 @@ func (l *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 
 			choice := resp.Choice[0]
 
-			usage = fantasy.Usage{
-				InputTokens:     int64(resp.Usage.PromptTokens),
-				OutputTokens:    int64(resp.Usage.CompletionTokens),
-				TotalTokens:     int64(resp.Usage.PromptTokens + resp.Usage.CompletionTokens),
-				ReasoningTokens: int64(resp.Usage.ReasoningTokens),
-			}
+			if resp.Usage != nil {
+				usage = fantasy.Usage{
+					InputTokens:     int64(resp.Usage.PromptTokens),
+					OutputTokens:    int64(resp.Usage.CompletionTokens),
+					TotalTokens:     int64(resp.Usage.PromptTokens + resp.Usage.CompletionTokens),
+					ReasoningTokens: int64(resp.Usage.ReasoningTokens),
+				}
 
-			if pm, ok := providerMetadata[Name]; ok {
-				if metadata, ok := pm.(*ProviderMetadata); ok {
-					metadata.TokensPerSecond = resp.Usage.TokensPerSecond
-					metadata.OutputTokens = int64(resp.Usage.OutputTokens)
+				if pm, ok := providerMetadata[Name]; ok {
+					if metadata, ok := pm.(*ProviderMetadata); ok {
+						metadata.TokensPerSecond = resp.Usage.TokensPerSecond
+						metadata.OutputTokens = int64(resp.Usage.OutputTokens)
+					}
 				}
 			}
 
@@ -320,7 +329,7 @@ func (l *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 				}
 
 				for _, tc := range choice.Delta.ToolCalls {
-					argsJSON, _ := json.Marshal(tc.Function.Arguments)
+					argsJSON, _ := json.Marshal(map[string]any(tc.Function.Arguments))
 					argsStr := string(argsJSON)
 
 					toolID := tc.ID
@@ -434,7 +443,7 @@ func (l *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 				}
 
 				for _, tc := range choice.Delta.ToolCalls {
-					argsJSON, _ := json.Marshal(tc.Function.Arguments)
+					argsJSON, _ := json.Marshal(map[string]any(tc.Function.Arguments))
 					argsStr := string(argsJSON)
 
 					switch existingTC, ok := toolCalls[toolIndex]; ok {

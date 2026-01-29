@@ -16,7 +16,6 @@ type Logger func(ctx context.Context, msg string, args ...any)
 
 type options struct {
 	name                 string
-	modelInstances       int
 	modelConfig          model.Config
 	logger               Logger
 	objectMode           fantasy.ObjectMode
@@ -27,13 +26,6 @@ type options struct {
 func WithName(name string) Option {
 	return func(o *options) {
 		o.name = name
-	}
-}
-
-// WithModelInstances sets the number of model instances to create.
-func WithModelInstances(instances int) Option {
-	return func(o *options) {
-		o.modelInstances = instances
 	}
 }
 

@@ -169,7 +169,7 @@ func (l *languageModel) Generate(ctx context.Context, call fantasy.Call) (*fanta
 		lastResponse = resp
 
 		if len(resp.Choice) > 0 {
-			switch resp.Choice[0].FinishReason {
+			switch resp.Choice[0].FinishReason() {
 			case model.FinishReasonError:
 				return nil, &fantasy.Error{Title: "model error", Message: resp.Choice[0].Delta.Content}
 
@@ -193,12 +193,12 @@ func (l *languageModel) Generate(ctx context.Context, call fantasy.Call) (*fanta
 	}
 
 	for _, tc := range choice.Delta.ToolCalls {
-		argsJSON, _ := json.Marshal(tc.Arguments)
+		argsJSON, _ := json.Marshal(tc.Function.Arguments)
 
 		content = append(content, fantasy.ToolCallContent{
 			ProviderExecuted: false,
 			ToolCallID:       tc.ID,
-			ToolName:         tc.Name,
+			ToolName:         tc.Function.Name,
 			Input:            string(argsJSON),
 		})
 	}
@@ -210,7 +210,7 @@ func (l *languageModel) Generate(ctx context.Context, call fantasy.Call) (*fanta
 		ReasoningTokens: int64(lastResponse.Usage.ReasoningTokens),
 	}
 
-	mappedFinishReason := l.mapFinishReasonFunc(choice.FinishReason)
+	mappedFinishReason := l.mapFinishReasonFunc(choice.FinishReason())
 	if len(choice.Delta.ToolCalls) > 0 {
 		mappedFinishReason = fantasy.FinishReasonToolCalls
 	}
@@ -286,11 +286,11 @@ func (l *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 				}
 			}
 
-			if choice.FinishReason != "" {
-				finishReason = choice.FinishReason
+			if choice.FinishReason() != "" {
+				finishReason = choice.FinishReason()
 			}
 
-			switch choice.FinishReason {
+			switch choice.FinishReason() {
 			case model.FinishReasonError:
 				yield(fantasy.StreamPart{
 					Type:  fantasy.StreamPartTypeError,
@@ -320,7 +320,7 @@ func (l *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 				}
 
 				for _, tc := range choice.Delta.ToolCalls {
-					argsJSON, _ := json.Marshal(tc.Arguments)
+					argsJSON, _ := json.Marshal(tc.Function.Arguments)
 					argsStr := string(argsJSON)
 
 					toolID := tc.ID
@@ -331,7 +331,7 @@ func (l *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 					if !yield(fantasy.StreamPart{
 						Type:         fantasy.StreamPartTypeToolInputStart,
 						ID:           toolID,
-						ToolCallName: tc.Name,
+						ToolCallName: tc.Function.Name,
 					}) {
 						return
 					}
@@ -354,7 +354,7 @@ func (l *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 					if !yield(fantasy.StreamPart{
 						Type:          fantasy.StreamPartTypeToolCall,
 						ID:            toolID,
-						ToolCallName:  tc.Name,
+						ToolCallName:  tc.Function.Name,
 						ToolCallInput: argsStr,
 					}) {
 						return
@@ -362,7 +362,7 @@ func (l *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 
 					toolCalls[toolIndex] = streamToolCall{
 						id:          toolID,
-						name:        tc.Name,
+						name:        tc.Function.Name,
 						arguments:   argsStr,
 						hasFinished: true,
 					}
@@ -434,7 +434,7 @@ func (l *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 				}
 
 				for _, tc := range choice.Delta.ToolCalls {
-					argsJSON, _ := json.Marshal(tc.Arguments)
+					argsJSON, _ := json.Marshal(tc.Function.Arguments)
 					argsStr := string(argsJSON)
 
 					switch existingTC, ok := toolCalls[toolIndex]; ok {
@@ -485,14 +485,14 @@ func (l *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 						if !yield(fantasy.StreamPart{
 							Type:         fantasy.StreamPartTypeToolInputStart,
 							ID:           toolID,
-							ToolCallName: tc.Name,
+							ToolCallName: tc.Function.Name,
 						}) {
 							return
 						}
 
 						toolCalls[toolIndex] = streamToolCall{
 							id:        toolID,
-							name:      tc.Name,
+							name:      tc.Function.Name,
 							arguments: argsStr,
 						}
 
@@ -516,7 +516,7 @@ func (l *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 								if !yield(fantasy.StreamPart{
 									Type:          fantasy.StreamPartTypeToolCall,
 									ID:            toolID,
-									ToolCallName:  tc.Name,
+									ToolCallName:  tc.Function.Name,
 									ToolCallInput: argsStr,
 								}) {
 									return

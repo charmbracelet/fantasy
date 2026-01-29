@@ -17,9 +17,6 @@ import (
 const (
 	// Name is the name of the Kronk provider.
 	Name = "kronk"
-
-	// DefaultModelInstances is the default number of model instances.
-	DefaultModelInstances = 1
 )
 
 type provider struct {
@@ -32,7 +29,6 @@ type provider struct {
 func New(opts ...Option) (fantasy.Provider, error) {
 	providerOptions := options{
 		languageModelOptions: make([]LanguageModelOption, 0),
-		modelInstances:       DefaultModelInstances,
 	}
 
 	for _, o := range opts {
@@ -155,7 +151,7 @@ func (p *provider) newKronk(mp models.Path) (*kronk.Kronk, error) {
 	cfg := p.options.modelConfig
 	cfg.ModelFiles = mp.ModelFiles
 
-	krn, err := kronk.New(p.options.modelInstances, cfg)
+	krn, err := kronk.New(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create inference model: %w", err)
 	}

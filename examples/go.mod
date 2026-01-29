@@ -6,7 +6,7 @@ replace charm.land/fantasy => ../
 
 require (
 	charm.land/fantasy v0.0.0-00010101000000-000000000000
-	github.com/ardanlabs/kronk v1.16.2
+	github.com/ardanlabs/kronk v1.16.3
 	github.com/charmbracelet/lipgloss/v2 v2.0.0-beta.3.0.20250917201909-41ff0bf215ea
 	github.com/charmbracelet/log/v2 v2.0.0-20251001162505-358b5269b546
 	github.com/charmbracelet/x/term v0.2.1

@@ -3247,3 +3247,59 @@ func TestResponsesToPrompt_DropsEmptyMessages(t *testing.T) {
 		require.Empty(t, warnings)
 	})
 }
+
+func TestOpenAIEmbeddings(t *testing.T) {
+	server := newMockServer()
+	defer server.close()
+
+	server.response = map[string]any{
+		"object": "list",
+		"model":  "text-embedding-3-small",
+		"data": []map[string]any{
+			{
+				"object":    "embedding",
+				"index":     0,
+				"embedding": []float64{0.1, -0.2},
+			},
+		},
+		"usage": map[string]any{
+			"prompt_tokens": 5,
+			"total_tokens":  5,
+		},
+	}
+
+	provider, err := New(WithBaseURL(server.server.URL))
+	require.NoError(t, err)
+
+	embeddingProvider, ok := provider.(fantasy.EmbeddingProvider)
+	require.True(t, ok)
+
+	model, err := embeddingProvider.EmbeddingModel(t.Context(), "text-embedding-3-small")
+	require.NoError(t, err)
+	require.Equal(t, "text-embedding-3-small", model.Model())
+	require.Equal(t, Name, model.Provider())
+
+	input := "hello"
+	dims := int64(2)
+	user := "alice"
+	response, err := model.Embed(t.Context(), fantasy.EmbeddingCall{
+		Input:      &input,
+		Dimensions: &dims,
+		ProviderOptions: NewProviderOptions(&ProviderOptions{
+			User: fantasy.Opt(user),
+		}),
+	})
+	require.NoError(t, err)
+	require.Len(t, response.Embeddings, 1)
+	require.Equal(t, []float32{0.1, -0.2}, response.Embeddings[0].Vector)
+	require.Equal(t, int64(5), response.Usage.InputTokens)
+	require.Equal(t, int64(5), response.Usage.TotalTokens)
+
+	require.Len(t, server.calls, 1)
+	call := server.calls[0]
+	require.Equal(t, "/embeddings", call.path)
+	require.Equal(t, "text-embedding-3-small", call.body["model"])
+	require.Equal(t, "hello", call.body["input"])
+	require.Equal(t, float64(2), call.body["dimensions"])
+	require.Equal(t, "alice", call.body["user"])
+}

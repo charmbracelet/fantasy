@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 832
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"}],"model":"google/gemini-3-pro-preview","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://ai-gateway.vercel.sh/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"id":"gen_01KGF39J2GMGMAPH0F955QXJN5","object":"chat.completion","created":1770033304,"model":"google/gemini-3-pro-preview","choices":[{"index":0,"message":{"role":"assistant","content":null,"tool_calls":[{"id":"yr8vjBiBxciYk81p","type":"function","function":{"name":"add","arguments":"{\"b\":3,\"a\":2}"}},{"id":"AmDRMtn5jFH1FM4J","type":"function","function":{"name":"multiply","arguments":"{\"b\":3,\"a\":2}"}}],"provider_metadata":{"google":{"promptFeedback":null,"groundingMetadata":null,"urlContextMetadata":null,"safetyRatings":null,"usageMetadata":{"thoughtsTokenCount":119,"promptTokenCount":61,"candidatesTokenCount":18,"totalTokenCount":198,"trafficType":"PROVISIONED_THROUGHPUT"}},"gateway":{"routing":{"originalModelId":"google/gemini-3-pro-preview","resolvedProvider":"vertex","resolvedProviderApiModelId":"gemini-3-pro-preview","internalResolvedModelId":"vertex:gemini-3-pro-preview","fallbacksAvailable":["google"],"internalReasoning":"Selected vertex as preferred provider for gemini-3-pro-preview. 1 fallback(s) available: google","planningReasoning":"System credentials planned for: vertex, google. Total execution order: vertex(system) → google(system)","canonicalSlug":"google/gemini-3-pro-preview","finalProvider":"vertex","attempts":[{"provider":"vertex","internalModelId":"vertex:gemini-3-pro-preview","providerApiModelId":"gemini-3-pro-preview","credentialType":"system","success":true,"startTime":7050722.565232,"endTime":7053930.218976,"statusCode":200,"providerResponseId":"lZCAaejDKf6BmLAPjqmi-Qo"}],"modelAttemptCount":1,"modelAttempts":[{"modelId":"google/gemini-3-pro-preview","canonicalSlug":"google/gemini-3-pro-preview","success":false,"providerAttemptCount":0,"providerAttempts":[]}],"totalProviderAttemptCount":0},"cost":"0.001766","marketCost":"0.001766","generationId":"gen_01KGF39J2GMGMAPH0F955QXJN5","billableWebSearchCalls":0}}},"logprobs":null,"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":61,"completion_tokens":18,"total_tokens":79,"cost":0.001766,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":119,"image_tokens":0},"cache_creation_input_tokens":0,"market_cost":0.001766},"system_fingerprint":"fp_sbwyjrbwm9","generationId":"gen_01KGF39J2GMGMAPH0F955QXJN5"}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 3.301019917s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1205
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"tool_calls":[{"id":"yr8vjBiBxciYk81p","function":{"arguments":"{\"b\":3,\"a\":2}","name":"add"},"type":"function"},{"id":"AmDRMtn5jFH1FM4J","function":{"arguments":"{\"b\":3,\"a\":2}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"yr8vjBiBxciYk81p","role":"tool"},{"content":"6","tool_call_id":"AmDRMtn5jFH1FM4J","role":"tool"}],"model":"google/gemini-3-pro-preview","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://ai-gateway.vercel.sh/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"id":"gen_01KGF39N3ZQQNAHVCNDKGKFDXH","object":"chat.completion","created":1770033309,"model":"google/gemini-3-pro-preview","choices":[{"index":0,"message":{"role":"assistant","content":"The sum of 2 and 3 is 5, and the product of 2 and 3 is 6.","reasoning_details":[{"type":"reasoning.encrypted","data":"EowECokEAXLI2nxcmOHKFmCie8wZQj4/lvp5r14Pp4tqdLOscZ0XBOKdSP60HUPURffivhxpaKDjwvyYIf43reXC7PyAzrNjw/g82cNAjfDK7wpy9ytBDKW8Jmn0KghvDqliK1EHUa5r5phWGwyclW3coT/6X1mtcQd89uAjf3qg3HyAvSNRrpjY+5E8i1CWh9Klnz+4AJ6cAHyahhkqS6Kc/0fZWFwggkOYPetH/bLrdipfcjBOIyRsWg8YeR9iRiv2cBbHruJeops0JKxCVhr750bJiYYehM3eOgvfD6rXA9TJnv6+sjoGXK/kWkrFW84i7lJvbDZaonJwVbDe3B1qpm+cmiGRHDHBQDam9dfLnRoeuk8lvEHtJctSIGRKSG+qavsxhHsr+IyWolld74TkIc7/dFHqJvCUkp8UtIg7KFMIHsQmi0FGn2IpUK/pW47Q8wT9eUdbxr8FFkmcsTMziI1QexEK1bosMZYDYc6AnQ3HXQzGuCq/Alx8jaku4xeyl1xplmMCKPui0AvK05/uKD08xSmWouSi3iMsIxj/1QRvrejj22oT7DiHZuL/DKp8tnCR2f3M/U8OmxMr665dpyWMfrBLAFL0KL7AQGoRqpxoLEbTmISk5wDaxYdXqnLhgPw9qF4TCRYnUQNfSbzIfKmCk/ekKwX0NBROCJu5yhVEBsMEevDTC/sg8q0=","format":"google-gemini-v1","index":0}],"provider_metadata":{"google":{"promptFeedback":null,"groundingMetadata":null,"urlContextMetadata":null,"safetyRatings":null,"usageMetadata":{"thoughtsTokenCount":119,"promptTokenCount":223,"candidatesTokenCount":25,"totalTokenCount":367}},"gateway":{"routing":{"originalModelId":"google/gemini-3-pro-preview","resolvedProvider":"vertex","resolvedProviderApiModelId":"gemini-3-pro-preview","internalResolvedModelId":"vertex:gemini-3-pro-preview","fallbacksAvailable":["google"],"internalReasoning":"Selected vertex as preferred provider for gemini-3-pro-preview. 1 fallback(s) available: google","planningReasoning":"System credentials planned for: vertex, google. Total execution order: vertex(system) → google(system)","canonicalSlug":"google/gemini-3-pro-preview","finalProvider":"google","attempts":[{"provider":"vertex","internalModelId":"vertex:gemini-3-pro-preview","providerApiModelId":"gemini-3-pro-preview","credentialType":"system","success":false,"error":"Please ensure that the number of function response parts is equal to the number of function call parts of the function call turn.","startTime":7674067.523962,"endTime":7674739.16189,"statusCode":400},{"provider":"google","internalModelId":"google:gemini-3-pro-preview","providerApiModelId":"gemini-3-pro-preview","credentialType":"system","success":true,"startTime":7674863.56271,"endTime":7678582.662173,"statusCode":200,"providerResponseId":"nZCAaaflFeKF7M8Pis3b4AE"}],"modelAttemptCount":1,"modelAttempts":[{"modelId":"google/gemini-3-pro-preview","canonicalSlug":"google/gemini-3-pro-preview","success":false,"providerAttemptCount":0,"providerAttempts":[]}],"totalProviderAttemptCount":0},"cost":"0.002174","marketCost":"0.002174","generationId":"gen_01KGF39N3ZQQNAHVCNDKGKFDXH","billableWebSearchCalls":0}}},"logprobs":null,"finish_reason":"stop"}],"usage":{"prompt_tokens":223,"completion_tokens":25,"total_tokens":248,"cost":0.002174,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":119,"image_tokens":0},"cache_creation_input_tokens":0,"market_cost":0.002174},"system_fingerprint":"fp_q0jgoj8amw","generationId":"gen_01KGF39N3ZQQNAHVCNDKGKFDXH"}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 4.618416166s

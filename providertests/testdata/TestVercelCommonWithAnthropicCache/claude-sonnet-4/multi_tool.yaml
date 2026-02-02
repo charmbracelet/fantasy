@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 904
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system","cache_control":{"type":"ephemeral"}},{"content":"Add and multiply the number 2 and 3","role":"user","cache_control":{"type":"ephemeral"}}],"model":"anthropic/claude-sonnet-4","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://ai-gateway.vercel.sh/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"id":"gen_01KGF3AEN63MVZD10V5VWY1NFK","object":"chat.completion","created":1770033333,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"message":{"role":"assistant","content":null,"tool_calls":[{"id":"toolu_018Bqrp5E4LTkWWKFAWjJcPw","type":"function","function":{"name":"add","arguments":"{\"a\":2,\"b\":3}"}},{"id":"toolu_01ModQEwNzE9utyENTnUKDzE","type":"function","function":{"name":"multiply","arguments":"{\"a\":2,\"b\":3}"}}],"provider_metadata":{"anthropic":{"usage":{"input_tokens":507,"output_tokens":137,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"service_tier":"standard"},"cacheCreationInputTokens":0,"stopSequence":null,"container":null},"gateway":{"routing":{"originalModelId":"anthropic/claude-sonnet-4","resolvedProvider":"anthropic","resolvedProviderApiModelId":"claude-sonnet-4-20250514","internalResolvedModelId":"anthropic:claude-sonnet-4-20250514","fallbacksAvailable":["vertexAnthropic","bedrock"],"internalReasoning":"Selected anthropic as preferred provider for claude-sonnet-4. 2 fallback(s) available: vertexAnthropic, bedrock","planningReasoning":"System credentials planned for: anthropic, vertexAnthropic, bedrock. Total execution order: anthropic(system) → vertexAnthropic(system) → bedrock(system)","canonicalSlug":"anthropic/claude-sonnet-4","finalProvider":"anthropic","attempts":[{"provider":"anthropic","internalModelId":"anthropic:claude-sonnet-4-20250514","providerApiModelId":"claude-sonnet-4-20250514","credentialType":"system","success":true,"startTime":7080018.781706,"endTime":7082515.69486,"statusCode":200,"providerResponseId":"msg_0198xyvGQtALbxVJ6en1oy92"}],"modelAttemptCount":1,"modelAttempts":[{"modelId":"anthropic/claude-sonnet-4","canonicalSlug":"anthropic/claude-sonnet-4","success":false,"providerAttemptCount":0,"providerAttempts":[]}],"totalProviderAttemptCount":0},"cost":"0.003576","marketCost":"0.003576","generationId":"gen_01KGF3AEN63MVZD10V5VWY1NFK","billableWebSearchCalls":0}}},"logprobs":null,"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":507,"completion_tokens":137,"total_tokens":644,"cost":0.003576,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0},"cache_creation_input_tokens":0,"market_cost":0.003576},"system_fingerprint":"fp_hbuq90twge","generationId":"gen_01KGF3AEN63MVZD10V5VWY1NFK"}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 2.724311375s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1333
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system","cache_control":{"type":"ephemeral"}},{"content":"Add and multiply the number 2 and 3","role":"user"},{"tool_calls":[{"id":"toolu_018Bqrp5E4LTkWWKFAWjJcPw","function":{"arguments":"{\"a\":2,\"b\":3}","name":"add"},"type":"function"},{"id":"toolu_01ModQEwNzE9utyENTnUKDzE","function":{"arguments":"{\"a\":2,\"b\":3}","name":"multiply"},"type":"function","cache_control":{"type":"ephemeral"}}],"role":"assistant"},{"content":"5","tool_call_id":"toolu_018Bqrp5E4LTkWWKFAWjJcPw","role":"tool"},{"content":"6","tool_call_id":"toolu_01ModQEwNzE9utyENTnUKDzE","role":"tool"}],"model":"anthropic/claude-sonnet-4","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://ai-gateway.vercel.sh/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"id":"gen_01KGF3AH9QQJ48CR5J8VYYZN30","object":"chat.completion","created":1770033335,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"message":{"role":"assistant","content":"I''ve performed both operations with the numbers 2 and 3:\n- Addition: 2 + 3 = 5\n- Multiplication: 2 × 3 = 6","provider_metadata":{"anthropic":{"usage":{"input_tokens":688,"output_tokens":47,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"service_tier":"standard"},"cacheCreationInputTokens":0,"stopSequence":null,"container":null},"gateway":{"routing":{"originalModelId":"anthropic/claude-sonnet-4","resolvedProvider":"anthropic","resolvedProviderApiModelId":"claude-sonnet-4-20250514","internalResolvedModelId":"anthropic:claude-sonnet-4-20250514","fallbacksAvailable":["vertexAnthropic","bedrock"],"internalReasoning":"Selected anthropic as preferred provider for claude-sonnet-4. 2 fallback(s) available: vertexAnthropic, bedrock","planningReasoning":"System credentials planned for: anthropic, vertexAnthropic, bedrock. Total execution order: anthropic(system) → vertexAnthropic(system) → bedrock(system)","canonicalSlug":"anthropic/claude-sonnet-4","finalProvider":"anthropic","attempts":[{"provider":"anthropic","internalModelId":"anthropic:claude-sonnet-4-20250514","providerApiModelId":"claude-sonnet-4-20250514","credentialType":"system","success":true,"startTime":1440501.815188,"endTime":1442379.185058,"statusCode":200,"providerResponseId":"msg_01HoW3wJwr4Hqen1m7PJHcEL"}],"modelAttemptCount":1,"modelAttempts":[{"modelId":"anthropic/claude-sonnet-4","canonicalSlug":"anthropic/claude-sonnet-4","success":false,"providerAttemptCount":0,"providerAttempts":[]}],"totalProviderAttemptCount":0},"cost":"0.002769","marketCost":"0.002769","generationId":"gen_01KGF3AH9QQJ48CR5J8VYYZN30","billableWebSearchCalls":0}}},"logprobs":null,"finish_reason":"stop"}],"usage":{"prompt_tokens":688,"completion_tokens":47,"total_tokens":735,"cost":0.002769,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0},"cache_creation_input_tokens":0,"market_cost":0.002769},"system_fingerprint":"fp_yb4k07q27e","generationId":"gen_01KGF3AH9QQJ48CR5J8VYYZN30"}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 2.006164709s

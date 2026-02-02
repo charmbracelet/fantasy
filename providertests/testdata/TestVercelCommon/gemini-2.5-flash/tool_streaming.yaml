@@ -1,0 +1,81 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 519
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"}],"model":"google/gemini-2.5-flash","max_tokens":4000,"stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://ai-gateway.vercel.sh/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"gen_01KGF3803YBNDA2M8B7319DJ82","object":"chat.completion.chunk","created":1770033251,"model":"google/gemini-2.5-flash","choices":[{"index":0,"delta":{"role":"assistant"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_7in70gabwf"}
+
+      data: {"id":"gen_01KGF3803YBNDA2M8B7319DJ82","object":"chat.completion.chunk","created":1770033251,"model":"google/gemini-2.5-flash","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"g8BRNPzm2XAHjElR","type":"function","function":{"name":"weather","arguments":""}}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_7in70gabwf"}
+
+      data: {"id":"gen_01KGF3803YBNDA2M8B7319DJ82","object":"chat.completion.chunk","created":1770033251,"model":"google/gemini-2.5-flash","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"{\"location\":\"Florence,Italy\"}"}}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_7in70gabwf"}
+
+      data: {"id":"gen_01KGF3803YBNDA2M8B7319DJ82","object":"chat.completion.chunk","created":1770033251,"model":"google/gemini-2.5-flash","choices":[{"index":0,"delta":{"provider_metadata":{"google":{"promptFeedback":null,"groundingMetadata":null,"urlContextMetadata":null,"safetyRatings":null,"usageMetadata":{"thoughtsTokenCount":51,"promptTokenCount":28,"candidatesTokenCount":5,"totalTokenCount":84,"trafficType":"ON_DEMAND"}},"gateway":{"routing":{"originalModelId":"google/gemini-2.5-flash","resolvedProvider":"vertex","resolvedProviderApiModelId":"gemini-2.5-flash","internalResolvedModelId":"vertex:gemini-2.5-flash","fallbacksAvailable":["google","deepinfra"],"internalReasoning":"Selected vertex as preferred provider for gemini-2.5-flash. 2 fallback(s) available: google, deepinfra","planningReasoning":"System credentials planned for: vertex, google, deepinfra. Total execution order: vertex(system) → google(system) → deepinfra(system)","canonicalSlug":"google/gemini-2.5-flash","finalProvider":"vertex","attempts":[{"provider":"vertex","internalModelId":"vertex:gemini-2.5-flash","providerApiModelId":"gemini-2.5-flash","credentialType":"system","success":true,"startTime":430027.607924,"endTime":430701.108841,"statusCode":200}],"modelAttemptCount":1,"modelAttempts":[{"modelId":"google/gemini-2.5-flash","canonicalSlug":"google/gemini-2.5-flash","success":true,"providerAttemptCount":1,"providerAttempts":[{"provider":"vertex","internalModelId":"vertex:gemini-2.5-flash","providerApiModelId":"gemini-2.5-flash","credentialType":"system","success":true,"startTime":430027.607924,"endTime":430701.108841,"statusCode":200}]}],"totalProviderAttemptCount":1},"cost":"0.0001484","marketCost":"0.0001484","generationId":"gen_01KGF3803YBNDA2M8B7319DJ82","billableWebSearchCalls":0}}},"logprobs":null,"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":28,"completion_tokens":5,"total_tokens":33,"cost":0.0001484,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":51,"image_tokens":0},"cache_creation_input_tokens":0,"market_cost":0.0001484},"system_fingerprint":"fp_7in70gabwf","generationId":"gen_01KGF3803YBNDA2M8B7319DJ82"}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 758.2815ms
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 744
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"g8BRNPzm2XAHjElR","function":{"arguments":"{\"location\":\"Florence,Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"g8BRNPzm2XAHjElR","role":"tool"}],"model":"google/gemini-2.5-flash","max_tokens":4000,"stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://ai-gateway.vercel.sh/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"gen_01KGF380V9QM93HK4DBFD3050C","object":"chat.completion.chunk","created":1770033251,"model":"google/gemini-2.5-flash","choices":[{"index":0,"delta":{"role":"assistant"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_edgl953q80"}
+
+      data: {"id":"gen_01KGF380V9QM93HK4DBFD3050C","object":"chat.completion.chunk","created":1770033251,"model":"google/gemini-2.5-flash","choices":[{"index":0,"delta":{"content":"The"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_edgl953q80"}
+
+      data: {"id":"gen_01KGF380V9QM93HK4DBFD3050C","object":"chat.completion.chunk","created":1770033251,"model":"google/gemini-2.5-flash","choices":[{"index":0,"delta":{"content":" weather in Florence, Italy is 40 C."},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_edgl953q80"}
+
+      data: {"id":"gen_01KGF380V9QM93HK4DBFD3050C","object":"chat.completion.chunk","created":1770033251,"model":"google/gemini-2.5-flash","choices":[{"index":0,"delta":{"provider_metadata":{"google":{"promptFeedback":null,"groundingMetadata":null,"urlContextMetadata":null,"safetyRatings":null,"usageMetadata":{"promptTokenCount":40,"candidatesTokenCount":12,"totalTokenCount":52,"trafficType":"ON_DEMAND"}},"gateway":{"routing":{"originalModelId":"google/gemini-2.5-flash","resolvedProvider":"vertex","resolvedProviderApiModelId":"gemini-2.5-flash","internalResolvedModelId":"vertex:gemini-2.5-flash","fallbacksAvailable":["google","deepinfra"],"internalReasoning":"Selected vertex as preferred provider for gemini-2.5-flash. 2 fallback(s) available: google, deepinfra","planningReasoning":"System credentials planned for: vertex, google, deepinfra. Total execution order: vertex(system) → google(system) → deepinfra(system)","canonicalSlug":"google/gemini-2.5-flash","finalProvider":"vertex","attempts":[{"provider":"vertex","internalModelId":"vertex:gemini-2.5-flash","providerApiModelId":"gemini-2.5-flash","credentialType":"system","success":true,"startTime":4541137.912067,"endTime":4541464.788969,"statusCode":200}],"modelAttemptCount":1,"modelAttempts":[{"modelId":"google/gemini-2.5-flash","canonicalSlug":"google/gemini-2.5-flash","success":true,"providerAttemptCount":1,"providerAttempts":[{"provider":"vertex","internalModelId":"vertex:gemini-2.5-flash","providerApiModelId":"gemini-2.5-flash","credentialType":"system","success":true,"startTime":4541137.912067,"endTime":4541464.788969,"statusCode":200}]}],"totalProviderAttemptCount":1},"cost":"0.000042","marketCost":"0.000042","generationId":"gen_01KGF380V9QM93HK4DBFD3050C","billableWebSearchCalls":0}}},"logprobs":null,"finish_reason":"stop"}],"usage":{"prompt_tokens":40,"completion_tokens":12,"total_tokens":52,"cost":0.000042,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0},"cache_creation_input_tokens":0,"market_cost":0.000042},"system_fingerprint":"fp_edgl953q80","generationId":"gen_01KGF380V9QM93HK4DBFD3050C"}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 425.562958ms

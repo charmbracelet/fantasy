@@ -1,0 +1,40 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 227
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"Say hi in Portuguese","role":"user"}],"model":"google/gemini-2.5-flash","max_tokens":4000,"stream_options":{"include_usage":true},"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://ai-gateway.vercel.sh/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"gen_01KGF37XVPQFTEF88B3MN5VGHK","object":"chat.completion.chunk","created":1770033248,"model":"google/gemini-2.5-flash","choices":[{"index":0,"delta":{"role":"assistant"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_1hjld5wcik"}
+
+      data: {"id":"gen_01KGF37XVPQFTEF88B3MN5VGHK","object":"chat.completion.chunk","created":1770033248,"model":"google/gemini-2.5-flash","choices":[{"index":0,"delta":{"content":"Olá!"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_1hjld5wcik"}
+
+      data: {"id":"gen_01KGF37XVPQFTEF88B3MN5VGHK","object":"chat.completion.chunk","created":1770033248,"model":"google/gemini-2.5-flash","choices":[{"index":0,"delta":{"provider_metadata":{"google":{"promptFeedback":null,"groundingMetadata":null,"urlContextMetadata":null,"safetyRatings":null,"usageMetadata":{"thoughtsTokenCount":25,"promptTokenCount":9,"candidatesTokenCount":2,"totalTokenCount":36,"trafficType":"ON_DEMAND"}},"gateway":{"routing":{"originalModelId":"google/gemini-2.5-flash","resolvedProvider":"vertex","resolvedProviderApiModelId":"gemini-2.5-flash","internalResolvedModelId":"vertex:gemini-2.5-flash","fallbacksAvailable":["google","deepinfra"],"internalReasoning":"Selected vertex as preferred provider for gemini-2.5-flash. 2 fallback(s) available: google, deepinfra","planningReasoning":"System credentials planned for: vertex, google, deepinfra. Total execution order: vertex(system) → google(system) → deepinfra(system)","canonicalSlug":"google/gemini-2.5-flash","finalProvider":"vertex","attempts":[{"provider":"vertex","internalModelId":"vertex:gemini-2.5-flash","providerApiModelId":"gemini-2.5-flash","credentialType":"system","success":true,"startTime":7617027.32849,"endTime":7617674.256609,"statusCode":200}],"modelAttemptCount":1,"modelAttempts":[{"modelId":"google/gemini-2.5-flash","canonicalSlug":"google/gemini-2.5-flash","success":true,"providerAttemptCount":1,"providerAttempts":[{"provider":"vertex","internalModelId":"vertex:gemini-2.5-flash","providerApiModelId":"gemini-2.5-flash","credentialType":"system","success":true,"startTime":7617027.32849,"endTime":7617674.256609,"statusCode":200}]}],"totalProviderAttemptCount":1},"cost":"0.0000702","marketCost":"0.0000702","generationId":"gen_01KGF37XVPQFTEF88B3MN5VGHK","billableWebSearchCalls":0}}},"logprobs":null,"finish_reason":"stop"}],"usage":{"prompt_tokens":9,"completion_tokens":2,"total_tokens":11,"cost":0.0000702,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":25,"image_tokens":0},"cache_creation_input_tokens":0,"market_cost":0.0000702},"system_fingerprint":"fp_1hjld5wcik","generationId":"gen_01KGF37XVPQFTEF88B3MN5VGHK"}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 875.25225ms

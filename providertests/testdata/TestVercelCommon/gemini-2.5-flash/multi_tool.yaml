@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 828
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"}],"model":"google/gemini-2.5-flash","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://ai-gateway.vercel.sh/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"id":"gen_01KGF381BH2CF0J56H612T8RC3","object":"chat.completion","created":1770033252,"model":"google/gemini-2.5-flash","choices":[{"index":0,"message":{"role":"assistant","content":null,"tool_calls":[{"id":"s3q46gVXfhyIqY2s","type":"function","function":{"name":"add","arguments":"{\"a\":2,\"b\":3}"}},{"id":"vomF7JlLjIRlW7U8","type":"function","function":{"name":"multiply","arguments":"{\"a\":2,\"b\":3}"}}],"provider_metadata":{"google":{"promptFeedback":null,"groundingMetadata":null,"urlContextMetadata":null,"safetyRatings":null,"usageMetadata":{"thoughtsTokenCount":111,"promptTokenCount":61,"candidatesTokenCount":10,"totalTokenCount":182,"trafficType":"ON_DEMAND"}},"gateway":{"routing":{"originalModelId":"google/gemini-2.5-flash","resolvedProvider":"vertex","resolvedProviderApiModelId":"gemini-2.5-flash","internalResolvedModelId":"vertex:gemini-2.5-flash","fallbacksAvailable":["google","deepinfra"],"internalReasoning":"Selected vertex as preferred provider for gemini-2.5-flash. 2 fallback(s) available: google, deepinfra","planningReasoning":"System credentials planned for: vertex, google, deepinfra. Total execution order: vertex(system) → google(system) → deepinfra(system)","canonicalSlug":"google/gemini-2.5-flash","finalProvider":"vertex","attempts":[{"provider":"vertex","internalModelId":"vertex:gemini-2.5-flash","providerApiModelId":"gemini-2.5-flash","credentialType":"system","success":true,"startTime":4669622.140163,"endTime":4670671.510973,"statusCode":200,"providerResponseId":"Y5CAadiYMJCgmPUPj9uV-AI"}],"modelAttemptCount":1,"modelAttempts":[{"modelId":"google/gemini-2.5-flash","canonicalSlug":"google/gemini-2.5-flash","success":false,"providerAttemptCount":0,"providerAttempts":[]}],"totalProviderAttemptCount":0},"cost":"0.0003208","marketCost":"0.0003208","generationId":"gen_01KGF381BH2CF0J56H612T8RC3","billableWebSearchCalls":0}}},"logprobs":null,"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":61,"completion_tokens":10,"total_tokens":71,"cost":0.0003208,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":111,"image_tokens":0},"cache_creation_input_tokens":0,"market_cost":0.0003208},"system_fingerprint":"fp_q0dgwe4fbo","generationId":"gen_01KGF381BH2CF0J56H612T8RC3"}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 1.184203208s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1201
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"tool_calls":[{"id":"s3q46gVXfhyIqY2s","function":{"arguments":"{\"a\":2,\"b\":3}","name":"add"},"type":"function"},{"id":"vomF7JlLjIRlW7U8","function":{"arguments":"{\"a\":2,\"b\":3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"s3q46gVXfhyIqY2s","role":"tool"},{"content":"6","tool_call_id":"vomF7JlLjIRlW7U8","role":"tool"}],"model":"google/gemini-2.5-flash","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://ai-gateway.vercel.sh/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"id":"gen_01KGF382G93A1FEHZRVZDSTMQE","object":"chat.completion","created":1770033253,"model":"google/gemini-2.5-flash","choices":[{"index":0,"message":{"role":"assistant","content":"The sum of 2 and 3 is 5, and the product of 2 and 3 is 6.","provider_metadata":{"google":{"promptFeedback":null,"groundingMetadata":null,"urlContextMetadata":null,"safetyRatings":null,"usageMetadata":{"promptTokenCount":197,"candidatesTokenCount":25,"totalTokenCount":222}},"gateway":{"routing":{"originalModelId":"google/gemini-2.5-flash","resolvedProvider":"vertex","resolvedProviderApiModelId":"gemini-2.5-flash","internalResolvedModelId":"vertex:gemini-2.5-flash","fallbacksAvailable":["google","deepinfra"],"internalReasoning":"Selected vertex as preferred provider for gemini-2.5-flash. 2 fallback(s) available: google, deepinfra","planningReasoning":"System credentials planned for: vertex, google, deepinfra. Total execution order: vertex(system) → google(system) → deepinfra(system)","canonicalSlug":"google/gemini-2.5-flash","finalProvider":"google","attempts":[{"provider":"vertex","internalModelId":"vertex:gemini-2.5-flash","providerApiModelId":"gemini-2.5-flash","credentialType":"system","success":false,"error":"Please ensure that the number of function response parts is equal to the number of function call parts of the function call turn.","startTime":1956234.837355,"endTime":1956397.272511,"statusCode":400},{"provider":"google","internalModelId":"google:gemini-2.5-flash","providerApiModelId":"gemini-2.5-flash","credentialType":"system","success":true,"startTime":1956497.822129,"endTime":1956985.150646,"statusCode":200,"providerResponseId":"ZZCAady9I-KF7M8PkM3b4AE"}],"modelAttemptCount":1,"modelAttempts":[{"modelId":"google/gemini-2.5-flash","canonicalSlug":"google/gemini-2.5-flash","success":false,"providerAttemptCount":0,"providerAttempts":[]}],"totalProviderAttemptCount":0},"cost":"0.0001216","marketCost":"0.0001216","generationId":"gen_01KGF382G93A1FEHZRVZDSTMQE","billableWebSearchCalls":0}}},"logprobs":null,"finish_reason":"stop"}],"usage":{"prompt_tokens":197,"completion_tokens":25,"total_tokens":222,"cost":0.0001216,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0},"cache_creation_input_tokens":0,"market_cost":0.0001216},"system_fingerprint":"fp_sxou9xxzzl","generationId":"gen_01KGF382G93A1FEHZRVZDSTMQE"}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 921.5745ms

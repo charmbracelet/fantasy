@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 465
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"}],"model":"openai/gpt-5","max_completion_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://ai-gateway.vercel.sh/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"id":"gen_01KGF389FA00FX9W76TJBD2FY0","object":"chat.completion","created":1770033261,"model":"openai/gpt-5","choices":[{"index":0,"message":{"role":"assistant","content":null,"reasoning_details":[{"type":"reasoning.encrypted","data":"gAAAAABpgJBt9rDWBVUu57Qp4eDPgvhNl_yejTP7GQIvS9aR9c0rc2udBHMKWf6Lov1QwiEeQbCc8LROQ_SbUEvfyEl-9PofdGalnrJON5sqNjhFmugyAnTzQwIbCLzHhViPQYcKTeDxYUNkLO-WUzh9UcgCE3H9-JaGFMFgvpEtK2izjoSXQAfcM4N4TpIjSZVLKCARs9L3jzHHdIMx1God2c7H0MErV3MDZ_7J_xlIDaVOQPKOOMzVO6EjBEWH9TQn_C3f2h5bm6YphGwIfcI7TxOmQVmf7NV0r9e5Tl0v2NQ6L5alFvBllJiKLOsmO6jShYoPT_i119sexG8bSw0w8qqlOvJJxA3nSmKgimH9TJXIynwqntgKw2sf3TUov2ZcXBXuuWEvwwuzvJZ-IblbQ4tp3voRndpGGLL5RaUAnVJxsawXAC7ghykRDhuqBywJVrc0HuNZKsl0qLjEi22IYXAhdbVerM84pD1IMgA-9XbzPryB6R6vvwk6UBQH7H35sSIywXRK0pWMJftKwUIfh87K8iPyt2sdvdxFgeCv1zygTwsvRNIyxrdLznmOlPPEmgeapkBzXMnpnhkIDRkm0q1owi849hYpArAr5dP9KonpVSkJEx_hO4Nu125WOtKG6kt59lWzVy5ntGaQbQx0Y9Ekg-YrVAt0MRBDTHbyYFvg01tRDT5qX7RTjVrxcnBJaS4jiHsE3ThGQCvlyUKDLrBD891lSuLZHJ-b_WDXiAZW63-INaU6dm7rkw0-kCCg6f02WEiTbwrUI3la4iJ_OHvO5dX8HMzO566TT_VPay9vmSAzBcO9vYyJHqAahlce6fc8HSC6yM4FmArFa7fAI24qzACBtcwPZGufHi6SvIarOzZ_Hqhs0K1707Jlm8Nad1QR-mSS4dhXCAWyFuF7uyAA9TrsmKQHIUPXQH3ohsYNkJ-MJwm168NoHL0_Bj2j00JLENHX1oK0iUQLFy2RasyOO6-ChpeYo4GCPxbXkXRNMst9RdOwswtqZKS9lKa4mSrV8_-rlb4exerAjDg2YPPoMSsXEZEZt1BmtnA_xEk2Ba9FhOw6p8n2zakljygABYj__RQ7pwvQZL9AQdpzrDu4eiYkl538d02K0It_d39qaUF-MQVNIqUv40OTI17kDAUhq9MFcYquHywFRcBzS2h0L5siHwieTqTaCPk9LEJwen2JlDWeXovmqX-bxuByh1TNemfkHKSG4lDhIW8Jg2wcilnNEuvvMRmVEAPDen8IaOiP3-S3gjXPv2wqrpG_HD4-XxjugEB0lTmtEn-tA-8jBTTG__H4kUjAv8gX94FW4QYmA9x-xKJwb8mVI_f9xTUMgmx7OsBXoGY1ddAmKfNA5dN4wtTYwKUIoj_VQ9LpXK86DNVlIuT-OaRE_wjLPxnUc0aTXGUUUQJNhmzLRa6xLeyw1A==","id":"rs_0c750dfa299f673c016980906c83288193a268c0d2c594d1ed","format":"openai-responses-v1","index":0}],"tool_calls":[{"id":"call_Rpqo15PMdWRph6Je9FbyRkrP","type":"function","function":{"name":"weather","arguments":"{\"location\":\"Florence, Italy\"}"}}],"provider_metadata":{"openai":{"responseId":"resp_0c750dfa299f673c016980906c2e748193aacbf2a1a14f5495","serviceTier":"default"},"gateway":{"routing":{"originalModelId":"openai/gpt-5","resolvedProvider":"openai","resolvedProviderApiModelId":"gpt-5-2025-08-07","internalResolvedModelId":"openai:gpt-5-2025-08-07","fallbacksAvailable":["azure"],"internalReasoning":"Selected openai as preferred provider for gpt-5. 1 fallback(s) available: azure","planningReasoning":"System credentials planned for: openai, azure. Total execution order: openai(system) → azure(system)","canonicalSlug":"openai/gpt-5","finalProvider":"openai","attempts":[{"provider":"openai","internalModelId":"openai:gpt-5-2025-08-07","providerApiModelId":"gpt-5-2025-08-07","credentialType":"system","success":true,"startTime":4677952.648505,"endTime":4679832.007624,"statusCode":200,"providerResponseId":"resp_0c750dfa299f673c016980906c2e748193aacbf2a1a14f5495"}],"modelAttemptCount":1,"modelAttempts":[{"modelId":"openai/gpt-5","canonicalSlug":"openai/gpt-5","success":false,"providerAttemptCount":0,"providerAttempts":[]}],"totalProviderAttemptCount":0},"cost":"0.00185875","marketCost":"0.00185875","generationId":"gen_01KGF389FA00FX9W76TJBD2FY0","billableWebSearchCalls":0}}},"logprobs":null,"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":63,"completion_tokens":114,"total_tokens":177,"cost":0.00185875,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":64,"image_tokens":0},"cache_creation_input_tokens":0,"market_cost":0.00185875},"system_fingerprint":"fp_4kn76nn85u","generationId":"gen_01KGF389FA00FX9W76TJBD2FY0"}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 2.189340917s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 2326
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"call_Rpqo15PMdWRph6Je9FbyRkrP","function":{"arguments":"{\"location\":\"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant","reasoning_details":[{"data":"gAAAAABpgJBt9rDWBVUu57Qp4eDPgvhNl_yejTP7GQIvS9aR9c0rc2udBHMKWf6Lov1QwiEeQbCc8LROQ_SbUEvfyEl-9PofdGalnrJON5sqNjhFmugyAnTzQwIbCLzHhViPQYcKTeDxYUNkLO-WUzh9UcgCE3H9-JaGFMFgvpEtK2izjoSXQAfcM4N4TpIjSZVLKCARs9L3jzHHdIMx1God2c7H0MErV3MDZ_7J_xlIDaVOQPKOOMzVO6EjBEWH9TQn_C3f2h5bm6YphGwIfcI7TxOmQVmf7NV0r9e5Tl0v2NQ6L5alFvBllJiKLOsmO6jShYoPT_i119sexG8bSw0w8qqlOvJJxA3nSmKgimH9TJXIynwqntgKw2sf3TUov2ZcXBXuuWEvwwuzvJZ-IblbQ4tp3voRndpGGLL5RaUAnVJxsawXAC7ghykRDhuqBywJVrc0HuNZKsl0qLjEi22IYXAhdbVerM84pD1IMgA-9XbzPryB6R6vvwk6UBQH7H35sSIywXRK0pWMJftKwUIfh87K8iPyt2sdvdxFgeCv1zygTwsvRNIyxrdLznmOlPPEmgeapkBzXMnpnhkIDRkm0q1owi849hYpArAr5dP9KonpVSkJEx_hO4Nu125WOtKG6kt59lWzVy5ntGaQbQx0Y9Ekg-YrVAt0MRBDTHbyYFvg01tRDT5qX7RTjVrxcnBJaS4jiHsE3ThGQCvlyUKDLrBD891lSuLZHJ-b_WDXiAZW63-INaU6dm7rkw0-kCCg6f02WEiTbwrUI3la4iJ_OHvO5dX8HMzO566TT_VPay9vmSAzBcO9vYyJHqAahlce6fc8HSC6yM4FmArFa7fAI24qzACBtcwPZGufHi6SvIarOzZ_Hqhs0K1707Jlm8Nad1QR-mSS4dhXCAWyFuF7uyAA9TrsmKQHIUPXQH3ohsYNkJ-MJwm168NoHL0_Bj2j00JLENHX1oK0iUQLFy2RasyOO6-ChpeYo4GCPxbXkXRNMst9RdOwswtqZKS9lKa4mSrV8_-rlb4exerAjDg2YPPoMSsXEZEZt1BmtnA_xEk2Ba9FhOw6p8n2zakljygABYj__RQ7pwvQZL9AQdpzrDu4eiYkl538d02K0It_d39qaUF-MQVNIqUv40OTI17kDAUhq9MFcYquHywFRcBzS2h0L5siHwieTqTaCPk9LEJwen2JlDWeXovmqX-bxuByh1TNemfkHKSG4lDhIW8Jg2wcilnNEuvvMRmVEAPDen8IaOiP3-S3gjXPv2wqrpG_HD4-XxjugEB0lTmtEn-tA-8jBTTG__H4kUjAv8gX94FW4QYmA9x-xKJwb8mVI_f9xTUMgmx7OsBXoGY1ddAmKfNA5dN4wtTYwKUIoj_VQ9LpXK86DNVlIuT-OaRE_wjLPxnUc0aTXGUUUQJNhmzLRa6xLeyw1A==","format":"openai-responses-v1","id":"rs_0c750dfa299f673c016980906c83288193a268c0d2c594d1ed","index":0,"type":"reasoning.encrypted"}]},{"content":"40 C","tool_call_id":"call_Rpqo15PMdWRph6Je9FbyRkrP","role":"tool"}],"model":"openai/gpt-5","max_completion_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://ai-gateway.vercel.sh/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"id":"gen_01KGF38BGEDFPFYA0YSVGK53PZ","object":"chat.completion","created":1770033266,"model":"openai/gpt-5","choices":[{"index":0,"message":{"role":"assistant","content":"The current temperature in Florence, Italy is 40°C (104°F). Would you like a forecast or more details?","reasoning_details":[{"type":"reasoning.encrypted","data":"gAAAAABpgJBy04wiPgHZlcnRtMeJdCXiXkMzEOjA4bYMCrCHqVuCdI7vEDq8PlukdtI96JyxomTXvXxRPCIzKJdzHSXR3OLLYvNzwfNDgNQ1dW4bvh69vQpp54zP4Dhs57GgfsfZAB7q9RB0Kg-6eJD86w2NsGfTIO2ITYeN-_Y5Bqeg8rOb4V9XK1pf-bLaeZsL4uBfvriH8M_uL5nEyaaZupiXTiZfv0A6Lb-lMWH9SS0PPy5LsSx0H_w-4OR8G6J2isU7-bG12BGklNspMvMmtj5JWmZbgbb-JHvR_NO7p--3Q6QCQzg088E_Uh1lQTqvnX3AffKuPJNgxVaiivOQwZXXLEG0NYULjeB20PNsMBVTi_OF4frTljlCvvTzecAd9iaeIECwDBEJDEgqTQefE0linoyLBeey8kD6DIweziBNn8ezoWU7ACiWCqz8FtB0smGue1W949AEmHfRizTjaqEbVpUiW3CA4aVp3eNZiu1XbE3b514H7XMG-6SBBohs0YfPdlTIez7To3Ptzv2x0t7KPiPZi7uDYTscYS1AWdTeB7LJRoLy3mO74Jmq0w0ZnSF3U2zu7-cHkyk6_x1R66bH8uLTtuQRzmyZtef-7T8QGt8k_belGqnRr9o9rdvLp80rwEjjwwPK9lIcR_mA1XDZZHEqoNWOQKINWxwwrjypgRDwSxs_FI3zi-OviKBsFe8YJTn3sJx1ppVkoBU-czhIfpfeF1wqjgGxIIcGGXm8wVXGqWG1Nm-AZwNLxnf34CfhcBddIL4lbPwMa39aaGYGU2qc9Qj8egNg7Bzk0wysMxC4ttsQSpcGM1CXVuyYY9nKiNybsbFQGSB6S32blf05IVD6J1WRqRWlQjJ-doPxmRMqKkXVWOuLN6jHpjAVhtQt2a2jMOvzkuj1bkmrxwLZ6HVKdFEgTN1tVRZ8URSvN3KAQxkOmLr0qPFjqEocjCM8CCTvWSZPbEGTKmHGZBqWFRkOTTC9r0XL_NmeDPZ8x9IfRRTjHg4lJpMixQyrTpgqUHJ_YWgo_jQGFWGntrj8YVfTaOjJmDXigBb2eUr22Tu72U8sBFURrBFDvXQvrL_gbgP4KifJ9ablHQ5M7k2W-I1wD9SgW77LZYYtsDdr_bv1tLIv9zn7tien8eAv1RQN4cICC8yJSnd_8RpzVnpVg6ZyDHOMRL9fU5URSQvtl0ld8c-Hu46NRTR_Ua6b1bIrCVswrbFF0j1tvEA3UBKnuN92LNavwOlu_N7AAPy0tmSvTk0bxfuus3AHDMAEzeHbQBH2OclogxZcfnrm1dXk3ee24hksoxJjfMVTzRBaVPssUCN_ZLzu1T6GwQ4YCdMl2QKX1KWz9ONt6zDNjvkhbZKGYod9E0anXx91NMzhIwou15N1USmduEuklufFN6adsQDWyJ_dK-mS1tlVI9GcDVNnbRUbHvtNui2qwtCzLGxyY82blpFO6dZRjpzY1YRtqo9QA-3MXT1J1mwPmnP2nQh8x5DQPZ-wxs3TcC0DuPVhu-pWmc1RyUtrri3vUy6evRKkezMqybI2zSibyq96ORSAQfB6jZmkyGCNj_w3oCEgYpFJRpPdK42z7SydPItcHGyTbFIE72QqD5lbMA37vCx6iCN38tTUNRYhmeXcKAot9wN5TZ_zNs8TY6BbW1PaIGnPumEudzJCFZhlwPkN6_93U57l23S0chlyA34JN7JMrjI3gVyI0WYFY6IrgQzknsiwpmMAqi9_RQaY6wgVBHadORhAufCHOvq-Qgrcbzpgppuc6zWp7qpc-PACaXLdG2HBvD_whxNmKjaW8b4sUu0IEhHv4esQ4Cxdurb6PAsPPRyUqAyfYX3uYKePFCSGe_Gv6Zss6Lbd5hp0GBvLoVdCxa_81e0EH62Oi5OzbiUpWGY1717a9l6SepkbpbyYnllAMuNGI8whTOBJrDXNR85-lNMSEfVIg6Pjw7Imle0jFkZX1ASfHLXCta9elSYiw7pYIzW67aO3DUacyqKYUxEqO2kVWtcllcO1-_s3rJzKAM4_Qp7A80_0B9X1CfkEKWKLpdJTjfeAiMKtqOTEs0IXngkbaxppW6KdxBsj5bhGCTAXhq_yXeCkBei_aVteFzK2BO1vvLlUhMysIzxs8CLs1YLdAA6vO2dEznTujNxz9Rc=","id":"rs_0c750dfa299f673c016980906e9f1c8193a6477099ec37fe1e","format":"openai-responses-v1","index":0}],"provider_metadata":{"openai":{"responseId":"resp_0c750dfa299f673c016980906e3c00819389d21d48153004b1","serviceTier":"default"},"gateway":{"routing":{"originalModelId":"openai/gpt-5","resolvedProvider":"openai","resolvedProviderApiModelId":"gpt-5-2025-08-07","internalResolvedModelId":"openai:gpt-5-2025-08-07","fallbacksAvailable":["azure"],"internalReasoning":"Selected openai as preferred provider for gpt-5. 1 fallback(s) available: azure","planningReasoning":"System credentials planned for: openai, azure. Total execution order: openai(system) → azure(system)","canonicalSlug":"openai/gpt-5","finalProvider":"openai","attempts":[{"provider":"openai","internalModelId":"openai:gpt-5-2025-08-07","providerApiModelId":"gpt-5-2025-08-07","credentialType":"system","success":true,"startTime":1368084.873343,"endTime":1372326.249053,"statusCode":200,"providerResponseId":"resp_0c750dfa299f673c016980906e3c00819389d21d48153004b1"}],"modelAttemptCount":1,"modelAttempts":[{"modelId":"openai/gpt-5","canonicalSlug":"openai/gpt-5","success":false,"providerAttemptCount":0,"providerAttempts":[]}],"totalProviderAttemptCount":0},"cost":"0.0045725","marketCost":"0.0045725","generationId":"gen_01KGF38BGEDFPFYA0YSVGK53PZ","billableWebSearchCalls":0}}},"logprobs":null,"finish_reason":"stop"}],"usage":{"prompt_tokens":186,"completion_tokens":242,"total_tokens":428,"cost":0.0045725,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":192,"image_tokens":0},"cache_creation_input_tokens":0,"market_cost":0.0045725},"system_fingerprint":"fp_4lohj8xzuj","generationId":"gen_01KGF38BGEDFPFYA0YSVGK53PZ"}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 4.324064375s

@@ -1,0 +1,87 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 535
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence, Italy?","role":"user"}],"model":"google/gemini-3-pro-preview","stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"reasoning":{"enabled":true},"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://ai-gateway.vercel.sh/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"gen_01KGF3C0Q49GHB7YJE7PKYYXEK","object":"chat.completion.chunk","created":1770033385,"model":"google/gemini-3-pro-preview","choices":[{"index":0,"delta":{"role":"assistant"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_q2vuvpzyv8"}
+
+      data: {"id":"gen_01KGF3C0Q49GHB7YJE7PKYYXEK","object":"chat.completion.chunk","created":1770033385,"model":"google/gemini-3-pro-preview","choices":[{"index":0,"delta":{"reasoning":"**Analyzing the User's Query**\n\nI'm focused on understanding the user's intent. My primary task is to identify the location for the weather query. It's evident the user wants weather data for Florence, Italy. I'll utilize the `weather` tool and set the `location` parameter accordingly.\n\n\n","reasoning_details":[{"type":"reasoning.text","text":"**Analyzing the User's Query**\n\nI'm focused on understanding the user's intent. My primary task is to identify the location for the weather query. It's evident the user wants weather data for Florence, Italy. I'll utilize the `weather` tool and set the `location` parameter accordingly.\n\n\n","format":"google-gemini-v1","index":0}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_q2vuvpzyv8"}
+
+      data: {"id":"gen_01KGF3C0Q49GHB7YJE7PKYYXEK","object":"chat.completion.chunk","created":1770033385,"model":"google/gemini-3-pro-preview","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"SmUJTLmrRxi0lu0v","type":"function","function":{"name":"weather","arguments":""}}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_q2vuvpzyv8"}
+
+      data: {"id":"gen_01KGF3C0Q49GHB7YJE7PKYYXEK","object":"chat.completion.chunk","created":1770033385,"model":"google/gemini-3-pro-preview","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"{\"location\":\"Florence, Italy\"}"}}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_q2vuvpzyv8"}
+
+      data: {"id":"gen_01KGF3C0Q49GHB7YJE7PKYYXEK","object":"chat.completion.chunk","created":1770033385,"model":"google/gemini-3-pro-preview","choices":[{"index":0,"delta":{"reasoning_details":[{"type":"reasoning.encrypted","data":"CiQBjz1rXzHrIG8VyKxoyvNfn34I0fU0MFB3Xbo4yGmi5lXxz9oKZgGPPWtfH7TJlamiXjXsugVyW8VxgOUJprUjmiUwJi/stNqMS3LooRoUA1fBkdgztTDDIGWmRMXQtWqouGUTAeueCke7VJzsJm3GwC5Czg9laR24rLZ/AU+1oJpvT5AmZHm0AYnOGAp3AY89a1+1SkejrgsX83pkwVBjFrYRepT+UEelh8Kexyj/KndelV/yYbA+gWgGGSMKe4zq3JKh99Toc1/OqRXykl9qKTNXZj1xaIkP98KH/4mRnVw4Mvc3mE2R97bmzKTFSxzAlJ7+XFtYnZjg7PiNxuwEiZIlG3kKNAGPPWtfzlrIZvrYjj2PtuKOaHbd5iP/2u4dRMmmPZ8fi8DHZdSpnDnJAKI/TVQikZmdBZo=","format":"google-gemini-v1","index":0}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_q2vuvpzyv8"}
+
+      data: {"id":"gen_01KGF3C0Q49GHB7YJE7PKYYXEK","object":"chat.completion.chunk","created":1770033385,"model":"google/gemini-3-pro-preview","choices":[{"index":0,"delta":{"provider_metadata":{"google":{"promptFeedback":null,"groundingMetadata":null,"urlContextMetadata":null,"safetyRatings":null,"usageMetadata":{"thoughtsTokenCount":39,"promptTokenCount":28,"candidatesTokenCount":9,"totalTokenCount":76,"trafficType":"ON_DEMAND"}},"gateway":{"routing":{"originalModelId":"google/gemini-3-pro-preview","resolvedProvider":"vertex","resolvedProviderApiModelId":"gemini-3-pro-preview","internalResolvedModelId":"vertex:gemini-3-pro-preview","fallbacksAvailable":["google"],"internalReasoning":"Selected vertex as preferred provider for gemini-3-pro-preview. 1 fallback(s) available: google","planningReasoning":"System credentials planned for: vertex, google. Total execution order: vertex(system) → google(system)","canonicalSlug":"google/gemini-3-pro-preview","finalProvider":"vertex","attempts":[{"provider":"vertex","internalModelId":"vertex:gemini-3-pro-preview","providerApiModelId":"gemini-3-pro-preview","credentialType":"system","success":true,"startTime":7750944.987373,"endTime":7754447.770022,"statusCode":200}],"modelAttemptCount":1,"modelAttempts":[{"modelId":"google/gemini-3-pro-preview","canonicalSlug":"google/gemini-3-pro-preview","success":true,"providerAttemptCount":1,"providerAttempts":[{"provider":"vertex","internalModelId":"vertex:gemini-3-pro-preview","providerApiModelId":"gemini-3-pro-preview","credentialType":"system","success":true,"startTime":7750944.987373,"endTime":7754447.770022,"statusCode":200}]}],"totalProviderAttemptCount":1},"cost":"0.000632","marketCost":"0.000632","generationId":"gen_01KGF3C0Q49GHB7YJE7PKYYXEK","billableWebSearchCalls":0}}},"logprobs":null,"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":28,"completion_tokens":9,"total_tokens":37,"cost":0.000632,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":39,"image_tokens":0},"cache_creation_input_tokens":0,"market_cost":0.000632},"system_fingerprint":"fp_q2vuvpzyv8","generationId":"gen_01KGF3C0Q49GHB7YJE7PKYYXEK"}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 3.681428625s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1286
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence, Italy?","role":"user"},{"tool_calls":[{"id":"SmUJTLmrRxi0lu0v","function":{"arguments":"{\"location\":\"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant","reasoning_details":[{"data":"CiQBjz1rXzHrIG8VyKxoyvNfn34I0fU0MFB3Xbo4yGmi5lXxz9oKZgGPPWtfH7TJlamiXjXsugVyW8VxgOUJprUjmiUwJi/stNqMS3LooRoUA1fBkdgztTDDIGWmRMXQtWqouGUTAeueCke7VJzsJm3GwC5Czg9laR24rLZ/AU+1oJpvT5AmZHm0AYnOGAp3AY89a1+1SkejrgsX83pkwVBjFrYRepT+UEelh8Kexyj/KndelV/yYbA+gWgGGSMKe4zq3JKh99Toc1/OqRXykl9qKTNXZj1xaIkP98KH/4mRnVw4Mvc3mE2R97bmzKTFSxzAlJ7+XFtYnZjg7PiNxuwEiZIlG3kKNAGPPWtfzlrIZvrYjj2PtuKOaHbd5iP/2u4dRMmmPZ8fi8DHZdSpnDnJAKI/TVQikZmdBZo=","format":"google-gemini-v1","index":0,"type":"reasoning.encrypted"}]},{"content":"40 C","tool_call_id":"SmUJTLmrRxi0lu0v","role":"tool"}],"model":"google/gemini-3-pro-preview","stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"reasoning":{"enabled":true},"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://ai-gateway.vercel.sh/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"gen_01KGF3C4C0A7ZEXSENPBN82KKW","object":"chat.completion.chunk","created":1770033396,"model":"google/gemini-3-pro-preview","choices":[{"index":0,"delta":{"role":"assistant"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_kt7kxbesam"}
+
+      data: {"id":"gen_01KGF3C4C0A7ZEXSENPBN82KKW","object":"chat.completion.chunk","created":1770033396,"model":"google/gemini-3-pro-preview","choices":[{"index":0,"delta":{"reasoning":"**Analyzing Weather Data**\n\nI've just received the weather data for Florence. My current task is to clearly convey the 40 degrees Celsius temperature reading to the user. I'm focusing on the best way to present this information so it's easily understood and actionable.\n\n\n","reasoning_details":[{"type":"reasoning.text","text":"**Analyzing Weather Data**\n\nI've just received the weather data for Florence. My current task is to clearly convey the 40 degrees Celsius temperature reading to the user. I'm focusing on the best way to present this information so it's easily understood and actionable.\n\n\n","format":"google-gemini-v1","index":0}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_kt7kxbesam"}
+
+      data: {"id":"gen_01KGF3C4C0A7ZEXSENPBN82KKW","object":"chat.completion.chunk","created":1770033396,"model":"google/gemini-3-pro-preview","choices":[{"index":0,"delta":{"content":"The current weather in Florence"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_kt7kxbesam"}
+
+      data: {"id":"gen_01KGF3C4C0A7ZEXSENPBN82KKW","object":"chat.completion.chunk","created":1770033396,"model":"google/gemini-3-pro-preview","choices":[{"index":0,"delta":{"content":", Italy is 40°C."},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_kt7kxbesam"}
+
+      data: {"id":"gen_01KGF3C4C0A7ZEXSENPBN82KKW","object":"chat.completion.chunk","created":1770033396,"model":"google/gemini-3-pro-preview","choices":[{"index":0,"delta":{"provider_metadata":{"google":{"promptFeedback":null,"groundingMetadata":null,"urlContextMetadata":null,"safetyRatings":null,"usageMetadata":{"thoughtsTokenCount":29,"promptTokenCount":40,"candidatesTokenCount":14,"totalTokenCount":83,"trafficType":"ON_DEMAND"}},"gateway":{"routing":{"originalModelId":"google/gemini-3-pro-preview","resolvedProvider":"vertex","resolvedProviderApiModelId":"gemini-3-pro-preview","internalResolvedModelId":"vertex:gemini-3-pro-preview","fallbacksAvailable":["google"],"internalReasoning":"Selected vertex as preferred provider for gemini-3-pro-preview. 1 fallback(s) available: google","planningReasoning":"System credentials planned for: vertex, google. Total execution order: vertex(system) → google(system)","canonicalSlug":"google/gemini-3-pro-preview","finalProvider":"vertex","attempts":[{"provider":"vertex","internalModelId":"vertex:gemini-3-pro-preview","providerApiModelId":"gemini-3-pro-preview","credentialType":"system","success":true,"startTime":1491866.50627,"endTime":1502204.735086,"statusCode":200}],"modelAttemptCount":1,"modelAttempts":[{"modelId":"google/gemini-3-pro-preview","canonicalSlug":"google/gemini-3-pro-preview","success":true,"providerAttemptCount":1,"providerAttempts":[{"provider":"vertex","internalModelId":"vertex:gemini-3-pro-preview","providerApiModelId":"gemini-3-pro-preview","credentialType":"system","success":true,"startTime":1491866.50627,"endTime":1502204.735086,"statusCode":200}]}],"totalProviderAttemptCount":1},"cost":"0.000596","marketCost":"0.000596","generationId":"gen_01KGF3C4C0A7ZEXSENPBN82KKW","billableWebSearchCalls":0}}},"logprobs":null,"finish_reason":"stop"}],"usage":{"prompt_tokens":40,"completion_tokens":14,"total_tokens":54,"cost":0.000596,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":29,"image_tokens":0},"cache_creation_input_tokens":0,"market_cost":0.000596},"system_fingerprint":"fp_kt7kxbesam","generationId":"gen_01KGF3C4C0A7ZEXSENPBN82KKW"}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 10.48104525s

@@ -1,0 +1,87 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 865
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"}],"model":"google/gemini-2.5-flash","max_tokens":4000,"stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://ai-gateway.vercel.sh/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"gen_01KGF383DF2E9FSJX95AA3ZED7","object":"chat.completion.chunk","created":1770033254,"model":"google/gemini-2.5-flash","choices":[{"index":0,"delta":{"role":"assistant"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_nkvitg7moc"}
+
+      data: {"id":"gen_01KGF383DF2E9FSJX95AA3ZED7","object":"chat.completion.chunk","created":1770033254,"model":"google/gemini-2.5-flash","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"S66o9rnUIliVpcHx","type":"function","function":{"name":"add","arguments":""}}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_nkvitg7moc"}
+
+      data: {"id":"gen_01KGF383DF2E9FSJX95AA3ZED7","object":"chat.completion.chunk","created":1770033254,"model":"google/gemini-2.5-flash","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"{\"b\":3,\"a\":2}"}}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_nkvitg7moc"}
+
+      data: {"id":"gen_01KGF383DF2E9FSJX95AA3ZED7","object":"chat.completion.chunk","created":1770033254,"model":"google/gemini-2.5-flash","choices":[{"index":0,"delta":{"tool_calls":[{"index":1,"id":"6e0NXuEtzAHkTRep","type":"function","function":{"name":"multiply","arguments":""}}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_nkvitg7moc"}
+
+      data: {"id":"gen_01KGF383DF2E9FSJX95AA3ZED7","object":"chat.completion.chunk","created":1770033254,"model":"google/gemini-2.5-flash","choices":[{"index":0,"delta":{"tool_calls":[{"index":1,"function":{"arguments":"{\"a\":2,\"b\":3}"}}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_nkvitg7moc"}
+
+      data: {"id":"gen_01KGF383DF2E9FSJX95AA3ZED7","object":"chat.completion.chunk","created":1770033254,"model":"google/gemini-2.5-flash","choices":[{"index":0,"delta":{"provider_metadata":{"google":{"promptFeedback":null,"groundingMetadata":null,"urlContextMetadata":null,"safetyRatings":null,"usageMetadata":{"thoughtsTokenCount":37,"promptTokenCount":57,"candidatesTokenCount":10,"totalTokenCount":104,"trafficType":"ON_DEMAND"}},"gateway":{"routing":{"originalModelId":"google/gemini-2.5-flash","resolvedProvider":"vertex","resolvedProviderApiModelId":"gemini-2.5-flash","internalResolvedModelId":"vertex:gemini-2.5-flash","fallbacksAvailable":["google","deepinfra"],"internalReasoning":"Selected vertex as preferred provider for gemini-2.5-flash. 2 fallback(s) available: google, deepinfra","planningReasoning":"System credentials planned for: vertex, google, deepinfra. Total execution order: vertex(system) → google(system) → deepinfra(system)","canonicalSlug":"google/gemini-2.5-flash","finalProvider":"vertex","attempts":[{"provider":"vertex","internalModelId":"vertex:gemini-2.5-flash","providerApiModelId":"gemini-2.5-flash","credentialType":"system","success":true,"startTime":3167743.289212,"endTime":3168716.703261,"statusCode":200}],"modelAttemptCount":1,"modelAttempts":[{"modelId":"google/gemini-2.5-flash","canonicalSlug":"google/gemini-2.5-flash","success":true,"providerAttemptCount":1,"providerAttempts":[{"provider":"vertex","internalModelId":"vertex:gemini-2.5-flash","providerApiModelId":"gemini-2.5-flash","credentialType":"system","success":true,"startTime":3167743.289212,"endTime":3168716.703261,"statusCode":200}]}],"totalProviderAttemptCount":1},"cost":"0.0001346","marketCost":"0.0001346","generationId":"gen_01KGF383DF2E9FSJX95AA3ZED7","billableWebSearchCalls":0}}},"logprobs":null,"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":57,"completion_tokens":10,"total_tokens":67,"cost":0.0001346,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":37,"image_tokens":0},"cache_creation_input_tokens":0,"market_cost":0.0001346},"system_fingerprint":"fp_nkvitg7moc","generationId":"gen_01KGF383DF2E9FSJX95AA3ZED7"}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 1.071326459s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1238
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"tool_calls":[{"id":"S66o9rnUIliVpcHx","function":{"arguments":"{\"b\":3,\"a\":2}","name":"add"},"type":"function"},{"id":"6e0NXuEtzAHkTRep","function":{"arguments":"{\"a\":2,\"b\":3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"S66o9rnUIliVpcHx","role":"tool"},{"content":"6","tool_call_id":"6e0NXuEtzAHkTRep","role":"tool"}],"model":"google/gemini-2.5-flash","max_tokens":4000,"stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://ai-gateway.vercel.sh/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"gen_01KGF384F3XAWSR4PC2A0QPAGW","object":"chat.completion.chunk","created":1770033255,"model":"google/gemini-2.5-flash","choices":[{"index":0,"delta":{"role":"assistant"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_r6gptvhx1g"}
+
+      data: {"id":"gen_01KGF384F3XAWSR4PC2A0QPAGW","object":"chat.completion.chunk","created":1770033255,"model":"google/gemini-2.5-flash","choices":[{"index":0,"delta":{"content":"The sum of"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_r6gptvhx1g"}
+
+      data: {"id":"gen_01KGF384F3XAWSR4PC2A0QPAGW","object":"chat.completion.chunk","created":1770033255,"model":"google/gemini-2.5-flash","choices":[{"index":0,"delta":{"content":" 2 and 3 is 5, and the product of 2 and"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_r6gptvhx1g"}
+
+      data: {"id":"gen_01KGF384F3XAWSR4PC2A0QPAGW","object":"chat.completion.chunk","created":1770033255,"model":"google/gemini-2.5-flash","choices":[{"index":0,"delta":{"content":" 3 is 6."},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_r6gptvhx1g"}
+
+      data: {"id":"gen_01KGF384F3XAWSR4PC2A0QPAGW","object":"chat.completion.chunk","created":1770033255,"model":"google/gemini-2.5-flash","choices":[{"index":0,"delta":{"provider_metadata":{"google":{"promptFeedback":null,"groundingMetadata":null,"urlContextMetadata":null,"safetyRatings":null,"usageMetadata":{"promptTokenCount":193,"candidatesTokenCount":23,"totalTokenCount":216}},"gateway":{"routing":{"originalModelId":"google/gemini-2.5-flash","resolvedProvider":"vertex","resolvedProviderApiModelId":"gemini-2.5-flash","internalResolvedModelId":"vertex:gemini-2.5-flash","fallbacksAvailable":["google","deepinfra"],"internalReasoning":"Selected vertex as preferred provider for gemini-2.5-flash. 2 fallback(s) available: google, deepinfra","planningReasoning":"System credentials planned for: vertex, google, deepinfra. Total execution order: vertex(system) → google(system) → deepinfra(system)","canonicalSlug":"google/gemini-2.5-flash","finalProvider":"google","attempts":[{"provider":"vertex","internalModelId":"vertex:gemini-2.5-flash","providerApiModelId":"gemini-2.5-flash","credentialType":"system","success":false,"error":"Please ensure that the number of function response parts is equal to the number of function call parts of the function call turn.","startTime":3168815.590185,"endTime":3168973.53366,"statusCode":400},{"provider":"google","internalModelId":"google:gemini-2.5-flash","providerApiModelId":"gemini-2.5-flash","credentialType":"system","success":true,"startTime":3169095.201105,"endTime":3169473.585021,"statusCode":200}],"modelAttemptCount":1,"modelAttempts":[{"modelId":"google/gemini-2.5-flash","canonicalSlug":"google/gemini-2.5-flash","success":true,"providerAttemptCount":2,"providerAttempts":[{"provider":"vertex","internalModelId":"vertex:gemini-2.5-flash","providerApiModelId":"gemini-2.5-flash","credentialType":"system","success":false,"error":"Please ensure that the number of function response parts is equal to the number of function call parts of the function call turn.","startTime":3168815.590185,"endTime":3168973.53366,"statusCode":400},{"provider":"google","internalModelId":"google:gemini-2.5-flash","providerApiModelId":"gemini-2.5-flash","credentialType":"system","success":true,"startTime":3169095.201105,"endTime":3169473.585021,"statusCode":200}]}],"totalProviderAttemptCount":2},"cost":"0.0001154","marketCost":"0.0001154","generationId":"gen_01KGF384F3XAWSR4PC2A0QPAGW","billableWebSearchCalls":0}}},"logprobs":null,"finish_reason":"stop"}],"usage":{"prompt_tokens":193,"completion_tokens":23,"total_tokens":216,"cost":0.0001154,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0},"cache_creation_input_tokens":0,"market_cost":0.0001154},"system_fingerprint":"fp_r6gptvhx1g","generationId":"gen_01KGF384F3XAWSR4PC2A0QPAGW"}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 752.724625ms

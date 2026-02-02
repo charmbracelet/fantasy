@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 479
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence, Italy?","role":"user"}],"model":"anthropic/claude-sonnet-4","tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"reasoning":{"enabled":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://ai-gateway.vercel.sh/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"id":"gen_01KGF3AQBSB35WNS62SPSARQ6W","object":"chat.completion","created":1770033342,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"message":{"role":"assistant","content":null,"reasoning":"The user is asking for weather information for Florence, Italy. I have access to a weather function that requires a \"location\" parameter. The user has provided the location as \"Florence, Italy\" which is specific enough to use for the weather query.\n\nI should call the weather function with \"Florence, Italy\" as the location parameter.","reasoning_details":[{"type":"reasoning.text","text":"The user is asking for weather information for Florence, Italy. I have access to a weather function that requires a \"location\" parameter. The user has provided the location as \"Florence, Italy\" which is specific enough to use for the weather query.\n\nI should call the weather function with \"Florence, Italy\" as the location parameter.","signature":"EvcDCkYICxgCKkAcv+JiUJrSmNoeyAKGVOi/csdYyFzgyZwNioa99UTlL/tPju5ML6OZ4LOvKaFwaUZyzcNW4uQLu7jI2eVLu1iBEgz1tmAQP8hgL/Hy0u0aDBov3mK2gXR/f7z0iiIw8orugLuO+L2R5wuK35rGJkQhVHAphISN2F2FNjrGts/gbB+dJtP1ncNCWYFSp2NjKt4Cq7EYeQ0x9ie1oKSCG9n9bGZ0br1TVg4ClNZEQQou4gAMGZonFMnDy0uwPwk5F1rujCQbIJVzttyhb/lVmqUeEy/IFbYDmIi/1MAHlpN8qhX/0NhviIlZGobT7wzZUuNgQYT10+Wr8AfCNuHrMfjN1XnW+72e2p7QmcMEBcR8/sO24stZFAuTrnZytWOrINqsgbuEKcklViQw8RqQNkWUOGlOS+BOWZXIcLinY5LCPftHjLCKrFFG37bGwWKlWpbu9z/whcQ9UVE+TnrIdnhwdhxoljIbuzDBQTuY8MhlOXBzUujm6QaqxOWX0bnyPe+8eq+T1zsq3BLU2OLg5P/6rMZCYxrSjCTSnX0dM/UKxasn7cqT0QwWeVt1hMRDdO3heoFOfQgHmx9w4RuDvlZ9xh0xMKG/Amy8PhqU8tzE8U1+uMCl1PpaOa42MpcWleUklf24hkwZVqM488rdUjIYAQ==","format":"anthropic-claude-v1","index":0}],"tool_calls":[{"id":"toolu_01VvThmBhnhGHEcRJeyCRSHe","type":"function","function":{"name":"weather","arguments":"{\"location\":\"Florence, Italy\"}"}}],"provider_metadata":{"anthropic":{"usage":{"input_tokens":424,"output_tokens":129,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"service_tier":"standard"},"cacheCreationInputTokens":0,"stopSequence":null,"container":null},"gateway":{"routing":{"originalModelId":"anthropic/claude-sonnet-4","resolvedProvider":"anthropic","resolvedProviderApiModelId":"claude-sonnet-4-20250514","internalResolvedModelId":"anthropic:claude-sonnet-4-20250514","fallbacksAvailable":["vertexAnthropic","bedrock"],"internalReasoning":"Selected anthropic as preferred provider for claude-sonnet-4. 2 fallback(s) available: vertexAnthropic, bedrock","planningReasoning":"System credentials planned for: anthropic, vertexAnthropic, bedrock. Total execution order: anthropic(system) → vertexAnthropic(system) → bedrock(system)","canonicalSlug":"anthropic/claude-sonnet-4","finalProvider":"anthropic","attempts":[{"provider":"anthropic","internalModelId":"anthropic:claude-sonnet-4-20250514","providerApiModelId":"claude-sonnet-4-20250514","credentialType":"system","success":true,"startTime":7088911.419434,"endTime":7091508.412367,"statusCode":200,"providerResponseId":"msg_01Um7d6HWfESfBhnukpiBeuy"}],"modelAttemptCount":1,"modelAttempts":[{"modelId":"anthropic/claude-sonnet-4","canonicalSlug":"anthropic/claude-sonnet-4","success":false,"providerAttemptCount":0,"providerAttempts":[]}],"totalProviderAttemptCount":0},"cost":"0.003207","marketCost":"0.003207","generationId":"gen_01KGF3AQBSB35WNS62SPSARQ6W","billableWebSearchCalls":0}}},"logprobs":null,"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":424,"completion_tokens":129,"total_tokens":553,"cost":0.003207,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0},"cache_creation_input_tokens":0,"market_cost":0.003207},"system_fingerprint":"fp_da7b9rssdj","generationId":"gen_01KGF3AQBSB35WNS62SPSARQ6W"}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 2.754280458s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 2226
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence, Italy?","role":"user"},{"tool_calls":[{"id":"toolu_01VvThmBhnhGHEcRJeyCRSHe","function":{"arguments":"{\"location\":\"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant","reasoning":"The user is asking for weather information for Florence, Italy. I have access to a weather function that requires a \"location\" parameter. The user has provided the location as \"Florence, Italy\" which is specific enough to use for the weather query.\n\nI should call the weather function with \"Florence, Italy\" as the location parameter.","reasoning_details":[{"format":"anthropic-claude-v1","index":0,"signature":"EvcDCkYICxgCKkAcv+JiUJrSmNoeyAKGVOi/csdYyFzgyZwNioa99UTlL/tPju5ML6OZ4LOvKaFwaUZyzcNW4uQLu7jI2eVLu1iBEgz1tmAQP8hgL/Hy0u0aDBov3mK2gXR/f7z0iiIw8orugLuO+L2R5wuK35rGJkQhVHAphISN2F2FNjrGts/gbB+dJtP1ncNCWYFSp2NjKt4Cq7EYeQ0x9ie1oKSCG9n9bGZ0br1TVg4ClNZEQQou4gAMGZonFMnDy0uwPwk5F1rujCQbIJVzttyhb/lVmqUeEy/IFbYDmIi/1MAHlpN8qhX/0NhviIlZGobT7wzZUuNgQYT10+Wr8AfCNuHrMfjN1XnW+72e2p7QmcMEBcR8/sO24stZFAuTrnZytWOrINqsgbuEKcklViQw8RqQNkWUOGlOS+BOWZXIcLinY5LCPftHjLCKrFFG37bGwWKlWpbu9z/whcQ9UVE+TnrIdnhwdhxoljIbuzDBQTuY8MhlOXBzUujm6QaqxOWX0bnyPe+8eq+T1zsq3BLU2OLg5P/6rMZCYxrSjCTSnX0dM/UKxasn7cqT0QwWeVt1hMRDdO3heoFOfQgHmx9w4RuDvlZ9xh0xMKG/Amy8PhqU8tzE8U1+uMCl1PpaOa42MpcWleUklf24hkwZVqM488rdUjIYAQ==","text":"The user is asking for weather information for Florence, Italy. I have access to a weather function that requires a \"location\" parameter. The user has provided the location as \"Florence, Italy\" which is specific enough to use for the weather query.\n\nI should call the weather function with \"Florence, Italy\" as the location parameter.","type":"reasoning.text"}]},{"content":"40 C","tool_call_id":"toolu_01VvThmBhnhGHEcRJeyCRSHe","role":"tool"}],"model":"anthropic/claude-sonnet-4","tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"reasoning":{"enabled":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://ai-gateway.vercel.sh/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"id":"gen_01KGF3AT2W4QFA7ZW3ASZ8571P","object":"chat.completion","created":1770033344,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"message":{"role":"assistant","content":"The current weather in Florence, Italy is 40°C (104°F). That''s quite hot! It''s a very warm day in Florence.","provider_metadata":{"anthropic":{"usage":{"input_tokens":568,"output_tokens":34,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"service_tier":"standard"},"cacheCreationInputTokens":0,"stopSequence":null,"container":null},"gateway":{"routing":{"originalModelId":"anthropic/claude-sonnet-4","resolvedProvider":"anthropic","resolvedProviderApiModelId":"claude-sonnet-4-20250514","internalResolvedModelId":"anthropic:claude-sonnet-4-20250514","fallbacksAvailable":["vertexAnthropic","bedrock"],"internalReasoning":"Selected anthropic as preferred provider for claude-sonnet-4. 2 fallback(s) available: vertexAnthropic, bedrock","planningReasoning":"System credentials planned for: anthropic, vertexAnthropic, bedrock. Total execution order: anthropic(system) → vertexAnthropic(system) → bedrock(system)","canonicalSlug":"anthropic/claude-sonnet-4","finalProvider":"anthropic","attempts":[{"provider":"anthropic","internalModelId":"anthropic:claude-sonnet-4-20250514","providerApiModelId":"claude-sonnet-4-20250514","credentialType":"system","success":true,"startTime":7712011.428399,"endTime":7713764.18868,"statusCode":200,"providerResponseId":"msg_01Xc77vidcSXUVZGp5byrDUm"}],"modelAttemptCount":1,"modelAttempts":[{"modelId":"anthropic/claude-sonnet-4","canonicalSlug":"anthropic/claude-sonnet-4","success":false,"providerAttemptCount":0,"providerAttempts":[]}],"totalProviderAttemptCount":0},"cost":"0.002214","marketCost":"0.002214","generationId":"gen_01KGF3AT2W4QFA7ZW3ASZ8571P","billableWebSearchCalls":0}}},"logprobs":null,"finish_reason":"stop"}],"usage":{"prompt_tokens":568,"completion_tokens":34,"total_tokens":602,"cost":0.002214,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0},"cache_creation_input_tokens":0,"market_cost":0.002214},"system_fingerprint":"fp_k3wp9lnz45","generationId":"gen_01KGF3AT2W4QFA7ZW3ASZ8571P"}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 1.837599167s

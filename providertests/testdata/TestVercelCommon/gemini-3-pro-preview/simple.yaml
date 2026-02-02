@@ -1,0 +1,33 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 177
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"Say hi in Portuguese","role":"user"}],"model":"google/gemini-3-pro-preview","max_tokens":4000}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://ai-gateway.vercel.sh/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"id":"gen_01KGF38WR2DQ7XVWAQPMSQN05J","object":"chat.completion","created":1770033284,"model":"google/gemini-3-pro-preview","choices":[{"index":0,"message":{"role":"assistant","content":"The most common way to say \"hi\" in Portuguese is:\n\n**Oi**\n\nYou can also say **Olá** (which is closer to \"hello\").","reasoning_details":[{"type":"reasoning.encrypted","data":"CtcGAY89a1/Vs+RSuBVpzJ1TJvRE/FtqFQVib99RvrHh+gb2EIdzDDZ/SY3ZVeQvQRZIOtEXdxlbjsymY95+YrKyX3B3sDmt7Y0hdpvDVQSQo7BymSD0/qtaPPexP57xCSzdyLZo08AKW5LCUmrBI15/XipH592d0XzRuidBu+EeAlTHMv3bwpwJaJ8DB4RoHhLpG8ueW73DsRnioUPYyQKnUK/8uov5qicTsNIiT67adu/wUBytqrDgRGmtiqw3MyQBaOG7xIEg8VUy8gTAVBKc3HFUh0m8d9+GbHshh2RgKyhA47cBxgef9hHH9fcM71mDXqgNJrZhv7vxgt4GOmVIF7e9iIx4lnYxi46WRlAchSO/rym7grFHNBAZ3D/uQoIp1VyoCyySIcLRVhLyNrU4c3IHWdOs6JuE+xbZiB3Flyccvg4oqiiaN4SOJXlP5+iAo9ASQmwHVy5e4j+/7Uo5G4D+pfxAdYwTT7cbGxLwHDZC13kcFfoi7YHawIghOLdcbQ4Y1wjkHbkP3vgp6zcTsQRw8PGZ8mPaHgMeZ3BGQn+q3jheqs3vcY0zazH9j2b1Yp4R2rcqyHqTpj1pV9BScW1g9dYuTRDjkzJbQxERZ2OrDTomVD6wPV76lldVGVeOOIRY/sNwl/VyXfyp4uJvqHTd6lz1A7JvUQDblT9GMvKmZKXlXW3uCqFroJpUGZVyFBxoNg4vo2vNZdpkCKikbX+irD58WxT8//oU9utaT5TmU7iVcGez3xeED8Pcfe8b4cDBnIBdNPDYJOjLXh5PFFJHJ7ad6Qzb+4FLdXnWl132D+uhuC3nQf7fPsrr8gf4yNzefuX8OjPgCGvobT56LusnH26ef8Vq7yYppYm8oz+JEVqXz2yydWWMwfJoCBESk96rNtdQ1fThaLrwGiz30NvOFZhBQ64f9MmTzt5/Ch97xfNBQNj4nCOzwOgsijXxOV0WG0W9zOjLVaL2StHURwyRNrCjDThoenOcOzRQiHIO+Y3ugEyp2k1dLIU93pILCZKmGmErUXVJxNOdPD/JNkfUDkioIvUDX9+To+cfmsx32Ynrm6auYsZzHI6ntFbu2Yw2S7iozfOVBER1ohInrt3djXS3gZn7NlaTlg71BQ3Lhr23As0Y","format":"google-gemini-v1","index":0}],"provider_metadata":{"google":{"promptFeedback":null,"groundingMetadata":null,"urlContextMetadata":null,"safetyRatings":null,"usageMetadata":{"thoughtsTokenCount":221,"promptTokenCount":9,"candidatesTokenCount":33,"totalTokenCount":263,"trafficType":"PROVISIONED_THROUGHPUT"}},"gateway":{"routing":{"originalModelId":"google/gemini-3-pro-preview","resolvedProvider":"vertex","resolvedProviderApiModelId":"gemini-3-pro-preview","internalResolvedModelId":"vertex:gemini-3-pro-preview","fallbacksAvailable":["google"],"internalReasoning":"Selected vertex as preferred provider for gemini-3-pro-preview. 1 fallback(s) available: google","planningReasoning":"System credentials planned for: vertex, google. Total execution order: vertex(system) → google(system)","canonicalSlug":"google/gemini-3-pro-preview","finalProvider":"vertex","attempts":[{"provider":"vertex","internalModelId":"vertex:gemini-3-pro-preview","providerApiModelId":"gemini-3-pro-preview","credentialType":"system","success":true,"startTime":7028889.551463,"endTime":7033870.641762,"statusCode":200,"providerResponseId":"f5CAaZznMrj2mLAP-aa82AU"}],"modelAttemptCount":1,"modelAttempts":[{"modelId":"google/gemini-3-pro-preview","canonicalSlug":"google/gemini-3-pro-preview","success":false,"providerAttemptCount":0,"providerAttempts":[]}],"totalProviderAttemptCount":0},"cost":"0.003066","marketCost":"0.003066","generationId":"gen_01KGF38WR2DQ7XVWAQPMSQN05J","billableWebSearchCalls":0}}},"logprobs":null,"finish_reason":"stop"}],"usage":{"prompt_tokens":9,"completion_tokens":33,"total_tokens":42,"cost":0.003066,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":221,"image_tokens":0},"cache_creation_input_tokens":0,"market_cost":0.003066},"system_fingerprint":"fp_kece7x1dv2","generationId":"gen_01KGF38WR2DQ7XVWAQPMSQN05J"}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 5.077063708s

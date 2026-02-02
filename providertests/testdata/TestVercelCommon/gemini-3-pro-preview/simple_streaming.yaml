@@ -1,0 +1,42 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 231
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"Say hi in Portuguese","role":"user"}],"model":"google/gemini-3-pro-preview","max_tokens":4000,"stream_options":{"include_usage":true},"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://ai-gateway.vercel.sh/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"gen_01KGF391Q1MADSMMMS7RN0MPJX","object":"chat.completion.chunk","created":1770033289,"model":"google/gemini-3-pro-preview","choices":[{"index":0,"delta":{"role":"assistant"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_s005gr6r3v"}
+
+      data: {"id":"gen_01KGF391Q1MADSMMMS7RN0MPJX","object":"chat.completion.chunk","created":1770033289,"model":"google/gemini-3-pro-preview","choices":[{"index":0,"delta":{"content":"The most common way to say \"hi\" in Portuguese is **\"Oi\"**.\n\nYou can also say **\"Olá\"** (which is more like \"hello\")."},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_s005gr6r3v"}
+
+      data: {"id":"gen_01KGF391Q1MADSMMMS7RN0MPJX","object":"chat.completion.chunk","created":1770033289,"model":"google/gemini-3-pro-preview","choices":[{"index":0,"delta":{"reasoning_details":[{"type":"reasoning.encrypted","data":"CikBjz1rX1dPuLSzjatsf+kEp2Ri1nfHbqwWCwH07OuC1ZuewqSVGPoPzgpfAY89a18bv4mLFvt3bZAdiEoaZ+mjKsSaNKkndIQFXlBX/7hCWWnr1+bAbThHMnH0oIh/4vTXgk8DVKR87b2jqz0KuQG/kFftlB+5jAH9Jiq5/n2JIbFm06nvcF0dlyoKZgGPPWtfUh80MPPeLg0AMzKvrsGiCeKISEhrD6sg11jcaV4dgc/eBV9iwvHXn1LQU3GtPAsNZ4H1ZJM2+49hgdR6sN4vu81IqEdPsBItnGmr4TBm4Gm90LBPvCkcoSb3bh3q41kuaAqSAQGPPWtfYRILvpzZWl2d/sialYcYOf3UGDEFKBuz8HHUo40bCo+HQuJTal05BxWjIEzS4+wNKYrEsmo65fYSq/W1VBPGJVWbySFHDILvcVbMLJriGdWQbpAtXRAi/EoxQYjctaLyV1H77smAtachR9b7fKBfAlccpyd6QqLRi55uBIIczarwv97rFs+ylW/T/2m8CpQBAY89a198U9DZKPUsXuUCZvugyKq7U4JFHcDNk8+2W9F22IOz/lRPP4mRMj2DnaeMEZvj8NlAgN+uPpIS7pBPMWCiTsNUdTp0ZXfGZid8B/M6DFVv/DiS62f+C9LyW93Y+YLltHz0HsYgqFAhNW/TbxLFwshqad8KSAwEUJspHG5VheRkyflEReRxpNFm9MX7FTIsAQrhAQGPPWtf1NKdz86iQg+9J+FwwgJmOemZh5b7nk1s4iVyI4+SRdy5n6lGIwM/RS4brolzexTvzZU4yJHDd3kPm4eEOrATOu7g6wW4Vsdw6+LA6RkX/+TTPZbt7JmWYVbws5YUJGdKD3ddEG9faoV+kxGun8mJDEOdCKVZUDRQtU07nKEa/R9/8xkJaNBv8GBs4TuOHB56wH9rIp4I1qvaW9DU6TlcxKhw8BdtpYbD6Gg3e6asqePEUEIAXeQ5eQUfgC5lDSXRD99j4j42y3tNiKNXY+h2TZc3SIc40ohsM5XzTwqzAQGPPWtfzWc0ZYfA/k2tbqLr/45Vpgn/1yfSC1kXi+ABfbLhzZR4oNnbBlBHcmEbBF3DokgxaI7WEbopj4zbm0ZsYNJVLxD0cGd/kV+CBKbCf4j7L1fCJKlI8Mnorq5Bgp8i28XWjCydjvRAoTT49cJp0LKnKHw2Hr95yMnKPIwlOiAtQ0IFOjNXbfWQSCp42fSXDofsoufZor01El8xVfsaIQTkJtCbyE/AjOwz25v4xsp/CnkBjz1rXw6jbdgKOjllJsnqicBq0+EJ8nM5HbD25Dj1klrIvslkr8/5YyV6Fk43IYUfpLJW63qj9/4/cuRTDWBmbwOYMbf0JJCC0vGZvlz0UbLH3gEFfElZ7D8KAjc6iQ71etnHkYAHfUHlMdJ/B7qJLvQGpN8w4H/A","format":"google-gemini-v1","index":0}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_s005gr6r3v"}
+
+      data: {"id":"gen_01KGF391Q1MADSMMMS7RN0MPJX","object":"chat.completion.chunk","created":1770033289,"model":"google/gemini-3-pro-preview","choices":[{"index":0,"delta":{"provider_metadata":{"google":{"promptFeedback":null,"groundingMetadata":null,"urlContextMetadata":null,"safetyRatings":null,"usageMetadata":{"thoughtsTokenCount":223,"promptTokenCount":9,"candidatesTokenCount":35,"totalTokenCount":267,"trafficType":"ON_DEMAND"}},"gateway":{"routing":{"originalModelId":"google/gemini-3-pro-preview","resolvedProvider":"vertex","resolvedProviderApiModelId":"gemini-3-pro-preview","internalResolvedModelId":"vertex:gemini-3-pro-preview","fallbacksAvailable":["google"],"internalReasoning":"Selected vertex as preferred provider for gemini-3-pro-preview. 1 fallback(s) available: google","planningReasoning":"System credentials planned for: vertex, google. Total execution order: vertex(system) → google(system)","canonicalSlug":"google/gemini-3-pro-preview","finalProvider":"vertex","attempts":[{"provider":"vertex","internalModelId":"vertex:gemini-3-pro-preview","providerApiModelId":"gemini-3-pro-preview","credentialType":"system","success":true,"startTime":1391831.603433,"endTime":1396730.275173,"statusCode":200}],"modelAttemptCount":1,"modelAttempts":[{"modelId":"google/gemini-3-pro-preview","canonicalSlug":"google/gemini-3-pro-preview","success":true,"providerAttemptCount":1,"providerAttempts":[{"provider":"vertex","internalModelId":"vertex:gemini-3-pro-preview","providerApiModelId":"gemini-3-pro-preview","credentialType":"system","success":true,"startTime":1391831.603433,"endTime":1396730.275173,"statusCode":200}]}],"totalProviderAttemptCount":1},"cost":"0.003114","marketCost":"0.003114","generationId":"gen_01KGF391Q1MADSMMMS7RN0MPJX","billableWebSearchCalls":0}}},"logprobs":null,"finish_reason":"stop"}],"usage":{"prompt_tokens":9,"completion_tokens":35,"total_tokens":44,"cost":0.003114,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":223,"image_tokens":0},"cache_creation_input_tokens":0,"market_cost":0.003114},"system_fingerprint":"fp_s005gr6r3v","generationId":"gen_01KGF391Q1MADSMMMS7RN0MPJX"}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 5.130387417s

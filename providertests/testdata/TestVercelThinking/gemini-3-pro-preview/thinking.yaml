@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 481
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence, Italy?","role":"user"}],"model":"google/gemini-3-pro-preview","tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"reasoning":{"enabled":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://ai-gateway.vercel.sh/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"id":"gen_01KGF3BTEQ7ZXNXTXM5HCM0ZW5","object":"chat.completion","created":1770033379,"model":"google/gemini-3-pro-preview","choices":[{"index":0,"message":{"role":"assistant","content":null,"reasoning":"**Determining the Weather**\n\nI''ve identified the need for weather data. I believe the `weather` function is a solid choice. It''s now a matter of calling this function. I''ll pass it ''Florence, Italy'' to retrieve the current conditions.\n\n\n","reasoning_details":[{"type":"reasoning.text","text":"**Determining the Weather**\n\nI''ve identified the need for weather data. I believe the `weather` function is a solid choice. It''s now a matter of calling this function. I''ll pass it ''Florence, Italy'' to retrieve the current conditions.\n\n\n","format":"google-gemini-v1","index":0}],"tool_calls":[{"id":"Zwo8e1JcXjoJ0bPs","type":"function","function":{"name":"weather","arguments":"{\"location\":\"Florence, Italy\"}"}}],"provider_metadata":{"google":{"promptFeedback":null,"groundingMetadata":null,"urlContextMetadata":null,"safetyRatings":null,"usageMetadata":{"thoughtsTokenCount":67,"promptTokenCount":28,"candidatesTokenCount":9,"totalTokenCount":104,"trafficType":"PROVISIONED_THROUGHPUT"}},"gateway":{"routing":{"originalModelId":"google/gemini-3-pro-preview","resolvedProvider":"vertex","resolvedProviderApiModelId":"gemini-3-pro-preview","internalResolvedModelId":"vertex:gemini-3-pro-preview","fallbacksAvailable":["google"],"internalReasoning":"Selected vertex as preferred provider for gemini-3-pro-preview. 1 fallback(s) available: google","planningReasoning":"System credentials planned for: vertex, google. Total execution order: vertex(system) → google(system)","canonicalSlug":"google/gemini-3-pro-preview","finalProvider":"vertex","attempts":[{"provider":"vertex","internalModelId":"vertex:gemini-3-pro-preview","providerApiModelId":"gemini-3-pro-preview","credentialType":"system","success":true,"startTime":390947.964322,"endTime":394738.481613,"statusCode":200,"providerResponseId":"35CAacnTN9X8tfAPg7j5QA"}],"modelAttemptCount":1,"modelAttempts":[{"modelId":"google/gemini-3-pro-preview","canonicalSlug":"google/gemini-3-pro-preview","success":false,"providerAttemptCount":0,"providerAttempts":[]}],"totalProviderAttemptCount":0},"cost":"0.000968","marketCost":"0.000968","generationId":"gen_01KGF3BTEQ7ZXNXTXM5HCM0ZW5","billableWebSearchCalls":0}}},"logprobs":null,"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":28,"completion_tokens":9,"total_tokens":37,"cost":0.000968,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":67,"image_tokens":0},"cache_creation_input_tokens":0,"market_cost":0.000968},"system_fingerprint":"fp_t3b6jfaxsx","generationId":"gen_01KGF3BTEQ7ZXNXTXM5HCM0ZW5"}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 4.135991625s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1114
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence, Italy?","role":"user"},{"tool_calls":[{"id":"Zwo8e1JcXjoJ0bPs","function":{"arguments":"{\"location\":\"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant","reasoning_details":[{"format":"google-gemini-v1","index":0,"text":"**Determining the Weather**\n\nI''ve identified the need for weather data. I believe the `weather` function is a solid choice. It''s now a matter of calling this function. I''ll pass it ''Florence, Italy'' to retrieve the current conditions.\n\n\n","type":"reasoning.text"},{"format":"google-gemini-v1","index":0,"type":"reasoning.encrypted"}]},{"content":"40 C","tool_call_id":"Zwo8e1JcXjoJ0bPs","role":"tool"}],"model":"google/gemini-3-pro-preview","tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"reasoning":{"enabled":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://ai-gateway.vercel.sh/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"id":"gen_01KGF3BYDZXE5BFFQQRPX4SSCP","object":"chat.completion","created":1770033382,"model":"google/gemini-3-pro-preview","choices":[{"index":0,"message":{"role":"assistant","content":"The current temperature in Florence, Italy is 40°C.","provider_metadata":{"google":{"promptFeedback":null,"groundingMetadata":null,"urlContextMetadata":null,"safetyRatings":null,"usageMetadata":{"promptTokenCount":97,"candidatesTokenCount":14,"totalTokenCount":111,"trafficType":"PROVISIONED_THROUGHPUT"}},"gateway":{"routing":{"originalModelId":"google/gemini-3-pro-preview","resolvedProvider":"vertex","resolvedProviderApiModelId":"gemini-3-pro-preview","internalResolvedModelId":"vertex:gemini-3-pro-preview","fallbacksAvailable":["google"],"internalReasoning":"Selected vertex as preferred provider for gemini-3-pro-preview. 1 fallback(s) available: google","planningReasoning":"System credentials planned for: vertex, google. Total execution order: vertex(system) → google(system)","canonicalSlug":"google/gemini-3-pro-preview","finalProvider":"vertex","attempts":[{"provider":"vertex","internalModelId":"vertex:gemini-3-pro-preview","providerApiModelId":"gemini-3-pro-preview","credentialType":"system","success":true,"startTime":7748615.626226,"endTime":7750847.973285,"statusCode":200,"providerResponseId":"45CAae7FNaahmPUPueDE6QU"}],"modelAttemptCount":1,"modelAttempts":[{"modelId":"google/gemini-3-pro-preview","canonicalSlug":"google/gemini-3-pro-preview","success":false,"providerAttemptCount":0,"providerAttempts":[]}],"totalProviderAttemptCount":0},"cost":"0.000362","marketCost":"0.000362","generationId":"gen_01KGF3BYDZXE5BFFQQRPX4SSCP","billableWebSearchCalls":0}}},"logprobs":null,"finish_reason":"stop"}],"usage":{"prompt_tokens":97,"completion_tokens":14,"total_tokens":111,"cost":0.000362,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0},"cache_creation_input_tokens":0,"market_cost":0.000362},"system_fingerprint":"fp_02078i909k","generationId":"gen_01KGF3BYDZXE5BFFQQRPX4SSCP"}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 2.353875042s

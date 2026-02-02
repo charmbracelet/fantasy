@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 465
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"}],"model":"google/gemini-2.5-flash","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://ai-gateway.vercel.sh/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"id":"gen_01KGF37YQYT0615AXEWGQMX7A4","object":"chat.completion","created":1770033249,"model":"google/gemini-2.5-flash","choices":[{"index":0,"message":{"role":"assistant","content":null,"tool_calls":[{"id":"2UEinTAmGM13bjwN","type":"function","function":{"name":"weather","arguments":"{\"location\":\"Florence,Italy\"}"}}],"provider_metadata":{"google":{"promptFeedback":null,"groundingMetadata":null,"urlContextMetadata":null,"safetyRatings":null,"usageMetadata":{"thoughtsTokenCount":57,"promptTokenCount":28,"candidatesTokenCount":5,"totalTokenCount":90,"trafficType":"ON_DEMAND"}},"gateway":{"routing":{"originalModelId":"google/gemini-2.5-flash","resolvedProvider":"vertex","resolvedProviderApiModelId":"gemini-2.5-flash","internalResolvedModelId":"vertex:gemini-2.5-flash","fallbacksAvailable":["google","deepinfra"],"internalReasoning":"Selected vertex as preferred provider for gemini-2.5-flash. 2 fallback(s) available: google, deepinfra","planningReasoning":"System credentials planned for: vertex, google, deepinfra. Total execution order: vertex(system) → google(system) → deepinfra(system)","canonicalSlug":"google/gemini-2.5-flash","finalProvider":"vertex","attempts":[{"provider":"vertex","internalModelId":"vertex:gemini-2.5-flash","providerApiModelId":"gemini-2.5-flash","credentialType":"system","success":true,"startTime":1355937.787241,"endTime":1356631.240553,"statusCode":200,"providerResponseId":"YZCAafTaCP-xhcIP6Zz3mAQ"}],"modelAttemptCount":1,"modelAttempts":[{"modelId":"google/gemini-2.5-flash","canonicalSlug":"google/gemini-2.5-flash","success":false,"providerAttemptCount":0,"providerAttempts":[]}],"totalProviderAttemptCount":0},"cost":"0.0001634","marketCost":"0.0001634","generationId":"gen_01KGF37YQYT0615AXEWGQMX7A4","billableWebSearchCalls":0}}},"logprobs":null,"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":28,"completion_tokens":5,"total_tokens":33,"cost":0.0001634,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":57,"image_tokens":0},"cache_creation_input_tokens":0,"market_cost":0.0001634},"system_fingerprint":"fp_q7zc9ylbsc","generationId":"gen_01KGF37YQYT0615AXEWGQMX7A4"}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 851.617709ms
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 690
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"2UEinTAmGM13bjwN","function":{"arguments":"{\"location\":\"Florence,Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"2UEinTAmGM13bjwN","role":"tool"}],"model":"google/gemini-2.5-flash","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://ai-gateway.vercel.sh/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"id":"gen_01KGF37ZH945B4T7Q2YDF1YW7K","object":"chat.completion","created":1770033250,"model":"google/gemini-2.5-flash","choices":[{"index":0,"message":{"role":"assistant","content":"The weather in Florence, Italy is 40 C.","provider_metadata":{"google":{"promptFeedback":null,"groundingMetadata":null,"urlContextMetadata":null,"safetyRatings":null,"usageMetadata":{"promptTokenCount":40,"candidatesTokenCount":12,"totalTokenCount":52,"trafficType":"ON_DEMAND"}},"gateway":{"routing":{"originalModelId":"google/gemini-2.5-flash","resolvedProvider":"vertex","resolvedProviderApiModelId":"gemini-2.5-flash","internalResolvedModelId":"vertex:gemini-2.5-flash","fallbacksAvailable":["google","deepinfra"],"internalReasoning":"Selected vertex as preferred provider for gemini-2.5-flash. 2 fallback(s) available: google, deepinfra","planningReasoning":"System credentials planned for: vertex, google, deepinfra. Total execution order: vertex(system) → google(system) → deepinfra(system)","canonicalSlug":"google/gemini-2.5-flash","finalProvider":"vertex","attempts":[{"provider":"vertex","internalModelId":"vertex:gemini-2.5-flash","providerApiModelId":"gemini-2.5-flash","credentialType":"system","success":true,"startTime":347802.523594,"endTime":348287.615775,"statusCode":200,"providerResponseId":"YZCAaYSqO9X8tfAPg7j5QA"}],"modelAttemptCount":1,"modelAttempts":[{"modelId":"google/gemini-2.5-flash","canonicalSlug":"google/gemini-2.5-flash","success":false,"providerAttemptCount":0,"providerAttempts":[]}],"totalProviderAttemptCount":0},"cost":"0.000042","marketCost":"0.000042","generationId":"gen_01KGF37ZH945B4T7Q2YDF1YW7K","billableWebSearchCalls":0}}},"logprobs":null,"finish_reason":"stop"}],"usage":{"prompt_tokens":40,"completion_tokens":12,"total_tokens":52,"cost":0.000042,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0},"cache_creation_input_tokens":0,"market_cost":0.000042},"system_fingerprint":"fp_oqc02i8x0x","generationId":"gen_01KGF37ZH945B4T7Q2YDF1YW7K"}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 587.012542ms

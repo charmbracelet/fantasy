@@ -1,0 +1,119 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 941
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"system","cache_control":{"type":"ephemeral"}},{"content":"Add and multiply the number 2 and 3","role":"user","cache_control":{"type":"ephemeral"}}],"model":"anthropic/claude-sonnet-4","max_tokens":4000,"stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://ai-gateway.vercel.sh/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"gen_01KGF3AK848QW52MG188A9XZRA","object":"chat.completion.chunk","created":1770033336,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"role":"assistant"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_kk4h3svyf"}
+
+      data: {"id":"gen_01KGF3AK848QW52MG188A9XZRA","object":"chat.completion.chunk","created":1770033336,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":"I"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_kk4h3svyf"}
+
+      data: {"id":"gen_01KGF3AK848QW52MG188A9XZRA","object":"chat.completion.chunk","created":1770033336,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":"'ll"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_kk4h3svyf"}
+
+      data: {"id":"gen_01KGF3AK848QW52MG188A9XZRA","object":"chat.completion.chunk","created":1770033336,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":" ad"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_kk4h3svyf"}
+
+      data: {"id":"gen_01KGF3AK848QW52MG188A9XZRA","object":"chat.completion.chunk","created":1770033336,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":"d an"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_kk4h3svyf"}
+
+      data: {"id":"gen_01KGF3AK848QW52MG188A9XZRA","object":"chat.completion.chunk","created":1770033336,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":"d multiply the"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_kk4h3svyf"}
+
+      data: {"id":"gen_01KGF3AK848QW52MG188A9XZRA","object":"chat.completion.chunk","created":1770033336,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":" numbers 2 and 3 "},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_kk4h3svyf"}
+
+      data: {"id":"gen_01KGF3AK848QW52MG188A9XZRA","object":"chat.completion.chunk","created":1770033336,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":"for you."},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_kk4h3svyf"}
+
+      data: {"id":"gen_01KGF3AK848QW52MG188A9XZRA","object":"chat.completion.chunk","created":1770033336,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"toolu_01EbUPM9AHLKandFdpD3hR2d","type":"function","function":{"name":"add","arguments":""}}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_kk4h3svyf"}
+
+      data: {"id":"gen_01KGF3AK848QW52MG188A9XZRA","object":"chat.completion.chunk","created":1770033336,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"{\"a\": 2"}}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_kk4h3svyf"}
+
+      data: {"id":"gen_01KGF3AK848QW52MG188A9XZRA","object":"chat.completion.chunk","created":1770033336,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":", \"b\""}}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_kk4h3svyf"}
+
+      data: {"id":"gen_01KGF3AK848QW52MG188A9XZRA","object":"chat.completion.chunk","created":1770033336,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":": 3}"}}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_kk4h3svyf"}
+
+      data: {"id":"gen_01KGF3AK848QW52MG188A9XZRA","object":"chat.completion.chunk","created":1770033336,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"tool_calls":[{"index":1,"id":"toolu_01WJxb3WgmL33DJCq2hw4DFL","type":"function","function":{"name":"multiply","arguments":""}}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_kk4h3svyf"}
+
+      data: {"id":"gen_01KGF3AK848QW52MG188A9XZRA","object":"chat.completion.chunk","created":1770033336,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"tool_calls":[{"index":1,"function":{"arguments":"{\"a\": "}}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_kk4h3svyf"}
+
+      data: {"id":"gen_01KGF3AK848QW52MG188A9XZRA","object":"chat.completion.chunk","created":1770033336,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"tool_calls":[{"index":1,"function":{"arguments":"2"}}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_kk4h3svyf"}
+
+      data: {"id":"gen_01KGF3AK848QW52MG188A9XZRA","object":"chat.completion.chunk","created":1770033336,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"tool_calls":[{"index":1,"function":{"arguments":", "}}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_kk4h3svyf"}
+
+      data: {"id":"gen_01KGF3AK848QW52MG188A9XZRA","object":"chat.completion.chunk","created":1770033336,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"tool_calls":[{"index":1,"function":{"arguments":"\"b\""}}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_kk4h3svyf"}
+
+      data: {"id":"gen_01KGF3AK848QW52MG188A9XZRA","object":"chat.completion.chunk","created":1770033336,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"tool_calls":[{"index":1,"function":{"arguments":": 3}"}}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_kk4h3svyf"}
+
+      data: {"id":"gen_01KGF3AK848QW52MG188A9XZRA","object":"chat.completion.chunk","created":1770033336,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"provider_metadata":{"anthropic":{"usage":{"input_tokens":502,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":137,"service_tier":"standard"},"cacheCreationInputTokens":0,"stopSequence":null,"container":null},"gateway":{"routing":{"originalModelId":"anthropic/claude-sonnet-4","resolvedProvider":"anthropic","resolvedProviderApiModelId":"claude-sonnet-4-20250514","internalResolvedModelId":"anthropic:claude-sonnet-4-20250514","fallbacksAvailable":["vertexAnthropic","bedrock"],"internalReasoning":"Selected anthropic as preferred provider for claude-sonnet-4. 2 fallback(s) available: vertexAnthropic, bedrock","planningReasoning":"System credentials planned for: anthropic, vertexAnthropic, bedrock. Total execution order: anthropic(system) → vertexAnthropic(system) → bedrock(system)","canonicalSlug":"anthropic/claude-sonnet-4","finalProvider":"anthropic","attempts":[{"provider":"anthropic","internalModelId":"anthropic:claude-sonnet-4-20250514","providerApiModelId":"claude-sonnet-4-20250514","credentialType":"system","success":true,"startTime":4753514.35299,"endTime":4754858.992657,"statusCode":200}],"modelAttemptCount":1,"modelAttempts":[{"modelId":"anthropic/claude-sonnet-4","canonicalSlug":"anthropic/claude-sonnet-4","success":true,"providerAttemptCount":1,"providerAttempts":[{"provider":"anthropic","internalModelId":"anthropic:claude-sonnet-4-20250514","providerApiModelId":"claude-sonnet-4-20250514","credentialType":"system","success":true,"startTime":4753514.35299,"endTime":4754858.992657,"statusCode":200}]}],"totalProviderAttemptCount":1},"cost":"0.003561","marketCost":"0.003561","generationId":"gen_01KGF3AK848QW52MG188A9XZRA","billableWebSearchCalls":0}}},"logprobs":null,"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":502,"completion_tokens":137,"total_tokens":639,"cost":0.003561,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0},"cache_creation_input_tokens":0,"market_cost":0.003561},"system_fingerprint":"fp_kk4h3svyf","generationId":"gen_01KGF3AK848QW52MG188A9XZRA"}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 1.471487583s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1439
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"system","cache_control":{"type":"ephemeral"}},{"content":"Add and multiply the number 2 and 3","role":"user"},{"content":"I''ll add and multiply the numbers 2 and 3 for you.","tool_calls":[{"id":"toolu_01EbUPM9AHLKandFdpD3hR2d","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"add"},"type":"function"},{"id":"toolu_01WJxb3WgmL33DJCq2hw4DFL","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"multiply"},"type":"function","cache_control":{"type":"ephemeral"}}],"role":"assistant"},{"content":"5","tool_call_id":"toolu_01EbUPM9AHLKandFdpD3hR2d","role":"tool"},{"content":"6","tool_call_id":"toolu_01WJxb3WgmL33DJCq2hw4DFL","role":"tool"}],"model":"anthropic/claude-sonnet-4","max_tokens":4000,"stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://ai-gateway.vercel.sh/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"gen_01KGF3ANVSZB8AH86G2J0K92JN","object":"chat.completion.chunk","created":1770033339,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"role":"assistant"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_jv4rc3pqm1"}
+
+      data: {"id":"gen_01KGF3ANVSZB8AH86G2J0K92JN","object":"chat.completion.chunk","created":1770033339,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":"The"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_jv4rc3pqm1"}
+
+      data: {"id":"gen_01KGF3ANVSZB8AH86G2J0K92JN","object":"chat.completion.chunk","created":1770033339,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":" results"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_jv4rc3pqm1"}
+
+      data: {"id":"gen_01KGF3ANVSZB8AH86G2J0K92JN","object":"chat.completion.chunk","created":1770033339,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":" are:\n- "},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_jv4rc3pqm1"}
+
+      data: {"id":"gen_01KGF3ANVSZB8AH86G2J0K92JN","object":"chat.completion.chunk","created":1770033339,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":"2 + 3 = "},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_jv4rc3pqm1"}
+
+      data: {"id":"gen_01KGF3ANVSZB8AH86G2J0K92JN","object":"chat.completion.chunk","created":1770033339,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":"5\n- 2 × "},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_jv4rc3pqm1"}
+
+      data: {"id":"gen_01KGF3ANVSZB8AH86G2J0K92JN","object":"chat.completion.chunk","created":1770033339,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":"3 = 6"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_jv4rc3pqm1"}
+
+      data: {"id":"gen_01KGF3ANVSZB8AH86G2J0K92JN","object":"chat.completion.chunk","created":1770033339,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"provider_metadata":{"anthropic":{"usage":{"input_tokens":700,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":31,"service_tier":"standard"},"cacheCreationInputTokens":0,"stopSequence":null,"container":null},"gateway":{"routing":{"originalModelId":"anthropic/claude-sonnet-4","resolvedProvider":"anthropic","resolvedProviderApiModelId":"claude-sonnet-4-20250514","internalResolvedModelId":"anthropic:claude-sonnet-4-20250514","fallbacksAvailable":["vertexAnthropic","bedrock"],"internalReasoning":"Selected anthropic as preferred provider for claude-sonnet-4. 2 fallback(s) available: vertexAnthropic, bedrock","planningReasoning":"System credentials planned for: anthropic, vertexAnthropic, bedrock. Total execution order: anthropic(system) → vertexAnthropic(system) → bedrock(system)","canonicalSlug":"anthropic/claude-sonnet-4","finalProvider":"anthropic","attempts":[{"provider":"anthropic","internalModelId":"anthropic:claude-sonnet-4-20250514","providerApiModelId":"claude-sonnet-4-20250514","credentialType":"system","success":true,"startTime":1445140.487939,"endTime":1446016.149192,"statusCode":200}],"modelAttemptCount":1,"modelAttempts":[{"modelId":"anthropic/claude-sonnet-4","canonicalSlug":"anthropic/claude-sonnet-4","success":true,"providerAttemptCount":1,"providerAttempts":[{"provider":"anthropic","internalModelId":"anthropic:claude-sonnet-4-20250514","providerApiModelId":"claude-sonnet-4-20250514","credentialType":"system","success":true,"startTime":1445140.487939,"endTime":1446016.149192,"statusCode":200}]}],"totalProviderAttemptCount":1},"cost":"0.002565","marketCost":"0.002565","generationId":"gen_01KGF3ANVSZB8AH86G2J0K92JN","billableWebSearchCalls":0}}},"logprobs":null,"finish_reason":"stop"}],"usage":{"prompt_tokens":700,"completion_tokens":31,"total_tokens":731,"cost":0.002565,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0},"cache_creation_input_tokens":0,"market_cost":0.002565},"system_fingerprint":"fp_jv4rc3pqm1","generationId":"gen_01KGF3ANVSZB8AH86G2J0K92JN"}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 1.063098791s

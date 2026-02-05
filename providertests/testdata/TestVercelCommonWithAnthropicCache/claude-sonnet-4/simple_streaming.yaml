@@ -1,0 +1,60 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 303
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system","cache_control":{"type":"ephemeral"}},{"content":"Say hi in Portuguese","role":"user","cache_control":{"type":"ephemeral"}}],"model":"anthropic/claude-sonnet-4","max_tokens":4000,"stream_options":{"include_usage":true},"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://ai-gateway.vercel.sh/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"gen_01KGF3A2KGQFE5BW4K7TRSZ9DF","object":"chat.completion.chunk","created":1770033319,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"role":"assistant"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_c0bnftwhqr"}
+
+      data: {"id":"gen_01KGF3A2KGQFE5BW4K7TRSZ9DF","object":"chat.completion.chunk","created":1770033319,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":"Olá! "},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_c0bnftwhqr"}
+
+      data: {"id":"gen_01KGF3A2KGQFE5BW4K7TRSZ9DF","object":"chat.completion.chunk","created":1770033319,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":"\n\n("},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_c0bnftwhqr"}
+
+      data: {"id":"gen_01KGF3A2KGQFE5BW4K7TRSZ9DF","object":"chat.completion.chunk","created":1770033319,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":"That"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_c0bnftwhqr"}
+
+      data: {"id":"gen_01KGF3A2KGQFE5BW4K7TRSZ9DF","object":"chat.completion.chunk","created":1770033319,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":"'s \""},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_c0bnftwhqr"}
+
+      data: {"id":"gen_01KGF3A2KGQFE5BW4K7TRSZ9DF","object":"chat.completion.chunk","created":1770033319,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":"hello"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_c0bnftwhqr"}
+
+      data: {"id":"gen_01KGF3A2KGQFE5BW4K7TRSZ9DF","object":"chat.completion.chunk","created":1770033319,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":"\" in Portuguese -"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_c0bnftwhqr"}
+
+      data: {"id":"gen_01KGF3A2KGQFE5BW4K7TRSZ9DF","object":"chat.completion.chunk","created":1770033319,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":" a"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_c0bnftwhqr"}
+
+      data: {"id":"gen_01KGF3A2KGQFE5BW4K7TRSZ9DF","object":"chat.completion.chunk","created":1770033319,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":" friendly"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_c0bnftwhqr"}
+
+      data: {"id":"gen_01KGF3A2KGQFE5BW4K7TRSZ9DF","object":"chat.completion.chunk","created":1770033319,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":" way"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_c0bnftwhqr"}
+
+      data: {"id":"gen_01KGF3A2KGQFE5BW4K7TRSZ9DF","object":"chat.completion.chunk","created":1770033319,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":" to say hi"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_c0bnftwhqr"}
+
+      data: {"id":"gen_01KGF3A2KGQFE5BW4K7TRSZ9DF","object":"chat.completion.chunk","created":1770033319,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":"!)"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_c0bnftwhqr"}
+
+      data: {"id":"gen_01KGF3A2KGQFE5BW4K7TRSZ9DF","object":"chat.completion.chunk","created":1770033319,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"provider_metadata":{"anthropic":{"usage":{"input_tokens":16,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":25,"service_tier":"standard"},"cacheCreationInputTokens":0,"stopSequence":null,"container":null},"gateway":{"routing":{"originalModelId":"anthropic/claude-sonnet-4","resolvedProvider":"anthropic","resolvedProviderApiModelId":"claude-sonnet-4-20250514","internalResolvedModelId":"anthropic:claude-sonnet-4-20250514","fallbacksAvailable":["vertexAnthropic","bedrock"],"internalReasoning":"Selected anthropic as preferred provider for claude-sonnet-4. 2 fallback(s) available: vertexAnthropic, bedrock","planningReasoning":"System credentials planned for: anthropic, vertexAnthropic, bedrock. Total execution order: anthropic(system) → vertexAnthropic(system) → bedrock(system)","canonicalSlug":"anthropic/claude-sonnet-4","finalProvider":"anthropic","attempts":[{"provider":"anthropic","internalModelId":"anthropic:claude-sonnet-4-20250514","providerApiModelId":"claude-sonnet-4-20250514","credentialType":"system","success":true,"startTime":1425425.670751,"endTime":1426422.314773,"statusCode":200}],"modelAttemptCount":1,"modelAttempts":[{"modelId":"anthropic/claude-sonnet-4","canonicalSlug":"anthropic/claude-sonnet-4","success":true,"providerAttemptCount":1,"providerAttempts":[{"provider":"anthropic","internalModelId":"anthropic:claude-sonnet-4-20250514","providerApiModelId":"claude-sonnet-4-20250514","credentialType":"system","success":true,"startTime":1425425.670751,"endTime":1426422.314773,"statusCode":200}]}],"totalProviderAttemptCount":1},"cost":"0.000423","marketCost":"0.000423","generationId":"gen_01KGF3A2KGQFE5BW4K7TRSZ9DF","billableWebSearchCalls":0}}},"logprobs":null,"finish_reason":"stop"}],"usage":{"prompt_tokens":16,"completion_tokens":25,"total_tokens":41,"cost":0.000423,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0},"cache_creation_input_tokens":0,"market_cost":0.000423},"system_fingerprint":"fp_c0bnftwhqr","generationId":"gen_01KGF3A2KGQFE5BW4K7TRSZ9DF"}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 1.097552958s

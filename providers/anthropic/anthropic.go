@@ -298,7 +298,7 @@ func (a languageModel) prepareParams(call fantasy.Call) (*anthropic.MessageNewPa
 				Details: "TopK is not supported when thinking is enabled",
 			})
 		}
-		params.MaxTokens = params.MaxTokens + thinkingBudget
+
 	}
 
 	if len(call.Tools) > 0 {

@@ -5,7 +5,6 @@ go 1.25
 require (
 	charm.land/x/vcr v0.1.1
 	cloud.google.com/go/auth v0.18.1
-	github.com/RealAlexandreAI/json-repair v0.0.15
 	github.com/aws/aws-sdk-go-v2 v1.41.1
 	github.com/aws/aws-sdk-go-v2/config v1.32.7
 	github.com/aws/smithy-go v1.24.0

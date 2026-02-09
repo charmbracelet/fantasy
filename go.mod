@@ -15,11 +15,11 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
-	github.com/kaptinlin/jsonschema v0.6.9
+	github.com/kaptinlin/jsonschema v0.6.10
 	github.com/openai/openai-go/v2 v2.7.1
 	github.com/stretchr/testify v1.11.1
-	golang.org/x/oauth2 v0.34.0
-	google.golang.org/genai v1.44.0
+	golang.org/x/oauth2 v0.35.0
+	google.golang.org/genai v1.45.0
 )
 
 require (

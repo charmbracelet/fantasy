@@ -3247,3 +3247,126 @@ func TestResponsesToPrompt_DropsEmptyMessages(t *testing.T) {
 		require.Empty(t, warnings)
 	})
 }
+
+func TestResponsesPrepareParams_SystemPromptAsInstructions(t *testing.T) {
+	t.Parallel()
+
+	prompt := fantasy.Prompt{
+		{
+			Role: fantasy.MessageRoleSystem,
+			Content: []fantasy.MessagePart{
+				fantasy.TextPart{Text: "You are concise."},
+			},
+		},
+		{
+			Role: fantasy.MessageRoleUser,
+			Content: []fantasy.MessagePart{
+				fantasy.TextPart{Text: "Say hello"},
+			},
+		},
+	}
+
+	t.Run("default responses behavior keeps system prompt in input", func(t *testing.T) {
+		t.Parallel()
+
+		model := responsesLanguageModel{
+			modelID: "gpt-5.1-codex-mini",
+		}
+
+		params, warnings := model.prepareParams(fantasy.Call{Prompt: prompt})
+		require.Empty(t, warnings)
+
+		body := mustJSONMap(t, params)
+		_, hasInstructions := body["instructions"]
+		require.False(t, hasInstructions)
+
+		input := mustInputItems(t, body)
+		require.True(t, inputHasRole(input, "developer"))
+		require.True(t, inputHasRole(input, "user"))
+	})
+
+	t.Run("codex compatibility lifts system prompt to instructions", func(t *testing.T) {
+		t.Parallel()
+
+		model := responsesLanguageModel{
+			modelID: "gpt-5.1-codex-mini",
+			isCodex: true,
+		}
+
+		params, warnings := model.prepareParams(fantasy.Call{Prompt: prompt})
+		require.Empty(t, warnings)
+
+		body := mustJSONMap(t, params)
+		require.Equal(t, "You are concise.", body["instructions"])
+
+		input := mustInputItems(t, body)
+		require.False(t, inputHasRole(input, "developer"))
+		require.False(t, inputHasRole(input, "system"))
+		require.True(t, inputHasRole(input, "user"))
+	})
+
+	t.Run("explicit instructions are respected", func(t *testing.T) {
+		t.Parallel()
+
+		instructions := "Use explicit instructions."
+		model := responsesLanguageModel{
+			modelID: "gpt-5.1-codex-mini",
+			isCodex: true,
+		}
+
+		params, warnings := model.prepareParams(fantasy.Call{
+			Prompt: prompt,
+			ProviderOptions: fantasy.ProviderOptions{
+				Name: &ResponsesProviderOptions{
+					Instructions: &instructions,
+				},
+			},
+		})
+		require.Empty(t, warnings)
+
+		body := mustJSONMap(t, params)
+		require.Equal(t, instructions, body["instructions"])
+
+		input := mustInputItems(t, body)
+		require.True(t, inputHasRole(input, "developer"))
+	})
+}
+
+func mustJSONMap(t *testing.T, v any) map[string]any {
+	t.Helper()
+
+	data, err := json.Marshal(v)
+	require.NoError(t, err)
+
+	var result map[string]any
+	require.NoError(t, json.Unmarshal(data, &result))
+
+	return result
+}
+
+func mustInputItems(t *testing.T, body map[string]any) []any {
+	t.Helper()
+
+	inputRaw, ok := body["input"]
+	require.True(t, ok)
+
+	input, ok := inputRaw.([]any)
+	require.True(t, ok)
+
+	return input
+}
+
+func inputHasRole(input []any, role string) bool {
+	for _, itemRaw := range input {
+		item, ok := itemRaw.(map[string]any)
+		if !ok {
+			continue
+		}
+		itemRole, ok := item["role"].(string)
+		if ok && itemRole == role {
+			return true
+		}
+	}
+
+	return false
+}

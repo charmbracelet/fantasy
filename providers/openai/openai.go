@@ -34,6 +34,7 @@ type options struct {
 	sdkOptions           []option.RequestOption
 	objectMode           fantasy.ObjectMode
 	languageModelOptions []LanguageModelOption
+	isCodex              bool
 }
 
 // Option defines a function that configures OpenAI provider options.
@@ -132,6 +133,13 @@ func WithUseResponsesAPI() Option {
 	}
 }
 
+// WithIsCodex configures provider to use Codex style requests
+func WithIsCodex() Option {
+	return func(o *options) {
+		o.isCodex = true
+	}
+}
+
 // WithObjectMode sets the object generation mode.
 func WithObjectMode(om fantasy.ObjectMode) Option {
 	return func(o *options) {
@@ -173,7 +181,13 @@ func (o *provider) LanguageModel(_ context.Context, modelID string) (fantasy.Lan
 		if objectMode == fantasy.ObjectModeJSON {
 			objectMode = fantasy.ObjectModeAuto
 		}
-		return newResponsesLanguageModel(modelID, o.options.name, client, objectMode), nil
+		return newResponsesLanguageModel(
+			modelID,
+			o.options.name,
+			client,
+			objectMode,
+			o.options.isCodex,
+		), nil
 	}
 
 	o.options.languageModelOptions = append(o.options.languageModelOptions, WithLanguageModelObjectMode(o.options.objectMode))

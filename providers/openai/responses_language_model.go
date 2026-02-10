@@ -25,16 +25,24 @@ type responsesLanguageModel struct {
 	modelID    string
 	client     openai.Client
 	objectMode fantasy.ObjectMode
+	isCodex    bool
 }
 
 // newResponsesLanguageModel implements a responses api model
 // INFO: (kujtim) currently we do not support stored parameter we default it to false.
-func newResponsesLanguageModel(modelID string, provider string, client openai.Client, objectMode fantasy.ObjectMode) responsesLanguageModel {
+func newResponsesLanguageModel(
+	modelID string,
+	provider string,
+	client openai.Client,
+	objectMode fantasy.ObjectMode,
+	isCodex bool,
+) responsesLanguageModel {
 	return responsesLanguageModel{
 		modelID:    modelID,
 		provider:   provider,
 		client:     client,
 		objectMode: objectMode,
+		isCodex:    isCodex,
 	}
 }
 
@@ -155,7 +163,20 @@ func (o responsesLanguageModel) prepareParams(call fantasy.Call) (*responses.Res
 		}
 	}
 
-	input, inputWarnings := toResponsesPrompt(call.Prompt, modelConfig.systemMessageMode)
+	systemMessageMode := modelConfig.systemMessageMode
+	// if the request is for codex backend lift the prompt to top level instructions
+	shouldLiftSystemToInstructions := o.isCodex &&
+		(openaiOptions == nil || openaiOptions.Instructions == nil)
+	if shouldLiftSystemToInstructions {
+		instructions, instructionWarnings := toResponsesInstructions(call.Prompt)
+		warnings = append(warnings, instructionWarnings...)
+		if instructions != "" {
+			params.Instructions = param.NewOpt(instructions)
+		}
+		systemMessageMode = "lift"
+	}
+
+	input, inputWarnings := toResponsesPrompt(call.Prompt, systemMessageMode)
 	warnings = append(warnings, inputWarnings...)
 
 	var include []IncludeType
@@ -193,7 +214,7 @@ func (o responsesLanguageModel) prepareParams(call fantasy.Call) (*responses.Res
 	if call.TopP != nil {
 		params.TopP = param.NewOpt(*call.TopP)
 	}
-	if call.MaxOutputTokens != nil {
+	if call.MaxOutputTokens != nil && !o.isCodex {
 		params.MaxOutputTokens = param.NewOpt(*call.MaxOutputTokens)
 	}
 
@@ -371,6 +392,8 @@ func toResponsesPrompt(prompt fantasy.Prompt, systemMessageMode string) (respons
 				input = append(input, responses.ResponseInputItemParamOfMessage(systemText, responses.EasyInputMessageRoleSystem))
 			case "developer":
 				input = append(input, responses.ResponseInputItemParamOfMessage(systemText, responses.EasyInputMessageRoleDeveloper))
+			case "lift":
+				// System messages were lifted to top-level instructions.
 			case "remove":
 				warnings = append(warnings, fantasy.CallWarning{
 					Type:    fantasy.CallWarningTypeOther,
@@ -581,6 +604,51 @@ func toResponsesPrompt(prompt fantasy.Prompt, systemMessageMode string) (respons
 	}
 
 	return input, warnings
+}
+
+func toResponsesInstructions(prompt fantasy.Prompt) (string, []fantasy.CallWarning) {
+	var warnings []fantasy.CallWarning
+	var instructions []string
+
+	for _, msg := range prompt {
+		if msg.Role != fantasy.MessageRoleSystem {
+			continue
+		}
+
+		var systemText string
+		for _, c := range msg.Content {
+			if c.GetType() != fantasy.ContentTypeText {
+				warnings = append(warnings, fantasy.CallWarning{
+					Type:    fantasy.CallWarningTypeOther,
+					Message: "system prompt can only have text content",
+				})
+				continue
+			}
+			textPart, ok := fantasy.AsContentType[fantasy.TextPart](c)
+			if !ok {
+				warnings = append(warnings, fantasy.CallWarning{
+					Type:    fantasy.CallWarningTypeOther,
+					Message: "system prompt text part does not have the right type",
+				})
+				continue
+			}
+			if strings.TrimSpace(textPart.Text) != "" {
+				systemText += textPart.Text
+			}
+		}
+
+		if systemText == "" {
+			warnings = append(warnings, fantasy.CallWarning{
+				Type:    fantasy.CallWarningTypeOther,
+				Message: "system prompt has no text parts",
+			})
+			continue
+		}
+
+		instructions = append(instructions, systemText)
+	}
+
+	return strings.Join(instructions, "\n\n"), warnings
 }
 
 func hasVisibleResponsesUserContent(content responses.ResponseInputMessageContentListParam) bool {

@@ -160,6 +160,8 @@ var responsesReasoningModelIDs = []string{
 	"gpt-5.1-chat",
 	"gpt-5.2",
 	"gpt-5.2-codex",
+	"gpt-5.3",
+	"gpt-5.3-codex",
 	"gpt-oss-120b",
 }
 

@@ -12,9 +12,19 @@ import (
 	"charm.land/fantasy/providers/openrouter"
 )
 
+const (
+	apiKey  = "sike"
+	modelId = "moonshotai/kimi-k2"
+)
+
+// Schema for the tool input
+type cuteDogQuery struct {
+	Location string `json:"location" description:"The location to search for cute dogs."`
+}
+
 func main() {
 	// Choose your fave provider.
-	provider, err := openrouter.New(openrouter.WithAPIKey(os.Getenv("OPENROUTER_API_KEY")))
+	provider, err := openrouter.New(openrouter.WithAPIKey(os.Getenv(apiKey)))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Whoops:", err)
 		os.Exit(1)
@@ -23,19 +33,13 @@ func main() {
 	ctx := context.Background()
 
 	// Pick your fave model.
-	model, err := provider.LanguageModel(ctx, "moonshotai/kimi-k2")
+	model, err := provider.LanguageModel(ctx, modelId)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Dang:", err)
 		os.Exit(1)
 	}
 
-	// Let's make a tool that fetches info about cute dogs. Here's a schema
-	// for the tool's input.
-	type cuteDogQuery struct {
-		Location string `json:"location" description:"The location to search for cute dogs."`
-	}
-
-	// And here's the implementation of that tool.
+	// Let's make a tool that fetches info about cute dogs
 	fetchCuteDogInfo := func(ctx context.Context, input cuteDogQuery, _ fantasy.ToolCall) (fantasy.ToolResponse, error) {
 		if input.Location == "Silver Lake, Los Angeles" {
 			return fantasy.NewTextResponse("Cute dogs are everywhere!"), nil

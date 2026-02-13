@@ -401,3 +401,42 @@ func toSnakeCase(s string) string {
 	}
 	return strings.ToLower(result.String())
 }
+
+// Normalize recursively normalizes a raw JSON Schema map so it is
+// compatible with providers that reject type-arrays (e.g. OpenAI). Type
+// arrays are converted to anyOf and bare "array" types get "items":{}.
+func Normalize(node map[string]any) {
+	for _, child := range node {
+		switch v := child.(type) {
+		case map[string]any:
+			Normalize(v)
+		case []any:
+			for _, item := range v {
+				if m, ok := item.(map[string]any); ok {
+					Normalize(m)
+				}
+			}
+		}
+	}
+
+	typeArr, ok := node["type"].([]any)
+	if !ok {
+		if node["type"] == "array" {
+			if _, has := node["items"]; !has {
+				node["items"] = map[string]any{}
+			}
+		}
+		return
+	}
+
+	anyOf := make([]any, 0, len(typeArr))
+	for _, t := range typeArr {
+		variant := map[string]any{"type": t}
+		if t == "array" {
+			variant["items"] = map[string]any{}
+		}
+		anyOf = append(anyOf, variant)
+	}
+	delete(node, "type")
+	node["anyOf"] = anyOf
+}

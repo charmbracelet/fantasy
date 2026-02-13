@@ -31,10 +31,23 @@ func init() {
 	})
 }
 
+// ThinkingLevel controls the amount of thinking a model does.
+// Use this for Gemini 3+ models instead of ThinkingBudget.
+// Mutually exclusive with ThinkingBudget.
+type ThinkingLevel = string
+
+const (
+	ThinkingLevelLow     ThinkingLevel = "LOW"
+	ThinkingLevelMedium  ThinkingLevel = "MEDIUM"
+	ThinkingLevelHigh    ThinkingLevel = "HIGH"
+	ThinkingLevelMinimal ThinkingLevel = "MINIMAL"
+)
+
 // ThinkingConfig represents thinking configuration for the Google provider.
 type ThinkingConfig struct {
-	ThinkingBudget  *int64 `json:"thinking_budget"`
-	IncludeThoughts *bool  `json:"include_thoughts"`
+	ThinkingBudget  *int64  `json:"thinking_budget,omitempty"`
+	IncludeThoughts *bool   `json:"include_thoughts,omitempty"`
+	ThinkingLevel   *string `json:"thinking_level,omitempty"`
 }
 
 // ReasoningMetadata represents reasoning metadata for the Google provider.

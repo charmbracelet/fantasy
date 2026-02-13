@@ -533,11 +533,8 @@ func (p ProviderDefinedTool) GetName() string {
 
 // NewUserMessage creates a new user message with the given prompt and optional files.
 func NewUserMessage(prompt string, files ...FilePart) Message {
-	content := []MessagePart{
-		TextPart{
-			Text: prompt,
-		},
-	}
+	content := make([]MessagePart, 0, len(files)+1)
+	content = append(content, TextPart{Text: prompt})
 
 	for _, f := range files {
 		content = append(content, f)

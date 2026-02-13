@@ -242,6 +242,14 @@ func (g languageModel) prepareParams(call fantasy.Call) (*genai.GenerateContentC
 			})
 			providerOptions.ThinkingConfig.ThinkingBudget = fantasy.Opt(int64(128))
 		}
+
+		if providerOptions.ThinkingConfig.ThinkingLevel != nil &&
+			providerOptions.ThinkingConfig.ThinkingBudget != nil {
+			return nil, nil, nil, &fantasy.Error{
+				Title:   "invalid argument",
+				Message: "thinking_level and thinking_budget are mutually exclusive",
+			}
+		}
 	}
 
 	isGemmaModel := strings.HasPrefix(strings.ToLower(g.modelID), "gemma-")
@@ -297,6 +305,9 @@ func (g languageModel) prepareParams(call fantasy.Call) (*genai.GenerateContentC
 		if providerOptions.ThinkingConfig.ThinkingBudget != nil {
 			tmp := int32(*providerOptions.ThinkingConfig.ThinkingBudget) //nolint: gosec
 			config.ThinkingConfig.ThinkingBudget = &tmp
+		}
+		if providerOptions.ThinkingConfig.ThinkingLevel != nil {
+			config.ThinkingConfig.ThinkingLevel = genai.ThinkingLevel(*providerOptions.ThinkingConfig.ThinkingLevel)
 		}
 	}
 	for _, safetySetting := range providerOptions.SafetySettings {

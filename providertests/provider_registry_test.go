@@ -181,6 +181,9 @@ func TestProviderRegistry_Serialization_GoogleOptions(t *testing.T) {
 			google.Name: &google.ProviderOptions{
 				CachedContent: "cached-123",
 				Threshold:     "BLOCK_ONLY_HIGH",
+				ThinkingConfig: &google.ThinkingConfig{
+					ThinkingLevel: fantasy.Opt(google.ThinkingLevelHigh),
+				},
 			},
 		},
 	}
@@ -197,6 +200,9 @@ func TestProviderRegistry_Serialization_GoogleOptions(t *testing.T) {
 	require.True(t, ok)
 	require.Equal(t, "cached-123", opt.CachedContent)
 	require.Equal(t, "BLOCK_ONLY_HIGH", opt.Threshold)
+	require.NotNil(t, opt.ThinkingConfig)
+	require.NotNil(t, opt.ThinkingConfig.ThinkingLevel)
+	require.Equal(t, google.ThinkingLevelHigh, *opt.ThinkingConfig.ThinkingLevel)
 }
 
 func TestProviderRegistry_Serialization_OpenRouterOptions(t *testing.T) {

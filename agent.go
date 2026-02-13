@@ -9,6 +9,8 @@ import (
 	"maps"
 	"slices"
 	"sync"
+
+	"charm.land/fantasy/schema"
 )
 
 // StepResult represents the result of a single step in an agent execution.
@@ -912,14 +914,16 @@ func (a *agent) prepareTools(tools []AgentTool, activeTools []string, disableAll
 			continue
 		}
 		info := tool.Info()
+		inputSchema := map[string]any{
+			"type":       "object",
+			"properties": info.Parameters,
+			"required":   info.Required,
+		}
+		schema.Normalize(inputSchema)
 		preparedTools = append(preparedTools, FunctionTool{
-			Name:        info.Name,
-			Description: info.Description,
-			InputSchema: map[string]any{
-				"type":       "object",
-				"properties": info.Parameters,
-				"required":   info.Required,
-			},
+			Name:            info.Name,
+			Description:     info.Description,
+			InputSchema:     inputSchema,
 			ProviderOptions: tool.ProviderOptions(),
 		})
 	}

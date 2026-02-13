@@ -532,3 +532,108 @@ func TestSchemaToParametersEdgeCases(t *testing.T) {
 		})
 	}
 }
+
+func TestNormalize_TypeArray(t *testing.T) {
+	t.Parallel()
+
+	node := map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"value": map[string]any{
+				"description": "Config value",
+				"type":        []any{"string", "number", "boolean", "object", "array", "null"},
+			},
+		},
+	}
+
+	Normalize(node)
+
+	val := node["properties"].(map[string]any)["value"].(map[string]any)
+	require.Nil(t, val["type"])
+	anyOf, ok := val["anyOf"].([]any)
+	require.True(t, ok)
+	require.Len(t, anyOf, 6)
+
+	for _, v := range anyOf {
+		variant := v.(map[string]any)
+		if variant["type"] == "array" {
+			require.Contains(t, variant, "items")
+		}
+	}
+	require.Equal(t, "Config value", val["description"])
+}
+
+func TestNormalize_SingleStringType(t *testing.T) {
+	t.Parallel()
+
+	node := map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"name": map[string]any{"type": "string"},
+		},
+	}
+
+	Normalize(node)
+
+	val := node["properties"].(map[string]any)["name"].(map[string]any)
+	require.Equal(t, "string", val["type"])
+}
+
+func TestNormalize_BareArrayGetsItems(t *testing.T) {
+	t.Parallel()
+
+	node := map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"tags": map[string]any{"type": "array"},
+		},
+	}
+
+	Normalize(node)
+
+	val := node["properties"].(map[string]any)["tags"].(map[string]any)
+	require.Equal(t, "array", val["type"])
+	require.Contains(t, val, "items")
+}
+
+func TestNormalize_SingleElementTypeArray(t *testing.T) {
+	t.Parallel()
+
+	node := map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"name": map[string]any{"type": []any{"string"}},
+		},
+	}
+
+	Normalize(node)
+
+	val := node["properties"].(map[string]any)["name"].(map[string]any)
+	require.Nil(t, val["type"])
+	anyOf, ok := val["anyOf"].([]any)
+	require.True(t, ok)
+	require.Len(t, anyOf, 1)
+	require.Equal(t, "string", anyOf[0].(map[string]any)["type"])
+}
+
+func TestNormalize_NestedProperties(t *testing.T) {
+	t.Parallel()
+
+	node := map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"config": map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"val": map[string]any{"type": []any{"string", "number"}},
+				},
+			},
+		},
+	}
+
+	Normalize(node)
+
+	val := node["properties"].(map[string]any)["config"].(map[string]any)["properties"].(map[string]any)["val"].(map[string]any)
+	require.Nil(t, val["type"])
+	require.NotNil(t, val["anyOf"])
+}

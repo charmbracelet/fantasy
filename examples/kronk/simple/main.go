@@ -11,7 +11,6 @@ import (
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/providers/kronk"
-	"github.com/ardanlabs/kronk/sdk/kronk/model"
 )
 
 const modelURL = "Qwen/Qwen3-8B-GGUF/Qwen3-8B-Q8_0.gguf"
@@ -31,11 +30,6 @@ func run() error {
 	provider, err := kronk.New(
 		kronk.WithName("kronk"),
 		kronk.WithLogger(kronk.FmtLogger),
-		kronk.WithModelConfig(model.Config{
-			CacheTypeK: model.GGMLTypeQ8_0,
-			CacheTypeV: model.GGMLTypeQ8_0,
-			NSeqMax:    1,
-		}),
 	)
 	if err != nil {
 		return fmt.Errorf("unable to create provider: %w", err)

@@ -56,6 +56,26 @@ func TestGoogleThinking(t *testing.T) {
 	testThinking(t, pairs, testGoogleThinking)
 }
 
+func TestGoogleThinkingLevel(t *testing.T) {
+	opts := fantasy.ProviderOptions{
+		google.Name: &google.ProviderOptions{
+			ThinkingConfig: &google.ThinkingConfig{
+				ThinkingLevel:   fantasy.Opt(google.ThinkingLevelHigh),
+				IncludeThoughts: fantasy.Opt(true),
+			},
+		},
+	}
+
+	var pairs []builderPair
+	for _, m := range geminiTestModels {
+		if !m.reasoning {
+			continue
+		}
+		pairs = append(pairs, builderPair{m.name, geminiBuilder(m.model), opts, nil})
+	}
+	testThinking(t, pairs, testGoogleThinking)
+}
+
 func TestGoogleObjectGeneration(t *testing.T) {
 	var pairs []builderPair
 	for _, m := range geminiTestModels {

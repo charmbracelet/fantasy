@@ -18,9 +18,9 @@ To see which models are available for you, see the [Kronk Catalog][catalog].
 
 Examples on how to use it are available in [`examples/kronk`][examples].
 
-[kronk]: https://github.com/ardanlabs/kronk)
-[ardanlabs]: https://github.com/ardanlabs)
-[yzma]: https://github.com/hybridgroup/yzma)
+[kronk]: https://github.com/ardanlabs/kronk
+[ardanlabs]: https://github.com/ardanlabs
+[yzma]: https://github.com/hybridgroup/yzma
 [llama.cpp]: https://github.com/ggml-org/llama.cpp
 [catalog]: https://github.com/ardanlabs/kronk_catalogs
 [examples]: https://github.com/charmbracelet/fantasy/tree/main/examples/kronk

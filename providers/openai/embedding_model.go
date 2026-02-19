@@ -50,14 +50,8 @@ func (e embeddingModel) Embed(ctx context.Context, call fantasy.EmbeddingCall) (
 		params.Dimensions = param.NewOpt(*call.Dimensions)
 	}
 
-	if call.Input != nil {
-		params.Input = openai.EmbeddingNewParamsInputUnion{
-			OfString: param.NewOpt(*call.Input),
-		}
-	} else {
-		params.Input = openai.EmbeddingNewParamsInputUnion{
-			OfArrayOfStrings: call.Inputs,
-		}
+	params.Input = openai.EmbeddingNewParamsInputUnion{
+		OfArrayOfStrings: call.Inputs,
 	}
 
 	response, err := e.client.Embeddings.New(ctx, params)

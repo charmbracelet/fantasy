@@ -7,23 +7,8 @@ import (
 )
 
 func TestValidateEmbeddingCall(t *testing.T) {
-	t.Run("requires one input", func(t *testing.T) {
+	t.Run("requires inputs", func(t *testing.T) {
 		err := ValidateEmbeddingCall(EmbeddingCall{})
-		require.Error(t, err)
-	})
-
-	t.Run("rejects both input and inputs", func(t *testing.T) {
-		input := "hello"
-		err := ValidateEmbeddingCall(EmbeddingCall{
-			Input:  &input,
-			Inputs: []string{"world"},
-		})
-		require.Error(t, err)
-	})
-
-	t.Run("rejects empty input", func(t *testing.T) {
-		input := ""
-		err := ValidateEmbeddingCall(EmbeddingCall{Input: &input})
 		require.Error(t, err)
 	})
 
@@ -32,9 +17,8 @@ func TestValidateEmbeddingCall(t *testing.T) {
 		require.Error(t, err)
 	})
 
-	t.Run("accepts single input", func(t *testing.T) {
-		input := "hello"
-		err := ValidateEmbeddingCall(EmbeddingCall{Input: &input})
+	t.Run("accepts single input in inputs", func(t *testing.T) {
+		err := ValidateEmbeddingCall(EmbeddingCall{Inputs: []string{"hello"}})
 		require.NoError(t, err)
 	})
 

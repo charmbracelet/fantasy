@@ -20,9 +20,8 @@ type EmbeddingModel interface {
 }
 
 // EmbeddingCall represents a request to generate embeddings.
-// Exactly one of Input or Inputs must be provided.
+// Inputs must include at least one non-empty item.
 type EmbeddingCall struct {
-	Input      *string  `json:"input,omitempty"`
 	Inputs     []string `json:"inputs,omitempty"`
 	Dimensions *int64   `json:"dimensions,omitempty"`
 
@@ -44,24 +43,11 @@ type EmbeddingResponse struct {
 
 // ValidateEmbeddingCall validates the embedding request parameters.
 func ValidateEmbeddingCall(call EmbeddingCall) error {
-	hasInput := call.Input != nil
-	hasInputs := len(call.Inputs) > 0
-
-	if hasInput == hasInputs {
+	if len(call.Inputs) == 0 {
 		return &Error{
 			Title:   "invalid argument",
-			Message: "embedding call must set exactly one of input or inputs",
+			Message: "embedding inputs are required",
 		}
-	}
-
-	if hasInput {
-		if *call.Input == "" {
-			return &Error{
-				Title:   "invalid argument",
-				Message: "embedding input cannot be empty",
-			}
-		}
-		return nil
 	}
 
 	for i, input := range call.Inputs {

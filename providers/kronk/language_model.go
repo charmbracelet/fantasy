@@ -168,7 +168,7 @@ func (l *languageModel) Generate(ctx context.Context, call fantasy.Call) (*fanta
 	for resp := range ch {
 		lastResponse = resp
 
-		if len(resp.Choice) > 0 {
+		if len(resp.Choice) > 0 && resp.Choice[0].Delta != nil {
 			switch resp.Choice[0].FinishReason() {
 			case model.FinishReasonError:
 				return nil, &fantasy.Error{Title: "model error", Message: resp.Choice[0].Delta.Content}
@@ -189,7 +189,10 @@ func (l *languageModel) Generate(ctx context.Context, call fantasy.Call) (*fanta
 	}
 
 	choice := lastResponse.Choice[0]
-	content := make([]fantasy.Content, 0, 1+len(choice.Delta.ToolCalls))
+	var content []fantasy.Content
+	if choice.Delta != nil {
+		content = make([]fantasy.Content, 0, 1+len(choice.Delta.ToolCalls))
+	}
 
 	if fullContent != "" {
 		content = append(content, fantasy.TextContent{
@@ -197,42 +200,52 @@ func (l *languageModel) Generate(ctx context.Context, call fantasy.Call) (*fanta
 		})
 	}
 
-	for _, tc := range choice.Delta.ToolCalls {
-		// Marshal the underlying map directly, not the ToolCallArguments type
-		// which has a custom MarshalJSON that double-encodes to a JSON string.
-		argsJSON, _ := json.Marshal(map[string]any(tc.Function.Arguments))
+	if choice.Delta != nil {
+		for _, tc := range choice.Delta.ToolCalls {
+			// Marshal the underlying map directly, not the ToolCallArguments type
+			// which has a custom MarshalJSON that double-encodes to a JSON string.
+			argsJSON, _ := json.Marshal(map[string]any(tc.Function.Arguments))
 
-		content = append(content, fantasy.ToolCallContent{
-			ProviderExecuted: false,
-			ToolCallID:       tc.ID,
-			ToolName:         tc.Function.Name,
-			Input:            string(argsJSON),
-		})
+			content = append(content, fantasy.ToolCallContent{
+				ProviderExecuted: false,
+				ToolCallID:       tc.ID,
+				ToolName:         tc.Function.Name,
+				Input:            string(argsJSON),
+			})
+		}
 	}
 
-	usage := fantasy.Usage{
-		InputTokens:     int64(lastResponse.Usage.PromptTokens),
-		OutputTokens:    int64(lastResponse.Usage.CompletionTokens),
-		TotalTokens:     int64(lastResponse.Usage.PromptTokens + lastResponse.Usage.CompletionTokens),
-		ReasoningTokens: int64(lastResponse.Usage.ReasoningTokens),
+	usage := fantasy.Usage{}
+	if lastResponse.Usage != nil {
+		usage = fantasy.Usage{
+			InputTokens:     int64(lastResponse.Usage.PromptTokens),
+			OutputTokens:    int64(lastResponse.Usage.CompletionTokens),
+			TotalTokens:     int64(lastResponse.Usage.PromptTokens + lastResponse.Usage.CompletionTokens),
+			ReasoningTokens: int64(lastResponse.Usage.ReasoningTokens),
+		}
 	}
 
 	mappedFinishReason := l.mapFinishReasonFunc(choice.FinishReason())
-	if len(choice.Delta.ToolCalls) > 0 {
+	if choice.Delta != nil && len(choice.Delta.ToolCalls) > 0 {
 		mappedFinishReason = fantasy.FinishReasonToolCalls
 	}
 
-	resp := fantasy.Response{
-		Content:      content,
-		Usage:        usage,
-		FinishReason: mappedFinishReason,
-		ProviderMetadata: fantasy.ProviderMetadata{
+	providerMetadata := fantasy.ProviderMetadata{}
+	if lastResponse.Usage != nil {
+		providerMetadata = fantasy.ProviderMetadata{
 			Name: &ProviderMetadata{
 				TokensPerSecond: lastResponse.Usage.TokensPerSecond,
 				OutputTokens:    int64(lastResponse.Usage.OutputTokens),
 			},
-		},
-		Warnings: warnings,
+		}
+	}
+
+	resp := fantasy.Response{
+		Content:          content,
+		Usage:            usage,
+		FinishReason:     mappedFinishReason,
+		ProviderMetadata: providerMetadata,
+		Warnings:         warnings,
 	}
 
 	return &resp, nil
@@ -278,6 +291,9 @@ func (l *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 			}
 
 			choice := resp.Choice[0]
+			if choice.Delta == nil {
+				continue
+			}
 
 			if resp.Usage != nil {
 				usage = fantasy.Usage{

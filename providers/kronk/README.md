@@ -10,7 +10,7 @@ under the hood to provide hardware accelerated local inference with
 Kronk provides a high-level API that feels similar to using an OpenAI compatible
 API.
 
-When using the Kronk provider in fantasy, you only need to specify the model you
+When using the Kronk provider in Fantasy, you only need to specify the model you
 want to use and it'll be automatically downloaded in your machine and used for
 inference.
 

@@ -1,0 +1,33 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 249
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system","cache_control":{"type":"ephemeral"}},{"content":"Say hi in Portuguese","role":"user","cache_control":{"type":"ephemeral"}}],"model":"anthropic/claude-sonnet-4","max_tokens":4000}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://ai-gateway.vercel.sh/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"id":"gen_01KGF3A0GNP7F130T7D4SZFNFG","object":"chat.completion","created":1770033318,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"message":{"role":"assistant","content":"Olá! (Oh-LAH)\n\nThis is the most common way to say \"hi\" in Portuguese. You can also use \"Oi!\" (OH-ee) for a more casual greeting.","provider_metadata":{"anthropic":{"usage":{"input_tokens":16,"output_tokens":48,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"service_tier":"standard"},"cacheCreationInputTokens":0,"stopSequence":null,"container":null},"gateway":{"routing":{"originalModelId":"anthropic/claude-sonnet-4","resolvedProvider":"anthropic","resolvedProviderApiModelId":"claude-sonnet-4-20250514","internalResolvedModelId":"anthropic:claude-sonnet-4-20250514","fallbacksAvailable":["vertexAnthropic","bedrock"],"internalReasoning":"Selected anthropic as preferred provider for claude-sonnet-4. 2 fallback(s) available: vertexAnthropic, bedrock","planningReasoning":"System credentials planned for: anthropic, vertexAnthropic, bedrock. Total execution order: anthropic(system) → vertexAnthropic(system) → bedrock(system)","canonicalSlug":"anthropic/claude-sonnet-4","finalProvider":"anthropic","attempts":[{"provider":"anthropic","internalModelId":"anthropic:claude-sonnet-4-20250514","providerApiModelId":"claude-sonnet-4-20250514","credentialType":"system","success":true,"startTime":305884.462307,"endTime":307858.655195,"statusCode":200,"providerResponseId":"msg_01NUekGRWWJS2rvj8HY222rZ"}],"modelAttemptCount":1,"modelAttempts":[{"modelId":"anthropic/claude-sonnet-4","canonicalSlug":"anthropic/claude-sonnet-4","success":false,"providerAttemptCount":0,"providerAttempts":[]}],"totalProviderAttemptCount":0},"cost":"0.000768","marketCost":"0.000768","generationId":"gen_01KGF3A0GNP7F130T7D4SZFNFG","billableWebSearchCalls":0}}},"logprobs":null,"finish_reason":"stop"}],"usage":{"prompt_tokens":16,"completion_tokens":48,"total_tokens":64,"cost":0.000768,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0},"cache_creation_input_tokens":0,"market_cost":0.000768},"system_fingerprint":"fp_qvkh98zees","generationId":"gen_01KGF3A0GNP7F130T7D4SZFNFG"}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 2.145596209s

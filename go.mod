@@ -5,7 +5,6 @@ go 1.26.0
 require (
 	charm.land/x/vcr v0.1.1
 	cloud.google.com/go/auth v0.18.2
-	github.com/RealAlexandreAI/json-repair v0.0.14
 	github.com/ardanlabs/kronk v1.19.2
 	github.com/aws/aws-sdk-go-v2 v1.41.1
 	github.com/aws/aws-sdk-go-v2/config v1.32.7
@@ -13,14 +12,14 @@ require (
 	github.com/charmbracelet/anthropic-sdk-go v0.0.0-20251024181547-21d6f3d9a904
 	github.com/charmbracelet/x/exp/slice v0.0.0-20250904123553-b4e2667e5ad5
 	github.com/charmbracelet/x/json v0.2.0
-	github.com/go-viper/mapstructure/v2 v2.4.0
+	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
-	github.com/kaptinlin/jsonschema v0.6.5
+	github.com/kaptinlin/jsonschema v0.7.1
 	github.com/openai/openai-go/v2 v2.7.1
 	github.com/stretchr/testify v1.11.1
 	golang.org/x/oauth2 v0.35.0
-	google.golang.org/genai v1.40.0
+	google.golang.org/genai v1.46.0
 )
 
 require (
@@ -67,7 +66,7 @@ require (
 	github.com/go-json-experiment/json v0.0.0-20251027170946-4849db3c2f7e // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
-	github.com/goccy/go-yaml v1.19.0 // indirect
+	github.com/goccy/go-yaml v1.19.2 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.12 // indirect
@@ -81,9 +80,9 @@ require (
 	github.com/hybridgroup/yzma v1.9.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/jupiterrider/ffi v0.6.0 // indirect
-	github.com/kaptinlin/go-i18n v0.2.2 // indirect
-	github.com/kaptinlin/jsonpointer v0.4.8 // indirect
-	github.com/kaptinlin/messageformat-go v0.4.7 // indirect
+	github.com/kaptinlin/go-i18n v0.2.8 // indirect
+	github.com/kaptinlin/jsonpointer v0.4.15 // indirect
+	github.com/kaptinlin/messageformat-go v0.4.16 // indirect
 	github.com/klauspost/compress v1.18.4 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect

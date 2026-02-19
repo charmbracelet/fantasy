@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 479
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence, Italy?","role":"user"}],"model":"anthropic/claude-sonnet-4","tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"reasoning":{"enabled":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://ai-gateway.vercel.sh/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"id":"gen_01KGF3CESJKXWS3VT4KZ7Z4H0S","object":"chat.completion","created":1770033398,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"message":{"role":"assistant","content":null,"reasoning":"The user is asking for weather information for Florence, Italy. I have a weather function available that takes a location parameter. The location is clearly specified as \"Florence, Italy\" so I have all the required parameters to make the function call.","reasoning_details":[{"type":"reasoning.text","text":"The user is asking for weather information for Florence, Italy. I have a weather function available that takes a location parameter. The location is clearly specified as \"Florence, Italy\" so I have all the required parameters to make the function call.","signature":"EqUDCkYICxgCKkB94vhGG6xKjNnGimHMfRxMKRoDnfxu8X0ubqexC/CZ0gU1q1TlbdRN/J4R0tWVpSFl6fFlfjxBILkP/+4vk0rsEgxEmjcKGGfHXogpkvoaDIJiOn8VbzE+KqPLBCIwyk+17OatdTJTKgOrfaX2tZL5Qmx9Mm1mCs2Djj2mmm5pnDwGymarqbOQn4al+112KowCfd3UWJ1pnfvuMtHp4LCLBjiLWnPPq+gZnlgsNecPBSBXKDt73jMGOd0NQBN7lOOZBy2AR9oQzKpCbyH5CY475OUYjbr8Rz+Xi3JIBit+AL96bsHSares7CpY1y2KVT0d8EPZZMmRr2SEK0AYtccALMpN3n/+QTu0eOlC1Jsv1ygyiRhoPszCqW98h/OdlMzWQyLu60Hir9D91svBFCQ1umLHR3wiJQ/fN025OVtiffGmkjcYWuvEChRS+fN21kSeDOcjbU2nqhRBWJc61RFRjJ8scShRpYoTQn5tNOeSsRIgAfzfmYRK1tp3NzhGDbQM/t6ytgrsToE9ehXnyKIKCVknQl5mkfT3Jw5S+xgB","format":"anthropic-claude-v1","index":0}],"tool_calls":[{"id":"toolu_01QueSgW64L24gT3TZdWbizV","type":"function","function":{"name":"weather","arguments":"{\"location\":\"Florence, Italy\"}"}}],"provider_metadata":{"anthropic":{"usage":{"input_tokens":424,"output_tokens":109,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"service_tier":"standard"},"cacheCreationInputTokens":0,"stopSequence":null,"container":null},"gateway":{"routing":{"originalModelId":"anthropic/claude-sonnet-4","resolvedProvider":"anthropic","resolvedProviderApiModelId":"claude-sonnet-4-20250514","internalResolvedModelId":"anthropic:claude-sonnet-4-20250514","fallbacksAvailable":["vertexAnthropic","bedrock"],"internalReasoning":"Selected anthropic as preferred provider for claude-sonnet-4. 2 fallback(s) available: vertexAnthropic, bedrock","planningReasoning":"System credentials planned for: anthropic, vertexAnthropic, bedrock. Total execution order: anthropic(system) → vertexAnthropic(system) → bedrock(system)","canonicalSlug":"anthropic/claude-sonnet-4","finalProvider":"anthropic","attempts":[{"provider":"anthropic","internalModelId":"anthropic:claude-sonnet-4-20250514","providerApiModelId":"claude-sonnet-4-20250514","credentialType":"system","success":true,"startTime":7765415.569026,"endTime":7767783.415776,"statusCode":200,"providerResponseId":"msg_015136shD3sTPiMES5sYeqsD"}],"modelAttemptCount":1,"modelAttempts":[{"modelId":"anthropic/claude-sonnet-4","canonicalSlug":"anthropic/claude-sonnet-4","success":false,"providerAttemptCount":0,"providerAttempts":[]}],"totalProviderAttemptCount":0},"cost":"0.002907","marketCost":"0.002907","generationId":"gen_01KGF3CESJKXWS3VT4KZ7Z4H0S","billableWebSearchCalls":0}}},"logprobs":null,"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":424,"completion_tokens":109,"total_tokens":533,"cost":0.002907,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0},"cache_creation_input_tokens":0,"market_cost":0.002907},"system_fingerprint":"fp_zqq5kppgz1","generationId":"gen_01KGF3CESJKXWS3VT4KZ7Z4H0S"}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 2.513099333s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1938
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence, Italy?","role":"user"},{"tool_calls":[{"id":"toolu_01QueSgW64L24gT3TZdWbizV","function":{"arguments":"{\"location\":\"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant","reasoning_details":[{"format":"anthropic-claude-v1","index":0,"signature":"EqUDCkYICxgCKkB94vhGG6xKjNnGimHMfRxMKRoDnfxu8X0ubqexC/CZ0gU1q1TlbdRN/J4R0tWVpSFl6fFlfjxBILkP/+4vk0rsEgxEmjcKGGfHXogpkvoaDIJiOn8VbzE+KqPLBCIwyk+17OatdTJTKgOrfaX2tZL5Qmx9Mm1mCs2Djj2mmm5pnDwGymarqbOQn4al+112KowCfd3UWJ1pnfvuMtHp4LCLBjiLWnPPq+gZnlgsNecPBSBXKDt73jMGOd0NQBN7lOOZBy2AR9oQzKpCbyH5CY475OUYjbr8Rz+Xi3JIBit+AL96bsHSares7CpY1y2KVT0d8EPZZMmRr2SEK0AYtccALMpN3n/+QTu0eOlC1Jsv1ygyiRhoPszCqW98h/OdlMzWQyLu60Hir9D91svBFCQ1umLHR3wiJQ/fN025OVtiffGmkjcYWuvEChRS+fN21kSeDOcjbU2nqhRBWJc61RFRjJ8scShRpYoTQn5tNOeSsRIgAfzfmYRK1tp3NzhGDbQM/t6ytgrsToE9ehXnyKIKCVknQl5mkfT3Jw5S+xgB","text":"The user is asking for weather information for Florence, Italy. I have a weather function available that takes a location parameter. The location is clearly specified as \"Florence, Italy\" so I have all the required parameters to make the function call.","type":"reasoning.text"}],"reasoning":"The user is asking for weather information for Florence, Italy. I have a weather function available that takes a location parameter. The location is clearly specified as \"Florence, Italy\" so I have all the required parameters to make the function call."},{"content":"40 C","tool_call_id":"toolu_01QueSgW64L24gT3TZdWbizV","role":"tool"}],"model":"anthropic/claude-sonnet-4","tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"reasoning":{"enabled":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://ai-gateway.vercel.sh/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"id":"gen_01KGF3CH7MBCX5TG98WJF2BTYT","object":"chat.completion","created":1770033402,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"message":{"role":"assistant","content":"The current weather in Florence, Italy is 40°C (104°F). That''s quite hot! It''s a very warm day in Florence.","provider_metadata":{"anthropic":{"usage":{"input_tokens":548,"output_tokens":34,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"service_tier":"standard"},"cacheCreationInputTokens":0,"stopSequence":null,"container":null},"gateway":{"routing":{"originalModelId":"anthropic/claude-sonnet-4","resolvedProvider":"anthropic","resolvedProviderApiModelId":"claude-sonnet-4-20250514","internalResolvedModelId":"anthropic:claude-sonnet-4-20250514","fallbacksAvailable":["vertexAnthropic","bedrock"],"internalReasoning":"Selected anthropic as preferred provider for claude-sonnet-4. 2 fallback(s) available: vertexAnthropic, bedrock","planningReasoning":"System credentials planned for: anthropic, vertexAnthropic, bedrock. Total execution order: anthropic(system) → vertexAnthropic(system) → bedrock(system)","canonicalSlug":"anthropic/claude-sonnet-4","finalProvider":"anthropic","attempts":[{"provider":"anthropic","internalModelId":"anthropic:claude-sonnet-4-20250514","providerApiModelId":"claude-sonnet-4-20250514","credentialType":"system","success":true,"startTime":1505902.416236,"endTime":1508977.489215,"statusCode":200,"providerResponseId":"msg_01RG65Q4UDkyK2BAznqpD7GE"}],"modelAttemptCount":1,"modelAttempts":[{"modelId":"anthropic/claude-sonnet-4","canonicalSlug":"anthropic/claude-sonnet-4","success":false,"providerAttemptCount":0,"providerAttempts":[]}],"totalProviderAttemptCount":0},"cost":"0.002154","marketCost":"0.002154","generationId":"gen_01KGF3CH7MBCX5TG98WJF2BTYT","billableWebSearchCalls":0}}},"logprobs":null,"finish_reason":"stop"}],"usage":{"prompt_tokens":548,"completion_tokens":34,"total_tokens":582,"cost":0.002154,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0},"cache_creation_input_tokens":0,"market_cost":0.002154},"system_fingerprint":"fp_9mdcax34m","generationId":"gen_01KGF3CH7MBCX5TG98WJF2BTYT"}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 3.165230708s

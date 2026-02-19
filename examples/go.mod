@@ -23,7 +23,6 @@ require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.31.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.55.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.55.0 // indirect
-	github.com/RealAlexandreAI/json-repair v0.0.14 // indirect
 	github.com/ardanlabs/kronk v1.19.2 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.41.1 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.4 // indirect
@@ -68,8 +67,8 @@ require (
 	github.com/go-logfmt/logfmt v0.6.0 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
-	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
-	github.com/goccy/go-yaml v1.19.0 // indirect
+	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
+	github.com/goccy/go-yaml v1.19.2 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
 	github.com/google/uuid v1.6.0 // indirect
@@ -84,10 +83,10 @@ require (
 	github.com/hybridgroup/yzma v1.9.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/jupiterrider/ffi v0.6.0 // indirect
-	github.com/kaptinlin/go-i18n v0.2.2 // indirect
-	github.com/kaptinlin/jsonpointer v0.4.8 // indirect
-	github.com/kaptinlin/jsonschema v0.6.5 // indirect
-	github.com/kaptinlin/messageformat-go v0.4.7 // indirect
+	github.com/kaptinlin/go-i18n v0.2.8 // indirect
+	github.com/kaptinlin/jsonpointer v0.4.15 // indirect
+	github.com/kaptinlin/jsonschema v0.7.1 // indirect
+	github.com/kaptinlin/messageformat-go v0.4.16 // indirect
 	github.com/klauspost/compress v1.18.4 // indirect
 	github.com/lucasb-eyer/go-colorful v1.3.0 // indirect
 	github.com/mattn/go-runewidth v0.0.17 // indirect
@@ -135,7 +134,7 @@ require (
 	golang.org/x/text v0.34.0 // indirect
 	golang.org/x/time v0.14.0 // indirect
 	google.golang.org/api v0.266.0 // indirect
-	google.golang.org/genai v1.40.0 // indirect
+	google.golang.org/genai v1.46.0 // indirect
 	google.golang.org/genproto v0.0.0-20260209200024-4cfbd4190f57 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260209200024-4cfbd4190f57 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260209200024-4cfbd4190f57 // indirect

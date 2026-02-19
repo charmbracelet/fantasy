@@ -1,4 +1,4 @@
-// Package openaicompat provides an implementation of the fantasy AI SDK for OpenAI-compatible APIs.
+// Package openaicompat provides an implementation of the fantasy AI SDK for OpenAI-compatible language and embedding APIs.
 package openaicompat
 
 import (

@@ -3279,11 +3279,10 @@ func TestOpenAIEmbeddings(t *testing.T) {
 	require.Equal(t, "text-embedding-3-small", model.Model())
 	require.Equal(t, Name, model.Provider())
 
-	input := "hello"
 	dims := int64(2)
 	user := "alice"
 	response, err := model.Embed(t.Context(), fantasy.EmbeddingCall{
-		Input:      &input,
+		Inputs:     []string{"hello"},
 		Dimensions: &dims,
 		ProviderOptions: NewProviderOptions(&ProviderOptions{
 			User: fantasy.Opt(user),
@@ -3299,7 +3298,7 @@ func TestOpenAIEmbeddings(t *testing.T) {
 	call := server.calls[0]
 	require.Equal(t, "/embeddings", call.path)
 	require.Equal(t, "text-embedding-3-small", call.body["model"])
-	require.Equal(t, "hello", call.body["input"])
+	require.Equal(t, []any{"hello"}, call.body["input"])
 	require.Equal(t, float64(2), call.body["dimensions"])
 	require.Equal(t, "alice", call.body["user"])
 }

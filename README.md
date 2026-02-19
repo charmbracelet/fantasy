@@ -87,7 +87,7 @@ if err != nil {
 }
 
 input := "hello embeddings"
-embeds, err := embedModel.Embed(ctx, fantasy.EmbeddingCall{Input: &input})
+embeds, err := embedModel.Embed(ctx, fantasy.EmbeddingCall{Inputs: []string{input}})
 if err != nil {
 	fmt.Fprintln(os.Stderr, "Oof:", err)
 	os.Exit(1)

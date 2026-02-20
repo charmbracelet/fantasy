@@ -68,7 +68,7 @@ Yeah! Fantasy is designed to support a wide variety of providers and models unde
 
 ## Work in Progress
 
-We built Fantasy to power [Crush](https://github.com/charmbracelet/crush), a hot coding agent for glamourously invincible development. Given that, Fantasy does not yet support things like:
+We built Fantasy to power [Crush](https://github.com/charmbracelet/crush), a hot coding agent for glamorously invincible development. Given that, Fantasy does not yet support things like:
 
 - Image models
 - Audio models

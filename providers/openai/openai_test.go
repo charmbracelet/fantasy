@@ -3247,3 +3247,58 @@ func TestResponsesToPrompt_DropsEmptyMessages(t *testing.T) {
 		require.Empty(t, warnings)
 	})
 }
+
+func TestParseContextTooLargeError(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		message  string
+		wantErr  bool
+		wantUsed int
+		wantMax  int
+	}{
+		{
+			name:     "matches openai format with resulted in",
+			message:  "This model's maximum context length is 128000 tokens. However, your messages resulted in 150000 tokens.",
+			wantErr:  true,
+			wantUsed: 150000,
+			wantMax:  128000,
+		},
+		{
+			name:     "matches openai format with requested",
+			message:  "maximum context length is 8192 tokens, however you requested 10000 tokens",
+			wantErr:  true,
+			wantUsed: 10000,
+			wantMax:  8192,
+		},
+		{
+			name:    "does not match unrelated error",
+			message: "invalid api key",
+			wantErr: false,
+		},
+		{
+			name:    "does not match rate limit error",
+			message: "rate limit exceeded",
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			providerErr := &fantasy.ProviderError{Message: tt.message}
+			parseContextTooLargeError(tt.message, providerErr)
+
+			if tt.wantErr {
+				require.True(t, providerErr.IsContextTooLarge())
+				if tt.wantUsed > 0 {
+					require.Equal(t, tt.wantUsed, providerErr.ContextUsedTokens)
+					require.Equal(t, tt.wantMax, providerErr.ContextMaxTokens)
+				}
+			} else {
+				require.False(t, providerErr.IsContextTooLarge())
+			}
+		})
+	}
+}

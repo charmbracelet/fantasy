@@ -514,6 +514,26 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 				}
 			}
 
+			for idx, tc := range toolCalls {
+				if tc.hasFinished {
+					continue
+				}
+				if tc.arguments == "" {
+					tc.arguments = "{}"
+					toolCalls[idx] = tc
+				}
+				if xjson.IsValid(tc.arguments) {
+					if !yield(fantasy.StreamPart{Type: fantasy.StreamPartTypeToolInputEnd, ID: tc.id}) {
+						return
+					}
+					if !yield(fantasy.StreamPart{Type: fantasy.StreamPartTypeToolCall, ID: tc.id, ToolCallName: tc.name, ToolCallInput: tc.arguments}) {
+						return
+					}
+					tc.hasFinished = true
+					toolCalls[idx] = tc
+				}
+			}
+
 			if len(acc.Choices) > 0 {
 				choice := acc.Choices[0]
 				providerMetadata = o.streamProviderMetadataFunc(choice, providerMetadata)

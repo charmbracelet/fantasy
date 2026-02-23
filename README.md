@@ -62,6 +62,40 @@ fmt.Println(result.Response.Content.Text())
 
 🍔 For the full implementation and more [see the examples directory](https://github.com/charmbracelet/fantasy/tree/main/examples).
 
+## Embeddings
+
+Fantasy supports embeddings for OpenAI and OpenAI-compatible providers (e.g. OpenRouter, Azure, Together).
+Providers that support embeddings implement `fantasy.EmbeddingProvider`.
+
+```go
+provider, err := openai.New(openai.WithAPIKey(myHotKey))
+if err != nil {
+	fmt.Fprintln(os.Stderr, "Whoops:", err)
+	os.Exit(1)
+}
+
+embedProvider, ok := provider.(fantasy.EmbeddingProvider)
+if !ok {
+	fmt.Fprintln(os.Stderr, "Embeddings not supported by this provider")
+	os.Exit(1)
+}
+
+embedModel, err := embedProvider.EmbeddingModel(ctx, "text-embedding-3-small")
+if err != nil {
+	fmt.Fprintln(os.Stderr, "Dang:", err)
+	os.Exit(1)
+}
+
+input := "hello embeddings"
+embeds, err := embedModel.Embed(ctx, fantasy.EmbeddingCall{Inputs: []string{input}})
+if err != nil {
+	fmt.Fprintln(os.Stderr, "Oof:", err)
+	os.Exit(1)
+}
+
+fmt.Println(len(embeds.Embeddings[0].Vector))
+```
+
 ## Multi-model? Multi-provider?
 
 Yeah! Fantasy is designed to support a wide variety of providers and models under a single API. While many providers such as Microsoft Azure, Amazon Bedrock, and OpenRouter have dedicated packages in Fantasy, many others work just fine with `openaicompat`, the generic OpenAI-compatible layer. That said, if you find a provider that’s not compatible and needs special treatment, please let us know in an issue (or open a PR).

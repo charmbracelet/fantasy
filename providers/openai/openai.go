@@ -1,4 +1,4 @@
-// Package openai provides an implementation of the fantasy AI SDK for OpenAI's language models.
+// Package openai provides an implementation of the fantasy AI SDK for OpenAI's language and embedding models.
 package openai
 
 import (
@@ -184,6 +184,37 @@ func (o *provider) LanguageModel(_ context.Context, modelID string) (fantasy.Lan
 		client,
 		o.options.languageModelOptions...,
 	), nil
+}
+
+// EmbeddingModel implements fantasy.EmbeddingProvider.
+func (o *provider) EmbeddingModel(_ context.Context, modelID string) (fantasy.EmbeddingModel, error) {
+	openaiClientOptions := make([]option.RequestOption, 0, 5+len(o.options.headers)+len(o.options.sdkOptions))
+	openaiClientOptions = append(openaiClientOptions, option.WithMaxRetries(0))
+
+	if o.options.apiKey != "" {
+		openaiClientOptions = append(openaiClientOptions, option.WithAPIKey(o.options.apiKey))
+	}
+	if o.options.baseURL != "" {
+		openaiClientOptions = append(openaiClientOptions, option.WithBaseURL(o.options.baseURL))
+	}
+
+	for key, value := range o.options.headers {
+		openaiClientOptions = append(openaiClientOptions, option.WithHeader(key, value))
+	}
+
+	if o.options.client != nil {
+		openaiClientOptions = append(openaiClientOptions, option.WithHTTPClient(o.options.client))
+	}
+
+	openaiClientOptions = append(openaiClientOptions, o.options.sdkOptions...)
+
+	client := openai.NewClient(openaiClientOptions...)
+
+	return embeddingModel{
+		modelID:  modelID,
+		provider: o.options.name,
+		client:   client,
+	}, nil
 }
 
 func (o *provider) Name() string {

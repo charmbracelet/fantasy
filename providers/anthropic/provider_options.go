@@ -7,6 +7,22 @@ import (
 	"charm.land/fantasy"
 )
 
+// Effort represents the output effort level for Anthropic models.
+//
+// This maps to Messages API `output_config.effort`.
+type Effort string
+
+const (
+	// EffortLow represents low output effort.
+	EffortLow Effort = "low"
+	// EffortMedium represents medium output effort.
+	EffortMedium Effort = "medium"
+	// EffortHigh represents high output effort.
+	EffortHigh Effort = "high"
+	// EffortMax represents maximum output effort.
+	EffortMax Effort = "max"
+)
+
 // Global type identifiers for Anthropic-specific provider data.
 const (
 	TypeProviderOptions         = Name + ".options"
@@ -43,6 +59,7 @@ func init() {
 type ProviderOptions struct {
 	SendReasoning          *bool                   `json:"send_reasoning"`
 	Thinking               *ThinkingProviderOption `json:"thinking"`
+	Effort                 *Effort                 `json:"effort"`
 	DisableParallelToolUse *bool                   `json:"disable_parallel_tool_use"`
 }
 

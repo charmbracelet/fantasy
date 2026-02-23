@@ -225,6 +225,11 @@ func (a languageModel) prepareParams(call fantasy.Call) (*anthropic.MessageNewPa
 			return nil, nil, &fantasy.Error{Title: "invalid argument", Message: "anthropic provider options should be *anthropic.ProviderOptions"}
 		}
 	}
+	if providerOptions.Effort != nil {
+		params.OutputConfig = anthropic.OutputConfigParam{
+			Effort: anthropic.OutputConfigEffort(*providerOptions.Effort),
+		}
+	}
 	sendReasoning := true
 	if providerOptions.SendReasoning != nil {
 		sendReasoning = *providerOptions.SendReasoning

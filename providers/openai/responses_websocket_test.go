@@ -206,7 +206,7 @@ func TestWSTransport_PreviousResponseIDChaining(t *testing.T) {
 	}
 
 	body := json.RawMessage(`{"model":"gpt-4o","input":[]}`)
-	result := ws.applyWSOptions(body, call)
+	result, _ := ws.applyWSOptions(body, call)
 
 	var resultMap map[string]json.RawMessage
 	if err := json.Unmarshal(result, &resultMap); err != nil {
@@ -238,7 +238,7 @@ func TestWSTransport_GenerateWarmup(t *testing.T) {
 	}
 
 	body := json.RawMessage(`{"model":"gpt-4o","input":[]}`)
-	result := ws.applyWSOptions(body, call)
+	result, _ := ws.applyWSOptions(body, call)
 
 	var resultMap map[string]json.RawMessage
 	if err := json.Unmarshal(result, &resultMap); err != nil {
@@ -262,7 +262,7 @@ func TestWSTransport_ExplicitPreviousResponseIDOverridesAuto(t *testing.T) {
 	// Set explicit previous_response_id in the body
 	body := json.RawMessage(`{"model":"gpt-4o","input":[],"previous_response_id":"resp_explicit_456"}`)
 	call := fantasy.Call{}
-	result := ws.applyWSOptions(body, call)
+	result, _ := ws.applyWSOptions(body, call)
 
 	var resultMap map[string]json.RawMessage
 	if err := json.Unmarshal(result, &resultMap); err != nil {
@@ -300,6 +300,87 @@ func TestWSTransport_FallbackToHTTP(t *testing.T) {
 	}
 	if rlm.wsTransport == nil {
 		t.Fatal("expected wsTransport to be set")
+	}
+}
+
+func TestWSTransport_IncrementalInput(t *testing.T) {
+	ws := newWSTransport("wss://api.openai.com/v1", "test-key", nil)
+	ws.lastResponseID = "resp_001"
+	ws.lastInputLen = 3
+
+	// Simulate full input: 3 old items + 2 new (1 function_call + 1 function_call_output).
+	// The function_call should be filtered out since the server generated it.
+	fullInput := json.RawMessage(`[
+		{"type":"message","role":"system","content":"sys"},
+		{"type":"message","role":"user","content":"hello"},
+		{"type":"message","role":"assistant","content":"hi"},
+		{"type":"function_call","call_id":"call_1","name":"search","arguments":"{}"},
+		{"type":"function_call_output","call_id":"call_1","output":"result"}
+	]`)
+
+	got, fullLen := ws.extractIncrementalInput(fullInput)
+	if fullLen != 5 {
+		t.Fatalf("expected fullLen=5, got %d", fullLen)
+	}
+
+	var items []map[string]interface{}
+	if err := json.Unmarshal(got, &items); err != nil {
+		t.Fatalf("unmarshal result: %v", err)
+	}
+
+	if len(items) != 1 {
+		t.Fatalf("expected 1 incremental item, got %d: %s", len(items), string(got))
+	}
+	if items[0]["type"] != "function_call_output" {
+		t.Errorf("expected function_call_output, got %v", items[0]["type"])
+	}
+}
+
+func TestWSTransport_IncrementalInput_FirstCall(t *testing.T) {
+	ws := newWSTransport("wss://api.openai.com/v1", "test-key", nil)
+	// No lastResponseID — should return full input.
+
+	fullInput := json.RawMessage(`[{"type":"message","role":"user","content":"hi"}]`)
+	got, fullLen := ws.extractIncrementalInput(fullInput)
+	if fullLen != 1 {
+		t.Fatalf("expected fullLen=1, got %d", fullLen)
+	}
+	if string(got) != string(fullInput) {
+		t.Errorf("expected full input returned on first call")
+	}
+}
+
+func TestWSTransport_IncrementalInput_AppliedViaApplyWSOptions(t *testing.T) {
+	ws := newWSTransport("wss://api.openai.com/v1", "test-key", nil)
+	ws.lastResponseID = "resp_001"
+	ws.lastInputLen = 2
+
+	body := json.RawMessage(`{"model":"gpt-4o","input":[
+		{"type":"message","role":"user","content":"hello"},
+		{"type":"message","role":"assistant","content":"hi"},
+		{"type":"function_call_output","call_id":"call_1","output":"42"}
+	]}`)
+
+	result, fullLen := ws.applyWSOptions(body, fantasy.Call{})
+	if fullLen != 3 {
+		t.Fatalf("expected fullLen=3, got %d", fullLen)
+	}
+
+	var resultMap map[string]json.RawMessage
+	if err := json.Unmarshal(result, &resultMap); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+
+	var items []map[string]interface{}
+	if err := json.Unmarshal(resultMap["input"], &items); err != nil {
+		t.Fatalf("unmarshal input: %v", err)
+	}
+
+	if len(items) != 1 {
+		t.Fatalf("expected 1 incremental input item, got %d", len(items))
+	}
+	if items[0]["type"] != "function_call_output" {
+		t.Errorf("expected function_call_output, got %v", items[0]["type"])
 	}
 }
 

@@ -22,7 +22,8 @@ func (o responsesLanguageModel) generateViaWebSocket(ctx context.Context, params
 		return nil, fmt.Errorf("marshal params: %w", err)
 	}
 
-	body = o.wsTransport.applyWSOptions(body, call)
+	var fullInputLen int
+	body, fullInputLen = o.wsTransport.applyWSOptions(body, call)
 
 	events, err := o.wsTransport.sendResponseCreate(ctx, body)
 	if err != nil {
@@ -44,6 +45,7 @@ func (o responsesLanguageModel) generateViaWebSocket(ctx context.Context, params
 		case "response.completed", "response.incomplete":
 			completed := streamEvent.AsResponseCompleted()
 			o.wsTransport.lastResponseID = completed.Response.ID
+			o.wsTransport.lastInputLen = fullInputLen
 
 			// Build content from the completed response output
 			content = nil // Reset — use the final response
@@ -134,6 +136,7 @@ func (o responsesLanguageModel) generateViaWebSocket(ctx context.Context, params
 			errorEvent := streamEvent.AsError()
 			if errorEvent.Code == "previous_response_not_found" {
 				o.wsTransport.lastResponseID = ""
+				o.wsTransport.lastInputLen = 0
 				return nil, fmt.Errorf("previous_response_not_found")
 			}
 			responseErr = fmt.Errorf("%s (code: %s)", errorEvent.Message, errorEvent.Code)
@@ -169,7 +172,8 @@ func (o responsesLanguageModel) streamViaWebSocket(ctx context.Context, params *
 		return nil, fmt.Errorf("marshal params: %w", err)
 	}
 
-	body = o.wsTransport.applyWSOptions(body, call)
+	var fullInputLen int
+	body, fullInputLen = o.wsTransport.applyWSOptions(body, call)
 
 	events, err := o.wsTransport.sendResponseCreate(ctx, body)
 	if err != nil {
@@ -355,6 +359,7 @@ func (o responsesLanguageModel) streamViaWebSocket(ctx context.Context, params *
 			case "response.completed", "response.incomplete":
 				completed := event.AsResponseCompleted()
 				o.wsTransport.lastResponseID = completed.Response.ID
+				o.wsTransport.lastInputLen = fullInputLen
 				finishReason = mapResponsesFinishReason(completed.Response.IncompleteDetails.Reason, hasFunctionCall)
 				usage = fantasy.Usage{
 					InputTokens:  completed.Response.Usage.InputTokens,
@@ -372,6 +377,7 @@ func (o responsesLanguageModel) streamViaWebSocket(ctx context.Context, params *
 				errorEvent := event.AsError()
 				if errorEvent.Code == "previous_response_not_found" {
 					o.wsTransport.lastResponseID = ""
+					o.wsTransport.lastInputLen = 0
 				}
 				if !yield(fantasy.StreamPart{
 					Type:  fantasy.StreamPartTypeError,

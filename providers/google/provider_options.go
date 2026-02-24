@@ -36,6 +36,7 @@ func init() {
 // Mutually exclusive with ThinkingBudget.
 type ThinkingLevel = string
 
+// Predefined thinking levels for the Google provider.
 const (
 	ThinkingLevelLow     ThinkingLevel = "LOW"
 	ThinkingLevelMedium  ThinkingLevel = "MEDIUM"

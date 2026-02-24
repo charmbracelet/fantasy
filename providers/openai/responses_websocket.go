@@ -25,7 +25,6 @@ type wsTransport struct {
 	apiKey         string
 	headers        map[string]string
 	lastResponseID string
-	lastInputLen   int // number of input items sent in the last successful request
 }
 
 // newWSTransport creates a new WebSocket transport for the OpenAI Responses API.
@@ -60,10 +59,7 @@ func (ws *wsTransport) connect(ctx context.Context) error {
 		HandshakeTimeout: 30 * time.Second,
 	}
 
-	conn, resp, err := dialer.DialContext(ctx, ws.wsURL(), header)
-	if resp != nil && resp.Body != nil {
-		_ = resp.Body.Close()
-	}
+	conn, _, err := dialer.DialContext(ctx, ws.wsURL(), header)
 	if err != nil {
 		return fmt.Errorf("websocket connect: %w", err)
 	}
@@ -80,7 +76,7 @@ func (ws *wsTransport) ensureConnected(ctx context.Context) error {
 	}
 
 	if ws.conn != nil {
-		_ = ws.conn.Close()
+		ws.conn.Close()
 		ws.conn = nil
 	}
 
@@ -150,28 +146,17 @@ func (ws *wsTransport) sendResponseCreate(ctx context.Context, body json.RawMess
 
 	events := make(chan wsServerEvent, 64)
 
-	conn := ws.conn
 	go func() {
 		defer close(events)
-
-		// Set a read deadline when the context is cancelled to unblock ReadMessage.
-		done := make(chan struct{})
-		defer close(done)
-		go func() {
+		for {
 			select {
 			case <-ctx.Done():
-				_ = conn.SetReadDeadline(time.Now())
-			case <-done:
+				return
+			default:
 			}
-		}()
 
-		for {
-			_, message, err := conn.ReadMessage()
+			_, message, err := ws.conn.ReadMessage()
 			if err != nil {
-				// Don't emit an error event if the context was cancelled.
-				if ctx.Err() != nil {
-					return
-				}
 				events <- wsServerEvent{
 					Type: "error",
 					Raw:  mustMarshal(map[string]string{"type": "error", "code": "websocket_read_error", "message": err.Error()}),
@@ -205,110 +190,34 @@ func mustMarshal(v any) json.RawMessage {
 	return data
 }
 
-// extractIncrementalInput returns only the new input items that the server hasn't
-// seen yet. When chaining with previous_response_id, the server already has the
-// prior context, so we only send function_call_output items and new user messages.
-// Items of type "function_call" are filtered out because the server generated those
-// as part of its own response output.
-func (ws *wsTransport) extractIncrementalInput(fullInput json.RawMessage) (json.RawMessage, int) {
-	var items []json.RawMessage
-	if err := json.Unmarshal(fullInput, &items); err != nil {
-		return fullInput, 0
-	}
-
-	fullLen := len(items)
-
-	if ws.lastResponseID == "" || ws.lastInputLen == 0 {
-		return fullInput, fullLen
-	}
-
-	if len(items) <= ws.lastInputLen {
-		return fullInput, fullLen
-	}
-
-	// Take only items appended since the last request.
-	newItems := items[ws.lastInputLen:]
-
-	// Filter out function_call items — the server already has these from its
-	// own response output; sending them again would be redundant.
-	var incremental []json.RawMessage
-	for _, item := range newItems {
-		var parsed map[string]json.RawMessage
-		if err := json.Unmarshal(item, &parsed); err != nil {
-			incremental = append(incremental, item)
-			continue
-		}
-		if typeField, ok := parsed["type"]; ok {
-			var itemType string
-			if err := json.Unmarshal(typeField, &itemType); err == nil && itemType == "function_call" {
-				continue
-			}
-		}
-		incremental = append(incremental, item)
-	}
-
-	result, err := json.Marshal(incremental)
-	if err != nil {
-		return fullInput, fullLen
-	}
-	return result, fullLen
-}
-
 // applyWSOptions modifies the marshaled params JSON to add WebSocket-specific fields
 // like previous_response_id (from transport state) and generate (for warmup).
-// It returns the modified body and the full input item count (before any trimming)
-// so callers can update lastInputLen after a successful response.
-func (ws *wsTransport) applyWSOptions(body json.RawMessage, call fantasy.Call) (json.RawMessage, int) {
+func (ws *wsTransport) applyWSOptions(body json.RawMessage, call fantasy.Call) json.RawMessage {
 	var bodyMap map[string]json.RawMessage
 	if err := json.Unmarshal(body, &bodyMap); err != nil {
-		return body, 0
+		return body
 	}
 
-	// Handle ResetChain from provider options - must be checked before auto-chaining.
+	// Auto-chain with previous_response_id from transport state if not explicitly set
+	if _, hasPrevID := bodyMap["previous_response_id"]; !hasPrevID && ws.lastResponseID != "" {
+		prevIDBytes, _ := json.Marshal(ws.lastResponseID)
+		bodyMap["previous_response_id"] = prevIDBytes
+	}
+
+	// Handle GenerateWarmup from provider options
 	var openaiOptions *ResponsesProviderOptions
 	if opts, ok := call.ProviderOptions[Name]; ok {
 		if typedOpts, ok := opts.(*ResponsesProviderOptions); ok {
 			openaiOptions = typedOpts
 		}
 	}
-	if openaiOptions != nil && openaiOptions.ResetChain != nil && *openaiOptions.ResetChain {
-		ws.lastResponseID = ""
-		ws.lastInputLen = 0
-	}
-
-	var fullInputLen int
-
-	// Auto-chain with previous_response_id from transport state if not explicitly set
-	usingPrevID := false
-	if _, hasPrevID := bodyMap["previous_response_id"]; !hasPrevID && ws.lastResponseID != "" {
-		prevIDBytes, _ := json.Marshal(ws.lastResponseID)
-		bodyMap["previous_response_id"] = prevIDBytes
-		usingPrevID = true
-	} else if _, hasPrevID := bodyMap["previous_response_id"]; hasPrevID {
-		usingPrevID = true
-	}
-
-	// When chaining, send only incremental input items.
-	if inputField, hasInput := bodyMap["input"]; hasInput {
-		if usingPrevID && ws.lastInputLen > 0 {
-			bodyMap["input"], fullInputLen = ws.extractIncrementalInput(inputField)
-		} else {
-			// Count full input items for tracking.
-			var items []json.RawMessage
-			if err := json.Unmarshal(inputField, &items); err == nil {
-				fullInputLen = len(items)
-			}
-		}
-	}
-
-	// Handle GenerateWarmup from provider options.
 	if openaiOptions != nil && openaiOptions.GenerateWarmup != nil && *openaiOptions.GenerateWarmup {
 		bodyMap["generate"] = json.RawMessage("false")
 	}
 
 	result, err := json.Marshal(bodyMap)
 	if err != nil {
-		return body, fullInputLen
+		return body
 	}
-	return result, fullInputLen
+	return result
 }

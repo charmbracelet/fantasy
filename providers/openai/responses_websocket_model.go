@@ -8,7 +8,7 @@ import (
 
 	"charm.land/fantasy"
 	"github.com/google/uuid"
-	"github.com/openai/openai-go/v2/responses"
+	"github.com/charmbracelet/openai-go/responses"
 )
 
 // generateViaWebSocket sends a response.create event over WebSocket and collects
@@ -22,8 +22,7 @@ func (o responsesLanguageModel) generateViaWebSocket(ctx context.Context, params
 		return nil, fmt.Errorf("marshal params: %w", err)
 	}
 
-	var fullInputLen int
-	body, fullInputLen = o.wsTransport.applyWSOptions(body, call)
+	body = o.wsTransport.applyWSOptions(body, call)
 
 	events, err := o.wsTransport.sendResponseCreate(ctx, body)
 	if err != nil {
@@ -45,7 +44,6 @@ func (o responsesLanguageModel) generateViaWebSocket(ctx context.Context, params
 		case "response.completed", "response.incomplete":
 			completed := streamEvent.AsResponseCompleted()
 			o.wsTransport.lastResponseID = completed.Response.ID
-			o.wsTransport.lastInputLen = fullInputLen
 
 			// Build content from the completed response output
 			content = nil // Reset — use the final response
@@ -92,7 +90,7 @@ func (o responsesLanguageModel) generateViaWebSocket(ctx context.Context, params
 						ProviderExecuted: false,
 						ToolCallID:       outputItem.CallID,
 						ToolName:         outputItem.Name,
-						Input:            outputItem.Arguments,
+						Input:            outputItem.Arguments.OfString,
 					})
 				case "reasoning":
 					metadata := &ResponsesReasoningMetadata{
@@ -132,16 +130,10 @@ func (o responsesLanguageModel) generateViaWebSocket(ctx context.Context, params
 				usage.CacheReadTokens = completed.Response.Usage.InputTokensDetails.CachedTokens
 			}
 
-		case "response.failed":
-			completed := streamEvent.AsResponseCompleted()
-			responseErr = fmt.Errorf("response failed: %s (code: %s)",
-				completed.Response.Error.Message, completed.Response.Error.Code)
-
 		case "error":
 			errorEvent := streamEvent.AsError()
 			if errorEvent.Code == "previous_response_not_found" {
 				o.wsTransport.lastResponseID = ""
-				o.wsTransport.lastInputLen = 0
 				return nil, fmt.Errorf("previous_response_not_found")
 			}
 			responseErr = fmt.Errorf("%s (code: %s)", errorEvent.Message, errorEvent.Code)
@@ -152,7 +144,10 @@ func (o responsesLanguageModel) generateViaWebSocket(ctx context.Context, params
 		return nil, responseErr
 	}
 
-	finishReason := mapResponsesFinishReason("", hasFunctionCall)
+	finishReason := fantasy.FinishReasonStop
+	if hasFunctionCall {
+		finishReason = fantasy.FinishReasonToolCalls
+	}
 
 	return &fantasy.Response{
 		Content:          content,
@@ -174,8 +169,7 @@ func (o responsesLanguageModel) streamViaWebSocket(ctx context.Context, params *
 		return nil, fmt.Errorf("marshal params: %w", err)
 	}
 
-	var fullInputLen int
-	body, fullInputLen = o.wsTransport.applyWSOptions(body, call)
+	body = o.wsTransport.applyWSOptions(body, call)
 
 	events, err := o.wsTransport.sendResponseCreate(ctx, body)
 	if err != nil {
@@ -271,7 +265,7 @@ func (o responsesLanguageModel) streamViaWebSocket(ctx context.Context, params *
 							Type:          fantasy.StreamPartTypeToolCall,
 							ID:            done.Item.CallID,
 							ToolCallName:  done.Item.Name,
-							ToolCallInput: done.Item.Arguments,
+							ToolCallInput: done.Item.Arguments.OfString,
 						}) {
 							return
 						}
@@ -361,7 +355,6 @@ func (o responsesLanguageModel) streamViaWebSocket(ctx context.Context, params *
 			case "response.completed", "response.incomplete":
 				completed := event.AsResponseCompleted()
 				o.wsTransport.lastResponseID = completed.Response.ID
-				o.wsTransport.lastInputLen = fullInputLen
 				finishReason = mapResponsesFinishReason(completed.Response.IncompleteDetails.Reason, hasFunctionCall)
 				usage = fantasy.Usage{
 					InputTokens:  completed.Response.Usage.InputTokens,
@@ -375,21 +368,10 @@ func (o responsesLanguageModel) streamViaWebSocket(ctx context.Context, params *
 					usage.CacheReadTokens = completed.Response.Usage.InputTokensDetails.CachedTokens
 				}
 
-			case "response.failed":
-				completed := event.AsResponseCompleted()
-				if !yield(fantasy.StreamPart{
-					Type:  fantasy.StreamPartTypeError,
-					Error: fmt.Errorf("response failed: %s (code: %s)", completed.Response.Error.Message, completed.Response.Error.Code),
-				}) {
-					return
-				}
-				return
-
 			case "error":
 				errorEvent := event.AsError()
 				if errorEvent.Code == "previous_response_not_found" {
 					o.wsTransport.lastResponseID = ""
-					o.wsTransport.lastInputLen = 0
 				}
 				if !yield(fantasy.StreamPart{
 					Type:  fantasy.StreamPartTypeError,

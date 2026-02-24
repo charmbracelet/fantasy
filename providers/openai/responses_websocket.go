@@ -60,7 +60,10 @@ func (ws *wsTransport) connect(ctx context.Context) error {
 		HandshakeTimeout: 30 * time.Second,
 	}
 
-	conn, _, err := dialer.DialContext(ctx, ws.wsURL(), header)
+	conn, resp, err := dialer.DialContext(ctx, ws.wsURL(), header)
+	if resp != nil && resp.Body != nil {
+		resp.Body.Close()
+	}
 	if err != nil {
 		return fmt.Errorf("websocket connect: %w", err)
 	}
@@ -77,7 +80,7 @@ func (ws *wsTransport) ensureConnected(ctx context.Context) error {
 	}
 
 	if ws.conn != nil {
-		ws.conn.Close()
+		_ = ws.conn.Close()
 		ws.conn = nil
 	}
 

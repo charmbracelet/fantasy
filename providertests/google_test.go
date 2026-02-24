@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"testing"
 
 	"charm.land/fantasy"
@@ -37,7 +38,7 @@ func TestGoogleCommon(t *testing.T) {
 }
 
 func TestGoogleThinking(t *testing.T) {
-	opts := fantasy.ProviderOptions{
+	gemini2Opts := fantasy.ProviderOptions{
 		google.Name: &google.ProviderOptions{
 			ThinkingConfig: &google.ThinkingConfig{
 				ThinkingBudget:  fantasy.Opt(int64(100)),
@@ -45,19 +46,7 @@ func TestGoogleThinking(t *testing.T) {
 			},
 		},
 	}
-
-	var pairs []builderPair
-	for _, m := range geminiTestModels {
-		if !m.reasoning {
-			continue
-		}
-		pairs = append(pairs, builderPair{m.name, geminiBuilder(m.model), opts, nil})
-	}
-	testThinking(t, pairs, testGoogleThinking)
-}
-
-func TestGoogleThinkingLevel(t *testing.T) {
-	opts := fantasy.ProviderOptions{
+	gemini3Opts := fantasy.ProviderOptions{
 		google.Name: &google.ProviderOptions{
 			ThinkingConfig: &google.ThinkingConfig{
 				ThinkingLevel:   fantasy.Opt(google.ThinkingLevelHigh),
@@ -70,6 +59,10 @@ func TestGoogleThinkingLevel(t *testing.T) {
 	for _, m := range geminiTestModels {
 		if !m.reasoning {
 			continue
+		}
+		opts := gemini3Opts
+		if strings.HasPrefix(m.model, "gemini-2") {
+			opts = gemini2Opts
 		}
 		pairs = append(pairs, builderPair{m.name, geminiBuilder(m.model), opts, nil})
 	}

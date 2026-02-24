@@ -147,17 +147,28 @@ func (ws *wsTransport) sendResponseCreate(ctx context.Context, body json.RawMess
 
 	events := make(chan wsServerEvent, 64)
 
+	conn := ws.conn
 	go func() {
 		defer close(events)
-		for {
+
+		// Set a read deadline when the context is cancelled to unblock ReadMessage.
+		done := make(chan struct{})
+		defer close(done)
+		go func() {
 			select {
 			case <-ctx.Done():
-				return
-			default:
+				conn.SetReadDeadline(time.Now())
+			case <-done:
 			}
+		}()
 
-			_, message, err := ws.conn.ReadMessage()
+		for {
+			_, message, err := conn.ReadMessage()
 			if err != nil {
+				// Don't emit an error event if the context was cancelled.
+				if ctx.Err() != nil {
+					return
+				}
 				events <- wsServerEvent{
 					Type: "error",
 					Raw:  mustMarshal(map[string]string{"type": "error", "code": "websocket_read_error", "message": err.Error()}),

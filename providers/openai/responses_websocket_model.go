@@ -132,6 +132,11 @@ func (o responsesLanguageModel) generateViaWebSocket(ctx context.Context, params
 				usage.CacheReadTokens = completed.Response.Usage.InputTokensDetails.CachedTokens
 			}
 
+		case "response.failed":
+			completed := streamEvent.AsResponseCompleted()
+			responseErr = fmt.Errorf("response failed: %s (code: %s)",
+				completed.Response.Error.Message, completed.Response.Error.Code)
+
 		case "error":
 			errorEvent := streamEvent.AsError()
 			if errorEvent.Code == "previous_response_not_found" {
@@ -147,10 +152,7 @@ func (o responsesLanguageModel) generateViaWebSocket(ctx context.Context, params
 		return nil, responseErr
 	}
 
-	finishReason := fantasy.FinishReasonStop
-	if hasFunctionCall {
-		finishReason = fantasy.FinishReasonToolCalls
-	}
+	finishReason := mapResponsesFinishReason("", hasFunctionCall)
 
 	return &fantasy.Response{
 		Content:          content,
@@ -372,6 +374,16 @@ func (o responsesLanguageModel) streamViaWebSocket(ctx context.Context, params *
 				if completed.Response.Usage.InputTokensDetails.CachedTokens != 0 {
 					usage.CacheReadTokens = completed.Response.Usage.InputTokensDetails.CachedTokens
 				}
+
+			case "response.failed":
+				completed := event.AsResponseCompleted()
+				if !yield(fantasy.StreamPart{
+					Type:  fantasy.StreamPartTypeError,
+					Error: fmt.Errorf("response failed: %s (code: %s)", completed.Response.Error.Message, completed.Response.Error.Code),
+				}) {
+					return
+				}
+				return
 
 			case "error":
 				errorEvent := event.AsError()

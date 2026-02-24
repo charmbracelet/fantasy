@@ -5,18 +5,23 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"charm.land/fantasy"
 	"github.com/openai/openai-go/v2"
 )
 
+var openaiContextPattern = regexp.MustCompile(`maximum context length is (\d+) tokens.*?(?:resulted in|requested) (\d+) tokens`)
+
 func toProviderErr(err error) error {
 	var apiErr *openai.Error
 	if errors.As(err, &apiErr) {
-		return &fantasy.ProviderError{
+		message := toProviderErrMessage(apiErr)
+		providerErr := &fantasy.ProviderError{
 			Title:           cmp.Or(fantasy.ErrorTitleForStatusCode(apiErr.StatusCode), "provider request failed"),
-			Message:         toProviderErrMessage(apiErr),
+			Message:         message,
 			Cause:           apiErr,
 			URL:             apiErr.Request.URL.String(),
 			StatusCode:      apiErr.StatusCode,
@@ -24,8 +29,22 @@ func toProviderErr(err error) error {
 			ResponseHeaders: toHeaderMap(apiErr.Response.Header),
 			ResponseBody:    apiErr.DumpResponse(true),
 		}
+
+		parseContextTooLargeError(message, providerErr)
+
+		return providerErr
 	}
 	return err
+}
+
+func parseContextTooLargeError(message string, providerErr *fantasy.ProviderError) {
+	matches := openaiContextPattern.FindStringSubmatch(message)
+	if matches == nil {
+		return
+	}
+	providerErr.ContextTooLargeErr = true
+	providerErr.ContextMaxTokens, _ = strconv.Atoi(matches[1])
+	providerErr.ContextUsedTokens, _ = strconv.Atoi(matches[2])
 }
 
 func toProviderErrMessage(apiErr *openai.Error) string {

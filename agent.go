@@ -990,17 +990,36 @@ func (a *agent) validateToolCall(toolCall ToolCallContent, availableTools []Agen
 }
 
 func (a *agent) createPrompt(system, prompt string, messages []Message, files ...FilePart) (Prompt, error) {
-	if prompt == "" {
+	if prompt == "" && len(messages) < 1 {
 		return nil, &Error{Title: "invalid argument", Message: "prompt can't be empty"}
 	}
 
 	var preparedPrompt Prompt
 
-	if system != "" {
-		preparedPrompt = append(preparedPrompt, NewSystemMessage(system))
+	var newsystem string
+	// Check first message for system role
+	if len(messages) > 0 && messages[0].Role == MessageRoleSystem {
+		if len(messages[0].Content) > 0 {
+			if tp, ok := messages[0].Content[0].(TextPart); ok {
+				newsystem = tp.Text
+			}
+		}
 	}
+	// Rewrite system role with main role of agent if it exist
+	if system != "" {
+		newsystem = system
+	}
+
+	if newsystem != "" {
+		preparedPrompt = append(preparedPrompt, NewSystemMessage(newsystem))
+	}
+
 	preparedPrompt = append(preparedPrompt, messages...)
-	preparedPrompt = append(preparedPrompt, NewUserMessage(prompt, files...))
+
+	if prompt != "" {
+		preparedPrompt = append(preparedPrompt, NewUserMessage(prompt, files...))
+	}
+
 	return preparedPrompt, nil
 }
 

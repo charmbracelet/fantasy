@@ -62,7 +62,7 @@ func (ws *wsTransport) connect(ctx context.Context) error {
 
 	conn, resp, err := dialer.DialContext(ctx, ws.wsURL(), header)
 	if resp != nil && resp.Body != nil {
-		resp.Body.Close()
+		_ = resp.Body.Close()
 	}
 	if err != nil {
 		return fmt.Errorf("websocket connect: %w", err)
@@ -160,7 +160,7 @@ func (ws *wsTransport) sendResponseCreate(ctx context.Context, body json.RawMess
 		go func() {
 			select {
 			case <-ctx.Done():
-				conn.SetReadDeadline(time.Now())
+				_ = conn.SetReadDeadline(time.Now())
 			case <-done:
 			}
 		}()

@@ -30,6 +30,7 @@ type options struct {
 	project              string
 	name                 string
 	useResponsesAPI      bool
+	useWebSocket         bool
 	headers              map[string]string
 	userAgent            string
 	client               option.HTTPClient
@@ -142,6 +143,15 @@ func WithUserAgent(ua string) Option {
 	}
 }
 
+// WithWebSocket enables WebSocket mode for the Responses API, providing lower-latency
+// persistent connections for tool-call-heavy workflows. Requires WithUseResponsesAPI().
+// Falls back to HTTP if the WebSocket connection cannot be established.
+func WithWebSocket() Option {
+	return func(o *options) {
+		o.useWebSocket = true
+	}
+}
+
 // WithObjectMode sets the object generation mode.
 func WithObjectMode(om fantasy.ObjectMode) Option {
 	return func(o *options) {
@@ -185,7 +195,11 @@ func (o *provider) LanguageModel(_ context.Context, modelID string) (fantasy.Lan
 		if objectMode == fantasy.ObjectModeJSON {
 			objectMode = fantasy.ObjectModeAuto
 		}
-		return newResponsesLanguageModel(modelID, o.options.name, client, objectMode), nil
+		var ws *wsTransport
+		if o.options.useWebSocket {
+			ws = newWSTransport(o.options.baseURL, o.options.apiKey, o.options.headers)
+		}
+		return newResponsesLanguageModel(modelID, o.options.name, client, objectMode, ws), nil
 	}
 
 	languageModelOptions := append([]LanguageModelOption{}, o.options.languageModelOptions...)

@@ -163,6 +163,7 @@ type ResponsesProviderOptions struct {
 	StrictJSONSchema *bool          `json:"strict_json_schema"`
 	TextVerbosity    *TextVerbosity `json:"text_verbosity"`
 	User             *string        `json:"user"`
+	GenerateWarmup   *bool          `json:"generate_warmup"`
 }
 
 // Options implements the ProviderOptions interface.

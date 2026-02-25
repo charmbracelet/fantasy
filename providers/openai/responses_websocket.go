@@ -264,6 +264,18 @@ func (ws *wsTransport) applyWSOptions(body json.RawMessage, call fantasy.Call) (
 		return body, 0
 	}
 
+	// Handle ResetChain from provider options - must be checked before auto-chaining.
+	var openaiOptions *ResponsesProviderOptions
+	if opts, ok := call.ProviderOptions[Name]; ok {
+		if typedOpts, ok := opts.(*ResponsesProviderOptions); ok {
+			openaiOptions = typedOpts
+		}
+	}
+	if openaiOptions != nil && openaiOptions.ResetChain != nil && *openaiOptions.ResetChain {
+		ws.lastResponseID = ""
+		ws.lastInputLen = 0
+	}
+
 	var fullInputLen int
 
 	// Auto-chain with previous_response_id from transport state if not explicitly set
@@ -289,13 +301,7 @@ func (ws *wsTransport) applyWSOptions(body json.RawMessage, call fantasy.Call) (
 		}
 	}
 
-	// Handle GenerateWarmup from provider options
-	var openaiOptions *ResponsesProviderOptions
-	if opts, ok := call.ProviderOptions[Name]; ok {
-		if typedOpts, ok := opts.(*ResponsesProviderOptions); ok {
-			openaiOptions = typedOpts
-		}
-	}
+	// Handle GenerateWarmup from provider options.
 	if openaiOptions != nil && openaiOptions.GenerateWarmup != nil && *openaiOptions.GenerateWarmup {
 		bodyMap["generate"] = json.RawMessage("false")
 	}

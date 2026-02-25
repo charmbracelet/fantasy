@@ -107,6 +107,7 @@ type ResponsesProviderOptions struct {
 	PromptCacheKey     *string          `json:"prompt_cache_key"`
 	ReasoningEffort    *ReasoningEffort `json:"reasoning_effort"`
 	ReasoningSummary   *string          `json:"reasoning_summary"`
+	ResetChain         *bool            `json:"reset_chain"`
 	SafetyIdentifier   *string          `json:"safety_identifier"`
 	ServiceTier        *ServiceTier     `json:"service_tier"`
 	StrictJSONSchema   *bool            `json:"strict_json_schema"`

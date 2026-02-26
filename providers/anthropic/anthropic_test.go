@@ -495,74 +495,6 @@ func TestStream_SendsOutputConfigEffort(t *testing.T) {
 	requireAnthropicEffort(t, call.body, EffortHigh)
 }
 
-func TestGenerate_InvalidEffortReturnsFantasyError(t *testing.T) {
-	t.Parallel()
-
-	server, calls := newAnthropicJSONServer(mockAnthropicGenerateResponse())
-	defer server.Close()
-
-	provider, err := New(
-		WithAPIKey("test-api-key"),
-		WithBaseURL(server.URL),
-	)
-	require.NoError(t, err)
-
-	model, err := provider.LanguageModel(context.Background(), "claude-sonnet-4-20250514")
-	require.NoError(t, err)
-
-	invalidEffort := Effort("invalid")
-	_, err = model.Generate(context.Background(), fantasy.Call{
-		Prompt: testPrompt(),
-		ProviderOptions: NewProviderOptions(&ProviderOptions{
-			Effort: &invalidEffort,
-		}),
-	})
-	require.Error(t, err)
-
-	var fantasyErr *fantasy.Error
-	require.ErrorAs(t, err, &fantasyErr)
-	require.Equal(t, "invalid argument", fantasyErr.Title)
-	require.Contains(t, fantasyErr.Message, "low, medium, high, max")
-
-	assertNoAnthropicCall(t, calls)
-}
-
-func TestGenerate_ThinkingBudgetStillSentWithEffort(t *testing.T) {
-	t.Parallel()
-
-	server, calls := newAnthropicJSONServer(mockAnthropicGenerateResponse())
-	defer server.Close()
-
-	provider, err := New(
-		WithAPIKey("test-api-key"),
-		WithBaseURL(server.URL),
-	)
-	require.NoError(t, err)
-
-	model, err := provider.LanguageModel(context.Background(), "claude-sonnet-4-20250514")
-	require.NoError(t, err)
-
-	effort := EffortMax
-	_, err = model.Generate(context.Background(), fantasy.Call{
-		Prompt: testPrompt(),
-		ProviderOptions: NewProviderOptions(&ProviderOptions{
-			Effort: &effort,
-			Thinking: &ThinkingProviderOption{
-				BudgetTokens: 2048,
-			},
-		}),
-	})
-	require.NoError(t, err)
-
-	call := awaitAnthropicCall(t, calls)
-	requireAnthropicEffort(t, call.body, EffortMax)
-
-	thinking, ok := call.body["thinking"].(map[string]any)
-	require.True(t, ok)
-	require.Equal(t, "enabled", thinking["type"])
-	require.Equal(t, float64(2048), thinking["budget_tokens"])
-}
-
 type anthropicCall struct {
 	method string
 	path   string
@@ -648,8 +580,10 @@ func requireAnthropicEffort(t *testing.T, body map[string]any, expected Effort) 
 	t.Helper()
 
 	outputConfig, ok := body["output_config"].(map[string]any)
+	thinking, ok := body["thinking"].(map[string]any)
 	require.True(t, ok)
 	require.Equal(t, string(expected), outputConfig["effort"])
+	require.Equal(t, "adaptive", thinking["type"])
 }
 
 func testPrompt() fantasy.Prompt {

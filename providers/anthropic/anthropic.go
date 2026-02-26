@@ -225,20 +225,6 @@ func (a languageModel) prepareParams(call fantasy.Call) (*anthropic.MessageNewPa
 			return nil, nil, &fantasy.Error{Title: "invalid argument", Message: "anthropic provider options should be *anthropic.ProviderOptions"}
 		}
 	}
-	if providerOptions.Effort != nil {
-		effort := *providerOptions.Effort
-		switch effort {
-		case EffortLow, EffortMedium, EffortHigh, EffortMax:
-		default:
-			return nil, nil, &fantasy.Error{
-				Title:   "invalid argument",
-				Message: "anthropic effort must be one of: low, medium, high, max",
-			}
-		}
-		params.OutputConfig = anthropic.OutputConfigParam{
-			Effort: anthropic.OutputConfigEffort(effort),
-		}
-	}
 	sendReasoning := true
 	if providerOptions.SendReasoning != nil {
 		sendReasoning = *providerOptions.SendReasoning
@@ -277,17 +263,19 @@ func (a languageModel) prepareParams(call fantasy.Call) (*anthropic.MessageNewPa
 		params.TopP = param.NewOpt(*call.TopP)
 	}
 
-	isThinking := false
-	var thinkingBudget int64
-	if providerOptions.Thinking != nil {
-		isThinking = true
-		thinkingBudget = providerOptions.Thinking.BudgetTokens
-	}
-	if isThinking {
-		if thinkingBudget == 0 {
+	switch {
+	case providerOptions.Effort != nil:
+		effort := *providerOptions.Effort
+		params.OutputConfig = anthropic.OutputConfigParam{
+			Effort: anthropic.OutputConfigEffort(effort),
+		}
+		adaptive := anthropic.NewThinkingConfigAdaptiveParam()
+		params.Thinking.OfAdaptive = &adaptive
+	case providerOptions.Thinking != nil:
+		if providerOptions.Thinking.BudgetTokens == 0 {
 			return nil, nil, &fantasy.Error{Title: "no budget", Message: "thinking requires budget"}
 		}
-		params.Thinking = anthropic.ThinkingConfigParamOfEnabled(thinkingBudget)
+		params.Thinking = anthropic.ThinkingConfigParamOfEnabled(providerOptions.Thinking.BudgetTokens)
 		if call.Temperature != nil {
 			params.Temperature = param.Opt[float64]{}
 			warnings = append(warnings, fantasy.CallWarning{

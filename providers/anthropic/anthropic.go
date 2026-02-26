@@ -226,8 +226,17 @@ func (a languageModel) prepareParams(call fantasy.Call) (*anthropic.MessageNewPa
 		}
 	}
 	if providerOptions.Effort != nil {
+		effort := *providerOptions.Effort
+		switch effort {
+		case EffortLow, EffortMedium, EffortHigh, EffortMax:
+		default:
+			return nil, nil, &fantasy.Error{
+				Title:   "invalid argument",
+				Message: "anthropic effort must be one of: low, medium, high, max",
+			}
+		}
 		params.OutputConfig = anthropic.OutputConfigParam{
-			Effort: anthropic.OutputConfigEffort(*providerOptions.Effort),
+			Effort: anthropic.OutputConfigEffort(effort),
 		}
 	}
 	sendReasoning := true

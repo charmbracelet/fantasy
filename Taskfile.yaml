@@ -37,7 +37,9 @@ tasks:
       - sh: "[ $(git status --porcelain=2 | wc -l) = 0 ]"
         msg: "Git is dirty"
     cmds:
-      - git commit --allow-empty -m "{{.NEXT}}"
+      - echo {{trimPrefix "v" .NEXT}} > version.txt
+      - git add version.txt
+      - git commit -m "{{.NEXT}}"
       - git tag --annotate --sign -m "{{.NEXT}}" {{.NEXT}} {{.CLI_ARGS}}
       - echo "Pushing {{.NEXT}}..."
       - git push origin main --follow-tags

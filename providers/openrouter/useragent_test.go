@@ -1,4 +1,4 @@
-package anthropic
+package openrouter
 
 import (
 	"encoding/json"
@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"charm.land/fantasy"
+	"charm.land/fantasy/providers/openai"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -26,9 +27,15 @@ func TestUserAgent(t *testing.T) {
 			captured = append(captured, h)
 
 			w.Header().Set("Content-Type", "application/json")
-			_ = json.NewEncoder(w).Encode(mockAnthropicGenerateResponse())
+			_ = json.NewEncoder(w).Encode(mockOpenAIResponse())
 		}))
 		return server, &captured
+	}
+
+	withBaseURL := func(url string) Option {
+		return func(o *options) {
+			o.openaiOptions = append(o.openaiOptions, openai.WithBaseURL(url))
+		}
 	}
 
 	prompt := fantasy.Prompt{
@@ -43,9 +50,9 @@ func TestUserAgent(t *testing.T) {
 		server, captured := newUAServer()
 		defer server.Close()
 
-		p, err := New(WithAPIKey("k"), WithBaseURL(server.URL))
+		p, err := New(WithAPIKey("k"), withBaseURL(server.URL))
 		require.NoError(t, err)
-		model, _ := p.LanguageModel(t.Context(), "claude-sonnet-4-20250514")
+		model, _ := p.LanguageModel(t.Context(), "openai/gpt-4")
 		_, _ = model.Generate(t.Context(), fantasy.Call{Prompt: prompt})
 
 		require.Len(t, *captured, 1)
@@ -57,64 +64,69 @@ func TestUserAgent(t *testing.T) {
 		server, captured := newUAServer()
 		defer server.Close()
 
-		p, err := New(WithAPIKey("k"), WithBaseURL(server.URL), WithModelSegment("Claude 4.6 Opus"))
+		p, err := New(WithAPIKey("k"), withBaseURL(server.URL), WithModelSegment("Claude 4.6 Opus"))
 		require.NoError(t, err)
-		model, _ := p.LanguageModel(t.Context(), "claude-sonnet-4-20250514")
+		model, _ := p.LanguageModel(t.Context(), "openai/gpt-4")
 		_, _ = model.Generate(t.Context(), fantasy.Call{Prompt: prompt})
 
 		require.Len(t, *captured, 1)
 		assert.Equal(t, "Charm Fantasy/"+fantasy.Version+" (Claude 4.6 Opus)", (*captured)[0]["User-Agent"])
 	})
 
-	t.Run("WithHeaders User-Agent wins over default", func(t *testing.T) {
+	t.Run("WithUserAgent wins over default", func(t *testing.T) {
 		t.Parallel()
 		server, captured := newUAServer()
 		defer server.Close()
 
-		p, err := New(WithAPIKey("k"), WithBaseURL(server.URL), WithHeaders(map[string]string{"User-Agent": "custom-from-headers"}))
+		p, err := New(WithAPIKey("k"), withBaseURL(server.URL), WithUserAgent("explicit-ua"))
 		require.NoError(t, err)
-		model, _ := p.LanguageModel(t.Context(), "claude-sonnet-4-20250514")
-		_, _ = model.Generate(t.Context(), fantasy.Call{Prompt: prompt})
-
-		require.Len(t, *captured, 1)
-		assert.Equal(t, "custom-from-headers", (*captured)[0]["User-Agent"])
-	})
-
-	t.Run("WithUserAgent wins over both", func(t *testing.T) {
-		t.Parallel()
-		server, captured := newUAServer()
-		defer server.Close()
-
-		p, err := New(
-			WithAPIKey("k"),
-			WithBaseURL(server.URL),
-			WithHeaders(map[string]string{"User-Agent": "from-headers"}),
-			WithUserAgent("explicit-ua"),
-		)
-		require.NoError(t, err)
-		model, _ := p.LanguageModel(t.Context(), "claude-sonnet-4-20250514")
+		model, _ := p.LanguageModel(t.Context(), "openai/gpt-4")
 		_, _ = model.Generate(t.Context(), fantasy.Call{Prompt: prompt})
 
 		require.Len(t, *captured, 1)
 		assert.Equal(t, "explicit-ua", (*captured)[0]["User-Agent"])
 	})
 
-	t.Run("WithModelSegment empty clears segment", func(t *testing.T) {
+	t.Run("WithUserAgent wins over WithHeaders", func(t *testing.T) {
 		t.Parallel()
 		server, captured := newUAServer()
 		defer server.Close()
 
 		p, err := New(
 			WithAPIKey("k"),
-			WithBaseURL(server.URL),
-			WithModelSegment("initial"),
-			WithModelSegment(""),
+			withBaseURL(server.URL),
+			WithHeaders(map[string]string{"User-Agent": "from-headers"}),
+			WithUserAgent("explicit-ua"),
 		)
 		require.NoError(t, err)
-		model, _ := p.LanguageModel(t.Context(), "claude-sonnet-4-20250514")
+		model, _ := p.LanguageModel(t.Context(), "openai/gpt-4")
 		_, _ = model.Generate(t.Context(), fantasy.Call{Prompt: prompt})
 
 		require.Len(t, *captured, 1)
-		assert.Equal(t, "Charm Fantasy/"+fantasy.Version, (*captured)[0]["User-Agent"])
+		assert.Equal(t, "explicit-ua", (*captured)[0]["User-Agent"])
 	})
+}
+
+func mockOpenAIResponse() map[string]any {
+	return map[string]any{
+		"id":      "chatcmpl-test",
+		"object":  "chat.completion",
+		"created": 1711115037,
+		"model":   "openai/gpt-4",
+		"choices": []map[string]any{
+			{
+				"index": 0,
+				"message": map[string]any{
+					"role":    "assistant",
+					"content": "Hi there",
+				},
+				"finish_reason": "stop",
+			},
+		},
+		"usage": map[string]any{
+			"prompt_tokens":     4,
+			"total_tokens":      6,
+			"completion_tokens": 2,
+		},
+	}
 }

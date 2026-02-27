@@ -32,7 +32,7 @@ type options struct {
 	useResponsesAPI      bool
 	headers              map[string]string
 	userAgent            string
-	agentSegment         string
+	modelSegment         string
 	client               option.HTTPClient
 	sdkOptions           []option.RequestOption
 	objectMode           fantasy.ObjectMode
@@ -143,12 +143,12 @@ func WithUserAgent(ua string) Option {
 	}
 }
 
-// WithAgentSegment sets the agent segment appended to the default User-Agent.
-// The resulting header is "Fantasy/<version> (<agent>)". Pass an empty string
+// WithModelSegment sets the model segment appended to the default User-Agent.
+// The resulting header is "Fantasy/<version> (<model>)". Pass an empty string
 // to clear a previously set segment.
-func WithAgentSegment(agent string) Option {
+func WithModelSegment(model string) Option {
 	return func(o *options) {
-		o.agentSegment = agent
+		o.modelSegment = model
 	}
 }
 
@@ -175,7 +175,7 @@ func (o *provider) LanguageModel(_ context.Context, modelID string) (fantasy.Lan
 		openaiClientOptions = append(openaiClientOptions, option.WithBaseURL(o.options.baseURL))
 	}
 
-	defaultUA := httpheaders.DefaultUserAgent(fantasy.Version, o.options.agentSegment)
+	defaultUA := httpheaders.DefaultUserAgent(fantasy.Version, o.options.modelSegment)
 	resolved := httpheaders.ResolveHeaders(o.options.headers, o.options.userAgent, defaultUA)
 	for key, value := range resolved {
 		openaiClientOptions = append(openaiClientOptions, option.WithHeader(key, value))

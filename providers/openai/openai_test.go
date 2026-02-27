@@ -3323,14 +3323,14 @@ func TestUserAgent(t *testing.T) {
 		assert.Equal(t, "Charm Fantasy/"+fantasy.Version, server.calls[0].headers["User-Agent"])
 	})
 
-	t.Run("agent segment format", func(t *testing.T) {
+	t.Run("model segment format", func(t *testing.T) {
 		t.Parallel()
 
 		server := newMockServer()
 		defer server.close()
 		server.prepareJSONResponse(map[string]any{})
 
-		p, err := New(WithAPIKey("k"), WithBaseURL(server.server.URL), WithAgentSegment("Claude 4.6 Opus"))
+		p, err := New(WithAPIKey("k"), WithBaseURL(server.server.URL), WithModelSegment("Claude 4.6 Opus"))
 		require.NoError(t, err)
 		model, _ := p.LanguageModel(t.Context(), "gpt-4")
 		_, _ = model.Generate(t.Context(), fantasy.Call{Prompt: testPrompt})
@@ -3376,7 +3376,7 @@ func TestUserAgent(t *testing.T) {
 		assert.Equal(t, "explicit-ua", server.calls[0].headers["User-Agent"])
 	})
 
-	t.Run("WithAgentSegment empty clears segment", func(t *testing.T) {
+	t.Run("WithModelSegment empty clears segment", func(t *testing.T) {
 		t.Parallel()
 
 		server := newMockServer()
@@ -3386,8 +3386,8 @@ func TestUserAgent(t *testing.T) {
 		p, err := New(
 			WithAPIKey("k"),
 			WithBaseURL(server.server.URL),
-			WithAgentSegment("initial"),
-			WithAgentSegment(""),
+			WithModelSegment("initial"),
+			WithModelSegment(""),
 		)
 		require.NoError(t, err)
 		model, _ := p.LanguageModel(t.Context(), "gpt-4")

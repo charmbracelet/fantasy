@@ -89,6 +89,23 @@ func WithHTTPClient(client option.HTTPClient) Option {
 	}
 }
 
+// WithUserAgent sets an explicit User-Agent header, overriding the default and any
+// value set via WithHeaders.
+func WithUserAgent(ua string) Option {
+	return func(o *options) {
+		o.openaiOptions = append(o.openaiOptions, openai.WithUserAgent(ua))
+	}
+}
+
+// WithModelSegment sets the model segment appended to the default User-Agent.
+// The resulting header is "Fantasy/<version> (<model>)". Pass an empty string
+// to clear a previously set segment.
+func WithModelSegment(model string) Option {
+	return func(o *options) {
+		o.openaiOptions = append(o.openaiOptions, openai.WithModelSegment(model))
+	}
+}
+
 // WithObjectMode sets the object generation mode for the OpenRouter provider.
 // Supported modes: ObjectModeTool, ObjectModeText.
 // ObjectModeAuto and ObjectModeJSON are automatically converted to ObjectModeTool

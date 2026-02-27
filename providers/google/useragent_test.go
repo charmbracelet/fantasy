@@ -83,7 +83,7 @@ func TestUserAgent(t *testing.T) {
 		assert.True(t, findUA(captured, "Charm Fantasy/"+fantasy.Version))
 	})
 
-	t.Run("agent segment format", func(t *testing.T) {
+	t.Run("model segment format", func(t *testing.T) {
 		t.Parallel()
 		server, captured := newUAServer()
 		defer server.Close()
@@ -92,7 +92,7 @@ func TestUserAgent(t *testing.T) {
 			WithVertex("test-project", "us-central1"),
 			WithBaseURL(server.URL),
 			WithSkipAuth(true),
-			WithAgentSegment("Claude 4.6 Opus"),
+			WithModelSegment("Claude 4.6 Opus"),
 		)
 		require.NoError(t, err)
 		model, err := p.LanguageModel(t.Context(), "gemini-2.0-flash")
@@ -164,7 +164,7 @@ func TestUserAgent(t *testing.T) {
 		assert.True(t, findUA(captured, "explicit-ua"))
 	})
 
-	t.Run("WithAgentSegment empty clears segment", func(t *testing.T) {
+	t.Run("WithModelSegment empty clears segment", func(t *testing.T) {
 		t.Parallel()
 		server, captured := newUAServer()
 		defer server.Close()
@@ -173,8 +173,8 @@ func TestUserAgent(t *testing.T) {
 			WithVertex("test-project", "us-central1"),
 			WithBaseURL(server.URL),
 			WithSkipAuth(true),
-			WithAgentSegment("initial"),
-			WithAgentSegment(""),
+			WithModelSegment("initial"),
+			WithModelSegment(""),
 		)
 		require.NoError(t, err)
 		model, err := p.LanguageModel(t.Context(), "gemini-2.0-flash")

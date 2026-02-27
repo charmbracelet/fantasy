@@ -108,6 +108,23 @@ func WithObjectMode(om fantasy.ObjectMode) Option {
 	}
 }
 
+// WithUserAgent sets an explicit User-Agent header, overriding the default and any
+// value set via WithHeaders.
+func WithUserAgent(ua string) Option {
+	return func(o *options) {
+		o.openaiOptions = append(o.openaiOptions, openai.WithUserAgent(ua))
+	}
+}
+
+// WithModelSegment sets the model segment appended to the default User-Agent.
+// The resulting header is "Fantasy/<version> (<model>)". Pass an empty string
+// to clear a previously set segment.
+func WithModelSegment(model string) Option {
+	return func(o *options) {
+		o.openaiOptions = append(o.openaiOptions, openai.WithModelSegment(model))
+	}
+}
+
 // WithUseResponsesAPI configures the provider to use the responses API for models that support it.
 func WithUseResponsesAPI() Option {
 	return func(o *options) {

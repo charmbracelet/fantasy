@@ -12,6 +12,7 @@ import (
 
 	"charm.land/fantasy"
 	"github.com/openai/openai-go/v2/packages/param"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -3301,4 +3302,98 @@ func TestParseContextTooLargeError(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestUserAgent(t *testing.T) {
+	t.Parallel()
+
+	t.Run("default UA applied", func(t *testing.T) {
+		t.Parallel()
+
+		server := newMockServer()
+		defer server.close()
+		server.prepareJSONResponse(map[string]any{})
+
+		p, err := New(WithAPIKey("k"), WithBaseURL(server.server.URL))
+		require.NoError(t, err)
+		model, _ := p.LanguageModel(t.Context(), "gpt-4")
+		_, _ = model.Generate(t.Context(), fantasy.Call{Prompt: testPrompt})
+
+		require.Len(t, server.calls, 1)
+		assert.Equal(t, "Charm Fantasy/"+fantasy.Version, server.calls[0].headers["User-Agent"])
+	})
+
+	t.Run("agent segment format", func(t *testing.T) {
+		t.Parallel()
+
+		server := newMockServer()
+		defer server.close()
+		server.prepareJSONResponse(map[string]any{})
+
+		p, err := New(WithAPIKey("k"), WithBaseURL(server.server.URL), WithAgentSegment("Claude 4.6 Opus"))
+		require.NoError(t, err)
+		model, _ := p.LanguageModel(t.Context(), "gpt-4")
+		_, _ = model.Generate(t.Context(), fantasy.Call{Prompt: testPrompt})
+
+		require.Len(t, server.calls, 1)
+		assert.Equal(t, "Charm Fantasy/"+fantasy.Version+" (Claude 4.6 Opus)", server.calls[0].headers["User-Agent"])
+	})
+
+	t.Run("WithHeaders User-Agent wins over default", func(t *testing.T) {
+		t.Parallel()
+
+		server := newMockServer()
+		defer server.close()
+		server.prepareJSONResponse(map[string]any{})
+
+		p, err := New(WithAPIKey("k"), WithBaseURL(server.server.URL), WithHeaders(map[string]string{"User-Agent": "custom-from-headers"}))
+		require.NoError(t, err)
+		model, _ := p.LanguageModel(t.Context(), "gpt-4")
+		_, _ = model.Generate(t.Context(), fantasy.Call{Prompt: testPrompt})
+
+		require.Len(t, server.calls, 1)
+		assert.Equal(t, "custom-from-headers", server.calls[0].headers["User-Agent"])
+	})
+
+	t.Run("WithUserAgent wins over both", func(t *testing.T) {
+		t.Parallel()
+
+		server := newMockServer()
+		defer server.close()
+		server.prepareJSONResponse(map[string]any{})
+
+		p, err := New(
+			WithAPIKey("k"),
+			WithBaseURL(server.server.URL),
+			WithHeaders(map[string]string{"User-Agent": "from-headers"}),
+			WithUserAgent("explicit-ua"),
+		)
+		require.NoError(t, err)
+		model, _ := p.LanguageModel(t.Context(), "gpt-4")
+		_, _ = model.Generate(t.Context(), fantasy.Call{Prompt: testPrompt})
+
+		require.Len(t, server.calls, 1)
+		assert.Equal(t, "explicit-ua", server.calls[0].headers["User-Agent"])
+	})
+
+	t.Run("WithAgentSegment empty clears segment", func(t *testing.T) {
+		t.Parallel()
+
+		server := newMockServer()
+		defer server.close()
+		server.prepareJSONResponse(map[string]any{})
+
+		p, err := New(
+			WithAPIKey("k"),
+			WithBaseURL(server.server.URL),
+			WithAgentSegment("initial"),
+			WithAgentSegment(""),
+		)
+		require.NoError(t, err)
+		model, _ := p.LanguageModel(t.Context(), "gpt-4")
+		_, _ = model.Generate(t.Context(), fantasy.Call{Prompt: testPrompt})
+
+		require.Len(t, server.calls, 1)
+		assert.Equal(t, "Charm Fantasy/"+fantasy.Version, server.calls[0].headers["User-Agent"])
+	})
 }

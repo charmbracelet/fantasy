@@ -14,6 +14,7 @@ import (
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/object"
+	"charm.land/fantasy/providers/internal/httpheaders"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/charmbracelet/anthropic-sdk-go"
 	"github.com/charmbracelet/anthropic-sdk-go/bedrock"
@@ -31,11 +32,13 @@ const (
 )
 
 type options struct {
-	baseURL string
-	apiKey  string
-	name    string
-	headers map[string]string
-	client  option.HTTPClient
+	baseURL      string
+	apiKey       string
+	name         string
+	headers      map[string]string
+	userAgent    string
+	agentSegment string
+	client       option.HTTPClient
 
 	vertexProject  string
 	vertexLocation string
@@ -125,6 +128,23 @@ func WithHTTPClient(client option.HTTPClient) Option {
 	}
 }
 
+// WithUserAgent sets an explicit User-Agent header, overriding the default and any
+// value set via WithHeaders.
+func WithUserAgent(ua string) Option {
+	return func(o *options) {
+		o.userAgent = ua
+	}
+}
+
+// WithAgentSegment sets the agent segment appended to the default User-Agent.
+// The resulting header is "Fantasy/<version> (<agent>)". Pass an empty string
+// to clear a previously set segment.
+func WithAgentSegment(agent string) Option {
+	return func(o *options) {
+		o.agentSegment = agent
+	}
+}
+
 // WithObjectMode sets the object generation mode.
 func WithObjectMode(om fantasy.ObjectMode) Option {
 	return func(o *options) {
@@ -146,7 +166,9 @@ func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.L
 	if a.options.baseURL != "" {
 		clientOptions = append(clientOptions, option.WithBaseURL(a.options.baseURL))
 	}
-	for key, value := range a.options.headers {
+	defaultUA := httpheaders.DefaultUserAgent(fantasy.Version, a.options.agentSegment)
+	resolved := httpheaders.ResolveHeaders(a.options.headers, a.options.userAgent, defaultUA)
+	for key, value := range resolved {
 		clientOptions = append(clientOptions, option.WithHeader(key, value))
 	}
 	if a.options.client != nil {

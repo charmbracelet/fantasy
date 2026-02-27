@@ -7,6 +7,7 @@ import (
 	"maps"
 
 	"charm.land/fantasy"
+	"charm.land/fantasy/providers/internal/httpheaders"
 	"github.com/openai/openai-go/v2"
 	"github.com/openai/openai-go/v2/option"
 )
@@ -30,6 +31,8 @@ type options struct {
 	name                 string
 	useResponsesAPI      bool
 	headers              map[string]string
+	userAgent            string
+	agentSegment         string
 	client               option.HTTPClient
 	sdkOptions           []option.RequestOption
 	objectMode           fantasy.ObjectMode
@@ -132,6 +135,23 @@ func WithUseResponsesAPI() Option {
 	}
 }
 
+// WithUserAgent sets an explicit User-Agent header, overriding the default and any
+// value set via WithHeaders.
+func WithUserAgent(ua string) Option {
+	return func(o *options) {
+		o.userAgent = ua
+	}
+}
+
+// WithAgentSegment sets the agent segment appended to the default User-Agent.
+// The resulting header is "Fantasy/<version> (<agent>)". Pass an empty string
+// to clear a previously set segment.
+func WithAgentSegment(agent string) Option {
+	return func(o *options) {
+		o.agentSegment = agent
+	}
+}
+
 // WithObjectMode sets the object generation mode.
 func WithObjectMode(om fantasy.ObjectMode) Option {
 	return func(o *options) {
@@ -155,7 +175,9 @@ func (o *provider) LanguageModel(_ context.Context, modelID string) (fantasy.Lan
 		openaiClientOptions = append(openaiClientOptions, option.WithBaseURL(o.options.baseURL))
 	}
 
-	for key, value := range o.options.headers {
+	defaultUA := httpheaders.DefaultUserAgent(fantasy.Version, o.options.agentSegment)
+	resolved := httpheaders.ResolveHeaders(o.options.headers, o.options.userAgent, defaultUA)
+	for key, value := range resolved {
 		openaiClientOptions = append(openaiClientOptions, option.WithHeader(key, value))
 	}
 

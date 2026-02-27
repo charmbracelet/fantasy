@@ -14,6 +14,7 @@ import (
 	"charm.land/fantasy"
 	"charm.land/fantasy/object"
 	"charm.land/fantasy/providers/anthropic"
+	"charm.land/fantasy/providers/internal/httpheaders"
 	"charm.land/fantasy/schema"
 	"cloud.google.com/go/auth"
 	"github.com/charmbracelet/x/exp/slice"
@@ -36,6 +37,8 @@ type options struct {
 	name           string
 	baseURL        string
 	headers        map[string]string
+	userAgent      string
+	agentSegment   string
 	client         *http.Client
 	backend        genai.Backend
 	project        string
@@ -132,6 +135,23 @@ func WithToolCallIDFunc(f ToolCallIDFunc) Option {
 	}
 }
 
+// WithUserAgent sets an explicit User-Agent header, overriding the default and any
+// value set via WithHeaders.
+func WithUserAgent(ua string) Option {
+	return func(o *options) {
+		o.userAgent = ua
+	}
+}
+
+// WithAgentSegment sets the agent segment appended to the default User-Agent.
+// The resulting header is "Fantasy/<version> (<agent>)". Pass an empty string
+// to clear a previously set segment.
+func WithAgentSegment(agent string) Option {
+	return func(o *options) {
+		o.agentSegment = agent
+	}
+}
+
 // WithObjectMode sets the object generation mode for the Google provider.
 func WithObjectMode(om fantasy.ObjectMode) Option {
 	return func(o *options) {
@@ -154,11 +174,18 @@ type languageModel struct {
 // LanguageModel implements fantasy.Provider.
 func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.LanguageModel, error) {
 	if strings.Contains(modelID, "anthropic") || strings.Contains(modelID, "claude") {
-		p, err := anthropic.New(
+		anthropicOpts := []anthropic.Option{
 			anthropic.WithVertex(a.options.project, a.options.location),
 			anthropic.WithHTTPClient(a.options.client),
 			anthropic.WithSkipAuth(a.options.skipAuth),
-		)
+		}
+		if a.options.userAgent != "" {
+			anthropicOpts = append(anthropicOpts, anthropic.WithUserAgent(a.options.userAgent))
+		}
+		if a.options.agentSegment != "" {
+			anthropicOpts = append(anthropicOpts, anthropic.WithAgentSegment(a.options.agentSegment))
+		}
+		p, err := anthropic.New(anthropicOpts...)
 		if err != nil {
 			return nil, err
 		}
@@ -180,15 +207,16 @@ func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.L
 		}
 	}
 
-	if a.options.baseURL != "" || len(a.options.headers) > 0 {
-		headers := http.Header{}
-		for k, v := range a.options.headers {
-			headers.Add(k, v)
-		}
-		cc.HTTPOptions = genai.HTTPOptions{
-			BaseURL: a.options.baseURL,
-			Headers: headers,
-		}
+	defaultUA := httpheaders.DefaultUserAgent(fantasy.Version, a.options.agentSegment)
+	resolved := httpheaders.ResolveHeaders(a.options.headers, a.options.userAgent, defaultUA)
+
+	headers := http.Header{}
+	for k, v := range resolved {
+		headers.Set(k, v)
+	}
+	cc.HTTPOptions = genai.HTTPOptions{
+		BaseURL: a.options.baseURL,
+		Headers: headers,
 	}
 	client, err := genai.NewClient(ctx, cc)
 	if err != nil {

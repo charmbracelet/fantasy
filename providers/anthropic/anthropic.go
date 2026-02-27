@@ -32,12 +32,12 @@ const (
 )
 
 type options struct {
-	baseURL      string
-	apiKey       string
-	name         string
-	headers      map[string]string
-	userAgent    string
-	client       option.HTTPClient
+	baseURL   string
+	apiKey    string
+	name      string
+	headers   map[string]string
+	userAgent string
+	client    option.HTTPClient
 
 	vertexProject  string
 	vertexLocation string

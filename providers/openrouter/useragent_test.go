@@ -59,20 +59,6 @@ func TestUserAgent(t *testing.T) {
 		assert.Equal(t, "Charm Fantasy/"+fantasy.Version, (*captured)[0]["User-Agent"])
 	})
 
-	t.Run("model segment format", func(t *testing.T) {
-		t.Parallel()
-		server, captured := newUAServer()
-		defer server.Close()
-
-		p, err := New(WithAPIKey("k"), withBaseURL(server.URL), WithModelSegment("Claude 4.6 Opus"))
-		require.NoError(t, err)
-		model, _ := p.LanguageModel(t.Context(), "openai/gpt-4")
-		_, _ = model.Generate(t.Context(), fantasy.Call{Prompt: prompt})
-
-		require.Len(t, *captured, 1)
-		assert.Equal(t, "Charm Fantasy/"+fantasy.Version+" (Claude 4.6 Opus)", (*captured)[0]["User-Agent"])
-	})
-
 	t.Run("WithUserAgent wins over default", func(t *testing.T) {
 		t.Parallel()
 		server, captured := newUAServer()

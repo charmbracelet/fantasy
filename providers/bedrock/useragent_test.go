@@ -56,25 +56,6 @@ func TestUserAgent(t *testing.T) {
 		assert.Equal(t, "Charm Fantasy/"+fantasy.Version, (*captured)[0]["User-Agent"])
 	})
 
-	t.Run("model segment format", func(t *testing.T) {
-		t.Parallel()
-		server, captured := newUAServer()
-		defer server.Close()
-
-		p, err := New(
-			WithAPIKey("k"),
-			WithSkipAuth(true),
-			WithHTTPClient(&http.Client{Transport: redirectTransport(server.URL)}),
-			WithModelSegment("Claude 4.6 Opus"),
-		)
-		require.NoError(t, err)
-		model, _ := p.LanguageModel(t.Context(), "us.anthropic.claude-sonnet-4-20250514-v1:0")
-		_, _ = model.Generate(t.Context(), fantasy.Call{Prompt: prompt})
-
-		require.Len(t, *captured, 1)
-		assert.Equal(t, "Charm Fantasy/"+fantasy.Version+" (Claude 4.6 Opus)", (*captured)[0]["User-Agent"])
-	})
-
 	t.Run("WithUserAgent wins over default", func(t *testing.T) {
 		t.Parallel()
 		server, captured := newUAServer()

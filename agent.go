@@ -139,7 +139,6 @@ type agentSettings struct {
 	frequencyPenalty *float64
 	headers          map[string]string
 	userAgent        string
-	modelSegment     string
 	providerOptions  ProviderOptions
 
 	// TODO: add support for provider tools
@@ -451,7 +450,6 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 				Tools:            preparedTools,
 				ToolChoice:       &stepToolChoice,
 				UserAgent:        a.settings.userAgent,
-				ModelSegment:     a.settings.modelSegment,
 				ProviderOptions:  opts.ProviderOptions,
 			})
 		})
@@ -834,7 +832,6 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 			Tools:            preparedTools,
 			ToolChoice:       &stepToolChoice,
 			UserAgent:        a.settings.userAgent,
-			ModelSegment:     a.settings.modelSegment,
 			ProviderOptions:  call.ProviderOptions,
 		}
 
@@ -1429,16 +1426,6 @@ func WithHeaders(headers map[string]string) AgentOption {
 func WithUserAgent(ua string) AgentOption {
 	return func(s *agentSettings) {
 		s.userAgent = ua
-	}
-}
-
-// WithModelSegment sets the model segment appended to the default User-Agent
-// header. The default UA becomes "Fantasy/<version> (<segment>)". An empty
-// string clears any previously set segment. This is overridden by WithUserAgent
-// at either the agent or provider level.
-func WithModelSegment(segment string) AgentOption {
-	return func(s *agentSettings) {
-		s.modelSegment = segment
 	}
 }
 

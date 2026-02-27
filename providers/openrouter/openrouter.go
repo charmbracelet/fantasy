@@ -97,15 +97,6 @@ func WithUserAgent(ua string) Option {
 	}
 }
 
-// WithModelSegment sets the model segment appended to the default User-Agent.
-// The resulting header is "Fantasy/<version> (<model>)". Pass an empty string
-// to clear a previously set segment.
-func WithModelSegment(model string) Option {
-	return func(o *options) {
-		o.openaiOptions = append(o.openaiOptions, openai.WithModelSegment(model))
-	}
-}
-
 // WithObjectMode sets the object generation mode for the OpenRouter provider.
 // Supported modes: ObjectModeTool, ObjectModeText.
 // ObjectModeAuto and ObjectModeJSON are automatically converted to ObjectModeTool

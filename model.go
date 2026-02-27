@@ -220,8 +220,6 @@ type Call struct {
 
 	// UserAgent overrides the provider-level User-Agent header for this call.
 	UserAgent string `json:"-"`
-	// ModelSegment overrides the provider-level model segment for this call.
-	ModelSegment string `json:"-"`
 
 	// for provider specific options, the key is the provider id
 	ProviderOptions ProviderOptions `json:"provider_options"`

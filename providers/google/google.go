@@ -38,7 +38,6 @@ type options struct {
 	baseURL        string
 	headers        map[string]string
 	userAgent      string
-	modelSegment   string
 	client         *http.Client
 	backend        genai.Backend
 	project        string
@@ -143,15 +142,6 @@ func WithUserAgent(ua string) Option {
 	}
 }
 
-// WithModelSegment sets the model segment appended to the default User-Agent.
-// The resulting header is "Fantasy/<version> (<model>)". Pass an empty string
-// to clear a previously set segment.
-func WithModelSegment(model string) Option {
-	return func(o *options) {
-		o.modelSegment = model
-	}
-}
-
 // WithObjectMode sets the object generation mode for the Google provider.
 func WithObjectMode(om fantasy.ObjectMode) Option {
 	return func(o *options) {
@@ -182,9 +172,6 @@ func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.L
 		if a.options.userAgent != "" {
 			anthropicOpts = append(anthropicOpts, anthropic.WithUserAgent(a.options.userAgent))
 		}
-		if a.options.modelSegment != "" {
-			anthropicOpts = append(anthropicOpts, anthropic.WithModelSegment(a.options.modelSegment))
-		}
 		p, err := anthropic.New(anthropicOpts...)
 		if err != nil {
 			return nil, err
@@ -207,7 +194,7 @@ func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.L
 		}
 	}
 
-	defaultUA := httpheaders.DefaultUserAgent(fantasy.Version, a.options.modelSegment)
+	defaultUA := httpheaders.DefaultUserAgent(fantasy.Version)
 	resolved := httpheaders.ResolveHeaders(a.options.headers, a.options.userAgent, defaultUA)
 
 	headers := http.Header{}

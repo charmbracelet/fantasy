@@ -1,7 +1,6 @@
 package httpheaders
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -14,22 +13,16 @@ func TestDefaultUserAgent(t *testing.T) {
 	tests := []struct {
 		name    string
 		version string
-		agent   string
 		want    string
 	}{
-		{name: "no agent", version: "0.11.0", agent: "", want: "Charm Fantasy/0.11.0"},
-		{name: "with agent", version: "0.11.0", agent: "Claude 4.6 Opus", want: "Charm Fantasy/0.11.0 (Claude 4.6 Opus)"},
-		{name: "agent trimmed", version: "1.0.0", agent: "  spaces  ", want: "Charm Fantasy/1.0.0 (spaces)"},
-		{name: "agent strips parens", version: "1.0.0", agent: "foo(bar)", want: "Charm Fantasy/1.0.0 (foobar)"},
-		{name: "agent strips control chars", version: "1.0.0", agent: "foo\x01bar", want: "Charm Fantasy/1.0.0 (foobar)"},
-		{name: "agent capped at 64 chars", version: "1.0.0", agent: strings.Repeat("a", 100), want: "Charm Fantasy/1.0.0 (" + strings.Repeat("a", 64) + ")"},
-		{name: "whitespace-only agent treated as empty", version: "1.0.0", agent: "   ", want: "Charm Fantasy/1.0.0"},
+		{name: "basic version", version: "0.11.0", want: "Charm Fantasy/0.11.0"},
+		{name: "another version", version: "1.0.0", want: "Charm Fantasy/1.0.0"},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			got := DefaultUserAgent(tt.version, tt.agent)
+			got := DefaultUserAgent(tt.version)
 			assert.Equal(t, tt.want, got)
 		})
 	}
@@ -99,34 +92,6 @@ func TestResolveHeaders_PreservesOtherHeaders(t *testing.T) {
 	assert.Equal(t, "Charm Fantasy/1.0.0", got["User-Agent"])
 }
 
-func TestSanitizeAgent(t *testing.T) {
-	t.Parallel()
-
-	tests := []struct {
-		name  string
-		input string
-		want  string
-	}{
-		{name: "normal text", input: "Claude 4.6 Opus", want: "Claude 4.6 Opus"},
-		{name: "leading trailing spaces", input: "  spaced  ", want: "spaced"},
-		{name: "parentheses removed", input: "agent(v2)", want: "agentv2"},
-		{name: "control chars removed", input: "a\x00b\x1fc", want: "abc"},
-		{name: "capped at 64", input: strings.Repeat("x", 100), want: strings.Repeat("x", 64)},
-		{name: "multibyte runes capped at 64 chars", input: strings.Repeat("é", 100), want: strings.Repeat("é", 64)},
-		{name: "empty stays empty", input: "", want: ""},
-		{name: "only spaces", input: "   ", want: ""},
-		{name: "trailing space after cap", input: strings.Repeat("a", 63) + " b", want: strings.Repeat("a", 63)},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-			got := sanitizeAgent(tt.input)
-			assert.Equal(t, tt.want, got)
-		})
-	}
-}
-
 func TestResolveHeaders_DuplicateCaseInsensitiveKeys(t *testing.T) {
 	t.Parallel()
 
@@ -144,21 +109,18 @@ func TestCallUserAgent(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		name        string
-		callUA      string
-		callSegment string
-		wantUA      string
-		wantOK      bool
+		name   string
+		callUA string
+		wantUA string
+		wantOK bool
 	}{
-		{name: "no override", callUA: "", callSegment: "", wantUA: "", wantOK: false},
-		{name: "explicit UA", callUA: "MyAgent/1.0", callSegment: "", wantUA: "MyAgent/1.0", wantOK: true},
-		{name: "model segment only", callUA: "", callSegment: "Claude 4.6", wantUA: "Charm Fantasy/0.11.0 (Claude 4.6)", wantOK: true},
-		{name: "explicit UA wins over segment", callUA: "MyAgent/1.0", callSegment: "Claude 4.6", wantUA: "MyAgent/1.0", wantOK: true},
+		{name: "no override", callUA: "", wantUA: "", wantOK: false},
+		{name: "explicit UA", callUA: "MyAgent/1.0", wantUA: "MyAgent/1.0", wantOK: true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			ua, ok := CallUserAgent("0.11.0", tt.callUA, tt.callSegment)
+			ua, ok := CallUserAgent(tt.callUA)
 			assert.Equal(t, tt.wantOK, ok)
 			assert.Equal(t, tt.wantUA, ua)
 		})

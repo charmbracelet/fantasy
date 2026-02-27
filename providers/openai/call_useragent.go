@@ -9,7 +9,7 @@ import (
 // callUARequestOptions returns per-request options that override the
 // client-level User-Agent header when the Call carries agent-level UA settings.
 func callUARequestOptions(call fantasy.Call) []option.RequestOption {
-	if ua, ok := httpheaders.CallUserAgent(fantasy.Version, call.UserAgent, call.ModelSegment); ok {
+	if ua, ok := httpheaders.CallUserAgent(call.UserAgent); ok {
 		return []option.RequestOption{option.WithHeader("User-Agent", ua)}
 	}
 	return nil
@@ -18,7 +18,7 @@ func callUARequestOptions(call fantasy.Call) []option.RequestOption {
 // objectCallUARequestOptions returns per-request options that override the
 // client-level User-Agent header when the ObjectCall carries agent-level UA settings.
 func objectCallUARequestOptions(call fantasy.ObjectCall) []option.RequestOption {
-	if ua, ok := httpheaders.CallUserAgent(fantasy.Version, call.UserAgent, call.ModelSegment); ok {
+	if ua, ok := httpheaders.CallUserAgent(call.UserAgent); ok {
 		return []option.RequestOption{option.WithHeader("User-Agent", ua)}
 	}
 	return nil

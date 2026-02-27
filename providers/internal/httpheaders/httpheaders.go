@@ -1,23 +1,12 @@
 // Package httpheaders provides shared User-Agent resolution for all HTTP-based providers.
 package httpheaders
 
-import (
-	"strings"
-	"unicode"
-)
-
-const maxAgentLength = 64
+import "strings"
 
 // DefaultUserAgent returns the default User-Agent string for the SDK.
-// If agent is non-empty, the result is "Charm Fantasy/<version> (<agent>)".
-// Otherwise, the result is "Charm Fantasy/<version>".
-func DefaultUserAgent(version, agent string) string {
-	const sdk = "Charm Fantasy/"
-	agent = sanitizeAgent(agent)
-	if agent == "" {
-		return sdk + version
-	}
-	return sdk + version + " (" + agent + ")"
+// The result is "Charm Fantasy/<version>".
+func DefaultUserAgent(version string) string {
+	return "Charm Fantasy/" + version
 }
 
 // ResolveHeaders returns a new header map with User-Agent resolved according to precedence:
@@ -55,35 +44,9 @@ func ResolveHeaders(headers map[string]string, explicitUA, defaultUA string) map
 // CallUserAgent resolves the User-Agent for a single API call. It returns the
 // resolved UA string and true if a per-call override should be applied, or
 // empty string and false if the client-level UA should be used as-is.
-//
-// Precedence:
-//  1. callUA (agent-level WithUserAgent) — highest
-//  2. callSegment used to build default UA (agent-level WithModelSegment)
-//  3. empty — use client-level UA (return false)
-func CallUserAgent(version, callUA, callSegment string) (string, bool) {
+func CallUserAgent(callUA string) (string, bool) {
 	if callUA != "" {
 		return callUA, true
 	}
-	if callSegment != "" {
-		return DefaultUserAgent(version, callSegment), true
-	}
 	return "", false
-}
-
-func sanitizeAgent(s string) string {
-	s = strings.TrimSpace(s)
-	var b strings.Builder
-	b.Grow(len(s))
-	count := 0
-	for _, r := range s {
-		if r < 0x20 || r == '(' || r == ')' {
-			continue
-		}
-		if count >= maxAgentLength {
-			break
-		}
-		b.WriteRune(r)
-		count++
-	}
-	return strings.TrimRightFunc(b.String(), unicode.IsSpace)
 }

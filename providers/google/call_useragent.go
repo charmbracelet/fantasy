@@ -11,14 +11,14 @@ import (
 type callUAKey struct{}
 
 func withCallUA(ctx context.Context, call fantasy.Call) context.Context {
-	if ua, ok := httpheaders.CallUserAgent(fantasy.Version, call.UserAgent, call.ModelSegment); ok {
+	if ua, ok := httpheaders.CallUserAgent(call.UserAgent); ok {
 		return context.WithValue(ctx, callUAKey{}, ua)
 	}
 	return ctx
 }
 
 func withObjectCallUA(ctx context.Context, call fantasy.ObjectCall) context.Context {
-	if ua, ok := httpheaders.CallUserAgent(fantasy.Version, call.UserAgent, call.ModelSegment); ok {
+	if ua, ok := httpheaders.CallUserAgent(call.UserAgent); ok {
 		return context.WithValue(ctx, callUAKey{}, ua)
 	}
 	return ctx

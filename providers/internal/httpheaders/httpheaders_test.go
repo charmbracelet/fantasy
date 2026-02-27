@@ -60,11 +60,13 @@ func TestResolveHeaders_Precedence(t *testing.T) {
 		assert.False(t, hasLower, "old case-insensitive key should be removed")
 	})
 
-	t.Run("case-insensitive header key preserved when no explicit UA", func(t *testing.T) {
+	t.Run("case-insensitive header key canonicalized when no explicit UA", func(t *testing.T) {
 		t.Parallel()
 		headers := map[string]string{"user-agent": "from-headers"}
 		got := ResolveHeaders(headers, "", "default-ua")
-		assert.Equal(t, "from-headers", got["user-agent"])
+		assert.Equal(t, "from-headers", got["User-Agent"])
+		_, hasLower := got["user-agent"]
+		assert.False(t, hasLower, "non-canonical key should be removed")
 	})
 }
 
@@ -95,14 +97,30 @@ func TestResolveHeaders_PreservesOtherHeaders(t *testing.T) {
 func TestResolveHeaders_DuplicateCaseInsensitiveKeys(t *testing.T) {
 	t.Parallel()
 
-	headers := map[string]string{
-		"User-Agent": "canonical",
-		"user-agent": "lowercase",
-	}
-	got := ResolveHeaders(headers, "explicit", "default")
-	assert.Equal(t, "explicit", got["User-Agent"])
-	_, hasLower := got["user-agent"]
-	assert.False(t, hasLower, "all case-insensitive UA keys must be removed")
+	t.Run("explicit UA removes all variants", func(t *testing.T) {
+		t.Parallel()
+		headers := map[string]string{
+			"User-Agent": "canonical",
+			"user-agent": "lowercase",
+		}
+		got := ResolveHeaders(headers, "explicit", "default")
+		assert.Equal(t, "explicit", got["User-Agent"])
+		_, hasLower := got["user-agent"]
+		assert.False(t, hasLower, "all case-insensitive UA keys must be removed")
+	})
+
+	t.Run("no explicit UA collapses to single canonical key", func(t *testing.T) {
+		t.Parallel()
+		headers := map[string]string{
+			"User-Agent": "canonical",
+			"user-agent": "lowercase",
+		}
+		got := ResolveHeaders(headers, "", "default")
+		_, hasLower := got["user-agent"]
+		hasCanonical := got["User-Agent"]
+		assert.False(t, hasLower, "non-canonical key should be removed")
+		assert.NotEmpty(t, hasCanonical, "canonical User-Agent key must exist")
+	})
 }
 
 func TestCallUserAgent(t *testing.T) {

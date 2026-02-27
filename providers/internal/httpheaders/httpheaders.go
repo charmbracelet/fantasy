@@ -34,7 +34,11 @@ func ResolveHeaders(headers map[string]string, explicitUA, defaultUA string) map
 		}
 		out["User-Agent"] = explicitUA
 	case len(uaKeys) > 0:
-		// keep the header-map value as-is
+		val := out[uaKeys[0]]
+		for _, k := range uaKeys {
+			delete(out, k)
+		}
+		out["User-Agent"] = val
 	default:
 		out["User-Agent"] = defaultUA
 	}

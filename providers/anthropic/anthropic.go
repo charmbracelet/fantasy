@@ -216,18 +216,23 @@ func (a languageModel) Provider() string {
 	return a.provider
 }
 
-func (a languageModel) prepareParams(call fantasy.Call) (*anthropic.MessageNewParams, []fantasy.CallWarning, error) {
+func (a languageModel) prepareParams(call fantasy.Call) (*anthropic.MessageNewParams, []option.RequestOption, []fantasy.CallWarning, error) {
 	params := &anthropic.MessageNewParams{}
+	var requestOpts []option.RequestOption
 	providerOptions := &ProviderOptions{}
 	if v, ok := call.ProviderOptions[Name]; ok {
 		providerOptions, ok = v.(*ProviderOptions)
 		if !ok {
-			return nil, nil, &fantasy.Error{Title: "invalid argument", Message: "anthropic provider options should be *anthropic.ProviderOptions"}
+			return nil, nil, nil, &fantasy.Error{Title: "invalid argument", Message: "anthropic provider options should be *anthropic.ProviderOptions"}
 		}
 	}
 	sendReasoning := true
 	if providerOptions.SendReasoning != nil {
 		sendReasoning = *providerOptions.SendReasoning
+	}
+	// Add beta headers for features like 1M context window on Bedrock
+	for _, beta := range providerOptions.Betas {
+		requestOpts = append(requestOpts, option.WithHeaderAdd("anthropic-beta", beta))
 	}
 	systemBlocks, messages, warnings := toPrompt(call.Prompt, sendReasoning)
 
@@ -273,7 +278,7 @@ func (a languageModel) prepareParams(call fantasy.Call) (*anthropic.MessageNewPa
 		params.Thinking.OfAdaptive = &adaptive
 	case providerOptions.Thinking != nil:
 		if providerOptions.Thinking.BudgetTokens == 0 {
-			return nil, nil, &fantasy.Error{Title: "no budget", Message: "thinking requires budget"}
+			return nil, nil, nil, &fantasy.Error{Title: "no budget", Message: "thinking requires budget"}
 		}
 		params.Thinking = anthropic.ThinkingConfigParamOfEnabled(providerOptions.Thinking.BudgetTokens)
 		if call.Temperature != nil {
@@ -315,7 +320,7 @@ func (a languageModel) prepareParams(call fantasy.Call) (*anthropic.MessageNewPa
 		warnings = append(warnings, toolWarnings...)
 	}
 
-	return params, warnings, nil
+	return params, requestOpts, warnings, nil
 }
 
 func (a *provider) Name() string {
@@ -767,11 +772,11 @@ func mapFinishReason(finishReason string) fantasy.FinishReason {
 
 // Generate implements fantasy.LanguageModel.
 func (a languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantasy.Response, error) {
-	params, warnings, err := a.prepareParams(call)
+	params, requestOpts, warnings, err := a.prepareParams(call)
 	if err != nil {
 		return nil, err
 	}
-	response, err := a.client.Messages.New(ctx, *params)
+	response, err := a.client.Messages.New(ctx, *params, requestOpts...)
 	if err != nil {
 		return nil, toProviderErr(err)
 	}
@@ -844,12 +849,12 @@ func (a languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantas
 
 // Stream implements fantasy.LanguageModel.
 func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.StreamResponse, error) {
-	params, warnings, err := a.prepareParams(call)
+	params, requestOpts, warnings, err := a.prepareParams(call)
 	if err != nil {
 		return nil, err
 	}
 
-	stream := a.client.Messages.NewStreaming(ctx, *params)
+	stream := a.client.Messages.NewStreaming(ctx, *params, requestOpts...)
 	acc := anthropic.Message{}
 	return func(yield func(fantasy.StreamPart) bool) {
 		if len(warnings) > 0 {

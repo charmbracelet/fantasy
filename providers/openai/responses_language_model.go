@@ -668,7 +668,7 @@ func toResponsesTools(tools []fantasy.Tool, toolChoice *fantasy.ToolChoice, opti
 
 func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call) (*fantasy.Response, error) {
 	params, warnings := o.prepareParams(call)
-	response, err := o.client.Responses.New(ctx, *params)
+	response, err := o.client.Responses.New(ctx, *params, callUARequestOptions(call)...)
 	if err != nil {
 		return nil, toProviderErr(err)
 	}
@@ -806,7 +806,7 @@ func mapResponsesFinishReason(reason string, hasFunctionCall bool) fantasy.Finis
 func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.StreamResponse, error) {
 	params, warnings := o.prepareParams(call)
 
-	stream := o.client.Responses.NewStreaming(ctx, *params)
+	stream := o.client.Responses.NewStreaming(ctx, *params, callUARequestOptions(call)...)
 
 	finishReason := fantasy.FinishReasonUnknown
 	var usage fantasy.Usage
@@ -1106,7 +1106,7 @@ func (o responsesLanguageModel) generateObjectWithJSONMode(ctx context.Context, 
 	}
 
 	// Make request
-	response, err := o.client.Responses.New(ctx, *params)
+	response, err := o.client.Responses.New(ctx, *params, objectCallUARequestOptions(call)...)
 	if err != nil {
 		return nil, toProviderErr(err)
 	}
@@ -1216,7 +1216,7 @@ func (o responsesLanguageModel) streamObjectWithJSONMode(ctx context.Context, ca
 		Format: responses.ResponseFormatTextConfigParamOfJSONSchema(schemaName, jsonSchemaMap),
 	}
 
-	stream := o.client.Responses.NewStreaming(ctx, *params)
+	stream := o.client.Responses.NewStreaming(ctx, *params, objectCallUARequestOptions(call)...)
 
 	return func(yield func(fantasy.ObjectStreamPart) bool) {
 		if len(warnings) > 0 {

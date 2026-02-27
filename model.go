@@ -218,6 +218,9 @@ type Call struct {
 	Tools            []Tool      `json:"tools"`
 	ToolChoice       *ToolChoice `json:"tool_choice"`
 
+	// UserAgent overrides the provider-level User-Agent header for this call.
+	UserAgent string `json:"-"`
+
 	// for provider specific options, the key is the provider id
 	ProviderOptions ProviderOptions `json:"provider_options"`
 }

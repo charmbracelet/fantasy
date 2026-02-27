@@ -1,4 +1,12 @@
 package fantasy
 
-// Version is the SDK version. Update this before tagging a new release.
-const Version = "0.11.0"
+import (
+	_ "embed"
+	"strings"
+)
+
+//go:embed version.txt
+var version string
+
+// Version is the SDK version, read from version.txt.
+var Version = strings.TrimSpace(version)

@@ -11,11 +11,11 @@ func DefaultUserAgent(version string) string {
 
 // ResolveHeaders returns a new header map, with a User-Agent field.
 //
-// Setting the value via WithUserAgent() takes prescidence, however the user
+// Setting the value via WithUserAgent() takes precedence, however the user
 // agent can also be set via HTTP headers (i.e. WithHeaders()). Otherwise, the
 // default user agent will be used, i.e. Charm Fantasy/0.11.0.
 //
-// Also note that The input map is never mutated.
+// Also note that the input map is never mutated.
 func ResolveHeaders(headers map[string]string, explicitUA, defaultUA string) map[string]string {
 	out := make(map[string]string, len(headers)+1)
 	var uaKeys []string

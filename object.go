@@ -41,6 +41,11 @@ type ObjectCall struct {
 	PresencePenalty  *float64
 	FrequencyPenalty *float64
 
+	// UserAgent overrides the provider-level User-Agent header for this call.
+	UserAgent string `json:"-"`
+	// ModelSegment overrides the provider-level model segment for this call.
+	ModelSegment string `json:"-"`
+
 	ProviderOptions ProviderOptions
 
 	RepairText schema.ObjectRepairFunc

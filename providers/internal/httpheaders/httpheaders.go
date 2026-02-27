@@ -52,6 +52,24 @@ func ResolveHeaders(headers map[string]string, explicitUA, defaultUA string) map
 	return out
 }
 
+// CallUserAgent resolves the User-Agent for a single API call. It returns the
+// resolved UA string and true if a per-call override should be applied, or
+// empty string and false if the client-level UA should be used as-is.
+//
+// Precedence:
+//  1. callUA (agent-level WithUserAgent) — highest
+//  2. callSegment used to build default UA (agent-level WithModelSegment)
+//  3. empty — use client-level UA (return false)
+func CallUserAgent(version, callUA, callSegment string) (string, bool) {
+	if callUA != "" {
+		return callUA, true
+	}
+	if callSegment != "" {
+		return DefaultUserAgent(version, callSegment), true
+	}
+	return "", false
+}
+
 func sanitizeAgent(s string) string {
 	s = strings.TrimSpace(s)
 	var b strings.Builder

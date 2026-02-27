@@ -193,7 +193,7 @@ func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.L
 	}
 
 	cc := &genai.ClientConfig{
-		HTTPClient: a.options.client,
+		HTTPClient: wrapHTTPClient(a.options.client),
 		Backend:    a.options.backend,
 		APIKey:     a.options.apiKey,
 		Project:    a.options.project,
@@ -558,6 +558,7 @@ func toGooglePrompt(prompt fantasy.Prompt) (*genai.Content, []*genai.Content, []
 
 // Generate implements fantasy.LanguageModel.
 func (g *languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantasy.Response, error) {
+	ctx = withCallUA(ctx, call)
 	config, contents, warnings, err := g.prepareParams(call)
 	if err != nil {
 		return nil, err
@@ -593,6 +594,7 @@ func (g *languageModel) Provider() string {
 
 // Stream implements fantasy.LanguageModel.
 func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.StreamResponse, error) {
+	ctx = withCallUA(ctx, call)
 	config, contents, warnings, err := g.prepareParams(call)
 	if err != nil {
 		return nil, err
@@ -919,6 +921,7 @@ func (g *languageModel) StreamObject(ctx context.Context, call fantasy.ObjectCal
 }
 
 func (g *languageModel) generateObjectWithJSONMode(ctx context.Context, call fantasy.ObjectCall) (*fantasy.ObjectResponse, error) {
+	ctx = withObjectCallUA(ctx, call)
 	// Convert our Schema to Google's JSON Schema format
 	jsonSchemaMap := schema.ToMap(call.Schema)
 
@@ -1001,6 +1004,7 @@ func (g *languageModel) generateObjectWithJSONMode(ctx context.Context, call fan
 }
 
 func (g *languageModel) streamObjectWithJSONMode(ctx context.Context, call fantasy.ObjectCall) (fantasy.ObjectStreamResponse, error) {
+	ctx = withObjectCallUA(ctx, call)
 	// Convert our Schema to Google's JSON Schema format
 	jsonSchemaMap := schema.ToMap(call.Schema)
 

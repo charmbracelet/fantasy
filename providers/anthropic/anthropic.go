@@ -793,7 +793,7 @@ func (a languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantas
 	if err != nil {
 		return nil, err
 	}
-	response, err := a.client.Messages.New(ctx, *params)
+	response, err := a.client.Messages.New(ctx, *params, callUARequestOptions(call)...)
 	if err != nil {
 		return nil, toProviderErr(err)
 	}
@@ -871,7 +871,7 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 		return nil, err
 	}
 
-	stream := a.client.Messages.NewStreaming(ctx, *params)
+	stream := a.client.Messages.NewStreaming(ctx, *params, callUARequestOptions(call)...)
 	acc := anthropic.Message{}
 	return func(yield func(fantasy.StreamPart) bool) {
 		if len(warnings) > 0 {

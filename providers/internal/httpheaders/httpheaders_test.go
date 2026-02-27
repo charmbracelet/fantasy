@@ -139,3 +139,28 @@ func TestResolveHeaders_DuplicateCaseInsensitiveKeys(t *testing.T) {
 	_, hasLower := got["user-agent"]
 	assert.False(t, hasLower, "all case-insensitive UA keys must be removed")
 }
+
+func TestCallUserAgent(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name        string
+		callUA      string
+		callSegment string
+		wantUA      string
+		wantOK      bool
+	}{
+		{name: "no override", callUA: "", callSegment: "", wantUA: "", wantOK: false},
+		{name: "explicit UA", callUA: "MyAgent/1.0", callSegment: "", wantUA: "MyAgent/1.0", wantOK: true},
+		{name: "model segment only", callUA: "", callSegment: "Claude 4.6", wantUA: "Charm Fantasy/0.11.0 (Claude 4.6)", wantOK: true},
+		{name: "explicit UA wins over segment", callUA: "MyAgent/1.0", callSegment: "Claude 4.6", wantUA: "MyAgent/1.0", wantOK: true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			ua, ok := CallUserAgent("0.11.0", tt.callUA, tt.callSegment)
+			assert.Equal(t, tt.wantOK, ok)
+			assert.Equal(t, tt.wantUA, ua)
+		})
+	}
+}

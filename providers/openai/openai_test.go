@@ -3396,4 +3396,157 @@ func TestUserAgent(t *testing.T) {
 		require.Len(t, server.calls, 1)
 		assert.Equal(t, "Charm Fantasy/"+fantasy.Version, server.calls[0].headers["User-Agent"])
 	})
+
+	t.Run("Call.UserAgent overrides provider UA", func(t *testing.T) {
+		t.Parallel()
+
+		server := newMockServer()
+		defer server.close()
+		server.prepareJSONResponse(map[string]any{})
+
+		p, err := New(
+			WithAPIKey("k"),
+			WithBaseURL(server.server.URL),
+			WithUserAgent("provider-ua"),
+		)
+		require.NoError(t, err)
+		model, _ := p.LanguageModel(t.Context(), "gpt-4")
+		_, _ = model.Generate(t.Context(), fantasy.Call{
+			Prompt:    testPrompt,
+			UserAgent: "agent-ua",
+		})
+
+		require.Len(t, server.calls, 1)
+		assert.Equal(t, "agent-ua", server.calls[0].headers["User-Agent"])
+	})
+
+	t.Run("Call.ModelSegment overrides provider default", func(t *testing.T) {
+		t.Parallel()
+
+		server := newMockServer()
+		defer server.close()
+		server.prepareJSONResponse(map[string]any{})
+
+		p, err := New(
+			WithAPIKey("k"),
+			WithBaseURL(server.server.URL),
+		)
+		require.NoError(t, err)
+		model, _ := p.LanguageModel(t.Context(), "gpt-4")
+		_, _ = model.Generate(t.Context(), fantasy.Call{
+			Prompt:       testPrompt,
+			ModelSegment: "GPT-5",
+		})
+
+		require.Len(t, server.calls, 1)
+		assert.Equal(t, "Charm Fantasy/"+fantasy.Version+" (GPT-5)", server.calls[0].headers["User-Agent"])
+	})
+
+	t.Run("Call.UserAgent overrides provider WithHeaders UA", func(t *testing.T) {
+		t.Parallel()
+
+		server := newMockServer()
+		defer server.close()
+		server.prepareJSONResponse(map[string]any{})
+
+		p, err := New(
+			WithAPIKey("k"),
+			WithBaseURL(server.server.URL),
+			WithHeaders(map[string]string{"User-Agent": "header-ua"}),
+		)
+		require.NoError(t, err)
+		model, _ := p.LanguageModel(t.Context(), "gpt-4")
+		_, _ = model.Generate(t.Context(), fantasy.Call{
+			Prompt:    testPrompt,
+			UserAgent: "call-level-ua",
+		})
+
+		require.Len(t, server.calls, 1)
+		assert.Equal(t, "call-level-ua", server.calls[0].headers["User-Agent"])
+	})
+
+	t.Run("no Call UA falls through to provider UA", func(t *testing.T) {
+		t.Parallel()
+
+		server := newMockServer()
+		defer server.close()
+		server.prepareJSONResponse(map[string]any{})
+
+		p, err := New(
+			WithAPIKey("k"),
+			WithBaseURL(server.server.URL),
+			WithUserAgent("provider-ua"),
+		)
+		require.NoError(t, err)
+		model, _ := p.LanguageModel(t.Context(), "gpt-4")
+		_, _ = model.Generate(t.Context(), fantasy.Call{Prompt: testPrompt})
+
+		require.Len(t, server.calls, 1)
+		assert.Equal(t, "provider-ua", server.calls[0].headers["User-Agent"])
+	})
+
+	t.Run("agent WithUserAgent overrides provider UA end-to-end", func(t *testing.T) {
+		t.Parallel()
+
+		server := newMockServer()
+		defer server.close()
+		server.prepareJSONResponse(map[string]any{})
+
+		p, err := New(
+			WithAPIKey("k"),
+			WithBaseURL(server.server.URL),
+			WithUserAgent("provider-ua"),
+		)
+		require.NoError(t, err)
+		model, _ := p.LanguageModel(t.Context(), "gpt-4")
+
+		agent := fantasy.NewAgent(model, fantasy.WithUserAgent("agent-ua"))
+		_, _ = agent.Generate(t.Context(), fantasy.AgentCall{Prompt: "hi"})
+
+		require.Len(t, server.calls, 1)
+		assert.Equal(t, "agent-ua", server.calls[0].headers["User-Agent"])
+	})
+
+	t.Run("agent WithModelSegment overrides provider default end-to-end", func(t *testing.T) {
+		t.Parallel()
+
+		server := newMockServer()
+		defer server.close()
+		server.prepareJSONResponse(map[string]any{})
+
+		p, err := New(
+			WithAPIKey("k"),
+			WithBaseURL(server.server.URL),
+		)
+		require.NoError(t, err)
+		model, _ := p.LanguageModel(t.Context(), "gpt-4")
+
+		agent := fantasy.NewAgent(model, fantasy.WithModelSegment("Claude 4.6"))
+		_, _ = agent.Generate(t.Context(), fantasy.AgentCall{Prompt: "hi"})
+
+		require.Len(t, server.calls, 1)
+		assert.Equal(t, "Charm Fantasy/"+fantasy.Version+" (Claude 4.6)", server.calls[0].headers["User-Agent"])
+	})
+
+	t.Run("agent without UA falls through to provider UA end-to-end", func(t *testing.T) {
+		t.Parallel()
+
+		server := newMockServer()
+		defer server.close()
+		server.prepareJSONResponse(map[string]any{})
+
+		p, err := New(
+			WithAPIKey("k"),
+			WithBaseURL(server.server.URL),
+			WithUserAgent("provider-ua"),
+		)
+		require.NoError(t, err)
+		model, _ := p.LanguageModel(t.Context(), "gpt-4")
+
+		agent := fantasy.NewAgent(model)
+		_, _ = agent.Generate(t.Context(), fantasy.AgentCall{Prompt: "hi"})
+
+		require.Len(t, server.calls, 1)
+		assert.Equal(t, "provider-ua", server.calls[0].headers["User-Agent"])
+	})
 }

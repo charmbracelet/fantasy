@@ -3,6 +3,7 @@ package fantasy
 import (
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 
@@ -53,7 +54,14 @@ func (m *ProviderError) Error() string {
 
 // IsRetryable checks if the error is retryable based on the status code.
 func (m *ProviderError) IsRetryable() bool {
-	return m.StatusCode == http.StatusRequestTimeout || m.StatusCode == http.StatusConflict || m.StatusCode == http.StatusTooManyRequests
+	// According to OpenAI's Go SDK [1], we should retry on connection errors and server internal errors.
+	// [1] https://github.com/openai/openai-go/blob/719cc10a9a2f8b1ad5bc60f2aac279bf6646a842/internal/requestconfig/requestconfig.go#L250
+
+	if errors.Is(m.Cause, io.ErrUnexpectedEOF) {
+		return true
+	}
+
+	return m.StatusCode == http.StatusRequestTimeout || m.StatusCode == http.StatusConflict || m.StatusCode == http.StatusTooManyRequests || m.StatusCode >= http.StatusInternalServerError
 }
 
 // IsContextTooLarge checks if the error is due to the context exceeding the model's limit.

@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 459
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"}],"model":"qwen-3-coder-480b","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://api.cerebras.ai/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"id":"chatcmpl-358e2e8b-193b-44db-8f3b-b82dc786d90e","choices":[{"finish_reason":"tool_calls","index":0,"message":{"tool_calls":[{"id":"181e286b1","type":"function","function":{"name":"weather","arguments":"{\"location\": \"Florence\"}"}}],"role":"assistant"}}],"created":1761231233,"model":"qwen-3-coder-480b","system_fingerprint":"fp_386b539e7b02ce3613b7","object":"chat.completion","usage":{"prompt_tokens":277,"completion_tokens":23,"total_tokens":300,"prompt_tokens_details":{"cached_tokens":0}},"time_info":{"queue_time":0.042823605,"prompt_time":0.012713736,"completion_time":0.016030452,"total_time":0.07278990745544434,"created":1761231233.7300596}}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 590.744083ms
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 665
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"181e286b1","function":{"arguments":"{\"location\": \"Florence\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"181e286b1","role":"tool"}],"model":"qwen-3-coder-480b","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://api.cerebras.ai/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"id":"chatcmpl-2dec33fe-8287-4b1a-803c-8a6a00664bb8","choices":[{"finish_reason":"stop","index":0,"message":{"content":"The current weather in Florence, Italy is 40°C.","role":"assistant"}}],"created":1761231231,"model":"qwen-3-coder-480b","system_fingerprint":"fp_386b539e7b02ce3613b7","object":"chat.completion","usage":{"prompt_tokens":317,"completion_tokens":14,"total_tokens":331,"prompt_tokens_details":{"cached_tokens":0}},"time_info":{"queue_time":0.025669097,"prompt_time":0.015523098,"completion_time":0.009339437,"total_time":0.055092573165893555,"created":1761231231.8161113}}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 366.827417ms

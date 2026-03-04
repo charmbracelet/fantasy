@@ -28,6 +28,8 @@ const (
 	Name = "anthropic"
 	// DefaultURL is the default URL for the Anthropic API.
 	DefaultURL = "https://api.anthropic.com"
+	// VertexAuthScope is the auth scope required for vertex auth if using a Service Account JSON file (e.g. GOOGLE_APPLICATION_CREDENTIALS)
+	VertexAuthScope = "https://www.googleapis.com/auth/cloud-platform"
 )
 
 type options struct {
@@ -159,6 +161,7 @@ func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.L
 		} else {
 			var err error
 			credentials, err = google.FindDefaultCredentials(ctx)
+			credentials, err = google.FindDefaultCredentials(ctx, VertexAuthScope)
 			if err != nil {
 				return nil, err
 			}

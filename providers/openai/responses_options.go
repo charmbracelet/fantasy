@@ -97,20 +97,23 @@ const (
 
 // ResponsesProviderOptions represents additional options for OpenAI Responses API.
 type ResponsesProviderOptions struct {
-	Include           []IncludeType    `json:"include"`
-	Instructions      *string          `json:"instructions"`
-	Logprobs          any              `json:"logprobs"`
-	MaxToolCalls      *int64           `json:"max_tool_calls"`
-	Metadata          map[string]any   `json:"metadata"`
-	ParallelToolCalls *bool            `json:"parallel_tool_calls"`
-	PromptCacheKey    *string          `json:"prompt_cache_key"`
-	ReasoningEffort   *ReasoningEffort `json:"reasoning_effort"`
-	ReasoningSummary  *string          `json:"reasoning_summary"`
-	SafetyIdentifier  *string          `json:"safety_identifier"`
-	ServiceTier       *ServiceTier     `json:"service_tier"`
-	StrictJSONSchema  *bool            `json:"strict_json_schema"`
-	TextVerbosity     *TextVerbosity   `json:"text_verbosity"`
-	User              *string          `json:"user"`
+	Include            []IncludeType    `json:"include"`
+	Instructions       *string          `json:"instructions"`
+	Logprobs           any              `json:"logprobs"`
+	MaxToolCalls       *int64           `json:"max_tool_calls"`
+	Metadata           map[string]any   `json:"metadata"`
+	ParallelToolCalls  *bool            `json:"parallel_tool_calls"`
+	PreviousResponseID *string          `json:"previous_response_id"`
+	PromptCacheKey     *string          `json:"prompt_cache_key"`
+	ReasoningEffort    *ReasoningEffort `json:"reasoning_effort"`
+	ReasoningSummary   *string          `json:"reasoning_summary"`
+	ResetChain         *bool            `json:"reset_chain"`
+	SafetyIdentifier   *string          `json:"safety_identifier"`
+	ServiceTier        *ServiceTier     `json:"service_tier"`
+	StrictJSONSchema   *bool            `json:"strict_json_schema"`
+	TextVerbosity      *TextVerbosity   `json:"text_verbosity"`
+	User               *string          `json:"user"`
+	GenerateWarmup     *bool            `json:"generate_warmup"`
 }
 
 // Options implements the ProviderOptions interface.

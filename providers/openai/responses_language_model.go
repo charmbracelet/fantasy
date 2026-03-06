@@ -21,20 +21,22 @@ import (
 const topLogprobsMax = 20
 
 type responsesLanguageModel struct {
-	provider   string
-	modelID    string
-	client     openai.Client
-	objectMode fantasy.ObjectMode
+	provider    string
+	modelID     string
+	client      openai.Client
+	objectMode  fantasy.ObjectMode
+	wsTransport *wsTransport
 }
 
 // newResponsesLanguageModel implements a responses api model
 // INFO: (kujtim) currently we do not support stored parameter we default it to false.
-func newResponsesLanguageModel(modelID string, provider string, client openai.Client, objectMode fantasy.ObjectMode) responsesLanguageModel {
+func newResponsesLanguageModel(modelID string, provider string, client openai.Client, objectMode fantasy.ObjectMode, ws *wsTransport) responsesLanguageModel {
 	return responsesLanguageModel{
-		modelID:    modelID,
-		provider:   provider,
-		client:     client,
-		objectMode: objectMode,
+		modelID:     modelID,
+		provider:    provider,
+		client:      client,
+		objectMode:  objectMode,
+		wsTransport: ws,
 	}
 }
 
@@ -227,6 +229,9 @@ func (o responsesLanguageModel) prepareParams(call fantasy.Call) (*responses.Res
 		}
 		if openaiOptions.SafetyIdentifier != nil {
 			params.SafetyIdentifier = param.NewOpt(*openaiOptions.SafetyIdentifier)
+		}
+		if openaiOptions.PreviousResponseID != nil {
+			params.PreviousResponseID = param.NewOpt(*openaiOptions.PreviousResponseID)
 		}
 		if topLogprobs > 0 {
 			params.TopLogprobs = param.NewOpt(int64(topLogprobs))
@@ -668,6 +673,15 @@ func toResponsesTools(tools []fantasy.Tool, toolChoice *fantasy.ToolChoice, opti
 
 func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call) (*fantasy.Response, error) {
 	params, warnings := o.prepareParams(call)
+
+	if o.wsTransport != nil {
+		resp, err := o.generateViaWebSocket(ctx, params, warnings, call)
+		if err == nil {
+			return resp, nil
+		}
+		// Fall back to HTTP on WebSocket failure
+	}
+
 	response, err := o.client.Responses.New(ctx, *params)
 	if err != nil {
 		return nil, toProviderErr(err)
@@ -805,6 +819,14 @@ func mapResponsesFinishReason(reason string, hasFunctionCall bool) fantasy.Finis
 
 func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.StreamResponse, error) {
 	params, warnings := o.prepareParams(call)
+
+	if o.wsTransport != nil {
+		resp, err := o.streamViaWebSocket(ctx, params, warnings, call)
+		if err == nil {
+			return resp, nil
+		}
+		// Fall back to HTTP on WebSocket failure
+	}
 
 	stream := o.client.Responses.NewStreaming(ctx, *params)
 

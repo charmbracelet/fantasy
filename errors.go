@@ -38,6 +38,10 @@ type ProviderError struct {
 	RequestBody     []byte
 	ResponseHeaders map[string]string
 	ResponseBody    []byte
+
+	ContextUsedTokens  int
+	ContextMaxTokens   int
+	ContextTooLargeErr bool
 }
 
 func (m *ProviderError) Error() string {
@@ -50,6 +54,11 @@ func (m *ProviderError) Error() string {
 // IsRetryable checks if the error is retryable based on the status code.
 func (m *ProviderError) IsRetryable() bool {
 	return m.StatusCode == http.StatusRequestTimeout || m.StatusCode == http.StatusConflict || m.StatusCode == http.StatusTooManyRequests
+}
+
+// IsContextTooLarge checks if the error is due to the context exceeding the model's limit.
+func (m *ProviderError) IsContextTooLarge() bool {
+	return m.ContextTooLargeErr || m.ContextMaxTokens > 0 || m.ContextUsedTokens > 0
 }
 
 // RetryError represents an error that occurred during retry operations.

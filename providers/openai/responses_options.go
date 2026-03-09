@@ -162,6 +162,9 @@ var responsesReasoningModelIDs = []string{
 	"gpt-5.2-codex",
 	"gpt-5.3",
 	"gpt-5.3-codex",
+	"gpt-5.4",
+	"gpt-5.4-pro",
+	"gpt-5.4-codex",
 	"gpt-oss-120b",
 }
 

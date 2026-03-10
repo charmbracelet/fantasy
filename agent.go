@@ -138,6 +138,7 @@ type agentSettings struct {
 	presencePenalty  *float64
 	frequencyPenalty *float64
 	headers          map[string]string
+	userAgent        string
 	providerOptions  ProviderOptions
 
 	// TODO: add support for provider tools
@@ -448,6 +449,7 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 				FrequencyPenalty: opts.FrequencyPenalty,
 				Tools:            preparedTools,
 				ToolChoice:       &stepToolChoice,
+				UserAgent:        a.settings.userAgent,
 				ProviderOptions:  opts.ProviderOptions,
 			})
 		})
@@ -829,6 +831,7 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 			FrequencyPenalty: call.FrequencyPenalty,
 			Tools:            preparedTools,
 			ToolChoice:       &stepToolChoice,
+			UserAgent:        a.settings.userAgent,
 			ProviderOptions:  call.ProviderOptions,
 		}
 
@@ -1415,6 +1418,14 @@ func addUsage(a, b Usage) Usage {
 func WithHeaders(headers map[string]string) AgentOption {
 	return func(s *agentSettings) {
 		s.headers = headers
+	}
+}
+
+// WithUserAgent sets the User-Agent header for the agent. This overrides any
+// provider-level User-Agent setting.
+func WithUserAgent(ua string) AgentOption {
+	return func(s *agentSettings) {
+		s.userAgent = ua
 	}
 }
 

@@ -14,6 +14,7 @@ import (
 	"charm.land/fantasy"
 	"charm.land/fantasy/object"
 	"charm.land/fantasy/providers/anthropic"
+	"charm.land/fantasy/providers/internal/httpheaders"
 	"charm.land/fantasy/schema"
 	"cloud.google.com/go/auth"
 	"github.com/charmbracelet/x/exp/slice"
@@ -36,6 +37,7 @@ type options struct {
 	name           string
 	baseURL        string
 	headers        map[string]string
+	userAgent      string
 	client         *http.Client
 	backend        genai.Backend
 	project        string
@@ -132,6 +134,14 @@ func WithToolCallIDFunc(f ToolCallIDFunc) Option {
 	}
 }
 
+// WithUserAgent sets an explicit User-Agent header, overriding the default and any
+// value set via WithHeaders.
+func WithUserAgent(ua string) Option {
+	return func(o *options) {
+		o.userAgent = ua
+	}
+}
+
 // WithObjectMode sets the object generation mode for the Google provider.
 func WithObjectMode(om fantasy.ObjectMode) Option {
 	return func(o *options) {
@@ -154,11 +164,15 @@ type languageModel struct {
 // LanguageModel implements fantasy.Provider.
 func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.LanguageModel, error) {
 	if strings.Contains(modelID, "anthropic") || strings.Contains(modelID, "claude") {
-		p, err := anthropic.New(
+		anthropicOpts := []anthropic.Option{
 			anthropic.WithVertex(a.options.project, a.options.location),
 			anthropic.WithHTTPClient(a.options.client),
 			anthropic.WithSkipAuth(a.options.skipAuth),
-		)
+		}
+		if a.options.userAgent != "" {
+			anthropicOpts = append(anthropicOpts, anthropic.WithUserAgent(a.options.userAgent))
+		}
+		p, err := anthropic.New(anthropicOpts...)
 		if err != nil {
 			return nil, err
 		}
@@ -166,7 +180,7 @@ func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.L
 	}
 
 	cc := &genai.ClientConfig{
-		HTTPClient: a.options.client,
+		HTTPClient: wrapHTTPClient(a.options.client),
 		Backend:    a.options.backend,
 		APIKey:     a.options.apiKey,
 		Project:    a.options.project,
@@ -180,15 +194,16 @@ func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.L
 		}
 	}
 
-	if a.options.baseURL != "" || len(a.options.headers) > 0 {
-		headers := http.Header{}
-		for k, v := range a.options.headers {
-			headers.Add(k, v)
-		}
-		cc.HTTPOptions = genai.HTTPOptions{
-			BaseURL: a.options.baseURL,
-			Headers: headers,
-		}
+	defaultUA := httpheaders.DefaultUserAgent(fantasy.Version)
+	resolved := httpheaders.ResolveHeaders(a.options.headers, a.options.userAgent, defaultUA)
+
+	headers := http.Header{}
+	for k, v := range resolved {
+		headers.Set(k, v)
+	}
+	cc.HTTPOptions = genai.HTTPOptions{
+		BaseURL: a.options.baseURL,
+		Headers: headers,
 	}
 	client, err := genai.NewClient(ctx, cc)
 	if err != nil {
@@ -530,6 +545,7 @@ func toGooglePrompt(prompt fantasy.Prompt) (*genai.Content, []*genai.Content, []
 
 // Generate implements fantasy.LanguageModel.
 func (g *languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantasy.Response, error) {
+	ctx = withCallUA(ctx, call)
 	config, contents, warnings, err := g.prepareParams(call)
 	if err != nil {
 		return nil, err
@@ -565,6 +581,7 @@ func (g *languageModel) Provider() string {
 
 // Stream implements fantasy.LanguageModel.
 func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.StreamResponse, error) {
+	ctx = withCallUA(ctx, call)
 	config, contents, warnings, err := g.prepareParams(call)
 	if err != nil {
 		return nil, err
@@ -891,6 +908,7 @@ func (g *languageModel) StreamObject(ctx context.Context, call fantasy.ObjectCal
 }
 
 func (g *languageModel) generateObjectWithJSONMode(ctx context.Context, call fantasy.ObjectCall) (*fantasy.ObjectResponse, error) {
+	ctx = withObjectCallUA(ctx, call)
 	// Convert our Schema to Google's JSON Schema format
 	jsonSchemaMap := schema.ToMap(call.Schema)
 
@@ -973,6 +991,7 @@ func (g *languageModel) generateObjectWithJSONMode(ctx context.Context, call fan
 }
 
 func (g *languageModel) streamObjectWithJSONMode(ctx context.Context, call fantasy.ObjectCall) (fantasy.ObjectStreamResponse, error) {
+	ctx = withObjectCallUA(ctx, call)
 	// Convert our Schema to Google's JSON Schema format
 	jsonSchemaMap := schema.ToMap(call.Schema)
 

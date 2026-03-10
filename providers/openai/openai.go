@@ -7,6 +7,7 @@ import (
 	"maps"
 
 	"charm.land/fantasy"
+	"charm.land/fantasy/providers/internal/httpheaders"
 	"github.com/openai/openai-go/v2"
 	"github.com/openai/openai-go/v2/option"
 )
@@ -31,6 +32,7 @@ type options struct {
 	useResponsesAPI      bool
 	useWebSocket         bool
 	headers              map[string]string
+	userAgent            string
 	client               option.HTTPClient
 	sdkOptions           []option.RequestOption
 	objectMode           fantasy.ObjectMode
@@ -133,12 +135,11 @@ func WithUseResponsesAPI() Option {
 	}
 }
 
-// WithWebSocket enables WebSocket mode for the Responses API, providing lower-latency
-// persistent connections for tool-call-heavy workflows. Requires WithUseResponsesAPI().
-// Falls back to HTTP if the WebSocket connection cannot be established.
-func WithWebSocket() Option {
+// WithUserAgent sets an explicit User-Agent header, overriding the default and any
+// value set via WithHeaders.
+func WithUserAgent(ua string) Option {
 	return func(o *options) {
-		o.useWebSocket = true
+		o.userAgent = ua
 	}
 }
 
@@ -165,7 +166,9 @@ func (o *provider) LanguageModel(_ context.Context, modelID string) (fantasy.Lan
 		openaiClientOptions = append(openaiClientOptions, option.WithBaseURL(o.options.baseURL))
 	}
 
-	for key, value := range o.options.headers {
+	defaultUA := httpheaders.DefaultUserAgent(fantasy.Version)
+	resolved := httpheaders.ResolveHeaders(o.options.headers, o.options.userAgent, defaultUA)
+	for key, value := range resolved {
 		openaiClientOptions = append(openaiClientOptions, option.WithHeader(key, value))
 	}
 

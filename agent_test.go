@@ -1768,3 +1768,84 @@ func TestAgent_MediaToolResponses(t *testing.T) {
 		require.Equal(t, 600, metadata.Height)
 	})
 }
+
+func TestToResponseMessages_ProviderExecutedRouting(t *testing.T) {
+	t.Parallel()
+
+	// Build step content that mixes a provider-executed tool call/result
+	// (e.g. web search) with a regular local tool call/result.
+	content := []Content{
+		// Provider-executed tool call.
+		&ToolCallContent{
+			ToolCallID:       "srvtoolu_01",
+			ToolName:         "web_search",
+			Input:            `{"query":"test"}`,
+			ProviderExecuted: true,
+		},
+		// Provider-executed tool result.
+		&ToolResultContent{
+			ToolCallID:       "srvtoolu_01",
+			ProviderExecuted: true,
+		},
+		// Regular (locally-executed) tool call.
+		&ToolCallContent{
+			ToolCallID: "toolu_02",
+			ToolName:   "calculator",
+			Input:      `{"expr":"1+1"}`,
+		},
+		// Regular tool result.
+		&ToolResultContent{
+			ToolCallID: "toolu_02",
+			Result:     ToolResultOutputContentText{Text: "2"},
+		},
+		// Some trailing text.
+		&TextContent{Text: "Done."},
+	}
+
+	msgs := toResponseMessages(content)
+
+	// Expect two messages: assistant + tool.
+	require.Len(t, msgs, 2)
+
+	// Assistant message should contain:
+	//   1. provider-executed ToolCallPart
+	//   2. provider-executed ToolResultPart
+	//   3. regular ToolCallPart
+	//   4. TextPart
+	assistant := msgs[0]
+	require.Equal(t, MessageRoleAssistant, assistant.Role)
+	require.Len(t, assistant.Content, 4)
+
+	// Verify provider-executed tool call is in assistant.
+	tc1, ok := AsMessagePart[ToolCallPart](assistant.Content[0])
+	require.True(t, ok)
+	require.Equal(t, "srvtoolu_01", tc1.ToolCallID)
+	require.True(t, tc1.ProviderExecuted)
+
+	// Verify provider-executed tool result is in assistant.
+	tr1, ok := AsMessagePart[ToolResultPart](assistant.Content[1])
+	require.True(t, ok)
+	require.Equal(t, "srvtoolu_01", tr1.ToolCallID)
+	require.True(t, tr1.ProviderExecuted)
+
+	// Verify regular tool call is in assistant.
+	tc2, ok := AsMessagePart[ToolCallPart](assistant.Content[2])
+	require.True(t, ok)
+	require.Equal(t, "toolu_02", tc2.ToolCallID)
+	require.False(t, tc2.ProviderExecuted)
+
+	// Verify text part is in assistant.
+	text, ok := AsMessagePart[TextPart](assistant.Content[3])
+	require.True(t, ok)
+	require.Equal(t, "Done.", text.Text)
+
+	// Tool message should contain only the regular tool result.
+	toolMsg := msgs[1]
+	require.Equal(t, MessageRoleTool, toolMsg.Role)
+	require.Len(t, toolMsg.Content, 1)
+
+	tr2, ok := AsMessagePart[ToolResultPart](toolMsg.Content[0])
+	require.True(t, ok)
+	require.Equal(t, "toolu_02", tr2.ToolCallID)
+	require.False(t, tr2.ProviderExecuted)
+}

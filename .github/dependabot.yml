@@ -17,6 +17,12 @@ updates:
       all:
         patterns:
           - "*"
+        exclude-patterns:
+          - github.com/ardanlabs/kronk
+      kronk:
+        patterns:
+          - github.com/ardanlabs/kronk
+
 
   - package-ecosystem: "gomod"
     directory: "/examples"

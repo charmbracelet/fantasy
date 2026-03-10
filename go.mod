@@ -1,6 +1,6 @@
 module charm.land/fantasy
 
-go 1.26.0
+go 1.26.1
 
 require (
 	charm.land/x/vcr v0.1.1

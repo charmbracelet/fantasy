@@ -1,0 +1,1107 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 382
+        host: ""
+        body: '{"max_tokens":4000,"messages":[{"content":[{"text":"What is the current population of Tokyo? Cite your source.","type":"text"}],"role":"user"}],"model":"claude-sonnet-4-20250514","system":[{"text":"You are a helpful assistant","type":"text"}],"tool_choice":{"disable_parallel_tool_use":false,"type":"auto"},"tools":[{"name":"web_search","type":"web_search_20250305"}],"stream":true}'
+        headers:
+            Accept:
+                - application/json
+            Content-Type:
+                - application/json
+            User-Agent:
+                - Charm Fantasy/0.12.0
+        url: https://api.anthropic.com/v1/messages
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        content_length: -1
+        uncompressed: true
+        body: |+
+            event: message_start
+            data: {"type":"message_start","message":{"model":"claude-sonnet-4-20250514","id":"msg_019wEazncxZZExmW7sTECaeK","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":2049,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1,"service_tier":"standard","inference_geo":"not_available"}}             }
+
+            event: content_block_start
+            data: {"type":"content_block_start","index":0,"content_block":{"type":"server_tool_use","id":"srvtoolu_01KYmV1c6SjLeWGNcNG4p2yi","name":"web_search","input":{},"caller":{"type":"direct"}} }
+
+            event: ping
+            data: {"type": "ping"}
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":""}         }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"{\"query\":"}       }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":" \"Tok"}}
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"yo"}   }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":" popula"}       }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"tion 2026 c"}       }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"urrent\"}"}     }
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":0              }
+
+            event: content_block_start
+            data: {"type":"content_block_start","index":1,"content_block":{"type":"web_search_tool_result","tool_use_id":"srvtoolu_01KYmV1c6SjLeWGNcNG4p2yi","content":[{"type":"web_search_result","title":"Tokyo Population 2026","url":"https://worldpopulationreview.com/cities/japan/tokyo","encrypted_content":"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","page_age":"6 days ago"},{"type":"web_search_result","title":"Tokyo, Japan Metro Area Population (1950-2026) | MacroTrends","url":"https://www.macrotrends.net/global-metrics/cities/21671/tokyo/population","encrypted_content":"Eo8GCioIDRgCIiQ1N2U5MGUwZC0xMTk2LTRjNjAtODU1OC1mMzUzNTFkNDQ2YWQSDIpxFnRYFlG8exiE/RoMf4R4fw6QIiAI0GJRIjC8X05Xv3d4LeYtY7yVys+S660CtLiQ7vKgsAo68bw1e7QBE1JRFfH5c8qM2i10cjsqkgUKBpDMeaBMTb/HQN8radTmTJC/DneQy8Yo7yPrdKLSeb9TYcw73cVk5lBPl/RRpnQm1oYpC5IGJeqLPERWJ5lMMi2Etj4OKd+RCtAoi7Na4LYfTDJflhnl6+C85fETDKu8wF0UdP4HJaBVzwkMhR4PASE7n7bc/gJTgP0CSHU6YC6b9Az49jIq6cPv2pWiHYDxmHe5rmdT1sC4nH02L43SSalIume85VUdGf4iJ/clj8wQjEjgxwlzbA0RZY58z4QMt3B0RXVosQ3gxtQbTODkHBYSF5zVMYWUsr7+zkzNIZhtLFd6Dt3GKpF4zC2HJbf09cx6ouG5trXiCCZaJz8FQt0sh4Bbj6FEw52ObnKm3MGa5iJCVUTy7zgPqc3mMVXcUpM6CCrORJOP03XmxgasxlQstspQLsOyeIU+Cpnb3+6ySSGVe9bGyKfJQOBtp+yscvf0s5Nhfdj4X3yt1yB/mfEvBiNnd4lfMsAkulmURBF2Uuil0FL9FyFJTBemwVWFWKmR4P/mp55bmRy5ILVaaowyhNnbNai8aULym+Vih9gyTmvHRiX5z6eRtkrMeSA1VkJxchY8Fll43XQevGoDOysXOXZKrPb02mIj1GVrrEGSmhxGGpwnlICpyNyIQhky8mX7ocW+mzscWk15vtzE/sphw5uCyiAJiNG3xzvofuavSxwO9EY8WF0yka0vliWU2E7uSFXhl02vhZFwzuSKub91x7PFEoSUSn3ZCiZ/6BR5yQEkqiUTVN1quQ51zALuCnUphZHxT2IDdshhU5gkdHd6440Vn3ZGqGW9qBZWktvFa6wdmWOV4A/kWSyw3n1tp1Y9VG0N7U45POInQbayPBP5Pfjb7fu02zrQAKQ+DZ59GAM=","page_age":null},{"type":"web_search_result","title":"Japan Population (2026) - Worldometer","url":"https://www.worldometers.info/world-population/japan-population/","encrypted_content":"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","page_age":null},{"type":"web_search_result","title":"Tokyo, Japan Population (2026) - Population Stat","url":"https://populationstat.com/japan/tokyo","encrypted_content":"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","page_age":null},{"type":"web_search_result","title":"Demographics of Tokyo - Wikipedia","url":"https://en.wikipedia.org/wiki/Demographics_of_Tokyo","encrypted_content":"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","page_age":"1 week ago"},{"type":"web_search_result","title":"Tokyo Population 2026 - Japan City Statistics | World Measure","url":"https://worldmeasure.com/cities/tokyo-jpn","encrypted_content":"ErMHCioIDRgCIiQ1N2U5MGUwZC0xMTk2LTRjNjAtODU1OC1mMzUzNTFkNDQ2YWQSDLV9OPdYf4xYdxL/JhoMTStPtrX5LcsuygmYIjAaW7ffHk/jRgBuvH12Q3EtWjbarDCDvccIL+XlMVHfOeFynCcLb4I4A7Vdv+ChUFUqtgbNW0vvHa0xsNNzx7jKqqgfUMRcnza3zLUsO7NbRIgvIPV6nOyVv24PsokITAnUlbdwUuV4WngdwwHXRg33JFiAb4B58ilGokG/cmoQsfSSHVNKGjZP25yb6k/q1Y74vjYRFNH7G6AeS/8vDBv8JRisSAtZ6jqY7vpvdrXxfR/DDfzyG/twJ+DKMZhnaWC6xvjrLcIGH3p99b0CmkohxzOzz5ilqApzaxJxl83tc82QQnwJC3DrPcHAzjptGr2iBEQP2Zr+6AcGCtYyt0HDUOD6QxXTiyALzL73z/Mom4wYtr6LPSiPBYENFC7M6dX3Ent6YD7aNaXaCzd/F1SEnx0ue7llEHMMkILauWesNjVRjmHlPJibDIVpUk6c6X94+tl95VpjCtA7zEvXqpljAsbK1lNOXf79Cq5Xbli4gaEoUCLMU+QgWYtNPALmg2pjFE7gNtRhnajZhYv/TGDIzxWvlnJCYpCYEZD10XB1TMFe2cSGuqxxp1s/9FrgPywruJ8ii0NtKlQHLlckmpRpLV2WBkrqEhvJSD8pM2eF57cJNaffymfzNb3x7b+Iwrj/jA3Tsc0K1O3XzxUH7C5YF2qxHn5yQIOfSnk+G+2K1RXNGIVqsGIwb+CKp9iwB9jkLK2eWLxaXOMiQTVqZA2LMZuo/7wUJzHDijCDBovaFUoxyru9LQwCYw2XdN2qVp9ySJhJwQ2YNb91aF9/2fW66dA8RgcCnajm4Lcuu+71cA66T9GvjfL7ONORT/D2/jvs4EZW7CW3tXKo0f5LPRvvbL6jtQWK1mqUwjAUj6qvL1S03tEla3JMurDAHsr3tZ/UwS651tUyOqa1eMOD9jaQwRhpVHpXek4uu0u2fY3AhB+YkGu01cU8Kmt9FCYYUY17glJO2tKRxgHJSnQRv7JvpBJafe+cDLkmEtG+mOEGy3HI1p2GS6wuoDPlYNitvqPmYZXNtHybmZRi3fxgJ8f4vS8N6lkc9+9E1WeOQwLJPexuy0+2XLNNOrdiORivkRW9IlIp3YoxmS2rIZOIfFcyGPcPlvipbS3j3CnJqfyAdpbGQJa4OGux/hIP+EVMh9gJzFIO9rKgHUYYAw==","page_age":null},{"type":"web_search_result","title":"Greater Tokyo Area - Wikipedia","url":"https://en.wikipedia.org/wiki/Greater_Tokyo_Area","encrypted_content":"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","page_age":"2 weeks ago"},{"type":"web_search_result","title":"Japan Cities by Population 2026","url":"https://worldpopulationreview.com/cities/japan","encrypted_content":"ErkJCioIDRgCIiQ1N2U5MGUwZC0xMTk2LTRjNjAtODU1OC1mMzUzNTFkNDQ2YWQSDKCGBszEKNLHu3neGBoMPovqHr0UXVQnS+WFIjAJ1KG4Ml2cLFqrsAiA9v7x/8DAufd4D3wBHOH5zfu7iO90I9KnoVzvhIhXnXiSGlsqvAh0EsAtn+x5yD6QEP380r/vZCnK7k/HR9HavzsbX6NnOOpZBl3b1sp9cZuQFcCQUVuAWnVLi14qSFM9CCSMLdwiCvBXmq63YOlu0pEiu8rR5MsOgobPvlsVpftxfO9x4g5IvWGkc5i5xDz0NUCYUkwnabNRc5I9gq7p4XQMBaMj2tK/c2oiubhSMQ3pilVD/0oWbF6/8YJvqccmz1pyhab1mfjWOqxU9slBC73iFmI6pM42MKu0uAc0HZO3xsGVKbhs+qlwM0uoPDtM5cBGE42FdbdfJJWp1yLWqD4KEfk4rXxqGPgqMhXOamRAgYOZQxergbmk+WKgJF7wg9gil69/SPaTY3QCInUfEHzxFFpKw+Xa3SQ/zTXLm6vHWRcVrsJSVWopqFvjHZd4/gyoI48IxlI3HBxTgxOcllW7a9ZiLrXoSBQgZCn5uBxhBwzG9ep1FeNIacdVMwpVBn9P6roZXJnjuDZW0zAJv5nQq8qcha7IPt5adHFvlS1fm5QknycQqoalJhH6hLzhfza1+C6ZfVHRtU5r1LWjbM+UTJ1Vn+S4oCR5oJH4iUB6Ecctnm0AY1exbFiNBTLQp0JlZcFHpphVu95cju7VvvLHKd3BpPUzS0kNErLzMzYWtVPHJrmU6EPpcbrXlzMq7kNGCDavB5ALnAsmFlYHZYzfMyWR9lxDhLmFCbcSNTJ/2bZLmTPaDULQuTr9YZJaFsotYpBxUBu8F2//xJixji4wkNQQplaCpC4ZmMCbjlVb67KC+efvCEob+ATQzWyNlbReQ+bhjmWxXmihMEef8n07JE43fG8Et3F8QrpQUJ3qupdOTrfFyz31Aj1Qw6/fYl0U8Wd9SRMCO+2hKqyBMiCOrnrSjEo3eCsU4u2juYxOx0CoIWWwy6Q7w0zpRlnu9itb9kL2pajlPvgq5oiVq0KHDDt1wdJTMWM31S0S5yBYa13ID5qHBGgW8ULegl0dRaQ+qOmbrhKWg0b78U3LdfORBkQ4PYvzgU6jJ7M0WJwVyEyVViqbGZQpWrVQP0oS9ZBvjDAdC5D4uA/DHZjC7LY1AZYzAUGXnuKp8+HwWv3QqnxdwcLS6bhwiKSVmwfWdPP3+B3J5HQQ7/cCfDBiMHK3Wuubt86YLxLBCc12PXpckgQEXcq7bsTJbuEU8pGoWKV8af04hJJPcPUN/9uZLBEwY/iaUfPwwlWVV1wKr4urQQgC+iyebquMv/IHWVjfHh+PcBpiDmq73W+GtxxLCncZHnFOZlJbSGypo8ePifIY9IsuQxg8dx9w0C7acpWQ8Jo/Csw72NiNfcmY40hn0T21UAy3J6e/+zzUaH5GBbVcop6Z11IQ6SgLaglNs0LQKgoyGoBHTmGHpKdyvk4Z3+O3PGQZ90+4EdsaKDdx6VVXbv+C3j8ZRWijnGRhYIZHsLiIaIlmgNRLQYFxesF/vOrqGAM=","page_age":"6 days ago"},{"type":"web_search_result","title":"Population of Tokyo 2026 | Tokyo population - statistics","url":"https://population-hub.com/en/jp/population-of-tokyo-3383.html","encrypted_content":"EuUCCioIDRgCIiQ1N2U5MGUwZC0xMTk2LTRjNjAtODU1OC1mMzUzNTFkNDQ2YWQSDIF7fKVdn6ARk5tCHhoMGBuKDJQm0zCqgvkBIjCMU/sdZRaNyP/zg9vQwR1FAnVaserBNuVsXLTyAtJJwU9H0pmJ3bGXmOxGDk/bGeQq6AGuJ4oEF89dfXvot6fe70Siza0hUVIEjNQkTYctTZjE13b3wNEw82JNwEHDEOBqW0ZBQxG7CcT0DZOoC8cjtg1yC8Y9CDyEsRTk75QDnc1lY+Dj0v5PCka+lOZuqvSA9BF2CkZxx45M+UffG4tGZoYgd3ic6JfVWhikjqXChVP1Km7Qf7gJHjgbAmc43namuzpsKZSwOdf0uhNGTX+NaKoCF7ZRAZc+8OJmq1KfiwcFYB5vh2SmZz1nBDNqv7+HpiqwjwYTtCL4Pa2MNrUbWup4auvHOrd4Qag+hWt9/PQbEkForigGcZpKGAM=","page_age":null},{"type":"web_search_result","title":"Tokyo - Wikipedia","url":"https://en.wikipedia.org/wiki/Tokyo","encrypted_content":"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","page_age":"1 day ago"}],"caller":{"type":"direct"}}     }
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":1         }
+
+            event: content_block_start
+            data: {"type":"content_block_start","index":2,"content_block":{"type":"text","text":""}         }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":2,"delta":{"type":"text_delta","text":"Based"}             }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":2,"delta":{"type":"text_delta","text":" on the search results, the"}         }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":2,"delta":{"type":"text_delta","text":" current"}           }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":2,"delta":{"type":"text_delta","text":" population of Tokyo depends"}               }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":2,"delta":{"type":"text_delta","text":" on which"}             }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":2,"delta":{"type":"text_delta","text":" definition is"}      }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":2,"delta":{"type":"text_delta","text":" used:\n\n**"} }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":2,"delta":{"type":"text_delta","text":"Greater"}          }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":2,"delta":{"type":"text_delta","text":" Tokyo Metropolitan"}       }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":2,"delta":{"type":"text_delta","text":" Area**:"}             }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":2,"delta":{"type":"text_delta","text":" "}            }
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":2    }
+
+            event: content_block_start
+            data: {"type":"content_block_start","index":3,"content_block":{"citations":[],"type":"text","text":""}   }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":3,"delta":{"type":"citations_delta","citation":{"type":"web_search_result_location","cited_text":"Tokyo&#x27;s 2026 population is now estimated at 36,953,600. ","url":"https://worldpopulationreview.com/cities/japan/tokyo","title":"Tokyo Population 2026","encrypted_index":"Eo8BCioIDRgCIiQ1N2U5MGUwZC0xMTk2LTRjNjAtODU1OC1mMzUzNTFkNDQ2YWQSDOUcqzHl5WfpYYXnJxoMUyxYHCM1hATi1yu8IjBBqfiARf6AgzOwIYFsWSub1k0MyECaPc3XTQoJDBLgbKbxAqUUtaoVoHm5KtKXLd0qE0W4fwe3xpzCWEV7xLC6KCQWs/QYBA=="}}          }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":3,"delta":{"type":"citations_delta","citation":{"type":"web_search_result_location","cited_text":"As of 2026, the United Nations estimates the total population at 36,954,512.","url":"https://en.wikipedia.org/wiki/Greater_Tokyo_Area","title":"Greater Tokyo Area - Wikipedia","encrypted_index":"Eo8BCioIDRgCIiQ1N2U5MGUwZC0xMTk2LTRjNjAtODU1OC1mMzUzNTFkNDQ2YWQSDCaMQJQPzKJFDP55MRoMpqQyz4nT0kt4CQK8IjAdLAq2k3jSF6TNI+qOG2BI+JNnEQvFxBC9paVvkDdYzsGmDMbwTyA2JaBHLqKoIrsqEzEHoXX0XSDOJiYUNvEToDszmNIYBA=="}}  }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":3,"delta":{"type":"text_delta","text":"Tokyo"}             }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":3,"delta":{"type":"text_delta","text":"'s"}              }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":3,"delta":{"type":"text_delta","text":" "}      }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":3,"delta":{"type":"text_delta","text":"2026 population is now"} }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":3,"delta":{"type":"text_delta","text":" estimated at"}}
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":3,"delta":{"type":"text_delta","text":" 36,953"}           }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":3,"delta":{"type":"text_delta","text":",600"}          }
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":3          }
+
+            event: content_block_start
+            data: {"type":"content_block_start","index":4,"content_block":{"type":"text","text":""}         }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":4,"delta":{"type":"text_delta","text":" according to World"}   }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":4,"delta":{"type":"text_delta","text":" Population Review. The"}            }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":4,"delta":{"type":"text_delta","text":" United"}               }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":4,"delta":{"type":"text_delta","text":" Nations also"}               }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":4,"delta":{"type":"text_delta","text":" estimates"}            }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":4,"delta":{"type":"text_delta","text":" "}           }
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":4   }
+
+            event: content_block_start
+            data: {"type":"content_block_start","index":5,"content_block":{"citations":[],"type":"text","text":""}               }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":5,"delta":{"type":"citations_delta","citation":{"type":"web_search_result_location","cited_text":"As of 2026, the United Nations estimates the total population at 36,954,512.","url":"https://en.wikipedia.org/wiki/Greater_Tokyo_Area","title":"Greater Tokyo Area - Wikipedia","encrypted_index":"Eo8BCioIDRgCIiQ1N2U5MGUwZC0xMTk2LTRjNjAtODU1OC1mMzUzNTFkNDQ2YWQSDJ79uZVbCkcEjh58GBoMJOgzo0KD95n7dOJcIjDqxtcYsqSJIOsTXu8ORFFWGxATm9O5Qbu9wSLHzHZMbykH23ITO6134pyFqY0InesqEw+pSO/3cgFacZQMM4z1oybPdF8YBA=="}}              }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":5,"delta":{"type":"text_delta","text":"the total population at 36"}   }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":5,"delta":{"type":"text_delta","text":",954,512"}   }
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":5           }
+
+            event: content_block_start
+            data: {"type":"content_block_start","index":6,"content_block":{"type":"text","text":""}          }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":6,"delta":{"type":"text_delta","text":" for"}             }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":6,"delta":{"type":"text_delta","text":" the Greater Tokyo Area as"}   }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":6,"delta":{"type":"text_delta","text":" of 2026.\n\n**Tokyo"}     }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":6,"delta":{"type":"text_delta","text":" Metropolis ("}       }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":6,"delta":{"type":"text_delta","text":"Prefecture"}}
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":6,"delta":{"type":"text_delta","text":")**: "}    }
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":6   }
+
+            event: content_block_start
+            data: {"type":"content_block_start","index":7,"content_block":{"citations":[],"type":"text","text":""}}
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":7,"delta":{"type":"citations_delta","citation":{"type":"web_search_result_location","cited_text":"As of 2025, the total population of Tokyo is 14,195,730 and had the largest population (11.5 percent of the total population). ","url":"https://en.wikipedia.org/wiki/Demographics_of_Tokyo","title":"Demographics of Tokyo - Wikipedia","encrypted_index":"Eo8BCioIDRgCIiQ1N2U5MGUwZC0xMTk2LTRjNjAtODU1OC1mMzUzNTFkNDQ2YWQSDH0BbIj99aeUbJAUQhoM/QG5+JzU0pukKkg3IjB/P2s1LY6RqDjNX0/Kx61rOxcHCIGEhkjGLMxCQMeW9RH+mUNgkliLQ+zntj8Ynn0qE2ChdaXUlgsbXTuPHy2A+5O3hNwYBA=="}}      }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":7,"delta":{"type":"text_delta","text":"As"}           }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":7,"delta":{"type":"text_delta","text":" of 2025"}       }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":7,"delta":{"type":"text_delta","text":", the"}           }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":7,"delta":{"type":"text_delta","text":" total"}    }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":7,"delta":{"type":"text_delta","text":" population of Tokyo is"}  }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":7,"delta":{"type":"text_delta","text":" 14"}        }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":7,"delta":{"type":"text_delta","text":",195"}             }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":7,"delta":{"type":"text_delta","text":",730"}             }
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":7    }
+
+            event: content_block_start
+            data: {"type":"content_block_start","index":8,"content_block":{"type":"text","text":""}       }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":8,"delta":{"type":"text_delta","text":" according to"}   }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":8,"delta":{"type":"text_delta","text":" Wikipedia"}        }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":8,"delta":{"type":"text_delta","text":".\n\n**Tokyo City"}            }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":8,"delta":{"type":"text_delta","text":" Proper ("}    }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":8,"delta":{"type":"text_delta","text":"23"} }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":8,"delta":{"type":"text_delta","text":" Special"}           }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":8,"delta":{"type":"text_delta","text":" Wards)**: The"}      }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":8,"delta":{"type":"text_delta","text":" population figures"}            }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":8,"delta":{"type":"text_delta","text":" vary"}        }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":8,"delta":{"type":"text_delta","text":","}              }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":8,"delta":{"type":"text_delta","text":" with"}            }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":8,"delta":{"type":"text_delta","text":" some"}         }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":8,"delta":{"type":"text_delta","text":" sources citing around"}       }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":8,"delta":{"type":"text_delta","text":" "}       }
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":8     }
+
+            event: content_block_start
+            data: {"type":"content_block_start","index":9,"content_block":{"citations":[],"type":"text","text":""}            }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":9,"delta":{"type":"citations_delta","citation":{"type":"web_search_result_location","cited_text":"According to recent estimates, the 23 wards that make up the city of Tokyo had an approximate 2016 population of 9,262,046. ","url":"https://worldpopulationreview.com/cities/japan/tokyo","title":"Tokyo Population 2026","encrypted_index":"EpABCioIDRgCIiQ1N2U5MGUwZC0xMTk2LTRjNjAtODU1OC1mMzUzNTFkNDQ2YWQSDP6t3caEUYkCqIrmKRoMnGUL/QHKvm1Zw06CIjA+IAXsf3269ZmkgScAFV+FJiY8NKqLEpnFxkjQnUdjrtrbizIRJMRvj9IBfQxmlHIqFEVF3yRpttw7eNvahoRnvM/aIoujGAQ="}}               }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":9,"delta":{"type":"text_delta","text":"9"}}
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":9,"delta":{"type":"text_delta","text":",262"}    }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":9,"delta":{"type":"text_delta","text":",046"}           }
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":9    }
+
+            event: content_block_start
+            data: {"type":"content_block_start","index":10,"content_block":{"type":"text","text":""}   }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":10,"delta":{"type":"text_delta","text":" for"}     }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":10,"delta":{"type":"text_delta","text":" the "}               }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":10,"delta":{"type":"text_delta","text":"23 "}             }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":10,"delta":{"type":"text_delta","text":"wards that"}           }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":10,"delta":{"type":"text_delta","text":" make up the"}          }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":10,"delta":{"type":"text_delta","text":" historic"} }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":10,"delta":{"type":"text_delta","text":" city of"}   }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":10,"delta":{"type":"text_delta","text":" Tokyo."}     }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":10,"delta":{"type":"text_delta","text":"\n\nThe different"}          }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":10,"delta":{"type":"text_delta","text":" population figures reflect"}   }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":10,"delta":{"type":"text_delta","text":" different geographic"}      }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":10,"delta":{"type":"text_delta","text":" definitions:\n- "}        }
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":10      }
+
+            event: content_block_start
+            data: {"type":"content_block_start","index":11,"content_block":{"citations":[],"type":"text","text":""} }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":11,"delta":{"type":"citations_delta","citation":{"type":"web_search_result_location","cited_text":"These estimates represent the Urban agglomeration of Tokyo, which typically includes Tokyo's population in addition to adjacent suburban areas. ","url":"https://worldpopulationreview.com/cities/japan/tokyo","title":"Tokyo Population 2026","encrypted_index":"Eo8BCioIDRgCIiQ1N2U5MGUwZC0xMTk2LTRjNjAtODU1OC1mMzUzNTFkNDQ2YWQSDFxwSQgdHopyfSCzqxoM5+AVEz6vAdL3Do9BIjBi+xt03DRcsjlpZSM635Bu3sWcfaSh4V1DVdohZRw9yjkCugRpU2Tx9/Tk8+sHNT0qE9Yo/bx7dfCOmm3RIZyp/X/J+RQYBA=="}}  }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":"These"}   }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":" estimates"}         }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":" represent"}             }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":" the Urban"}               }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":" ag"}               }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":"glomeration of Tokyo, which typically"}             }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":" includes Tokyo"}         }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":"'s"}               }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":" population"}       }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":" in"}    }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":" addition"}      }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":" to adjacent"}      }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":" suburban"}     }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":" areas"}           }
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":11   }
+
+            event: content_block_start
+            data: {"type":"content_block_start","index":12,"content_block":{"type":"text","text":""}        }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":12,"delta":{"type":"text_delta","text":"\n- "}              }
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":12             }
+
+            event: content_block_start
+            data: {"type":"content_block_start","index":13,"content_block":{"citations":[],"type":"text","text":""}             }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"citations_delta","citation":{"type":"web_search_result_location","cited_text":"The greater Tokyo metropolitan area, which is spread over 3 prefectures, is much larger and has a population that is estimated to be over 36 million. ","url":"https://worldpopulationreview.com/cities/japan/tokyo","title":"Tokyo Population 2026","encrypted_index":"EpABCioIDRgCIiQ1N2U5MGUwZC0xMTk2LTRjNjAtODU1OC1mMzUzNTFkNDQ2YWQSDHZE8IFFsqvsgW0BcRoMO3kH/ykzSZy1Du+zIjDOlwC++9Thr8Xd/Mt999OnFKsSwmmJlCMxs6cd0SWWsHC7frGuqOTaHfJzmeMBJ78qFI7aF1Q7i84Uo9VPFv2w9Srzy3/XGAQ="}}  }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":"The"}        }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":" greater"}}
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":" Tokyo metropolitan"}          }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":" area,"}             }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":" which is"}              }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":" spread"}    }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":" over"}      }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":" 3"}              }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":" "} }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":"prefectures,"}}
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":" is"}          }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":" much"}     }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":" larger and"}           }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":" has"}    }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":" a population that"}    }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":" is"}             }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":" estimated"}  }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":" to be over"}   }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":" 36"}      }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":" million"}      }
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":13       }
+
+            event: content_block_start
+            data: {"type":"content_block_start","index":14,"content_block":{"type":"text","text":""}            }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":14,"delta":{"type":"text_delta","text":"\n\n**"}       }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":14,"delta":{"type":"text_delta","text":"Sources"}            }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":14,"delta":{"type":"text_delta","text":"**: World"}              }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":14,"delta":{"type":"text_delta","text":" Population Review, United Nations World"}             }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":14,"delta":{"type":"text_delta","text":" Urbanization Prospects, and Wikipedia"}   }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":14,"delta":{"type":"text_delta","text":" Demographics"}             }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":14,"delta":{"type":"text_delta","text":" of Tokyo page"}    }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":14,"delta":{"type":"text_delta","text":"."}         }
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":14             }
+
+            event: message_delta
+            data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"input_tokens":13520,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":415,"server_tool_use":{"web_search_requests":1,"web_fetch_requests":0}}             }
+
+            event: message_stop
+            data: {"type":"message_stop"  }
+
+        headers:
+            Content-Type:
+                - text/event-stream; charset=utf-8
+        status: 200 OK
+        code: 200
+        duration: 2.951669638s
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 36017
+        host: ""
+        body: '{"max_tokens":4000,"messages":[{"content":[{"text":"What is the current population of Tokyo? Cite your source.","type":"text"}],"role":"user"},{"content":[{"id":"srvtoolu_01KYmV1c6SjLeWGNcNG4p2yi","input":{"query":"Tokyo population 2026 current"},"name":"web_search","type":"server_tool_use"},{"content":[{"encrypted_content":"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","page_age":"6 days ago","title":"Tokyo Population 2026","type":"web_search_result","url":"https://worldpopulationreview.com/cities/japan/tokyo"},{"encrypted_content":"Eo8GCioIDRgCIiQ1N2U5MGUwZC0xMTk2LTRjNjAtODU1OC1mMzUzNTFkNDQ2YWQSDIpxFnRYFlG8exiE/RoMf4R4fw6QIiAI0GJRIjC8X05Xv3d4LeYtY7yVys+S660CtLiQ7vKgsAo68bw1e7QBE1JRFfH5c8qM2i10cjsqkgUKBpDMeaBMTb/HQN8radTmTJC/DneQy8Yo7yPrdKLSeb9TYcw73cVk5lBPl/RRpnQm1oYpC5IGJeqLPERWJ5lMMi2Etj4OKd+RCtAoi7Na4LYfTDJflhnl6+C85fETDKu8wF0UdP4HJaBVzwkMhR4PASE7n7bc/gJTgP0CSHU6YC6b9Az49jIq6cPv2pWiHYDxmHe5rmdT1sC4nH02L43SSalIume85VUdGf4iJ/clj8wQjEjgxwlzbA0RZY58z4QMt3B0RXVosQ3gxtQbTODkHBYSF5zVMYWUsr7+zkzNIZhtLFd6Dt3GKpF4zC2HJbf09cx6ouG5trXiCCZaJz8FQt0sh4Bbj6FEw52ObnKm3MGa5iJCVUTy7zgPqc3mMVXcUpM6CCrORJOP03XmxgasxlQstspQLsOyeIU+Cpnb3+6ySSGVe9bGyKfJQOBtp+yscvf0s5Nhfdj4X3yt1yB/mfEvBiNnd4lfMsAkulmURBF2Uuil0FL9FyFJTBemwVWFWKmR4P/mp55bmRy5ILVaaowyhNnbNai8aULym+Vih9gyTmvHRiX5z6eRtkrMeSA1VkJxchY8Fll43XQevGoDOysXOXZKrPb02mIj1GVrrEGSmhxGGpwnlICpyNyIQhky8mX7ocW+mzscWk15vtzE/sphw5uCyiAJiNG3xzvofuavSxwO9EY8WF0yka0vliWU2E7uSFXhl02vhZFwzuSKub91x7PFEoSUSn3ZCiZ/6BR5yQEkqiUTVN1quQ51zALuCnUphZHxT2IDdshhU5gkdHd6440Vn3ZGqGW9qBZWktvFa6wdmWOV4A/kWSyw3n1tp1Y9VG0N7U45POInQbayPBP5Pfjb7fu02zrQAKQ+DZ59GAM=","title":"Tokyo, Japan Metro Area Population (1950-2026) | MacroTrends","type":"web_search_result","url":"https://www.macrotrends.net/global-metrics/cities/21671/tokyo/population"},{"encrypted_content":"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","title":"Japan Population (2026) - Worldometer","type":"web_search_result","url":"https://www.worldometers.info/world-population/japan-population/"},{"encrypted_content":"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","title":"Tokyo, Japan Population (2026) - Population Stat","type":"web_search_result","url":"https://populationstat.com/japan/tokyo"},{"encrypted_content":"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","page_age":"1 week ago","title":"Demographics of Tokyo - Wikipedia","type":"web_search_result","url":"https://en.wikipedia.org/wiki/Demographics_of_Tokyo"},{"encrypted_content":"ErMHCioIDRgCIiQ1N2U5MGUwZC0xMTk2LTRjNjAtODU1OC1mMzUzNTFkNDQ2YWQSDLV9OPdYf4xYdxL/JhoMTStPtrX5LcsuygmYIjAaW7ffHk/jRgBuvH12Q3EtWjbarDCDvccIL+XlMVHfOeFynCcLb4I4A7Vdv+ChUFUqtgbNW0vvHa0xsNNzx7jKqqgfUMRcnza3zLUsO7NbRIgvIPV6nOyVv24PsokITAnUlbdwUuV4WngdwwHXRg33JFiAb4B58ilGokG/cmoQsfSSHVNKGjZP25yb6k/q1Y74vjYRFNH7G6AeS/8vDBv8JRisSAtZ6jqY7vpvdrXxfR/DDfzyG/twJ+DKMZhnaWC6xvjrLcIGH3p99b0CmkohxzOzz5ilqApzaxJxl83tc82QQnwJC3DrPcHAzjptGr2iBEQP2Zr+6AcGCtYyt0HDUOD6QxXTiyALzL73z/Mom4wYtr6LPSiPBYENFC7M6dX3Ent6YD7aNaXaCzd/F1SEnx0ue7llEHMMkILauWesNjVRjmHlPJibDIVpUk6c6X94+tl95VpjCtA7zEvXqpljAsbK1lNOXf79Cq5Xbli4gaEoUCLMU+QgWYtNPALmg2pjFE7gNtRhnajZhYv/TGDIzxWvlnJCYpCYEZD10XB1TMFe2cSGuqxxp1s/9FrgPywruJ8ii0NtKlQHLlckmpRpLV2WBkrqEhvJSD8pM2eF57cJNaffymfzNb3x7b+Iwrj/jA3Tsc0K1O3XzxUH7C5YF2qxHn5yQIOfSnk+G+2K1RXNGIVqsGIwb+CKp9iwB9jkLK2eWLxaXOMiQTVqZA2LMZuo/7wUJzHDijCDBovaFUoxyru9LQwCYw2XdN2qVp9ySJhJwQ2YNb91aF9/2fW66dA8RgcCnajm4Lcuu+71cA66T9GvjfL7ONORT/D2/jvs4EZW7CW3tXKo0f5LPRvvbL6jtQWK1mqUwjAUj6qvL1S03tEla3JMurDAHsr3tZ/UwS651tUyOqa1eMOD9jaQwRhpVHpXek4uu0u2fY3AhB+YkGu01cU8Kmt9FCYYUY17glJO2tKRxgHJSnQRv7JvpBJafe+cDLkmEtG+mOEGy3HI1p2GS6wuoDPlYNitvqPmYZXNtHybmZRi3fxgJ8f4vS8N6lkc9+9E1WeOQwLJPexuy0+2XLNNOrdiORivkRW9IlIp3YoxmS2rIZOIfFcyGPcPlvipbS3j3CnJqfyAdpbGQJa4OGux/hIP+EVMh9gJzFIO9rKgHUYYAw==","title":"Tokyo Population 2026 - Japan City Statistics | World Measure","type":"web_search_result","url":"https://worldmeasure.com/cities/tokyo-jpn"},{"encrypted_content":"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","page_age":"2 weeks ago","title":"Greater Tokyo Area - Wikipedia","type":"web_search_result","url":"https://en.wikipedia.org/wiki/Greater_Tokyo_Area"},{"encrypted_content":"ErkJCioIDRgCIiQ1N2U5MGUwZC0xMTk2LTRjNjAtODU1OC1mMzUzNTFkNDQ2YWQSDKCGBszEKNLHu3neGBoMPovqHr0UXVQnS+WFIjAJ1KG4Ml2cLFqrsAiA9v7x/8DAufd4D3wBHOH5zfu7iO90I9KnoVzvhIhXnXiSGlsqvAh0EsAtn+x5yD6QEP380r/vZCnK7k/HR9HavzsbX6NnOOpZBl3b1sp9cZuQFcCQUVuAWnVLi14qSFM9CCSMLdwiCvBXmq63YOlu0pEiu8rR5MsOgobPvlsVpftxfO9x4g5IvWGkc5i5xDz0NUCYUkwnabNRc5I9gq7p4XQMBaMj2tK/c2oiubhSMQ3pilVD/0oWbF6/8YJvqccmz1pyhab1mfjWOqxU9slBC73iFmI6pM42MKu0uAc0HZO3xsGVKbhs+qlwM0uoPDtM5cBGE42FdbdfJJWp1yLWqD4KEfk4rXxqGPgqMhXOamRAgYOZQxergbmk+WKgJF7wg9gil69/SPaTY3QCInUfEHzxFFpKw+Xa3SQ/zTXLm6vHWRcVrsJSVWopqFvjHZd4/gyoI48IxlI3HBxTgxOcllW7a9ZiLrXoSBQgZCn5uBxhBwzG9ep1FeNIacdVMwpVBn9P6roZXJnjuDZW0zAJv5nQq8qcha7IPt5adHFvlS1fm5QknycQqoalJhH6hLzhfza1+C6ZfVHRtU5r1LWjbM+UTJ1Vn+S4oCR5oJH4iUB6Ecctnm0AY1exbFiNBTLQp0JlZcFHpphVu95cju7VvvLHKd3BpPUzS0kNErLzMzYWtVPHJrmU6EPpcbrXlzMq7kNGCDavB5ALnAsmFlYHZYzfMyWR9lxDhLmFCbcSNTJ/2bZLmTPaDULQuTr9YZJaFsotYpBxUBu8F2//xJixji4wkNQQplaCpC4ZmMCbjlVb67KC+efvCEob+ATQzWyNlbReQ+bhjmWxXmihMEef8n07JE43fG8Et3F8QrpQUJ3qupdOTrfFyz31Aj1Qw6/fYl0U8Wd9SRMCO+2hKqyBMiCOrnrSjEo3eCsU4u2juYxOx0CoIWWwy6Q7w0zpRlnu9itb9kL2pajlPvgq5oiVq0KHDDt1wdJTMWM31S0S5yBYa13ID5qHBGgW8ULegl0dRaQ+qOmbrhKWg0b78U3LdfORBkQ4PYvzgU6jJ7M0WJwVyEyVViqbGZQpWrVQP0oS9ZBvjDAdC5D4uA/DHZjC7LY1AZYzAUGXnuKp8+HwWv3QqnxdwcLS6bhwiKSVmwfWdPP3+B3J5HQQ7/cCfDBiMHK3Wuubt86YLxLBCc12PXpckgQEXcq7bsTJbuEU8pGoWKV8af04hJJPcPUN/9uZLBEwY/iaUfPwwlWVV1wKr4urQQgC+iyebquMv/IHWVjfHh+PcBpiDmq73W+GtxxLCncZHnFOZlJbSGypo8ePifIY9IsuQxg8dx9w0C7acpWQ8Jo/Csw72NiNfcmY40hn0T21UAy3J6e/+zzUaH5GBbVcop6Z11IQ6SgLaglNs0LQKgoyGoBHTmGHpKdyvk4Z3+O3PGQZ90+4EdsaKDdx6VVXbv+C3j8ZRWijnGRhYIZHsLiIaIlmgNRLQYFxesF/vOrqGAM=","page_age":"6 days ago","title":"Japan Cities by Population 2026","type":"web_search_result","url":"https://worldpopulationreview.com/cities/japan"},{"encrypted_content":"EuUCCioIDRgCIiQ1N2U5MGUwZC0xMTk2LTRjNjAtODU1OC1mMzUzNTFkNDQ2YWQSDIF7fKVdn6ARk5tCHhoMGBuKDJQm0zCqgvkBIjCMU/sdZRaNyP/zg9vQwR1FAnVaserBNuVsXLTyAtJJwU9H0pmJ3bGXmOxGDk/bGeQq6AGuJ4oEF89dfXvot6fe70Siza0hUVIEjNQkTYctTZjE13b3wNEw82JNwEHDEOBqW0ZBQxG7CcT0DZOoC8cjtg1yC8Y9CDyEsRTk75QDnc1lY+Dj0v5PCka+lOZuqvSA9BF2CkZxx45M+UffG4tGZoYgd3ic6JfVWhikjqXChVP1Km7Qf7gJHjgbAmc43namuzpsKZSwOdf0uhNGTX+NaKoCF7ZRAZc+8OJmq1KfiwcFYB5vh2SmZz1nBDNqv7+HpiqwjwYTtCL4Pa2MNrUbWup4auvHOrd4Qag+hWt9/PQbEkForigGcZpKGAM=","title":"Population of Tokyo 2026 | Tokyo population - statistics","type":"web_search_result","url":"https://population-hub.com/en/jp/population-of-tokyo-3383.html"},{"encrypted_content":"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","page_age":"1 day ago","title":"Tokyo - Wikipedia","type":"web_search_result","url":"https://en.wikipedia.org/wiki/Tokyo"}],"tool_use_id":"srvtoolu_01KYmV1c6SjLeWGNcNG4p2yi","type":"web_search_tool_result"},{"text":"Based on the search results, the current population of Tokyo depends on which definition is used:\n\n**Greater Tokyo Metropolitan Area**: ","type":"text"},{"text":"Tokyo''s 2026 population is now estimated at 36,953,600","type":"text"},{"text":" according to World Population Review. The United Nations also estimates ","type":"text"},{"text":"the total population at 36,954,512","type":"text"},{"text":" for the Greater Tokyo Area as of 2026.\n\n**Tokyo Metropolis (Prefecture)**: ","type":"text"},{"text":"As of 2025, the total population of Tokyo is 14,195,730","type":"text"},{"text":" according to Wikipedia.\n\n**Tokyo City Proper (23 Special Wards)**: The population figures vary, with some sources citing around ","type":"text"},{"text":"9,262,046","type":"text"},{"text":" for the 23 wards that make up the historic city of Tokyo.\n\nThe different population figures reflect different geographic definitions:\n- ","type":"text"},{"text":"These estimates represent the Urban agglomeration of Tokyo, which typically includes Tokyo''s population in addition to adjacent suburban areas","type":"text"},{"text":"\n- ","type":"text"},{"text":"The greater Tokyo metropolitan area, which is spread over 3 prefectures, is much larger and has a population that is estimated to be over 36 million","type":"text"},{"text":"\n\n**Sources**: World Population Review, United Nations World Urbanization Prospects, and Wikipedia Demographics of Tokyo page.","type":"text"}],"role":"assistant"},{"content":[{"text":"How does that compare to Osaka?","type":"text"}],"role":"user"}],"model":"claude-sonnet-4-20250514","stream":true,"system":[{"text":"You are a helpful assistant","type":"text"}],"tool_choice":{"disable_parallel_tool_use":false,"type":"auto"},"tools":[{"name":"web_search","type":"web_search_20250305"}]}'
+        headers:
+            Accept:
+                - application/json
+            Content-Type:
+                - application/json
+            User-Agent:
+                - Charm Fantasy/0.12.0
+        url: https://api.anthropic.com/v1/messages
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        content_length: -1
+        uncompressed: true
+        body: |+
+            event: message_start
+            data: {"type":"message_start","message":{"model":"claude-sonnet-4-20250514","id":"msg_01QAkNUq5Y815ZSq17zZhUxd","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":11734,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":5,"service_tier":"standard","inference_geo":"not_available"}} }
+
+            event: content_block_start
+            data: {"type":"content_block_start","index":0,"content_block":{"type":"server_tool_use","id":"srvtoolu_01V19o13uW5yrYGhkwwKnQbo","name":"web_search","input":{},"caller":{"type":"direct"}}              }
+
+            event: ping
+            data: {"type": "ping"}
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":""}             }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"{\"que"}      }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"ry\":"}       }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":" \"Osaka po"}               }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"pulation 202"}    }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"6 current\"}"}         }
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":0   }
+
+            event: content_block_start
+            data: {"type":"content_block_start","index":1,"content_block":{"type":"web_search_tool_result","tool_use_id":"srvtoolu_01V19o13uW5yrYGhkwwKnQbo","content":[{"type":"web_search_result","title":"Osaka Population 2026","url":"https://worldpopulationreview.com/cities/japan/osaka","encrypted_content":"EosaCioIDRgCIiQ1N2U5MGUwZC0xMTk2LTRjNjAtODU1OC1mMzUzNTFkNDQ2YWQSDD4f8oD6aUm9Kw+l7RoMxXILHCoKyGpKViFwIjBY696D/wPIJUb0TWDgAXRMTJ3uENzV+0ThrKTFlyHnySeUCP54X4jbUwMARZVnzvUqjhnP0LtZRpzo4FKSRZd3im9Jq2aTuXHA1NxTYDh7QVOjkQTZue8TI0otx5CoEZETRlaR5gY8OASaJ9MkUkrdc4t3nvTCKHY8b5xFkxSKDaCxSWxsfhw1PXngMfKKCr9nm43HKkZZvsklbnsVPUG/09InCR+I/GWREn/JpxdA4rJyOy/vO2Gjtn8XiRxr9RmvmjHOEFhS7FpjrHPaKGN5+RH0CxzshGnAj7B09SfMEq/xLZc1ZHMjmZq/XMraRHKnXxqbbF4VukohNTppU07YhvR3m4kCtZKOk4tNSX7OSrLo6YTuKoAjwM+koFvR8Zixh+5ENUUB1GNSyywKV2kbZNOiKusk8FZy/b+9o7EgzT73oBv+H72lkWBvkWRQAzh2YRpodazoL/sJPGNQeHDZYgs0PqqF5AmLeUxMOVqyAo5dO+Kl8Yey1c/c/qAJqH+GhcH4JMa2cVhzVFeGGwlepRdWBzT0r6bAP8JreurVP8lEcdfATlimhJdianklSJ/yg0Bsa68SNSPi58IFp2n0eW3nJBUfSpBtobUlCBr6/Gpj6R3Z/yyIedSXK7omajO/nRuDYCrScCREC8nRdzcrqtRdF/H/wJSLDt9KrFENVUjG1Go+Uah8YQ8/1h7ds1nrtFe6YAQzvm21puJnw1U7NrqTduXiK+uKR+QnJaZammzJ2FWv1zsVwM7ZXODHh/FD5oT4uiCmYxJrU1Yj3kriFYMOzY6z/9kKXU5Unp5e+Jn+u1kfpo7dS4bYV2g8l2cs1nSX+mqL6Z4a2DZXuyx6NtNzjek9fNQH/i1L79IkdQpuqDE5Lyyx6xcxAbIOdpUN5bzNV4OJTpQ9pp/UXR40no74m8fhIN/no8Rquia3fap8+zMkee98vN8eJGwrb0T0fSBXeIQj0j3BH8v7tK3rGMzganZgASpFqLwGxs4KJ3As+5twM7BEChzeDsDMeK4ktERFFBFFlUTLjjbqzjvmnvcxr5vQI0eV+qbAR5AuAYpPHUm1a1H+5b6LJJoyWxNz034D5T+ZsLvtcFrZ7o/+9mFCa83dFFBUfm7FUuLLDwo8Jzr5+QLYeqMP5GfezZ6FKw3w4eawyHz8uMIavzZt+ptSTy36gXT9lNOxNz8kMMeoYIDoRVAWA4pjL2VupnKNJQLb8a4F3JqTXwUJ4YrCc3ba0p/7340Z3t70iY2PsFGTlLLWBnkCkk9NahJi3jBMxjDRo8lPCwIZNUYIH1nDMqgPCZvVz4m0EmDPim22b1YIn5vGOhsbNG+BMW8WtQuLCmm46uJ+b/OqUOBR3yGOXL0I1EpeALWIrAK38sMhvxIr5nyOpVf54OuxBpFI4+FL9aLQRq+RlaoZz1/9B4lSGBJdt2tl/hI/HfKu9Y5whAJqbgVUpomR07Nojwg2v10CKs5PK9HPnTaKPawwcbbZSz3xpuKRbp9l2gGFrj5yqJ5hiAzNclInEYZeGn/Xj1FIVoTQCGcELtM9TQpnIiv/mUnAxwi8VsXDiDaZegbG/MHxsj5/xP8fYmztQBFh2y3uBtFSuSaPdr5rj8BnvROUSgw28G2igztuS8sDd5HROMWYo8FSV70d/NgptFuDvdC/Ktnv8SolJq2IgaWZI1IVbOYZd+8YKzfGDbIDFFyPU52eKed0eT4LtV0i+l1jlTDVwYiQy3rtUWq+oWdMg1xJh+NtHw+NGeD1jRWpHFmb9kopirGEvxHK3QP774QMDtqt541BrdlmL5kNDIhnwI5sEJOCn03kP1GXcLGduj37/GhyM2nOYTJTCjkk6pVf8iwttcdXftkrqNpmVmZPjQhHb5GmNazpWtZzqOQpnwVYCqMkBbjyqlnLUp5tlBU/obJIVLFfedNIyG+xf+UkV/lDcJnDvAfbpnN/Ss3DN+pkFTh1hTRa8YLrPNxfgyUWT2m8PPh96ozJOKbBFse+qZgZ4uKBBxMS+PQZqpNyGVFtPXTZxfdiIXS3VrhLbN73NUNgGFh0X7ihNn+CV2jTTqoN6QMpalT0EfS0Emu7nBkA5cL8F0pmNRUdUj+cdtfevEaAUmhQfq9aVgKSC1RzhJRx3pgxrs+eEx79dV6onCeEIVdWTlvZhZWipzOyVhagGFPtOtbelqfW6911hnBRlXNg5+f7RQhCo0hib6EHOegINYrX6ReeGZXdnFkrc5/lUiXc1moj6X1INBHKIxFconD/xKM5meonYI5DjnFHCa9k0grU8YwFnTyoh2xoOrHhMfVipeZrVdEpOaGEYpRe1sBzV5xLv6i3ClAwTqpZD3ZPu2OzBNZx8RVg8buz67FpIa79Yc3lOU31azaZ2r2TUiYKgGetUDeQR2NP5ETPEfisRDXEn/vwoW6Zqplz2KMJGfFE8ovZkE6Q5XMJug7bsAO3IT3r8Q7F9HDEVkS+/SV3lW5e9HtBOPWMg2APIBJDtwOmnMSwOjM9c2bUKcgqkmGB5EqIiDbXQHgWHEApeMhbHVolRdiOg0bi76VvFxiYjl69cw1NRr+gqA5XcD3XhqqSq2WkNEl8Pj221vCHjqtqhLyykI/NJZknY1CxboZSVfitq4RA03At8/pRjs2DUMffP0kyyRsuref5RfMezemulcivxvktUsMPZzBsKfSagIcPpI+IWx2OYm1EhDqlchDJBr9MKtkr6LB/R1iGaSha7TYLt7a/d7Yi/MQCtjaijv6GpGUzV32LksEsQGq8LCv1S0mS716dM6xIge09uBKvMc4HHm2TJtdgZsS8hfCWzy6KGRWos/yysY/TKlNwSyGDYF3w9bsWqSkvd99wKb32A71/e2OBoB59tNRkH2l5JS+QRG0/A8JrYprH1ujaj8doyXBvzhGQv79PVyFuuaDZOPJfA8s3z+Ped05j6nd1Ex9c4I2V98f8BNY1ZfJK9fOv0B3VoztTE/0c3VLv+wdCoOnZ5PsLBTVFs4CIHTvuk/bn07/nm+NjMpWR9ijF5Fo1oKL3OFzkhnsgNYK6dKLWuOUwuCamLTGCzagPv/PpjAVlBHQvgAKxbi54unJz6vawyFVmR6OYh89laFU9etX0noLqGFWjd4cCHZ8xNj55ePSAXmUCUxVp9lScJzUTeaAw8VAJ6i4VcPm3J4irn0UaPv6HQSb7YKYbrXI4AS2OzVtPtoTpKONWUfSxIp5Jd/I7uMBJOYUfUGfzhPU5L42KHBrhrq7O740erN0js8J5O/jphGc6ervUeeVF2T2i6f1ETm/Zgc79MmyczhJ7bQfB+t4XorDpN6fe0JUl1/ICKCoHmgJByHWpaQe2encG84HsGi5Tmdk/mqKnvT+k8sOYvu07C5C7ZRRaIMexMx5sPO6aLBL/v4YRZOTiwYQIaipUoMVILy//5vJjOIl3arn1pDxY2JN2N5eECfnZYCgBO/bTP8w5XOFINQYK3ijGklPVnGjtnW1F3zQiesDVuOq3EBJm3VsHFRH78+QtnSb4Q2dT8Li6Z3GcqKuiqfTg4lbyaSlFbDl0wWNigpSnThU6/5yixF0MaQ4pWsJTs3+SUuVhN7tYalSLDHS2F+IM/Ij4rsmgZi1VytMauURTNsPfGD6gJJmJ5LowZp00k9px98YfJuaeoozRkMFTOhF9+QtwVGOcsY5Bj9vbRoD6bAGn023UApkUxyIS0eKvIj89UExywXWRAPgZW6mvFoAP6ZUrvwJeznTr5O2aCgVTldMbQ0KcF5HFK4w6iG2NzVFaQqQsqdV6WyAhHvIBtFKW3NZUbG+VR4rCwo3OL34Ej6KwO/EUYFOaZZYL6DiierkD3LLxNj5AWPStgbVAiUimlQ+TxsAtEENtIFC8NLt7ZDbrPNSbg0TGkGKNCQOQPo04yw+Tt0r0cEYksYb1OmcpMh2EvmwanAXsotFWkQ1VsxLYW1Zh4njrjxyqShqVTXn4a3MPC4KBDjX3NIm+npCvZpNwgWJBWsJS3JgCfQoQba5VNNMAvkLWh84LFXMVd1y2KSOJ6Z4hd95rRhK+WkHAHBHE9uWLJQYI0fol51h8GMmwdrpw+Z62TGYuDb9lXgQFqPvzk6MDCKvWPMRi0spcqvhV8RRKonrc14o48x00/0aJhmc4P3/DED7TY3kNsC8zZT+fC10tFbnvHEcXXfAvmHcns1gNIHKdG0F0gPYAbvY5RbUsZijislPMTr+VQMhbl6QaLSF1mIEywqcxde7UFQBzqDLcrq/9GlKhn0OpbpK5VPpSZmQ7UGDj+Txa+MToyS3fVJTZl5rpkEKRO49NWCPCVE5CtAomqOyUALoY5j4d+j+U17V+cFYDxrlBBPF+PmIMGAM=","page_age":"2 weeks ago"},{"type":"web_search_result","title":"Osaka, Japan Metro Area Population (1950-2026) | MacroTrends","url":"https://www.macrotrends.net/global-metrics/cities/206459/osaka/population","encrypted_content":"Eo8GCioIDRgCIiQ1N2U5MGUwZC0xMTk2LTRjNjAtODU1OC1mMzUzNTFkNDQ2YWQSDOlYbRhDT0eW3Elq4RoM4fuNmzISIx1XhNK0IjCL9MBwV0RExHbiVcEdjwNd4qVd1atVknC2gJYeZV3qeboTq18DW8a+XPmRldouJ9wqkgUTsxqcVLXi7zNH1XxiJZNXgazmvrs+3E+JRT5UUfohpr+9s8pUKSbcdXnfZR2lGtt5lqPtu0F6cIpzIPD9Q3qX5rizCTLKYH7w5R7Z4ynvrVjzKyellcGs3j88FlTPy8sICl6SsXfl9YKi3BkzGDKNkTmxedWSjmhutEpchM3Z2LdiS8ZYXU8pban0ImB5JCzzVLnqVq7KPc4LvepKWFTgAQK2zGqvzf+0c/cfWvWz1XTWR50RDE3pBZwy7IECTVYUmc+hXdU33joOz74q0sRH/bTUM60gPYmtOIowgY//z67fUEqqlfjkmTOarCTVDHu4iPWWoKOFE3f09sgGySZS7rTOTbTaPAgNZdXHKo/KBHVtMGttUA4ZQSOtAVizWVa42+cnNiyQyNlxzrzROEQgo0QnFoLiIlMuEpQNu/vSYUAP3EFr0oKOVBM42KRx33ZcFG3cWyW4jy8oodnLCwxr1CsEAN1bRCYJLMeBKB1mUkRtKjSo3DptgGliZBj9LDwIvupHzdVurPNw4jh06T5sFGe13e2yw37+5+gkGJfrGqeO01rS2TuqjTQ3/kqfMSkoy4AooQ8P9V7FAo6RGw4F+an7EUR8GE2LnPam6jPtZ+DoXEcgTo0h6wt5s5WcLGU6qELHm4eC3CvdvmJ0//VD/tta0OGzZx0kt5CvJYr4nbOLVfZTeSsJv138BrA3QhKxf4Lrr7XjLLjTjQ8U/nRftrGukY7+n27AQewyOWeweqLtlERJ0Yu/LB7e5Sf3V+cdDmie2VkDy5XOQutrTVnCE7PZookmDtEeXg4xsT3F8UHn/eq30zBF6KauoZIFFfiFU2eyVq2gR2+N3SdQdkR078AccyU1+ANFIuZj4zXAonCbGAM=","page_age":null},{"type":"web_search_result","title":"Osaka, Japan Population (2026) - Population Stat","url":"https://populationstat.com/japan/osaka","encrypted_content":"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","page_age":null},{"type":"web_search_result","title":"Estimated population (monthly report) / Osaka Prefecture website [Osaka Prefectural Government]","url":"https://www-pref-osaka-lg-jp-e.athp.transer.com/o040090/toukei/jinkou/jinkou-xlslist.html","encrypted_content":"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","page_age":null},{"type":"web_search_result","title":"Population of Osaka 2026 — Japan","url":"https://www.aznations.com/population/jp/cities/osaka","encrypted_content":"EuUCCioIDRgCIiQ1N2U5MGUwZC0xMTk2LTRjNjAtODU1OC1mMzUzNTFkNDQ2YWQSDIef2MDHTcH6MsyqARoMV4oyBIFhtN3cAykxIjA/dvckQDnlUhdgJ5BrUJHk3Qf3fP30L6iM82eZNtQn93KVpPQTgfpcVxxc22zZUwMq6AGwEwTNeUm4SgpHSQiVQBbr7ng2XwGsfYW6rSF7nnfV1bb4ISj6BpqGubF+rLXwo/Y4nns1lzMva1I85jY57LnSKA50RC5ZBzKqmbzvQOGJIChZT6wRjktixv8wmuWtIkrS/vnuiafkQj+k7vOAXcnPGnYBIjZ/tpFwnhWYV+JMS1WR870hUF+K4wRgnJErFjFjgAyPnLTlfGnP0yP7NfDxMvsIkmtn77/CMyrpWqsOc8W2pr2otrjSfKbwFpB+J8V4WzhgJVutKJiQO/ZUN6ZL1saHpRpyLUWKvidRYDZ5Frm7Pmknbzr1GAM=","page_age":null},{"type":"web_search_result","title":"Japan Population (2026) - Worldometer","url":"https://www.worldometers.info/world-population/japan-population/","encrypted_content":"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","page_age":null},{"type":"web_search_result","title":"Osaka - Wikipedia","url":"https://en.wikipedia.org/wiki/Osaka","encrypted_content":"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","page_age":"6 days ago"},{"type":"web_search_result","title":"All | Browse Statistics | Portal Site of Official Statistics of Japan","url":"https://www.e-stat.go.jp/en/stat-search?page=1&query=Osaka+population&layout=dataset","encrypted_content":"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","page_age":null},{"type":"web_search_result","title":"Osaka, Japan Metro Area Population | Historical Data | Chart | 1950-2026 | MacroTrends","url":"https://www.macrotrends.net/datasets/global-metrics/cities/206459/osaka/population","encrypted_content":"EpIDCioIDRgCIiQ1N2U5MGUwZC0xMTk2LTRjNjAtODU1OC1mMzUzNTFkNDQ2YWQSDE8Lu7GiR8BT0S+v1xoMUAtV0+0JQ5mboBQrIjCE9PpLSAWbwxrUIk2j+HLgqPGebV5cvx3IaZfPBdxTnto83m7O1XExStcLjxY3HIcqlQI7Qb+DEANOz4/yWaeMU9G3pcQtW8qA84igqrvqfL1Vh14hgta3qDrhA4YPXp0uj/N9PztIlc3RSM59GMxwrp9ozpiQYKdCvL7RBME4lLj6rkgzZXRiKrosn9Z4nmSliyeW2BU8RUsoIKd0vQYb1JX4X/q/EWudZ3KdP2vLuu74J7YxjOU3UR5jo9cjfNUlW6RsNdsqEzyZOaCDuOshsHGIEI+PTRYNv97bE3Ag2h1cZhhfu/bs/7iAZ4tLaHAmC+AyeDUp5DoCizTFnyp5Tnju7Uapcp7pyllDgXJHLPaGelszKMW4wWmK6kUYAKveEHwt6HNvGc4Z4zpPU7VROaQZieNiLQLSSRHim7q6D9KqVgkDSCG7GAM=","page_age":"January 31, 2026"},{"type":"web_search_result","title":"Japan: population Osaka | Statista","url":"https://www.statista.com/statistics/608273/japan-population-osaka/","encrypted_content":"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","page_age":null}],"caller":{"type":"direct"}}    }
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":1      }
+
+            event: content_block_start
+            data: {"type":"content_block_start","index":2,"content_block":{"type":"text","text":""}       }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":2,"delta":{"type":"text_delta","text":"Comparing"}      }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":2,"delta":{"type":"text_delta","text":" Tokyo"}  }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":2,"delta":{"type":"text_delta","text":" and Osaka's current"}           }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":2,"delta":{"type":"text_delta","text":" populations shows"}    }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":2,"delta":{"type":"text_delta","text":" a"}              }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":2,"delta":{"type":"text_delta","text":" significant size"}     }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":2,"delta":{"type":"text_delta","text":" difference:\n\n**"}         }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":2,"delta":{"type":"text_delta","text":"Tokyo vs"}             }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":2,"delta":{"type":"text_delta","text":" Osaka Metropolitan"} }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":2,"delta":{"type":"text_delta","text":" Areas"}        }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":2,"delta":{"type":"text_delta","text":":**\n- "}              }
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":2      }
+
+            event: content_block_start
+            data: {"type":"content_block_start","index":3,"content_block":{"citations":[],"type":"text","text":""} }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":3,"delta":{"type":"citations_delta","citation":{"type":"web_search_result_location","cited_text":"Tokyo&#x27;s 2026 population is now estimated at 36,953,600. ","url":"https://worldpopulationreview.com/cities/japan/tokyo","title":"Tokyo Population 2026","encrypted_index":"Eo8BCioIDRgCIiQ1N2U5MGUwZC0xMTk2LTRjNjAtODU1OC1mMzUzNTFkNDQ2YWQSDPUqKLVcna8EMuMdOxoMpUXxq0K/xNUv4xkOIjD8am11oIMlcqyCLjpOLh1IFJcqmEYoYdGxMo94wm7WzC94r2zbYiS0+34ZlDARCvkqE+zrt61m1XNeoOzPz9/f9OBndZMYBA=="}}          }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":3,"delta":{"type":"text_delta","text":"Tokyo's"}        }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":3,"delta":{"type":"text_delta","text":" "}            }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":3,"delta":{"type":"text_delta","text":"2026"}     }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":3,"delta":{"type":"text_delta","text":" population is now"}}
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":3,"delta":{"type":"text_delta","text":" estimated"} }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":3,"delta":{"type":"text_delta","text":" at 36"}       }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":3,"delta":{"type":"text_delta","text":","}            }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":3,"delta":{"type":"text_delta","text":"953"}   }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":3,"delta":{"type":"text_delta","text":",600"}               }
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":3}
+
+            event: content_block_start
+            data: {"type":"content_block_start","index":4,"content_block":{"type":"text","text":""}  }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":4,"delta":{"type":"text_delta","text":"\n- "}             }
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":4  }
+
+            event: content_block_start
+            data: {"type":"content_block_start","index":5,"content_block":{"citations":[],"type":"text","text":""}         }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":5,"delta":{"type":"citations_delta","citation":{"type":"web_search_result_location","cited_text":"Osaka&#x27;s 2026 population is now estimated at 18,873,900. ","url":"https://worldpopulationreview.com/cities/japan/osaka","title":"Osaka Population 2026","encrypted_index":"EpABCioIDRgCIiQ1N2U5MGUwZC0xMTk2LTRjNjAtODU1OC1mMzUzNTFkNDQ2YWQSDNwtGDhG2PN4Ia/h9xoMVeCMZsljQ/CtZbhKIjBx0btscPgIln/UVamnPhr3FBovbYbqk3/XXud5Hru5mJ3mQpA4/6ldAUfIpwgV1ngqFIRrHi+HO4uq+XN1R5GyDK/PkC/SGAQ="}}      }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":5,"delta":{"type":"text_delta","text":"Osaka's 2"}         }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":5,"delta":{"type":"text_delta","text":"026 population is now estimated at "}     }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":5,"delta":{"type":"text_delta","text":"18"}       }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":5,"delta":{"type":"text_delta","text":",873"} }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":5,"delta":{"type":"text_delta","text":",900"}}
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":5       }
+
+            event: content_block_start
+            data: {"type":"content_block_start","index":6,"content_block":{"type":"text","text":""}          }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":6,"delta":{"type":"text_delta","text":"\n\nThis"}      }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":6,"delta":{"type":"text_delta","text":" means"}               }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":6,"delta":{"type":"text_delta","text":" Tokyo's"}    }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":6,"delta":{"type":"text_delta","text":" metropolitan"}      }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":6,"delta":{"type":"text_delta","text":" area is approximately"}}
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":6,"delta":{"type":"text_delta","text":" **"}           }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":6,"delta":{"type":"text_delta","text":"1.96"}      }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":6,"delta":{"type":"text_delta","text":" times larger** than Osaka's"}}
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":6,"delta":{"type":"text_delta","text":" metropolitan area,"}      }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":6,"delta":{"type":"text_delta","text":" or"}         }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":6,"delta":{"type":"text_delta","text":" nearly"}       }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":6,"delta":{"type":"text_delta","text":" twice"}            }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":6,"delta":{"type":"text_delta","text":" the"}        }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":6,"delta":{"type":"text_delta","text":" size."}      }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":6,"delta":{"type":"text_delta","text":"\n\n**City"}         }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":6,"delta":{"type":"text_delta","text":" Proper"}        }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":6,"delta":{"type":"text_delta","text":" Compar"}               }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":6,"delta":{"type":"text_delta","text":"isons:**\n- Tokyo"}          }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":6,"delta":{"type":"text_delta","text":" Metropolis ("}              }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":6,"delta":{"type":"text_delta","text":"Prefecture"}           }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":6,"delta":{"type":"text_delta","text":"):"}               }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":6,"delta":{"type":"text_delta","text":" "}             }
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":6}
+
+            event: content_block_start
+            data: {"type":"content_block_start","index":7,"content_block":{"citations":[],"type":"text","text":""} }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":7,"delta":{"type":"citations_delta","citation":{"type":"web_search_result_location","cited_text":"As of 2025, the total population of Tokyo is 14,195,730 and had the largest population (11.5 percent of the total population). ","url":"https://en.wikipedia.org/wiki/Demographics_of_Tokyo","title":"Demographics of Tokyo - Wikipedia","encrypted_index":"Eo8BCioIDRgCIiQ1N2U5MGUwZC0xMTk2LTRjNjAtODU1OC1mMzUzNTFkNDQ2YWQSDA0kxYGOX6SrNhqqQxoMdyuS6uUg5gHhCMhvIjCYtWA73ErnTn3Tem0QkvOUV6WmCa76QtyNA8TbBBIZvPOWlvdtPEgLQzb4DMhsudMqEwzZmBxqAzA2onewEVGD/KRlIbgYBA=="}}  }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":7,"delta":{"type":"text_delta","text":"As"}               }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":7,"delta":{"type":"text_delta","text":" of 2025"}               }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":7,"delta":{"type":"text_delta","text":", the"}       }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":7,"delta":{"type":"text_delta","text":" total"}               }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":7,"delta":{"type":"text_delta","text":" population of Tokyo is"}    }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":7,"delta":{"type":"text_delta","text":" "}            }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":7,"delta":{"type":"text_delta","text":"14"}        }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":7,"delta":{"type":"text_delta","text":",195"} }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":7,"delta":{"type":"text_delta","text":",730"}            }
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":7    }
+
+            event: content_block_start
+            data: {"type":"content_block_start","index":8,"content_block":{"type":"text","text":""}    }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":8,"delta":{"type":"text_delta","text":"\n-"}  }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":8,"delta":{"type":"text_delta","text":" Osaka City"}              }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":8,"delta":{"type":"text_delta","text":": "}          }
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":8}
+
+            event: content_block_start
+            data: {"type":"content_block_start","index":9,"content_block":{"citations":[],"type":"text","text":""}         }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":9,"delta":{"type":"citations_delta","citation":{"type":"web_search_result_location","cited_text":"Population of Osaka is 2,754,742 . ","url":"https://www.aznations.com/population/jp/cities/osaka","title":"Population of Osaka 2026 — Japan","encrypted_index":"EpABCioIDRgCIiQ1N2U5MGUwZC0xMTk2LTRjNjAtODU1OC1mMzUzNTFkNDQ2YWQSDM9UQdlCgBudDpdXZBoMcM6Lx8gVilPYzaJQIjAWw+C2Ld/huQQTnVY9m67hiFwtZ27rMocsChKQjqfoJCCbjGnrKBTNMdzvKc2AzYgqFPzujOpEdeVpLZe4AA9iCQQytf3AGAQ="}}  }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":9,"delta":{"type":"text_delta","text":"Population"}           }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":9,"delta":{"type":"text_delta","text":" of Osaka is"}}
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":9,"delta":{"type":"text_delta","text":" 2,754"}              }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":9,"delta":{"type":"text_delta","text":",742"}      }
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":9}
+
+            event: content_block_start
+            data: {"type":"content_block_start","index":10,"content_block":{"type":"text","text":""}     }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":10,"delta":{"type":"text_delta","text":"\n\nAt"}   }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":10,"delta":{"type":"text_delta","text":" the"} }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":10,"delta":{"type":"text_delta","text":" city level, Tokyo is"}          }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":10,"delta":{"type":"text_delta","text":" approximately **"}             }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":10,"delta":{"type":"text_delta","text":"5"}}
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":10,"delta":{"type":"text_delta","text":".2"}         }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":10,"delta":{"type":"text_delta","text":" times larger** than Osaka city"}         }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":10,"delta":{"type":"text_delta","text":" proper.\n\n**Historical"}        }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":10,"delta":{"type":"text_delta","text":" Context:**"}           }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":10,"delta":{"type":"text_delta","text":"\nInter"}           }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":10,"delta":{"type":"text_delta","text":"estingly, "}        }
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":10      }
+
+            event: content_block_start
+            data: {"type":"content_block_start","index":11,"content_block":{"citations":[],"type":"text","text":""} }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":11,"delta":{"type":"citations_delta","citation":{"type":"web_search_result_location","cited_text":"In 1925, it was the largest and most populous city in Japan and the sixth largest in the world. ","url":"https://en.wikipedia.org/wiki/Osaka","title":"Osaka - Wikipedia","encrypted_index":"EpEBCioIDRgCIiQ1N2U5MGUwZC0xMTk2LTRjNjAtODU1OC1mMzUzNTFkNDQ2YWQSDLp6umPmnQuM+/DOsxoM/7l9eBQYOTyRCCxPIjCynTSM03HYFxiZwb9f2wfe/q17HGm4J7dgrKgZ6cRfVr/hQTEWqhfPcvJSv9Vky9IqFREOLuOPMIx4DmaKBpuuSYBtATT8ghgE"}}       }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":11,"delta":{"type":"citations_delta","citation":{"type":"web_search_result_location","cited_text":"The Great Kantō earthquake caused a mass migration to Osaka between 1920 and 1930, and the city became Japan's largest city in 1930 with 2,453,573 peo...","url":"https://en.wikipedia.org/wiki/Osaka","title":"Osaka - Wikipedia","encrypted_index":"EpEBCioIDRgCIiQ1N2U5MGUwZC0xMTk2LTRjNjAtODU1OC1mMzUzNTFkNDQ2YWQSDGBvXlc5C0SkE/2nxxoM5IoKRZFESRRzRpaZIjDZ5nox2XuuQ3uy372gHUlnC6isiUTkfQAzyF5imBZoRPCJPRbl/4Dcy5WR3mEerPYqFT2hRQPOyMdCjH+ZLpYp9OJm6ypUpxgE"}}    }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":"in"}               }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":" 1925, it was the largest"}              }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":" and most populous city in Japan and the"}              }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":" sixth largest in the world..."}               }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":" The Great"}       }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":" Kantō earthquake caused a mass migration"}  }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":" to Osaka between 1920 "}   }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":"and 1930, and the city"}  }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":" became Japan's largest city in 1"}       }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":"930 with 2,453,"} }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":"573 people, outnumbering"}      }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":" even Tokyo"}     }
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":11           }
+
+            event: content_block_start
+            data: {"type":"content_block_start","index":12,"content_block":{"type":"text","text":""}          }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":12,"delta":{"type":"text_delta","text":". However"}          }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":12,"delta":{"type":"text_delta","text":", Tokyo"}}
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":12,"delta":{"type":"text_delta","text":" has"}            }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":12,"delta":{"type":"text_delta","text":" since"}      }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":12,"delta":{"type":"text_delta","text":" far"}              }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":12,"delta":{"type":"text_delta","text":" surpassed Osaka in size"}               }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":12,"delta":{"type":"text_delta","text":"."}          }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":12,"delta":{"type":"text_delta","text":"\n\n**"}        }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":12,"delta":{"type":"text_delta","text":"Population"}       }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":12,"delta":{"type":"text_delta","text":" Trends"}              }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":12,"delta":{"type":"text_delta","text":":**\nBoth"}       }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":12,"delta":{"type":"text_delta","text":" metropolitan"} }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":12,"delta":{"type":"text_delta","text":" areas are"}            }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":12,"delta":{"type":"text_delta","text":" experiencing population decline:"}          }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":12,"delta":{"type":"text_delta","text":" "}      }
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":12      }
+
+            event: content_block_start
+            data: {"type":"content_block_start","index":13,"content_block":{"citations":[],"type":"text","text":""}       }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"citations_delta","citation":{"type":"web_search_result_location","cited_text":"Tokyo experienced a decrease of -82,600 residents over the past year, marking an annual decline of -0.22%. ","url":"https://worldpopulationreview.com/cities/japan/tokyo","title":"Tokyo Population 2026","encrypted_index":"Eo8BCioIDRgCIiQ1N2U5MGUwZC0xMTk2LTRjNjAtODU1OC1mMzUzNTFkNDQ2YWQSDFAerMrgWh6ah352CRoMEJTu/gkwZLsYUlMnIjBLljt69WJflNlNAgvA8AW+gA9aHDygrsEXSs0DxdS2CmZaBvhRPCyoCws3MK5EXU4qE/fNr8r1zTaRuuy4IcJeMjJZWJkYBA=="}}       }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":"Tokyo experienced"}      }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":" a decrease"}               }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":" of -"}        }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":"82"}        }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":","}      }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":"600"}   }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":" residents"} }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":" over"}}
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":" the past year, marking"} }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":" an"}   }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":" annual"}     }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":" decline of -"}     }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":"0.22"}          }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":"%"}   }
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":13  }
+
+            event: content_block_start
+            data: {"type":"content_block_start","index":14,"content_block":{"type":"text","text":""}            }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":14,"delta":{"type":"text_delta","text":","}               }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":14,"delta":{"type":"text_delta","text":" while "}          }
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":14 }
+
+            event: content_block_start
+            data: {"type":"content_block_start","index":15,"content_block":{"citations":[],"type":"text","text":""}           }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":15,"delta":{"type":"citations_delta","citation":{"type":"web_search_result_location","cited_text":"Osaka experienced a decrease of -47,700 residents over the past year, marking an annual decline of -0.25%. ","url":"https://worldpopulationreview.com/cities/japan/osaka","title":"Osaka Population 2026","encrypted_index":"EpABCioIDRgCIiQ1N2U5MGUwZC0xMTk2LTRjNjAtODU1OC1mMzUzNTFkNDQ2YWQSDCwcFTCFqLZVuXzeoBoMEXCPMKvOh40vHm1eIjBxmgNdbqtdfdSWBQ1XOIU4sBd4stDyMRYIZZoZirpSeHk6jQMq2OLbG8G1AiBXlk0qFDpScLGQDxc+un0uhmUcz2i4jBKsGAQ="}}              }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":15,"delta":{"type":"text_delta","text":"Osaka experienced"}               }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":15,"delta":{"type":"text_delta","text":" a decrease of -47"}             }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":15,"delta":{"type":"text_delta","text":",700 residents over the past year"}        }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":15,"delta":{"type":"text_delta","text":", marking an annual decline of -0"}     }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":15,"delta":{"type":"text_delta","text":".25"}               }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":15,"delta":{"type":"text_delta","text":"%"}        }
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":15  }
+
+            event: content_block_start
+            data: {"type":"content_block_start","index":16,"content_block":{"type":"text","text":""}        }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":16,"delta":{"type":"text_delta","text":"."}   }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":16,"delta":{"type":"text_delta","text":"\n\n**"}    }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":16,"delta":{"type":"text_delta","text":"Sources"}             }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":16,"delta":{"type":"text_delta","text":":**"}       }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":16,"delta":{"type":"text_delta","text":" World"}       }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":16,"delta":{"type":"text_delta","text":" Population Review"}      }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":16,"delta":{"type":"text_delta","text":", Mac"}              }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":16,"delta":{"type":"text_delta","text":"roTrends, Wikipedia"}    }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":16,"delta":{"type":"text_delta","text":", and"}            }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":16,"delta":{"type":"text_delta","text":" various"}       }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":16,"delta":{"type":"text_delta","text":" Japanese"}          }
+
+            event: content_block_delta
+            data: {"type":"content_block_delta","index":16,"delta":{"type":"text_delta","text":" government statistics."}      }
+
+            event: content_block_stop
+            data: {"type":"content_block_stop","index":16  }
+
+            event: message_delta
+            data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"input_tokens":33652,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":547,"server_tool_use":{"web_search_requests":1,"web_fetch_requests":0}}       }
+
+            event: message_stop
+            data: {"type":"message_stop"     }
+
+        headers:
+            Content-Type:
+                - text/event-stream; charset=utf-8
+        status: 200 OK
+        code: 200
+        duration: 1.723231839s

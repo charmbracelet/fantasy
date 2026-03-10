@@ -391,6 +391,7 @@ func TestProviderRegistry_AllTypesRegistered(t *testing.T) {
 	}{
 		{"OpenAI Responses Reasoning Metadata", openai.Name, &openai.ResponsesReasoningMetadata{}},
 		{"Anthropic Reasoning Metadata", anthropic.Name, &anthropic.ReasoningOptionMetadata{}},
+		{"Anthropic Web Search Result Metadata", anthropic.Name, &anthropic.WebSearchResultMetadata{}},
 		{"Google Reasoning Metadata", google.Name, &google.ReasoningMetadata{}},
 		{"OpenRouter Metadata", openrouter.Name, &openrouter.ProviderMetadata{}},
 	}

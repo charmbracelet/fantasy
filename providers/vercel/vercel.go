@@ -96,6 +96,14 @@ func WithHTTPClient(client option.HTTPClient) Option {
 	}
 }
 
+// WithUserAgent sets an explicit User-Agent header, overriding the default and any
+// value set via WithHeaders.
+func WithUserAgent(ua string) Option {
+	return func(o *options) {
+		o.openaiOptions = append(o.openaiOptions, openai.WithUserAgent(ua))
+	}
+}
+
 // WithSDKOptions sets the SDK options for the Vercel provider.
 func WithSDKOptions(opts ...option.RequestOption) Option {
 	return func(o *options) {

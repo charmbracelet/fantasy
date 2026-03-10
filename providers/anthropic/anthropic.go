@@ -14,6 +14,7 @@ import (
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/object"
+	"charm.land/fantasy/providers/internal/httpheaders"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/charmbracelet/anthropic-sdk-go"
 	"github.com/charmbracelet/anthropic-sdk-go/bedrock"
@@ -31,11 +32,12 @@ const (
 )
 
 type options struct {
-	baseURL string
-	apiKey  string
-	name    string
-	headers map[string]string
-	client  option.HTTPClient
+	baseURL   string
+	apiKey    string
+	name      string
+	headers   map[string]string
+	userAgent string
+	client    option.HTTPClient
 
 	vertexProject  string
 	vertexLocation string
@@ -125,6 +127,14 @@ func WithHTTPClient(client option.HTTPClient) Option {
 	}
 }
 
+// WithUserAgent sets an explicit User-Agent header, overriding the default and any
+// value set via WithHeaders.
+func WithUserAgent(ua string) Option {
+	return func(o *options) {
+		o.userAgent = ua
+	}
+}
+
 // WithObjectMode sets the object generation mode.
 func WithObjectMode(om fantasy.ObjectMode) Option {
 	return func(o *options) {
@@ -146,7 +156,9 @@ func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.L
 	if a.options.baseURL != "" {
 		clientOptions = append(clientOptions, option.WithBaseURL(a.options.baseURL))
 	}
-	for key, value := range a.options.headers {
+	defaultUA := httpheaders.DefaultUserAgent(fantasy.Version)
+	resolved := httpheaders.ResolveHeaders(a.options.headers, a.options.userAgent, defaultUA)
+	for key, value := range resolved {
 		clientOptions = append(clientOptions, option.WithHeader(key, value))
 	}
 	if a.options.client != nil {
@@ -771,7 +783,7 @@ func (a languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantas
 	if err != nil {
 		return nil, err
 	}
-	response, err := a.client.Messages.New(ctx, *params)
+	response, err := a.client.Messages.New(ctx, *params, callUARequestOptions(call)...)
 	if err != nil {
 		return nil, toProviderErr(err)
 	}
@@ -849,7 +861,7 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 		return nil, err
 	}
 
-	stream := a.client.Messages.NewStreaming(ctx, *params)
+	stream := a.client.Messages.NewStreaming(ctx, *params, callUARequestOptions(call)...)
 	acc := anthropic.Message{}
 	return func(yield func(fantasy.StreamPart) bool) {
 		if len(warnings) > 0 {

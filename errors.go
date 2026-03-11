@@ -53,9 +53,12 @@ func (m *ProviderError) Error() string {
 	return fmt.Sprintf("%s: %s", m.Title, m.Message)
 }
 
-// IsRetryable checks if the error is retryable based on the status code.
+// IsRetryable reports whether the error should be retried.
+// It returns true if the underlying cause is io.ErrUnexpectedEOF, if the
+// "x-should-retry" response header evaluates to true, or if the HTTP status
+// code indicates a retryable condition (408, 409, 429, or any 5xx).
 func (m *ProviderError) IsRetryable() bool {
-	// We're mostly mimicing the OpenAI's Go SDK here:
+	// We're mostly mimicking OpenAI's Go SDK here:
 	// https://github.com/openai/openai-go/blob/b9d280a37149430982e9dfeed16c41d27d45cfc5/internal/requestconfig/requestconfig.go#L244
 	if errors.Is(m.Cause, io.ErrUnexpectedEOF) {
 		return true
@@ -69,7 +72,7 @@ func (m *ProviderError) IsRetryable() bool {
 		m.StatusCode >= http.StatusInternalServerError
 }
 
-func (m *ProviderError) shouldRetryHeader() (bool) {
+func (m *ProviderError) shouldRetryHeader() bool {
 	if m.ResponseHeaders == nil {
 		return false
 	}

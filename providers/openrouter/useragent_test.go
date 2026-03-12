@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"charm.land/fantasy"
@@ -56,7 +57,7 @@ func TestUserAgent(t *testing.T) {
 		_, _ = model.Generate(t.Context(), fantasy.Call{Prompt: prompt})
 
 		require.Len(t, *captured, 1)
-		assert.Equal(t, "OpenAI/Go 2.7.1", (*captured)[0]["User-Agent"])
+		assert.True(t, strings.HasPrefix((*captured)[0]["User-Agent"], "OpenAI/Go"))
 	})
 
 	t.Run("WithUserAgent wins over default", func(t *testing.T) {

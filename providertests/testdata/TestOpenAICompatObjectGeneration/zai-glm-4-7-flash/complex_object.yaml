@@ -1,0 +1,33 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 964
+    host: ""
+    body: '{"messages":[{"content":"Generate information about ''The Lord of the Rings'' book by J.R.R. Tolkien, including genres like fantasy and adventure, and its publication year (1954).","role":"user"}],"model":"glm-4.7-flash","max_tokens":4000,"tool_choice":{"function":{"name":"Book"},"type":"function"},"tools":[{"function":{"name":"Book","strict":false,"description":"A book with title, author, genres, and publication year","parameters":{"properties":{"author":{"properties":{"name":{"description":"Author''s name","type":"string"},"nationality":{"description":"Author''s nationality","type":"string"}},"required":["name","nationality"],"type":"object"},"genres":{"description":"List of genres","items":{"type":"string"},"type":"array"},"published_year":{"description":"Year the book was published","type":"integer"},"title":{"description":"The book title","type":"string"}},"required":["title","author","genres","published_year"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+    url: https://api.z.ai/api/coding/paas/v4/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"choices":[{"finish_reason":"tool_calls","index":0,"message":{"content":"","reasoning_content":"The user is asking me to generate information about \"The Lord of the Rings\" book by J.R.R. Tolkien. They''ve provided the specific details I need:\n- Title: \"The Lord of the Rings\"\n- Author: J.R.R. Tolkien (nationality: British/English - this is well-known)\n- Genres: fantasy and adventure (they mentioned these explicitly)\n- Publication year: 1954\n\nI need to use the Book function to create this entry. Let me check the required parameters:\n- title: \"The Lord of the Rings\" ✓\n- author: Need to create an author object with name and nationality\n  - name: \"J.R.R. Tolkien\" ✓\n  - nationality: \"British\" (this is correct - Tolkien was British) ✓\n- genres: [\"fantasy\", \"adventure\"] ✓\n- published_year: 1954 ✓\n\nAll required parameters are provided or can be reasonably inferred.","role":"assistant","tool_calls":[{"function":{"arguments":"{\"author\":{\"name\": \"J.R.R. Tolkien\", \"nationality\": \"British\"},\"genres\":[\"fantasy\", \"adventure\"],\"published_year\":1954,\"title\":\"The Lord of the Rings\"}","name":"Book"},"id":"call_-7807251775253113230","index":0,"type":"function"}]}}],"created":1773349517,"id":"20260313050506f00a029fba604431","model":"glm-4.7-flash","object":"chat.completion","request_id":"20260313050506f00a029fba604431","usage":{"completion_tokens":252,"completion_tokens_details":{"reasoning_tokens":194},"prompt_tokens":312,"prompt_tokens_details":{"cached_tokens":43},"total_tokens":564}}'
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+    status: 200 OK
+    code: 200
+    duration: 12.180893083s

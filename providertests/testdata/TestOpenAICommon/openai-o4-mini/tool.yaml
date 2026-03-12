@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/chat/completions
     method: POST
   response:
@@ -26,9 +26,9 @@ interactions:
     uncompressed: true
     body: |
       {
-        "id": "chatcmpl-CRdzrg9Xy1ovxuEsdeaIh5HbAmzlq",
+        "id": "chatcmpl-DIgPjH4PSJNZtaCUtWht6f93kVI2o",
         "object": "chat.completion",
-        "created": 1760704639,
+        "created": 1773345315,
         "model": "o4-mini-2025-04-16",
         "choices": [
           {
@@ -38,11 +38,11 @@ interactions:
               "content": null,
               "tool_calls": [
                 {
-                  "id": "call_ZvgvJnyxcLxfnrw1vvy9QVMu",
+                  "id": "call_Uto0Xgr2iYWOHzkWGoNNoYTb",
                   "type": "function",
                   "function": {
                     "name": "weather",
-                    "arguments": "{\"location\":\"Florence,Italy\"}"
+                    "arguments": "{\"location\":\"Florence, Italy\"}"
                   }
                 }
               ],
@@ -75,22 +75,22 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 2.706478833s
+    duration: 1.500324417s
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 711
+    content_length: 712
     host: ""
-    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"call_ZvgvJnyxcLxfnrw1vvy9QVMu","function":{"arguments":"{\"location\":\"Florence,Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"call_ZvgvJnyxcLxfnrw1vvy9QVMu","role":"tool"}],"model":"o4-mini","max_completion_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"call_Uto0Xgr2iYWOHzkWGoNNoYTb","function":{"arguments":"{\"location\":\"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"call_Uto0Xgr2iYWOHzkWGoNNoYTb","role":"tool"}],"model":"o4-mini","max_completion_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
     headers:
       Accept:
       - application/json
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/chat/completions
     method: POST
   response:
@@ -101,16 +101,16 @@ interactions:
     uncompressed: true
     body: |
       {
-        "id": "chatcmpl-CRdzu4C4EiqGRGJMYLhi1nnaygxRb",
+        "id": "chatcmpl-DIgPkGqw5A5Sl65TfoTZrI4dgSUHd",
         "object": "chat.completion",
-        "created": 1760704642,
+        "created": 1773345316,
         "model": "o4-mini-2025-04-16",
         "choices": [
           {
             "index": 0,
             "message": {
               "role": "assistant",
-              "content": "The current temperature in Florence, Italy is 40°C. It's quite hot, so stay hydrated and try to stay in the shade or indoors with air conditioning if you can!",
+              "content": "The current temperature in Florence, Italy is 40 °C.",
               "refusal": null,
               "annotations": []
             },
@@ -119,8 +119,8 @@ interactions:
         ],
         "usage": {
           "prompt_tokens": 95,
-          "completion_tokens": 47,
-          "total_tokens": 142,
+          "completion_tokens": 25,
+          "total_tokens": 120,
           "prompt_tokens_details": {
             "cached_tokens": 0,
             "audio_tokens": 0
@@ -140,4 +140,4 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 1.575507083s
+    duration: 872.285291ms

@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.7.1
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.x.ai/v1/chat/completions
     method: POST
   response:
@@ -24,10 +24,10 @@ interactions:
     proto_minor: 0
     content_length: -1
     uncompressed: true
-    body: '{"id":"c741f0c0-b3ad-605e-94e9-aa17f8ad0f1f","object":"chat.completion","created":1762637610,"model":"grok-4-fast-reasoning","choices":[{"index":0,"message":{"role":"assistant","content":"","tool_calls":[{"id":"call_85975414","function":{"name":"Person","arguments":"{\"age\":30,\"city\":\"Paris\",\"name\":\"Alice\"}"},"type":"function"}],"refusal":null},"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":401,"completion_tokens":46,"total_tokens":787,"prompt_tokens_details":{"text_tokens":401,"audio_tokens":0,"image_tokens":0,"cached_tokens":305},"completion_tokens_details":{"reasoning_tokens":340,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0},"num_sources_used":0},"system_fingerprint":"fp_bfbe7bd0a2"}'
+    body: '{"id":"ab5611ac-960a-803b-029b-1f1e3e99c3c0","object":"chat.completion","created":1773345643,"model":"grok-4-fast-reasoning","choices":[{"index":0,"message":{"role":"assistant","content":"","tool_calls":[{"id":"call_76442708","function":{"name":"Person","arguments":"{\"age\":30,\"city\":\"Paris\",\"name\":\"Alice\"}"},"type":"function"}],"refusal":null},"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":401,"completion_tokens":44,"total_tokens":630,"prompt_tokens_details":{"text_tokens":401,"audio_tokens":0,"image_tokens":0,"cached_tokens":305},"completion_tokens_details":{"reasoning_tokens":185,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0},"num_sources_used":0,"cost_in_usd_ticks":1489500},"system_fingerprint":"fp_3d7ed3b779"}'
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 2.228575458s
+    duration: 2.231993875s

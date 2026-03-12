@@ -208,11 +208,7 @@ func (o *provider) LanguageModel(_ context.Context, modelID string) (fantasy.Lan
 		if objectMode == fantasy.ObjectModeJSON {
 			objectMode = fantasy.ObjectModeAuto
 		}
-		var ws *wsTransport
-		if o.options.useWebSocket {
-			ws = newWSTransport(o.options.baseURL, o.options.apiKey, o.options.headers)
-		}
-		return newResponsesLanguageModel(modelID, o.options.name, client, objectMode, ws), nil
+		return newResponsesLanguageModel(modelID, o.options.name, client, objectMode, o.options.noDefaultUserAgent), nil
 	}
 
 	languageModelOptions := append([]LanguageModelOption{}, o.options.languageModelOptions...)

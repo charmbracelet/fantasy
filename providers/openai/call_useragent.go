@@ -12,7 +12,7 @@ import (
 //
 // When noDefaultUA is true the SDK's own User-Agent is preserved and no
 // override is applied (needed for providers like OpenRouter, which reject
-// User-Agents headers they don't expect).
+// User-Agent headers they don't expect).
 func callUARequestOptions(call fantasy.Call, noDefaultUA bool) []option.RequestOption {
 	if noDefaultUA {
 		return nil

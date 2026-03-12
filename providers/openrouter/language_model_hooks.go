@@ -188,6 +188,7 @@ type currentReasoningState struct {
 	metadata       *openai.ResponsesReasoningMetadata
 	googleMetadata *google.ReasoningMetadata
 	googleText     string
+	format         string
 }
 
 func extractReasoningContext(ctx map[string]any) *currentReasoningState {
@@ -291,6 +292,7 @@ func languageModelStreamExtra(chunk openaisdk.ChatCompletionChunk, yield func(fa
 			}
 		}
 
+		currentState.format = detail.Format
 		ctx[reasoningStartedCtx] = currentState
 		delta := detail.Summary
 		if strings.HasPrefix(detail.Format, "google-gemini") {
@@ -304,6 +306,10 @@ func languageModelStreamExtra(chunk openaisdk.ChatCompletionChunk, yield func(fa
 		})
 	}
 	if len(reasoningData.ReasoningDetails) == 0 {
+		// Anthropic sends the signature after tool_calls, so don't end reasoning early
+		if strings.HasPrefix(currentState.format, "anthropic-claude") {
+			return ctx, true
+		}
 		// this means its a model different from openai/anthropic that ended reasoning
 		if choice.Delta.Content != "" || len(choice.Delta.ToolCalls) > 0 {
 			ctx[reasoningStartedCtx] = nil

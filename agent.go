@@ -1240,7 +1240,9 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 		case StreamPartTypeReasoningDelta:
 			if active, exists := activeReasoningContent[part.ID]; exists {
 				active.content += part.Delta
-				active.options = part.ProviderMetadata
+				if part.ProviderMetadata != nil {
+					active.options = part.ProviderMetadata
+				}
 				activeReasoningContent[part.ID] = active
 			}
 			if opts.OnReasoningDelta != nil {

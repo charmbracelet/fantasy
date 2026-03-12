@@ -874,12 +874,14 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 								Index:   inx,
 							})
 						}
-						reasoningDetails = append(reasoningDetails, ReasoningDetail{
-							Type:   "reasoning.encrypted",
-							Format: "openai-responses-v1",
-							Data:   *metadata.EncryptedContent,
-							ID:     metadata.ItemID,
-						})
+						if metadata.EncryptedContent != nil {
+							reasoningDetails = append(reasoningDetails, ReasoningDetail{
+								Type:   "reasoning.encrypted",
+								Format: "openai-responses-v1",
+								Data:   *metadata.EncryptedContent,
+								ID:     metadata.ItemID,
+							})
+						}
 						data, _ := json.Marshal(reasoningDetails)
 						reasoningDetailsMap := []map[string]any{}
 						_ = json.Unmarshal(data, &reasoningDetailsMap)

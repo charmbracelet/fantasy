@@ -7,8 +7,16 @@ import (
 )
 
 // callUARequestOptions returns per-request options that override the
-// client-level User-Agent header when the Call carries agent-level UA settings.
-func callUARequestOptions(call fantasy.Call) []option.RequestOption {
+// client-level User-Agent header when the Call carries agent-level UA
+// settings.
+//
+// When noDefaultUA is true the SDK's own User-Agent is preserved and no
+// override is applied (needed for providers like OpenRouter, which reject
+// User-Agents headers they don't expect).
+func callUARequestOptions(call fantasy.Call, noDefaultUA bool) []option.RequestOption {
+	if noDefaultUA {
+		return nil
+	}
 	if ua, ok := httpheaders.CallUserAgent(call.UserAgent); ok {
 		return []option.RequestOption{option.WithHeader("User-Agent", ua)}
 	}
@@ -16,8 +24,12 @@ func callUARequestOptions(call fantasy.Call) []option.RequestOption {
 }
 
 // objectCallUARequestOptions returns per-request options that override the
-// client-level User-Agent header when the ObjectCall carries agent-level UA settings.
-func objectCallUARequestOptions(call fantasy.ObjectCall) []option.RequestOption {
+// client-level User-Agent header when the ObjectCall carries agent-level UA
+// settings.
+func objectCallUARequestOptions(call fantasy.ObjectCall, noDefaultUA bool) []option.RequestOption {
+	if noDefaultUA {
+		return nil
+	}
 	if ua, ok := httpheaders.CallUserAgent(call.UserAgent); ok {
 		return []option.RequestOption{option.WithHeader("User-Agent", ua)}
 	}

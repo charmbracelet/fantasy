@@ -56,7 +56,7 @@ func TestUserAgent(t *testing.T) {
 		_, _ = model.Generate(t.Context(), fantasy.Call{Prompt: prompt})
 
 		require.Len(t, *captured, 1)
-		assert.Equal(t, "Charm Fantasy/"+fantasy.Version, (*captured)[0]["User-Agent"])
+		assert.Equal(t, "OpenAI/Go 2.7.1", (*captured)[0]["User-Agent"])
 	})
 
 	t.Run("WithUserAgent wins over default", func(t *testing.T) {

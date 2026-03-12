@@ -80,7 +80,7 @@ func TestUserAgent(t *testing.T) {
 		_, _ = model.Generate(t.Context(), fantasy.Call{Prompt: prompt})
 
 		require.NotEmpty(t, *captured)
-		assert.True(t, findUA(captured, "Charm Fantasy/"+fantasy.Version))
+		assert.True(t, findUA(captured, "Charm-Fantasy/"+fantasy.Version+" (https://charm.land/fantasy)"))
 	})
 
 	t.Run("WithUserAgent wins over default", func(t *testing.T) {

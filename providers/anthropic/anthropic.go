@@ -153,7 +153,7 @@ func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.L
 	if a.options.apiKey != "" && !a.options.useBedrock {
 		clientOptions = append(clientOptions, option.WithAPIKey(a.options.apiKey))
 	}
-	if a.options.baseURL != "" {
+	if !a.options.useBedrock && a.options.baseURL != "" {
 		clientOptions = append(clientOptions, option.WithBaseURL(a.options.baseURL))
 	}
 	defaultUA := httpheaders.DefaultUserAgent(fantasy.Version)
@@ -201,6 +201,9 @@ func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.L
 					bedrock.WithConfig(cfg),
 				)
 			}
+		}
+		if a.options.baseURL != "" {
+			clientOptions = append(clientOptions, option.WithBaseURL(a.options.baseURL))
 		}
 	}
 	return languageModel{

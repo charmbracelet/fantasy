@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 852
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"}],"model":"deepseek/deepseek-v3.2","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1773323896-yilCh8sn1R8UFUbdxmGz\",\"object\":\"chat.completion\",\"created\":1773323896,\"model\":\"deepseek/deepseek-v3.2-20251201\",\"provider\":\"AtlasCloud\",\"system_fingerprint\":null,\"choices\":[{\"index\":0,\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"native_finish_reason\":\"tool_calls\",\"message\":{\"role\":\"assistant\",\"content\":\"I'll add and multiply the numbers 2 and 3 at the same time as required\",\"refusal\":null,\"reasoning\":null,\"tool_calls\":[{\"type\":\"function\",\"index\":0,\"id\":\"11cf71f38f0b4894b68d75abb63dfbad\",\"function\":{\"name\":\"add\",\"arguments\":\"{\\\"a\\\": 2, \\\"b\\\": 3}\"}},{\"type\":\"function\",\"index\":1,\"id\":\"598d391f886f4aae9d12e1fe63701947\",\"function\":{\"name\":\"multiply\",\"arguments\":\"{\\\"a\\\": 2, \\\"b\\\": 3}\"}}]}}],\"usage\":{\"prompt_tokens\":422,\"completion_tokens\":122,\"total_tokens\":544,\"cost\":0.00015608,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"cache_write_tokens\":0,\"audio_tokens\":0,\"video_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":0.00015608,\"upstream_inference_prompt_cost\":0.00010972,\"upstream_inference_completions_cost\":0.00004636},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0,\"audio_tokens\":0}}}"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 1.419623959s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1378
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"content":"I''ll add and multiply the numbers 2 and 3 at the same time as required","tool_calls":[{"id":"11cf71f38f0b4894b68d75abb63dfbad","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"add"},"type":"function"},{"id":"598d391f886f4aae9d12e1fe63701947","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"11cf71f38f0b4894b68d75abb63dfbad","role":"tool"},{"content":"6","tool_call_id":"598d391f886f4aae9d12e1fe63701947","role":"tool"}],"model":"deepseek/deepseek-v3.2","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1773323901-yNEwfFD1Mu1e66ZJ7PVt\",\"object\":\"chat.completion\",\"created\":1773323901,\"model\":\"deepseek/deepseek-v3.2-20251201\",\"provider\":\"AtlasCloud\",\"system_fingerprint\":null,\"choices\":[{\"index\":0,\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"stop\",\"message\":{\"role\":\"assistant\",\"content\":\"Results:\\n- Addition: 2 + 3 = 5\\n- Multiplication: 2 × 3 = 6\",\"refusal\":null,\"reasoning\":null}}],\"usage\":{\"prompt_tokens\":569,\"completion_tokens\":26,\"total_tokens\":595,\"cost\":0.00015782,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"cache_write_tokens\":0,\"audio_tokens\":0,\"video_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":0.00015782,\"upstream_inference_prompt_cost\":0.00014794,\"upstream_inference_completions_cost\":0.00000988},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0,\"audio_tokens\":0}}}"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 1.833652167s

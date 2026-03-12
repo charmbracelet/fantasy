@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - OpenAI/Go 2.7.1
     url: https://openrouter.ai/api/v1/chat/completions
     method: POST
   response:
@@ -24,28 +24,28 @@ interactions:
     proto_minor: 0
     content_length: -1
     uncompressed: true
-    body: "\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1758884830-zaGHbgLiY1LQM5ZOVLtN\",\"provider\":\"Chutes\",\"model\":\"moonshotai/kimi-k2-0905\",\"object\":\"chat.completion\",\"created\":1758884830,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"native_finish_reason\":\"tool_calls\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"I'll add and multiply the numbers 2 and 3 for you.\",\"refusal\":null,\"reasoning\":null,\"tool_calls\":[{\"id\":\"functions.add:0\",\"index\":0,\"type\":\"function\",\"function\":{\"name\":\"add\",\"arguments\":\"{\\\"a\\\": 2, \\\"b\\\": 3}\"}},{\"id\":\"functions.multiply:1\",\"index\":1,\"type\":\"function\",\"function\":{\"name\":\"multiply\",\"arguments\":\"{\\\"a\\\": 2, \\\"b\\\": 3}\"}}]}}],\"usage\":{\"prompt_tokens\":201,\"completion_tokens\":55,\"total_tokens\":256,\"cost\":0.00015998,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.00007638,\"upstream_inference_completions_cost\":0.0000836},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0}}}"
+    body: "\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1773323489-qBPdo41xHFaoVZOVMG8s\",\"object\":\"chat.completion\",\"created\":1773323489,\"model\":\"moonshotai/kimi-k2-0905\",\"provider\":\"Moonshot AI\",\"system_fingerprint\":\"fpv0_10a6da87\",\"choices\":[{\"index\":0,\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"native_finish_reason\":\"tool_calls\",\"message\":{\"role\":\"assistant\",\"content\":null,\"refusal\":null,\"reasoning\":null,\"tool_calls\":[{\"type\":\"function\",\"index\":0,\"id\":\"add:0\",\"function\":{\"name\":\"add\",\"arguments\":\"{\\\"a\\\": 2, \\\"b\\\": 3}\"}},{\"type\":\"function\",\"index\":1,\"id\":\"multiply:1\",\"function\":{\"name\":\"multiply\",\"arguments\":\"{\\\"a\\\": 2, \\\"b\\\": 3}\"}}]}}],\"usage\":{\"prompt_tokens\":128,\"completion_tokens\":40,\"total_tokens\":168,\"cost\":0.0004672,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"cache_write_tokens\":0,\"audio_tokens\":0,\"video_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":0.0004672,\"upstream_inference_prompt_cost\":0.0001472,\"upstream_inference_completions_cost\":0.00032},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0,\"audio_tokens\":0}}}"
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 1.143856417s
+    duration: 2.727534875s
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 1301
+    content_length: 1198
     host: ""
-    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"content":"I''ll add and multiply the numbers 2 and 3 for you.","tool_calls":[{"id":"functions.add:0","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"add"},"type":"function"},{"id":"functions.multiply:1","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"functions.add:0","role":"tool"},{"content":"6","tool_call_id":"functions.multiply:1","role":"tool"}],"model":"moonshotai/kimi-k2-0905","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"tool_calls":[{"id":"add:0","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"add"},"type":"function"},{"id":"multiply:1","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"add:0","role":"tool"},{"content":"6","tool_call_id":"multiply:1","role":"tool"}],"model":"moonshotai/kimi-k2-0905","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
     headers:
       Accept:
       - application/json
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - OpenAI/Go 2.7.1
     url: https://openrouter.ai/api/v1/chat/completions
     method: POST
   response:
@@ -54,10 +54,10 @@ interactions:
     proto_minor: 0
     content_length: -1
     uncompressed: true
-    body: "\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1758884834-GInh4t6Aro9w3F9lkWTH\",\"provider\":\"SiliconFlow\",\"model\":\"moonshotai/kimi-k2-0905\",\"object\":\"chat.completion\",\"created\":1758884834,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"stop\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"The results are:\\n- 2 + 3 = 5\\n- 2 × 3 = 6\",\"refusal\":null,\"reasoning\":null}}],\"system_fingerprint\":\"\",\"usage\":{\"prompt_tokens\":310,\"completion_tokens\":23,\"total_tokens\":333,\"cost\":0.00023247,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.0001798,\"upstream_inference_completions_cost\":0.00005267},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0}}}"
+    body: "\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1773323492-xXin2fjbs7CFe0HeKEd3\",\"object\":\"chat.completion\",\"created\":1773323492,\"model\":\"moonshotai/kimi-k2-0905\",\"provider\":\"Moonshot AI\",\"system_fingerprint\":\"fpv0_10a6da87\",\"choices\":[{\"index\":0,\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"stop\",\"message\":{\"role\":\"assistant\",\"content\":\"The sum of 2 and 3 is 5, and their product is 6.\",\"refusal\":null,\"reasoning\":null}}],\"usage\":{\"prompt_tokens\":198,\"completion_tokens\":20,\"total_tokens\":218,\"cost\":0.0003877,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"cache_write_tokens\":0,\"audio_tokens\":0,\"video_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":0.0003877,\"upstream_inference_prompt_cost\":0.0002277,\"upstream_inference_completions_cost\":0.00016},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0,\"audio_tokens\":0}}}"
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 1.290988792s
+    duration: 2.281229167s

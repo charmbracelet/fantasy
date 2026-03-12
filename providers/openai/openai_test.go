@@ -3320,7 +3320,7 @@ func TestUserAgent(t *testing.T) {
 		_, _ = model.Generate(t.Context(), fantasy.Call{Prompt: testPrompt})
 
 		require.Len(t, server.calls, 1)
-		assert.Equal(t, "Charm Fantasy/"+fantasy.Version, server.calls[0].headers["User-Agent"])
+		assert.Equal(t, "Charm-Fantasy/"+fantasy.Version+" (https://charm.land/fantasy)", server.calls[0].headers["User-Agent"])
 	})
 
 	t.Run("WithHeaders User-Agent wins over default", func(t *testing.T) {

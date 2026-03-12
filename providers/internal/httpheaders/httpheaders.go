@@ -1,12 +1,15 @@
 // Package httpheaders provides shared User-Agent resolution for all HTTP-based providers.
 package httpheaders
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 // DefaultUserAgent returns the default User-Agent string for the SDK.
 // The result is "Charm Fantasy/<version>".
 func DefaultUserAgent(version string) string {
-	return "Charm Fantasy/" + version
+	return fmt.Sprintf("Charm-Fantasy/%s (https://charm.land/fantasy)", version)
 }
 
 // ResolveHeaders returns a new header map, with a User-Agent field.

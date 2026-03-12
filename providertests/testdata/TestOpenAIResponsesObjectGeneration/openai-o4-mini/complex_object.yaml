@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.7.1
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/responses
     method: POST
   response:
@@ -26,15 +26,17 @@ interactions:
     uncompressed: true
     body: |-
       {
-        "id": "resp_017b2c309fa6f10301690fb622abf481a0a85dad143f87cc57",
+        "id": "resp_05ec23e6760348680169b319c85f708193a530450b951622fc",
         "object": "response",
-        "created_at": 1762637346,
+        "created_at": 1773345224,
         "status": "completed",
         "background": false,
         "billing": {
           "payer": "developer"
         },
+        "completed_at": 1773345230,
         "error": null,
+        "frequency_penalty": 0.0,
         "incomplete_details": null,
         "instructions": null,
         "max_output_tokens": 4000,
@@ -42,12 +44,12 @@ interactions:
         "model": "o4-mini-2025-04-16",
         "output": [
           {
-            "id": "rs_017b2c309fa6f10301690fb623133881a0b253929605c93041",
+            "id": "rs_05ec23e6760348680169b319c8e4b48193a5077f5366ff8cd6",
             "type": "reasoning",
             "summary": []
           },
           {
-            "id": "msg_017b2c309fa6f10301690fb6269d6c81a0abb3acf886a1efe0",
+            "id": "msg_05ec23e6760348680169b319cdb3d881938d81458bb166d538",
             "type": "message",
             "status": "completed",
             "content": [
@@ -55,13 +57,14 @@ interactions:
                 "type": "output_text",
                 "annotations": [],
                 "logprobs": [],
-                "text": "{\"author\":{\"name\":\"J.R.R. Tolkien\",\"nationality\":\"English\"},\"genres\":[\"Fantasy\",\"Adventure\"],\"published_year\":1954,\"title\":\"The Lord of the Rings\"}"
+                "text": "{\"author\":{\"name\":\"J.R.R. Tolkien\",\"nationality\":\"English\"},\"genres\":[\"fantasy\",\"adventure\"],\"published_year\":1954,\"title\":\"The Lord of the Rings\"}"
               }
             ],
             "role": "assistant"
           }
         ],
         "parallel_tool_calls": true,
+        "presence_penalty": 0.0,
         "previous_response_id": null,
         "prompt_cache_key": null,
         "prompt_cache_retention": null,
@@ -137,11 +140,11 @@ interactions:
           "input_tokens_details": {
             "cached_tokens": 0
           },
-          "output_tokens": 431,
+          "output_tokens": 434,
           "output_tokens_details": {
             "reasoning_tokens": 384
           },
-          "total_tokens": 569
+          "total_tokens": 572
         },
         "user": null,
         "metadata": {}
@@ -151,4 +154,4 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 4.660075375s
+    duration: 6.283059s

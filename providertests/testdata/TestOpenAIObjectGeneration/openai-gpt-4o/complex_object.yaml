@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.7.1
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/chat/completions
     method: POST
   response:
@@ -26,16 +26,16 @@ interactions:
     uncompressed: true
     body: |
       {
-        "id": "chatcmpl-CZkh4icu3jixl4IcoAjWVF1mV1oYu",
+        "id": "chatcmpl-DIgPpnnBOUcrX4LrD5A74X9krJj97",
         "object": "chat.completion",
-        "created": 1762637006,
+        "created": 1773345321,
         "model": "gpt-4o-2024-08-06",
         "choices": [
           {
             "index": 0,
             "message": {
               "role": "assistant",
-              "content": "{\"author\":{\"name\":\"J.R.R. Tolkien\",\"nationality\":\"British\"},\"genres\":[\"Fantasy\",\"Adventure\",\"Epic\"],\"published_year\":1954,\"title\":\"The Lord of the Rings\"}",
+              "content": "{\"author\":{\"name\":\"J.R.R. Tolkien\",\"nationality\":\"British\"},\"genres\":[\"Fantasy\",\"Adventure\",\"Epic\",\"High Fantasy\"],\"published_year\":1954,\"title\":\"The Lord of the Rings\"}",
               "refusal": null,
               "annotations": []
             },
@@ -45,8 +45,8 @@ interactions:
         ],
         "usage": {
           "prompt_tokens": 160,
-          "completion_tokens": 40,
-          "total_tokens": 200,
+          "completion_tokens": 43,
+          "total_tokens": 203,
           "prompt_tokens_details": {
             "cached_tokens": 0,
             "audio_tokens": 0
@@ -59,11 +59,11 @@ interactions:
           }
         },
         "service_tier": "default",
-        "system_fingerprint": "fp_b1442291a8"
+        "system_fingerprint": "fp_4d96cd32fd"
       }
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 1.01740425s
+    duration: 1.435517917s

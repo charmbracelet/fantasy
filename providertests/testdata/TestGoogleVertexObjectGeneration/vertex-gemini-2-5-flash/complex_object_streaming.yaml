@@ -17,7 +17,8 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.34.0 gl-go/go1.25.0
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+      - google-genai-sdk/1.49.0 gl-go/go1.26.1
     url: https://us-east5-aiplatform.googleapis.com/v1beta1/projects/fantasy-playground-472418/locations/us-east5/publishers/google/models/gemini-2.5-flash:streamGenerateContent?alt=sse
     method: POST
   response:
@@ -25,10 +26,10 @@ interactions:
     proto_major: 2
     proto_minor: 0
     content_length: -1
-    body: "data: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"text\": \"{\\n  \\\"title\\\": \\\"The Lord of the Rings\\\",\\n  \\\"author\\\": {\\n    \"}]}}],\"usageMetadata\": {\"trafficType\": \"ON_DEMAND\"},\"modelVersion\": \"gemini-2.5-flash\",\"createTime\": \"2025-11-10T12:36:26.936156Z\",\"responseId\": \"StwRadyROZ3qptQPg8OiiQU\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"text\": \"\\\"name\\\": \\\"J.R.R. Tolkien\\\",\\n    \\\"nationality\\\": \\\"British\\\"\\n  },\\n  \\\"genres\\\": [\\n    \\\"fantasy\\\",\\n    \\\"adventure\\\"\\n  ],\\n  \\\"published_year\"}]}}],\"usageMetadata\": {\"trafficType\": \"ON_DEMAND\"},\"modelVersion\": \"gemini-2.5-flash\",\"createTime\": \"2025-11-10T12:36:26.936156Z\",\"responseId\": \"StwRadyROZ3qptQPg8OiiQU\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"text\": \"\\\": 1954\\n}\"}]},\"finishReason\": \"STOP\"}],\"usageMetadata\": {\"promptTokenCount\": 37,\"candidatesTokenCount\": 77,\"totalTokenCount\": 165,\"trafficType\": \"ON_DEMAND\",\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 37}],\"candidatesTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 77}],\"thoughtsTokenCount\": 51},\"modelVersion\": \"gemini-2.5-flash\",\"createTime\": \"2025-11-10T12:36:26.936156Z\",\"responseId\": \"StwRadyROZ3qptQPg8OiiQU\"}\r\n\r\n"
+    body: "data: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"text\": \"{\\n  \\\"title\\\": \\\"The\"}]}}],\"usageMetadata\": {\"trafficType\": \"ON_DEMAND\"},\"modelVersion\": \"gemini-2.5-flash\",\"createTime\": \"2026-03-12T18:08:10.217850Z\",\"responseId\": \"CgGzafqlDeTjt8gPydPHkAI\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"text\": \" Lord of the Rings\\\",\\n  \\\"author\\\": {\\n    \\\"name\\\": \\\"J.R.R. Tolkien\\\",\\n    \\\"nationality\\\": \\\"British\\\"\\n  },\\n  \\\"genres\\\": [\\n    \\\"fantasy\\\",\\n    \\\"adventure\\\"\\n  ],\\n  \\\"published_year\\\": 1954\\n}\"}]},\"finishReason\": \"STOP\"}],\"usageMetadata\": {\"promptTokenCount\": 37,\"candidatesTokenCount\": 77,\"totalTokenCount\": 249,\"trafficType\": \"ON_DEMAND\",\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 37}],\"candidatesTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 77}],\"thoughtsTokenCount\": 135},\"modelVersion\": \"gemini-2.5-flash\",\"createTime\": \"2026-03-12T18:08:10.217850Z\",\"responseId\": \"CgGzafqlDeTjt8gPydPHkAI\"}\r\n\r\n"
     headers:
       Content-Type:
       - text/event-stream
     status: 200 OK
     code: 200
-    duration: 997.700625ms
+    duration: 1.751441042s

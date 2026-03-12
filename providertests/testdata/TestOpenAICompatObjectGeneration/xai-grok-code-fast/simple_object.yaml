@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.7.1
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.x.ai/v1/chat/completions
     method: POST
   response:
@@ -24,10 +24,10 @@ interactions:
     proto_minor: 0
     content_length: -1
     uncompressed: true
-    body: '{"id":"8d3d6258-cbe1-f871-55c0-32bd3487f2d7","object":"chat.completion","created":1762637621,"model":"grok-code-fast-1","choices":[{"index":0,"message":{"role":"assistant","content":"","tool_calls":[{"id":"call_38033184","function":{"name":"Person","arguments":"{\"age\":30,\"city\":\"Paris\",\"name\":\"Alice\"}"},"type":"function"}],"refusal":null},"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":429,"completion_tokens":44,"total_tokens":630,"prompt_tokens_details":{"text_tokens":429,"audio_tokens":0,"image_tokens":0,"cached_tokens":320},"completion_tokens_details":{"reasoning_tokens":157,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0},"num_sources_used":0},"system_fingerprint":"fp_10f00c862d"}'
+    body: '{"id":"abf5cc8a-cbff-c3b8-aa7d-b8751de51020","object":"chat.completion","created":1773345657,"model":"grok-code-fast-1","choices":[{"index":0,"message":{"role":"assistant","content":"","reasoning_content":"## Processing user request  \n- The user asked for information about Alice, who is 30 years old and lives in Paris.  \n- Found a tool called \"Person\" that matches the request, with parameters for name, age, and city.  \n\n## Structuring tool call  \n- The tool requires parameters in the order: age, city, name, based on function definitions.  \n- Will call the tool with parameters: age 30, city Paris, name Alice, to generate the information.","tool_calls":[{"id":"call_22831808","function":{"name":"Person","arguments":"{\"age\":30,\"city\":\"Paris\",\"name\":\"Alice\"}"},"type":"function"}],"refusal":null},"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":429,"completion_tokens":44,"total_tokens":975,"prompt_tokens_details":{"text_tokens":429,"audio_tokens":0,"image_tokens":0,"cached_tokens":192},"completion_tokens_details":{"reasoning_tokens":502,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0},"num_sources_used":0,"cost_in_usd_ticks":8702400},"system_fingerprint":"fp_99052e9f23"}'
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 1.615676541s
+    duration: 12.069042709s

@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/responses
     method: POST
   response:
@@ -26,15 +26,17 @@ interactions:
     uncompressed: true
     body: |-
       {
-        "id": "resp_05edda4810c41de00168f23812e34481909c921eeab19085a0",
+        "id": "resp_0577d63a991eed700169b31961c10481928212a8fddee831e8",
         "object": "response",
-        "created_at": 1760704531,
+        "created_at": 1773345121,
         "status": "completed",
         "background": false,
         "billing": {
           "payer": "developer"
         },
+        "completed_at": 1773345124,
         "error": null,
+        "frequency_penalty": 0.0,
         "incomplete_details": null,
         "instructions": null,
         "max_output_tokens": 4000,
@@ -42,12 +44,12 @@ interactions:
         "model": "o4-mini-2025-04-16",
         "output": [
           {
-            "id": "rs_05edda4810c41de00168f2381383e08190b96c0313059265a9",
+            "id": "rs_0577d63a991eed700169b319627ff88192a1f65d0284fde2da",
             "type": "reasoning",
             "summary": []
           },
           {
-            "id": "msg_05edda4810c41de00168f23814db48819083a54f56411e35a5",
+            "id": "msg_0577d63a991eed700169b31963cb688192bb2174abf46137e4",
             "type": "message",
             "status": "completed",
             "content": [
@@ -62,8 +64,10 @@ interactions:
           }
         ],
         "parallel_tool_calls": true,
+        "presence_penalty": 0.0,
         "previous_response_id": null,
         "prompt_cache_key": null,
+        "prompt_cache_retention": null,
         "reasoning": {
           "effort": "medium",
           "summary": null
@@ -88,11 +92,11 @@ interactions:
           "input_tokens_details": {
             "cached_tokens": 0
           },
-          "output_tokens": 136,
+          "output_tokens": 111,
           "output_tokens_details": {
-            "reasoning_tokens": 128
+            "reasoning_tokens": 64
           },
-          "total_tokens": 155
+          "total_tokens": 130
         },
         "user": null,
         "metadata": {}
@@ -102,4 +106,4 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 2.327569333s
+    duration: 2.5590765s

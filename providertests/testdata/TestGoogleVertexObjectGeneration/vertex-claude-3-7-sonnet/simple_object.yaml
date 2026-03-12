@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - Anthropic/Go 1.14.0
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://us-east5-aiplatform.googleapis.com/v1/projects/fantasy-playground-472418/locations/us-east5/publishers/anthropic/models/claude-3-7-sonnet@20250219:rawPredict
     method: POST
   response:
@@ -24,10 +24,10 @@ interactions:
     proto_minor: 0
     content_length: -1
     uncompressed: true
-    body: '{"model":"claude-3-7-sonnet-20250219","id":"msg_vrtx_014VLsXeDXtuC84Nx9V4pBdW","type":"message","role":"assistant","content":[{"type":"tool_use","id":"toolu_vrtx_01TaBaQU6GZpxjApVgvzLfev","name":"Person","input":{"name":"Alice","age":30,"city":"Paris"}}],"stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":453,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":67}}'
+    body: '{"model":"claude-3-7-sonnet-20250219","id":"msg_vrtx_01E4KA4WSm8m4kRkf8hCnhXX","type":"message","role":"assistant","content":[{"type":"tool_use","id":"toolu_vrtx_01HXsVRoRan74amQY6F2y8iC","name":"Person","input":{"name":"Alice","age":30,"city":"Paris"}}],"stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":453,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":67}}'
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 1.818802583s
+    duration: 1.585054541s

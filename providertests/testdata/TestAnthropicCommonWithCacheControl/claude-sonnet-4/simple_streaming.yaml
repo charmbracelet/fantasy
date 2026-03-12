@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - Anthropic/Go 1.14.0
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.anthropic.com/v1/messages
     method: POST
   response:
@@ -23,48 +23,79 @@ interactions:
     proto_major: 2
     proto_minor: 0
     content_length: -1
+    uncompressed: true
     body: |+
       event: message_start
-      data: {"type":"message_start","message":{"model":"claude-sonnet-4-20250514","id":"msg_01QBAGSzfj2ZoqStejnhgqXh","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":16,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":4,"service_tier":"standard"}}         }
+      data: {"type":"message_start","message":{"model":"claude-sonnet-4-20250514","id":"msg_01JGB62RRpQEwVHUjLdhqWMi","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":16,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":5,"service_tier":"standard","inference_geo":"not_available"}}   }
 
       event: content_block_start
-      data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}
-
-      event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Olá!"}}
-
-      event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"\n\n("}      }
+      data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}           }
 
       event: ping
       data: {"type": "ping"}
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"That's \"hello"} }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Olá! ("}     }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"\" in Portuguese."}     }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Oh"}        }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" Other common"}           }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"-LA"}}
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" greetings include \""}          }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"H"}     }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Oi!\""}      }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":")"}             }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" for a more casual \""}            }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"\n\nThat"}       }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"hi!\")"}         }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"'s \""}        }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"hello\" in Portuguese."}  }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" You"}          }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" can also"}           }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" say \""}   }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Oi!\""}          }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" ("}     }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Oy)"}}
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" for"}    }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" a"}  }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" more"}           }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" casual \""}  }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"hi!\""}   }
 
       event: content_block_stop
-      data: {"type":"content_block_stop","index":0               }
+      data: {"type":"content_block_stop","index":0 }
 
       event: message_delta
-      data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"input_tokens":16,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":35}   }
+      data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"input_tokens":16,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":43}          }
 
       event: message_stop
       data: {"type":"message_stop"            }
@@ -74,4 +105,4 @@ interactions:
       - text/event-stream; charset=utf-8
     status: 200 OK
     code: 200
-    duration: 2.247809834s
+    duration: 1.122226333s

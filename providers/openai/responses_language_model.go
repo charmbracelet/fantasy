@@ -808,7 +808,7 @@ func mapResponsesFinishReason(reason string, hasFunctionCall bool) fantasy.Finis
 func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.StreamResponse, error) {
 	params, warnings := o.prepareParams(call)
 
-	stream := o.client.Responses.NewStreaming(ctx, *params, callUARequestOptions(call, false)...)
+	stream := o.client.Responses.NewStreaming(ctx, *params, callUARequestOptions(call, o.noDefaultUserAgent)...)
 
 	finishReason := fantasy.FinishReasonUnknown
 	var usage fantasy.Usage
@@ -1108,7 +1108,7 @@ func (o responsesLanguageModel) generateObjectWithJSONMode(ctx context.Context, 
 	}
 
 	// Make request
-	response, err := o.client.Responses.New(ctx, *params, objectCallUARequestOptions(call, false)...)
+	response, err := o.client.Responses.New(ctx, *params, objectCallUARequestOptions(call, o.noDefaultUserAgent)...)
 	if err != nil {
 		return nil, toProviderErr(err)
 	}
@@ -1218,7 +1218,7 @@ func (o responsesLanguageModel) streamObjectWithJSONMode(ctx context.Context, ca
 		Format: responses.ResponseFormatTextConfigParamOfJSONSchema(schemaName, jsonSchemaMap),
 	}
 
-	stream := o.client.Responses.NewStreaming(ctx, *params, objectCallUARequestOptions(call, false)...)
+	stream := o.client.Responses.NewStreaming(ctx, *params, objectCallUARequestOptions(call, o.noDefaultUserAgent)...)
 
 	return func(yield func(fantasy.ObjectStreamPart) bool) {
 		if len(warnings) > 0 {

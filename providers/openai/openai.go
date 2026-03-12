@@ -210,16 +210,17 @@ func (o *provider) LanguageModel(_ context.Context, modelID string) (fantasy.Lan
 		return newResponsesLanguageModel(modelID, o.options.name, client, objectMode), nil
 	}
 
-	o.options.languageModelOptions = append(o.options.languageModelOptions, WithLanguageModelObjectMode(o.options.objectMode))
+	languageModelOptions := append([]LanguageModelOption{}, o.options.languageModelOptions...)
+	languageModelOptions = append(languageModelOptions, WithLanguageModelObjectMode(o.options.objectMode))
 	if o.options.noDefaultUserAgent {
-		o.options.languageModelOptions = append(o.options.languageModelOptions, WithLanguageModelSkipUserAgent())
+		languageModelOptions = append(languageModelOptions, WithLanguageModelSkipUserAgent())
 	}
 
 	return newLanguageModel(
 		modelID,
 		o.options.name,
 		client,
-		o.options.languageModelOptions...,
+		languageModelOptions...,
 	), nil
 }
 

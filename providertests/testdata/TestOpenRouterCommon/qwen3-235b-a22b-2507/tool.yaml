@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - OpenAI/Go 2.7.1
     url: https://openrouter.ai/api/v1/chat/completions
     method: POST
   response:
@@ -24,28 +24,28 @@ interactions:
     proto_minor: 0
     content_length: -1
     uncompressed: true
-    body: "\n         \n{\"id\":\"gen-1758884945-5uDqMdZtpqK4kUPIuQIf\",\"provider\":\"WandB\",\"model\":\"qwen/qwen3-235b-a22b-2507\",\"object\":\"chat.completion\",\"created\":1758884945,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"native_finish_reason\":\"tool_calls\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\",\"refusal\":null,\"reasoning\":null,\"tool_calls\":[{\"id\":\"chatcmpl-tool-fd4d9460276d48b9ab949c0188d8cfae\",\"type\":\"function\",\"index\":0,\"function\":{\"name\":\"weather\",\"arguments\":\"{\\\"location\\\": \\\"Florence, Italy\\\"}\"}}]}}],\"usage\":{\"prompt_tokens\":171,\"completion_tokens\":22,\"total_tokens\":193,\"cost\":0.0000193,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.0000171,\"upstream_inference_completions_cost\":0.0000022},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0}}}"
+    body: "\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1773323578-bFJS3JLS1vdGfLobyYO6\",\"object\":\"chat.completion\",\"created\":1773323578,\"model\":\"qwen/qwen3-235b-a22b-07-25\",\"provider\":\"Alibaba\",\"system_fingerprint\":null,\"choices\":[{\"index\":0,\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"native_finish_reason\":\"tool_calls\",\"message\":{\"role\":\"assistant\",\"content\":null,\"refusal\":null,\"reasoning\":null,\"tool_calls\":[{\"type\":\"function\",\"index\":0,\"id\":\"call_72e6b5890385469d9a5c17\",\"function\":{\"name\":\"weather\",\"arguments\":\"{\\\"location\\\": \\\"Florence,Italy\\\"}\"}}]}}],\"usage\":{\"prompt_tokens\":167,\"completion_tokens\":21,\"total_tokens\":188,\"cost\":0.0000375245,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"cache_write_tokens\":0,\"audio_tokens\":0,\"video_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":0.00005773,\"upstream_inference_prompt_cost\":0.00003841,\"upstream_inference_completions_cost\":0.00001932},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0,\"audio_tokens\":0}}}"
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 401.369ms
+    duration: 6.79434925s
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 779
+    content_length: 740
     host: ""
-    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"chatcmpl-tool-fd4d9460276d48b9ab949c0188d8cfae","function":{"arguments":"{\"location\": \"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"chatcmpl-tool-fd4d9460276d48b9ab949c0188d8cfae","role":"tool"}],"model":"qwen/qwen3-235b-a22b-2507","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"call_72e6b5890385469d9a5c17","function":{"arguments":"{\"location\": \"Florence,Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"call_72e6b5890385469d9a5c17","role":"tool"}],"model":"qwen/qwen3-235b-a22b-2507","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
     headers:
       Accept:
       - application/json
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - OpenAI/Go 2.7.1
     url: https://openrouter.ai/api/v1/chat/completions
     method: POST
   response:
@@ -54,10 +54,10 @@ interactions:
     proto_minor: 0
     content_length: -1
     uncompressed: true
-    body: "\n         \n\n         \n\n         \n{\"id\":\"gen-1758884946-bwO12CgPbxWTNCrT2DXz\",\"provider\":\"DeepInfra\",\"model\":\"qwen/qwen3-235b-a22b-2507\",\"object\":\"chat.completion\",\"created\":1758884946,\"choices\":[{\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"stop\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"The current temperature in Florence, Italy is 40°C. That's quite hot! Make sure to stay hydrated and avoid prolonged exposure to the sun if you're there.\",\"refusal\":null,\"reasoning\":null}}],\"usage\":{\"prompt_tokens\":205,\"completion_tokens\":35,\"total_tokens\":240,\"cost\":0.00003945,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":null,\"upstream_inference_prompt_cost\":0.00001845,\"upstream_inference_completions_cost\":0.000021},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0}}}"
+    body: "\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1773323585-nJKeiMdmmaVo3UWXOxsZ\",\"object\":\"chat.completion\",\"created\":1773323585,\"model\":\"qwen/qwen3-235b-a22b-07-25\",\"provider\":\"Alibaba\",\"system_fingerprint\":null,\"choices\":[{\"index\":0,\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"stop\",\"message\":{\"role\":\"assistant\",\"content\":\"The current temperature in Florence, Italy is 40°C. That's quite hot - you might want to stay hydrated and avoid prolonged sun exposure if you're there!\",\"refusal\":null,\"reasoning\":null}}],\"usage\":{\"prompt_tokens\":205,\"completion_tokens\":34,\"total_tokens\":239,\"cost\":0.0000509795,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"cache_write_tokens\":0,\"audio_tokens\":0,\"video_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":0.00007843,\"upstream_inference_prompt_cost\":0.00004715,\"upstream_inference_completions_cost\":0.00003128},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0,\"audio_tokens\":0}}}"
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 778.53375ms
+    duration: 1.367666167s

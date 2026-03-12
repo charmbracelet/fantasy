@@ -1,0 +1,33 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 197
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"Say hi in Portuguese","role":"user"}],"model":"deepseek/deepseek-v3.2","max_tokens":4000,"usage":{"include":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1773323879-BNXjUOAjb0ekhuFzfdmG\",\"object\":\"chat.completion\",\"created\":1773323879,\"model\":\"deepseek/deepseek-v3.2-20251201\",\"provider\":\"AtlasCloud\",\"system_fingerprint\":null,\"choices\":[{\"index\":0,\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"stop\",\"message\":{\"role\":\"assistant\",\"content\":\"Olá! \U0001F60A\",\"refusal\":null,\"reasoning\":null}}],\"usage\":{\"prompt_tokens\":13,\"completion_tokens\":6,\"total_tokens\":19,\"cost\":0.00000566,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"cache_write_tokens\":0,\"audio_tokens\":0,\"video_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":0.00000566,\"upstream_inference_prompt_cost\":0.00000338,\"upstream_inference_completions_cost\":0.00000228},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0,\"audio_tokens\":0}}}"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 2.374466917s

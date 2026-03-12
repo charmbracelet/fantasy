@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/chat/completions
     method: POST
   response:
@@ -26,9 +26,9 @@ interactions:
     uncompressed: true
     body: |
       {
-        "id": "chatcmpl-CRdykecyitTrtBgxG3cAhHM82R3ar",
+        "id": "chatcmpl-DIgOVkcYwRdDIvQjYGbUZZD00gsxh",
         "object": "chat.completion",
-        "created": 1760704570,
+        "created": 1773345239,
         "model": "gpt-4o-2024-08-06",
         "choices": [
           {
@@ -38,11 +38,11 @@ interactions:
               "content": null,
               "tool_calls": [
                 {
-                  "id": "call_zKl0GvROtopAKaVzafvOYfPu",
+                  "id": "call_3eHnfvL6QJXyzdmN10qxuau6",
                   "type": "function",
                   "function": {
                     "name": "weather",
-                    "arguments": "{\"location\":\"Florence, Italy\"}"
+                    "arguments": "{\"location\":\"Florence,Italy\"}"
                   }
                 }
               ],
@@ -69,29 +69,29 @@ interactions:
           }
         },
         "service_tier": "default",
-        "system_fingerprint": "fp_cbf1785567"
+        "system_fingerprint": "fp_ad6e9d3570"
       }
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 1.142721375s
+    duration: 2.097003459s
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 700
+    content_length: 699
     host: ""
-    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"call_zKl0GvROtopAKaVzafvOYfPu","function":{"arguments":"{\"location\":\"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"call_zKl0GvROtopAKaVzafvOYfPu","role":"tool"}],"model":"gpt-4o","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"call_3eHnfvL6QJXyzdmN10qxuau6","function":{"arguments":"{\"location\":\"Florence,Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"call_3eHnfvL6QJXyzdmN10qxuau6","role":"tool"}],"model":"gpt-4o","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
     headers:
       Accept:
       - application/json
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/chat/completions
     method: POST
   response:
@@ -102,16 +102,16 @@ interactions:
     uncompressed: true
     body: |
       {
-        "id": "chatcmpl-CRdyljyj1IrCMsT69QVozUugzhlwd",
+        "id": "chatcmpl-DIgOWwD5sH104pb99yiRJ1be9UtUd",
         "object": "chat.completion",
-        "created": 1760704571,
+        "created": 1773345240,
         "model": "gpt-4o-2024-08-06",
         "choices": [
           {
             "index": 0,
             "message": {
               "role": "assistant",
-              "content": "The current temperature in Florence, Italy is 40°C.",
+              "content": "The current weather in Florence, Italy is 40°C.",
               "refusal": null,
               "annotations": []
             },
@@ -135,11 +135,11 @@ interactions:
           }
         },
         "service_tier": "default",
-        "system_fingerprint": "fp_cbf1785567"
+        "system_fingerprint": "fp_ad6e9d3570"
       }
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 1.414555709s
+    duration: 920.258625ms

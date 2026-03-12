@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.7.1
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.groq.com/openai/v1/chat/completions
     method: POST
   response:
@@ -24,17 +24,17 @@ interactions:
     proto_minor: 0
     content_length: -1
     body: |+
-      data: {"id":"chatcmpl-01c5e4bc-e533-4f23-bc74-32b9f2f473b0","object":"chat.completion.chunk","created":1762854973,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"role":"assistant","content":""},"logprobs":null,"finish_reason":null}],"x_groq":{"id":"req_01k9s5gc9mfqk9exgvmtm3gw25"}}
+      data: {"id":"chatcmpl-f07b368c-ae72-4555-9465-ae09fe4614e6","object":"chat.completion.chunk","created":1773345612,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_00c37775b7","choices":[{"index":0,"delta":{"role":"assistant","content":""},"logprobs":null,"finish_reason":null}],"x_groq":{"id":"req_01kkht58hmfqdt7taat7yqmh20","seed":2139001717}}
 
-      data: {"id":"chatcmpl-01c5e4bc-e533-4f23-bc74-32b9f2f473b0","object":"chat.completion.chunk","created":1762854973,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":"Ol"},"logprobs":null,"finish_reason":null}]}
+      data: {"id":"chatcmpl-f07b368c-ae72-4555-9465-ae09fe4614e6","object":"chat.completion.chunk","created":1773345612,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_00c37775b7","choices":[{"index":0,"delta":{"content":"Ol"},"logprobs":null,"finish_reason":null}]}
 
-      data: {"id":"chatcmpl-01c5e4bc-e533-4f23-bc74-32b9f2f473b0","object":"chat.completion.chunk","created":1762854973,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":"á"},"logprobs":null,"finish_reason":null}]}
+      data: {"id":"chatcmpl-f07b368c-ae72-4555-9465-ae09fe4614e6","object":"chat.completion.chunk","created":1773345612,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_00c37775b7","choices":[{"index":0,"delta":{"content":"á"},"logprobs":null,"finish_reason":null}]}
 
-      data: {"id":"chatcmpl-01c5e4bc-e533-4f23-bc74-32b9f2f473b0","object":"chat.completion.chunk","created":1762854973,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{"content":"!"},"logprobs":null,"finish_reason":null}]}
+      data: {"id":"chatcmpl-f07b368c-ae72-4555-9465-ae09fe4614e6","object":"chat.completion.chunk","created":1773345612,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_00c37775b7","choices":[{"index":0,"delta":{"content":"!"},"logprobs":null,"finish_reason":null}]}
 
-      data: {"id":"chatcmpl-01c5e4bc-e533-4f23-bc74-32b9f2f473b0","object":"chat.completion.chunk","created":1762854973,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"stop"}],"x_groq":{"id":"req_01k9s5gc9mfqk9exgvmtm3gw25","usage":{"queue_time":0.160975287,"prompt_tokens":20,"prompt_time":0.009101728,"completion_tokens":4,"completion_time":0.009250085,"total_tokens":24,"total_time":0.018351813}},"usage":{"queue_time":0.160975287,"prompt_tokens":20,"prompt_time":0.009101728,"completion_tokens":4,"completion_time":0.009250085,"total_tokens":24,"total_time":0.018351813}}
+      data: {"id":"chatcmpl-f07b368c-ae72-4555-9465-ae09fe4614e6","object":"chat.completion.chunk","created":1773345612,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_00c37775b7","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"stop"}],"x_groq":{"id":"req_01kkht58hmfqdt7taat7yqmh20","usage":{"queue_time":0.193227832,"prompt_tokens":20,"prompt_time":0.010710679,"completion_tokens":4,"completion_time":0.009030045,"total_tokens":24,"total_time":0.019740724}},"usage":{"queue_time":0.193227832,"prompt_tokens":20,"prompt_time":0.010710679,"completion_tokens":4,"completion_time":0.009030045,"total_tokens":24,"total_time":0.019740724}}
 
-      data: {"id":"chatcmpl-01c5e4bc-e533-4f23-bc74-32b9f2f473b0","object":"chat.completion.chunk","created":1762854973,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_5fe129dff6","choices":[],"usage":{"queue_time":0.160975287,"prompt_tokens":20,"prompt_time":0.009101728,"completion_tokens":4,"completion_time":0.009250085,"total_tokens":24,"total_time":0.018351813},"service_tier":"on_demand"}
+      data: {"id":"chatcmpl-f07b368c-ae72-4555-9465-ae09fe4614e6","object":"chat.completion.chunk","created":1773345612,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_00c37775b7","choices":[],"usage":{"queue_time":0.193227832,"prompt_tokens":20,"prompt_time":0.010710679,"completion_tokens":4,"completion_time":0.009030045,"total_tokens":24,"total_time":0.019740724},"service_tier":"on_demand"}
 
       data: [DONE]
 
@@ -43,4 +43,4 @@ interactions:
       - text/event-stream
     status: 200 OK
     code: 200
-    duration: 221.770167ms
+    duration: 238.122625ms

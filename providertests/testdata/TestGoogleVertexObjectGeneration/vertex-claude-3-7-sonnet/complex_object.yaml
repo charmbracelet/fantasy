@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - Anthropic/Go 1.14.0
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://us-east5-aiplatform.googleapis.com/v1/projects/fantasy-playground-472418/locations/us-east5/publishers/anthropic/models/claude-3-7-sonnet@20250219:rawPredict
     method: POST
   response:
@@ -24,10 +24,10 @@ interactions:
     proto_minor: 0
     content_length: -1
     uncompressed: true
-    body: '{"model":"claude-3-7-sonnet-20250219","id":"msg_vrtx_01UAjss8kpXQotMqUWtjP8Vd","type":"message","role":"assistant","content":[{"type":"tool_use","id":"toolu_vrtx_01UqmeUWH5fBpvtZE1jx4knQ","name":"Book","input":{"title":"The Lord of the Rings","author":{"name":"J.R.R. Tolkien","nationality":"British"},"genres":["Fantasy","Adventure","Epic","High fantasy"],"published_year":1954}}],"stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":548,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":132}}'
+    body: '{"model":"claude-3-7-sonnet-20250219","id":"msg_vrtx_015Mzf3KDhaBnCM8at8mxVaG","type":"message","role":"assistant","content":[{"type":"tool_use","id":"toolu_vrtx_01X2tYiztpv1AS2L4tpgEbEn","name":"Book","input":{"title":"The Lord of the Rings","author":{"name":"J.R.R. Tolkien","nationality":"British"},"genres":["Fantasy","Adventure","Epic"],"published_year":1954}}],"stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":548,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":128}}'
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 2.867918541s
+    duration: 2.142388625s

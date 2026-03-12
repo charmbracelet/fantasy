@@ -17,7 +17,8 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.34.0 gl-go/go1.25.4
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+      - google-genai-sdk/1.49.0 gl-go/go1.26.1
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:streamGenerateContent?alt=sse
     method: POST
   response:
@@ -25,10 +26,10 @@ interactions:
     proto_major: 2
     proto_minor: 0
     content_length: -1
-    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"{\\n  \\\"author\\\": {\\n    \\\"name\\\": \\\"J\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 38,\"candidatesTokenCount\": 14,\"totalTokenCount\": 188,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 38}],\"thoughtsTokenCount\": 136},\"modelVersion\": \"gemini-2.5-pro\",\"responseId\": \"06IdadTyD9b9vdIP4ITmwQk\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \".R.R. Tolkien\\\",\\n    \\\"nationality\\\": \\\"British\\\"\\n  },\\n  \\\"genres\\\": [\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 38,\"candidatesTokenCount\": 38,\"totalTokenCount\": 212,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 38}],\"thoughtsTokenCount\": 136},\"modelVersion\": \"gemini-2.5-pro\",\"responseId\": \"06IdadTyD9b9vdIP4ITmwQk\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"\\n    \\\"fantasy\\\",\\n    \\\"adventure\\\"\\n  ],\\n  \\\"published_year\\\": 195\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 38,\"candidatesTokenCount\": 60,\"totalTokenCount\": 234,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 38}],\"thoughtsTokenCount\": 136},\"modelVersion\": \"gemini-2.5-pro\",\"responseId\": \"06IdadTyD9b9vdIP4ITmwQk\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"4,\\n  \\\"title\\\": \\\"The Lord of the Rings\\\"\\n}\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 38,\"candidatesTokenCount\": 76,\"totalTokenCount\": 250,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 38}],\"thoughtsTokenCount\": 136},\"modelVersion\": \"gemini-2.5-pro\",\"responseId\": \"06IdadTyD9b9vdIP4ITmwQk\"}\r\n\r\n"
+    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"{\\n  \\\"author\\\": {\\n    \\\"name\\\": \\\"J.R.R. Tolkien\\\",\\n    \\\"nationality\\\":\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 38,\"candidatesTokenCount\": 26,\"totalTokenCount\": 469,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 38}],\"thoughtsTokenCount\": 405},\"modelVersion\": \"gemini-2.5-pro\",\"responseId\": \"AQGzaef8KcvQz7IPjunSwA4\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \" \\\"British\\\"\\n  },\\n  \\\"genres\\\": [\\n    \\\"Fantasy\\\",\\n    \\\"Adventure\\\"\\n  \"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 38,\"candidatesTokenCount\": 48,\"totalTokenCount\": 491,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 38}],\"thoughtsTokenCount\": 405},\"modelVersion\": \"gemini-2.5-pro\",\"responseId\": \"AQGzaef8KcvQz7IPjunSwA4\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"],\\n  \\\"published_year\\\": 1954,\\n  \\\"title\\\": \\\"The Lord of the\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 38,\"candidatesTokenCount\": 72,\"totalTokenCount\": 515,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 38}],\"thoughtsTokenCount\": 405},\"modelVersion\": \"gemini-2.5-pro\",\"responseId\": \"AQGzaef8KcvQz7IPjunSwA4\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \" Rings\\\"\\n}\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 38,\"candidatesTokenCount\": 77,\"totalTokenCount\": 520,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 38}],\"thoughtsTokenCount\": 405},\"modelVersion\": \"gemini-2.5-pro\",\"responseId\": \"AQGzaef8KcvQz7IPjunSwA4\"}\r\n\r\n"
     headers:
       Content-Type:
       - text/event-stream
     status: 200 OK
     code: 200
-    duration: 2.114800584s
+    duration: 4.397248417s

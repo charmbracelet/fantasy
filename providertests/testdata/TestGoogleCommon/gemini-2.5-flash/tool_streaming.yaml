@@ -17,7 +17,8 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.34.0 gl-go/go1.25.4
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+      - google-genai-sdk/1.49.0 gl-go/go1.26.1
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse
     method: POST
   response:
@@ -25,22 +26,22 @@ interactions:
     proto_major: 2
     proto_minor: 0
     content_length: -1
-    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"functionCall\": {\"name\": \"weather\",\"args\": {\"location\": \"Florence, Italy\"}},\"thoughtSignature\": \"CiQB0e2Kb5hLxW4oJvRVAtEyLSHknL6TrwoTlUrzV/NIKu+R2z8KYwHR7YpvSN4fng8omWFL8Aqjsl9X3H+kgDzmS7IrsQLTYrFyl7mDqVImhz66isD523DqKjTNM+VDowi7QGeoVmSGy4+iDSNmK4JMcn8hMxHExBdm1BDyf2m5oXW+6Q2hVWscoQqJAgHR7YpvKGTVtc/SBxH4DcGgHUE2vbnfSF8icr79c/9Z4JUVIM8e3vDxVSlSoXqSyOBIjCYx75OWcokqKhKSbksYQhgWj2OBK4yqkjgDn4Ei6a3mO4m1B+fCX39c73spRSK+0RCGfPdkmL0iTB+lTB4QjKZZGqjEe87oL4rt26ZlndfpPRmdqqqdC4MVnRDqXOO4xrSr4A+n27MCr/mzu0FGg2ld13WUuu42nvb+pSgIoQC1ARz5CsDhTfXp2vFywCpbFzK1w61QJSgyjcBph/SljYIVLLwcY8uaWr1ZLIc+6sdZU9g3n2jlZ/HIR9zc62qdIcdLWLaqfuRKfRQXykjOAJwwMziZ7ncKIwHR7YpvVfOT+ooTKaMyWqreuH0LElgmp0tV5T5M+SoXjTTp\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0,\"finishMessage\": \"Model generated function call(s).\"}],\"usageMetadata\": {\"promptTokenCount\": 54,\"candidatesTokenCount\": 15,\"totalTokenCount\": 139,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 54}],\"thoughtsTokenCount\": 70},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"caIdad66Iaq-vdIPlaK54Ak\"}\r\n\r\n"
+    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"functionCall\": {\"name\": \"weather\",\"args\": {\"location\": \"Florence,Italy\"}},\"thoughtSignature\": \"CiQBvj72+xCKZ6n2ewHIHg3nIWfu6zy4Znh/TJTlgZMDBj7UcfoKZwG+Pvb7HC0+ds8yTx13X71T68CdLhgHBq/EHSe1cdetUYt/hbcv5aJy5o7Bhux5fWqkmSsGNBs9HiMdsbRqRN4YXh9UR3LTnYuV7Bp0gR8nIE/QLK2BQtGNxrxaD8scXwvrZ2q3izMKmgEBvj72++/EmTKY6Vq77EISxk0GbpbjN6ypU29fapjcLCRtNSNfgpdcqgMgWIGqH6E9d20r2UYGXgyGsx5cdtWBvI0q5dQwy2xATovEZNRPNJC/+vY0yBsTojt61TKhp26PJ5fIdu02X8RN89S15Xr3egRayx72aPeUzfheqRxqGWjiMcbK4EWyiX+UxHHFqKTppeSRhBjtMdse\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0,\"finishMessage\": \"Model generated function call(s).\"}],\"usageMetadata\": {\"promptTokenCount\": 54,\"candidatesTokenCount\": 15,\"totalTokenCount\": 112,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 54}],\"thoughtsTokenCount\": 43},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"WQCzaayhL8Xmz7IP-63dqQk\"}\r\n\r\n"
     headers:
       Content-Type:
       - text/event-stream
     status: 200 OK
     code: 200
-    duration: 1.638936291s
+    duration: 1.022032708s
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 1337
+    content_length: 1144
     host: generativelanguage.googleapis.com
     body: |
-      {"contents":[{"parts":[{"text":"What's the weather in Florence,Italy?"}],"role":"user"},{"parts":[{"functionCall":{"args":{"location":"Florence, Italy"},"id":"1","name":"weather"},"thoughtSignature":"CiQB0e2Kb5hLxW4oJvRVAtEyLSHknL6TrwoTlUrzV/NIKu+R2z8KYwHR7YpvSN4fng8omWFL8Aqjsl9X3H+kgDzmS7IrsQLTYrFyl7mDqVImhz66isD523DqKjTNM+VDowi7QGeoVmSGy4+iDSNmK4JMcn8hMxHExBdm1BDyf2m5oXW+6Q2hVWscoQqJAgHR7YpvKGTVtc/SBxH4DcGgHUE2vbnfSF8icr79c/9Z4JUVIM8e3vDxVSlSoXqSyOBIjCYx75OWcokqKhKSbksYQhgWj2OBK4yqkjgDn4Ei6a3mO4m1B+fCX39c73spRSK+0RCGfPdkmL0iTB+lTB4QjKZZGqjEe87oL4rt26ZlndfpPRmdqqqdC4MVnRDqXOO4xrSr4A+n27MCr/mzu0FGg2ld13WUuu42nvb+pSgIoQC1ARz5CsDhTfXp2vFywCpbFzK1w61QJSgyjcBph/SljYIVLLwcY8uaWr1ZLIc+6sdZU9g3n2jlZ/HIR9zc62qdIcdLWLaqfuRKfRQXykjOAJwwMziZ7ncKIwHR7YpvVfOT+ooTKaMyWqreuH0LElgmp0tV5T5M+SoXjTTp"}],"role":"model"},{"parts":[{"functionResponse":{"id":"1","name":"weather","response":{"result":"40 C"}}}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}
+      {"contents":[{"parts":[{"text":"What's the weather in Florence,Italy?"}],"role":"user"},{"parts":[{"functionCall":{"args":{"location":"Florence,Italy"},"id":"1","name":"weather"},"thoughtSignature":"CiQBvj72+xCKZ6n2ewHIHg3nIWfu6zy4Znh/TJTlgZMDBj7UcfoKZwG+Pvb7HC0+ds8yTx13X71T68CdLhgHBq/EHSe1cdetUYt/hbcv5aJy5o7Bhux5fWqkmSsGNBs9HiMdsbRqRN4YXh9UR3LTnYuV7Bp0gR8nIE/QLK2BQtGNxrxaD8scXwvrZ2q3izMKmgEBvj72++/EmTKY6Vq77EISxk0GbpbjN6ypU29fapjcLCRtNSNfgpdcqgMgWIGqH6E9d20r2UYGXgyGsx5cdtWBvI0q5dQwy2xATovEZNRPNJC/+vY0yBsTojt61TKhp26PJ5fIdu02X8RN89S15Xr3egRayx72aPeUzfheqRxqGWjiMcbK4EWyiX+UxHHFqKTppeSRhBjtMdse"}],"role":"model"},{"parts":[{"functionResponse":{"id":"1","name":"weather","response":{"result":"40 C"}}}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}
     form:
       alt:
       - sse
@@ -48,7 +49,8 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.34.0 gl-go/go1.25.4
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+      - google-genai-sdk/1.49.0 gl-go/go1.26.1
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse
     method: POST
   response:
@@ -56,10 +58,10 @@ interactions:
     proto_major: 2
     proto_minor: 0
     content_length: -1
-    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"The weather in Florence\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 152,\"candidatesTokenCount\": 4,\"totalTokenCount\": 156,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 152}]},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"cqIdaf_pKt20xN8P1r_twQg\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \", Italy is 40 C.\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 152,\"candidatesTokenCount\": 12,\"totalTokenCount\": 164,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 152}]},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"cqIdaf_pKt20xN8P1r_twQg\"}\r\n\r\n"
+    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"The weather in Florence\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 127,\"candidatesTokenCount\": 4,\"totalTokenCount\": 131,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 127}]},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"WgCzaZzmMLnoz7IP_czm6Q4\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \",Italy is 40 C.\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 127,\"candidatesTokenCount\": 12,\"totalTokenCount\": 139,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 127}]},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"WgCzaZzmMLnoz7IP_czm6Q4\"}\r\n\r\n"
     headers:
       Content-Type:
       - text/event-stream
     status: 200 OK
     code: 200
-    duration: 744.812791ms
+    duration: 714.666833ms

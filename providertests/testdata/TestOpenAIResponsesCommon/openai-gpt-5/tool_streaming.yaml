@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/responses
     method: POST
   response:
@@ -25,59 +25,59 @@ interactions:
     content_length: -1
     body: |+
       event: response.created
-      data: {"type":"response.created","sequence_number":0,"response":{"id":"resp_0f08b04cd21bd82c0168f23801d5c881a2b0d9b07784b8413a","object":"response","created_at":1760704513,"status":"in_progress","background":false,"error":null,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-5-2025-08-07","output":[],"parallel_tool_calls":true,"previous_response_id":null,"prompt_cache_key":null,"reasoning":{"effort":"medium","summary":null},"safety_identifier":null,"service_tier":"auto","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"function","description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"strict":false}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":null,"user":null,"metadata":{}}}
+      data: {"type":"response.created","response":{"id":"resp_0482d9f8acdf0e0d0169b319432fa481948bdc7df374b5e464","object":"response","created_at":1773345091,"status":"in_progress","background":false,"completed_at":null,"error":null,"frequency_penalty":0.0,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-5-2025-08-07","output":[],"parallel_tool_calls":true,"presence_penalty":0.0,"previous_response_id":null,"prompt_cache_key":null,"prompt_cache_retention":null,"reasoning":{"effort":"medium","summary":null},"safety_identifier":null,"service_tier":"auto","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"function","description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"strict":false}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":null,"user":null,"metadata":{}},"sequence_number":0}
 
       event: response.in_progress
-      data: {"type":"response.in_progress","sequence_number":1,"response":{"id":"resp_0f08b04cd21bd82c0168f23801d5c881a2b0d9b07784b8413a","object":"response","created_at":1760704513,"status":"in_progress","background":false,"error":null,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-5-2025-08-07","output":[],"parallel_tool_calls":true,"previous_response_id":null,"prompt_cache_key":null,"reasoning":{"effort":"medium","summary":null},"safety_identifier":null,"service_tier":"auto","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"function","description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"strict":false}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":null,"user":null,"metadata":{}}}
+      data: {"type":"response.in_progress","response":{"id":"resp_0482d9f8acdf0e0d0169b319432fa481948bdc7df374b5e464","object":"response","created_at":1773345091,"status":"in_progress","background":false,"completed_at":null,"error":null,"frequency_penalty":0.0,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-5-2025-08-07","output":[],"parallel_tool_calls":true,"presence_penalty":0.0,"previous_response_id":null,"prompt_cache_key":null,"prompt_cache_retention":null,"reasoning":{"effort":"medium","summary":null},"safety_identifier":null,"service_tier":"auto","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"function","description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"strict":false}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":null,"user":null,"metadata":{}},"sequence_number":1}
 
       event: response.output_item.added
-      data: {"type":"response.output_item.added","sequence_number":2,"output_index":0,"item":{"id":"rs_0f08b04cd21bd82c0168f2380221f881a290014a36b8e479a4","type":"reasoning","summary":[]}}
+      data: {"type":"response.output_item.added","item":{"id":"rs_0482d9f8acdf0e0d0169b319438b988194b48fd3d175a69307","type":"reasoning","summary":[]},"output_index":0,"sequence_number":2}
 
       event: response.output_item.done
-      data: {"type":"response.output_item.done","sequence_number":3,"output_index":0,"item":{"id":"rs_0f08b04cd21bd82c0168f2380221f881a290014a36b8e479a4","type":"reasoning","summary":[]}}
+      data: {"type":"response.output_item.done","item":{"id":"rs_0482d9f8acdf0e0d0169b319438b988194b48fd3d175a69307","type":"reasoning","summary":[]},"output_index":0,"sequence_number":3}
 
       event: response.output_item.added
-      data: {"type":"response.output_item.added","sequence_number":4,"output_index":1,"item":{"id":"fc_0f08b04cd21bd82c0168f23803cc1481a28dc92074ab71c2e0","type":"function_call","status":"in_progress","arguments":"","call_id":"call_kGfQAVJ6MRnp9dXE2d0uYojD","name":"weather"}}
+      data: {"type":"response.output_item.added","item":{"id":"fc_0482d9f8acdf0e0d0169b3194641ac8194b5d6d7120eb52c48","type":"function_call","status":"in_progress","arguments":"","call_id":"call_lEeVe1NUWaZ7MWIyf58FEKCg","name":"weather"},"output_index":1,"sequence_number":4}
 
       event: response.function_call_arguments.delta
-      data: {"type":"response.function_call_arguments.delta","sequence_number":5,"item_id":"fc_0f08b04cd21bd82c0168f23803cc1481a28dc92074ab71c2e0","output_index":1,"delta":"{\"","obfuscation":"xcxYsutrsF2Mr3"}
+      data: {"type":"response.function_call_arguments.delta","delta":"{\"","item_id":"fc_0482d9f8acdf0e0d0169b3194641ac8194b5d6d7120eb52c48","obfuscation":"VHCQFAeIhlWuax","output_index":1,"sequence_number":5}
 
       event: response.function_call_arguments.delta
-      data: {"type":"response.function_call_arguments.delta","sequence_number":6,"item_id":"fc_0f08b04cd21bd82c0168f23803cc1481a28dc92074ab71c2e0","output_index":1,"delta":"location","obfuscation":"wSCxPmqE"}
+      data: {"type":"response.function_call_arguments.delta","delta":"location","item_id":"fc_0482d9f8acdf0e0d0169b3194641ac8194b5d6d7120eb52c48","obfuscation":"vqQDaUOz","output_index":1,"sequence_number":6}
 
       event: response.function_call_arguments.delta
-      data: {"type":"response.function_call_arguments.delta","sequence_number":7,"item_id":"fc_0f08b04cd21bd82c0168f23803cc1481a28dc92074ab71c2e0","output_index":1,"delta":"\":\"","obfuscation":"UNB0sKeiNNVya"}
+      data: {"type":"response.function_call_arguments.delta","delta":"\":\"","item_id":"fc_0482d9f8acdf0e0d0169b3194641ac8194b5d6d7120eb52c48","obfuscation":"FilxKuJ4z4aV4","output_index":1,"sequence_number":7}
 
       event: response.function_call_arguments.delta
-      data: {"type":"response.function_call_arguments.delta","sequence_number":8,"item_id":"fc_0f08b04cd21bd82c0168f23803cc1481a28dc92074ab71c2e0","output_index":1,"delta":"Flor","obfuscation":"nmio6Y5KgBCY"}
+      data: {"type":"response.function_call_arguments.delta","delta":"Flor","item_id":"fc_0482d9f8acdf0e0d0169b3194641ac8194b5d6d7120eb52c48","obfuscation":"ftgV6AHDDmLR","output_index":1,"sequence_number":8}
 
       event: response.function_call_arguments.delta
-      data: {"type":"response.function_call_arguments.delta","sequence_number":9,"item_id":"fc_0f08b04cd21bd82c0168f23803cc1481a28dc92074ab71c2e0","output_index":1,"delta":"ence","obfuscation":"dnccg49kl0GV"}
+      data: {"type":"response.function_call_arguments.delta","delta":"ence","item_id":"fc_0482d9f8acdf0e0d0169b3194641ac8194b5d6d7120eb52c48","obfuscation":"QZrcohzpzm8x","output_index":1,"sequence_number":9}
 
       event: response.function_call_arguments.delta
-      data: {"type":"response.function_call_arguments.delta","sequence_number":10,"item_id":"fc_0f08b04cd21bd82c0168f23803cc1481a28dc92074ab71c2e0","output_index":1,"delta":",","obfuscation":"zwu8CHinn8HhyUq"}
+      data: {"type":"response.function_call_arguments.delta","delta":",","item_id":"fc_0482d9f8acdf0e0d0169b3194641ac8194b5d6d7120eb52c48","obfuscation":"GVBt3zDgbpXMvHN","output_index":1,"sequence_number":10}
 
       event: response.function_call_arguments.delta
-      data: {"type":"response.function_call_arguments.delta","sequence_number":11,"item_id":"fc_0f08b04cd21bd82c0168f23803cc1481a28dc92074ab71c2e0","output_index":1,"delta":" Italy","obfuscation":"JrzifooHsu"}
+      data: {"type":"response.function_call_arguments.delta","delta":" Italy","item_id":"fc_0482d9f8acdf0e0d0169b3194641ac8194b5d6d7120eb52c48","obfuscation":"loHW1eoXLG","output_index":1,"sequence_number":11}
 
       event: response.function_call_arguments.delta
-      data: {"type":"response.function_call_arguments.delta","sequence_number":12,"item_id":"fc_0f08b04cd21bd82c0168f23803cc1481a28dc92074ab71c2e0","output_index":1,"delta":"\"}","obfuscation":"EOPhpWvCbvwgkS"}
+      data: {"type":"response.function_call_arguments.delta","delta":"\"}","item_id":"fc_0482d9f8acdf0e0d0169b3194641ac8194b5d6d7120eb52c48","obfuscation":"Mn7Frdqyx8HpSC","output_index":1,"sequence_number":12}
 
       event: response.function_call_arguments.done
-      data: {"type":"response.function_call_arguments.done","sequence_number":13,"item_id":"fc_0f08b04cd21bd82c0168f23803cc1481a28dc92074ab71c2e0","output_index":1,"arguments":"{\"location\":\"Florence, Italy\"}"}
+      data: {"type":"response.function_call_arguments.done","arguments":"{\"location\":\"Florence, Italy\"}","item_id":"fc_0482d9f8acdf0e0d0169b3194641ac8194b5d6d7120eb52c48","output_index":1,"sequence_number":13}
 
       event: response.output_item.done
-      data: {"type":"response.output_item.done","sequence_number":14,"output_index":1,"item":{"id":"fc_0f08b04cd21bd82c0168f23803cc1481a28dc92074ab71c2e0","type":"function_call","status":"completed","arguments":"{\"location\":\"Florence, Italy\"}","call_id":"call_kGfQAVJ6MRnp9dXE2d0uYojD","name":"weather"}}
+      data: {"type":"response.output_item.done","item":{"id":"fc_0482d9f8acdf0e0d0169b3194641ac8194b5d6d7120eb52c48","type":"function_call","status":"completed","arguments":"{\"location\":\"Florence, Italy\"}","call_id":"call_lEeVe1NUWaZ7MWIyf58FEKCg","name":"weather"},"output_index":1,"sequence_number":14}
 
       event: response.completed
-      data: {"type":"response.completed","sequence_number":15,"response":{"id":"resp_0f08b04cd21bd82c0168f23801d5c881a2b0d9b07784b8413a","object":"response","created_at":1760704513,"status":"completed","background":false,"error":null,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-5-2025-08-07","output":[{"id":"rs_0f08b04cd21bd82c0168f2380221f881a290014a36b8e479a4","type":"reasoning","summary":[]},{"id":"fc_0f08b04cd21bd82c0168f23803cc1481a28dc92074ab71c2e0","type":"function_call","status":"completed","arguments":"{\"location\":\"Florence, Italy\"}","call_id":"call_kGfQAVJ6MRnp9dXE2d0uYojD","name":"weather"}],"parallel_tool_calls":true,"previous_response_id":null,"prompt_cache_key":null,"reasoning":{"effort":"medium","summary":null},"safety_identifier":null,"service_tier":"default","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"function","description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"strict":false}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":{"input_tokens":66,"input_tokens_details":{"cached_tokens":0},"output_tokens":150,"output_tokens_details":{"reasoning_tokens":128},"total_tokens":216},"user":null,"metadata":{}}}
+      data: {"type":"response.completed","response":{"id":"resp_0482d9f8acdf0e0d0169b319432fa481948bdc7df374b5e464","object":"response","created_at":1773345091,"status":"completed","background":false,"completed_at":1773345094,"error":null,"frequency_penalty":0.0,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-5-2025-08-07","output":[{"id":"rs_0482d9f8acdf0e0d0169b319438b988194b48fd3d175a69307","type":"reasoning","summary":[]},{"id":"fc_0482d9f8acdf0e0d0169b3194641ac8194b5d6d7120eb52c48","type":"function_call","status":"completed","arguments":"{\"location\":\"Florence, Italy\"}","call_id":"call_lEeVe1NUWaZ7MWIyf58FEKCg","name":"weather"}],"parallel_tool_calls":true,"presence_penalty":0.0,"previous_response_id":null,"prompt_cache_key":null,"prompt_cache_retention":null,"reasoning":{"effort":"medium","summary":null},"safety_identifier":null,"service_tier":"default","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"function","description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"strict":false}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":{"input_tokens":63,"input_tokens_details":{"cached_tokens":0},"output_tokens":124,"output_tokens_details":{"reasoning_tokens":64},"total_tokens":187},"user":null,"metadata":{}},"sequence_number":15}
 
     headers:
       Content-Type:
       - text/event-stream; charset=utf-8
     status: 200 OK
     code: 200
-    duration: 281.778583ms
+    duration: 314.099875ms
 - id: 1
   request:
     proto: HTTP/1.1
@@ -85,14 +85,14 @@ interactions:
     proto_minor: 1
     content_length: 735
     host: ""
-    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":"You are a helpful assistant","role":"developer"},{"content":[{"text":"What''s the weather in Florence,Italy?","type":"input_text"}],"role":"user"},{"arguments":"\"{\\\"location\\\":\\\"Florence, Italy\\\"}\"","call_id":"call_kGfQAVJ6MRnp9dXE2d0uYojD","name":"weather","type":"function_call"},{"call_id":"call_kGfQAVJ6MRnp9dXE2d0uYojD","output":"40 C","type":"function_call_output"}],"model":"gpt-5","tool_choice":"auto","tools":[{"strict":false,"parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location","type":"function"}],"stream":true}'
+    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":"You are a helpful assistant","role":"developer"},{"content":[{"text":"What''s the weather in Florence,Italy?","type":"input_text"}],"role":"user"},{"arguments":"\"{\\\"location\\\":\\\"Florence, Italy\\\"}\"","call_id":"call_lEeVe1NUWaZ7MWIyf58FEKCg","name":"weather","type":"function_call"},{"call_id":"call_lEeVe1NUWaZ7MWIyf58FEKCg","output":"40 C","type":"function_call_output"}],"model":"gpt-5","tool_choice":"auto","tools":[{"strict":false,"parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location","type":"function"}],"stream":true}'
     headers:
       Accept:
       - application/json
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/responses
     method: POST
   response:
@@ -102,116 +102,125 @@ interactions:
     content_length: -1
     body: |+
       event: response.created
-      data: {"type":"response.created","sequence_number":0,"response":{"id":"resp_0eaa9d097b2a92720168f238043bb481929c94d445e6308cf0","object":"response","created_at":1760704516,"status":"in_progress","background":false,"error":null,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-5-2025-08-07","output":[],"parallel_tool_calls":true,"previous_response_id":null,"prompt_cache_key":null,"reasoning":{"effort":"medium","summary":null},"safety_identifier":null,"service_tier":"auto","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"function","description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"strict":false}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":null,"user":null,"metadata":{}}}
+      data: {"type":"response.created","response":{"id":"resp_06494ddbfa4b09cc0169b319477e2c8191a3c7d50a6412241c","object":"response","created_at":1773345095,"status":"in_progress","background":false,"completed_at":null,"error":null,"frequency_penalty":0.0,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-5-2025-08-07","output":[],"parallel_tool_calls":true,"presence_penalty":0.0,"previous_response_id":null,"prompt_cache_key":null,"prompt_cache_retention":null,"reasoning":{"effort":"medium","summary":null},"safety_identifier":null,"service_tier":"auto","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"function","description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"strict":false}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":null,"user":null,"metadata":{}},"sequence_number":0}
 
       event: response.in_progress
-      data: {"type":"response.in_progress","sequence_number":1,"response":{"id":"resp_0eaa9d097b2a92720168f238043bb481929c94d445e6308cf0","object":"response","created_at":1760704516,"status":"in_progress","background":false,"error":null,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-5-2025-08-07","output":[],"parallel_tool_calls":true,"previous_response_id":null,"prompt_cache_key":null,"reasoning":{"effort":"medium","summary":null},"safety_identifier":null,"service_tier":"auto","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"function","description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"strict":false}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":null,"user":null,"metadata":{}}}
+      data: {"type":"response.in_progress","response":{"id":"resp_06494ddbfa4b09cc0169b319477e2c8191a3c7d50a6412241c","object":"response","created_at":1773345095,"status":"in_progress","background":false,"completed_at":null,"error":null,"frequency_penalty":0.0,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-5-2025-08-07","output":[],"parallel_tool_calls":true,"presence_penalty":0.0,"previous_response_id":null,"prompt_cache_key":null,"prompt_cache_retention":null,"reasoning":{"effort":"medium","summary":null},"safety_identifier":null,"service_tier":"auto","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"function","description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"strict":false}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":null,"user":null,"metadata":{}},"sequence_number":1}
 
       event: response.output_item.added
-      data: {"type":"response.output_item.added","sequence_number":2,"output_index":0,"item":{"id":"rs_0eaa9d097b2a92720168f23804ce888192b7336b8d4035a45d","type":"reasoning","summary":[]}}
+      data: {"type":"response.output_item.added","item":{"id":"rs_06494ddbfa4b09cc0169b3194822e48191acc98a982fdf7970","type":"reasoning","summary":[]},"output_index":0,"sequence_number":2}
 
       event: response.output_item.done
-      data: {"type":"response.output_item.done","sequence_number":3,"output_index":0,"item":{"id":"rs_0eaa9d097b2a92720168f23804ce888192b7336b8d4035a45d","type":"reasoning","summary":[]}}
+      data: {"type":"response.output_item.done","item":{"id":"rs_06494ddbfa4b09cc0169b3194822e48191acc98a982fdf7970","type":"reasoning","summary":[]},"output_index":0,"sequence_number":3}
 
       event: response.output_item.added
-      data: {"type":"response.output_item.added","sequence_number":4,"output_index":1,"item":{"id":"msg_0eaa9d097b2a92720168f238084de88192bd4307c15498a6c0","type":"message","status":"in_progress","content":[],"role":"assistant"}}
+      data: {"type":"response.output_item.added","item":{"id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","type":"message","status":"in_progress","content":[],"role":"assistant"},"output_index":1,"sequence_number":4}
 
       event: response.content_part.added
-      data: {"type":"response.content_part.added","sequence_number":5,"item_id":"msg_0eaa9d097b2a92720168f238084de88192bd4307c15498a6c0","output_index":1,"content_index":0,"part":{"type":"output_text","annotations":[],"logprobs":[],"text":""}}
+      data: {"type":"response.content_part.added","content_index":0,"item_id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","output_index":1,"part":{"type":"output_text","annotations":[],"logprobs":[],"text":""},"sequence_number":5}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":6,"item_id":"msg_0eaa9d097b2a92720168f238084de88192bd4307c15498a6c0","output_index":1,"content_index":0,"delta":"It","logprobs":[],"obfuscation":"qcuOrpMigLjgYx"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":"It","item_id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","logprobs":[],"obfuscation":"cWBSszRtrOCIRl","output_index":1,"sequence_number":6}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":7,"item_id":"msg_0eaa9d097b2a92720168f238084de88192bd4307c15498a6c0","output_index":1,"content_index":0,"delta":"’s","logprobs":[],"obfuscation":"BPKnl3lugU0n8Q"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":"’s","item_id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","logprobs":[],"obfuscation":"6lvv5DFjWiM8k5","output_index":1,"sequence_number":7}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":8,"item_id":"msg_0eaa9d097b2a92720168f238084de88192bd4307c15498a6c0","output_index":1,"content_index":0,"delta":" currently","logprobs":[],"obfuscation":"MoQlwI"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" about","item_id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","logprobs":[],"obfuscation":"ePiPxjpkR5","output_index":1,"sequence_number":8}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":9,"item_id":"msg_0eaa9d097b2a92720168f238084de88192bd4307c15498a6c0","output_index":1,"content_index":0,"delta":" about","logprobs":[],"obfuscation":"jJLAHeLcaa"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" ","item_id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","logprobs":[],"obfuscation":"r5DjzxsGPKzzhaL","output_index":1,"sequence_number":9}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":10,"item_id":"msg_0eaa9d097b2a92720168f238084de88192bd4307c15498a6c0","output_index":1,"content_index":0,"delta":" ","logprobs":[],"obfuscation":"T7DA0KFl7T9dCNp"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":"40","item_id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","logprobs":[],"obfuscation":"Vq2Y4PRmIwQe14","output_index":1,"sequence_number":10}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":11,"item_id":"msg_0eaa9d097b2a92720168f238084de88192bd4307c15498a6c0","output_index":1,"content_index":0,"delta":"40","logprobs":[],"obfuscation":"iqIKIEx7Vvby8v"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":"°C","item_id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","logprobs":[],"obfuscation":"JEwuFcRH5Wg9kA","output_index":1,"sequence_number":11}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":12,"item_id":"msg_0eaa9d097b2a92720168f238084de88192bd4307c15498a6c0","output_index":1,"content_index":0,"delta":"°C","logprobs":[],"obfuscation":"Z6SUC2Ijtf39QQ"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" (","item_id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","logprobs":[],"obfuscation":"SbxxnA0luqhUTh","output_index":1,"sequence_number":12}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":13,"item_id":"msg_0eaa9d097b2a92720168f238084de88192bd4307c15498a6c0","output_index":1,"content_index":0,"delta":" (","logprobs":[],"obfuscation":"0fdEh8YqW52Eln"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":"104","item_id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","logprobs":[],"obfuscation":"X0k6tZfDWz4hM","output_index":1,"sequence_number":13}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":14,"item_id":"msg_0eaa9d097b2a92720168f238084de88192bd4307c15498a6c0","output_index":1,"content_index":0,"delta":"104","logprobs":[],"obfuscation":"NPDD9eImQzTaO"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":"°F","item_id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","logprobs":[],"obfuscation":"S3fUdQ7R4HAQ8Y","output_index":1,"sequence_number":14}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":15,"item_id":"msg_0eaa9d097b2a92720168f238084de88192bd4307c15498a6c0","output_index":1,"content_index":0,"delta":"°F","logprobs":[],"obfuscation":"2v6RZJh1tMZuzH"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":")","item_id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","logprobs":[],"obfuscation":"J5iLIX5Pwy82zwd","output_index":1,"sequence_number":15}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":16,"item_id":"msg_0eaa9d097b2a92720168f238084de88192bd4307c15498a6c0","output_index":1,"content_index":0,"delta":")","logprobs":[],"obfuscation":"acclkkaR3ZuJLEO"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" in","item_id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","logprobs":[],"obfuscation":"Ezk0gX2gQlgFV","output_index":1,"sequence_number":16}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":17,"item_id":"msg_0eaa9d097b2a92720168f238084de88192bd4307c15498a6c0","output_index":1,"content_index":0,"delta":" in","logprobs":[],"obfuscation":"mAqi3AUpM4err"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" Florence","item_id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","logprobs":[],"obfuscation":"Stt1mR3","output_index":1,"sequence_number":17}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":18,"item_id":"msg_0eaa9d097b2a92720168f238084de88192bd4307c15498a6c0","output_index":1,"content_index":0,"delta":" Florence","logprobs":[],"obfuscation":"EzqWNVR"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":",","item_id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","logprobs":[],"obfuscation":"2VatvV5R9RVvoOD","output_index":1,"sequence_number":18}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":19,"item_id":"msg_0eaa9d097b2a92720168f238084de88192bd4307c15498a6c0","output_index":1,"content_index":0,"delta":",","logprobs":[],"obfuscation":"V9xzbMRz64sqFUh"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" Italy","item_id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","logprobs":[],"obfuscation":"ikJklK9yap","output_index":1,"sequence_number":19}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":20,"item_id":"msg_0eaa9d097b2a92720168f238084de88192bd4307c15498a6c0","output_index":1,"content_index":0,"delta":" Italy","logprobs":[],"obfuscation":"0Icvry5xOU"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" right","item_id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","logprobs":[],"obfuscation":"PgXFwJWXi0","output_index":1,"sequence_number":20}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":21,"item_id":"msg_0eaa9d097b2a92720168f238084de88192bd4307c15498a6c0","output_index":1,"content_index":0,"delta":".","logprobs":[],"obfuscation":"pmxPGojorJXet5q"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" now","item_id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","logprobs":[],"obfuscation":"KOlW9nYdpLEN","output_index":1,"sequence_number":21}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":22,"item_id":"msg_0eaa9d097b2a92720168f238084de88192bd4307c15498a6c0","output_index":1,"content_index":0,"delta":" Would","logprobs":[],"obfuscation":"qbbDMSp9OW"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":".","item_id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","logprobs":[],"obfuscation":"787d1eJwdajC4Xm","output_index":1,"sequence_number":22}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":23,"item_id":"msg_0eaa9d097b2a92720168f238084de88192bd4307c15498a6c0","output_index":1,"content_index":0,"delta":" you","logprobs":[],"obfuscation":"aektY0mnj2fu"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" Want","item_id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","logprobs":[],"obfuscation":"wnD0ywo76A5","output_index":1,"sequence_number":23}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":24,"item_id":"msg_0eaa9d097b2a92720168f238084de88192bd4307c15498a6c0","output_index":1,"content_index":0,"delta":" like","logprobs":[],"obfuscation":"WHfweP6M2nZ"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" the","item_id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","logprobs":[],"obfuscation":"DzY8NrwM7I5y","output_index":1,"sequence_number":24}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":25,"item_id":"msg_0eaa9d097b2a92720168f238084de88192bd4307c15498a6c0","output_index":1,"content_index":0,"delta":" today","logprobs":[],"obfuscation":"vKe3upqWqt"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" forecast","item_id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","logprobs":[],"obfuscation":"gYqteGg","output_index":1,"sequence_number":25}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":26,"item_id":"msg_0eaa9d097b2a92720168f238084de88192bd4307c15498a6c0","output_index":1,"content_index":0,"delta":"’s","logprobs":[],"obfuscation":"NZe03vwqxO25tr"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" or","item_id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","logprobs":[],"obfuscation":"tUfZZADznQk8L","output_index":1,"sequence_number":26}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":27,"item_id":"msg_0eaa9d097b2a92720168f238084de88192bd4307c15498a6c0","output_index":1,"content_index":0,"delta":" forecast","logprobs":[],"obfuscation":"Mm5i3mS"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" tips","item_id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","logprobs":[],"obfuscation":"NmSkqcqLdW0","output_index":1,"sequence_number":27}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":28,"item_id":"msg_0eaa9d097b2a92720168f238084de88192bd4307c15498a6c0","output_index":1,"content_index":0,"delta":" or","logprobs":[],"obfuscation":"SQ8WZNc7b96eu"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" for","item_id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","logprobs":[],"obfuscation":"WbQhp14NfU2C","output_index":1,"sequence_number":28}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":29,"item_id":"msg_0eaa9d097b2a92720168f238084de88192bd4307c15498a6c0","output_index":1,"content_index":0,"delta":" hourly","logprobs":[],"obfuscation":"rNTUCs5ZP"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" staying","item_id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","logprobs":[],"obfuscation":"TsTDK1jY","output_index":1,"sequence_number":29}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":30,"item_id":"msg_0eaa9d097b2a92720168f238084de88192bd4307c15498a6c0","output_index":1,"content_index":0,"delta":" details","logprobs":[],"obfuscation":"DCaRtQ80"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" cool","item_id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","logprobs":[],"obfuscation":"spwLMyDeecW","output_index":1,"sequence_number":30}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":31,"item_id":"msg_0eaa9d097b2a92720168f238084de88192bd4307c15498a6c0","output_index":1,"content_index":0,"delta":"?","logprobs":[],"obfuscation":"CunNisEbweeNHGk"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" in","item_id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","logprobs":[],"obfuscation":"LJYUdtCFfr0Ls","output_index":1,"sequence_number":31}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" the","item_id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","logprobs":[],"obfuscation":"XsMR9DGqltH8","output_index":1,"sequence_number":32}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" heat","item_id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","logprobs":[],"obfuscation":"YUD1G3S0F5v","output_index":1,"sequence_number":33}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":"?","item_id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","logprobs":[],"obfuscation":"OdrruQMA4a3qf2T","output_index":1,"sequence_number":34}
 
       event: response.output_text.done
-      data: {"type":"response.output_text.done","sequence_number":32,"item_id":"msg_0eaa9d097b2a92720168f238084de88192bd4307c15498a6c0","output_index":1,"content_index":0,"text":"It’s currently about 40°C (104°F) in Florence, Italy. Would you like today’s forecast or hourly details?","logprobs":[]}
+      data: {"type":"response.output_text.done","content_index":0,"item_id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","logprobs":[],"output_index":1,"sequence_number":35,"text":"It’s about 40°C (104°F) in Florence, Italy right now. Want the forecast or tips for staying cool in the heat?"}
 
       event: response.content_part.done
-      data: {"type":"response.content_part.done","sequence_number":33,"item_id":"msg_0eaa9d097b2a92720168f238084de88192bd4307c15498a6c0","output_index":1,"content_index":0,"part":{"type":"output_text","annotations":[],"logprobs":[],"text":"It’s currently about 40°C (104°F) in Florence, Italy. Would you like today’s forecast or hourly details?"}}
+      data: {"type":"response.content_part.done","content_index":0,"item_id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","output_index":1,"part":{"type":"output_text","annotations":[],"logprobs":[],"text":"It’s about 40°C (104°F) in Florence, Italy right now. Want the forecast or tips for staying cool in the heat?"},"sequence_number":36}
 
       event: response.output_item.done
-      data: {"type":"response.output_item.done","sequence_number":34,"output_index":1,"item":{"id":"msg_0eaa9d097b2a92720168f238084de88192bd4307c15498a6c0","type":"message","status":"completed","content":[{"type":"output_text","annotations":[],"logprobs":[],"text":"It’s currently about 40°C (104°F) in Florence, Italy. Would you like today’s forecast or hourly details?"}],"role":"assistant"}}
+      data: {"type":"response.output_item.done","item":{"id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","type":"message","status":"completed","content":[{"type":"output_text","annotations":[],"logprobs":[],"text":"It’s about 40°C (104°F) in Florence, Italy right now. Want the forecast or tips for staying cool in the heat?"}],"role":"assistant"},"output_index":1,"sequence_number":37}
 
       event: response.completed
-      data: {"type":"response.completed","sequence_number":35,"response":{"id":"resp_0eaa9d097b2a92720168f238043bb481929c94d445e6308cf0","object":"response","created_at":1760704516,"status":"completed","background":false,"error":null,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-5-2025-08-07","output":[{"id":"rs_0eaa9d097b2a92720168f23804ce888192b7336b8d4035a45d","type":"reasoning","summary":[]},{"id":"msg_0eaa9d097b2a92720168f238084de88192bd4307c15498a6c0","type":"message","status":"completed","content":[{"type":"output_text","annotations":[],"logprobs":[],"text":"It’s currently about 40°C (104°F) in Florence, Italy. Would you like today’s forecast or hourly details?"}],"role":"assistant"}],"parallel_tool_calls":true,"previous_response_id":null,"prompt_cache_key":null,"reasoning":{"effort":"medium","summary":null},"safety_identifier":null,"service_tier":"default","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"function","description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"strict":false}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":{"input_tokens":97,"input_tokens_details":{"cached_tokens":0},"output_tokens":288,"output_tokens_details":{"reasoning_tokens":256},"total_tokens":385},"user":null,"metadata":{}}}
+      data: {"type":"response.completed","response":{"id":"resp_06494ddbfa4b09cc0169b319477e2c8191a3c7d50a6412241c","object":"response","created_at":1773345095,"status":"completed","background":false,"completed_at":1773345100,"error":null,"frequency_penalty":0.0,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-5-2025-08-07","output":[{"id":"rs_06494ddbfa4b09cc0169b3194822e48191acc98a982fdf7970","type":"reasoning","summary":[]},{"id":"msg_06494ddbfa4b09cc0169b3194bc4608191a6d41a96e797951d","type":"message","status":"completed","content":[{"type":"output_text","annotations":[],"logprobs":[],"text":"It’s about 40°C (104°F) in Florence, Italy right now. Want the forecast or tips for staying cool in the heat?"}],"role":"assistant"}],"parallel_tool_calls":true,"presence_penalty":0.0,"previous_response_id":null,"prompt_cache_key":null,"prompt_cache_retention":null,"reasoning":{"effort":"medium","summary":null},"safety_identifier":null,"service_tier":"default","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"function","description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"strict":false}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":{"input_tokens":94,"input_tokens_details":{"cached_tokens":0},"output_tokens":230,"output_tokens_details":{"reasoning_tokens":192},"total_tokens":324},"user":null,"metadata":{}},"sequence_number":38}
 
     headers:
       Content-Type:
       - text/event-stream; charset=utf-8
     status: 200 OK
     code: 200
-    duration: 316.59475ms
+    duration: 1.109639291s

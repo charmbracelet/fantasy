@@ -1,0 +1,32 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 211
+    host: ""
+    body: '{"max_tokens":4000,"messages":[{"content":[{"text":"Say hi in Portuguese","type":"text"}],"role":"user"}],"system":[{"text":"You are a helpful assistant","type":"text"}],"anthropic_version":"bedrock-2023-05-31"}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+    url: https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-opus-4-6-v1/invoke
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: 634
+    body: "{\"model\":\"claude-opus-4-6\",\"id\":\"msg_bdrk_019MXdjEDwT8AxvGrwKpndmP\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"**Olá!** \U0001F44B\\n\\nThis is the most common way to say \\\"hi\\\" in Portuguese. Other options include:\\n\\n- **Oi!** (very casual, especially in Brazilian Portuguese)\\n- **E aí?** (informal, like \\\"What's up?\\\" in Brazil)\\n- **Tudo bem?** (like \\\"How's it going?\\\")\"}],\"stop_reason\":\"end_turn\",\"stop_sequence\":null,\"usage\":{\"input_tokens\":17,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":86}}"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 3.008987083s

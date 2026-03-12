@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 479
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"}],"model":"moonshotai/Kimi-K2-Instruct-0905:groq","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+    url: https://router.huggingface.co/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |
+      {"id":"chatcmpl-ef313da5-2ff8-414d-9aed-0a94fc53e3f7","object":"chat.completion","created":1773347274,"model":"moonshotai/kimi-k2-instruct-0905","choices":[{"index":0,"message":{"role":"assistant","tool_calls":[{"id":"functions.weather:0","type":"function","function":{"name":"weather","arguments":"{\"location\":\"Florence, Italy\"}"}}]},"logprobs":null,"finish_reason":"tool_calls"}],"usage":{"queue_time":0.065433504,"prompt_tokens":93,"prompt_time":0.041686801,"completion_tokens":21,"completion_time":0.060912659,"total_tokens":114,"total_time":0.10259946},"usage_breakdown":null,"system_fingerprint":"fp_241bc7119c","x_groq":{"id":"req_01kkhvqz45ey8rhqtrqyf6c680","seed":791288437},"service_tier":"on_demand"}
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 390.445292ms
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 711
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"functions.weather:0","function":{"arguments":"{\"location\":\"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"functions.weather:0","role":"tool"}],"model":"moonshotai/Kimi-K2-Instruct-0905:groq","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+    url: https://router.huggingface.co/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |
+      {"id":"chatcmpl-edbab22b-e60b-479c-98cc-dcca330826cc","object":"chat.completion","created":1773347274,"model":"moonshotai/kimi-k2-instruct-0905","choices":[{"index":0,"message":{"role":"assistant","content":"The weather in Florence, Italy is currently 40°C."},"logprobs":null,"finish_reason":"stop"}],"usage":{"queue_time":0.066086028,"prompt_tokens":132,"prompt_time":0.016352698,"completion_tokens":13,"completion_time":0.023336147,"total_tokens":145,"total_time":0.039688845},"usage_breakdown":null,"system_fingerprint":"fp_00c37775b7","x_groq":{"id":"req_01kkhvqzfwe76trxv7rrjhvane","seed":2089780372},"service_tier":"on_demand"}
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 327.523833ms

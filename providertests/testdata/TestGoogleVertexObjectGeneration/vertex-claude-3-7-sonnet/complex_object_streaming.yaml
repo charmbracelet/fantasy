@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - Anthropic/Go 1.14.0
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://us-east5-aiplatform.googleapis.com/v1/projects/fantasy-playground-472418/locations/us-east5/publishers/anthropic/models/claude-3-7-sonnet@20250219:streamRawPredict
     method: POST
   response:
@@ -26,107 +26,116 @@ interactions:
     uncompressed: true
     body: |+
       event: message_start
-      data: {"type":"message_start","message":{"model":"claude-3-7-sonnet-20250219","id":"msg_vrtx_01JiiYx8JQZEW8hLLjVmFa6C","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":548,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":15}}               }
+      data: {"type":"message_start","message":{"model":"claude-3-7-sonnet-20250219","id":"msg_vrtx_01CgkZ1g6PHNfBLee3NPfQ1q","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":548,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":10}}      }
 
       event: ping
       data: {"type": "ping"}
 
       event: content_block_start
-      data: {"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_vrtx_01TpniKAvXfPprSuYGgYUUSx","name":"Book","input":{}}               }
+      data: {"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_vrtx_01BqmvunjZwqA9ybjM4QQQDC","name":"Book","input":{}}     }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":""}        }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":""}       }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"{\"title\""}   }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"{\"title\""}       }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":": \"T"}            }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":": "}  }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"he "}  }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"\"Th"}      }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"Lord "}             }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"e Lord o"}             }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"of the Rings"}               }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"f the"} }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"\""}  }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":" Rings\""}     }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":", \"au"}             }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":", \"autho"}      }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"thor\": {\""} }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"r\": {\"n"}         }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"name\""}    }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"ame\":\"J"}              }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":":\"J.R"}       }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":".R.R. Tolk"}     }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":".R. Tolkien"}}
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"ien\""}            }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"\","}        }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":",\"natio"}              }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"\"nationalit"}         }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"nal"}           }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"y\":\""}        }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"it"}         }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"British\"}"}               }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"y\":"} }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":", \"genre"} }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"\"British\""}               }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"s\": [\"Fantas"}               }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"}"}    }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"y\",\"A"}           }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":", \"ge"}            }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"dventure\",\""}             }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"nres"}              }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"Epic\""}              }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"\": [\"F"}    }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"]"}   }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"anta"}     }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":", \"publishe"}          }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"sy\",\"Advent"}            }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"d_yea"}}
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"ure\",\"Epic"}       }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"r\""}               }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"\"]"}}
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":": 195"}     }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":", "}              }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"4}"}   }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"\"publishe"}  }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"d_ye"}             }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"ar\": 19"}               }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"54}"} }
 
       event: content_block_stop
-      data: {"type":"content_block_stop","index":0          }
+      data: {"type":"content_block_stop","index":0 }
 
       event: message_delta
-      data: {"type":"message_delta","delta":{"stop_reason":"tool_use","stop_sequence":null},"usage":{"output_tokens":119}      }
+      data: {"type":"message_delta","delta":{"stop_reason":"tool_use","stop_sequence":null},"usage":{"output_tokens":128}          }
 
       event: message_stop
-      data: {"type":"message_stop"        }
+      data: {"type":"message_stop"    }
 
     headers:
       Content-Type:
       - text/event-stream; charset=utf-8
     status: 200 OK
     code: 200
-    duration: 952.687083ms
+    duration: 949.262667ms

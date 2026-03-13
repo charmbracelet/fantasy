@@ -12,10 +12,10 @@ import (
 	"charm.land/fantasy/object"
 	"charm.land/fantasy/schema"
 	"github.com/google/uuid"
-	"github.com/openai/openai-go/v2"
-	"github.com/openai/openai-go/v2/packages/param"
-	"github.com/openai/openai-go/v2/responses"
-	"github.com/openai/openai-go/v2/shared"
+	"github.com/openai/openai-go/v3"
+	"github.com/openai/openai-go/v3/packages/param"
+	"github.com/openai/openai-go/v3/responses"
+	"github.com/openai/openai-go/v3/shared"
 )
 
 const topLogprobsMax = 20
@@ -730,7 +730,7 @@ func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call)
 				ProviderExecuted: false,
 				ToolCallID:       outputItem.CallID,
 				ToolName:         outputItem.Name,
-				Input:            outputItem.Arguments,
+				Input:            outputItem.Arguments.OfString,
 			})
 
 		case "reasoning":
@@ -899,7 +899,7 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 							Type:          fantasy.StreamPartTypeToolCall,
 							ID:            done.Item.CallID,
 							ToolCallName:  done.Item.Name,
-							ToolCallInput: done.Item.Arguments,
+							ToolCallInput: done.Item.Arguments.OfString,
 						}) {
 							return
 						}

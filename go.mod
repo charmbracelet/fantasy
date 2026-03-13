@@ -16,7 +16,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/kaptinlin/jsonschema v0.7.5
-	github.com/openai/openai-go/v2 v2.7.1
+	github.com/openai/openai-go/v3 v3.26.0
 	github.com/stretchr/testify v1.11.1
 	golang.org/x/oauth2 v0.36.0
 	google.golang.org/genai v1.49.0

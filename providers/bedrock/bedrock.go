@@ -65,6 +65,13 @@ func WithUserAgent(ua string) Option {
 	}
 }
 
+// WithBaseURL sets the base URL for the Bedrock provider.
+func WithBaseURL(baseURL string) Option {
+	return func(o *options) {
+		o.anthropicOptions = append(o.anthropicOptions, anthropic.WithBaseURL(baseURL))
+	}
+}
+
 // WithSkipAuth configures whether to skip authentication for the Bedrock provider.
 func WithSkipAuth(skipAuth bool) Option {
 	return func(o *options) {

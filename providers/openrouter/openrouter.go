@@ -31,7 +31,6 @@ func New(opts ...Option) (fantasy.Provider, error) {
 		openaiOptions: []openai.Option{
 			openai.WithName(Name),
 			openai.WithBaseURL(DefaultURL),
-			openai.WithSkipUserAgent(),
 		},
 		languageModelOptions: []openai.LanguageModelOption{
 			openai.WithLanguageModelPrepareCallFunc(languagePrepareModelCall),

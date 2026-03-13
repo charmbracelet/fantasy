@@ -32,7 +32,6 @@ type options struct {
 	useResponsesAPI      bool
 	headers              map[string]string
 	userAgent            string
-	noDefaultUserAgent   bool
 	client               option.HTTPClient
 	sdkOptions           []option.RequestOption
 	objectMode           fantasy.ObjectMode
@@ -143,18 +142,6 @@ func WithUserAgent(ua string) Option {
 	}
 }
 
-// WithSkipUserAgent prevents the provider from setting a default
-// User-Agent header, preserving the underlying SDK's own User-Agent.
-// This is needed for providers like OpenRouter whose API behaviour depends
-// on the User-Agent matching the SDK that is making the request.
-//
-// This function is provisional and may be removed in a future release.
-func WithSkipUserAgent() Option {
-	return func(o *options) {
-		o.noDefaultUserAgent = true
-	}
-}
-
 // WithObjectMode sets the object generation mode.
 func WithObjectMode(om fantasy.ObjectMode) Option {
 	return func(o *options) {
@@ -178,19 +165,10 @@ func (o *provider) LanguageModel(_ context.Context, modelID string) (fantasy.Lan
 		openaiClientOptions = append(openaiClientOptions, option.WithBaseURL(o.options.baseURL))
 	}
 
-	if o.options.noDefaultUserAgent {
-		for key, value := range o.options.headers {
-			openaiClientOptions = append(openaiClientOptions, option.WithHeader(key, value))
-		}
-		if o.options.userAgent != "" {
-			openaiClientOptions = append(openaiClientOptions, option.WithHeader("User-Agent", o.options.userAgent))
-		}
-	} else {
-		defaultUA := httpheaders.DefaultUserAgent(fantasy.Version)
-		resolved := httpheaders.ResolveHeaders(o.options.headers, o.options.userAgent, defaultUA)
-		for key, value := range resolved {
-			openaiClientOptions = append(openaiClientOptions, option.WithHeader(key, value))
-		}
+	defaultUA := httpheaders.DefaultUserAgent(fantasy.Version)
+	resolved := httpheaders.ResolveHeaders(o.options.headers, o.options.userAgent, defaultUA)
+	for key, value := range resolved {
+		openaiClientOptions = append(openaiClientOptions, option.WithHeader(key, value))
 	}
 
 	if o.options.client != nil {
@@ -207,14 +185,11 @@ func (o *provider) LanguageModel(_ context.Context, modelID string) (fantasy.Lan
 		if objectMode == fantasy.ObjectModeJSON {
 			objectMode = fantasy.ObjectModeAuto
 		}
-		return newResponsesLanguageModel(modelID, o.options.name, client, objectMode, o.options.noDefaultUserAgent), nil
+		return newResponsesLanguageModel(modelID, o.options.name, client, objectMode), nil
 	}
 
 	languageModelOptions := append([]LanguageModelOption{}, o.options.languageModelOptions...)
 	languageModelOptions = append(languageModelOptions, WithLanguageModelObjectMode(o.options.objectMode))
-	if o.options.noDefaultUserAgent {
-		languageModelOptions = append(languageModelOptions, WithLanguageModelSkipUserAgent())
-	}
 
 	return newLanguageModel(
 		modelID,

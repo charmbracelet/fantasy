@@ -57,7 +57,7 @@ func TestUserAgent(t *testing.T) {
 		_, _ = model.Generate(t.Context(), fantasy.Call{Prompt: prompt})
 
 		require.Len(t, *captured, 1)
-		assert.True(t, strings.HasPrefix((*captured)[0]["User-Agent"], "OpenAI/Go"))
+		assert.True(t, strings.HasPrefix((*captured)[0]["User-Agent"], "Charm-Fantasy/"))
 	})
 
 	t.Run("WithUserAgent wins over default", func(t *testing.T) {

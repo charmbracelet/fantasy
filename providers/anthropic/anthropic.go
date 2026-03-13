@@ -65,7 +65,9 @@ func New(opts ...Option) (fantasy.Provider, error) {
 		o(&providerOptions)
 	}
 
-	providerOptions.baseURL = cmp.Or(providerOptions.baseURL, DefaultURL)
+	if !providerOptions.useBedrock {
+		providerOptions.baseURL = cmp.Or(providerOptions.baseURL, DefaultURL)
+	}
 	providerOptions.name = cmp.Or(providerOptions.name, Name)
 	return &provider{options: providerOptions}, nil
 }

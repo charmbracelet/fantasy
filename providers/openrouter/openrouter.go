@@ -31,6 +31,7 @@ func New(opts ...Option) (fantasy.Provider, error) {
 		openaiOptions: []openai.Option{
 			openai.WithName(Name),
 			openai.WithBaseURL(DefaultURL),
+			openai.WithSkipUserAgent(),
 		},
 		languageModelOptions: []openai.LanguageModelOption{
 			openai.WithLanguageModelPrepareCallFunc(languagePrepareModelCall),
@@ -86,6 +87,14 @@ func WithHeaders(headers map[string]string) Option {
 func WithHTTPClient(client option.HTTPClient) Option {
 	return func(o *options) {
 		o.openaiOptions = append(o.openaiOptions, openai.WithHTTPClient(client))
+	}
+}
+
+// WithUserAgent sets an explicit User-Agent header, overriding the default and any
+// value set via WithHeaders.
+func WithUserAgent(ua string) Option {
+	return func(o *options) {
+		o.openaiOptions = append(o.openaiOptions, openai.WithUserAgent(ua))
 	}
 }
 

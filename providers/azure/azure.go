@@ -109,6 +109,14 @@ func WithHTTPClient(client option.HTTPClient) Option {
 	}
 }
 
+// WithUserAgent sets an explicit User-Agent header, overriding the default and any
+// value set via WithHeaders.
+func WithUserAgent(ua string) Option {
+	return func(o *options) {
+		o.openaiOptions = append(o.openaiOptions, openai.WithUserAgent(ua))
+	}
+}
+
 // WithUseResponsesAPI configures the provider to use the responses API for models that support it.
 func WithUseResponsesAPI() Option {
 	return func(o *options) {

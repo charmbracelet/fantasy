@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -1026,6 +1027,183 @@ func TestGenerate_WebSearchToolInRequest(t *testing.T) {
 		maxUses, ok := tool["max_uses"].(float64)
 		require.True(t, ok, "tool should have max_uses")
 		require.Equal(t, float64(3), maxUses)
+	})
+
+	t.Run("with json-round-tripped provider tool args", func(t *testing.T) {
+		t.Parallel()
+
+		server, calls := newAnthropicJSONServer(mockAnthropicGenerateResponse())
+		defer server.Close()
+
+		provider, err := New(
+			WithAPIKey("test-api-key"),
+			WithBaseURL(server.URL),
+		)
+		require.NoError(t, err)
+
+		model, err := provider.LanguageModel(context.Background(), "claude-sonnet-4-20250514")
+		require.NoError(t, err)
+
+		baseTool := WebSearchTool(&WebSearchToolOptions{
+			MaxUses:        7,
+			BlockedDomains: []string{"example.com", "test.com"},
+			UserLocation: &UserLocation{
+				City:     "San Francisco",
+				Region:   "CA",
+				Country:  "US",
+				Timezone: "America/Los_Angeles",
+			},
+		})
+
+		data, err := json.Marshal(baseTool)
+		require.NoError(t, err)
+
+		var roundTripped fantasy.ProviderDefinedTool
+		err = json.Unmarshal(data, &roundTripped)
+		require.NoError(t, err)
+
+		_, err = model.Generate(context.Background(), fantasy.Call{
+			Prompt: testPrompt(),
+			Tools:  []fantasy.Tool{roundTripped},
+		})
+		require.NoError(t, err)
+
+		call := awaitAnthropicCall(t, calls)
+		tools, ok := call.body["tools"].([]any)
+		require.True(t, ok)
+		require.Len(t, tools, 1)
+
+		tool, ok := tools[0].(map[string]any)
+		require.True(t, ok)
+		require.Equal(t, "web_search_20250305", tool["type"])
+
+		domains, ok := tool["blocked_domains"].([]any)
+		require.True(t, ok, "tool should have blocked_domains")
+		require.Len(t, domains, 2)
+		require.Equal(t, "example.com", domains[0])
+		require.Equal(t, "test.com", domains[1])
+
+		maxUses, ok := tool["max_uses"].(float64)
+		require.True(t, ok, "tool should have max_uses")
+		require.Equal(t, float64(7), maxUses)
+
+		userLoc, ok := tool["user_location"].(map[string]any)
+		require.True(t, ok, "tool should have user_location")
+		require.Equal(t, "San Francisco", userLoc["city"])
+		require.Equal(t, "CA", userLoc["region"])
+		require.Equal(t, "US", userLoc["country"])
+		require.Equal(t, "America/Los_Angeles", userLoc["timezone"])
+		require.Equal(t, "approximate", userLoc["type"])
+	})
+}
+
+func TestAnyToStringSlice(t *testing.T) {
+	t.Parallel()
+
+	t.Run("from string slice", func(t *testing.T) {
+		t.Parallel()
+
+		got := anyToStringSlice([]string{"example.com", ""})
+		require.Equal(t, []string{"example.com", ""}, got)
+	})
+
+	t.Run("from any slice filters non-strings and empty", func(t *testing.T) {
+		t.Parallel()
+
+		got := anyToStringSlice([]any{"example.com", 123, "", "test.com"})
+		require.Equal(t, []string{"example.com", "test.com"}, got)
+	})
+
+	t.Run("unsupported type", func(t *testing.T) {
+		t.Parallel()
+
+		got := anyToStringSlice("example.com")
+		require.Nil(t, got)
+	})
+}
+
+func TestAnyToInt64(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name   string
+		input  any
+		want   int64
+		wantOK bool
+	}{
+		{name: "int64", input: int64(7), want: 7, wantOK: true},
+		{name: "float64 integer", input: float64(7), want: 7, wantOK: true},
+		{name: "float32 integer", input: float32(9), want: 9, wantOK: true},
+		{name: "float64 non-integer", input: float64(7.5), wantOK: false},
+		{name: "float64 max exact int ok", input: float64(1<<53 - 1), want: 1<<53 - 1, wantOK: true},
+		{name: "float64 over max exact int", input: float64(1 << 53), wantOK: false},
+		{name: "json number int", input: json.Number("42"), want: 42, wantOK: true},
+		{name: "json number float", input: json.Number("4.2"), wantOK: false},
+		{name: "nan", input: math.NaN(), wantOK: false},
+		{name: "inf", input: math.Inf(1), wantOK: false},
+		{name: "uint64 overflow", input: uint64(math.MaxInt64) + 1, wantOK: false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, ok := anyToInt64(tt.input)
+			require.Equal(t, tt.wantOK, ok)
+			if tt.wantOK {
+				require.Equal(t, tt.want, got)
+			}
+		})
+	}
+}
+
+func TestAnyToUserLocation(t *testing.T) {
+	t.Parallel()
+
+	t.Run("pointer passthrough", func(t *testing.T) {
+		t.Parallel()
+
+		input := &UserLocation{City: "San Francisco", Country: "US"}
+		got := anyToUserLocation(input)
+		require.Same(t, input, got)
+	})
+
+	t.Run("struct value", func(t *testing.T) {
+		t.Parallel()
+
+		got := anyToUserLocation(UserLocation{City: "San Francisco", Country: "US"})
+		require.NotNil(t, got)
+		require.Equal(t, "San Francisco", got.City)
+		require.Equal(t, "US", got.Country)
+	})
+
+	t.Run("map value", func(t *testing.T) {
+		t.Parallel()
+
+		got := anyToUserLocation(map[string]any{
+			"city":     "San Francisco",
+			"region":   "CA",
+			"country":  "US",
+			"timezone": "America/Los_Angeles",
+			"type":     "approximate",
+		})
+		require.NotNil(t, got)
+		require.Equal(t, "San Francisco", got.City)
+		require.Equal(t, "CA", got.Region)
+		require.Equal(t, "US", got.Country)
+		require.Equal(t, "America/Los_Angeles", got.Timezone)
+	})
+
+	t.Run("empty map", func(t *testing.T) {
+		t.Parallel()
+
+		got := anyToUserLocation(map[string]any{"type": "approximate"})
+		require.Nil(t, got)
+	})
+
+	t.Run("unsupported type", func(t *testing.T) {
+		t.Parallel()
+
+		got := anyToUserLocation("San Francisco")
+		require.Nil(t, got)
 	})
 }
 

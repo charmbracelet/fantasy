@@ -28,6 +28,7 @@ const (
 	TypeProviderOptions         = Name + ".options"
 	TypeReasoningOptionMetadata = Name + ".reasoning_metadata"
 	TypeProviderCacheControl    = Name + ".cache_control_options"
+	TypeWebSearchResultMetadata = Name + ".web_search_result_metadata"
 )
 
 // Register Anthropic provider-specific types with the global registry.
@@ -48,6 +49,13 @@ func init() {
 	})
 	fantasy.RegisterProviderType(TypeProviderCacheControl, func(data []byte) (fantasy.ProviderOptionsData, error) {
 		var v ProviderCacheControlOptions
+		if err := json.Unmarshal(data, &v); err != nil {
+			return nil, err
+		}
+		return &v, nil
+	})
+	fantasy.RegisterProviderType(TypeWebSearchResultMetadata, func(data []byte) (fantasy.ProviderOptionsData, error) {
+		var v WebSearchResultMetadata
 		if err := json.Unmarshal(data, &v); err != nil {
 			return nil, err
 		}
@@ -139,6 +147,42 @@ func (o *ProviderCacheControlOptions) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// WebSearchResultItem represents a single web search result for round-tripping.
+type WebSearchResultItem struct {
+	URL              string `json:"url"`
+	Title            string `json:"title"`
+	EncryptedContent string `json:"encrypted_content"`
+	// PageAge may be empty when the API does not return age info.
+	PageAge string `json:"page_age,omitempty"`
+}
+
+// WebSearchResultMetadata stores web search results from Anthropic's
+// server-executed web_search tool. The structured data (especially
+// EncryptedContent) must be preserved for multi-turn conversations.
+type WebSearchResultMetadata struct {
+	Results []WebSearchResultItem `json:"results"`
+}
+
+// Options implements the ProviderOptions interface.
+func (*WebSearchResultMetadata) Options() {}
+
+// MarshalJSON implements custom JSON marshaling with type info for WebSearchResultMetadata.
+func (m WebSearchResultMetadata) MarshalJSON() ([]byte, error) {
+	type plain WebSearchResultMetadata
+	return fantasy.MarshalProviderType(TypeWebSearchResultMetadata, plain(m))
+}
+
+// UnmarshalJSON implements custom JSON unmarshaling with type info for WebSearchResultMetadata.
+func (m *WebSearchResultMetadata) UnmarshalJSON(data []byte) error {
+	type plain WebSearchResultMetadata
+	var p plain
+	if err := fantasy.UnmarshalProviderType(data, &p); err != nil {
+		return err
+	}
+	*m = WebSearchResultMetadata(p)
+	return nil
+}
+
 // CacheControl represents cache control settings for the Anthropic provider.
 type CacheControl struct {
 	Type string `json:"type"`
@@ -165,4 +209,57 @@ func ParseOptions(data map[string]any) (*ProviderOptions, error) {
 		return nil, err
 	}
 	return &options, nil
+}
+
+// UserLocation provides geographic context for web search results.
+type UserLocation struct {
+	City     string `json:"city,omitempty"`
+	Region   string `json:"region,omitempty"`
+	Country  string `json:"country,omitempty"`
+	Timezone string `json:"timezone,omitempty"`
+}
+
+// WebSearchToolOptions configures the Anthropic web search tool.
+type WebSearchToolOptions struct {
+	// MaxUses limits the number of web searches the model can
+	// perform within a single API request. Zero means no limit.
+	MaxUses int64
+	// AllowedDomains restricts results to these domains. Cannot
+	// be used together with BlockedDomains.
+	AllowedDomains []string
+	// BlockedDomains excludes these domains from results. Cannot
+	// be used together with AllowedDomains.
+	BlockedDomains []string
+	// UserLocation provides geographic context for more relevant
+	// search results.
+	UserLocation *UserLocation
+}
+
+// WebSearchTool creates a provider-defined web search tool for
+// Anthropic models. Pass nil for default options.
+func WebSearchTool(opts *WebSearchToolOptions) fantasy.ProviderDefinedTool {
+	tool := fantasy.ProviderDefinedTool{
+		ID:   "web_search",
+		Name: "web_search",
+	}
+	if opts == nil {
+		return tool
+	}
+	args := map[string]any{}
+	if opts.MaxUses > 0 {
+		args["max_uses"] = opts.MaxUses
+	}
+	if len(opts.AllowedDomains) > 0 {
+		args["allowed_domains"] = opts.AllowedDomains
+	}
+	if len(opts.BlockedDomains) > 0 {
+		args["blocked_domains"] = opts.BlockedDomains
+	}
+	if opts.UserLocation != nil {
+		args["user_location"] = opts.UserLocation
+	}
+	if len(args) > 0 {
+		tool.Args = args
+	}
+	return tool
 }

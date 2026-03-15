@@ -495,10 +495,86 @@ func TestStream_SendsOutputConfigEffort(t *testing.T) {
 	requireAnthropicEffort(t, call.body, EffortHigh)
 }
 
+func TestAnthropicBetaHeaders(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name       string
+		newServer  func() (*httptest.Server, <-chan anthropicCall)
+		run        func(t *testing.T, model fantasy.LanguageModel, betas []string)
+	}{
+		{
+			name: "generate",
+			newServer: func() (*httptest.Server, <-chan anthropicCall) {
+				return newAnthropicJSONServer(mockAnthropicGenerateResponse())
+			},
+			run: func(t *testing.T, model fantasy.LanguageModel, betas []string) {
+				t.Helper()
+				_, err := model.Generate(context.Background(), fantasy.Call{
+					Prompt: testPrompt(),
+					ProviderOptions: NewProviderOptions(&ProviderOptions{
+						Betas: betas,
+					}),
+				})
+				require.NoError(t, err)
+			},
+		},
+		{
+			name: "stream",
+			newServer: func() (*httptest.Server, <-chan anthropicCall) {
+				return newAnthropicStreamingServer([]string{
+					"event: message_start\n",
+					"data: {\"type\":\"message_start\",\"message\":{}}\n\n",
+					"event: message_stop\n",
+					"data: {\"type\":\"message_stop\"}\n\n",
+				})
+			},
+			run: func(t *testing.T, model fantasy.LanguageModel, betas []string) {
+				t.Helper()
+				stream, err := model.Stream(context.Background(), fantasy.Call{
+					Prompt: testPrompt(),
+					ProviderOptions: NewProviderOptions(&ProviderOptions{
+						Betas: betas,
+					}),
+				})
+				require.NoError(t, err)
+				stream(func(fantasy.StreamPart) bool { return true })
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			server, calls := tt.newServer()
+			defer server.Close()
+
+			provider, err := New(
+				WithAPIKey("test-api-key"),
+				WithBaseURL(server.URL),
+			)
+			require.NoError(t, err)
+
+			model, err := provider.LanguageModel(context.Background(), "claude-sonnet-4-20250514")
+			require.NoError(t, err)
+
+			betas := []string{"feature-a", "feature-b"}
+			tt.run(t, model, betas)
+
+			call := awaitAnthropicCall(t, calls)
+			require.Equal(t, "POST", call.method)
+			require.Equal(t, "/v1/messages", call.path)
+			requireAnthropicBetas(t, call.headers, betas)
+		})
+	}
+}
+
 type anthropicCall struct {
-	method string
-	path   string
-	body   map[string]any
+	method  string
+	path    string
+	body    map[string]any
+	headers http.Header
 }
 
 func newAnthropicJSONServer(response map[string]any) (*httptest.Server, <-chan anthropicCall) {
@@ -511,9 +587,10 @@ func newAnthropicJSONServer(response map[string]any) (*httptest.Server, <-chan a
 		}
 
 		calls <- anthropicCall{
-			method: r.Method,
-			path:   r.URL.Path,
-			body:   body,
+			method:  r.Method,
+			path:    r.URL.Path,
+			body:    body,
+			headers: r.Header.Clone(),
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -533,9 +610,10 @@ func newAnthropicStreamingServer(chunks []string) (*httptest.Server, <-chan anth
 		}
 
 		calls <- anthropicCall{
-			method: r.Method,
-			path:   r.URL.Path,
-			body:   body,
+			method:  r.Method,
+			path:    r.URL.Path,
+			body:    body,
+			headers: r.Header.Clone(),
 		}
 
 		w.Header().Set("Content-Type", "text/event-stream")
@@ -584,6 +662,12 @@ func requireAnthropicEffort(t *testing.T, body map[string]any, expected Effort) 
 	require.True(t, ok)
 	require.Equal(t, string(expected), outputConfig["effort"])
 	require.Equal(t, "adaptive", thinking["type"])
+}
+
+func requireAnthropicBetas(t *testing.T, headers http.Header, expected []string) {
+	t.Helper()
+
+	require.ElementsMatch(t, expected, headers.Values("Anthropic-Beta"))
 }
 
 func testPrompt() fantasy.Prompt {

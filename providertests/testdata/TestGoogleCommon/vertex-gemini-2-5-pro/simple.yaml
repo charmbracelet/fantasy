@@ -14,7 +14,8 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.34.0 gl-go/go1.25.4
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+      - google-genai-sdk/1.49.0 gl-go/go1.26.1
     url: https://us-east5-aiplatform.googleapis.com/v1beta1/projects/fantasy-playground-472418/locations/us-east5/publishers/google/models/gemini-2.5-pro:generateContent
     method: POST
   response:
@@ -31,18 +32,18 @@ interactions:
               "role": "model",
               "parts": [
                 {
-                  "text": "Of course! The most common ways to say \"hi\" in Portuguese are:\n\n*   **Olá** (pronounced *oh-LAH*) - This is the direct translation of \"Hello\" and can be used in any situation, formal or informal.\n*   **Oi** (pronounced *OY*) - This is more casual, like \"Hi,\" and is what you'll hear most often in Brazil.\n\nYou can also combine them with \"How are you?\":\n\n*   **Oi, tudo bem?** (Hi, how are you?)"
+                  "text": "Of course!\n\nThe most common ways to say \"hi\" in Portuguese are:\n\n*   **Oi** (sounds like \"oy\") - This is the most direct equivalent of \"hi\" and is very common, especially in Brazil.\n*   **Olá** (sounds like \"oh-lah\") - This is the equivalent of \"hello\" and can be used in any situation, formal or informal.\n\nYou can also use greetings based on the time of day:\n\n*   **Bom dia** - Good morning\n*   **Boa tarde** - Good afternoon\n*   **Boa noite** - Good evening / Good night"
                 }
               ]
             },
             "finishReason": "STOP",
-            "avgLogprobs": -1.1641908612167626
+            "avgLogprobs": -0.79850663405198319
           }
         ],
         "usageMetadata": {
           "promptTokenCount": 9,
-          "candidatesTokenCount": 114,
-          "totalTokenCount": 1001,
+          "candidatesTokenCount": 130,
+          "totalTokenCount": 857,
           "trafficType": "ON_DEMAND",
           "promptTokensDetails": [
             {
@@ -53,18 +54,18 @@ interactions:
           "candidatesTokensDetails": [
             {
               "modality": "TEXT",
-              "tokenCount": 114
+              "tokenCount": 130
             }
           ],
-          "thoughtsTokenCount": 878
+          "thoughtsTokenCount": 718
         },
         "modelVersion": "gemini-2.5-pro",
-        "createTime": "2025-11-19T11:04:09.768454Z",
-        "responseId": "KaQdacbzLpTEptQP6pORgAo"
+        "createTime": "2026-03-12T18:06:06.323808Z",
+        "responseId": "jgCzaeDhE92Rt8gP1vXiYA"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 10.878821375s
+    duration: 8.616830125s

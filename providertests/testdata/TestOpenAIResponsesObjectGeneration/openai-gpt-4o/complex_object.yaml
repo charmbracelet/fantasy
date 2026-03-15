@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.7.1
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/responses
     method: POST
   response:
@@ -26,15 +26,17 @@ interactions:
     uncompressed: true
     body: |-
       {
-        "id": "resp_00fee2bcbce77a6b01690fb5e194848191a77c3f9796902417",
+        "id": "resp_0d5ff11864bd034c0169b3199075308192be4e46833d3f93c0",
         "object": "response",
-        "created_at": 1762637281,
+        "created_at": 1773345168,
         "status": "completed",
         "background": false,
         "billing": {
           "payer": "developer"
         },
+        "completed_at": 1773345170,
         "error": null,
+        "frequency_penalty": 0.0,
         "incomplete_details": null,
         "instructions": null,
         "max_output_tokens": 4000,
@@ -42,7 +44,7 @@ interactions:
         "model": "gpt-4o-2024-08-06",
         "output": [
           {
-            "id": "msg_00fee2bcbce77a6b01690fb5e25dfc8191b275e2c92a87865a",
+            "id": "msg_0d5ff11864bd034c0169b3199129f88192933e5996f8b66282",
             "type": "message",
             "status": "completed",
             "content": [
@@ -50,13 +52,14 @@ interactions:
                 "type": "output_text",
                 "annotations": [],
                 "logprobs": [],
-                "text": "{\"author\":{\"name\":\"J.R.R. Tolkien\",\"nationality\":\"British\"},\"genres\":[\"Fantasy\",\"Adventure\"],\"published_year\":1954,\"title\":\"The Lord of the Rings\"}"
+                "text": "{\"author\":{\"name\":\"J.R.R. Tolkien\",\"nationality\":\"British\"},\"genres\":[\"Fantasy\",\"Adventure\",\"Epic\"],\"published_year\":1954,\"title\":\"The Lord of the Rings\"}"
               }
             ],
             "role": "assistant"
           }
         ],
         "parallel_tool_calls": true,
+        "presence_penalty": 0.0,
         "previous_response_id": null,
         "prompt_cache_key": null,
         "prompt_cache_retention": null,
@@ -132,11 +135,11 @@ interactions:
           "input_tokens_details": {
             "cached_tokens": 0
           },
-          "output_tokens": 39,
+          "output_tokens": 41,
           "output_tokens_details": {
             "reasoning_tokens": 0
           },
-          "total_tokens": 179
+          "total_tokens": 181
         },
         "user": null,
         "metadata": {}
@@ -146,4 +149,4 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 1.348413375s
+    duration: 1.823091792s

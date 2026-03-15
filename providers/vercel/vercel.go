@@ -4,7 +4,7 @@ package vercel
 import (
 	"charm.land/fantasy"
 	"charm.land/fantasy/providers/openai"
-	"github.com/openai/openai-go/v2/option"
+	"github.com/openai/openai-go/v3/option"
 )
 
 type options struct {
@@ -93,6 +93,14 @@ func WithHeaders(headers map[string]string) Option {
 func WithHTTPClient(client option.HTTPClient) Option {
 	return func(o *options) {
 		o.openaiOptions = append(o.openaiOptions, openai.WithHTTPClient(client))
+	}
+}
+
+// WithUserAgent sets an explicit User-Agent header, overriding the default and any
+// value set via WithHeaders.
+func WithUserAgent(ua string) Option {
+	return func(o *options) {
+		o.openaiOptions = append(o.openaiOptions, openai.WithUserAgent(ua))
 	}
 }
 

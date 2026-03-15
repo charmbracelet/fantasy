@@ -14,7 +14,8 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.34.0 gl-go/go1.25.4
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+      - google-genai-sdk/1.49.0 gl-go/go1.26.1
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent
     method: POST
   response:
@@ -30,8 +31,8 @@ interactions:
             "content": {
               "parts": [
                 {
-                  "text": "{\n  \"age\": 30,\n  \"city\": \"Paris\",\n  \"name\": \"Alice\"\n}",
-                  "thoughtSignature": "EvQDCvEDAdHtim/cb1dWV6U1RcEIEknDD+tQ7jQ1cgOCFASlsLpobD0ejF9JGoUh6SZgWrjo54SGYwoEHM2DTRHS5UV44kUrVhIqPkXIsxhNZJyjplQsuL0+JJ3jriwV7dMSx3N6sFeTMzmFWrjzIXWsIG/S6yscqlMp9awgUisApHJXiQmTHsfCh4kxHdLsCuCl+WFrxYRTmGpsgNtgYhNFFw5xUAFtzSocFvlIepFglzOI4ccIrXEn32g2n0bgvq6CX4p2aBDRAcdRztxlblo0cUSRjDPQCsj4rRMpY2yeSI+PIXwsD+w8Vfy4sjGBafSh4bRnoQhc0U6SFRnEKaVxiZhoeWKhSc6usmjcuQDSR8mMFvVul8lsY3vPgn/KC/QCrlIwVYBsLMbhhsG9/LAeijGFzuYRX75D4pVvHxxWyEgdbvHrhT1wVmNJz01F+ZzwrtdWZjMiojhQAMWL8V9ujfQcrBG5JA2oRK/K18fW67seVo2BB3t0Us/jTTULNIqtp7mFz2JaK659n8YOe4IsMXHcQJmFxF793KNGdsQpkyACW9zENV+Idjh7zeABKrpXjmKgJ3wpdhQirzbwNuJG6gphCLDdUUeUUvjSQACjwvtJ0DWdLbJU65WEaBVTLf+hig3mEpwMANItd2caBaU7+fXFBH4="
+                  "text": "{\"age\":30,\"city\":\"Paris\",\"name\":\"Alice\"}",
+                  "thoughtSignature": "EsEHCr4HAb4+9vspyEj0mfPBpYCAMq/8S8uo1minbssZnBuLDoZUz1/V8LGwU82UaE34aVCRE+MTi3Tw8+Re5wFTiE1JbEMmHafHt8dWbqW2NSd78cj4VHF6EAVsB5BcYvWgSQV/hBaFXrItGnQVdiPkZBTx10QpqMfG0JQbs2t1hik7861Hr0dzJEjA5I22VfH6CoysS28TTYGNSYxJZFD0+UQwnNiMA7iJix4rSHlgBivr8MTBWnX50h1vfGAjrsDLDxrl0JUEz4DtMsJ6tPacJRabhErtpGCC84NniATSJvCtg5+21+YdvRHY/cajrmwBCUquMS6LJGy65G3Fz1shNiTn0ZtA9v60kxubLzNtpZYrLPFgq+l6lSmjaFb83FXmY3Cfzn2uOwRJKbjwi45/xBy2vzN9ag20MgjAnZ4lQ8/egGCEtm3HERi9nOhC6nM8VQk23v9IFKbV/G3EiUs4k5LwAwNyytYrZRmjOUytxZGhbA9IMKIaSoIvfIAMNp3QU7QPpkCgLu8crCCHFAh47dAGb+DFFTgkJpvCs3oMLINOYZANjcnYGuOVNRnR9Q0ZYdZbpetZubV5aSFd0g4492sshzDnv9pQayCoMIZcIhq9jIVceMrayfxKYnrDv91eW1mtH2eZYpSHb9D2sBHnFBS0MfJUjHSYbSsaX+a6kvzubvRLXAP6XyG73vEcnE0c2RBXkAsNCryiW96sdkDQ++50HCJu0YSzATyLXt7598/2jLBh4Y2hqNJYxDs3mweJpxcUwiQFVAhuQefcqRLhP5B0hvChfwYsYwQx/MqOnf5dqHZls+PgfIwDVlCXd39PQQE+CuKXkBj1pvXIvIRrWBniQmU23Hdj24Kj5o9oosabmwZEssf3yg/+7s6yHxA5tRHny8zzYReojLWOMp276qbyWh8U171jZ5huRkAhsi74RBSmy0dWnXpHmTGzIO/Wl8KgvAv4GTxk/I+KVilh6gmvccgE3G0kYJvxoWs5W85UvBzkuVVCEUFawznIqHIlW0Bst4+tug3BJ0VXC0Wc/Ld8Ke2tBhTsj3WR90c76+PUlpAZADP38/GfM4E0Vw81MVEHsBEKfZdSiTOWkQsyruk84o0EN7945U0Ny46un4JdXpLt6PmY5Vs0Kw8jg6PF8SlZJ/FJaDTyd77MKFmBvXZMMrfV/BPPyV/I1lav6yIC65phF/uhxUyC5iIdIOma6praUNm0tmpomzTJmVeTsELo8Oy4Js00S0EnmBR2MeNvQKRv4fbhD6W7YEDXqMu5mg=="
                 }
               ],
               "role": "model"
@@ -42,22 +43,22 @@ interactions:
         ],
         "usageMetadata": {
           "promptTokenCount": 20,
-          "candidatesTokenCount": 28,
-          "totalTokenCount": 183,
+          "candidatesTokenCount": 14,
+          "totalTokenCount": 310,
           "promptTokensDetails": [
             {
               "modality": "TEXT",
               "tokenCount": 20
             }
           ],
-          "thoughtsTokenCount": 135
+          "thoughtsTokenCount": 276
         },
-        "modelVersion": "gemini-3-pro-preview",
-        "responseId": "s6Idaf6qKo-7vdIP1aSIwAk"
+        "modelVersion": "gemini-3.1-pro-preview",
+        "responseId": "4ACzaYupBdLiz7IPuISqgQI"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 2.925005834s
+    duration: 4.748026459s

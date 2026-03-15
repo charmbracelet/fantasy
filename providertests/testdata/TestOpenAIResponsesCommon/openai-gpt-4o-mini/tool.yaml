@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/responses
     method: POST
   response:
@@ -26,15 +26,17 @@ interactions:
     uncompressed: true
     body: |-
       {
-        "id": "resp_010f0015da2b88280168f237ea6c18819e8ce2b72d44ac08b4",
+        "id": "resp_0589cd5cec6943ec0169b3191fa6288190ba41bc84bbb13455",
         "object": "response",
-        "created_at": 1760704490,
+        "created_at": 1773345055,
         "status": "completed",
         "background": false,
         "billing": {
           "payer": "developer"
         },
+        "completed_at": 1773345056,
         "error": null,
+        "frequency_penalty": 0.0,
         "incomplete_details": null,
         "instructions": null,
         "max_output_tokens": 4000,
@@ -42,17 +44,19 @@ interactions:
         "model": "gpt-4o-mini-2024-07-18",
         "output": [
           {
-            "id": "fc_010f0015da2b88280168f237eb2b7c819eae6470cdee55da77",
+            "id": "fc_0589cd5cec6943ec0169b3192048b48190b7a029b212da3cf0",
             "type": "function_call",
             "status": "completed",
             "arguments": "{\"location\":\"Florence, Italy\"}",
-            "call_id": "call_59vzLlFlML0RoHvlJxgWZZ7m",
+            "call_id": "call_fvLU8DzDYjJa5V2k9Nsvq3ls",
             "name": "weather"
           }
         ],
         "parallel_tool_calls": true,
+        "presence_penalty": 0.0,
         "previous_response_id": null,
         "prompt_cache_key": null,
+        "prompt_cache_retention": null,
         "reasoning": {
           "effort": null,
           "summary": null
@@ -110,7 +114,7 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 1.0454615s
+    duration: 2.063641541s
 - id: 1
   request:
     proto: HTTP/1.1
@@ -118,14 +122,14 @@ interactions:
     proto_minor: 1
     content_length: 724
     host: ""
-    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":"You are a helpful assistant","role":"system"},{"content":[{"text":"What''s the weather in Florence,Italy?","type":"input_text"}],"role":"user"},{"arguments":"\"{\\\"location\\\":\\\"Florence, Italy\\\"}\"","call_id":"call_59vzLlFlML0RoHvlJxgWZZ7m","name":"weather","type":"function_call"},{"call_id":"call_59vzLlFlML0RoHvlJxgWZZ7m","output":"40 C","type":"function_call_output"}],"model":"gpt-4o-mini","tool_choice":"auto","tools":[{"strict":false,"parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location","type":"function"}]}'
+    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":"You are a helpful assistant","role":"system"},{"content":[{"text":"What''s the weather in Florence,Italy?","type":"input_text"}],"role":"user"},{"arguments":"\"{\\\"location\\\":\\\"Florence, Italy\\\"}\"","call_id":"call_fvLU8DzDYjJa5V2k9Nsvq3ls","name":"weather","type":"function_call"},{"call_id":"call_fvLU8DzDYjJa5V2k9Nsvq3ls","output":"40 C","type":"function_call_output"}],"model":"gpt-4o-mini","tool_choice":"auto","tools":[{"strict":false,"parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location","type":"function"}]}'
     headers:
       Accept:
       - application/json
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/responses
     method: POST
   response:
@@ -136,15 +140,17 @@ interactions:
     uncompressed: true
     body: |-
       {
-        "id": "resp_0de529b5396cb7cc0168f237eb7d9c81a3aca3fef6a9749a5f",
+        "id": "resp_015a0cae6d9789840169b319218ff881a281cc1f960f86416b",
         "object": "response",
-        "created_at": 1760704491,
+        "created_at": 1773345057,
         "status": "completed",
         "background": false,
         "billing": {
           "payer": "developer"
         },
+        "completed_at": 1773345058,
         "error": null,
+        "frequency_penalty": 0.0,
         "incomplete_details": null,
         "instructions": null,
         "max_output_tokens": 4000,
@@ -152,7 +158,7 @@ interactions:
         "model": "gpt-4o-mini-2024-07-18",
         "output": [
           {
-            "id": "msg_0de529b5396cb7cc0168f237ebf0ec81a39a23afc61ca30582",
+            "id": "msg_015a0cae6d9789840169b31922616c81a28c661e338d69de27",
             "type": "message",
             "status": "completed",
             "content": [
@@ -160,15 +166,17 @@ interactions:
                 "type": "output_text",
                 "annotations": [],
                 "logprobs": [],
-                "text": "The current temperature in Florence, Italy, is 40\u00b0C. If you need more details like humidity or forecast, just let me know!"
+                "text": "The current temperature in Florence, Italy, is 40\u00b0C. If you need more details about the weather, feel free to ask!"
               }
             ],
             "role": "assistant"
           }
         ],
         "parallel_tool_calls": true,
+        "presence_penalty": 0.0,
         "previous_response_id": null,
         "prompt_cache_key": null,
+        "prompt_cache_retention": null,
         "reasoning": {
           "effort": null,
           "summary": null
@@ -212,11 +220,11 @@ interactions:
           "input_tokens_details": {
             "cached_tokens": 0
           },
-          "output_tokens": 30,
+          "output_tokens": 29,
           "output_tokens_details": {
             "reasoning_tokens": 0
           },
-          "total_tokens": 113
+          "total_tokens": 112
         },
         "user": null,
         "metadata": {}
@@ -226,4 +234,4 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 1.421569667s
+    duration: 2.210815041s

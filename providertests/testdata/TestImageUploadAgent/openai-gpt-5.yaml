@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.7.1
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/chat/completions
     method: POST
   response:
@@ -26,16 +26,16 @@ interactions:
     uncompressed: true
     body: |
       {
-        "id": "chatcmpl-CSjOzVpF3I8bIXI82utKxQ0hurdzG",
+        "id": "chatcmpl-DIekbWt9VqYjHeIhwFtwNR0XOrx7l",
         "object": "chat.completion",
-        "created": 1760963745,
+        "created": 1773338921,
         "model": "gpt-5-2025-08-07",
         "choices": [
           {
             "index": 0,
             "message": {
               "role": "assistant",
-              "content": "A cute pastel star with a tiny face streaks across a purple background, leaving a pink-to-teal trail and sparkles.",
+              "content": "A cute pastel star with a tiny face streaks across a purple background, leaving a pink-blue-green rainbow trail with sparkles.",
               "refusal": null,
               "annotations": []
             },
@@ -44,14 +44,14 @@ interactions:
         ],
         "usage": {
           "prompt_tokens": 232,
-          "completion_tokens": 99,
-          "total_tokens": 331,
+          "completion_tokens": 163,
+          "total_tokens": 395,
           "prompt_tokens_details": {
             "cached_tokens": 0,
             "audio_tokens": 0
           },
           "completion_tokens_details": {
-            "reasoning_tokens": 64,
+            "reasoning_tokens": 128,
             "audio_tokens": 0,
             "accepted_prediction_tokens": 0,
             "rejected_prediction_tokens": 0
@@ -65,4 +65,4 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 6.903364166s
+    duration: 6.199323792s

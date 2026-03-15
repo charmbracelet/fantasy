@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - Anthropic/Go 1.13.0
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.anthropic.com/v1/messages
     method: POST
   response:
@@ -23,121 +23,167 @@ interactions:
     proto_major: 2
     proto_minor: 0
     content_length: -1
+    uncompressed: true
     body: |+
       event: message_start
-      data: {"type":"message_start","message":{"model":"claude-sonnet-4-20250514","id":"msg_012xohG7vsYehZ9GLHx725XU","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":27,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1,"service_tier":"standard"}}   }
+      data: {"type":"message_start","message":{"model":"claude-sonnet-4-20250514","id":"msg_01Nq4f37FavxWju2RsbzYoG5","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":27,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1,"service_tier":"standard","inference_geo":"not_available"}}         }
 
       event: content_block_start
-      data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}        }
-
-      event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"This"}          }
-
-      event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" image"}               }
+      data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}       }
 
       event: ping
       data: {"type": "ping"}
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" shows"}  }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"This"}     }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" a simple"}}
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" image shows a simple"}    }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":","}          }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":","}       }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" minimalist illustration"}       }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" cute"}       }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" of a cute"}   }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" cartoon-style ghost"}         }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" green"} }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" character on"}      }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" frog or"}    }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" a"}          }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" f"}            }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" color"}            }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"rog-like character"}   }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"ful gradient"}          }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" sitting"}}
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" background. The ghost"}}
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" against"}       }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" is"}       }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" a soft"}        }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" pale"}             }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" gradient background that"}               }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" green"}  }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" transitions"}       }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" or"}}
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" from purple/"}               }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" white"}     }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"blue on"} }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" with a rounded"}       }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" the left to pink on"} }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":", floating"}               }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" the right. The frog appears"}           }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" form"}       }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" to be rendere"}    }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" typical"}          }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"d in a kawaii or"}              }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" of ghost"}           }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" adorable cartoon"}               }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" illustrations"}               }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" style with a"}        }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":". It"} }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" rounded, simple"}           }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" has two"}          }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" design."}         }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" small"} }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" The"}     }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" dark"} }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" overall"}        }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" dots"}     }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" aesthetic is clean and ple"}}
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" for eyes and appears"}       }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"asing with"}  }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" to have"}               }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" pastel colors."}          }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" a friendly"}  }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":", innocent"}   }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" expression. The background"}            }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" features"} }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" a soft gradient"}           }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" that"}    }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" transitions"}         }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" from purple"}}
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"/"}}
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"blue in"}      }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" the upper left"}              }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" to pink"}              }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"/mag"}      }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"enta in the lower right, creating a"}             }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" dre"}          }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"amy, pas"}    }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"tel aesthetic"}              }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"."}            }
 
       event: content_block_stop
-      data: {"type":"content_block_stop","index":0     }
+      data: {"type":"content_block_stop","index":0      }
 
       event: message_delta
-      data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"input_tokens":27,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":81}        }
+      data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"input_tokens":27,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":93}             }
 
       event: message_stop
-      data: {"type":"message_stop"    }
+      data: {"type":"message_stop"  }
 
     headers:
       Content-Type:
       - text/event-stream; charset=utf-8
     status: 200 OK
     code: 200
-    duration: 1.594873792s
+    duration: 1.789784375s

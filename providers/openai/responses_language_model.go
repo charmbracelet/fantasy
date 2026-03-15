@@ -12,29 +12,31 @@ import (
 	"charm.land/fantasy/object"
 	"charm.land/fantasy/schema"
 	"github.com/google/uuid"
-	"github.com/openai/openai-go/v2"
-	"github.com/openai/openai-go/v2/packages/param"
-	"github.com/openai/openai-go/v2/responses"
-	"github.com/openai/openai-go/v2/shared"
+	"github.com/openai/openai-go/v3"
+	"github.com/openai/openai-go/v3/packages/param"
+	"github.com/openai/openai-go/v3/responses"
+	"github.com/openai/openai-go/v3/shared"
 )
 
 const topLogprobsMax = 20
 
 type responsesLanguageModel struct {
-	provider   string
-	modelID    string
-	client     openai.Client
-	objectMode fantasy.ObjectMode
+	provider           string
+	modelID            string
+	client             openai.Client
+	objectMode         fantasy.ObjectMode
+	noDefaultUserAgent bool
 }
 
 // newResponsesLanguageModel implements a responses api model
 // INFO: (kujtim) currently we do not support stored parameter we default it to false.
-func newResponsesLanguageModel(modelID string, provider string, client openai.Client, objectMode fantasy.ObjectMode) responsesLanguageModel {
+func newResponsesLanguageModel(modelID string, provider string, client openai.Client, objectMode fantasy.ObjectMode, noDefaultUserAgent bool) responsesLanguageModel {
 	return responsesLanguageModel{
-		modelID:    modelID,
-		provider:   provider,
-		client:     client,
-		objectMode: objectMode,
+		modelID:            modelID,
+		provider:           provider,
+		client:             client,
+		objectMode:         objectMode,
+		noDefaultUserAgent: noDefaultUserAgent,
 	}
 }
 
@@ -668,7 +670,7 @@ func toResponsesTools(tools []fantasy.Tool, toolChoice *fantasy.ToolChoice, opti
 
 func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call) (*fantasy.Response, error) {
 	params, warnings := o.prepareParams(call)
-	response, err := o.client.Responses.New(ctx, *params)
+	response, err := o.client.Responses.New(ctx, *params, callUARequestOptions(call, o.noDefaultUserAgent)...)
 	if err != nil {
 		return nil, toProviderErr(err)
 	}
@@ -728,7 +730,7 @@ func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call)
 				ProviderExecuted: false,
 				ToolCallID:       outputItem.CallID,
 				ToolName:         outputItem.Name,
-				Input:            outputItem.Arguments,
+				Input:            outputItem.Arguments.OfString,
 			})
 
 		case "reasoning":
@@ -806,7 +808,7 @@ func mapResponsesFinishReason(reason string, hasFunctionCall bool) fantasy.Finis
 func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.StreamResponse, error) {
 	params, warnings := o.prepareParams(call)
 
-	stream := o.client.Responses.NewStreaming(ctx, *params)
+	stream := o.client.Responses.NewStreaming(ctx, *params, callUARequestOptions(call, o.noDefaultUserAgent)...)
 
 	finishReason := fantasy.FinishReasonUnknown
 	var usage fantasy.Usage
@@ -897,7 +899,7 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 							Type:          fantasy.StreamPartTypeToolCall,
 							ID:            done.Item.CallID,
 							ToolCallName:  done.Item.Name,
-							ToolCallInput: done.Item.Arguments,
+							ToolCallInput: done.Item.Arguments.OfString,
 						}) {
 							return
 						}
@@ -1106,7 +1108,7 @@ func (o responsesLanguageModel) generateObjectWithJSONMode(ctx context.Context, 
 	}
 
 	// Make request
-	response, err := o.client.Responses.New(ctx, *params)
+	response, err := o.client.Responses.New(ctx, *params, objectCallUARequestOptions(call, o.noDefaultUserAgent)...)
 	if err != nil {
 		return nil, toProviderErr(err)
 	}
@@ -1216,7 +1218,7 @@ func (o responsesLanguageModel) streamObjectWithJSONMode(ctx context.Context, ca
 		Format: responses.ResponseFormatTextConfigParamOfJSONSchema(schemaName, jsonSchemaMap),
 	}
 
-	stream := o.client.Responses.NewStreaming(ctx, *params)
+	stream := o.client.Responses.NewStreaming(ctx, *params, objectCallUARequestOptions(call, o.noDefaultUserAgent)...)
 
 	return func(yield func(fantasy.ObjectStreamPart) bool) {
 		if len(warnings) > 0 {

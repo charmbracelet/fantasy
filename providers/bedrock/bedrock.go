@@ -57,6 +57,14 @@ func WithHTTPClient(client option.HTTPClient) Option {
 	}
 }
 
+// WithUserAgent sets an explicit User-Agent header, overriding the default and any
+// value set via WithHeaders.
+func WithUserAgent(ua string) Option {
+	return func(o *options) {
+		o.anthropicOptions = append(o.anthropicOptions, anthropic.WithUserAgent(ua))
+	}
+}
+
 // WithSkipAuth configures whether to skip authentication for the Bedrock provider.
 func WithSkipAuth(skipAuth bool) Option {
 	return func(o *options) {

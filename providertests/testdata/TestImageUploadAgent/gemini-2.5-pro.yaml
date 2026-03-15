@@ -14,7 +14,8 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.29.0 gl-go/go1.25.0
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+      - google-genai-sdk/1.49.0 gl-go/go1.26.1
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent
     method: POST
   response:
@@ -30,7 +31,7 @@ interactions:
             "content": {
               "parts": [
                 {
-                  "text": "Of course! Here are a few ways to describe the image, from simple to more detailed:\n\n**Very Brief:**\nIt's an illustration of a cute, glowing cartoon star with a blushing face.\n\n**A Bit More Detailed:**\nThis is a kawaii-style digital art piece featuring a softly glowing, pale yellow star. The star has a cute face with simple black eyes and pink, blushing cheeks. It's set against a purple and blue gradient background, with a colorful shadow trail and a few sparkles to its right."
+                  "text": "This is a cute, kawaii-style illustration of a glowing, pale-yellow star with a face. The star has simple black eyes, pink rosy cheeks, and a small mouth. It is set against a purple and blue gradient background, casting a long, colorful shadow or trail behind it. To the right of the star, there are three small white sparkles, giving it a magical and whimsical appearance, like a shooting star."
                 }
               ],
               "role": "model"
@@ -41,8 +42,8 @@ interactions:
         ],
         "usageMetadata": {
           "promptTokenCount": 272,
-          "candidatesTokenCount": 109,
-          "totalTokenCount": 1550,
+          "candidatesTokenCount": 86,
+          "totalTokenCount": 999,
           "promptTokensDetails": [
             {
               "modality": "TEXT",
@@ -53,14 +54,14 @@ interactions:
               "tokenCount": 258
             }
           ],
-          "thoughtsTokenCount": 1169
+          "thoughtsTokenCount": 641
         },
         "modelVersion": "gemini-2.5-pro",
-        "responseId": "tiz2aKSJE7eDvdIP8oPkyQQ"
+        "responseId": "NQGzaf_aD6Xmz7IPle3n-QE"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 15.032053917s
+    duration: 7.006501s

@@ -1,0 +1,107 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 543
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"}],"model":"deepseek/deepseek-v3.2","max_tokens":4000,"stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"usage":{"include":true},"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"gen-1773323890-5hlASQg7HIbNczB2sxfw","object":"chat.completion.chunk","created":1773323890,"model":"deepseek/deepseek-v3.2-20251201","provider":"AtlasCloud","choices":[{"index":0,"delta":{"content":"I","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773323890-5hlASQg7HIbNczB2sxfw","object":"chat.completion.chunk","created":1773323890,"model":"deepseek/deepseek-v3.2-20251201","provider":"AtlasCloud","choices":[{"index":0,"delta":{"content":"'ll get","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773323890-5hlASQg7HIbNczB2sxfw","object":"chat.completion.chunk","created":1773323890,"model":"deepseek/deepseek-v3.2-20251201","provider":"AtlasCloud","choices":[{"index":0,"delta":{"content":" the weather","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773323890-5hlASQg7HIbNczB2sxfw","object":"chat.completion.chunk","created":1773323890,"model":"deepseek/deepseek-v3.2-20251201","provider":"AtlasCloud","choices":[{"index":0,"delta":{"content":" information for","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773323890-5hlASQg7HIbNczB2sxfw","object":"chat.completion.chunk","created":1773323890,"model":"deepseek/deepseek-v3.2-20251201","provider":"AtlasCloud","choices":[{"index":0,"delta":{"content":" Florence,","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773323890-5hlASQg7HIbNczB2sxfw","object":"chat.completion.chunk","created":1773323890,"model":"deepseek/deepseek-v3.2-20251201","provider":"AtlasCloud","choices":[{"index":0,"delta":{"content":" Italy for","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773323890-5hlASQg7HIbNczB2sxfw","object":"chat.completion.chunk","created":1773323890,"model":"deepseek/deepseek-v3.2-20251201","provider":"AtlasCloud","choices":[{"index":0,"delta":{"content":" you.\n\n","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773323890-5hlASQg7HIbNczB2sxfw","object":"chat.completion.chunk","created":1773323890,"model":"deepseek/deepseek-v3.2-20251201","provider":"AtlasCloud","choices":[{"index":0,"delta":{"content":null,"role":"assistant","tool_calls":[{"index":0,"id":"0a373b5ec8014719aec1898f092698c4","type":"function","function":{"name":"weather","arguments":""}}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773323890-5hlASQg7HIbNczB2sxfw","object":"chat.completion.chunk","created":1773323890,"model":"deepseek/deepseek-v3.2-20251201","provider":"AtlasCloud","choices":[{"index":0,"delta":{"content":null,"role":"assistant","tool_calls":[{"index":0,"function":{"arguments":"{\"location\": \"Florence\"}"}}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773323890-5hlASQg7HIbNczB2sxfw","object":"chat.completion.chunk","created":1773323890,"model":"deepseek/deepseek-v3.2-20251201","provider":"AtlasCloud","choices":[{"index":0,"delta":{"content":"","role":"assistant"},"finish_reason":"tool_calls","native_finish_reason":"tool_calls"}]}
+
+      data: {"id":"gen-1773323890-5hlASQg7HIbNczB2sxfw","object":"chat.completion.chunk","created":1773323890,"model":"deepseek/deepseek-v3.2-20251201","provider":"AtlasCloud","choices":[],"usage":{"prompt_tokens":318,"completion_tokens":56,"total_tokens":374,"cost":0.00010396,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"cache_write_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":0.00010396,"upstream_inference_prompt_cost":0.00008268,"upstream_inference_completions_cost":0.00002128},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0,"audio_tokens":0}}}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 1.497798917s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 873
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"content":"I''ll get the weather information for Florence, Italy for you.\n\n","tool_calls":[{"id":"0a373b5ec8014719aec1898f092698c4","function":{"arguments":"{\"location\": \"Florence\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"0a373b5ec8014719aec1898f092698c4","role":"tool"}],"model":"deepseek/deepseek-v3.2","max_tokens":4000,"stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"usage":{"include":true},"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAI/Go 2.7.1
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"gen-1773323894-rewl0HpIp9isI6kKd8cP","object":"chat.completion.chunk","created":1773323894,"model":"deepseek/deepseek-v3.2-20251201","provider":"AtlasCloud","choices":[{"index":0,"delta":{"content":"The","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773323894-rewl0HpIp9isI6kKd8cP","object":"chat.completion.chunk","created":1773323894,"model":"deepseek/deepseek-v3.2-20251201","provider":"AtlasCloud","choices":[{"index":0,"delta":{"content":" current","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773323894-rewl0HpIp9isI6kKd8cP","object":"chat.completion.chunk","created":1773323894,"model":"deepseek/deepseek-v3.2-20251201","provider":"AtlasCloud","choices":[{"index":0,"delta":{"content":" temperature in","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773323894-rewl0HpIp9isI6kKd8cP","object":"chat.completion.chunk","created":1773323894,"model":"deepseek/deepseek-v3.2-20251201","provider":"AtlasCloud","choices":[{"index":0,"delta":{"content":" Florence,","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773323894-rewl0HpIp9isI6kKd8cP","object":"chat.completion.chunk","created":1773323894,"model":"deepseek/deepseek-v3.2-20251201","provider":"AtlasCloud","choices":[{"index":0,"delta":{"content":" Italy is","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773323894-rewl0HpIp9isI6kKd8cP","object":"chat.completion.chunk","created":1773323894,"model":"deepseek/deepseek-v3.2-20251201","provider":"AtlasCloud","choices":[{"index":0,"delta":{"content":" ","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773323894-rewl0HpIp9isI6kKd8cP","object":"chat.completion.chunk","created":1773323894,"model":"deepseek/deepseek-v3.2-20251201","provider":"AtlasCloud","choices":[{"index":0,"delta":{"content":"40°","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773323894-rewl0HpIp9isI6kKd8cP","object":"chat.completion.chunk","created":1773323894,"model":"deepseek/deepseek-v3.2-20251201","provider":"AtlasCloud","choices":[{"index":0,"delta":{"content":"C.","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773323894-rewl0HpIp9isI6kKd8cP","object":"chat.completion.chunk","created":1773323894,"model":"deepseek/deepseek-v3.2-20251201","provider":"AtlasCloud","choices":[{"index":0,"delta":{"content":"","role":"assistant"},"finish_reason":"stop","native_finish_reason":"stop"}]}
+
+      data: {"id":"gen-1773323894-rewl0HpIp9isI6kKd8cP","object":"chat.completion.chunk","created":1773323894,"model":"deepseek/deepseek-v3.2-20251201","provider":"AtlasCloud","choices":[],"usage":{"prompt_tokens":393,"completion_tokens":13,"total_tokens":406,"cost":0.00010712,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"cache_write_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":0.00010712,"upstream_inference_prompt_cost":0.00010218,"upstream_inference_completions_cost":0.00000494},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0,"audio_tokens":0}}}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 1.430157167s

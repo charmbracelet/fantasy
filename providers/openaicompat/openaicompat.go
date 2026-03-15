@@ -4,7 +4,7 @@ package openaicompat
 import (
 	"charm.land/fantasy"
 	"charm.land/fantasy/providers/openai"
-	"github.com/openai/openai-go/v2/option"
+	"github.com/openai/openai-go/v3/option"
 )
 
 type options struct {
@@ -105,6 +105,14 @@ func WithSDKOptions(opts ...option.RequestOption) Option {
 func WithObjectMode(om fantasy.ObjectMode) Option {
 	return func(o *options) {
 		o.objectMode = om
+	}
+}
+
+// WithUserAgent sets an explicit User-Agent header, overriding the default and any
+// value set via WithHeaders.
+func WithUserAgent(ua string) Option {
+	return func(o *options) {
+		o.openaiOptions = append(o.openaiOptions, openai.WithUserAgent(ua))
 	}
 }
 

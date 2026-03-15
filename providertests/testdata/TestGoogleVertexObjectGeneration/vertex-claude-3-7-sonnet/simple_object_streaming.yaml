@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - Anthropic/Go 1.14.0
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://us-east5-aiplatform.googleapis.com/v1/projects/fantasy-playground-472418/locations/us-east5/publishers/anthropic/models/claude-3-7-sonnet@20250219:streamRawPredict
     method: POST
   response:
@@ -26,56 +26,53 @@ interactions:
     uncompressed: true
     body: |+
       event: message_start
-      data: {"type":"message_start","message":{"model":"claude-3-7-sonnet-20250219","id":"msg_vrtx_01XdrdQzn2BFw8pob1JJCRnX","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":453,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":11}}}
+      data: {"type":"message_start","message":{"model":"claude-3-7-sonnet-20250219","id":"msg_vrtx_016LVviTuDTey6wqvCXkQyRQ","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":453,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":10}}              }
 
       event: ping
       data: {"type": "ping"}
 
       event: content_block_start
-      data: {"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_vrtx_01Y5BDgK5DcxEvwThJWL5Pix","name":"Person","input":{}}        }
+      data: {"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_vrtx_01FVcwNij5LVEeuHy8jV34S5","name":"Person","input":{}}     }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":""}             }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":""}            }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"{\""}        }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"{\"na"}}
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"name\":"}          }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"me\""}}
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":" \"Alice\""}      }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":": \"Alice\""}          }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":", \"age\""}   }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":", \"age\": 3"}    }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":": 30"}      }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"0"}        }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":", \"city\""}            }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":", \"cit"}          }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":": \"P"}            }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"y\": \"Pa"}}
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"ari"}             }
-
-      event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"s\"}"}            }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"ris\"}"}     }
 
       event: content_block_stop
-      data: {"type":"content_block_stop","index":0        }
+      data: {"type":"content_block_stop","index":0         }
 
       event: message_delta
-      data: {"type":"message_delta","delta":{"stop_reason":"tool_use","stop_sequence":null},"usage":{"output_tokens":67}        }
+      data: {"type":"message_delta","delta":{"stop_reason":"tool_use","stop_sequence":null},"usage":{"output_tokens":67}           }
 
       event: message_stop
-      data: {"type":"message_stop"           }
+      data: {"type":"message_stop"       }
 
     headers:
       Content-Type:
       - text/event-stream; charset=utf-8
     status: 200 OK
     code: 200
-    duration: 1.471510916s
+    duration: 1.391476583s

@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 455
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"}],"model":"glm-4.7-flash","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+    url: https://api.z.ai/api/coding/paas/v4/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"choices":[{"finish_reason":"tool_calls","index":0,"message":{"content":"I''ll check the weather in Florence, Italy for you.","reasoning_content":"The user is asking for the weather in Florence, Italy. I have a weather function available that can get weather information for a location. The function requires a \"location\" parameter, and the user has provided \"Florence,Italy\" as the location. I should use this function to get the weather information.","role":"assistant","tool_calls":[{"function":{"arguments":"{\"location\":\"Florence,Italy\"}","name":"weather"},"id":"call_-7807249954186984837","index":0,"type":"function"}]}}],"created":1773349384,"id":"202603130503035652f6eb725d4b48","model":"glm-4.7-flash","object":"chat.completion","request_id":"202603130503035652f6eb725d4b48","usage":{"completion_tokens":88,"completion_tokens_details":{"reasoning_tokens":62},"prompt_tokens":173,"prompt_tokens_details":{"cached_tokens":43},"total_tokens":261}}'
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+    status: 200 OK
+    code: 200
+    duration: 2.001652542s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1092
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"content":"I''ll check the weather in Florence, Italy for you.","tool_calls":[{"id":"call_-7807249954186984837","function":{"arguments":"{\"location\":\"Florence,Italy\"}","name":"weather"},"type":"function"}],"role":"assistant","reasoning_content":"The user is asking for the weather in Florence, Italy. I have a weather function available that can get weather information for a location. The function requires a \"location\" parameter, and the user has provided \"Florence,Italy\" as the location. I should use this function to get the weather information."},{"content":"40 C","tool_call_id":"call_-7807249954186984837","role":"tool"}],"model":"glm-4.7-flash","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+    url: https://api.z.ai/api/coding/paas/v4/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"choices":[{"finish_reason":"stop","index":0,"message":{"content":"The weather in Florence, Italy is currently 40°C (104°F). That''s quite hot! Make sure to stay hydrated and seek shade if you''re out and about.","reasoning_content":"The weather function returned \"40 C\" which indicates the temperature in Florence, Italy is 40 degrees Celsius. This seems quite hot, which would be consistent with Florence being in Italy and possibly experiencing hot weather. I should provide this information to the user in a clear and helpful way.","role":"assistant"}}],"created":1773349386,"id":"20260313050305e26cddfc278c448a","model":"glm-4.7-flash","object":"chat.completion","request_id":"20260313050305e26cddfc278c448a","usage":{"completion_tokens":94,"completion_tokens_details":{"reasoning_tokens":57},"prompt_tokens":267,"prompt_tokens_details":{"cached_tokens":173},"total_tokens":361}}'
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+    status: 200 OK
+    code: 200
+    duration: 2.1321585s

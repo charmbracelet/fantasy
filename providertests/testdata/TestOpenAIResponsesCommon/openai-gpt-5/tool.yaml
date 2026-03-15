@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/responses
     method: POST
   response:
@@ -26,15 +26,17 @@ interactions:
     uncompressed: true
     body: |-
       {
-        "id": "resp_03c1862e0741d1d40168f237fb21e88191bbe5c97d0994130f",
+        "id": "resp_07acbe0aaedca68d0169b319365d8481969b62465aff0f7bc8",
         "object": "response",
-        "created_at": 1760704507,
+        "created_at": 1773345078,
         "status": "completed",
         "background": false,
         "billing": {
           "payer": "developer"
         },
+        "completed_at": 1773345080,
         "error": null,
+        "frequency_penalty": 0.0,
         "incomplete_details": null,
         "instructions": null,
         "max_output_tokens": 4000,
@@ -42,22 +44,24 @@ interactions:
         "model": "gpt-5-2025-08-07",
         "output": [
           {
-            "id": "rs_03c1862e0741d1d40168f237fb807c819194656e80eb126a65",
+            "id": "rs_07acbe0aaedca68d0169b31936b8c4819680474c33b1cd2067",
             "type": "reasoning",
             "summary": []
           },
           {
-            "id": "fc_03c1862e0741d1d40168f237fce0c88191a227de0e0fc29c2c",
+            "id": "fc_07acbe0aaedca68d0169b31937d54081968957c8161482d509",
             "type": "function_call",
             "status": "completed",
             "arguments": "{\"location\":\"Florence, Italy\"}",
-            "call_id": "call_pG7sDgSfcLvcZrGGJrH3Z3aQ",
+            "call_id": "call_d2Jw9Yi3xW2waCu4FfmMPBEn",
             "name": "weather"
           }
         ],
         "parallel_tool_calls": true,
+        "presence_penalty": 0.0,
         "previous_response_id": null,
         "prompt_cache_key": null,
+        "prompt_cache_retention": null,
         "reasoning": {
           "effort": "medium",
           "summary": null
@@ -97,15 +101,15 @@ interactions:
         "top_p": 1.0,
         "truncation": "disabled",
         "usage": {
-          "input_tokens": 66,
+          "input_tokens": 63,
           "input_tokens_details": {
             "cached_tokens": 0
           },
-          "output_tokens": 86,
+          "output_tokens": 93,
           "output_tokens_details": {
             "reasoning_tokens": 64
           },
-          "total_tokens": 152
+          "total_tokens": 156
         },
         "user": null,
         "metadata": {}
@@ -115,7 +119,7 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 2.09006325s
+    duration: 2.367363417s
 - id: 1
   request:
     proto: HTTP/1.1
@@ -123,14 +127,14 @@ interactions:
     proto_minor: 1
     content_length: 721
     host: ""
-    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":"You are a helpful assistant","role":"developer"},{"content":[{"text":"What''s the weather in Florence,Italy?","type":"input_text"}],"role":"user"},{"arguments":"\"{\\\"location\\\":\\\"Florence, Italy\\\"}\"","call_id":"call_pG7sDgSfcLvcZrGGJrH3Z3aQ","name":"weather","type":"function_call"},{"call_id":"call_pG7sDgSfcLvcZrGGJrH3Z3aQ","output":"40 C","type":"function_call_output"}],"model":"gpt-5","tool_choice":"auto","tools":[{"strict":false,"parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location","type":"function"}]}'
+    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":"You are a helpful assistant","role":"developer"},{"content":[{"text":"What''s the weather in Florence,Italy?","type":"input_text"}],"role":"user"},{"arguments":"\"{\\\"location\\\":\\\"Florence, Italy\\\"}\"","call_id":"call_d2Jw9Yi3xW2waCu4FfmMPBEn","name":"weather","type":"function_call"},{"call_id":"call_d2Jw9Yi3xW2waCu4FfmMPBEn","output":"40 C","type":"function_call_output"}],"model":"gpt-5","tool_choice":"auto","tools":[{"strict":false,"parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location","type":"function"}]}'
     headers:
       Accept:
       - application/json
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/responses
     method: POST
   response:
@@ -141,15 +145,17 @@ interactions:
     uncompressed: true
     body: |-
       {
-        "id": "resp_00c0656fa55dff4a0168f237fd3b9c8196bd4e4de8737e9452",
+        "id": "resp_03d61eab4560a2c00169b3193990088194a38da4e4ddb306ec",
         "object": "response",
-        "created_at": 1760704509,
+        "created_at": 1773345081,
         "status": "completed",
         "background": false,
         "billing": {
           "payer": "developer"
         },
+        "completed_at": 1773345090,
         "error": null,
+        "frequency_penalty": 0.0,
         "incomplete_details": null,
         "instructions": null,
         "max_output_tokens": 4000,
@@ -157,12 +163,12 @@ interactions:
         "model": "gpt-5-2025-08-07",
         "output": [
           {
-            "id": "rs_00c0656fa55dff4a0168f237fdc064819691999ce73a7ce97a",
+            "id": "rs_03d61eab4560a2c00169b3193a33388194b4ac06cdbd59dbea",
             "type": "reasoning",
             "summary": []
           },
           {
-            "id": "msg_00c0656fa55dff4a0168f2380148748196b3987065a61dba12",
+            "id": "msg_03d61eab4560a2c00169b31941cad881948f488c681492f5d6",
             "type": "message",
             "status": "completed",
             "content": [
@@ -170,15 +176,17 @@ interactions:
                 "type": "output_text",
                 "annotations": [],
                 "logprobs": [],
-                "text": "Right now in Florence, Italy it\u2019s about 40\u00b0C. Would you like the forecast or details like humidity and wind?"
+                "text": "It\u2019s currently about 40\u00b0C (104\u00b0F) in Florence, Italy."
               }
             ],
             "role": "assistant"
           }
         ],
         "parallel_tool_calls": true,
+        "presence_penalty": 0.0,
         "previous_response_id": null,
         "prompt_cache_key": null,
+        "prompt_cache_retention": null,
         "reasoning": {
           "effort": "medium",
           "summary": null
@@ -218,15 +226,15 @@ interactions:
         "top_p": 1.0,
         "truncation": "disabled",
         "usage": {
-          "input_tokens": 97,
+          "input_tokens": 94,
           "input_tokens_details": {
             "cached_tokens": 0
           },
-          "output_tokens": 287,
+          "output_tokens": 219,
           "output_tokens_details": {
-            "reasoning_tokens": 256
+            "reasoning_tokens": 192
           },
-          "total_tokens": 384
+          "total_tokens": 313
         },
         "user": null,
         "metadata": {}
@@ -236,4 +244,4 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 4.618793667s
+    duration: 10.431176s

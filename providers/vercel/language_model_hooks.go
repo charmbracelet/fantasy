@@ -11,8 +11,8 @@ import (
 	"charm.land/fantasy/providers/anthropic"
 	"charm.land/fantasy/providers/google"
 	openaipkg "charm.land/fantasy/providers/openai"
-	openaisdk "github.com/openai/openai-go/v2"
-	"github.com/openai/openai-go/v2/packages/param"
+	openaisdk "github.com/openai/openai-go/v3"
+	"github.com/openai/openai-go/v3/packages/param"
 )
 
 const reasoningStartedCtx = "reasoning_started"
@@ -874,12 +874,14 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 								Index:   inx,
 							})
 						}
-						reasoningDetails = append(reasoningDetails, ReasoningDetail{
-							Type:   "reasoning.encrypted",
-							Format: "openai-responses-v1",
-							Data:   *metadata.EncryptedContent,
-							ID:     metadata.ItemID,
-						})
+						if metadata.EncryptedContent != nil {
+							reasoningDetails = append(reasoningDetails, ReasoningDetail{
+								Type:   "reasoning.encrypted",
+								Format: "openai-responses-v1",
+								Data:   *metadata.EncryptedContent,
+								ID:     metadata.ItemID,
+							})
+						}
 						data, _ := json.Marshal(reasoningDetails)
 						reasoningDetailsMap := []map[string]any{}
 						_ = json.Unmarshal(data, &reasoningDetailsMap)

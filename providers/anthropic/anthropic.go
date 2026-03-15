@@ -242,7 +242,7 @@ func (a languageModel) prepareParams(call fantasy.Call) (*anthropic.MessageNewPa
 	if providerOptions.SendReasoning != nil {
 		sendReasoning = *providerOptions.SendReasoning
 	}
-	// Add beta headers for features like 1M context window on Bedrock
+	// Add beta headers for explicitly requested Anthropic beta feature flags.
 	for _, beta := range providerOptions.Betas {
 		requestOpts = append(requestOpts, option.WithHeaderAdd("anthropic-beta", beta))
 	}

@@ -61,6 +61,8 @@ type ProviderOptions struct {
 	Thinking               *ThinkingProviderOption `json:"thinking"`
 	Effort                 *Effort                 `json:"effort"`
 	DisableParallelToolUse *bool                   `json:"disable_parallel_tool_use"`
+	// Betas is a list of Anthropic beta feature flags to enable via the anthropic-beta header.
+	Betas []string `json:"betas,omitempty"`
 }
 
 // Options implements the ProviderOptions interface.

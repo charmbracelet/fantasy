@@ -921,7 +921,7 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 }
 
 func (a *agent) prepareTools(tools []AgentTool, providerDefinedTools []ProviderDefinedTool, activeTools []string, disableAllTools bool) []Tool {
-	preparedTools := make([]Tool, 0, len(tools))
+	preparedTools := make([]Tool, 0, len(tools)+len(providerDefinedTools))
 
 	// If explicitly disabling all tools, return no tools
 	if disableAllTools {
@@ -949,6 +949,11 @@ func (a *agent) prepareTools(tools []AgentTool, providerDefinedTools []ProviderD
 		})
 	}
 	for _, tool := range providerDefinedTools {
+		// If activeTools has items, only include tools in the list. If
+		// activeTools is empty, include all tools
+		if len(activeTools) > 0 && !slices.Contains(activeTools, tool.GetName()) {
+			continue
+		}
 		preparedTools = append(preparedTools, tool)
 	}
 	return preparedTools

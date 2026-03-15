@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"maps"
+	"math"
 	"strings"
 
 	"charm.land/fantasy"
@@ -407,6 +408,118 @@ func groupIntoBlocks(prompt fantasy.Prompt) []*messageBlock {
 	return blocks
 }
 
+func anyToStringSlice(v any) []string {
+	switch typed := v.(type) {
+	case []string:
+		if len(typed) == 0 {
+			return nil
+		}
+		out := make([]string, len(typed))
+		copy(out, typed)
+		return out
+	case []any:
+		if len(typed) == 0 {
+			return nil
+		}
+		out := make([]string, 0, len(typed))
+		for _, item := range typed {
+			s, ok := item.(string)
+			if !ok || s == "" {
+				continue
+			}
+			out = append(out, s)
+		}
+		if len(out) == 0 {
+			return nil
+		}
+		return out
+	default:
+		return nil
+	}
+}
+
+const maxExactIntFloat64 = float64(1<<53 - 1)
+
+func anyToInt64(v any) (int64, bool) {
+	switch typed := v.(type) {
+	case int:
+		return int64(typed), true
+	case int8:
+		return int64(typed), true
+	case int16:
+		return int64(typed), true
+	case int32:
+		return int64(typed), true
+	case int64:
+		return typed, true
+	case uint:
+		if uint64(typed) > math.MaxInt64 {
+			return 0, false
+		}
+		return int64(typed), true
+	case uint8:
+		return int64(typed), true
+	case uint16:
+		return int64(typed), true
+	case uint32:
+		return int64(typed), true
+	case uint64:
+		if typed > math.MaxInt64 {
+			return 0, false
+		}
+		return int64(typed), true
+	case float32:
+		f := float64(typed)
+		if math.Trunc(f) != f || math.IsNaN(f) || math.IsInf(f, 0) || f < -maxExactIntFloat64 || f > maxExactIntFloat64 {
+			return 0, false
+		}
+		return int64(f), true
+	case float64:
+		if math.Trunc(typed) != typed || math.IsNaN(typed) || math.IsInf(typed, 0) || typed < -maxExactIntFloat64 || typed > maxExactIntFloat64 {
+			return 0, false
+		}
+		return int64(typed), true
+	case json.Number:
+		parsed, err := typed.Int64()
+		if err != nil {
+			return 0, false
+		}
+		return parsed, true
+	default:
+		return 0, false
+	}
+}
+
+func anyToUserLocation(v any) *UserLocation {
+	switch typed := v.(type) {
+	case *UserLocation:
+		return typed
+	case UserLocation:
+		loc := typed
+		return &loc
+	case map[string]any:
+		loc := &UserLocation{}
+		if city, ok := typed["city"].(string); ok {
+			loc.City = city
+		}
+		if region, ok := typed["region"].(string); ok {
+			loc.Region = region
+		}
+		if country, ok := typed["country"].(string); ok {
+			loc.Country = country
+		}
+		if timezone, ok := typed["timezone"].(string); ok {
+			loc.Timezone = timezone
+		}
+		if loc.City == "" && loc.Region == "" && loc.Country == "" && loc.Timezone == "" {
+			return nil
+		}
+		return loc
+	default:
+		return nil
+	}
+}
+
 func (a languageModel) toTools(tools []fantasy.Tool, toolChoice *fantasy.ToolChoice, disableParallelToolCalls bool) (anthropicTools []anthropic.ToolUnionParam, anthropicToolChoice *anthropic.ToolChoiceUnionParam, warnings []fantasy.CallWarning) {
 	for _, tool := range tools {
 		if tool.GetType() == fantasy.ToolTypeFunction {
@@ -449,16 +562,16 @@ func (a languageModel) toTools(tools []fantasy.Tool, toolChoice *fantasy.ToolCho
 			case "web_search":
 				webSearchTool := anthropic.WebSearchTool20250305Param{}
 				if pt.Args != nil {
-					if domains, ok := pt.Args["allowed_domains"].([]string); ok && len(domains) > 0 {
+					if domains := anyToStringSlice(pt.Args["allowed_domains"]); len(domains) > 0 {
 						webSearchTool.AllowedDomains = domains
 					}
-					if domains, ok := pt.Args["blocked_domains"].([]string); ok && len(domains) > 0 {
+					if domains := anyToStringSlice(pt.Args["blocked_domains"]); len(domains) > 0 {
 						webSearchTool.BlockedDomains = domains
 					}
-					if maxUses, ok := pt.Args["max_uses"].(int64); ok && maxUses > 0 {
+					if maxUses, ok := anyToInt64(pt.Args["max_uses"]); ok && maxUses > 0 {
 						webSearchTool.MaxUses = param.NewOpt(maxUses)
 					}
-					if loc, ok := pt.Args["user_location"].(*UserLocation); ok && loc != nil {
+					if loc := anyToUserLocation(pt.Args["user_location"]); loc != nil {
 						var ulp anthropic.UserLocationParam
 						if loc.City != "" {
 							ulp.City = param.NewOpt(loc.City)

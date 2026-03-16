@@ -453,10 +453,11 @@ func anyToInt64(v any) (int64, bool) {
 	case int64:
 		return typed, true
 	case uint:
-		if uint64(typed) > math.MaxInt64 {
+		u64 := uint64(typed)
+		if u64 > math.MaxInt64 {
 			return 0, false
 		}
-		return int64(typed), true
+		return int64(u64), true
 	case uint8:
 		return int64(typed), true
 	case uint16:

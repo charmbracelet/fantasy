@@ -3447,3 +3447,361 @@ func TestUserAgent(t *testing.T) {
 		assert.Equal(t, "provider-ua", server.calls[0].headers["User-Agent"])
 	})
 }
+
+// --- OpenAI Responses API Web Search Tests ---
+
+// mockResponsesWebSearchResponse returns a Responses API response
+// containing a web_search_call output item followed by a message
+// with url_citation annotations.
+func mockResponsesWebSearchResponse() map[string]any {
+	return map[string]any{
+		"id":     "resp_01WebSearch",
+		"object": "response",
+		"model":  "gpt-4.1",
+		"output": []any{
+			map[string]any{
+				"type":   "web_search_call",
+				"id":     "ws_01",
+				"status": "completed",
+				"action": map[string]any{
+					"type":  "search",
+					"query": "latest AI news",
+				},
+			},
+			map[string]any{
+				"type":   "message",
+				"id":     "msg_01",
+				"role":   "assistant",
+				"status": "completed",
+				"content": []any{
+					map[string]any{
+						"type": "output_text",
+						"text": "Based on recent search results, here is the latest AI news.",
+						"annotations": []any{
+							map[string]any{
+								"type":        "url_citation",
+								"url":         "https://example.com/ai-news",
+								"title":       "Latest AI News",
+								"start_index": 0,
+								"end_index":   50,
+							},
+							map[string]any{
+								"type":        "url_citation",
+								"url":         "https://example.com/ml-update",
+								"title":       "ML Update",
+								"start_index": 51,
+								"end_index":   60,
+							},
+						},
+					},
+				},
+			},
+		},
+		"status": "completed",
+		"usage": map[string]any{
+			"input_tokens":  100,
+			"output_tokens": 50,
+			"total_tokens":  150,
+		},
+	}
+}
+
+func newResponsesProvider(t *testing.T, serverURL string) fantasy.LanguageModel {
+	t.Helper()
+	provider, err := New(
+		WithAPIKey("test-api-key"),
+		WithBaseURL(serverURL),
+		WithUseResponsesAPI(),
+	)
+	require.NoError(t, err)
+	model, err := provider.LanguageModel(context.Background(), "gpt-4.1")
+	require.NoError(t, err)
+	return model
+}
+
+func TestResponsesGenerate_WebSearchResponse(t *testing.T) {
+	t.Parallel()
+
+	server := newMockServer()
+	defer server.close()
+	server.response = mockResponsesWebSearchResponse()
+
+	model := newResponsesProvider(t, server.server.URL)
+
+	resp, err := model.Generate(context.Background(), fantasy.Call{
+		Prompt: testPrompt,
+		Tools:  []fantasy.Tool{WebSearchTool(nil)},
+	})
+	require.NoError(t, err)
+
+	require.Equal(t, "POST", server.calls[0].method)
+	require.Equal(t, "/responses", server.calls[0].path)
+
+	var (
+		toolCalls   []fantasy.ToolCallContent
+		sources     []fantasy.SourceContent
+		toolResults []fantasy.ToolResultContent
+		texts       []fantasy.TextContent
+	)
+	for _, c := range resp.Content {
+		switch v := c.(type) {
+		case fantasy.ToolCallContent:
+			toolCalls = append(toolCalls, v)
+		case fantasy.SourceContent:
+			sources = append(sources, v)
+		case fantasy.ToolResultContent:
+			toolResults = append(toolResults, v)
+		case fantasy.TextContent:
+			texts = append(texts, v)
+		}
+	}
+
+	// ToolCallContent for the provider-executed web_search.
+	require.Len(t, toolCalls, 1)
+	require.True(t, toolCalls[0].ProviderExecuted)
+	require.Equal(t, "web_search", toolCalls[0].ToolName)
+	require.Equal(t, "ws_01", toolCalls[0].ToolCallID)
+
+	// SourceContent entries from url_citation annotations.
+	require.Len(t, sources, 2)
+	require.Equal(t, "https://example.com/ai-news", sources[0].URL)
+	require.Equal(t, "Latest AI News", sources[0].Title)
+	require.Equal(t, fantasy.SourceTypeURL, sources[0].SourceType)
+	require.Equal(t, "https://example.com/ml-update", sources[1].URL)
+	require.Equal(t, "ML Update", sources[1].Title)
+
+	// ToolResultContent with provider metadata.
+	require.Len(t, toolResults, 1)
+	require.True(t, toolResults[0].ProviderExecuted)
+	require.Equal(t, "web_search", toolResults[0].ToolName)
+	require.Equal(t, "ws_01", toolResults[0].ToolCallID)
+
+	metaVal, ok := toolResults[0].ProviderMetadata[Name]
+	require.True(t, ok, "providerMetadata should contain openai key")
+	wsMeta, ok := metaVal.(*WebSearchCallMetadata)
+	require.True(t, ok, "metadata should be *WebSearchCallMetadata")
+	require.Equal(t, "ws_01", wsMeta.ItemID)
+	require.NotNil(t, wsMeta.Action)
+	require.Equal(t, "search", wsMeta.Action.Type)
+	require.Equal(t, "latest AI news", wsMeta.Action.Query)
+
+	// TextContent with the final answer.
+	require.Len(t, texts, 1)
+	require.Equal(t,
+		"Based on recent search results, here is the latest AI news.",
+		texts[0].Text,
+	)
+}
+
+func TestResponsesGenerate_WebSearchToolInRequest(t *testing.T) {
+	t.Parallel()
+
+	t.Run("basic web_search tool", func(t *testing.T) {
+		t.Parallel()
+
+		server := newMockServer()
+		defer server.close()
+		server.response = mockResponsesWebSearchResponse()
+
+		model := newResponsesProvider(t, server.server.URL)
+
+		_, err := model.Generate(context.Background(), fantasy.Call{
+			Prompt: testPrompt,
+			Tools:  []fantasy.Tool{WebSearchTool(nil)},
+		})
+		require.NoError(t, err)
+
+		tools, ok := server.calls[0].body["tools"].([]any)
+		require.True(t, ok, "request body should have tools array")
+		require.Len(t, tools, 1)
+
+		tool, ok := tools[0].(map[string]any)
+		require.True(t, ok)
+		require.Equal(t, "web_search", tool["type"])
+	})
+
+	t.Run("with search_context_size and allowed_domains", func(t *testing.T) {
+		t.Parallel()
+
+		server := newMockServer()
+		defer server.close()
+		server.response = mockResponsesWebSearchResponse()
+
+		model := newResponsesProvider(t, server.server.URL)
+
+		_, err := model.Generate(context.Background(), fantasy.Call{
+			Prompt: testPrompt,
+			Tools: []fantasy.Tool{
+				WebSearchTool(&WebSearchToolOptions{
+					SearchContextSize: SearchContextSizeHigh,
+					AllowedDomains:    []string{"example.com", "test.com"},
+				}),
+			},
+		})
+		require.NoError(t, err)
+
+		tools, ok := server.calls[0].body["tools"].([]any)
+		require.True(t, ok)
+		require.Len(t, tools, 1)
+
+		tool, ok := tools[0].(map[string]any)
+		require.True(t, ok)
+		require.Equal(t, "web_search", tool["type"])
+		require.Equal(t, "high", tool["search_context_size"])
+
+		filters, ok := tool["filters"].(map[string]any)
+		require.True(t, ok, "tool should have filters")
+		domains, ok := filters["allowed_domains"].([]any)
+		require.True(t, ok, "filters should have allowed_domains")
+		require.Len(t, domains, 2)
+		require.Equal(t, "example.com", domains[0])
+		require.Equal(t, "test.com", domains[1])
+	})
+
+	t.Run("with user_location", func(t *testing.T) {
+		t.Parallel()
+
+		server := newMockServer()
+		defer server.close()
+		server.response = mockResponsesWebSearchResponse()
+
+		model := newResponsesProvider(t, server.server.URL)
+
+		_, err := model.Generate(context.Background(), fantasy.Call{
+			Prompt: testPrompt,
+			Tools: []fantasy.Tool{
+				WebSearchTool(&WebSearchToolOptions{
+					UserLocation: &WebSearchUserLocation{
+						City:    "San Francisco",
+						Country: "US",
+					},
+				}),
+			},
+		})
+		require.NoError(t, err)
+
+		tools, ok := server.calls[0].body["tools"].([]any)
+		require.True(t, ok)
+		require.Len(t, tools, 1)
+
+		tool, ok := tools[0].(map[string]any)
+		require.True(t, ok)
+		require.Equal(t, "web_search", tool["type"])
+
+		userLoc, ok := tool["user_location"].(map[string]any)
+		require.True(t, ok, "tool should have user_location")
+		require.Equal(t, "San Francisco", userLoc["city"])
+		require.Equal(t, "US", userLoc["country"])
+	})
+}
+
+func TestResponsesToPrompt_WebSearchProviderExecutedToolResults(t *testing.T) {
+	t.Parallel()
+
+	prompt := fantasy.Prompt{
+		{
+			Role: fantasy.MessageRoleUser,
+			Content: []fantasy.MessagePart{
+				fantasy.TextPart{Text: "Search for the latest AI news"},
+			},
+		},
+		{
+			Role: fantasy.MessageRoleAssistant,
+			Content: []fantasy.MessagePart{
+				fantasy.ToolCallPart{
+					ToolCallID:       "ws_01",
+					ToolName:         "web_search",
+					ProviderExecuted: true,
+				},
+				fantasy.ToolResultPart{
+					ToolCallID:       "ws_01",
+					ProviderExecuted: true,
+				},
+				fantasy.TextPart{Text: "Here is what I found."},
+			},
+		},
+	}
+
+	input, warnings := toResponsesPrompt(prompt, "system instructions")
+
+	require.Empty(t, warnings)
+
+	// Expected input items: user message, item_reference (for
+	// provider-executed tool call; the ToolResultPart is skipped),
+	// and assistant text message. System instructions are passed
+	// via params.Instructions, not as an input item.
+	require.Len(t, input, 3,
+		"expected user + item_reference + assistant text")
+}
+
+func TestResponsesStream_WebSearchResponse(t *testing.T) {
+	t.Parallel()
+
+	chunks := []string{
+		"event: response.output_item.added\n" +
+			`data: {"type":"response.output_item.added","output_index":0,"item":{"type":"web_search_call","id":"ws_01","status":"in_progress"}}` + "\n\n",
+		"event: response.output_item.done\n" +
+			`data: {"type":"response.output_item.done","output_index":0,"item":{"type":"web_search_call","id":"ws_01","status":"completed","action":{"type":"search","query":"latest AI news"}}}` + "\n\n",
+		"event: response.output_item.added\n" +
+			`data: {"type":"response.output_item.added","output_index":1,"item":{"type":"message","id":"msg_01","role":"assistant","status":"in_progress","content":[]}}` + "\n\n",
+		"event: response.output_text.delta\n" +
+			`data: {"type":"response.output_text.delta","output_index":1,"content_index":0,"delta":"Here are the results."}` + "\n\n",
+		"event: response.output_item.done\n" +
+			`data: {"type":"response.output_item.done","output_index":1,"item":{"type":"message","id":"msg_01","role":"assistant","status":"completed","content":[{"type":"output_text","text":"Here are the results.","annotations":[{"type":"url_citation","url":"https://example.com/ai-news","title":"Latest AI News","start_index":0,"end_index":21}]}]}}` + "\n\n",
+		"event: response.completed\n" +
+			`data: {"type":"response.completed","response":{"id":"resp_01","status":"completed","output":[],"usage":{"input_tokens":100,"output_tokens":50,"total_tokens":150}}}` + "\n\n",
+	}
+
+	sms := newStreamingMockServer()
+	defer sms.close()
+	sms.chunks = chunks
+
+	model := newResponsesProvider(t, sms.server.URL)
+
+	stream, err := model.Stream(context.Background(), fantasy.Call{
+		Prompt: testPrompt,
+		Tools:  []fantasy.Tool{WebSearchTool(nil)},
+	})
+	require.NoError(t, err)
+
+	var parts []fantasy.StreamPart
+	stream(func(part fantasy.StreamPart) bool {
+		parts = append(parts, part)
+		return true
+	})
+
+	var (
+		toolInputStarts []fantasy.StreamPart
+		toolCalls       []fantasy.StreamPart
+		toolResults     []fantasy.StreamPart
+		textDeltas      []fantasy.StreamPart
+	)
+	for _, p := range parts {
+		switch p.Type {
+		case fantasy.StreamPartTypeToolInputStart:
+			toolInputStarts = append(toolInputStarts, p)
+		case fantasy.StreamPartTypeToolCall:
+			toolCalls = append(toolCalls, p)
+		case fantasy.StreamPartTypeToolResult:
+			toolResults = append(toolResults, p)
+		case fantasy.StreamPartTypeTextDelta:
+			textDeltas = append(textDeltas, p)
+		}
+	}
+
+	require.NotEmpty(t, toolInputStarts, "should have a tool input start")
+	require.True(t, toolInputStarts[0].ProviderExecuted)
+	require.Equal(t, "web_search", toolInputStarts[0].ToolCallName)
+
+	require.NotEmpty(t, toolCalls, "should have a tool call")
+	require.True(t, toolCalls[0].ProviderExecuted)
+	require.Equal(t, "web_search", toolCalls[0].ToolCallName)
+
+	require.NotEmpty(t, toolResults, "should have a tool result")
+	require.True(t, toolResults[0].ProviderExecuted)
+	require.Equal(t, "web_search", toolResults[0].ToolCallName)
+	require.Equal(t, "ws_01", toolResults[0].ID)
+
+	require.NotEmpty(t, textDeltas, "should have text deltas")
+	require.Equal(t, "Here are the results.", textDeltas[0].Delta)
+}

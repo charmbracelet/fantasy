@@ -168,27 +168,27 @@ func (l *languageModel) Generate(ctx context.Context, call fantasy.Call) (*fanta
 	for resp := range ch {
 		lastResponse = resp
 
-		if len(resp.Choice) > 0 && resp.Choice[0].Delta != nil {
-			switch resp.Choice[0].FinishReason() {
+		if len(resp.Choices) > 0 && resp.Choices[0].Delta != nil {
+			switch resp.Choices[0].FinishReason() {
 			case model.FinishReasonError:
-				return nil, &fantasy.Error{Title: "model error", Message: resp.Choice[0].Delta.Content}
+				return nil, &fantasy.Error{Title: "model error", Message: resp.Choices[0].Delta.Content}
 
 			case model.FinishReasonStop, model.FinishReasonTool:
 				// Final response already contains full accumulated content in Delta.Content,
 				// so we use it directly instead of continuing to accumulate.
-				fullContent = resp.Choice[0].Delta.Content
+				fullContent = resp.Choices[0].Delta.Content
 
 			default:
-				fullContent += resp.Choice[0].Delta.Content
+				fullContent += resp.Choices[0].Delta.Content
 			}
 		}
 	}
 
-	if len(lastResponse.Choice) == 0 {
+	if len(lastResponse.Choices) == 0 {
 		return nil, &fantasy.Error{Title: "no response", Message: "no response generated"}
 	}
 
-	choice := lastResponse.Choice[0]
+	choice := lastResponse.Choices[0]
 	var content []fantasy.Content
 	if choice.Delta != nil {
 		content = make([]fantasy.Content, 0, 1+len(choice.Delta.ToolCalls))
@@ -286,11 +286,11 @@ func (l *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 
 		toolIndex := 0
 		for resp := range ch {
-			if len(resp.Choice) == 0 {
+			if len(resp.Choices) == 0 {
 				continue
 			}
 
-			choice := resp.Choice[0]
+			choice := resp.Choices[0]
 			if choice.Delta == nil {
 				continue
 			}

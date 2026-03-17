@@ -1,0 +1,150 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 297
+    host: ""
+    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":"You are a helpful assistant","role":"system"},{"content":[{"text":"What is the current population of Tokyo? Cite your source.","type":"input_text"}],"role":"user"}],"model":"gpt-4.1","tool_choice":"auto","tools":[{"type":"web_search"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.12.3 (https://charm.land/fantasy)
+    url: https://api.openai.com/v1/responses
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: |-
+      {
+        "id": "resp_07bce1382dabd6c50169b960ccf2d481969a4addb2d83e8781",
+        "object": "response",
+        "created_at": 1773756620,
+        "status": "completed",
+        "background": false,
+        "billing": {
+          "payer": "developer"
+        },
+        "completed_at": 1773756625,
+        "error": null,
+        "frequency_penalty": 0.0,
+        "incomplete_details": null,
+        "instructions": null,
+        "max_output_tokens": 4000,
+        "max_tool_calls": null,
+        "model": "gpt-4.1-2025-04-14",
+        "output": [
+          {
+            "id": "ws_07bce1382dabd6c50169b960cdd08c8196820826087ad7361b",
+            "type": "web_search_call",
+            "status": "completed",
+            "action": {
+              "type": "search",
+              "queries": [
+                "current population of Tokyo 2024"
+              ],
+              "query": "current population of Tokyo 2024"
+            }
+          },
+          {
+            "id": "msg_07bce1382dabd6c50169b960cf63b881969452b2b9ab51a3a7",
+            "type": "message",
+            "status": "completed",
+            "content": [
+              {
+                "type": "output_text",
+                "annotations": [
+                  {
+                    "type": "url_citation",
+                    "end_index": 566,
+                    "start_index": 488,
+                    "title": "Tokyo Third in UN Ranking of Global Megacities at 33.4 Million | Nippon.com",
+                    "url": "https://www.nippon.com/en/japan-data/h02639/?utm_source=openai"
+                  },
+                  {
+                    "type": "url_citation",
+                    "end_index": 898,
+                    "start_index": 807,
+                    "title": "Demographics of Tokyo",
+                    "url": "https://en.wikipedia.org/wiki/Demographics_of_Tokyo?utm_source=openai"
+                  },
+                  {
+                    "type": "url_citation",
+                    "end_index": 1240,
+                    "start_index": 1152,
+                    "title": "Greater Tokyo Area",
+                    "url": "https://en.wikipedia.org/wiki/Greater_Tokyo_Area?utm_source=openai"
+                  }
+                ],
+                "logprobs": [],
+                "text": "Here is the most current and reliable information on Tokyo\u2019s population as of early 2026, based on authoritative sources:\n\nFirst, if you're referring to Tokyo as a broader **urban agglomeration** (commonly defined by the United Nations as the metropolitan area including Tokyo and surrounding prefectures like Saitama, Chiba, and Kanagawa), the population is approximately **33.4 million** as of 2025. This makes Tokyo the **third-largest megacity** in the world behind Jakarta and Dhaka ([nippon.com](https://www.nippon.com/en/japan-data/h02639/?utm_source=openai)).\n\nIf your interest is in the **administrative population** of **Tokyo Metropolis** (which includes the 23 special wards, as well as the western Tama area and outlying islands), the estimated population is about **14.20 million** as of 2025 ([en.wikipedia.org](https://en.wikipedia.org/wiki/Demographics_of_Tokyo?utm_source=openai)).\n\nAdditionally, if someone refers to the **Greater Tokyo Area** (which includes a wider region encompassing additional prefectures beyond Tokyo Metropolis), the United Nations estimates its total population at approximately **36.95 million** as of 2026 ([en.wikipedia.org](https://en.wikipedia.org/wiki/Greater_Tokyo_Area?utm_source=openai)).\n\nTo summarize, depending on how \"Tokyo\" is defined:\n\n\u2022 Urban agglomeration (metro area including adjacent prefectures): **\u2248\u202f33.4 million** (2025)  \n\u2022 Tokyo Metropolis (actual administrative area): **\u2248\u202f14.20 million** (2025)  \n\u2022 Greater Tokyo Area (extensive metropolitan region): **\u2248\u202f36.95 million** (2026)\n\nLet me know which specific definition you're interested in if you'd like further details."
+              }
+            ],
+            "role": "assistant"
+          }
+        ],
+        "parallel_tool_calls": true,
+        "presence_penalty": 0.0,
+        "previous_response_id": null,
+        "prompt_cache_key": null,
+        "prompt_cache_retention": null,
+        "reasoning": {
+          "effort": null,
+          "summary": null
+        },
+        "safety_identifier": null,
+        "service_tier": "default",
+        "store": false,
+        "temperature": 1.0,
+        "text": {
+          "format": {
+            "type": "text"
+          },
+          "verbosity": "medium"
+        },
+        "tool_choice": "auto",
+        "tools": [
+          {
+            "type": "web_search",
+            "search_context_size": "medium",
+            "user_location": {
+              "type": "approximate",
+              "city": null,
+              "country": "US",
+              "region": null,
+              "timezone": null
+            }
+          }
+        ],
+        "top_logprobs": 0,
+        "top_p": 1.0,
+        "truncation": "disabled",
+        "usage": {
+          "input_tokens": 17106,
+          "input_tokens_details": {
+            "cached_tokens": 0
+          },
+          "output_tokens": 386,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 17492
+        },
+        "user": null,
+        "metadata": {}
+      }
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 5.104430812s

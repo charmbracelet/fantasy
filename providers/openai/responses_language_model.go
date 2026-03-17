@@ -478,6 +478,10 @@ func toResponsesPrompt(prompt fantasy.Prompt, systemMessageMode string) (respons
 					}
 
 					if toolCallPart.ProviderExecuted {
+						// Round-trip provider-executed tools via
+						// item_reference, letting the API resolve
+						// the stored output item by ID.
+						input = append(input, responses.ResponseInputItemParamOfItemReference(toolCallPart.ToolCallID))
 						continue
 					}
 
@@ -491,6 +495,10 @@ func toResponsesPrompt(prompt fantasy.Prompt, systemMessageMode string) (respons
 					}
 
 					input = append(input, responses.ResponseInputItemParamOfFunctionCall(string(inputJSON), toolCallPart.ToolCallID, toolCallPart.ToolName))
+				case fantasy.ContentTypeSource:
+					// Source citations from web search are not a
+					// recognised Responses API input type; skip.
+					continue
 				case fantasy.ContentTypeReasoning:
 					reasoningMetadata := GetReasoningMetadata(c.Options())
 					if reasoningMetadata == nil || reasoningMetadata.ItemID == "" {
@@ -553,7 +561,14 @@ func toResponsesPrompt(prompt fantasy.Prompt, systemMessageMode string) (respons
 					continue
 				}
 
+				// Provider-executed tool results (e.g. web search)
+				// are already round-tripped via the tool call; skip.
+				if toolResultPart.ProviderExecuted {
+					continue
+				}
+
 				var outputStr string
+
 				switch toolResultPart.Output.GetType() {
 				case fantasy.ToolResultContentTypeText:
 					output, ok := fantasy.AsToolResultOutputType[fantasy.ToolResultOutputContentText](toolResultPart.Output)
@@ -628,6 +643,17 @@ func toResponsesTools(tools []fantasy.Tool, toolChoice *fantasy.ToolChoice, opti
 				},
 			})
 			continue
+		}
+		if tool.GetType() == fantasy.ToolTypeProviderDefined {
+			pt, ok := tool.(fantasy.ProviderDefinedTool)
+			if !ok {
+				continue
+			}
+			switch pt.ID {
+			case "web_search":
+				openaiTools = append(openaiTools, toWebSearchToolParam(pt))
+				continue
+			}
 		}
 
 		warnings = append(warnings, fantasy.CallWarning{
@@ -733,6 +759,28 @@ func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call)
 				Input:            outputItem.Arguments.OfString,
 			})
 
+		case "web_search_call":
+			// Provider-executed web search tool call. Emit both
+			// a ToolCallContent and ToolResultContent as a pair,
+			// matching the vercel/ai pattern for provider tools.
+			//
+			// Note: source citations come from url_citation annotations
+			// on the message text (handled in the "message" case above),
+			// not from the web_search_call action.
+			wsMeta := webSearchCallToMetadata(outputItem.ID, outputItem.Action)
+			content = append(content, fantasy.ToolCallContent{
+				ProviderExecuted: true,
+				ToolCallID:       outputItem.ID,
+				ToolName:         "web_search",
+			})
+			content = append(content, fantasy.ToolResultContent{
+				ProviderExecuted: true,
+				ToolCallID:       outputItem.ID,
+				ToolName:         "web_search",
+				ProviderMetadata: fantasy.ProviderMetadata{
+					Name: wsMeta,
+				},
+			})
 		case "reasoning":
 			metadata := &ResponsesReasoningMetadata{
 				ItemID: outputItem.ID,
@@ -849,6 +897,17 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 						return
 					}
 
+				case "web_search_call":
+					// Provider-executed web search; emit start.
+					if !yield(fantasy.StreamPart{
+						Type:             fantasy.StreamPartTypeToolInputStart,
+						ID:               added.Item.ID,
+						ToolCallName:     "web_search",
+						ProviderExecuted: true,
+					}) {
+						return
+					}
+
 				case "message":
 					if !yield(fantasy.StreamPart{
 						Type: fantasy.StreamPartTypeTextStart,
@@ -905,6 +964,37 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 						}
 					}
 
+				case "web_search_call":
+					// Provider-executed web search completed.
+					// Source citations come from url_citation annotations
+					// on the streamed message text, not from the action.
+					if !yield(fantasy.StreamPart{
+						Type: fantasy.StreamPartTypeToolInputEnd,
+						ID:   done.Item.ID,
+					}) {
+						return
+					}
+					if !yield(fantasy.StreamPart{
+						Type:             fantasy.StreamPartTypeToolCall,
+						ID:               done.Item.ID,
+						ToolCallName:     "web_search",
+						ProviderExecuted: true,
+					}) {
+						return
+					}
+					// Emit a ToolResult so the agent framework
+					// includes it in round-trip messages.
+					if !yield(fantasy.StreamPart{
+						Type:             fantasy.StreamPartTypeToolResult,
+						ID:               done.Item.ID,
+						ToolCallName:     "web_search",
+						ProviderExecuted: true,
+						ProviderMetadata: fantasy.ProviderMetadata{
+							Name: webSearchCallToMetadata(done.Item.ID, done.Item.Action),
+						},
+					}) {
+						return
+					}
 				case "message":
 					if !yield(fantasy.StreamPart{
 						Type: fantasy.StreamPartTypeTextEnd,
@@ -1032,6 +1122,63 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 			FinishReason: finishReason,
 		})
 	}, nil
+}
+
+// toWebSearchToolParam converts a ProviderDefinedTool with ID
+// "web_search" into the OpenAI SDK's WebSearchToolParam.
+func toWebSearchToolParam(pt fantasy.ProviderDefinedTool) responses.ToolUnionParam {
+	wst := responses.WebSearchToolParam{
+		Type: responses.WebSearchToolTypeWebSearch,
+	}
+	if pt.Args != nil {
+		if size, ok := pt.Args["search_context_size"].(SearchContextSize); ok && size != "" {
+			wst.SearchContextSize = responses.WebSearchToolSearchContextSize(size)
+		}
+		// Also accept plain string for search_context_size.
+		if size, ok := pt.Args["search_context_size"].(string); ok && size != "" {
+			wst.SearchContextSize = responses.WebSearchToolSearchContextSize(size)
+		}
+		if domains, ok := pt.Args["allowed_domains"].([]string); ok && len(domains) > 0 {
+			wst.Filters.AllowedDomains = domains
+		}
+		if loc, ok := pt.Args["user_location"].(*WebSearchUserLocation); ok && loc != nil {
+			if loc.City != "" {
+				wst.UserLocation.City = param.NewOpt(loc.City)
+			}
+			if loc.Region != "" {
+				wst.UserLocation.Region = param.NewOpt(loc.Region)
+			}
+			if loc.Country != "" {
+				wst.UserLocation.Country = param.NewOpt(loc.Country)
+			}
+			if loc.Timezone != "" {
+				wst.UserLocation.Timezone = param.NewOpt(loc.Timezone)
+			}
+		}
+	}
+	return responses.ToolUnionParam{
+		OfWebSearch: &wst,
+	}
+}
+
+// webSearchCallToMetadata converts an OpenAI web search call output
+// into our structured metadata for round-tripping.
+func webSearchCallToMetadata(itemID string, action responses.ResponseOutputItemUnionAction) *WebSearchCallMetadata {
+	meta := &WebSearchCallMetadata{ItemID: itemID}
+	if action.Type != "" {
+		a := &WebSearchAction{
+			Type:  action.Type,
+			Query: action.Query,
+		}
+		for _, src := range action.Sources {
+			a.Sources = append(a.Sources, WebSearchSource{
+				Type: string(src.Type),
+				URL:  src.URL,
+			})
+		}
+		meta.Action = a
+	}
+	return meta
 }
 
 // GetReasoningMetadata extracts reasoning metadata from provider options for responses models.

@@ -794,11 +794,12 @@ func TestGenerate_WebSearchResponse(t *testing.T) {
 	model, err := provider.LanguageModel(context.Background(), "claude-sonnet-4-20250514")
 	require.NoError(t, err)
 
-		resp, err := model.Generate(context.Background(), fantasy.Call{
-			Prompt: testPrompt(),
-			Tools: []fantasy.Tool{
-				WebSearchTool(nil),
-			},	})
+	resp, err := model.Generate(context.Background(), fantasy.Call{
+		Prompt: testPrompt(),
+		Tools: []fantasy.Tool{
+			WebSearchTool(nil),
+		},
+	})
 	require.NoError(t, err)
 
 	call := awaitAnthropicCall(t, calls)
@@ -1264,11 +1265,12 @@ func TestStream_WebSearchResponse(t *testing.T) {
 	model, err := provider.LanguageModel(context.Background(), "claude-sonnet-4-20250514")
 	require.NoError(t, err)
 
-		stream, err := model.Stream(context.Background(), fantasy.Call{
-			Prompt: testPrompt(),
-			Tools: []fantasy.Tool{
-				WebSearchTool(nil),
-			},	})
+	stream, err := model.Stream(context.Background(), fantasy.Call{
+		Prompt: testPrompt(),
+		Tools: []fantasy.Tool{
+			WebSearchTool(nil),
+		},
+	})
 	require.NoError(t, err)
 
 	var parts []fantasy.StreamPart

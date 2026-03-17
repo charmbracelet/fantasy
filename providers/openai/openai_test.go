@@ -3805,4 +3805,3 @@ func TestResponsesStream_WebSearchResponse(t *testing.T) {
 	require.NotEmpty(t, textDeltas, "should have text deltas")
 	require.Equal(t, "Here are the results.", textDeltas[0].Delta)
 }
-

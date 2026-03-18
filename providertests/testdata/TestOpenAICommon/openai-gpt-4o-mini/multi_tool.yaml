@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/chat/completions
     method: POST
   response:
@@ -26,9 +26,9 @@ interactions:
     uncompressed: true
     body: |
       {
-        "id": "chatcmpl-CRdyxdsCExOS7bMCJ0q5fBEN9lCYM",
+        "id": "chatcmpl-DIgOpyNV7XwvLi4hv5AIERgkhr9r2",
         "object": "chat.completion",
-        "created": 1760704583,
+        "created": 1773345259,
         "model": "gpt-4o-mini-2024-07-18",
         "choices": [
           {
@@ -38,7 +38,7 @@ interactions:
               "content": null,
               "tool_calls": [
                 {
-                  "id": "call_H0yMeWt85QiaFMjrlPqAyCYY",
+                  "id": "call_EnBRBmuabMwppICaGr0KqkBZ",
                   "type": "function",
                   "function": {
                     "name": "add",
@@ -46,7 +46,7 @@ interactions:
                   }
                 },
                 {
-                  "id": "call_Xh3xOMoQueLZUgW7HYVvwwql",
+                  "id": "call_I5Wnsq0pwgt98vEg7f63nTZI",
                   "type": "function",
                   "function": {
                     "name": "multiply",
@@ -77,14 +77,14 @@ interactions:
           }
         },
         "service_tier": "default",
-        "system_fingerprint": "fp_560af6e559"
+        "system_fingerprint": "fp_a1681c17ec"
       }
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 2.030219167s
+    duration: 1.068009292s
 - id: 1
   request:
     proto: HTTP/1.1
@@ -92,14 +92,14 @@ interactions:
     proto_minor: 1
     content_length: 1247
     host: ""
-    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"tool_calls":[{"id":"call_H0yMeWt85QiaFMjrlPqAyCYY","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"add"},"type":"function"},{"id":"call_Xh3xOMoQueLZUgW7HYVvwwql","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"call_H0yMeWt85QiaFMjrlPqAyCYY","role":"tool"},{"content":"6","tool_call_id":"call_Xh3xOMoQueLZUgW7HYVvwwql","role":"tool"}],"model":"gpt-4o-mini","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"tool_calls":[{"id":"call_EnBRBmuabMwppICaGr0KqkBZ","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"add"},"type":"function"},{"id":"call_I5Wnsq0pwgt98vEg7f63nTZI","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"call_EnBRBmuabMwppICaGr0KqkBZ","role":"tool"},{"content":"6","tool_call_id":"call_I5Wnsq0pwgt98vEg7f63nTZI","role":"tool"}],"model":"gpt-4o-mini","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
     headers:
       Accept:
       - application/json
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/chat/completions
     method: POST
   response:
@@ -110,9 +110,9 @@ interactions:
     uncompressed: true
     body: |
       {
-        "id": "chatcmpl-CRdyzVF8CB8APitB5WP6J9QSdWilT",
+        "id": "chatcmpl-DIgOqNuKd78j1HHOtDjbirEaWUqtl",
         "object": "chat.completion",
-        "created": 1760704585,
+        "created": 1773345260,
         "model": "gpt-4o-mini-2024-07-18",
         "choices": [
           {
@@ -143,11 +143,11 @@ interactions:
           }
         },
         "service_tier": "default",
-        "system_fingerprint": "fp_560af6e559"
+        "system_fingerprint": "fp_a1681c17ec"
       }
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 987.804708ms
+    duration: 919.718333ms

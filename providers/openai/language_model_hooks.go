@@ -6,9 +6,9 @@ import (
 	"strings"
 
 	"charm.land/fantasy"
-	"github.com/openai/openai-go/v2"
-	"github.com/openai/openai-go/v2/packages/param"
-	"github.com/openai/openai-go/v2/shared"
+	"github.com/openai/openai-go/v3"
+	"github.com/openai/openai-go/v3/packages/param"
+	"github.com/openai/openai-go/v3/shared"
 )
 
 // LanguageModelPrepareCallFunc is a function that prepares the call for the language model.

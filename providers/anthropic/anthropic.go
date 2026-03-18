@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"maps"
+	"math"
 	"strings"
 
 	"charm.land/fantasy"
@@ -407,6 +408,119 @@ func groupIntoBlocks(prompt fantasy.Prompt) []*messageBlock {
 	return blocks
 }
 
+func anyToStringSlice(v any) []string {
+	switch typed := v.(type) {
+	case []string:
+		if len(typed) == 0 {
+			return nil
+		}
+		out := make([]string, len(typed))
+		copy(out, typed)
+		return out
+	case []any:
+		if len(typed) == 0 {
+			return nil
+		}
+		out := make([]string, 0, len(typed))
+		for _, item := range typed {
+			s, ok := item.(string)
+			if !ok || s == "" {
+				continue
+			}
+			out = append(out, s)
+		}
+		if len(out) == 0 {
+			return nil
+		}
+		return out
+	default:
+		return nil
+	}
+}
+
+const maxExactIntFloat64 = float64(1<<53 - 1)
+
+func anyToInt64(v any) (int64, bool) {
+	switch typed := v.(type) {
+	case int:
+		return int64(typed), true
+	case int8:
+		return int64(typed), true
+	case int16:
+		return int64(typed), true
+	case int32:
+		return int64(typed), true
+	case int64:
+		return typed, true
+	case uint:
+		u64 := uint64(typed)
+		if u64 > math.MaxInt64 {
+			return 0, false
+		}
+		return int64(u64), true
+	case uint8:
+		return int64(typed), true
+	case uint16:
+		return int64(typed), true
+	case uint32:
+		return int64(typed), true
+	case uint64:
+		if typed > math.MaxInt64 {
+			return 0, false
+		}
+		return int64(typed), true
+	case float32:
+		f := float64(typed)
+		if math.Trunc(f) != f || math.IsNaN(f) || math.IsInf(f, 0) || f < -maxExactIntFloat64 || f > maxExactIntFloat64 {
+			return 0, false
+		}
+		return int64(f), true
+	case float64:
+		if math.Trunc(typed) != typed || math.IsNaN(typed) || math.IsInf(typed, 0) || typed < -maxExactIntFloat64 || typed > maxExactIntFloat64 {
+			return 0, false
+		}
+		return int64(typed), true
+	case json.Number:
+		parsed, err := typed.Int64()
+		if err != nil {
+			return 0, false
+		}
+		return parsed, true
+	default:
+		return 0, false
+	}
+}
+
+func anyToUserLocation(v any) *UserLocation {
+	switch typed := v.(type) {
+	case *UserLocation:
+		return typed
+	case UserLocation:
+		loc := typed
+		return &loc
+	case map[string]any:
+		loc := &UserLocation{}
+		if city, ok := typed["city"].(string); ok {
+			loc.City = city
+		}
+		if region, ok := typed["region"].(string); ok {
+			loc.Region = region
+		}
+		if country, ok := typed["country"].(string); ok {
+			loc.Country = country
+		}
+		if timezone, ok := typed["timezone"].(string); ok {
+			loc.Timezone = timezone
+		}
+		if loc.City == "" && loc.Region == "" && loc.Country == "" && loc.Timezone == "" {
+			return nil
+		}
+		return loc
+	default:
+		return nil
+	}
+}
+
 func (a languageModel) toTools(tools []fantasy.Tool, toolChoice *fantasy.ToolChoice, disableParallelToolCalls bool) (anthropicTools []anthropic.ToolUnionParam, anthropicToolChoice *anthropic.ToolChoiceUnionParam, warnings []fantasy.CallWarning) {
 	for _, tool := range tools {
 		if tool.GetType() == fantasy.ToolTypeFunction {
@@ -440,7 +554,47 @@ func (a languageModel) toTools(tools []fantasy.Tool, toolChoice *fantasy.ToolCho
 			anthropicTools = append(anthropicTools, anthropic.ToolUnionParam{OfTool: &anthropicTool})
 			continue
 		}
-		// TODO: handle provider tool calls
+		if tool.GetType() == fantasy.ToolTypeProviderDefined {
+			pt, ok := tool.(fantasy.ProviderDefinedTool)
+			if !ok {
+				continue
+			}
+			switch pt.ID {
+			case "web_search":
+				webSearchTool := anthropic.WebSearchTool20250305Param{}
+				if pt.Args != nil {
+					if domains := anyToStringSlice(pt.Args["allowed_domains"]); len(domains) > 0 {
+						webSearchTool.AllowedDomains = domains
+					}
+					if domains := anyToStringSlice(pt.Args["blocked_domains"]); len(domains) > 0 {
+						webSearchTool.BlockedDomains = domains
+					}
+					if maxUses, ok := anyToInt64(pt.Args["max_uses"]); ok && maxUses > 0 {
+						webSearchTool.MaxUses = param.NewOpt(maxUses)
+					}
+					if loc := anyToUserLocation(pt.Args["user_location"]); loc != nil {
+						var ulp anthropic.UserLocationParam
+						if loc.City != "" {
+							ulp.City = param.NewOpt(loc.City)
+						}
+						if loc.Region != "" {
+							ulp.Region = param.NewOpt(loc.Region)
+						}
+						if loc.Country != "" {
+							ulp.Country = param.NewOpt(loc.Country)
+						}
+						if loc.Timezone != "" {
+							ulp.Timezone = param.NewOpt(loc.Timezone)
+						}
+						webSearchTool.UserLocation = ulp
+					}
+				}
+				anthropicTools = append(anthropicTools, anthropic.ToolUnionParam{
+					OfWebSearchTool20250305: &webSearchTool,
+				})
+				continue
+			}
+		}
 		warnings = append(warnings, fantasy.CallWarning{
 			Type:    fantasy.CallWarningTypeUnsupportedTool,
 			Tool:    tool,
@@ -557,6 +711,10 @@ func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBl
 							anthropicContent = append(anthropicContent, anthropic.ContentBlockParamUnion{
 								OfText: textBlock,
 							})
+						case fantasy.ContentTypeSource:
+							// Source content from web search results is not a
+							// recognized Anthropic content block type; skip it.
+							continue
 						case fantasy.ContentTypeFile:
 							file, ok := fantasy.AsMessagePart[fantasy.FilePart](part)
 							if !ok {
@@ -713,10 +871,22 @@ func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBl
 							continue
 						}
 						if toolCall.ProviderExecuted {
-							// TODO: implement provider executed call
+							// Reconstruct server_tool_use block for
+							// multi-turn round-tripping.
+							var inputAny any
+							err := json.Unmarshal([]byte(toolCall.Input), &inputAny)
+							if err != nil {
+								continue
+							}
+							anthropicContent = append(anthropicContent, anthropic.ContentBlockParamUnion{
+								OfServerToolUse: &anthropic.ServerToolUseBlockParam{
+									ID:    toolCall.ToolCallID,
+									Name:  anthropic.ServerToolUseBlockParamName(toolCall.ToolName),
+									Input: inputAny,
+								},
+							})
 							continue
 						}
-
 						var inputMap map[string]any
 						err := json.Unmarshal([]byte(toolCall.Input), &inputMap)
 						if err != nil {
@@ -728,11 +898,28 @@ func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBl
 						}
 						anthropicContent = append(anthropicContent, toolUseBlock)
 					case fantasy.ContentTypeToolResult:
-						// TODO: implement provider executed tool result
+						result, ok := fantasy.AsMessagePart[fantasy.ToolResultPart](part)
+						if !ok {
+							continue
+						}
+						if result.ProviderExecuted {
+							// Reconstruct web_search_tool_result block
+							// with encrypted_content for round-tripping.
+							searchMeta := &WebSearchResultMetadata{}
+							if webMeta, ok := result.ProviderOptions[Name]; ok {
+								if typed, ok := webMeta.(*WebSearchResultMetadata); ok {
+									searchMeta = typed
+								}
+							}
+							anthropicContent = append(anthropicContent, buildWebSearchToolResultBlock(result.ToolCallID, searchMeta))
+							continue
+						}
+					case fantasy.ContentTypeSource: // Source content from web search results is not a
+						// recognized Anthropic content block type; skip it.
+						continue
 					}
 				}
 			}
-
 			if !hasVisibleAssistantContent(anthropicContent) {
 				warnings = append(warnings, fantasy.CallWarning{
 					Type:    fantasy.CallWarningTypeOther,
@@ -757,11 +944,36 @@ func hasVisibleUserContent(content []anthropic.ContentBlockParamUnion) bool {
 
 func hasVisibleAssistantContent(content []anthropic.ContentBlockParamUnion) bool {
 	for _, block := range content {
-		if block.OfText != nil || block.OfToolUse != nil {
+		if block.OfText != nil || block.OfToolUse != nil || block.OfServerToolUse != nil || block.OfWebSearchToolResult != nil {
 			return true
 		}
 	}
 	return false
+}
+
+// buildWebSearchToolResultBlock constructs an Anthropic
+// web_search_tool_result content block from structured metadata.
+func buildWebSearchToolResultBlock(toolCallID string, searchMeta *WebSearchResultMetadata) anthropic.ContentBlockParamUnion {
+	resultBlocks := make([]anthropic.WebSearchResultBlockParam, 0, len(searchMeta.Results))
+	for _, r := range searchMeta.Results {
+		block := anthropic.WebSearchResultBlockParam{
+			URL:              r.URL,
+			Title:            r.Title,
+			EncryptedContent: r.EncryptedContent,
+		}
+		if r.PageAge != "" {
+			block.PageAge = param.NewOpt(r.PageAge)
+		}
+		resultBlocks = append(resultBlocks, block)
+	}
+	return anthropic.ContentBlockParamUnion{
+		OfWebSearchToolResult: &anthropic.WebSearchToolResultBlockParam{
+			ToolUseID: toolCallID,
+			Content: anthropic.WebSearchToolResultBlockParamContentUnion{
+				OfWebSearchToolResultBlockItem: resultBlocks,
+			},
+		},
+	}
 }
 
 func mapFinishReason(finishReason string) fantasy.FinishReason {
@@ -836,6 +1048,56 @@ func (a languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantas
 				Input:            string(toolUse.Input),
 				ProviderExecuted: false,
 			})
+		case "server_tool_use":
+			serverToolUse, ok := block.AsAny().(anthropic.ServerToolUseBlock)
+			if !ok {
+				continue
+			}
+			var inputStr string
+			if b, err := json.Marshal(serverToolUse.Input); err == nil {
+				inputStr = string(b)
+			}
+			content = append(content, fantasy.ToolCallContent{
+				ToolCallID:       serverToolUse.ID,
+				ToolName:         string(serverToolUse.Name),
+				Input:            inputStr,
+				ProviderExecuted: true,
+			})
+		case "web_search_tool_result":
+			webSearchResult, ok := block.AsAny().(anthropic.WebSearchToolResultBlock)
+			if !ok {
+				continue
+			}
+			// Extract search results as sources/citations, preserving
+			// encrypted_content for multi-turn round-tripping.
+			toolResult := fantasy.ToolResultContent{
+				ToolCallID:       webSearchResult.ToolUseID,
+				ToolName:         "web_search",
+				ProviderExecuted: true,
+			}
+			if items := webSearchResult.Content.OfWebSearchResultBlockArray; len(items) > 0 {
+				var metadataResults []WebSearchResultItem
+				for _, item := range items {
+					content = append(content, fantasy.SourceContent{
+						SourceType: fantasy.SourceTypeURL,
+						ID:         item.URL,
+						URL:        item.URL,
+						Title:      item.Title,
+					})
+					metadataResults = append(metadataResults, WebSearchResultItem{
+						URL:              item.URL,
+						Title:            item.Title,
+						EncryptedContent: item.EncryptedContent,
+						PageAge:          item.PageAge,
+					})
+				}
+				toolResult.ProviderMetadata = fantasy.ProviderMetadata{
+					Name: &WebSearchResultMetadata{
+						Results: metadataResults,
+					},
+				}
+			}
+			content = append(content, toolResult)
 		}
 	}
 
@@ -915,6 +1177,16 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 					}) {
 						return
 					}
+				case "server_tool_use":
+					if !yield(fantasy.StreamPart{
+						Type:             fantasy.StreamPartTypeToolInputStart,
+						ID:               chunk.ContentBlock.ID,
+						ToolCallName:     chunk.ContentBlock.Name,
+						ToolCallInput:    "",
+						ProviderExecuted: true,
+					}) {
+						return
+					}
 				}
 			case "content_block_stop":
 				if len(acc.Content)-1 < int(chunk.Index) {
@@ -948,6 +1220,67 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 						ID:            contentBlock.ID,
 						ToolCallName:  contentBlock.Name,
 						ToolCallInput: string(contentBlock.Input),
+					}) {
+						return
+					}
+				case "server_tool_use":
+					if !yield(fantasy.StreamPart{
+						Type:             fantasy.StreamPartTypeToolInputEnd,
+						ID:               contentBlock.ID,
+						ProviderExecuted: true,
+					}) {
+						return
+					}
+					if !yield(fantasy.StreamPart{
+						Type:             fantasy.StreamPartTypeToolCall,
+						ID:               contentBlock.ID,
+						ToolCallName:     contentBlock.Name,
+						ToolCallInput:    string(contentBlock.Input),
+						ProviderExecuted: true,
+					}) {
+						return
+					}
+				case "web_search_tool_result":
+					// Read search results directly from the ContentBlockUnion
+					// struct fields instead of using AsAny(). The Anthropic SDK's
+					// Accumulate re-marshals the content block at content_block_stop,
+					// which corrupts JSON.raw for inline union types like
+					// WebSearchToolResultBlockContentUnion. The struct fields
+					// themselves remain correctly populated from content_block_start.
+					var metadataResults []WebSearchResultItem
+					var providerMeta fantasy.ProviderMetadata
+					if items := contentBlock.Content.OfWebSearchResultBlockArray; len(items) > 0 {
+						for _, item := range items {
+							if !yield(fantasy.StreamPart{
+								Type:       fantasy.StreamPartTypeSource,
+								ID:         item.URL,
+								SourceType: fantasy.SourceTypeURL,
+								URL:        item.URL,
+								Title:      item.Title,
+							}) {
+								return
+							}
+							metadataResults = append(metadataResults, WebSearchResultItem{
+								URL:              item.URL,
+								Title:            item.Title,
+								EncryptedContent: item.EncryptedContent,
+								PageAge:          item.PageAge,
+							})
+						}
+					}
+					if len(metadataResults) > 0 {
+						providerMeta = fantasy.ProviderMetadata{
+							Name: &WebSearchResultMetadata{
+								Results: metadataResults,
+							},
+						}
+					}
+					if !yield(fantasy.StreamPart{
+						Type:             fantasy.StreamPartTypeToolResult,
+						ID:               contentBlock.ToolUseID,
+						ToolCallName:     "web_search",
+						ProviderExecuted: true,
+						ProviderMetadata: providerMeta,
 					}) {
 						return
 					}

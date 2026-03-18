@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - Anthropic/Go 1.14.0
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.anthropic.com/v1/messages
     method: POST
   response:
@@ -23,130 +23,107 @@ interactions:
     proto_major: 2
     proto_minor: 0
     content_length: -1
+    uncompressed: true
     body: |+
       event: message_start
-      data: {"type":"message_start","message":{"model":"claude-sonnet-4-20250514","id":"msg_01USjYftFnxQLCtwU6p9mdju","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":549,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":16,"service_tier":"standard"}}         }
+      data: {"type":"message_start","message":{"model":"claude-sonnet-4-20250514","id":"msg_01J5VmN4LDdd6TGVDcbGze1P","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":549,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":16,"service_tier":"standard","inference_geo":"not_available"}}               }
 
       event: content_block_start
-      data: {"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_01GSfr2xJn2q4zqG46GXNdxt","name":"Book","input":{}}            }
-
-      event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":""} }
+      data: {"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_01Jf3uH5RmmFHbJjKVyuoP3p","name":"Book","input":{},"caller":{"type":"direct"}}    }
 
       event: ping
       data: {"type": "ping"}
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"{\"ti"}        }
-
-      event: ping
-      data: {"type": "ping"}
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":""}}
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"tle\": \"T"}      }
-
-      event: ping
-      data: {"type": "ping"}
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"{\"title\""}   }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"he Lord"}              }
-
-      event: ping
-      data: {"type": "ping"}
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":": \"T"}  }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":" of t"}  }
-
-      event: ping
-      data: {"type": "ping"}
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"he Lor"}            }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"he Ring"}       }
-
-      event: ping
-      data: {"type": "ping"}
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"d of th"}           }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"s\""}           }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"e Rings\""}  }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":", \"author\""}         }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":", \"a"}           }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":": {\"nam"}  }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"uthor\""}      }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"e\""}      }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":": {\"na"}}
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":":\""} }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"me\":\""}        }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"J.R.R. To"}              }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"J.R.R. Tol"}   }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"lkien\",\"na"}            }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"kien\",\"n"}    }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"tionality\":\""}        }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"ationalit"}          }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"Bri"}          }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"y\":\"B"} }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"tish\"}"}  }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"ritish\"}"}          }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":", \"g"}     }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":", \"genres\": "}             }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"enre"}        }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"[\"Fa"}              }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"s\": [\"Fanta"}              }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"ntasy\","}          }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"sy\",\"Adventu"}              }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"\"Adventure\","}               }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"re\",\"Epic Fa"}         }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"\"Epic "}    }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"nta"}        }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"Fantasy\","}              }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"sy\",\"High "}      }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"\"Hig"}        }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"Fantasy\"]"}               }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"h Fantasy\"]"}           }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":", \"pub"}     }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":", \"publishe"}           }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"lished_"}        }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"d_ye"}         }
 
       event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"yea"}           }
-
-      event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"r\":"}        }
-
-      event: content_block_delta
-      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":" 1954}"}         }
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"ar\": 1954}"} }
 
       event: content_block_stop
-      data: {"type":"content_block_stop","index":0}
+      data: {"type":"content_block_stop","index":0   }
 
       event: message_delta
-      data: {"type":"message_delta","delta":{"stop_reason":"tool_use","stop_sequence":null},"usage":{"input_tokens":549,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":124}           }
+      data: {"type":"message_delta","delta":{"stop_reason":"tool_use","stop_sequence":null},"usage":{"input_tokens":549,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":124}    }
 
       event: message_stop
-      data: {"type":"message_stop"          }
+      data: {"type":"message_stop"  }
 
     headers:
       Content-Type:
       - text/event-stream; charset=utf-8
     status: 200 OK
     code: 200
-    duration: 1.980122625s
+    duration: 3.585529375s

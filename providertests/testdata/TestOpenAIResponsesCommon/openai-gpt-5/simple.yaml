@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/responses
     method: POST
   response:
@@ -26,15 +26,17 @@ interactions:
     uncompressed: true
     body: |-
       {
-        "id": "resp_0b81ac5fdc5483560168f237f54ccc81968efa75aba7162889",
+        "id": "resp_02024dfc5f4dacc80169b319301db4819587c30653126df754",
         "object": "response",
-        "created_at": 1760704501,
+        "created_at": 1773345072,
         "status": "completed",
         "background": false,
         "billing": {
           "payer": "developer"
         },
+        "completed_at": 1773345074,
         "error": null,
+        "frequency_penalty": 0.0,
         "incomplete_details": null,
         "instructions": null,
         "max_output_tokens": 4000,
@@ -42,12 +44,12 @@ interactions:
         "model": "gpt-5-2025-08-07",
         "output": [
           {
-            "id": "rs_0b81ac5fdc5483560168f237f6618881968521aadd267daa6a",
+            "id": "rs_02024dfc5f4dacc80169b319307bc4819588310448b323625a",
             "type": "reasoning",
             "summary": []
           },
           {
-            "id": "msg_0b81ac5fdc5483560168f237f84b6c81968619287b3bf9dee9",
+            "id": "msg_02024dfc5f4dacc80169b319326820819584d998f22e95c207",
             "type": "message",
             "status": "completed",
             "content": [
@@ -55,15 +57,17 @@ interactions:
                 "type": "output_text",
                 "annotations": [],
                 "logprobs": [],
-                "text": "Oi!"
+                "text": "Ol\u00e1!"
               }
             ],
             "role": "assistant"
           }
         ],
         "parallel_tool_calls": true,
+        "presence_penalty": 0.0,
         "previous_response_id": null,
         "prompt_cache_key": null,
+        "prompt_cache_retention": null,
         "reasoning": {
           "effort": "medium",
           "summary": null
@@ -88,11 +92,11 @@ interactions:
           "input_tokens_details": {
             "cached_tokens": 0
           },
-          "output_tokens": 136,
+          "output_tokens": 116,
           "output_tokens_details": {
-            "reasoning_tokens": 128
+            "reasoning_tokens": 64
           },
-          "total_tokens": 155
+          "total_tokens": 135
         },
         "user": null,
         "metadata": {}
@@ -102,4 +106,4 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 3.478110792s
+    duration: 2.786829208s

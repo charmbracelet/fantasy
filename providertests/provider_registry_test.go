@@ -390,7 +390,9 @@ func TestProviderRegistry_AllTypesRegistered(t *testing.T) {
 		data         fantasy.ProviderOptionsData
 	}{
 		{"OpenAI Responses Reasoning Metadata", openai.Name, &openai.ResponsesReasoningMetadata{}},
+		{"OpenAI Web Search Call Metadata", openai.Name, &openai.WebSearchCallMetadata{}},
 		{"Anthropic Reasoning Metadata", anthropic.Name, &anthropic.ReasoningOptionMetadata{}},
+		{"Anthropic Web Search Result Metadata", anthropic.Name, &anthropic.WebSearchResultMetadata{}},
 		{"Google Reasoning Metadata", google.Name, &google.ReasoningMetadata{}},
 		{"OpenRouter Metadata", openrouter.Name, &openrouter.ProviderMetadata{}},
 	}

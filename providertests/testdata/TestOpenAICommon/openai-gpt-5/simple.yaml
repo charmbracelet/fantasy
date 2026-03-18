@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/chat/completions
     method: POST
   response:
@@ -26,9 +26,9 @@ interactions:
     uncompressed: true
     body: |
       {
-        "id": "chatcmpl-CRdz3IlGIW2lfJ0VP6n8tkysshWP6",
+        "id": "chatcmpl-DIgOvtAUIXW4npz54Y1WBQrdmydWl",
         "object": "chat.completion",
-        "created": 1760704589,
+        "created": 1773345265,
         "model": "gpt-5-2025-08-07",
         "choices": [
           {
@@ -44,14 +44,14 @@ interactions:
         ],
         "usage": {
           "prompt_tokens": 19,
-          "completion_tokens": 203,
-          "total_tokens": 222,
+          "completion_tokens": 75,
+          "total_tokens": 94,
           "prompt_tokens_details": {
             "cached_tokens": 0,
             "audio_tokens": 0
           },
           "completion_tokens_details": {
-            "reasoning_tokens": 192,
+            "reasoning_tokens": 64,
             "audio_tokens": 0,
             "accepted_prediction_tokens": 0,
             "rejected_prediction_tokens": 0
@@ -65,4 +65,4 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 5.250838625s
+    duration: 3.497726291s

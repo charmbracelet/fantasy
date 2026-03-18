@@ -13,8 +13,6 @@ Build AI agents with Go. Multi-provider, multi-model, one API.
 2. Add some tools
 3. Compile to native machine code and let it rip
 
-> [!NOTE]
-> Fantasy is currently a preview. Expect API changes.
 
 ```go
 import "charm.land/fantasy"
@@ -73,7 +71,6 @@ We built Fantasy to power [Crush](https://github.com/charmbracelet/crush), a hot
 - Image models
 - Audio models
 - PDF uploads
-- Provider tools (e.g. web_search)
 
 For things you’d like to see supported, PRs are welcome.
 

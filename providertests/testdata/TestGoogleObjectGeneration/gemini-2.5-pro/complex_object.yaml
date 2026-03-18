@@ -14,7 +14,8 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.34.0 gl-go/go1.25.4
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+      - google-genai-sdk/1.49.0 gl-go/go1.26.1
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent
     method: POST
   response:
@@ -30,7 +31,7 @@ interactions:
             "content": {
               "parts": [
                 {
-                  "text": "{\n  \"author\": {\n    \"name\": \"J.R.R. Tolkien\",\n    \"nationality\": \"British\"\n  },\n  \"genres\": [\n    \"Fantasy\",\n    \"Adventure\",\n    \"High fantasy\"\n  ],\n  \"published_year\": 1954,\n  \"title\": \"The Lord of the Rings\"\n}"
+                  "text": "{\n  \"author\": {\n    \"name\": \"J.R.R. Tolkien\",\n    \"nationality\": \"British\"\n  },\n  \"genres\": [\n    \"Fantasy\",\n    \"Adventure\"\n  ],\n  \"published_year\": 1954,\n  \"title\": \"The Lord of the Rings\"\n}"
                 }
               ],
               "role": "model"
@@ -41,22 +42,22 @@ interactions:
         ],
         "usageMetadata": {
           "promptTokenCount": 38,
-          "candidatesTokenCount": 84,
-          "totalTokenCount": 195,
+          "candidatesTokenCount": 78,
+          "totalTokenCount": 401,
           "promptTokensDetails": [
             {
               "modality": "TEXT",
               "tokenCount": 38
             }
           ],
-          "thoughtsTokenCount": 73
+          "thoughtsTokenCount": 285
         },
         "modelVersion": "gemini-2.5-pro",
-        "responseId": "0qIdaciCFffPvdIPp-ycyAk"
+        "responseId": "AAGzafvVCvHgz7IPsciD8AI"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 2.813791334s
+    duration: 3.976851875s

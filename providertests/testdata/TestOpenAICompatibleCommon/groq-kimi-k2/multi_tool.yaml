@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.7.1
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.groq.com/openai/v1/chat/completions
     method: POST
   response:
@@ -25,28 +25,28 @@ interactions:
     content_length: -1
     uncompressed: true
     body: |
-      {"id":"chatcmpl-f99f9572-5553-418a-a974-3ce7763f287d","object":"chat.completion","created":1762854975,"model":"moonshotai/kimi-k2-instruct-0905","choices":[{"index":0,"message":{"role":"assistant","content":"I'll add and multiply the numbers 2 and 3 for you.","tool_calls":[{"id":"functions.add:0","type":"function","function":{"name":"add","arguments":"{\"a\":2,\"b\":3}"}},{"id":"functions.multiply:1","type":"function","function":{"name":"multiply","arguments":"{\"a\":2,\"b\":3}"}}]},"logprobs":null,"finish_reason":"tool_calls"}],"usage":{"queue_time":0.16105511,"prompt_tokens":205,"prompt_time":0.021381762,"completion_tokens":55,"completion_time":0.177128832,"total_tokens":260,"total_time":0.198510594},"usage_breakdown":null,"system_fingerprint":"fp_5fe129dff6","x_groq":{"id":"req_01k9s5gdn9fqpaz58zxaarqt7b"},"service_tier":"on_demand"}
+      {"id":"chatcmpl-062b781b-b680-460e-b8c9-ec1d8fce6df9","object":"chat.completion","created":1773345614,"model":"moonshotai/kimi-k2-instruct-0905","choices":[{"index":0,"message":{"role":"assistant","content":"I'll add and multiply 2 and 3 for you.","tool_calls":[{"id":"functions.add:0","type":"function","function":{"name":"add","arguments":"{\"a\":2,\"b\":3}"}},{"id":"functions.multiply:1","type":"function","function":{"name":"multiply","arguments":"{\"a\":2,\"b\":3}"}}]},"logprobs":null,"finish_reason":"tool_calls"}],"usage":{"queue_time":0.199896963,"prompt_tokens":205,"prompt_time":0.042576435,"completion_tokens":53,"completion_time":0.149338403,"total_tokens":258,"total_time":0.191914838},"usage_breakdown":null,"system_fingerprint":"fp_05df423bab","x_groq":{"id":"req_01kkht5a6nfzxtkc3tsg6bsh65","seed":491682413},"service_tier":"on_demand"}
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 410.276791ms
+    duration: 525.948084ms
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 1279
+    content_length: 1267
     host: ""
-    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"content":"I''ll add and multiply the numbers 2 and 3 for you.","tool_calls":[{"id":"functions.add:0","function":{"arguments":"{\"a\":2,\"b\":3}","name":"add"},"type":"function"},{"id":"functions.multiply:1","function":{"arguments":"{\"a\":2,\"b\":3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"functions.add:0","role":"tool"},{"content":"6","tool_call_id":"functions.multiply:1","role":"tool"}],"model":"moonshotai/kimi-k2-instruct-0905","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"content":"I''ll add and multiply 2 and 3 for you.","tool_calls":[{"id":"functions.add:0","function":{"arguments":"{\"a\":2,\"b\":3}","name":"add"},"type":"function"},{"id":"functions.multiply:1","function":{"arguments":"{\"a\":2,\"b\":3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"functions.add:0","role":"tool"},{"content":"6","tool_call_id":"functions.multiply:1","role":"tool"}],"model":"moonshotai/kimi-k2-instruct-0905","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
     headers:
       Accept:
       - application/json
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.7.1
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.groq.com/openai/v1/chat/completions
     method: POST
   response:
@@ -56,10 +56,10 @@ interactions:
     content_length: -1
     uncompressed: true
     body: |
-      {"id":"chatcmpl-21bda724-6180-4357-943e-a555622dd5b9","object":"chat.completion","created":1762854975,"model":"moonshotai/kimi-k2-instruct-0905","choices":[{"index":0,"message":{"role":"assistant","content":"The results are:\n- Addition: 2 + 3 = 5\n- Multiplication: 2 × 3 = 6"},"logprobs":null,"finish_reason":"stop"}],"usage":{"queue_time":0.162310812,"prompt_tokens":297,"prompt_time":0.029482976,"completion_tokens":29,"completion_time":0.06281568,"total_tokens":326,"total_time":0.092298656},"usage_breakdown":null,"system_fingerprint":"fp_3312304636","x_groq":{"id":"req_01k9s5ge24ehwsanxan8an35he"},"service_tier":"on_demand"}
+      {"id":"chatcmpl-30fc98d9-2d82-4085-b639-2709664bc6c3","object":"chat.completion","created":1773345614,"model":"moonshotai/kimi-k2-instruct-0905","choices":[{"index":0,"message":{"role":"assistant","content":"Here are the results:\n- Addition: 2 + 3 = **5**\n- Multiplication: 2 × 3 = **6**"},"logprobs":null,"finish_reason":"stop"}],"usage":{"queue_time":0.192768557,"prompt_tokens":295,"prompt_time":0.094786521,"completion_tokens":31,"completion_time":0.074686642,"total_tokens":326,"total_time":0.169473163},"usage_breakdown":null,"system_fingerprint":"fp_241bc7119c","x_groq":{"id":"req_01kkht5aq5fzxr9z5y8yrcpmy4","seed":1916015797},"service_tier":"on_demand"}
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 305.567541ms
+    duration: 407.653083ms

@@ -252,9 +252,10 @@ func (t ToolCallPart) Options() ProviderOptions {
 
 // ToolResultPart represents a tool result in a message.
 type ToolResultPart struct {
-	ToolCallID      string                  `json:"tool_call_id"`
-	Output          ToolResultOutputContent `json:"output"`
-	ProviderOptions ProviderOptions         `json:"provider_options"`
+	ToolCallID       string                  `json:"tool_call_id"`
+	Output           ToolResultOutputContent `json:"output"`
+	ProviderExecuted bool                    `json:"provider_executed"`
+	ProviderOptions  ProviderOptions         `json:"provider_options"`
 }
 
 // GetType returns the type of the tool result part.

@@ -3593,6 +3593,156 @@ func TestResponsesGenerate_WebSearchResponse(t *testing.T) {
 	)
 }
 
+func TestResponsesGenerate_StoreOption(t *testing.T) {
+	t.Parallel()
+
+	server := newMockServer()
+	defer server.close()
+	server.response = mockResponsesWebSearchResponse()
+
+	model := newResponsesProvider(t, server.server.URL)
+
+	_, err := model.Generate(context.Background(), fantasy.Call{
+		Prompt: testPrompt,
+		ProviderOptions: fantasy.ProviderOptions{
+			Name: &ResponsesProviderOptions{
+				Store: fantasy.Opt(true),
+			},
+		},
+	})
+	require.NoError(t, err)
+
+	require.Equal(t, "POST", server.calls[0].method)
+	require.Equal(t, "/responses", server.calls[0].path)
+	require.Equal(t, true, server.calls[0].body["store"])
+}
+
+func TestResponsesGenerate_PreviousResponseIDOption(t *testing.T) {
+	t.Parallel()
+
+	server := newMockServer()
+	defer server.close()
+	server.response = mockResponsesWebSearchResponse()
+
+	model := newResponsesProvider(t, server.server.URL)
+
+	_, err := model.Generate(context.Background(), fantasy.Call{
+		Prompt: testPrompt,
+		ProviderOptions: fantasy.ProviderOptions{
+			Name: &ResponsesProviderOptions{
+				PreviousResponseID: fantasy.Opt("resp_prev_123"),
+				Store:              fantasy.Opt(true),
+			},
+		},
+	})
+	require.NoError(t, err)
+
+	require.Equal(t, "POST", server.calls[0].method)
+	require.Equal(t, "/responses", server.calls[0].path)
+	require.Equal(t, "resp_prev_123", server.calls[0].body["previous_response_id"])
+}
+
+func TestResponsesGenerate_StateChainingAcrossTurns(t *testing.T) {
+	t.Parallel()
+
+	server := newMockServer()
+	defer server.close()
+	server.response = map[string]any{
+		"id":     "resp_turn_1",
+		"object": "response",
+		"model":  "gpt-4.1",
+		"output": []any{
+			map[string]any{
+				"type":   "message",
+				"id":     "msg_1",
+				"role":   "assistant",
+				"status": "completed",
+				"content": []any{
+					map[string]any{
+						"type": "output_text",
+						"text": "First turn",
+					},
+				},
+			},
+		},
+		"status": "completed",
+		"usage": map[string]any{
+			"input_tokens":  10,
+			"output_tokens": 5,
+			"total_tokens":  15,
+		},
+	}
+
+	model := newResponsesProvider(t, server.server.URL)
+
+	first, err := model.Generate(context.Background(), fantasy.Call{
+		Prompt: testPrompt,
+		ProviderOptions: fantasy.ProviderOptions{
+			Name: &ResponsesProviderOptions{Store: fantasy.Opt(true)},
+		},
+	})
+	require.NoError(t, err)
+
+	meta, ok := first.ProviderMetadata[Name].(*ResponsesProviderMetadata)
+	require.True(t, ok)
+	require.Equal(t, "resp_turn_1", meta.ResponseID)
+
+	server.response = map[string]any{
+		"id":     "resp_turn_2",
+		"object": "response",
+		"model":  "gpt-4.1",
+		"output": []any{
+			map[string]any{
+				"type":   "message",
+				"id":     "msg_2",
+				"role":   "assistant",
+				"status": "completed",
+				"content": []any{
+					map[string]any{
+						"type": "output_text",
+						"text": "Second turn",
+					},
+				},
+			},
+		},
+		"status": "completed",
+		"usage": map[string]any{
+			"input_tokens":  8,
+			"output_tokens": 4,
+			"total_tokens":  12,
+		},
+	}
+
+	_, err = model.Generate(context.Background(), fantasy.Call{
+		Prompt: fantasy.Prompt{
+			fantasy.NewUserMessage("follow-up only"),
+		},
+		ProviderOptions: fantasy.ProviderOptions{
+			Name: &ResponsesProviderOptions{
+				Store:              fantasy.Opt(true),
+				PreviousResponseID: &meta.ResponseID,
+			},
+		},
+	})
+	require.NoError(t, err)
+	require.Len(t, server.calls, 2)
+
+	firstCall := server.calls[0]
+	require.Equal(t, true, firstCall.body["store"])
+
+	secondCall := server.calls[1]
+	require.Equal(t, "resp_turn_1", secondCall.body["previous_response_id"])
+	require.Equal(t, true, secondCall.body["store"])
+
+	input, ok := secondCall.body["input"].([]any)
+	require.True(t, ok)
+	require.Len(t, input, 1)
+
+	inputMessage, ok := input[0].(map[string]any)
+	require.True(t, ok)
+	require.Equal(t, "user", inputMessage["role"])
+}
+
 func TestResponsesGenerate_WebSearchToolInRequest(t *testing.T) {
 	t.Parallel()
 
@@ -3775,6 +3925,7 @@ func TestResponsesStream_WebSearchResponse(t *testing.T) {
 		toolCalls       []fantasy.StreamPart
 		toolResults     []fantasy.StreamPart
 		textDeltas      []fantasy.StreamPart
+		finishes        []fantasy.StreamPart
 	)
 	for _, p := range parts {
 		switch p.Type {
@@ -3786,6 +3937,8 @@ func TestResponsesStream_WebSearchResponse(t *testing.T) {
 			toolResults = append(toolResults, p)
 		case fantasy.StreamPartTypeTextDelta:
 			textDeltas = append(textDeltas, p)
+		case fantasy.StreamPartTypeFinish:
+			finishes = append(finishes, p)
 		}
 	}
 
@@ -3804,4 +3957,76 @@ func TestResponsesStream_WebSearchResponse(t *testing.T) {
 
 	require.NotEmpty(t, textDeltas, "should have text deltas")
 	require.Equal(t, "Here are the results.", textDeltas[0].Delta)
+
+	require.Len(t, finishes, 1)
+	responsesMeta, ok := finishes[0].ProviderMetadata[Name].(*ResponsesProviderMetadata)
+	require.True(t, ok)
+	require.Equal(t, "resp_01", responsesMeta.ResponseID)
+}
+
+func TestResponsesStream_StoreOption(t *testing.T) {
+	t.Parallel()
+
+	chunks := []string{
+		"event: response.completed\n" +
+			`data: {"type":"response.completed","response":{"id":"resp_01","status":"completed","output":[],"usage":{"input_tokens":100,"output_tokens":50,"total_tokens":150}}}` + "\n\n",
+	}
+
+	sms := newStreamingMockServer()
+	defer sms.close()
+	sms.chunks = chunks
+
+	model := newResponsesProvider(t, sms.server.URL)
+
+	stream, err := model.Stream(context.Background(), fantasy.Call{
+		Prompt: testPrompt,
+		ProviderOptions: fantasy.ProviderOptions{
+			Name: &ResponsesProviderOptions{
+				Store: fantasy.Opt(true),
+			},
+		},
+	})
+	require.NoError(t, err)
+
+	stream(func(part fantasy.StreamPart) bool {
+		return part.Type != fantasy.StreamPartTypeFinish
+	})
+
+	require.Equal(t, "POST", sms.calls[0].method)
+	require.Equal(t, "/responses", sms.calls[0].path)
+	require.Equal(t, true, sms.calls[0].body["store"])
+}
+
+func TestResponsesStream_PreviousResponseIDOption(t *testing.T) {
+	t.Parallel()
+
+	chunks := []string{
+		"event: response.completed\n" +
+			`data: {"type":"response.completed","response":{"id":"resp_01","status":"completed","output":[],"usage":{"input_tokens":100,"output_tokens":50,"total_tokens":150}}}` + "\n\n",
+	}
+
+	sms := newStreamingMockServer()
+	defer sms.close()
+	sms.chunks = chunks
+
+	model := newResponsesProvider(t, sms.server.URL)
+
+	stream, err := model.Stream(context.Background(), fantasy.Call{
+		Prompt: testPrompt,
+		ProviderOptions: fantasy.ProviderOptions{
+			Name: &ResponsesProviderOptions{
+				PreviousResponseID: fantasy.Opt("resp_prev_456"),
+				Store:              fantasy.Opt(true),
+			},
+		},
+	})
+	require.NoError(t, err)
+
+	stream(func(part fantasy.StreamPart) bool {
+		return part.Type != fantasy.StreamPartTypeFinish
+	})
+
+	require.Equal(t, "POST", sms.calls[0].method)
+	require.Equal(t, "/responses", sms.calls[0].path)
+	require.Equal(t, "resp_prev_456", sms.calls[0].body["previous_response_id"])
 }

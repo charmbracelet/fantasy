@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/responses
     method: POST
   response:
@@ -26,15 +26,17 @@ interactions:
     uncompressed: true
     body: |-
       {
-        "id": "resp_07891da4b653e1470168f237de167081909c53deff29e333b8",
+        "id": "resp_0e7dfdc132fa96a90169b3014c5470819eadf32151a0dbfd15",
         "object": "response",
-        "created_at": 1760704478,
+        "created_at": 1773338956,
         "status": "completed",
         "background": false,
         "billing": {
           "payer": "developer"
         },
+        "completed_at": 1773338957,
         "error": null,
+        "frequency_penalty": 0.0,
         "incomplete_details": null,
         "instructions": null,
         "max_output_tokens": 4000,
@@ -42,7 +44,7 @@ interactions:
         "model": "gpt-4o-2024-08-06",
         "output": [
           {
-            "id": "msg_07891da4b653e1470168f237deab0c8190be2fd9591e3d9afa",
+            "id": "msg_0e7dfdc132fa96a90169b3014db10c819ea5b69df79c7f2810",
             "type": "message",
             "status": "completed",
             "content": [
@@ -50,15 +52,17 @@ interactions:
                 "type": "output_text",
                 "annotations": [],
                 "logprobs": [],
-                "text": "Ol\u00e1!"
+                "text": "Oi!"
               }
             ],
             "role": "assistant"
           }
         ],
         "parallel_tool_calls": true,
+        "presence_penalty": 0.0,
         "previous_response_id": null,
         "prompt_cache_key": null,
+        "prompt_cache_retention": null,
         "reasoning": {
           "effort": null,
           "summary": null
@@ -97,4 +101,4 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 941.245125ms
+    duration: 2.574510083s

@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.7.1
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/responses
     method: POST
   response:
@@ -26,15 +26,17 @@ interactions:
     uncompressed: true
     body: |-
       {
-        "id": "resp_0d7efb113168df8301690fb603c0f881a1a5ecec45f910e875",
+        "id": "resp_0847b706422580fd0169b319aac66c81a0856e18fe5f42e169",
         "object": "response",
-        "created_at": 1762637315,
+        "created_at": 1773345194,
         "status": "completed",
         "background": false,
         "billing": {
           "payer": "developer"
         },
+        "completed_at": 1773345207,
         "error": null,
+        "frequency_penalty": 0.0,
         "incomplete_details": null,
         "instructions": null,
         "max_output_tokens": 4000,
@@ -42,12 +44,12 @@ interactions:
         "model": "gpt-5-2025-08-07",
         "output": [
           {
-            "id": "rs_0d7efb113168df8301690fb6041bb881a198a6e417f00bba70",
+            "id": "rs_0847b706422580fd0169b319ab2dc081a08b7a1951374c3ca6",
             "type": "reasoning",
             "summary": []
           },
           {
-            "id": "msg_0d7efb113168df8301690fb610bf2881a1be28a4885c1876ac",
+            "id": "msg_0847b706422580fd0169b319b6d08881a0ab5a70c7759e3ebb",
             "type": "message",
             "status": "completed",
             "content": [
@@ -55,13 +57,14 @@ interactions:
                 "type": "output_text",
                 "annotations": [],
                 "logprobs": [],
-                "text": "{\"author\":{\"name\":\"J.R.R. Tolkien\",\"nationality\":\"British\"},\"genres\":[\"Fantasy\",\"Adventure\",\"Epic fantasy\",\"High fantasy\"],\"published_year\":1954,\"title\":\"The Lord of the Rings\"}"
+                "text": "{\"author\":{\"name\":\"J.R.R. Tolkien\",\"nationality\":\"British\"},\"genres\":[\"Fantasy\",\"Adventure\",\"High fantasy\",\"Epic\"],\"published_year\":1954,\"title\":\"The Lord of the Rings\"}"
               }
             ],
             "role": "assistant"
           }
         ],
         "parallel_tool_calls": true,
+        "presence_penalty": 0.0,
         "previous_response_id": null,
         "prompt_cache_key": null,
         "prompt_cache_retention": null,
@@ -137,11 +140,11 @@ interactions:
           "input_tokens_details": {
             "cached_tokens": 0
           },
-          "output_tokens": 885,
+          "output_tokens": 664,
           "output_tokens_details": {
-            "reasoning_tokens": 832
+            "reasoning_tokens": 576
           },
-          "total_tokens": 1023
+          "total_tokens": 802
         },
         "user": null,
         "metadata": {}
@@ -151,4 +154,4 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 13.745367625s
+    duration: 12.793636458s

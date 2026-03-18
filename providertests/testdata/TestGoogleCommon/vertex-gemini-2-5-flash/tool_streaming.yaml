@@ -17,7 +17,8 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.34.0 gl-go/go1.25.4
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+      - google-genai-sdk/1.49.0 gl-go/go1.26.1
     url: https://us-east5-aiplatform.googleapis.com/v1beta1/projects/fantasy-playground-472418/locations/us-east5/publishers/google/models/gemini-2.5-flash:streamGenerateContent?alt=sse
     method: POST
   response:
@@ -25,22 +26,22 @@ interactions:
     proto_major: 2
     proto_minor: 0
     content_length: -1
-    body: "data: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"functionCall\": {\"name\": \"weather\",\"args\": {\"location\": \"Florence, Italy\"}},\"thoughtSignature\": \"CiwB4/H/XgPBx7H41mQWWTneSxzTQCyc0wzScVKc5AIn3b8TgdZFbTC1d2qUdgptAePx/15mCGBnWhulJd1gjHhny9mo+yzbH7tj5jIXAk1vLBp/plv9Qndwx+68CtQ3eZQa82W27zN7rJWw8Q5FW3NDGOiyXnfKXLOGKQ1x5+iF6wqe1Ec/nGhHEwB9t7NlhMWdtibPkELCfMhomgp6AePx/1608eQCMND2Pl/a47/lzL/nrECGx9ZAjsU+/4UHzTGH6vxQRmwNDZYqhrBcSxC2VA/ocT1F3eP6wMj8xDTWBHddDiA6WimCaXKT+aGRbnIXQfjhtOadLyNcCtea/7ny7CvrmsrTjJ4BfjToI87NtfObamCGJgIKVAHj8f9e2NadgSaLliJnkuWSr5p9PHqLP9pI0Fos4xq1pTJU3X4ar6fcLqymxxXfqgFmrcIWRkDiDG0N8LDtk1hsA4kZThlWIEvrGiLYFpx+HCqTTw==\"}]},\"finishReason\": \"STOP\"}],\"usageMetadata\": {\"promptTokenCount\": 28,\"candidatesTokenCount\": 5,\"totalTokenCount\": 86,\"trafficType\": \"ON_DEMAND\",\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 28}],\"candidatesTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 5}],\"thoughtsTokenCount\": 53},\"modelVersion\": \"gemini-2.5-flash\",\"createTime\": \"2025-11-19T11:04:04.229621Z\",\"responseId\": \"JKQdafWBDrrIptQPxeKNkA4\"}\r\n\r\n"
+    body: "data: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"functionCall\": {\"name\": \"weather\",\"args\": {\"location\": \"Florence,Italy\"}},\"thoughtSignature\": \"CiwBjz1rX5J0Jni1UwQkH3SeTysS4TF4kGuzSS99EDy6+inHVbJu1Xo0pYpXeQprAY89a18NHhloDuIj0yld57PAo2oNpG6rOh/35G9rcOwGsXkiTJHGjRY2kvEit3Re266ZMK2YpihBVAkZllpxOWlb/QZN7Cial15OT3HGih3VCgpPirbUHnr1W3xjYncuUEWiboS9GunS2foKegGPPWtfqxLOOBCOHYMB1vAbHSWDwTHtlQmKO8gOjjB+E7rIAvoI5c/zje1zY9TIePouZwvtbh4hW0W0RkY1X0JqcVVCsdoxAa177NpMX32OsBI4ADKGIJWKfyUxHqYVTWqRPQCUm+vMMcCBkhEpQl1e4h+elfClBEXzClYBjz1rX3o0PFc+JJWTsLa7RFOQY12RaETWEvaTPmkUSJjWK0s+pMC6adOFzZMC/3NY4wPGdqSA/P5xnES40TQMQNvL9zL7G8O1sU6LExlHc9wVoyeOcw==\"}]},\"finishReason\": \"STOP\"}],\"usageMetadata\": {\"promptTokenCount\": 28,\"candidatesTokenCount\": 5,\"totalTokenCount\": 84,\"trafficType\": \"ON_DEMAND\",\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 28}],\"candidatesTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 5}],\"thoughtsTokenCount\": 51},\"modelVersion\": \"gemini-2.5-flash\",\"createTime\": \"2026-03-12T18:05:59.704936Z\",\"responseId\": \"hwCzaaiDK5-Ew-UP4tT9sAY\"}\r\n\r\n"
     headers:
       Content-Type:
       - text/event-stream
     status: 200 OK
     code: 200
-    duration: 945.3105ms
+    duration: 1.073018292s
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 1237
+    content_length: 1236
     host: us-east5-aiplatform.googleapis.com
     body: |
-      {"contents":[{"parts":[{"text":"What's the weather in Florence,Italy?"}],"role":"user"},{"parts":[{"functionCall":{"args":{"location":"Florence, Italy"},"id":"1","name":"weather"},"thoughtSignature":"CiwB4/H/XgPBx7H41mQWWTneSxzTQCyc0wzScVKc5AIn3b8TgdZFbTC1d2qUdgptAePx/15mCGBnWhulJd1gjHhny9mo+yzbH7tj5jIXAk1vLBp/plv9Qndwx+68CtQ3eZQa82W27zN7rJWw8Q5FW3NDGOiyXnfKXLOGKQ1x5+iF6wqe1Ec/nGhHEwB9t7NlhMWdtibPkELCfMhomgp6AePx/1608eQCMND2Pl/a47/lzL/nrECGx9ZAjsU+/4UHzTGH6vxQRmwNDZYqhrBcSxC2VA/ocT1F3eP6wMj8xDTWBHddDiA6WimCaXKT+aGRbnIXQfjhtOadLyNcCtea/7ny7CvrmsrTjJ4BfjToI87NtfObamCGJgIKVAHj8f9e2NadgSaLliJnkuWSr5p9PHqLP9pI0Fos4xq1pTJU3X4ar6fcLqymxxXfqgFmrcIWRkDiDG0N8LDtk1hsA4kZThlWIEvrGiLYFpx+HCqTTw=="}],"role":"model"},{"parts":[{"functionResponse":{"id":"1","name":"weather","response":{"result":"40 C"}}}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}
+      {"contents":[{"parts":[{"text":"What's the weather in Florence,Italy?"}],"role":"user"},{"parts":[{"functionCall":{"args":{"location":"Florence,Italy"},"id":"1","name":"weather"},"thoughtSignature":"CiwBjz1rX5J0Jni1UwQkH3SeTysS4TF4kGuzSS99EDy6+inHVbJu1Xo0pYpXeQprAY89a18NHhloDuIj0yld57PAo2oNpG6rOh/35G9rcOwGsXkiTJHGjRY2kvEit3Re266ZMK2YpihBVAkZllpxOWlb/QZN7Cial15OT3HGih3VCgpPirbUHnr1W3xjYncuUEWiboS9GunS2foKegGPPWtfqxLOOBCOHYMB1vAbHSWDwTHtlQmKO8gOjjB+E7rIAvoI5c/zje1zY9TIePouZwvtbh4hW0W0RkY1X0JqcVVCsdoxAa177NpMX32OsBI4ADKGIJWKfyUxHqYVTWqRPQCUm+vMMcCBkhEpQl1e4h+elfClBEXzClYBjz1rX3o0PFc+JJWTsLa7RFOQY12RaETWEvaTPmkUSJjWK0s+pMC6adOFzZMC/3NY4wPGdqSA/P5xnES40TQMQNvL9zL7G8O1sU6LExlHc9wVoyeOcw=="}],"role":"model"},{"parts":[{"functionResponse":{"id":"1","name":"weather","response":{"result":"40 C"}}}],"role":"user"}],"generationConfig":{"maxOutputTokens":4000},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}
     form:
       alt:
       - sse
@@ -48,7 +49,8 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.34.0 gl-go/go1.25.4
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+      - google-genai-sdk/1.49.0 gl-go/go1.26.1
     url: https://us-east5-aiplatform.googleapis.com/v1beta1/projects/fantasy-playground-472418/locations/us-east5/publishers/google/models/gemini-2.5-flash:streamGenerateContent?alt=sse
     method: POST
   response:
@@ -56,10 +58,10 @@ interactions:
     proto_major: 2
     proto_minor: 0
     content_length: -1
-    body: "data: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"text\": \"The weather in Florence, Italy\"}]}}],\"usageMetadata\": {\"trafficType\": \"ON_DEMAND\"},\"modelVersion\": \"gemini-2.5-flash\",\"createTime\": \"2025-11-19T11:04:05.175922Z\",\"responseId\": \"JaQdabLeCoqb5OMPr6PXcQ\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"text\": \" is 40 C.\"}]},\"finishReason\": \"STOP\"}],\"usageMetadata\": {\"promptTokenCount\": 89,\"candidatesTokenCount\": 12,\"totalTokenCount\": 101,\"trafficType\": \"ON_DEMAND\",\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 89}],\"candidatesTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 12}]},\"modelVersion\": \"gemini-2.5-flash\",\"createTime\": \"2025-11-19T11:04:05.175922Z\",\"responseId\": \"JaQdabLeCoqb5OMPr6PXcQ\"}\r\n\r\n"
+    body: "data: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"text\": \"The\"}]}}],\"usageMetadata\": {\"trafficType\": \"ON_DEMAND\"},\"modelVersion\": \"gemini-2.5-flash\",\"createTime\": \"2026-03-12T18:06:00.786631Z\",\"responseId\": \"iACzaceBMJzr_dQPkszy8QI\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"role\": \"model\",\"parts\": [{\"text\": \" weather in Florence, Italy is 40 C.\"}]},\"finishReason\": \"STOP\"}],\"usageMetadata\": {\"promptTokenCount\": 89,\"candidatesTokenCount\": 12,\"totalTokenCount\": 101,\"trafficType\": \"ON_DEMAND\",\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 89}],\"candidatesTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 12}]},\"modelVersion\": \"gemini-2.5-flash\",\"createTime\": \"2026-03-12T18:06:00.786631Z\",\"responseId\": \"iACzaceBMJzr_dQPkszy8QI\"}\r\n\r\n"
     headers:
       Content-Type:
       - text/event-stream
     status: 200 OK
     code: 200
-    duration: 520.063542ms
+    duration: 567.852625ms

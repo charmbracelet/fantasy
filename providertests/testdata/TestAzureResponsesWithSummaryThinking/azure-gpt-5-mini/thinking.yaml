@@ -15,23 +15,94 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.7.1
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://fantasy-playground-resource.openai.azure.com/openai/v1/responses
     method: POST
   response:
     proto: HTTP/2.0
     proto_major: 2
     proto_minor: 0
-    content_length: 3590
+    content_length: 5968
     body: |-
       {
-        "id": "resp_08e75323d01317c301690399f6df988190bbb2d99c071619c6",
+        "id": "resp_03e04b1d440a87110169b2ff8dceac819697919beb0b86d619",
         "object": "response",
-        "created_at": 1761843702,
+        "created_at": 1773338509,
         "status": "completed",
         "background": false,
-        "content_filters": null,
+        "completed_at": 1773338517,
+        "content_filters": [
+          {
+            "blocked": false,
+            "source_type": "prompt",
+            "content_filter_raw": [],
+            "content_filter_results": {
+              "jailbreak": {
+                "detected": false,
+                "filtered": false
+              },
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            },
+            "content_filter_offsets": {
+              "start_offset": 0,
+              "end_offset": 71,
+              "check_offset": 0
+            }
+          },
+          {
+            "blocked": false,
+            "source_type": "completion",
+            "content_filter_raw": [],
+            "content_filter_results": {
+              "protected_material_text": {
+                "detected": false,
+                "filtered": false
+              },
+              "protected_material_code": {
+                "detected": false,
+                "filtered": false
+              },
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            },
+            "content_filter_offsets": {
+              "start_offset": 0,
+              "end_offset": 1878,
+              "check_offset": 0
+            }
+          }
+        ],
         "error": null,
+        "frequency_penalty": 0.0,
         "incomplete_details": null,
         "instructions": null,
         "max_output_tokens": null,
@@ -39,28 +110,30 @@ interactions:
         "model": "gpt-5-mini",
         "output": [
           {
-            "id": "rs_08e75323d01317c301690399f759088190a37f017516202cb2",
+            "id": "rs_03e04b1d440a87110169b2ff91f840819692bf236ebfcc7f66",
             "type": "reasoning",
-            "encrypted_content": "gAAAAABpA5n8UjdGuSzFx6uvW1lDRxxYfY3gisRCV-3fmThjXt28KBNtZygO2FLKsTDYK4GGvbbqBGkaDynHzJFsQBMjvIyjkiLCdu8peexsbHa9xfp_cWzTgMxBsqQK2CDGxcXqokVV1V4u71ZWHvcV7RzevmhbxOn48CoA7FjOZBvyk2C9uCUh2NJs-GQeWP1zXFjDTcJS-_jZOUNxAw4COewYXTv0FHblhMbM9B61tnoflu6S4Xm_7qrWAuBtP9KSqEJQNCRCkRUtVfVThnG7u33pTQJGnd1YcPehJDKkOOMCliIgIaJLyg5gUeLLma2fcecXmM5Y-mjtIvmwgS84ym08-jhj_hYr2P4YpsGIzT1cIsm83Uq9xtfeo4J1r-OUQ7FxE_syhAjvbFxMuhHQ36wr-kx5JLL7RsyaxXmeWVrG26-c5hgS_pzR-XtSConurdr-kr3KeqUhXYjhebrajzZaVh-fmT38K1iB3r7gJF_YNOONQlJyiw4i6vTOWRNIuhQNL10ujSL5UXB3a8i0CZLPO6kQ4ICflbRE-E-Bhi4iehyL28mCE00CNLr2iJkrmwHeYhn2zDCqKHk_sj2BgWmyTsXLdGwNPIG0LI0KTC1CY41PimKaVKOVruI_OaJe0XAu5YLPuCS3cvSSGFDzhLJkANUMr8rzfCNKyb_tHQbyT8FlC5Cga2Un5iNHThjxCN1kiiWbyT53kHghqWRwFcMZrWWt6KF8WYhMF31YXON7ZetPwK4AP2MQyOng7_UY4-jT3G0k0CPSz8EU87dfaWpZDrtuqsTNF3C2fzHyyXYreIC_K7g1Io3pVKoHGx3kzTrZ8SqjMgl3U1bUlt1swDqFf9rozlv-qxLCGPZcwLRv6ZlgU6Cy78B9bliMXz9O-GmSUEzOsEdDrxBXDzNkQ5LZwgTIIdulV3Ti2YpKMWltkgF_ugV-Nlx8BmXto13n6qqGWvKWNrO7cVXKBeXmF4_OnVk8eHTqBzO2DJWl6jaMuWGiyIhqG7TOSi9G97k0tB5LWWFcyWQodr6iBqbZ5Kf0ERpXd20URrHpyumjhV2bH_w1sDiBFFtliUhJPX69LxHPn_23xIZAn6mJsLxptH_RawP87M2m0Hs91cysbWePBmio8JeUI3bdxalBCnl4cRJhNMQ4yoaEkLe-BIWKxcDUXfbBWovyMYnVzK1tUNMKXBKVtiE=",
+            "encrypted_content": "gAAAAABpsv-VXwrkiA2LGZS81tv6gXmlZFltBSfylmK7DeO9bnDg43lIoU7T_Dmcxg4SHjIsSOAt1-QnNyApcix2-vjt8aim5NX85sGG-DOFbsikMl-eSyXc4B98LXjP9nS0XxNAakLhhBMObzmIFlf7CwMGSyn3z9VT9Z0oizw6BP5TiEVXSJKZcnzPW4CDfVlGzrBk60NnS2ugDpkWUd6krcc_vU_CudDFDAbFVs4HGEGJDSAXnms0XEWemEnkbjL1dLhesjW-MX-W4uQEGXNJqcVoaC0z0LPu6G7T9SdKEZbrNI5GQu-bL67pjdFfddv6VrrSWovs7-D0X6lr5ZAjuDkqPLQo1uyJDAoOUgx-Z2z7tACHEkG7jqCenTJ3fwQe88KdDcoJoZ59s6VqL-msbnAZpiTKdMyM0wR5jQSXwtaVp9yhNgqjRWDW-RlJc7RbY_4x4j5xL3p1vyF1ioFjo2z7u5Lb9tsBLHOXRDpb9BFGXQbxOmP4VpvMN_93CcszyIRd6mPp3taVpnJPlLTSVW4uBXfGX2RKLAcT0DsYicB3O0sjjfWpGLQuEvmCWSrCHBwYAy-PGDPAQgcsGjsE9alwXOhHXONyq5BkiIs4cQ3ZWCibDTqg2CEVsCuXZPHL50SjuQOFRmFZkXRbnH8xXTAhDNGqFsISgHCeSV6EPEUL72n1SPeJPdxHc1x1ZZL7HdqHMQUfPnE-eMW4IKapOU3MJ5rxXui6ye5aYBHtRFVJgv6xf-lYpWQXLjJWqulelZPST5gLeAl9NPcPwpz3frgoWH9GpB6glNgavPVWQ2cJwYTv85gJ0I3kLATYBY5LRegYAqBvKGBE0ZDR55neZwn83uckMcEh37diCV3SbPFQMUbxw9gkFVobB3jC3r0OetBTXc0rBcO1bN2s1pRf_493hP1uG4r1Q40_kJubyq6KjaJm_aOl6-X9aGVV6VmTmcvSPzrfga7_sXoS23Qxgo5qfyqj6ERnsSUHvqofb7XRUZDbpMSYUyQ8MonZSYs8OuZT7ZoFI0F2WNqZEOBfbYCMeCimlPYmdwgb_3LJMf5ivUbuRq9uG94TrZXxLG2MprIvNHJAxVVt3eRHOzMIo0kgwRYtHd-MdIyeo6nUmv_JPZIRJvnJ5w4GRCvcX9V6j2Yq2CV39NM7QFhSkoSTDz2dKvXwQY3gzhCQM651-mINb86qiL3L-vVtGzZe2ZL5z6VBDON-QOiQyZV7fLH8S5ECKgoK_X81fEjxBAuRkBZGAB-HiuIA6DV_B2O_zE-z09a0ObdBztRd68qMMBNQEuTGZx07C1nVLNZPKro-qT_mx9IbAUwQClw2QHhT6vWIvuWdFWdod44rFDtv-zTImkWtMxbQOjc7dWSPZN6dN-7TCQtVR0DIPl0aouEtgRu3eSWKeHOjTUKBa8D0izB2UQYGHpkyL5-FlTc7NplZRbWMjBDsio-63EV4a_ZISrt2AtacO7p1Tk_H-7atZdWYi1Y0aBg8qf1QWtKzdef-EdgkGPcmUr4rqkH67LrOiNncq-tiqiZhRQ1lHduosIB2dN-Of5NFPe3N5oRD0cSlwhMWJjgC3zkA7ECx8kzKjFsJNPFSqh738KQRxwpaZbqLBIc_FA5WzgSByt_7mLpNKTqQHss_RtU2YMe2JH0VO8V7Waa_mpqELoHcMjHfaIKci-srsOtheWV1x8VSE38ouhV16xaE5WieXL5vtrUJGjdKLsKbm7wYrSnIuU9nr_Ms9nGx5dqdEguJkjKbuNkrZFuUk_Ld5s0Dyg9loLcagD_rRJ8wswmH9xRY-4P1zNZMFKwULj92Xw==",
             "summary": [
               {
                 "type": "summary_text",
-                "text": "**Checking weather in Florence**\n\nThe user is asking about the weather in Florence, Italy, which is a common request. I know I can use the weather tool directly, specifically with the location string \"Florence, Italy.\" There's no need to complicate things with multiple tools for this task. I'll just call the functions.weather tool and then present the result to the user. It's straightforward!"
+                "text": "**Fetching weather for Florence**\n\nThe user is asking for the weather in Florence, Italy. I see that I can use the functions.weather tool, which takes a location string. I could use multi_tool_use.parallel, but since I just need one tool, it makes more sense to call functions.weather directly. The tool expects a JSON format with the location specified, so I'll structure it as {\"location\":\"Florence, Italy\"}. Now, I\u2019ll go ahead and call this function to get the weather."
               }
             ]
           },
           {
-            "id": "fc_08e75323d01317c301690399fc62bc8190b80c10a99849920f",
+            "id": "fc_03e04b1d440a87110169b2ff9482d08196b9611b538400d9b0",
             "type": "function_call",
             "status": "completed",
             "arguments": "{\"location\":\"Florence, Italy\"}",
-            "call_id": "call_Frvkxe2RXaW1CTvkYPyl0U68",
+            "call_id": "call_58ZCzgYxpwaBCsl2an3OWjkQ",
             "name": "weather"
           }
         ],
         "parallel_tool_calls": true,
+        "presence_penalty": 0.0,
         "previous_response_id": null,
         "prompt_cache_key": null,
+        "prompt_cache_retention": null,
         "reasoning": {
           "effort": "high",
           "summary": "detailed"
@@ -100,15 +173,15 @@ interactions:
         "top_p": 1.0,
         "truncation": "disabled",
         "usage": {
-          "input_tokens": 63,
+          "input_tokens": 66,
           "input_tokens_details": {
             "cached_tokens": 0
           },
-          "output_tokens": 22,
+          "output_tokens": 171,
           "output_tokens_details": {
-            "reasoning_tokens": 0
+            "reasoning_tokens": 128
           },
-          "total_tokens": 85
+          "total_tokens": 237
         },
         "user": null,
         "metadata": {}
@@ -118,38 +191,77 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 6.70119525s
+    duration: 8.094597125s
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 2549
+    content_length: 3250
     host: ""
-    body: '{"store":false,"include":["reasoning.encrypted_content"],"input":[{"content":"You are a helpful assistant","role":"developer"},{"content":[{"text":"What''s the weather in Florence, Italy?","type":"input_text"}],"role":"user"},{"id":"rs_08e75323d01317c301690399f759088190a37f017516202cb2","summary":[{"text":"**Checking weather in Florence**\n\nThe user is asking about the weather in Florence, Italy, which is a common request. I know I can use the weather tool directly, specifically with the location string \"Florence, Italy.\" There''s no need to complicate things with multiple tools for this task. I''ll just call the functions.weather tool and then present the result to the user. It''s straightforward!","type":"summary_text"}],"encrypted_content":"gAAAAABpA5n8UjdGuSzFx6uvW1lDRxxYfY3gisRCV-3fmThjXt28KBNtZygO2FLKsTDYK4GGvbbqBGkaDynHzJFsQBMjvIyjkiLCdu8peexsbHa9xfp_cWzTgMxBsqQK2CDGxcXqokVV1V4u71ZWHvcV7RzevmhbxOn48CoA7FjOZBvyk2C9uCUh2NJs-GQeWP1zXFjDTcJS-_jZOUNxAw4COewYXTv0FHblhMbM9B61tnoflu6S4Xm_7qrWAuBtP9KSqEJQNCRCkRUtVfVThnG7u33pTQJGnd1YcPehJDKkOOMCliIgIaJLyg5gUeLLma2fcecXmM5Y-mjtIvmwgS84ym08-jhj_hYr2P4YpsGIzT1cIsm83Uq9xtfeo4J1r-OUQ7FxE_syhAjvbFxMuhHQ36wr-kx5JLL7RsyaxXmeWVrG26-c5hgS_pzR-XtSConurdr-kr3KeqUhXYjhebrajzZaVh-fmT38K1iB3r7gJF_YNOONQlJyiw4i6vTOWRNIuhQNL10ujSL5UXB3a8i0CZLPO6kQ4ICflbRE-E-Bhi4iehyL28mCE00CNLr2iJkrmwHeYhn2zDCqKHk_sj2BgWmyTsXLdGwNPIG0LI0KTC1CY41PimKaVKOVruI_OaJe0XAu5YLPuCS3cvSSGFDzhLJkANUMr8rzfCNKyb_tHQbyT8FlC5Cga2Un5iNHThjxCN1kiiWbyT53kHghqWRwFcMZrWWt6KF8WYhMF31YXON7ZetPwK4AP2MQyOng7_UY4-jT3G0k0CPSz8EU87dfaWpZDrtuqsTNF3C2fzHyyXYreIC_K7g1Io3pVKoHGx3kzTrZ8SqjMgl3U1bUlt1swDqFf9rozlv-qxLCGPZcwLRv6ZlgU6Cy78B9bliMXz9O-GmSUEzOsEdDrxBXDzNkQ5LZwgTIIdulV3Ti2YpKMWltkgF_ugV-Nlx8BmXto13n6qqGWvKWNrO7cVXKBeXmF4_OnVk8eHTqBzO2DJWl6jaMuWGiyIhqG7TOSi9G97k0tB5LWWFcyWQodr6iBqbZ5Kf0ERpXd20URrHpyumjhV2bH_w1sDiBFFtliUhJPX69LxHPn_23xIZAn6mJsLxptH_RawP87M2m0Hs91cysbWePBmio8JeUI3bdxalBCnl4cRJhNMQ4yoaEkLe-BIWKxcDUXfbBWovyMYnVzK1tUNMKXBKVtiE=","type":"reasoning"},{"arguments":"\"{\\\"location\\\":\\\"Florence, Italy\\\"}\"","call_id":"call_Frvkxe2RXaW1CTvkYPyl0U68","name":"weather","type":"function_call"},{"call_id":"call_Frvkxe2RXaW1CTvkYPyl0U68","output":"40 C","type":"function_call_output"}],"model":"gpt-5-mini","reasoning":{"effort":"high","summary":"auto"},"tool_choice":"auto","tools":[{"strict":false,"parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location","type":"function"}]}'
+    body: '{"store":false,"include":["reasoning.encrypted_content"],"input":[{"content":"You are a helpful assistant","role":"developer"},{"content":[{"text":"What''s the weather in Florence, Italy?","type":"input_text"}],"role":"user"},{"id":"rs_03e04b1d440a87110169b2ff91f840819692bf236ebfcc7f66","summary":[{"text":"**Fetching weather for Florence**\n\nThe user is asking for the weather in Florence, Italy. I see that I can use the functions.weather tool, which takes a location string. I could use multi_tool_use.parallel, but since I just need one tool, it makes more sense to call functions.weather directly. The tool expects a JSON format with the location specified, so I''ll structure it as {\"location\":\"Florence, Italy\"}. Now, I’ll go ahead and call this function to get the weather.","type":"summary_text"}],"encrypted_content":"gAAAAABpsv-VXwrkiA2LGZS81tv6gXmlZFltBSfylmK7DeO9bnDg43lIoU7T_Dmcxg4SHjIsSOAt1-QnNyApcix2-vjt8aim5NX85sGG-DOFbsikMl-eSyXc4B98LXjP9nS0XxNAakLhhBMObzmIFlf7CwMGSyn3z9VT9Z0oizw6BP5TiEVXSJKZcnzPW4CDfVlGzrBk60NnS2ugDpkWUd6krcc_vU_CudDFDAbFVs4HGEGJDSAXnms0XEWemEnkbjL1dLhesjW-MX-W4uQEGXNJqcVoaC0z0LPu6G7T9SdKEZbrNI5GQu-bL67pjdFfddv6VrrSWovs7-D0X6lr5ZAjuDkqPLQo1uyJDAoOUgx-Z2z7tACHEkG7jqCenTJ3fwQe88KdDcoJoZ59s6VqL-msbnAZpiTKdMyM0wR5jQSXwtaVp9yhNgqjRWDW-RlJc7RbY_4x4j5xL3p1vyF1ioFjo2z7u5Lb9tsBLHOXRDpb9BFGXQbxOmP4VpvMN_93CcszyIRd6mPp3taVpnJPlLTSVW4uBXfGX2RKLAcT0DsYicB3O0sjjfWpGLQuEvmCWSrCHBwYAy-PGDPAQgcsGjsE9alwXOhHXONyq5BkiIs4cQ3ZWCibDTqg2CEVsCuXZPHL50SjuQOFRmFZkXRbnH8xXTAhDNGqFsISgHCeSV6EPEUL72n1SPeJPdxHc1x1ZZL7HdqHMQUfPnE-eMW4IKapOU3MJ5rxXui6ye5aYBHtRFVJgv6xf-lYpWQXLjJWqulelZPST5gLeAl9NPcPwpz3frgoWH9GpB6glNgavPVWQ2cJwYTv85gJ0I3kLATYBY5LRegYAqBvKGBE0ZDR55neZwn83uckMcEh37diCV3SbPFQMUbxw9gkFVobB3jC3r0OetBTXc0rBcO1bN2s1pRf_493hP1uG4r1Q40_kJubyq6KjaJm_aOl6-X9aGVV6VmTmcvSPzrfga7_sXoS23Qxgo5qfyqj6ERnsSUHvqofb7XRUZDbpMSYUyQ8MonZSYs8OuZT7ZoFI0F2WNqZEOBfbYCMeCimlPYmdwgb_3LJMf5ivUbuRq9uG94TrZXxLG2MprIvNHJAxVVt3eRHOzMIo0kgwRYtHd-MdIyeo6nUmv_JPZIRJvnJ5w4GRCvcX9V6j2Yq2CV39NM7QFhSkoSTDz2dKvXwQY3gzhCQM651-mINb86qiL3L-vVtGzZe2ZL5z6VBDON-QOiQyZV7fLH8S5ECKgoK_X81fEjxBAuRkBZGAB-HiuIA6DV_B2O_zE-z09a0ObdBztRd68qMMBNQEuTGZx07C1nVLNZPKro-qT_mx9IbAUwQClw2QHhT6vWIvuWdFWdod44rFDtv-zTImkWtMxbQOjc7dWSPZN6dN-7TCQtVR0DIPl0aouEtgRu3eSWKeHOjTUKBa8D0izB2UQYGHpkyL5-FlTc7NplZRbWMjBDsio-63EV4a_ZISrt2AtacO7p1Tk_H-7atZdWYi1Y0aBg8qf1QWtKzdef-EdgkGPcmUr4rqkH67LrOiNncq-tiqiZhRQ1lHduosIB2dN-Of5NFPe3N5oRD0cSlwhMWJjgC3zkA7ECx8kzKjFsJNPFSqh738KQRxwpaZbqLBIc_FA5WzgSByt_7mLpNKTqQHss_RtU2YMe2JH0VO8V7Waa_mpqELoHcMjHfaIKci-srsOtheWV1x8VSE38ouhV16xaE5WieXL5vtrUJGjdKLsKbm7wYrSnIuU9nr_Ms9nGx5dqdEguJkjKbuNkrZFuUk_Ld5s0Dyg9loLcagD_rRJ8wswmH9xRY-4P1zNZMFKwULj92Xw==","type":"reasoning"},{"arguments":"\"{\\\"location\\\":\\\"Florence, Italy\\\"}\"","call_id":"call_58ZCzgYxpwaBCsl2an3OWjkQ","name":"weather","type":"function_call"},{"call_id":"call_58ZCzgYxpwaBCsl2an3OWjkQ","output":"40 C","type":"function_call_output"}],"model":"gpt-5-mini","reasoning":{"effort":"high","summary":"auto"},"tool_choice":"auto","tools":[{"strict":false,"parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location","type":"function"}]}'
     headers:
       Accept:
       - application/json
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.7.1
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://fantasy-playground-resource.openai.azure.com/openai/v1/responses
     method: POST
   response:
     proto: HTTP/2.0
     proto_major: 2
     proto_minor: 0
-    content_length: 5385
+    content_length: 7839
     body: |-
       {
-        "id": "resp_08e75323d01317c301690399fcde608190a0fecfea7cd36d21",
+        "id": "resp_03e04b1d440a87110169b2ff95e7e881968351190f833d9929",
         "object": "response",
-        "created_at": 1761843708,
+        "created_at": 1773338517,
         "status": "completed",
         "background": false,
-        "content_filters": null,
+        "completed_at": 1773338527,
+        "content_filters": [
+          {
+            "blocked": false,
+            "source_type": "completion",
+            "content_filter_raw": [],
+            "content_filter_results": {
+              "protected_material_code": {
+                "detected": false,
+                "filtered": false
+              },
+              "protected_material_text": {
+                "detected": false,
+                "filtered": false
+              },
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            },
+            "content_filter_offsets": {
+              "start_offset": 0,
+              "end_offset": 3357,
+              "check_offset": 0
+            }
+          }
+        ],
         "error": null,
+        "frequency_penalty": 0.0,
         "incomplete_details": null,
         "instructions": null,
         "max_output_tokens": null,
@@ -157,18 +269,22 @@ interactions:
         "model": "gpt-5-mini",
         "output": [
           {
-            "id": "rs_08e75323d01317c301690399fd3850819098dd485846bdffdb",
+            "id": "rs_03e04b1d440a87110169b2ff9728608196a7633ffa976a82d9",
             "type": "reasoning",
-            "encrypted_content": "gAAAAABpA5oG_ll7ThMwW-18Yqi-ei4hs-px3XUGHH6dTl3eCweNP0omlO0V4VGombiAXb7GT_ScFOlhCGpQOY75MRsi2MvZrQ7HyAezH7dgX6YHPxYf_x9ryT028XZh82ZCjgnGj0xV6b2AhLZCo1sVIh3swqeNGgb8mnh5Ia1IByHnHXUEX7rZ525mvIUYhnwFh-AyE_cRbwC48d4dY8LwW_DBAjaHwkFKrL0Xc8Fwh6E9I8J2dDorTV6lbyNmhedpKcEUv9fHXQabANFFkubpOCDALvLPDsrDDRaTiGQw4WyePEPB531bqVZ0DXtlLsO6pyT-Cll4MM3WqMhEAIiEasnfbaidPeXXQzugFagSs--PBcoJ4Y616lc-kMELAuo27Gm2C1gNPWxGHePry7zCMj6gxouUZsxuOpCozOg1XRFlT2BctxSdGOU36swqyW4jjpyDDH0I21iSeRI6HY-wkjMrq-iaQRkrZm_WmVj8yInYLMb_g6THvjgzTeUWIxrFJYUk3NhOT4OaZ_b6NcLp0GatfLDQb_aXyPu1vjLX2oJhHjb7TWSrQYZiYmRR4qoTd9o3TMquC-M85vgsz-DkHlHN0fJUs3CXtwEzPPbupl0Wiyu4CF4EPvF3vxSYQf2tCLkbybVnJrdfPmmFPSzgeYFtf6T-M_Z26hUjJD2eRQ8qeMJurvDPE2TL_w6XSJPyFj0Tlzl_BcHVjkt3BvWP6SgKd4xxhde6O1cfU_gOlL91w879D-Z3OHDYCpkhN1f9GfdnH-CAGkmcLfAXcvPh5lHvLzpY1k2TXWeDwEsI0lj_ravjBNBjoXBIEZl3DG4VoWPrpLib-vhavHxNtwm-TEM8NOvy-fYtucz_yGMKFxhwWkcMcSNM9UpWrXcpp7iaSiXcbgZZgmuFXEqhaSQEKEeMOATMH_6CYzAh6wuRKRVisGOn6ZHsFvit0dMQxTPGc8zh1R-69kepkTNjLKC7U4cs1geqBQQyaO-A9hgUQX89zGXTdkmPRSfjOgShS3LQo90s7UGkUMlOBwCMESliwfjY_lwS8dSJ0t-qkYahcYAVzNqGkUh92eSuwwk94WDYGXTBZvKUUQKKJWb7xP2tyLCXflv4BGtO19_44tyLG68YmU-r82b-z_U_Rj77m1Wsz8TIuYY2fX4DrqSE5aV3Wbn2AYbAHAmNRz_UI3rEezN6wERgb9fyvcmzl4EV5YmsZuh_D28paVc8w56Qhki3VfnFQvPrGlCqdukBIWCByU2NhjUYix_n6-Iv2BfMmZTANDQH49m4eEOs0rxvy0hNBaa-wrAMCPBDJU6NF7FnaV7DYzXChz2dv8f8p3MndlD_e0JvCq3EnQdPIF0dmwK-gka_WZf45QrIX8gMlQLeeeDj-7uA1DpzjZsV44bK8mshVJJ_wz1WMTF23bxhJ3ADdpQPOWUJD9Ol3qUurBrA0NbtF1clZt2tdiuVOUMwEcs5jLy0Y8PUql_-9Uw8izYzwGWnwqLb8VBPfLTVnoRMnMVEP07Nhno3_L4yHJFPEWLKdawNBk6cDusX-lk0V-BdkYygJN7tPq04PP3puq5UccHkxh8ECBxwscKXtCUiBjYtGAVy3gcW2xgDBvkm42Aij9Z3ICftjlJIZLp5TFFGtb_PwpgCDSVSl31untlw3O2HkyVaj1IqWBx7Yvy3g7SMhRvtEZCzwIMFNAy7xnYOcvXjOgYk2btpt5vjrp8vnjkRsSx7VaIMRQsAKLIINDkqXgXjt0AkU90mF8__p_str-PfI1MyTyKE4E_VzlFSKcARe9v5oSVjBH39gwVd6PZW0E7hBcYybeasmnvWRoIfkqbagIumUHg5aCdDpqOrU4gisyw6r5b6ezBSP7lh4KceR-NNVdDcPI3vn3k7MiElIwEfUjwwh9AmsPCloh1et8d9uepGCFP6ehEtGUKvRbil17TZcUOq8DDGCfXAGKSRui8W_GU5hhOJBrDpjxZGvmH-29hfviPHZGtPNTi6zQWqcCxSpxDRyeNWmvp5IMf8Kz7ej6Ve6wHahVOBm_wM-8zwZI5yEazSWZRTYqaWY5vnPs--SsnS2R0lOd1oLHybGZTKW0-YXmqWDrIcnrA0fq7UsCkuNBgzew_9fZg2NIGvukMfBAtBTq-FQ9DM2-mnDPlNXvMRswTga-uV_Z2UQNjvEnY8xn_7ZnUGeGpVWjbHg4GXW5zV9f5aAdtV452YKqQ55JzvR5yJ47lg3EphgHR-5_vOvr-Bl-kEm40oEo8zvNquBcxJ9mvZ478WGGbvGzhOK065YN-nZD91JNUQcALSO_hF_FE4Tk_VvZmFztcRU3nOnF3mHXWe-wJ30UCzKuLNkL9keemUUiAylMvkec0_gR-SxmPyzYvI9XuYc8TYV1xrEWx37wI89fihJeXfS5fmUJEPkPpFq-W704mdXqdG873I15fr-HGx_hcqH1QA6x-8-JtwN-5Se9Pi-iq4UN10T5K95XVgadJbeehLim4Fjxf_SZSyb0rYVnP57h-u1Orh-mwlNNLcf4J_5OQ1h7MWE5DV_gQKhv4Myr3zHVmN6mweUx22fwW6H9AMwfpaEwA5B5feOz8Op94hSgQvmmA6mk5I2CuRZ3H2d0i1b4su4oCcVnW7",
+            "encrypted_content": "gAAAAABpsv-fpb3rS7-bQl4c_t4hmXUOwnwmGym7XB5QpPIRXiNgCXQVpiKPvvmqEGMhzrlTx0S1pxIn8cuyWLmsQnI76mv63_LRfNGBZekDfsfFDa2ZNTGW8WiWq3LMbP3CZz24Ld9x0rp83M90cKY4tWrWERKfsii6bX4b41p42leowZQMa9QAbuJH2z897shfIVbmwLsG8vUuD0OsrCcLfQcqHoTQJBE0Xme2H9o79idNBOf5mbrG8JhF9OxUHtwjH6LRuubx3fFtyfDAS53sx5oKtYZHbQoG0YMbD1oSqlWgO9DEqApKNb848RvGoXOp1_Yu2Pq4hLNBaH-I2VfR_3HEWupf5GJ1t85Sc3Ag69Ix_RcL2x46y1fpCaSrxw1dPZ0XlPX55cOVErQ4-3hNc3EdsQ4Qi5XWT-LYvophKrSzd02pFWYj4T86KiHX6ROteeGTxDkRZtf7v-3lO-QC1uNlsE5lHuPYsunES_ZXoyCc9n_mKrKxQlXyjVONQavgkpZz3BLNHQSFWPJ4ajip3aYHDjzdHtRp5Z3g7AWPC9_isbZ9MHx3IoR9gcnAEjYmo-yIJffbSEnPVyBCgiGpX9dG3KFue11g-uM9wzkQ_PvLnSeNCiXrP1JXEukQRJic9gQ7KvmRCzjNmGcbQnCvDt6iFmv9gut9HEPEj5DqLDnA5ntX2u_0vCJtCUGeL0iT0cChchvrLlA48XWwgYCmH3UyifNa7gh7NQ2Vm3vyMFcOmcWDFUYSYkTytc33Xr48yzPZKjxmkRtsxJqpF4h8v3z8N3hfRRq-fDsQZsmKW8soI03yuAW1bsVvabnEmdpu8Olk88HCD4NdBeEKHqA4-FiKYnXd6-KT2KZVvMejaCMPYYYE3FsTXpjMlBihDvl2Ajclc_izAD0KKhaGlHQ6VEzuVBDbxvleoOYsDGQwCI9bZXcneqeSSUxUOotJOHyt8gGISVuWkKuM8hLGMqn2gIOyuQERcwWwj1WkxwAaNSNdWszbwlmpSjFSdc9K6knWQna5R2DqlEh9-WQcHSxNtsWo8rGPWb3PbbuQMvaPfD1zVntCfTO3UssmXwwIWwnkMdgZylRDhaQqIln4Xsgx4DYhiK5eYN4Es9bXEXugi5cOq0OEOVj_A9C5-Aj438k9luAAnm09q1xZOIxI5amDblv80zleGijt1r2qsLpdsGCejr44GDFZ-S1Py9pWURzDQ7kfXsqv18Sw1TjsrewP2GwRmJQ4aYSpbsjZRUa82xoHb7kxdLz9j27Fyxi6I9HmnZf-bCcMzy7f8WzGmmCWgGQDRpE5iy7fMxTI0hML0sZpfxAxRWwFtMp7Emr4m8zjDzCgLFjp3S47wRtGJHft_JaWkBXbpjkiJknz0Wo_72Tshqk64PopsGyYNqU_sk2wBL98aHgL-tsrd7XJ4Xjzm0padS9iJ0NqkIX4pQyZ8cXyZa1kXoMb1_JWK2DEJSj1o34iZbxnKPKhgt9tM4yHJrmSX5wgbmeTYjPQVkmx5yiN8FygqyFaeSsCulS1HAfcwoQs59QWcj-vJS_a6ffpYJ336RMpodQ2PgloXTEdJzNvoSWEeZOPML7WKQsGHqjVfAzeENW9Psd2T3IuMjgfoE3xM8opHGd7PFIIS-5FPaWzE16vFWXT9vJDeZaeCOuTetYJjtxs-qaj5uBfQ-OknsSLposZcyYty__eagFdxfPKR_iFcy_AdBPp1mufM71OrN4CyRdQ2QCnPcLFNVzlXVR6LRKwBNCOkUq-gBei474FLheWLh0psuaUy9rxxo8y_hLjxn0_Z0LwAbdYKF2Siz9E18W8YmjGVD9iD1lcraodYs6Xl2D4J2jFKL4dmopw0P9-U143P46HXplpTANifxEGW_RnKG9HpgpUfv6Gp9vPPrL-GeBW-51JDAq-y0BCD0e4SFEHWSDT7b16c5BQpYul2K3XviYHGxjGAI8rWNS03Lac96eAmzuCn8KzqBvOHJcFyZ54PfcEitmhCzOZ03UXEQwduMbRnCCW1Gp-WZGloWpTxbJNQYpLH01nqSJn86wzsVj-g0DLQWSsC1pcOIh_wsslvp15HRqLD3fUtEFc_ls3BDciXoIkNG8O0wZ9HVQJcLm1k08hYvU-5W7X_LW8-cOa3-kBaW6oU0yqk9sNrzl-rAdl90U2j0L0oQF3lufR6A6K8ZJf67MzAWpXcazPOVN58gVu9ZvfR_KbraKjyTkIsQQmFBecWoptOMbxgD_uCOhsHtFzeS5SVFfg77Woxo1BFLqy2PUbw-IpDsTJ4ssJ241Ycyjg1KY8XDSl24AiyCaw70QIksSrcc__dAIUaE-lbHQlQRwRCFu3BHKgHHbwkgFbH2ar9xo_dI7v-uriY0gVxvzwVrnCnKKA6phKGJZs9nVb9fLupHBm5IiueakkoIWTpsGcl6nfZCnSAy3d1SpZJZ9OGHhR0yD_8uP6RvVeT3B5nebw8ko-LF6CWI9Wlb_T0m0yuzgwXqliYlHEVqT0u3IDFbpQ4yAUpIa9PFYatuYX6IEr_a5pfUbrnW63Z-1H3iz7iKJdDKdvrPbje1mvf70ZmRv7esI6BphFj2VRH9A4yJukCx5Kv_w4OYNfk3D7KCQ858p5V_JcUdVGxpOXP_s1PCJe7eZtpdywewNfcH_25mdK70IkAOEPSFsvA9tVmR0KJzYRycs5Nqpsd111HGylZIdrRSAiuxrBc0OiZP7dVsxBx6MeQhG7j-hUh0nk9iMenbyY4yA45R4jalCvR6yjuvJJ6Dgx6E1ePqFEfnISHPZrYTPXjqZtLZUnyD3zKbpF_kxpMlxA930Gi4-_qPNDtQm00TwraPvXkWTmTFHLtxGEh3D_btbymaRxRPkIfwi0myHkJNS-tsa3CUd4QfzvOAYMB5rB-K1dKSr38j_m4l0ZnhfZ7fCSHYgDcSZUWye5f2f3khFuPG5_xrGz_h0CIzugDxTCZI3BNUYQeO7u2e1XeovICoUspkat_BVE-pP2Hm6OSX2ZUNiVemI00bPoxjpxPhriAgzjAlxwz-hPbnc8cAkm6PZNMH4HeNfxJdeYFrtmES86AGW9lYCY8oxIjFsXXnxFhDDFtal1-5bnCSpi1EnsGmP5WmbDKUkj9vqWi1NUk0WrwnjsefvnOGwkvneoP8Yp6Dn4nLPQJl_e-L-cbjNInGf3FS2vdFtNEOMm7VbI-J4qIBnk3UQoTL8jCxct7TQvSEkFwZE-HO-oSFz03KPyWk4X2j2-A4xfUnGCuQOZOSyvIhh6BcJBsU1OwhqC3G0CZMwAj1-hWBvb3QPg00e-zqAADusg2ggkekD-fbopAG8x4rejhRBvrob2IA6Oroig69H1_WnpLuPHgJ9-TYP25iler8R66zuHkX60LKNN-D6B-ff6ymmQ_kF1zVGg2ufjfQ5xlkR302PCLKrb8IhVe5vBsTJEWERR2WehtdCvoqySNgh3u7C2t2thPV4mHN0xA5_HzOk6Zz7AqMLnnW-0m1-eKxWYDic=",
             "summary": [
               {
                 "type": "summary_text",
-                "text": "**Crafting weather update**\n\nI want to offer the user a gentle choice: \"Would you like the forecast or hourly updates?\" I think a good response could be: \"Right now it's 40\u00b0C (104\u00b0F) in Florence, Italy \u2014 quite hot!\" I should advise them to stay hydrated, limit outdoor activities during peak sun, wear light clothing, and seek shade or air conditioning. I\u2019ll ask if they want a 7-day forecast or hourly temperatures. Keeping it concise is key!"
+                "text": "**Reporting Florence weather**\n\nThe tool returned \"40 C,\" which is pretty hot! I need to provide the user with the current weather in Florence, Italy, but I realize it only gives the temperature. So, I should clarify that it's 40\u00b0C right now. It's extremely hot, and I want to remind the user to stay hydrated and seek shade. I'll keep the response concise and ask if they\u2019d like more details about the forecast or hourly conditions."
+              },
+              {
+                "type": "summary_text",
+                "text": "**Summarizing Florence weather info**\n\nI want to provide a comprehensive yet concise update on the weather in Florence, Italy. I\u2019ll tell the user the current temperature is 40\u00b0C (104\u00b0F), along with safety tips: stay hydrated, take breaks in the shade or air conditioning, and wear light clothing and sunscreen. I might also ask if they want a detailed forecast or hourly updates. I need to avoid claiming specifics about weather conditions since the tool didn\u2019t provide that data."
               }
             ]
           },
           {
-            "id": "msg_08e75323d01317c30169039a058e308190a79d0f0c4e834ad2",
+            "id": "msg_03e04b1d440a87110169b2ff9ed2a8819688f2b28a2cdba9a8",
             "type": "message",
             "status": "completed",
             "content": [
@@ -176,15 +292,17 @@ interactions:
                 "type": "output_text",
                 "annotations": [],
                 "logprobs": [],
-                "text": "Right now it\u2019s 40 \u00b0C (104 \u00b0F) in Florence, Italy \u2014 very hot. Stay hydrated, avoid strenuous outdoor activity during midday, wear light clothing and use sun protection. Would you like an hourly forecast or a multi-day outlook?"
+                "text": "Current temperature in Florence, Italy: 40\u00b0C (104\u00b0F).\n\nThat\u2019s very hot \u2014 stay hydrated, avoid strenuous outdoor activity in the midday sun, seek shade or air conditioning, wear light clothing and sunscreen. Would you like a full forecast (conditions, humidity, wind) or an hourly outlook?"
               }
             ],
             "role": "assistant"
           }
         ],
         "parallel_tool_calls": true,
+        "presence_penalty": 0.0,
         "previous_response_id": null,
         "prompt_cache_key": null,
+        "prompt_cache_retention": null,
         "reasoning": {
           "effort": "high",
           "summary": "detailed"
@@ -224,15 +342,15 @@ interactions:
         "top_p": 1.0,
         "truncation": "disabled",
         "usage": {
-          "input_tokens": 159,
+          "input_tokens": 248,
           "input_tokens_details": {
             "cached_tokens": 0
           },
-          "output_tokens": 313,
+          "output_tokens": 489,
           "output_tokens_details": {
-            "reasoning_tokens": 256
+            "reasoning_tokens": 384
           },
-          "total_tokens": 472
+          "total_tokens": 737
         },
         "user": null,
         "metadata": {}
@@ -242,4 +360,4 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 9.847531375s
+    duration: 9.999820417s

@@ -17,7 +17,8 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.34.0 gl-go/go1.25.4
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+      - google-genai-sdk/1.49.0 gl-go/go1.26.1
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse
     method: POST
   response:
@@ -25,10 +26,10 @@ interactions:
     proto_major: 2
     proto_minor: 0
     content_length: -1
-    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"{\\\"author\\\":{\\\"name\\\":\\\"J.R.R. Tolkien\\\",\\\"nationality\\\":\\\"British\\\"},\\\"genres\\\":[\\\"fantasy\\\",\\\"adventure\\\"],\\\"published_year\\\":1954,\\\"title\\\":\\\"The Lord\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 38,\"candidatesTokenCount\": 37,\"totalTokenCount\": 210,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 38}],\"thoughtsTokenCount\": 135},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"yaIdaYqFMfuDvdIPn_iEyAk\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \" of the Rings\\\"}\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 38,\"candidatesTokenCount\": 41,\"totalTokenCount\": 214,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 38}],\"thoughtsTokenCount\": 135},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"yaIdaYqFMfuDvdIPn_iEyAk\"}\r\n\r\n"
+    body: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"{\\\"author\\\": {\\\"name\\\": \\\"J\"}],\"role\": \"model\"},\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 38,\"candidatesTokenCount\": 8,\"totalTokenCount\": 192,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 38}],\"thoughtsTokenCount\": 146},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"9wCzae3oCajRz7IPsNKWsA4\"}\r\n\r\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \".R.R. Tolkien\\\", \\\"nationality\\\": \\\"English\\\"}, \\\"genres\\\": [\\\"fantasy\\\", \\\"adventure\\\"], \\\"published_year\\\": 1954, \\\"title\\\": \\\"The Lord of the Rings\\\"}\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\": 0}],\"usageMetadata\": {\"promptTokenCount\": 38,\"candidatesTokenCount\": 51,\"totalTokenCount\": 235,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\": 38}],\"thoughtsTokenCount\": 146},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\": \"9wCzae3oCajRz7IPsNKWsA4\"}\r\n\r\n"
     headers:
       Content-Type:
       - text/event-stream
     status: 200 OK
     code: 200
-    duration: 1.379188208s
+    duration: 1.428271s

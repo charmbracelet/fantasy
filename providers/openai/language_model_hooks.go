@@ -6,9 +6,9 @@ import (
 	"strings"
 
 	"charm.land/fantasy"
-	"github.com/openai/openai-go/v2"
-	"github.com/openai/openai-go/v2/packages/param"
-	"github.com/openai/openai-go/v2/shared"
+	"github.com/openai/openai-go/v3"
+	"github.com/openai/openai-go/v3/packages/param"
+	"github.com/openai/openai-go/v3/shared"
 )
 
 // LanguageModelPrepareCallFunc is a function that prepares the call for the language model.
@@ -211,8 +211,10 @@ func DefaultUsageFunc(response openai.ChatCompletion) (fantasy.Usage, fantasy.Pr
 			providerMetadata.RejectedPredictionTokens = completionTokenDetails.RejectedPredictionTokens
 		}
 	}
+	// OpenAI reports prompt_tokens INCLUDING cached tokens. Subtract to avoid double-counting.
+	inputTokens := max(response.Usage.PromptTokens-promptTokenDetails.CachedTokens, 0)
 	return fantasy.Usage{
-		InputTokens:     response.Usage.PromptTokens,
+		InputTokens:     inputTokens,
 		OutputTokens:    response.Usage.CompletionTokens,
 		TotalTokens:     response.Usage.TotalTokens,
 		ReasoningTokens: completionTokenDetails.ReasoningTokens,
@@ -237,8 +239,10 @@ func DefaultStreamUsageFunc(chunk openai.ChatCompletionChunk, _ map[string]any, 
 	// we do this here because the acc does not add prompt details
 	completionTokenDetails := chunk.Usage.CompletionTokensDetails
 	promptTokenDetails := chunk.Usage.PromptTokensDetails
+	// OpenAI reports prompt_tokens INCLUDING cached tokens. Subtract to avoid double-counting.
+	inputTokens := max(chunk.Usage.PromptTokens-promptTokenDetails.CachedTokens, 0)
 	usage := fantasy.Usage{
-		InputTokens:     chunk.Usage.PromptTokens,
+		InputTokens:     inputTokens,
 		OutputTokens:    chunk.Usage.CompletionTokens,
 		TotalTokens:     chunk.Usage.TotalTokens,
 		ReasoningTokens: completionTokenDetails.ReasoningTokens,
@@ -442,6 +446,13 @@ func DefaultToPrompt(prompt fantasy.Prompt, _, _ string) ([]openai.ChatCompletio
 					}
 				}
 			}
+			if !hasVisibleUserContent(content) {
+				warnings = append(warnings, fantasy.CallWarning{
+					Type:    fantasy.CallWarningTypeOther,
+					Message: "dropping empty user message (contains neither user-facing content nor tool results)",
+				})
+				continue
+			}
 			messages = append(messages, openai.UserMessage(content))
 		case fantasy.MessageRoleAssistant:
 			// simple assistant message just text content
@@ -496,6 +507,13 @@ func DefaultToPrompt(prompt fantasy.Prompt, _, _ string) ([]openai.ChatCompletio
 						})
 				}
 			}
+			if !hasVisibleAssistantContent(&assistantMsg) {
+				warnings = append(warnings, fantasy.CallWarning{
+					Type:    fantasy.CallWarningTypeOther,
+					Message: "dropping empty assistant message (contains neither user-facing content nor tool calls)",
+				})
+				continue
+			}
 			messages = append(messages, openai.ChatCompletionMessageParamUnion{
 				OfAssistant: &assistantMsg,
 			})
@@ -545,4 +563,25 @@ func DefaultToPrompt(prompt fantasy.Prompt, _, _ string) ([]openai.ChatCompletio
 		}
 	}
 	return messages, warnings
+}
+
+func hasVisibleUserContent(content []openai.ChatCompletionContentPartUnionParam) bool {
+	for _, part := range content {
+		if part.OfText != nil || part.OfImageURL != nil || part.OfInputAudio != nil || part.OfFile != nil {
+			return true
+		}
+	}
+	return false
+}
+
+func hasVisibleAssistantContent(msg *openai.ChatCompletionAssistantMessageParam) bool {
+	// Check if there's text content
+	if !param.IsOmitted(msg.Content.OfString) || len(msg.Content.OfArrayOfContentParts) > 0 {
+		return true
+	}
+	// Check if there are tool calls
+	if len(msg.ToolCalls) > 0 {
+		return true
+	}
+	return false
 }

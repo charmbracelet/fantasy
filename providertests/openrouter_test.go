@@ -17,7 +17,7 @@ var openrouterTestModels = []testModel{
 	{"grok-code-fast-1", "x-ai/grok-code-fast-1", true},
 	{"claude-sonnet-4", "anthropic/claude-sonnet-4", true},
 	{"gemini-2.5-flash", "google/gemini-2.5-flash", false},
-	{"deepseek-chat-v3.1-free", "deepseek/deepseek-chat-v3.1:free", false},
+	{"deepseek/deepseek-v3.2", "deepseek/deepseek-v3.2", false},
 	{"qwen3-235b-a22b-2507", "qwen/qwen3-235b-a22b-2507", false},
 	{"gpt-5", "openai/gpt-5", true},
 	{"gemini-3-pro-preview", "google/gemini-3-pro-preview", true},

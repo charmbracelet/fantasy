@@ -1,0 +1,141 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 533
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence, Italy?","role":"user"}],"model":"anthropic/claude-sonnet-4","stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"reasoning":{"enabled":true},"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+    url: https://ai-gateway.vercel.sh/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"gen_01KKHTT5W53GRP3A5WHWE2ZBCY","object":"chat.completion.chunk","created":1773346298,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"role":"assistant"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_v87huw1qog"}
+
+      data: {"id":"gen_01KKHTT5W53GRP3A5WHWE2ZBCY","object":"chat.completion.chunk","created":1773346298,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"reasoning":"The user is asking for","reasoning_details":[{"type":"reasoning.text","text":"The user is asking for","signature":"","format":"anthropic-claude-v1","index":0}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_v87huw1qog"}
+
+      data: {"id":"gen_01KKHTT5W53GRP3A5WHWE2ZBCY","object":"chat.completion.chunk","created":1773346298,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"reasoning":" weather","reasoning_details":[{"type":"reasoning.text","text":" weather","signature":"","format":"anthropic-claude-v1","index":0}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_v87huw1qog"}
+
+      data: {"id":"gen_01KKHTT5W53GRP3A5WHWE2ZBCY","object":"chat.completion.chunk","created":1773346298,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"reasoning":" information for Florence, Italy. I have","reasoning_details":[{"type":"reasoning.text","text":" information for Florence, Italy. I have","signature":"","format":"anthropic-claude-v1","index":0}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_v87huw1qog"}
+
+      data: {"id":"gen_01KKHTT5W53GRP3A5WHWE2ZBCY","object":"chat.completion.chunk","created":1773346298,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"reasoning":" access to a","reasoning_details":[{"type":"reasoning.text","text":" access to a","signature":"","format":"anthropic-claude-v1","index":0}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_v87huw1qog"}
+
+      data: {"id":"gen_01KKHTT5W53GRP3A5WHWE2ZBCY","object":"chat.completion.chunk","created":1773346298,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"reasoning":" weather","reasoning_details":[{"type":"reasoning.text","text":" weather","signature":"","format":"anthropic-claude-v1","index":0}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_v87huw1qog"}
+
+      data: {"id":"gen_01KKHTT5W53GRP3A5WHWE2ZBCY","object":"chat.completion.chunk","created":1773346298,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"reasoning":" function","reasoning_details":[{"type":"reasoning.text","text":" function","signature":"","format":"anthropic-claude-v1","index":0}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_v87huw1qog"}
+
+      data: {"id":"gen_01KKHTT5W53GRP3A5WHWE2ZBCY","object":"chat.completion.chunk","created":1773346298,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"reasoning":" that takes a location parameter. The","reasoning_details":[{"type":"reasoning.text","text":" that takes a location parameter. The","signature":"","format":"anthropic-claude-v1","index":0}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_v87huw1qog"}
+
+      data: {"id":"gen_01KKHTT5W53GRP3A5WHWE2ZBCY","object":"chat.completion.chunk","created":1773346298,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"reasoning":" location","reasoning_details":[{"type":"reasoning.text","text":" location","signature":"","format":"anthropic-claude-v1","index":0}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_v87huw1qog"}
+
+      data: {"id":"gen_01KKHTT5W53GRP3A5WHWE2ZBCY","object":"chat.completion.chunk","created":1773346298,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"reasoning":" is","reasoning_details":[{"type":"reasoning.text","text":" is","signature":"","format":"anthropic-claude-v1","index":0}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_v87huw1qog"}
+
+      data: {"id":"gen_01KKHTT5W53GRP3A5WHWE2ZBCY","object":"chat.completion.chunk","created":1773346298,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"reasoning":" clearly","reasoning_details":[{"type":"reasoning.text","text":" clearly","signature":"","format":"anthropic-claude-v1","index":0}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_v87huw1qog"}
+
+      data: {"id":"gen_01KKHTT5W53GRP3A5WHWE2ZBCY","object":"chat.completion.chunk","created":1773346298,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"reasoning":" specified as \"Florence, Italy\" so","reasoning_details":[{"type":"reasoning.text","text":" specified as \"Florence, Italy\" so","signature":"","format":"anthropic-claude-v1","index":0}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_v87huw1qog"}
+
+      data: {"id":"gen_01KKHTT5W53GRP3A5WHWE2ZBCY","object":"chat.completion.chunk","created":1773346298,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"reasoning":" I have","reasoning_details":[{"type":"reasoning.text","text":" I have","signature":"","format":"anthropic-claude-v1","index":0}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_v87huw1qog"}
+
+      data: {"id":"gen_01KKHTT5W53GRP3A5WHWE2ZBCY","object":"chat.completion.chunk","created":1773346298,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"reasoning":" all the required parameters to make the function","reasoning_details":[{"type":"reasoning.text","text":" all the required parameters to make the function","signature":"","format":"anthropic-claude-v1","index":0}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_v87huw1qog"}
+
+      data: {"id":"gen_01KKHTT5W53GRP3A5WHWE2ZBCY","object":"chat.completion.chunk","created":1773346298,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"reasoning":" call.","reasoning_details":[{"type":"reasoning.text","text":" call.","signature":"","format":"anthropic-claude-v1","index":0}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_v87huw1qog"}
+
+      data: {"id":"gen_01KKHTT5W53GRP3A5WHWE2ZBCY","object":"chat.completion.chunk","created":1773346298,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"reasoning":"","reasoning_details":[{"type":"reasoning.text","text":"","signature":"","format":"anthropic-claude-v1","index":0}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_v87huw1qog"}
+
+      data: {"id":"gen_01KKHTT5W53GRP3A5WHWE2ZBCY","object":"chat.completion.chunk","created":1773346298,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"reasoning":"","reasoning_details":[{"type":"reasoning.text","text":"","signature":"EqUDCkYICxgCKkDNAndr2nJPVxOWwX0PlM1JjuprXAg/UBMu/1tmFzyWgKvMb7TATXkChgKDYkb8t6/RlymDHuTJgFvuy34LG7q5Egx4Cq5KSCvX7xe5xakaDN/clAX+XIfmYbXBnCIwGRqnuZSrFOBh+zN+qhVrdZ+5d+sL81Og26dZCg7nCGUQKzGR7ovii9+LiTuudmzzKowCwkJTF0PeYHoPNiRWkYbbGtrjgrWBirlh8ksqxniINAxFFRXAwnMfJ6HKqxG/n8smG2Uu2aC2vp0sUvUETcsWiwWlzFWlTuHoVdrzlV8pw6f98BcNUrw6GceJP8MLdpgVaTVVx/05ZWUuSylFnNA1J41HMobeL+z4bi3XJUGfBgFSQTTUG5eZPcEKztNkbQt+T+0JQpl6bTbIOvZQ6YKjqoWMFewupmxperaVvhFarDpK7J0wllfwwMFnCh3QnFX8d0GtEuHr1m26XA0mzyIfNNgX2DboQXYgr7o4zuwU9Bi8Kru5XY4m5lNXYyB/nPfXIh9K37Ul4KcJNqtMNYPUH0SLmX6RjhoYXVCKdxgB","format":"anthropic-claude-v1","index":0}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_v87huw1qog"}
+
+      data: {"id":"gen_01KKHTT5W53GRP3A5WHWE2ZBCY","object":"chat.completion.chunk","created":1773346298,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"toolu_01L8DKSzJDJUgSqUJ6TDqfCH","type":"function","function":{"name":"weather","arguments":""}}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_v87huw1qog"}
+
+      data: {"id":"gen_01KKHTT5W53GRP3A5WHWE2ZBCY","object":"chat.completion.chunk","created":1773346298,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"{\"loca"}}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_v87huw1qog"}
+
+      data: {"id":"gen_01KKHTT5W53GRP3A5WHWE2ZBCY","object":"chat.completion.chunk","created":1773346298,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"tion\": \"Flor"}}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_v87huw1qog"}
+
+      data: {"id":"gen_01KKHTT5W53GRP3A5WHWE2ZBCY","object":"chat.completion.chunk","created":1773346298,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"enc"}}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_v87huw1qog"}
+
+      data: {"id":"gen_01KKHTT5W53GRP3A5WHWE2ZBCY","object":"chat.completion.chunk","created":1773346298,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"e, Italy"}}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_v87huw1qog"}
+
+      data: {"id":"gen_01KKHTT5W53GRP3A5WHWE2ZBCY","object":"chat.completion.chunk","created":1773346298,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"\"}"}}]},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_v87huw1qog"}
+
+      data: {"id":"gen_01KKHTT5W53GRP3A5WHWE2ZBCY","object":"chat.completion.chunk","created":1773346298,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"provider_metadata":{"anthropic":{"usage":{"input_tokens":424,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":110,"service_tier":"standard","inference_geo":"not_available"},"cacheCreationInputTokens":0,"stopSequence":null,"iterations":null,"container":null,"contextManagement":null},"gateway":{"routing":{"originalModelId":"anthropic/claude-sonnet-4","resolvedProvider":"anthropic","resolvedProviderApiModelId":"claude-sonnet-4-20250514","internalResolvedModelId":"anthropic:claude-sonnet-4-20250514","fallbacksAvailable":["vertexAnthropic","bedrock"],"internalReasoning":"Selected anthropic as preferred provider for claude-sonnet-4. 2 fallback(s) available: vertexAnthropic, bedrock","planningReasoning":"System credentials planned for: anthropic, vertexAnthropic, bedrock. Total execution order: anthropic(system) → vertexAnthropic(system) → bedrock(system)","canonicalSlug":"anthropic/claude-sonnet-4","finalProvider":"anthropic","attempts":[{"provider":"anthropic","internalModelId":"anthropic:claude-sonnet-4-20250514","providerApiModelId":"claude-sonnet-4-20250514","credentialType":"system","success":true,"startTime":369359.100927,"endTime":371647.826979,"providerRequestId":"req_011CYyo57GJ8sVyYvLToZWsF","statusCode":200,"providerResponseId":"msg_01PYMSHTNpGJCqPt2hUgsrBc"}],"modelAttemptCount":1,"modelAttempts":[{"modelId":"anthropic:claude-sonnet-4-20250514","canonicalSlug":"anthropic/claude-sonnet-4","success":true,"providerAttemptCount":1,"providerAttempts":[{"provider":"anthropic","internalModelId":"anthropic:claude-sonnet-4-20250514","providerApiModelId":"claude-sonnet-4-20250514","credentialType":"system","success":true,"startTime":369359.100927,"endTime":371647.826979,"providerRequestId":"req_011CYyo57GJ8sVyYvLToZWsF","statusCode":200,"providerResponseId":"msg_01PYMSHTNpGJCqPt2hUgsrBc"}]}],"totalProviderAttemptCount":1},"cost":"0.002922","marketCost":"0.002922","generationId":"gen_01KKHTT5W53GRP3A5WHWE2ZBCY","billableWebSearchCalls":0}}},"logprobs":null,"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":424,"completion_tokens":110,"total_tokens":534,"cost":0.002922,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0},"cache_creation_input_tokens":0,"market_cost":0.002922},"system_fingerprint":"fp_v87huw1qog","generationId":"gen_01KKHTT5W53GRP3A5WHWE2ZBCY"}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 1.246093292s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1993
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence, Italy?","role":"user"},{"tool_calls":[{"id":"toolu_01L8DKSzJDJUgSqUJ6TDqfCH","function":{"arguments":"{\"location\": \"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant","reasoning_details":[{"format":"anthropic-claude-v1","index":0,"signature":"EqUDCkYICxgCKkDNAndr2nJPVxOWwX0PlM1JjuprXAg/UBMu/1tmFzyWgKvMb7TATXkChgKDYkb8t6/RlymDHuTJgFvuy34LG7q5Egx4Cq5KSCvX7xe5xakaDN/clAX+XIfmYbXBnCIwGRqnuZSrFOBh+zN+qhVrdZ+5d+sL81Og26dZCg7nCGUQKzGR7ovii9+LiTuudmzzKowCwkJTF0PeYHoPNiRWkYbbGtrjgrWBirlh8ksqxniINAxFFRXAwnMfJ6HKqxG/n8smG2Uu2aC2vp0sUvUETcsWiwWlzFWlTuHoVdrzlV8pw6f98BcNUrw6GceJP8MLdpgVaTVVx/05ZWUuSylFnNA1J41HMobeL+z4bi3XJUGfBgFSQTTUG5eZPcEKztNkbQt+T+0JQpl6bTbIOvZQ6YKjqoWMFewupmxperaVvhFarDpK7J0wllfwwMFnCh3QnFX8d0GtEuHr1m26XA0mzyIfNNgX2DboQXYgr7o4zuwU9Bi8Kru5XY4m5lNXYyB/nPfXIh9K37Ul4KcJNqtMNYPUH0SLmX6RjhoYXVCKdxgB","text":"The user is asking for weather information for Florence, Italy. I have access to a weather function that takes a location parameter. The location is clearly specified as \"Florence, Italy\" so I have all the required parameters to make the function call.","type":"reasoning.text"}],"reasoning":"The user is asking for weather information for Florence, Italy. I have access to a weather function that takes a location parameter. The location is clearly specified as \"Florence, Italy\" so I have all the required parameters to make the function call."},{"content":"40 C","tool_call_id":"toolu_01L8DKSzJDJUgSqUJ6TDqfCH","role":"tool"}],"model":"anthropic/claude-sonnet-4","stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"reasoning":{"enabled":true},"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+    url: https://ai-gateway.vercel.sh/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"gen_01KKHTT89CX2S9SSQ455GAA1X3","object":"chat.completion.chunk","created":1773346301,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"role":"assistant"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_o85uf75mfs"}
+
+      data: {"id":"gen_01KKHTT89CX2S9SSQ455GAA1X3","object":"chat.completion.chunk","created":1773346301,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":"The"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_o85uf75mfs"}
+
+      data: {"id":"gen_01KKHTT89CX2S9SSQ455GAA1X3","object":"chat.completion.chunk","created":1773346301,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":" current"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_o85uf75mfs"}
+
+      data: {"id":"gen_01KKHTT89CX2S9SSQ455GAA1X3","object":"chat.completion.chunk","created":1773346301,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":" weather in Florence, Italy is 40"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_o85uf75mfs"}
+
+      data: {"id":"gen_01KKHTT89CX2S9SSQ455GAA1X3","object":"chat.completion.chunk","created":1773346301,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":"°C (104°F). That"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_o85uf75mfs"}
+
+      data: {"id":"gen_01KKHTT89CX2S9SSQ455GAA1X3","object":"chat.completion.chunk","created":1773346301,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":"'s quite"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_o85uf75mfs"}
+
+      data: {"id":"gen_01KKHTT89CX2S9SSQ455GAA1X3","object":"chat.completion.chunk","created":1773346301,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":" hot"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_o85uf75mfs"}
+
+      data: {"id":"gen_01KKHTT89CX2S9SSQ455GAA1X3","object":"chat.completion.chunk","created":1773346301,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":"!"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_o85uf75mfs"}
+
+      data: {"id":"gen_01KKHTT89CX2S9SSQ455GAA1X3","object":"chat.completion.chunk","created":1773346301,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":" It"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_o85uf75mfs"}
+
+      data: {"id":"gen_01KKHTT89CX2S9SSQ455GAA1X3","object":"chat.completion.chunk","created":1773346301,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":"'s a very"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_o85uf75mfs"}
+
+      data: {"id":"gen_01KKHTT89CX2S9SSQ455GAA1X3","object":"chat.completion.chunk","created":1773346301,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":" warm day in"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_o85uf75mfs"}
+
+      data: {"id":"gen_01KKHTT89CX2S9SSQ455GAA1X3","object":"chat.completion.chunk","created":1773346301,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":" Florence"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_o85uf75mfs"}
+
+      data: {"id":"gen_01KKHTT89CX2S9SSQ455GAA1X3","object":"chat.completion.chunk","created":1773346301,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"content":"."},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_o85uf75mfs"}
+
+      data: {"id":"gen_01KKHTT89CX2S9SSQ455GAA1X3","object":"chat.completion.chunk","created":1773346301,"model":"anthropic/claude-sonnet-4","choices":[{"index":0,"delta":{"provider_metadata":{"anthropic":{"usage":{"input_tokens":549,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":34,"service_tier":"standard","inference_geo":"not_available"},"cacheCreationInputTokens":0,"stopSequence":null,"iterations":null,"container":null,"contextManagement":null},"gateway":{"routing":{"originalModelId":"anthropic/claude-sonnet-4","resolvedProvider":"anthropic","resolvedProviderApiModelId":"claude-sonnet-4-20250514","internalResolvedModelId":"anthropic:claude-sonnet-4-20250514","fallbacksAvailable":["vertexAnthropic","bedrock"],"internalReasoning":"Selected anthropic as preferred provider for claude-sonnet-4. 2 fallback(s) available: vertexAnthropic, bedrock","planningReasoning":"System credentials planned for: anthropic, vertexAnthropic, bedrock. Total execution order: anthropic(system) → vertexAnthropic(system) → bedrock(system)","canonicalSlug":"anthropic/claude-sonnet-4","finalProvider":"anthropic","attempts":[{"provider":"anthropic","internalModelId":"anthropic:claude-sonnet-4-20250514","providerApiModelId":"claude-sonnet-4-20250514","credentialType":"system","success":true,"startTime":1319014.543112,"endTime":1320609.154077,"providerRequestId":"req_011CYyo5HqXsVt85DyVY3Eth","statusCode":200,"providerResponseId":"msg_01CiFXVMZktbrtEF8RnZpdF5"}],"modelAttemptCount":1,"modelAttempts":[{"modelId":"anthropic:claude-sonnet-4-20250514","canonicalSlug":"anthropic/claude-sonnet-4","success":true,"providerAttemptCount":1,"providerAttempts":[{"provider":"anthropic","internalModelId":"anthropic:claude-sonnet-4-20250514","providerApiModelId":"claude-sonnet-4-20250514","credentialType":"system","success":true,"startTime":1319014.543112,"endTime":1320609.154077,"providerRequestId":"req_011CYyo5HqXsVt85DyVY3Eth","statusCode":200,"providerResponseId":"msg_01CiFXVMZktbrtEF8RnZpdF5"}]}],"totalProviderAttemptCount":1},"cost":"0.002157","marketCost":"0.002157","generationId":"gen_01KKHTT89CX2S9SSQ455GAA1X3","billableWebSearchCalls":0}}},"logprobs":null,"finish_reason":"stop"}],"usage":{"prompt_tokens":549,"completion_tokens":34,"total_tokens":583,"cost":0.002157,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0},"cache_creation_input_tokens":0,"market_cost":0.002157},"system_fingerprint":"fp_o85uf75mfs","generationId":"gen_01KKHTT89CX2S9SSQ455GAA1X3"}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 1.047528916s

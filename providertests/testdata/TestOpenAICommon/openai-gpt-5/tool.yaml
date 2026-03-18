@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/chat/completions
     method: POST
   response:
@@ -26,9 +26,9 @@ interactions:
     uncompressed: true
     body: |
       {
-        "id": "chatcmpl-CRdzCfnkaQoMYKAvfAXds0hUUaCog",
+        "id": "chatcmpl-DIgP1cdJUOKtUeAnEKhAXPlz4ocX1",
         "object": "chat.completion",
-        "created": 1760704598,
+        "created": 1773345271,
         "model": "gpt-5-2025-08-07",
         "choices": [
           {
@@ -38,7 +38,7 @@ interactions:
               "content": null,
               "tool_calls": [
                 {
-                  "id": "call_iENK0JiZIVgIwVhzXgr2vqAb",
+                  "id": "call_UC58858zDb1VGnI3t4T7v19X",
                   "type": "function",
                   "function": {
                     "name": "weather",
@@ -54,14 +54,14 @@ interactions:
         ],
         "usage": {
           "prompt_tokens": 145,
-          "completion_tokens": 89,
-          "total_tokens": 234,
+          "completion_tokens": 153,
+          "total_tokens": 298,
           "prompt_tokens_details": {
             "cached_tokens": 0,
             "audio_tokens": 0
           },
           "completion_tokens_details": {
-            "reasoning_tokens": 64,
+            "reasoning_tokens": 128,
             "audio_tokens": 0,
             "accepted_prediction_tokens": 0,
             "rejected_prediction_tokens": 0
@@ -75,7 +75,7 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 4.061672083s
+    duration: 3.250397625s
 - id: 1
   request:
     proto: HTTP/1.1
@@ -83,14 +83,14 @@ interactions:
     proto_minor: 1
     content_length: 710
     host: ""
-    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"call_iENK0JiZIVgIwVhzXgr2vqAb","function":{"arguments":"{\"location\":\"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"call_iENK0JiZIVgIwVhzXgr2vqAb","role":"tool"}],"model":"gpt-5","max_completion_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"call_UC58858zDb1VGnI3t4T7v19X","function":{"arguments":"{\"location\":\"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"call_UC58858zDb1VGnI3t4T7v19X","role":"tool"}],"model":"gpt-5","max_completion_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
     headers:
       Accept:
       - application/json
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/chat/completions
     method: POST
   response:
@@ -101,16 +101,16 @@ interactions:
     uncompressed: true
     body: |
       {
-        "id": "chatcmpl-CRdzFTi2wOwwtpFFMfez7pGHYh07c",
+        "id": "chatcmpl-DIgP5ZkKTU1fpDUXvRzcsYmgrTBv5",
         "object": "chat.completion",
-        "created": 1760704601,
+        "created": 1773345275,
         "model": "gpt-5-2025-08-07",
         "choices": [
           {
             "index": 0,
             "message": {
               "role": "assistant",
-              "content": "It’s currently about 40°C (104°F) in Florence, Italy. Would you like a forecast or more details (humidity, wind, etc.)?",
+              "content": "Right now in Florence, Italy, it’s about 40°C (104°F). Would you like a forecast or more details like wind and humidity?",
               "refusal": null,
               "annotations": []
             },
@@ -119,14 +119,14 @@ interactions:
         ],
         "usage": {
           "prompt_tokens": 176,
-          "completion_tokens": 297,
-          "total_tokens": 473,
+          "completion_tokens": 359,
+          "total_tokens": 535,
           "prompt_tokens_details": {
             "cached_tokens": 0,
             "audio_tokens": 0
           },
           "completion_tokens_details": {
-            "reasoning_tokens": 256,
+            "reasoning_tokens": 320,
             "audio_tokens": 0,
             "accepted_prediction_tokens": 0,
             "rejected_prediction_tokens": 0
@@ -140,4 +140,4 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 6.021670833s
+    duration: 11.360699125s

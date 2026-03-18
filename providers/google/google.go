@@ -14,6 +14,7 @@ import (
 	"charm.land/fantasy"
 	"charm.land/fantasy/object"
 	"charm.land/fantasy/providers/anthropic"
+	"charm.land/fantasy/providers/internal/httpheaders"
 	"charm.land/fantasy/schema"
 	"cloud.google.com/go/auth"
 	"github.com/charmbracelet/x/exp/slice"
@@ -36,6 +37,7 @@ type options struct {
 	name           string
 	baseURL        string
 	headers        map[string]string
+	userAgent      string
 	client         *http.Client
 	backend        genai.Backend
 	project        string
@@ -132,6 +134,14 @@ func WithToolCallIDFunc(f ToolCallIDFunc) Option {
 	}
 }
 
+// WithUserAgent sets an explicit User-Agent header, overriding the default and any
+// value set via WithHeaders.
+func WithUserAgent(ua string) Option {
+	return func(o *options) {
+		o.userAgent = ua
+	}
+}
+
 // WithObjectMode sets the object generation mode for the Google provider.
 func WithObjectMode(om fantasy.ObjectMode) Option {
 	return func(o *options) {
@@ -154,11 +164,15 @@ type languageModel struct {
 // LanguageModel implements fantasy.Provider.
 func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.LanguageModel, error) {
 	if strings.Contains(modelID, "anthropic") || strings.Contains(modelID, "claude") {
-		p, err := anthropic.New(
+		anthropicOpts := []anthropic.Option{
 			anthropic.WithVertex(a.options.project, a.options.location),
 			anthropic.WithHTTPClient(a.options.client),
 			anthropic.WithSkipAuth(a.options.skipAuth),
-		)
+		}
+		if a.options.userAgent != "" {
+			anthropicOpts = append(anthropicOpts, anthropic.WithUserAgent(a.options.userAgent))
+		}
+		p, err := anthropic.New(anthropicOpts...)
 		if err != nil {
 			return nil, err
 		}
@@ -166,7 +180,7 @@ func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.L
 	}
 
 	cc := &genai.ClientConfig{
-		HTTPClient: a.options.client,
+		HTTPClient: wrapHTTPClient(a.options.client),
 		Backend:    a.options.backend,
 		APIKey:     a.options.apiKey,
 		Project:    a.options.project,
@@ -180,15 +194,16 @@ func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.L
 		}
 	}
 
-	if a.options.baseURL != "" || len(a.options.headers) > 0 {
-		headers := http.Header{}
-		for k, v := range a.options.headers {
-			headers.Add(k, v)
-		}
-		cc.HTTPOptions = genai.HTTPOptions{
-			BaseURL: a.options.baseURL,
-			Headers: headers,
-		}
+	defaultUA := httpheaders.DefaultUserAgent(fantasy.Version)
+	resolved := httpheaders.ResolveHeaders(a.options.headers, a.options.userAgent, defaultUA)
+
+	headers := http.Header{}
+	for k, v := range resolved {
+		headers.Set(k, v)
+	}
+	cc.HTTPOptions = genai.HTTPOptions{
+		BaseURL: a.options.baseURL,
+		Headers: headers,
 	}
 	client, err := genai.NewClient(ctx, cc)
 	if err != nil {
@@ -241,6 +256,14 @@ func (g languageModel) prepareParams(call fantasy.Call) (*genai.GenerateContentC
 				Message: "The 'thinking_budget' option can not be under 128 and will be set to 128 by default",
 			})
 			providerOptions.ThinkingConfig.ThinkingBudget = fantasy.Opt(int64(128))
+		}
+
+		if providerOptions.ThinkingConfig.ThinkingLevel != nil &&
+			providerOptions.ThinkingConfig.ThinkingBudget != nil {
+			return nil, nil, nil, &fantasy.Error{
+				Title:   "invalid argument",
+				Message: "thinking_level and thinking_budget are mutually exclusive",
+			}
 		}
 	}
 
@@ -297,6 +320,9 @@ func (g languageModel) prepareParams(call fantasy.Call) (*genai.GenerateContentC
 		if providerOptions.ThinkingConfig.ThinkingBudget != nil {
 			tmp := int32(*providerOptions.ThinkingConfig.ThinkingBudget) //nolint: gosec
 			config.ThinkingConfig.ThinkingBudget = &tmp
+		}
+		if providerOptions.ThinkingConfig.ThinkingLevel != nil {
+			config.ThinkingConfig.ThinkingLevel = genai.ThinkingLevel(*providerOptions.ThinkingConfig.ThinkingLevel)
 		}
 	}
 	for _, safetySetting := range providerOptions.SafetySettings {
@@ -519,6 +545,7 @@ func toGooglePrompt(prompt fantasy.Prompt) (*genai.Content, []*genai.Content, []
 
 // Generate implements fantasy.LanguageModel.
 func (g *languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantasy.Response, error) {
+	ctx = withCallUA(ctx, call)
 	config, contents, warnings, err := g.prepareParams(call)
 	if err != nil {
 		return nil, err
@@ -554,6 +581,7 @@ func (g *languageModel) Provider() string {
 
 // Stream implements fantasy.LanguageModel.
 func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.StreamResponse, error) {
+	ctx = withCallUA(ctx, call)
 	config, contents, warnings, err := g.prepareParams(call)
 	if err != nil {
 		return nil, err
@@ -842,9 +870,14 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 			finishReason = fantasy.FinishReasonStop
 		}
 
+		var finalUsage fantasy.Usage
+		if usage != nil {
+			finalUsage = *usage
+		}
+
 		yield(fantasy.StreamPart{
 			Type:         fantasy.StreamPartTypeFinish,
-			Usage:        *usage,
+			Usage:        finalUsage,
 			FinishReason: finishReason,
 		})
 	}, nil
@@ -875,6 +908,7 @@ func (g *languageModel) StreamObject(ctx context.Context, call fantasy.ObjectCal
 }
 
 func (g *languageModel) generateObjectWithJSONMode(ctx context.Context, call fantasy.ObjectCall) (*fantasy.ObjectResponse, error) {
+	ctx = withObjectCallUA(ctx, call)
 	// Convert our Schema to Google's JSON Schema format
 	jsonSchemaMap := schema.ToMap(call.Schema)
 
@@ -957,6 +991,7 @@ func (g *languageModel) generateObjectWithJSONMode(ctx context.Context, call fan
 }
 
 func (g *languageModel) streamObjectWithJSONMode(ctx context.Context, call fantasy.ObjectCall) (fantasy.ObjectStreamResponse, error) {
+	ctx = withObjectCallUA(ctx, call)
 	// Convert our Schema to Google's JSON Schema format
 	jsonSchemaMap := schema.ToMap(call.Schema)
 
@@ -1083,19 +1118,21 @@ func (g *languageModel) streamObjectWithJSONMode(ctx context.Context, call fanta
 
 		// Final validation and emit
 		if streamErr == nil && lastParsedObject != nil {
-			finishReason := lastFinishReason
-			if finishReason == "" {
-				finishReason = fantasy.FinishReasonStop
+			finishReason := cmp.Or(lastFinishReason, fantasy.FinishReasonStop)
+
+			var finalUsage fantasy.Usage
+			if usage != nil {
+				finalUsage = *usage
 			}
 
 			yield(fantasy.ObjectStreamPart{
 				Type:         fantasy.ObjectStreamPartTypeFinish,
-				Usage:        *usage,
+				Usage:        finalUsage,
 				FinishReason: finishReason,
 			})
 		} else if streamErr == nil && lastParsedObject == nil {
 			// No object was generated
-			finalUsage := fantasy.Usage{}
+			var finalUsage fantasy.Usage
 			if usage != nil {
 				finalUsage = *usage
 			}
@@ -1120,7 +1157,7 @@ func toGoogleTools(tools []fantasy.Tool, toolChoice *fantasy.ToolChoice) (google
 				continue
 			}
 
-			required := []string{}
+			var required []string
 			var properties map[string]any
 			if props, ok := ft.InputSchema["properties"]; ok {
 				properties, _ = props.(map[string]any)

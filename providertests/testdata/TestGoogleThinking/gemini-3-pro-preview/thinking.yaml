@@ -6,15 +6,16 @@ interactions:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 550
+    content_length: 552
     host: generativelanguage.googleapis.com
     body: |
-      {"contents":[{"parts":[{"text":"What's the weather in Florence, Italy?"}],"role":"user"}],"generationConfig":{"thinkingConfig":{"includeThoughts":true,"thinkingBudget":128}},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}
+      {"contents":[{"parts":[{"text":"What's the weather in Florence, Italy?"}],"role":"user"}],"generationConfig":{"thinkingConfig":{"includeThoughts":true,"thinkingLevel":"HIGH"}},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}
     headers:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.34.0 gl-go/go1.25.4
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+      - google-genai-sdk/1.49.0 gl-go/go1.26.1
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent
     method: POST
   response:
@@ -30,7 +31,7 @@ interactions:
             "content": {
               "parts": [
                 {
-                  "text": "**Breaking Down the Weather Query**\n\nOkay, here's what I'm processing. A user is asking about the weather in Florence, Italy. That's straightforward enough - they want current weather data. Looking at my toolset, I see the `weather` tool is perfect for this. It's explicitly designed for retrieving weather information based on a location. Easy. This is a classic example of intent recognition and tool selection. My next step would be to formulate the `weather` function call with the correct parameters, specifically the location, \"Florence, Italy\". I'm ready to get this user the information they need.\n\n\n",
+                  "text": "**My Thought Process: Weather in Florence**\n\nOkay, the user wants the weather in Florence, Italy. Simple enough. First, I need to identify the appropriate tool. Ah, the `default_api:weather` tool – perfect! That's exactly what I need for weather data. Now, what parameters does this tool require? Right, just a `location`. The user's provided location is \"Florence, Italy,\" so that's the value I'll use. Now to format the tool call correctly. I need a JSON object for the location, and then it's `{\"location\": \"Florence, Italy\"}`. Final step: I execute the tool call in the appropriate format: `டல்call:default_api:weather{\"location\": \"Florence, Italy\"}`. Done! I should get the weather data back shortly.\n\n\n",
                   "thought": true
                 },
                 {
@@ -38,9 +39,10 @@ interactions:
                     "name": "weather",
                     "args": {
                       "location": "Florence, Italy"
-                    }
+                    },
+                    "id": "v3yybtcf"
                   },
-                  "thoughtSignature": "EtMDCtADAdHtim/Qznjl3jYdbqtczyFkf1sarL7CYPmwkwMTU8qifm7AQe1i21NWqWvbSGT+KG/NkCBhcC0Zc8MusHqgFm2Iw+2TP0Ckp8nL5k+1G7jffxPRKsXcyq/6jvRtGvcxb199vZTNapt2/vYas7tEOZahNr/Xiuic7yVEcEEQD8Vdsp9qgRy8qu4RO1nc8Q5cnbd8fOEKfjusde2ehpTA47PUNhhIWlLBEGeMOowAoaEf9/W7cMxlg21omQYaYiIVgvI1qi2U/4nSOKDBlTA2N0LDuygPTtRsz2ZMwJGC8CIrrCW0apY1X2QcgO+s/9tNurJp/D9tiIFnwRXT8q7V90nAng9dSqHrChr2jvr4n3j5wgbvHnqLJouCKR8ME+leQZUHefdJyHeXNSjv9Rzs7cqiaUgWR7Rn11BQld3Q/myVqq7/r0LI/IchztYQVKDvE0XXbc0o8x4cfQTmtdlSwcAQxE5OG6sLNoRPAJmPfkwlppeHwNGG7ntkCKX/nG/o40w2OyFwk6WnkyNhnqTiA5knDyP51fnOiwKhFYxtDa7f2WdUPsILiJjqT7hDjtYTCnYvuWgTvqkaRtfLWES9QIVVZP63zK6PDFQLtLp8kd0="
+                  "thoughtSignature": "EucECuQEAb4+9vsYroJyp1uieeH5kjR2slN/TtULDJ5DWhM6IAskLN0yYqxSHckqkY3CLX/sBF+KwFP44rn+BjtIaS+rgcM+omQ3YzvLnnMVdeU97IAih7VbuWqqdpqcXrtiab4vZbhun83pab1NndOKL5M/o9RMPC8IlQNnzb3KMhmzhQ6whAePjKxI1bZpRil3s9aPHjHHwIMKhGhfjtbnli4XS93vEEWCe9YM5QYhY5afbnoJUxQXMDxH8SvUzqgTWULjDZPHNsr7jA/QvI8OFosXNjEFiyYFhsvNQxeHRW2Ce9kVJRSTskO5i+MXGVGYBZ1J7FpMAkTcbqUPHqnFd3kEMrsiGSHUDE6jCcYpN6DT215y9hnhG2cs0LqSVq8gqQqlCYeWW6fDXMhuzhOkcTOaZby8GrFumJiwbvBfZW9kEY+Dp0X1mDNuFethsFI9EsQ+3Q8Xw4OI1JaBCgriDuebHOgNrQZzMECawx7x3t1ctDwOa7Ehdh3Ct7X5+ZKur6x5JsCFqTpmbqD0mEx3xlHQsYMEpO+biVZkBHz0fb/sjAd55cvU0fyXYLt9YYPraY4jLDPr7dBlmh3/5u1yWShphIUyGdWaC5k4hhsZG4BRrm5ZERlWJdGwKj0Y9B45sbeObmT4X78WrWmghagQ29dvRYBeROneeVobZ7VY52zSfvtBmvnO614/9OjOKqKVJAdrNbo3LK3lT6dhIlesFvRV1c6O4QFf3z9ZdOKouH3vvxDg6TQsIc3dkIaKdT2G1fBUjjavEIjTWhjoe70FJGSp+5y5tWVGu+ULheKsjk7+bMX1gUw1"
                 }
               ],
               "role": "model"
@@ -53,38 +55,39 @@ interactions:
         "usageMetadata": {
           "promptTokenCount": 65,
           "candidatesTokenCount": 16,
-          "totalTokenCount": 189,
+          "totalTokenCount": 219,
           "promptTokensDetails": [
             {
               "modality": "TEXT",
               "tokenCount": 65
             }
           ],
-          "thoughtsTokenCount": 108
+          "thoughtsTokenCount": 138
         },
-        "modelVersion": "gemini-3-pro-preview",
-        "responseId": "mqIdabO3C5S3vdIPuPm34Ak"
+        "modelVersion": "gemini-3.1-pro-preview",
+        "responseId": "wgCzaf-rHeXgz7IPoryaqAU"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 3.163927334s
+    duration: 4.6109495s
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 1414
+    content_length: 1626
     host: generativelanguage.googleapis.com
     body: |
-      {"contents":[{"parts":[{"text":"What's the weather in Florence, Italy?"}],"role":"user"},{"parts":[{"functionCall":{"args":{"location":"Florence, Italy"},"id":"1","name":"weather"},"thoughtSignature":"EtMDCtADAdHtim/Qznjl3jYdbqtczyFkf1sarL7CYPmwkwMTU8qifm7AQe1i21NWqWvbSGT+KG/NkCBhcC0Zc8MusHqgFm2Iw+2TP0Ckp8nL5k+1G7jffxPRKsXcyq/6jvRtGvcxb199vZTNapt2/vYas7tEOZahNr/Xiuic7yVEcEEQD8Vdsp9qgRy8qu4RO1nc8Q5cnbd8fOEKfjusde2ehpTA47PUNhhIWlLBEGeMOowAoaEf9/W7cMxlg21omQYaYiIVgvI1qi2U/4nSOKDBlTA2N0LDuygPTtRsz2ZMwJGC8CIrrCW0apY1X2QcgO+s/9tNurJp/D9tiIFnwRXT8q7V90nAng9dSqHrChr2jvr4n3j5wgbvHnqLJouCKR8ME+leQZUHefdJyHeXNSjv9Rzs7cqiaUgWR7Rn11BQld3Q/myVqq7/r0LI/IchztYQVKDvE0XXbc0o8x4cfQTmtdlSwcAQxE5OG6sLNoRPAJmPfkwlppeHwNGG7ntkCKX/nG/o40w2OyFwk6WnkyNhnqTiA5knDyP51fnOiwKhFYxtDa7f2WdUPsILiJjqT7hDjtYTCnYvuWgTvqkaRtfLWES9QIVVZP63zK6PDFQLtLp8kd0="}],"role":"model"},{"parts":[{"functionResponse":{"id":"1","name":"weather","response":{"result":"40 C"}}}],"role":"user"}],"generationConfig":{"thinkingConfig":{"includeThoughts":true,"thinkingBudget":128}},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}
+      {"contents":[{"parts":[{"text":"What's the weather in Florence, Italy?"}],"role":"user"},{"parts":[{"functionCall":{"args":{"location":"Florence, Italy"},"id":"v3yybtcf","name":"weather"},"thoughtSignature":"EucECuQEAb4+9vsYroJyp1uieeH5kjR2slN/TtULDJ5DWhM6IAskLN0yYqxSHckqkY3CLX/sBF+KwFP44rn+BjtIaS+rgcM+omQ3YzvLnnMVdeU97IAih7VbuWqqdpqcXrtiab4vZbhun83pab1NndOKL5M/o9RMPC8IlQNnzb3KMhmzhQ6whAePjKxI1bZpRil3s9aPHjHHwIMKhGhfjtbnli4XS93vEEWCe9YM5QYhY5afbnoJUxQXMDxH8SvUzqgTWULjDZPHNsr7jA/QvI8OFosXNjEFiyYFhsvNQxeHRW2Ce9kVJRSTskO5i+MXGVGYBZ1J7FpMAkTcbqUPHqnFd3kEMrsiGSHUDE6jCcYpN6DT215y9hnhG2cs0LqSVq8gqQqlCYeWW6fDXMhuzhOkcTOaZby8GrFumJiwbvBfZW9kEY+Dp0X1mDNuFethsFI9EsQ+3Q8Xw4OI1JaBCgriDuebHOgNrQZzMECawx7x3t1ctDwOa7Ehdh3Ct7X5+ZKur6x5JsCFqTpmbqD0mEx3xlHQsYMEpO+biVZkBHz0fb/sjAd55cvU0fyXYLt9YYPraY4jLDPr7dBlmh3/5u1yWShphIUyGdWaC5k4hhsZG4BRrm5ZERlWJdGwKj0Y9B45sbeObmT4X78WrWmghagQ29dvRYBeROneeVobZ7VY52zSfvtBmvnO614/9OjOKqKVJAdrNbo3LK3lT6dhIlesFvRV1c6O4QFf3z9ZdOKouH3vvxDg6TQsIc3dkIaKdT2G1fBUjjavEIjTWhjoe70FJGSp+5y5tWVGu+ULheKsjk7+bMX1gUw1"}],"role":"model"},{"parts":[{"functionResponse":{"id":"v3yybtcf","name":"weather","response":{"result":"40 C"}}}],"role":"user"}],"generationConfig":{"thinkingConfig":{"includeThoughts":true,"thinkingLevel":"HIGH"}},"systemInstruction":{"parts":[{"text":"You are a helpful assistant"}],"role":"user"},"toolConfig":{"functionCallingConfig":{"mode":"AUTO"}},"tools":[{"functionDeclarations":[{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}
     headers:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.34.0 gl-go/go1.25.4
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+      - google-genai-sdk/1.49.0 gl-go/go1.26.1
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent
     method: POST
   response:
@@ -100,7 +103,12 @@ interactions:
             "content": {
               "parts": [
                 {
-                  "text": "It's currently 40°C (104°F) in Florence, Italy. That is quite hot!"
+                  "text": "**My Immediate Thoughts on the Florence Weather Query**\n\nOkay, so the system just spat out \"40 C\" for Florence, Italy. That's my starting point. Now, the task is to translate this raw data into a human-readable and contextually appropriate response, and it's imperative that the language be concise and accurate. Therefore, I need to frame it in a way that is clear and easy to understand. Considering the user, the focus should be on directness. The simplest, most effective way to communicate this is: \"The current weather in Florence, Italy is 40°C.\" Done.\n\n\n",
+                  "thought": true
+                },
+                {
+                  "text": "The current weather in Florence, Italy is 40°C (104°F). Stay hydrated, it's quite hot!",
+                  "thoughtSignature": "Eo4CCosCAb4+9vsxETlwySLJFpZ/qtlMnUAM3qEDlnHqRhZSkV9xniRXKG/EpuPM4I4FAc8YTUDWYW4lWjLGQpv5dxhQrRj0nmOSYkg9ENlrg0oAM28q/BNLo6w8ggk0uVsU4Oe0XZzP6rjTSBHiNxqCigE6fi/jP2Jk43tmM6iAKcHU0ZvSelZV4aTUaJ+LiyrBjckf5yCQcnxnJNy7FYKvGsYItkvB5KqEpJji9TjPHRjdwOAMd2nRIvUFnpusEtSAG8faV4Q/dRpub6Nge5xUrtGiRSU729ZBFdXZZfJA7S4sQOn8p/AGYsMZaLjfYJVkUxWmlrq9FEYggGgggvoCLL/0w/79A1H1zUZikDUX"
                 }
               ],
               "role": "model"
@@ -110,22 +118,23 @@ interactions:
           }
         ],
         "usageMetadata": {
-          "promptTokenCount": 201,
-          "candidatesTokenCount": 26,
-          "totalTokenCount": 227,
+          "promptTokenCount": 234,
+          "candidatesTokenCount": 28,
+          "totalTokenCount": 318,
           "promptTokensDetails": [
             {
               "modality": "TEXT",
-              "tokenCount": 201
+              "tokenCount": 234
             }
-          ]
+          ],
+          "thoughtsTokenCount": 56
         },
-        "modelVersion": "gemini-3-pro-preview",
-        "responseId": "naIdabjfC4HhvdIPo9CWoAk"
+        "modelVersion": "gemini-3.1-pro-preview",
+        "responseId": "xgCzad_bDYzUz7IPxoCRiAk"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 3.0175995s
+    duration: 3.764384209s

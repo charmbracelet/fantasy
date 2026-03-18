@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.7.1
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.x.ai/v1/chat/completions
     method: POST
   response:
@@ -24,10 +24,10 @@ interactions:
     proto_minor: 0
     content_length: -1
     uncompressed: true
-    body: '{"id":"2537f822-595e-1e8e-fe59-59c9761c15a1","object":"chat.completion","created":1762637624,"model":"grok-code-fast-1","choices":[{"index":0,"message":{"role":"assistant","content":"","tool_calls":[{"id":"call_05092142","function":{"name":"Book","arguments":"{\"author\":{\"name\":\"J.R.R. Tolkien\",\"nationality\":\"British\"},\"genres\":[\"fantasy\",\"adventure\"],\"published_year\":1954,\"title\":\"The Lord of the Rings\"}"},"type":"function"}],"refusal":null},"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":496,"completion_tokens":81,"total_tokens":820,"prompt_tokens_details":{"text_tokens":496,"audio_tokens":0,"image_tokens":0,"cached_tokens":320},"completion_tokens_details":{"reasoning_tokens":243,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0},"num_sources_used":0},"system_fingerprint":"fp_10f00c862d"}'
+    body: '{"id":"cf5c4efc-2fb0-ce7c-8020-a3d64e6cec23","object":"chat.completion","created":1773345673,"model":"grok-code-fast-1","choices":[{"index":0,"message":{"role":"assistant","content":"","reasoning_content":"## Gathering book details  \n- The user requested information on \"The Lord of the Rings\" by J.R.R. Tolkien, including its genres and publication year.  \n- Found the book fits the genres fantasy and adventure, with a publication year of 1954.  \n- Noted the author is British, which will be included in the details.  \n- Confirmed the book was published in three volumes, but commonly referred to as 1954 based on user input.  \n- Preparing to compile all details for a complete book summary.","tool_calls":[{"id":"call_88538725","function":{"name":"Book","arguments":"{\"author\":{\"name\":\"J.R.R. Tolkien\",\"nationality\":\"British\"},\"genres\":[\"fantasy\",\"adventure\"],\"published_year\":1954,\"title\":\"The Lord of the Rings\"}"},"type":"function"}],"refusal":null},"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":496,"completion_tokens":77,"total_tokens":829,"prompt_tokens_details":{"text_tokens":496,"audio_tokens":0,"image_tokens":0,"cached_tokens":320},"completion_tokens_details":{"reasoning_tokens":256,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0},"num_sources_used":0,"cost_in_usd_ticks":5411000},"system_fingerprint":"fp_99052e9f23"}'
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 2.213765834s
+    duration: 8.846421709s

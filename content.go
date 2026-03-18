@@ -252,9 +252,10 @@ func (t ToolCallPart) Options() ProviderOptions {
 
 // ToolResultPart represents a tool result in a message.
 type ToolResultPart struct {
-	ToolCallID      string                  `json:"tool_call_id"`
-	Output          ToolResultOutputContent `json:"output"`
-	ProviderOptions ProviderOptions         `json:"provider_options"`
+	ToolCallID       string                  `json:"tool_call_id"`
+	Output           ToolResultOutputContent `json:"output"`
+	ProviderExecuted bool                    `json:"provider_executed"`
+	ProviderOptions  ProviderOptions         `json:"provider_options"`
 }
 
 // GetType returns the type of the tool result part.
@@ -533,11 +534,8 @@ func (p ProviderDefinedTool) GetName() string {
 
 // NewUserMessage creates a new user message with the given prompt and optional files.
 func NewUserMessage(prompt string, files ...FilePart) Message {
-	content := []MessagePart{
-		TextPart{
-			Text: prompt,
-		},
-	}
+	content := make([]MessagePart, 0, len(files)+1)
+	content = append(content, TextPart{Text: prompt})
 
 	for _, f := range files {
 		content = append(content, f)

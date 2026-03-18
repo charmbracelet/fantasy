@@ -1,0 +1,33 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 173
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"Say hi in Portuguese","role":"user"}],"model":"openai/gpt-5","max_completion_tokens":4000}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+    url: https://ai-gateway.vercel.sh/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"id":"gen_01KKHTPR6079KRB242AQ8KAPH7","object":"chat.completion","created":1773346188,"model":"openai/gpt-5","choices":[{"index":0,"message":{"role":"assistant","content":"Olá!","reasoning_details":[{"type":"reasoning.encrypted","data":"gAAAAABpsx2MXX5j5zh_wPv9wXKPsDGSrYu8F_Vjr48YrwKWZYWMoaf597jXbICNxgfAMZE8rc1tw0NILxdz9ZQW-OTJwMuIZ-Ha0sC9pWJNmPRBNBHfordRbvIc6AEa6EvX6ewExxsJZBgpE7l2sjrrwq8nOjkMr_maWw5ITHEMjHHlLc-swEcGCyF9wD4ng09se6Bp4uMwYUUHpUNQ7vfHvYj85U_8zYlaVwHGkttSOm-QRtxVVlf79O68KgmYpgmFBQ3-xjAD1gg4fIL-DZ9ZlgQS2B8b6pg25_D7fwNrHDdlkZoL1kDcaidINpG0j7GouWQFrm2cetbZF71IOj0jn4o3nAgG0cOlU0UEdscYdr1xsaxFHIT0KX7JY2zFxAUN8vtb7Md_2ZWitpzboBgzHtL6O1qjXugRcFhnTlf6I_StUFpcLprJChXh4-rWkOTyqWMWbuMhfxRu4orP4TOkHQPF76Xuf-Y8bcScbbl2Wr9ZZF_doqoPd9UhJRuJ3eLz2SG1Cqus_YlvUQmbFFGnHdPCCrweOLrLEUu91NUxGgFnjygNMYHjhflefOv0Whq7gJ6cbTGxZvqI3G_9ttzALhj_C6y4K8DRIBV9cRHWCYYzQOoxGctQnnQ_TUKE4J0eKbvjWe-UAG1-0FkWs3nLE9LWXRkTlulgK3y7jhdlr9go2EvsArFdLHv4jxBMKaod2FKeSB8Hgi-ol4EoDRQEIs0RBQYM-l0Wjw00zqBugGrwlO_QTfewjcfWZKXhWBxyL0Ja_IZah5QudsIXz5bm2QcZje0QSQbjLEew4AqenvRZ7oq-nPRlnC_wGvYwdROJQ4dIWmLqEd5E_xubQ68UZXFaZy5KVgLNFTJ-cIPSIcY3DEwHru-RGJmEEXelvyUS5wQwkMNXbVrtHMchmSPZrFazZdqwmtk_rIBznpORzS4NwK39siA68swi-UBhd_fZepGOkZGDYBWbwzTKmCXYVxhcLd-oRFjv_GuAtNzLUEyxBdBMx4HDDAwBozcef5h7UOq49td8nuMdeHrYd6ZpKf0_ZsHcbt2shouAt5wv7Ovor6eDL2UwSqcjgweSgv1Ev3irohJPgUkEWLAZOAkXUmwWRTiiVAqgiMCDOdX_4H-gB53Ea-UdmFQ3rdNgO0uXT_f5v_-_g6ZH1WuR1d7OSuK0RaqStaVfT8TOq0LBzLAavg8QbMmGfW0Ec_JgpjP2M8vvPfoi_ijkTG1lw8wMBFu8zSGWMkjIvHam8xc2Za8P9jQ-LD63ghVds3mJ22qR4AeoBqiznRLFpMJBBu8-sdav4wLmjXMBdMU8dc_-S10Qfo-qN2hF2VblrfOXd0GWV3tPjISN1s1i2U_BQ1chLbrTq03AFO-KX_m0f77tjai2y4ZKdI2prux3Eiq_AWvS8mG9lp1mBuA_sLQE5wdNdSx8WoOfsbpni5uPoZ27VyZGMyDI-U96gURcjDsEaGAgzVaBh0AN-MTw9I5rOOG9bYzAADWadWZzvsXyP_aR1MzuVf_roig=","id":"rs_008ebf5c29a30fb00169b31d89faf881979b0b0460b02db6b8","format":"openai-responses-v1","index":0}],"provider_metadata":{"openai":{"responseId":"resp_008ebf5c29a30fb00169b31d8976c0819780ba44f97c2cdabb","serviceTier":"default"},"gateway":{"routing":{"originalModelId":"openai/gpt-5","resolvedProvider":"openai","resolvedProviderApiModelId":"gpt-5-2025-08-07","internalResolvedModelId":"openai:gpt-5-2025-08-07","fallbacksAvailable":["azure"],"internalReasoning":"Selected openai as preferred provider for gpt-5. 1 fallback(s) available: azure","planningReasoning":"System credentials planned for: openai, azure. Total execution order: openai(system) → azure(system)","canonicalSlug":"openai/gpt-5","finalProvider":"openai","attempts":[{"provider":"openai","internalModelId":"openai:gpt-5-2025-08-07","providerApiModelId":"gpt-5-2025-08-07","credentialType":"system","success":true,"startTime":257240.555879,"endTime":260698.98202,"statusCode":200,"providerResponseId":"resp_008ebf5c29a30fb00169b31d8976c0819780ba44f97c2cdabb"}],"modelAttemptCount":1,"modelAttempts":[{"modelId":"openai:gpt-5-2025-08-07","canonicalSlug":"openai/gpt-5","success":true,"providerAttemptCount":1,"providerAttempts":[{"provider":"openai","internalModelId":"openai:gpt-5-2025-08-07","providerApiModelId":"gpt-5-2025-08-07","credentialType":"system","success":true,"startTime":257240.555879,"endTime":260698.98202,"statusCode":200,"providerResponseId":"resp_008ebf5c29a30fb00169b31d8976c0819780ba44f97c2cdabb"}]}],"totalProviderAttemptCount":1},"cost":"0.00190375","marketCost":"0.00190375","generationId":"gen_01KKHTPR6079KRB242AQ8KAPH7","billableWebSearchCalls":0}}},"logprobs":null,"finish_reason":"stop"}],"usage":{"prompt_tokens":19,"completion_tokens":124,"total_tokens":143,"cost":0.00190375,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":64,"image_tokens":0},"cache_creation_input_tokens":0,"market_cost":0.00190375},"system_fingerprint":"fp_p2efo90h5o","service_tier":"default","generationId":"gen_01KKHTPR6079KRB242AQ8KAPH7"}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 3.675478166s

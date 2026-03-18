@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.7.1
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.x.ai/v1/chat/completions
     method: POST
   response:
@@ -24,13 +24,13 @@ interactions:
     proto_minor: 0
     content_length: -1
     uncompressed: true
-    body: '{"id":"dec7a509-fc2a-5adb-eed9-626affdd1430","object":"chat.completion","created":1762854946,"model":"grok-4-fast-reasoning","choices":[{"index":0,"message":{"role":"assistant","content":"","tool_calls":[{"id":"call_77946408","function":{"name":"add","arguments":"{\"a\":2,\"b\":3}"},"type":"function"},{"id":"call_90297600","function":{"name":"multiply","arguments":"{\"a\":2,\"b\":3}"},"type":"function"}],"refusal":null},"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":437,"completion_tokens":68,"total_tokens":648,"prompt_tokens_details":{"text_tokens":437,"audio_tokens":0,"image_tokens":0,"cached_tokens":304},"completion_tokens_details":{"reasoning_tokens":143,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0},"num_sources_used":0},"system_fingerprint":"fp_bfbe7bd0a2"}'
+    body: '{"id":"a75f6023-0e99-3ea6-bdfb-96c9314c2108","object":"chat.completion","created":1773345556,"model":"grok-4-fast-reasoning","choices":[{"index":0,"message":{"role":"assistant","content":"","tool_calls":[{"id":"call_17376387","function":{"name":"add","arguments":"{\"a\":2,\"b\":3}"},"type":"function"},{"id":"call_83407729","function":{"name":"multiply","arguments":"{\"a\":2,\"b\":3}"},"type":"function"}],"refusal":null},"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":436,"completion_tokens":68,"total_tokens":652,"prompt_tokens_details":{"text_tokens":436,"audio_tokens":0,"image_tokens":0,"cached_tokens":152},"completion_tokens_details":{"reasoning_tokens":148,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0},"num_sources_used":0,"cost_in_usd_ticks":1724000},"system_fingerprint":"fp_3d7ed3b779"}'
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 2.687079417s
+    duration: 1.798270916s
 - id: 1
   request:
     proto: HTTP/1.1
@@ -38,14 +38,14 @@ interactions:
     proto_minor: 1
     content_length: 1177
     host: ""
-    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"tool_calls":[{"id":"call_77946408","function":{"arguments":"{\"a\":2,\"b\":3}","name":"add"},"type":"function"},{"id":"call_90297600","function":{"arguments":"{\"a\":2,\"b\":3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"call_77946408","role":"tool"},{"content":"6","tool_call_id":"call_90297600","role":"tool"}],"model":"grok-4-fast","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"tool_calls":[{"id":"call_17376387","function":{"arguments":"{\"a\":2,\"b\":3}","name":"add"},"type":"function"},{"id":"call_83407729","function":{"arguments":"{\"a\":2,\"b\":3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"call_17376387","role":"tool"},{"content":"6","tool_call_id":"call_83407729","role":"tool"}],"model":"grok-4-fast","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
     headers:
       Accept:
       - application/json
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.7.1
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.x.ai/v1/chat/completions
     method: POST
   response:
@@ -54,10 +54,10 @@ interactions:
     proto_minor: 0
     content_length: -1
     uncompressed: true
-    body: '{"id":"bfde0945-c590-ce6c-b493-8f7f3fced601","object":"chat.completion","created":1762854948,"model":"grok-4-fast-reasoning","choices":[{"index":0,"message":{"role":"assistant","content":"The sum of 2 and 3 is 5.  \nThe product of 2 and 3 is 6.","refusal":null},"finish_reason":"stop"}],"usage":{"prompt_tokens":666,"completion_tokens":25,"total_tokens":734,"prompt_tokens_details":{"text_tokens":666,"audio_tokens":0,"image_tokens":0,"cached_tokens":304},"completion_tokens_details":{"reasoning_tokens":43,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0},"num_sources_used":0},"system_fingerprint":"fp_bfbe7bd0a2"}'
+    body: '{"id":"faabcc4e-e56a-0426-1904-52c0f880742d","object":"chat.completion","created":1773345558,"model":"grok-4-fast-reasoning","choices":[{"index":0,"message":{"role":"assistant","content":"The sum of 2 and 3 is 5.  \nThe product of 2 and 3 is 6.","refusal":null},"finish_reason":"stop"}],"usage":{"prompt_tokens":670,"completion_tokens":25,"total_tokens":739,"prompt_tokens_details":{"text_tokens":670,"audio_tokens":0,"image_tokens":0,"cached_tokens":618},"completion_tokens_details":{"reasoning_tokens":44,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0},"num_sources_used":0,"cost_in_usd_ticks":758000},"system_fingerprint":"fp_3d7ed3b779"}'
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 1.056138584s
+    duration: 768.233916ms

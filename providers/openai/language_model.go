@@ -14,9 +14,9 @@ import (
 	"charm.land/fantasy/schema"
 	xjson "github.com/charmbracelet/x/json"
 	"github.com/google/uuid"
-	"github.com/openai/openai-go/v2"
-	"github.com/openai/openai-go/v2/packages/param"
-	"github.com/openai/openai-go/v2/shared"
+	"github.com/openai/openai-go/v3"
+	"github.com/openai/openai-go/v3/packages/param"
+	"github.com/openai/openai-go/v3/shared"
 )
 
 type languageModel struct {
@@ -32,6 +32,7 @@ type languageModel struct {
 	streamExtraFunc            LanguageModelStreamExtraFunc
 	streamProviderMetadataFunc LanguageModelStreamProviderMetadataFunc
 	toPromptFunc               LanguageModelToPromptFunc
+	noDefaultUserAgent         bool
 }
 
 // LanguageModelOption is a function that configures a languageModel.
@@ -83,6 +84,16 @@ func WithLanguageModelStreamUsageFunc(fn LanguageModelStreamUsageFunc) LanguageM
 func WithLanguageModelToPromptFunc(fn LanguageModelToPromptFunc) LanguageModelOption {
 	return func(l *languageModel) {
 		l.toPromptFunc = fn
+	}
+}
+
+// WithLanguageModelSkipUserAgent prevents per-call User-Agent overrides. This
+// exists solely for OpenRouter, which rejects User-Agent overrides.
+//
+// This function is provisional and may be removed in a future release.
+func WithLanguageModelSkipUserAgent() LanguageModelOption {
+	return func(l *languageModel) {
+		l.noDefaultUserAgent = true
 	}
 }
 
@@ -246,7 +257,7 @@ func (o languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantas
 	if err != nil {
 		return nil, err
 	}
-	response, err := o.client.Chat.Completions.New(ctx, *params)
+	response, err := o.client.Chat.Completions.New(ctx, *params, callUARequestOptions(call, o.noDefaultUserAgent)...)
 	if err != nil {
 		return nil, toProviderErr(err)
 	}
@@ -314,7 +325,7 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 		IncludeUsage: openai.Bool(true),
 	}
 
-	stream := o.client.Chat.Completions.NewStreaming(ctx, *params)
+	stream := o.client.Chat.Completions.NewStreaming(ctx, *params, callUARequestOptions(call, o.noDefaultUserAgent)...)
 	isActiveText := false
 	toolCalls := make(map[int64]streamToolCall)
 
@@ -619,6 +630,10 @@ func toOpenAiTools(tools []fantasy.Tool, toolChoice *fantasy.ToolChoice) (openAi
 		openAiToolChoice = &openai.ChatCompletionToolChoiceOptionUnionParam{
 			OfAuto: param.NewOpt("none"),
 		}
+	case fantasy.ToolChoiceRequired:
+		openAiToolChoice = &openai.ChatCompletionToolChoiceOptionUnionParam{
+			OfAuto: param.NewOpt("required"),
+		}
 	default:
 		openAiToolChoice = &openai.ChatCompletionToolChoiceOptionUnionParam{
 			OfFunctionToolChoice: &openai.ChatCompletionNamedToolChoiceParam{
@@ -648,14 +663,18 @@ func parseAnnotationsFromDelta(delta openai.ChatCompletionChunkChoiceDelta) []op
 			if annotationMap, ok := annotationData.(map[string]any); ok {
 				if annotationType, ok := annotationMap["type"].(string); ok && annotationType == "url_citation" {
 					if urlCitationData, ok := annotationMap["url_citation"].(map[string]any); ok {
-						annotation := openai.ChatCompletionMessageAnnotation{
-							Type: "url_citation",
-							URLCitation: openai.ChatCompletionMessageAnnotationURLCitation{
-								URL:   urlCitationData["url"].(string),
-								Title: urlCitationData["title"].(string),
-							},
+						url, urlOk := urlCitationData["url"].(string)
+						title, titleOk := urlCitationData["title"].(string)
+						if urlOk && titleOk {
+							annotation := openai.ChatCompletionMessageAnnotation{
+								Type: "url_citation",
+								URLCitation: openai.ChatCompletionMessageAnnotationURLCitation{
+									URL:   url,
+									Title: title,
+								},
+							}
+							annotations = append(annotations, annotation)
 						}
-						annotations = append(annotations, annotation)
 					}
 				}
 			}
@@ -725,11 +744,10 @@ func (o languageModel) generateObjectWithJSONMode(ctx context.Context, call fant
 		},
 	}
 
-	response, err := o.client.Chat.Completions.New(ctx, *params)
+	response, err := o.client.Chat.Completions.New(ctx, *params, objectCallUARequestOptions(call, o.noDefaultUserAgent)...)
 	if err != nil {
 		return nil, toProviderErr(err)
 	}
-
 	if len(response.Choices) == 0 {
 		usage, _ := o.usageFunc(*response)
 		return nil, &fantasy.NoObjectGeneratedError{
@@ -810,7 +828,7 @@ func (o languageModel) streamObjectWithJSONMode(ctx context.Context, call fantas
 		IncludeUsage: openai.Bool(true),
 	}
 
-	stream := o.client.Chat.Completions.NewStreaming(ctx, *params)
+	stream := o.client.Chat.Completions.NewStreaming(ctx, *params, objectCallUARequestOptions(call, o.noDefaultUserAgent)...)
 
 	return func(yield func(fantasy.ObjectStreamPart) bool) {
 		if len(warnings) > 0 {

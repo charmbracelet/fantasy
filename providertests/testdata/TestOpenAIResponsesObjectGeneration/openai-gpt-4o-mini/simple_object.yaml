@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.7.1
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/responses
     method: POST
   response:
@@ -26,15 +26,17 @@ interactions:
     uncompressed: true
     body: |-
       {
-        "id": "resp_0bbc50a7c5ff86f001690fb5e419a8819087b97bd3cbc4c406",
+        "id": "resp_0e4307a7d5c3a0f50169b319944394819c80c2da0f3391b34c",
         "object": "response",
-        "created_at": 1762637284,
+        "created_at": 1773345172,
         "status": "completed",
         "background": false,
         "billing": {
           "payer": "developer"
         },
+        "completed_at": 1773345173,
         "error": null,
+        "frequency_penalty": 0.0,
         "incomplete_details": null,
         "instructions": null,
         "max_output_tokens": 4000,
@@ -42,7 +44,7 @@ interactions:
         "model": "gpt-4o-mini-2024-07-18",
         "output": [
           {
-            "id": "msg_0bbc50a7c5ff86f001690fb5e4fabc8190a9749a3e0c928bce",
+            "id": "msg_0e4307a7d5c3a0f50169b3199537b0819c87440bdccc49790c",
             "type": "message",
             "status": "completed",
             "content": [
@@ -57,6 +59,7 @@ interactions:
           }
         ],
         "parallel_tool_calls": true,
+        "presence_penalty": 0.0,
         "previous_response_id": null,
         "prompt_cache_key": null,
         "prompt_cache_retention": null,
@@ -124,4 +127,4 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 1.465307584s
+    duration: 1.315079167s

@@ -1,6 +1,7 @@
 package openaicompat
 
 import (
+	"errors"
 	"testing"
 
 	"charm.land/fantasy"
@@ -81,16 +82,14 @@ func TestToPromptFunc_ReasoningContent(t *testing.T) {
 
 		messages, warnings := ToPromptFunc(prompt, "", "")
 
-		require.Empty(t, warnings)
-		require.Len(t, messages, 2)
+		require.Len(t, warnings, 1)
+		require.Contains(t, warnings[0].Message, "dropping empty assistant message")
+		require.Len(t, messages, 1) // Only user message, assistant message dropped
 
-		// Assistant message with only reasoning
-		msg := messages[1].OfAssistant
+		// User message - unchanged
+		msg := messages[0].OfUser
 		require.NotNil(t, msg)
-		extraFields := msg.ExtraFields()
-		reasoningContent, hasReasoning := extraFields["reasoning_content"]
-		require.True(t, hasReasoning)
-		require.Equal(t, "Internal reasoning only...", reasoningContent)
+		require.Equal(t, "Hello", msg.Content.OfString.Value)
 	})
 
 	t.Run("should not add reasoning_content to messages without reasoning", func(t *testing.T) {
@@ -219,24 +218,19 @@ func TestToPromptFunc_ReasoningContent(t *testing.T) {
 
 		messages, warnings := ToPromptFunc(prompt, "", "")
 
-		require.Len(t, warnings, 1)
+		require.Len(t, warnings, 2) // unsupported type + empty message
 		require.Contains(t, warnings[0].Message, "not supported")
-		// Should have all 3 messages (matching openai behavior - don't skip empty content)
-		require.Len(t, messages, 3)
+		require.Contains(t, warnings[1].Message, "dropping empty user message")
+		// Should have only 2 messages (empty content message is now dropped)
+		require.Len(t, messages, 2)
 
 		msg1 := messages[0].OfUser
 		require.NotNil(t, msg1)
 		require.Equal(t, "Hello", msg1.Content.OfString.Value)
 
-		// Second message has empty content (unsupported attachment was skipped)
 		msg2 := messages[1].OfUser
 		require.NotNil(t, msg2)
-		content2 := msg2.Content.OfArrayOfContentParts
-		require.Len(t, content2, 0)
-
-		msg3 := messages[2].OfUser
-		require.NotNil(t, msg3)
-		require.Equal(t, "After unsupported", msg3.Content.OfString.Value)
+		require.Equal(t, "After unsupported", msg2.Content.OfString.Value)
 	})
 
 	t.Run("should detect PDF file IDs using strings.HasPrefix", func(t *testing.T) {
@@ -271,5 +265,170 @@ func TestToPromptFunc_ReasoningContent(t *testing.T) {
 		filePart := content[1].OfFile
 		require.NotNil(t, filePart)
 		require.Equal(t, "file-abc123xyz", filePart.File.FileID.Value)
+	})
+}
+
+func TestToPromptFunc_DropsEmptyMessages(t *testing.T) {
+	t.Parallel()
+
+	t.Run("should drop truly empty assistant messages", func(t *testing.T) {
+		t.Parallel()
+
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "Hello"},
+				},
+			},
+			{
+				Role:    fantasy.MessageRoleAssistant,
+				Content: []fantasy.MessagePart{},
+			},
+		}
+
+		messages, warnings := ToPromptFunc(prompt, "", "")
+
+		require.Len(t, messages, 1, "should only have user message")
+		require.Len(t, warnings, 1)
+		require.Equal(t, fantasy.CallWarningTypeOther, warnings[0].Type)
+		require.Contains(t, warnings[0].Message, "dropping empty assistant message")
+	})
+
+	t.Run("should keep assistant messages with text content", func(t *testing.T) {
+		t.Parallel()
+
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "Hello"},
+				},
+			},
+			{
+				Role: fantasy.MessageRoleAssistant,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "Hi there!"},
+				},
+			},
+		}
+
+		messages, warnings := ToPromptFunc(prompt, "", "")
+
+		require.Len(t, messages, 2, "should have both user and assistant messages")
+		require.Empty(t, warnings)
+	})
+
+	t.Run("should keep assistant messages with tool calls", func(t *testing.T) {
+		t.Parallel()
+
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "What's the weather?"},
+				},
+			},
+			{
+				Role: fantasy.MessageRoleAssistant,
+				Content: []fantasy.MessagePart{
+					fantasy.ToolCallPart{
+						ToolCallID: "call_123",
+						ToolName:   "get_weather",
+						Input:      `{"location":"NYC"}`,
+					},
+				},
+			},
+		}
+
+		messages, warnings := ToPromptFunc(prompt, "", "")
+
+		require.Len(t, messages, 2, "should have both user and assistant messages")
+		require.Empty(t, warnings)
+	})
+
+	t.Run("should drop user messages without visible content", func(t *testing.T) {
+		t.Parallel()
+
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.FilePart{
+						Data:      []byte("not supported"),
+						MediaType: "application/unknown",
+					},
+				},
+			},
+		}
+
+		messages, warnings := ToPromptFunc(prompt, "", "")
+
+		require.Empty(t, messages)
+		require.Len(t, warnings, 2) // unsupported type + empty message
+		require.Contains(t, warnings[1].Message, "dropping empty user message")
+	})
+
+	t.Run("should keep user messages with image content", func(t *testing.T) {
+		t.Parallel()
+
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.FilePart{
+						Data:      []byte{0x01, 0x02, 0x03},
+						MediaType: "image/png",
+					},
+				},
+			},
+		}
+
+		messages, warnings := ToPromptFunc(prompt, "", "")
+
+		require.Len(t, messages, 1)
+		require.Empty(t, warnings)
+	})
+
+	t.Run("should keep user messages with tool results", func(t *testing.T) {
+		t.Parallel()
+
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleTool,
+				Content: []fantasy.MessagePart{
+					fantasy.ToolResultPart{
+						ToolCallID: "call_123",
+						Output:     fantasy.ToolResultOutputContentText{Text: "done"},
+					},
+				},
+			},
+		}
+
+		messages, warnings := ToPromptFunc(prompt, "", "")
+
+		require.Len(t, messages, 1)
+		require.Empty(t, warnings)
+	})
+
+	t.Run("should keep user messages with tool error results", func(t *testing.T) {
+		t.Parallel()
+
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleTool,
+				Content: []fantasy.MessagePart{
+					fantasy.ToolResultPart{
+						ToolCallID: "call_456",
+						Output:     fantasy.ToolResultOutputContentError{Error: errors.New("boom")},
+					},
+				},
+			},
+		}
+
+		messages, warnings := ToPromptFunc(prompt, "", "")
+
+		require.Len(t, messages, 1)
+		require.Empty(t, warnings)
 	})
 }

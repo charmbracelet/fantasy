@@ -638,7 +638,10 @@ func (a languageModel) toTools(tools []fantasy.Tool, toolChoice *fantasy.ToolCho
 			},
 		}
 	case fantasy.ToolChoiceNone:
-		return anthropicTools, anthropicToolChoice, warnings
+		none := anthropic.NewToolChoiceNoneParam()
+		anthropicToolChoice = &anthropic.ToolChoiceUnionParam{
+			OfNone: &none,
+		}
 	default:
 		anthropicToolChoice = &anthropic.ToolChoiceUnionParam{
 			OfTool: &anthropic.ToolChoiceToolParam{

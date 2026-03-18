@@ -1333,3 +1333,34 @@ func TestStream_WebSearchResponse(t *testing.T) {
 	require.NotEmpty(t, textDeltas, "should have text deltas")
 	require.Equal(t, "Here are the results.", textDeltas[0].Delta)
 }
+
+func TestGenerate_ToolChoiceNone(t *testing.T) {
+	t.Parallel()
+
+	server, calls := newAnthropicJSONServer(mockAnthropicGenerateResponse())
+	defer server.Close()
+
+	provider, err := New(
+		WithAPIKey("test-api-key"),
+		WithBaseURL(server.URL),
+	)
+	require.NoError(t, err)
+
+	model, err := provider.LanguageModel(context.Background(), "claude-sonnet-4-20250514")
+	require.NoError(t, err)
+
+	toolChoiceNone := fantasy.ToolChoiceNone
+	_, err = model.Generate(context.Background(), fantasy.Call{
+		Prompt: testPrompt(),
+		Tools: []fantasy.Tool{
+			WebSearchTool(nil),
+		},
+		ToolChoice: &toolChoiceNone,
+	})
+	require.NoError(t, err)
+
+	call := awaitAnthropicCall(t, calls)
+	toolChoice, ok := call.body["tool_choice"].(map[string]any)
+	require.True(t, ok, "request body should have tool_choice")
+	require.Equal(t, "none", toolChoice["type"], "tool_choice should be 'none'")
+}

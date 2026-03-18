@@ -1425,7 +1425,8 @@ func TestDoGenerate(t *testing.T) {
 
 		require.NoError(t, err)
 		require.Equal(t, int64(1152), result.Usage.CacheReadTokens)
-		require.Equal(t, int64(15), result.Usage.InputTokens)
+		// InputTokens = prompt_tokens - cached_tokens = 15 - 1152 = -1137 → clamped to 0
+		require.Equal(t, int64(0), result.Usage.InputTokens)
 		require.Equal(t, int64(20), result.Usage.OutputTokens)
 		require.Equal(t, int64(35), result.Usage.TotalTokens)
 	})
@@ -2594,7 +2595,8 @@ func TestDoStream(t *testing.T) {
 
 		require.NotNil(t, finishPart)
 		require.Equal(t, int64(1152), finishPart.Usage.CacheReadTokens)
-		require.Equal(t, int64(15), finishPart.Usage.InputTokens)
+		// InputTokens = prompt_tokens - cached_tokens = 15 - 1152 = -1137 → clamped to 0
+		require.Equal(t, int64(0), finishPart.Usage.InputTokens)
 		require.Equal(t, int64(20), finishPart.Usage.OutputTokens)
 		require.Equal(t, int64(35), finishPart.Usage.TotalTokens)
 	})

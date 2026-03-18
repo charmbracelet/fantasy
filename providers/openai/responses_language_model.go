@@ -375,8 +375,10 @@ func responsesProviderMetadata(responseID string) fantasy.ProviderMetadata {
 }
 
 func responsesUsage(resp responses.Response) fantasy.Usage {
+	// OpenAI reports input_tokens INCLUDING cached tokens. Subtract to avoid double-counting.
+	inputTokens := max(resp.Usage.InputTokens-resp.Usage.InputTokensDetails.CachedTokens, 0)
 	usage := fantasy.Usage{
-		InputTokens:  resp.Usage.InputTokens,
+		InputTokens:  inputTokens,
 		OutputTokens: resp.Usage.OutputTokens,
 		TotalTokens:  resp.Usage.InputTokens + resp.Usage.OutputTokens,
 	}

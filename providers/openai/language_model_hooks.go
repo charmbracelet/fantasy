@@ -211,8 +211,10 @@ func DefaultUsageFunc(response openai.ChatCompletion) (fantasy.Usage, fantasy.Pr
 			providerMetadata.RejectedPredictionTokens = completionTokenDetails.RejectedPredictionTokens
 		}
 	}
+	// OpenAI reports prompt_tokens INCLUDING cached tokens. Subtract to avoid double-counting.
+	inputTokens := max(response.Usage.PromptTokens-promptTokenDetails.CachedTokens, 0)
 	return fantasy.Usage{
-		InputTokens:     response.Usage.PromptTokens,
+		InputTokens:     inputTokens,
 		OutputTokens:    response.Usage.CompletionTokens,
 		TotalTokens:     response.Usage.TotalTokens,
 		ReasoningTokens: completionTokenDetails.ReasoningTokens,
@@ -237,8 +239,10 @@ func DefaultStreamUsageFunc(chunk openai.ChatCompletionChunk, _ map[string]any, 
 	// we do this here because the acc does not add prompt details
 	completionTokenDetails := chunk.Usage.CompletionTokensDetails
 	promptTokenDetails := chunk.Usage.PromptTokensDetails
+	// OpenAI reports prompt_tokens INCLUDING cached tokens. Subtract to avoid double-counting.
+	inputTokens := max(chunk.Usage.PromptTokens-promptTokenDetails.CachedTokens, 0)
 	usage := fantasy.Usage{
-		InputTokens:     chunk.Usage.PromptTokens,
+		InputTokens:     inputTokens,
 		OutputTokens:    chunk.Usage.CompletionTokens,
 		TotalTokens:     chunk.Usage.TotalTokens,
 		ReasoningTokens: completionTokenDetails.ReasoningTokens,

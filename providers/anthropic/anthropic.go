@@ -726,16 +726,20 @@ func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBl
 								continue
 							}
 							// TODO: handle other file types
-							if !strings.HasPrefix(file.MediaType, "image/") {
-								continue
+							switch {
+							case strings.HasPrefix(file.MediaType, "image/"):
+								base64Encoded := base64.StdEncoding.EncodeToString(file.Data)
+								imageBlock := anthropic.NewImageBlockBase64(file.MediaType, base64Encoded)
+								if cacheControl != nil {
+									imageBlock.OfImage.CacheControl = anthropic.NewCacheControlEphemeralParam()
+								}
+								anthropicContent = append(anthropicContent, imageBlock)
+							case strings.HasPrefix(file.MediaType, "text/"):
+								documentBlock := anthropic.NewDocumentBlock(anthropic.PlainTextSourceParam{
+									Data: string(file.Data),
+								})
+								anthropicContent = append(anthropicContent, documentBlock)
 							}
-
-							base64Encoded := base64.StdEncoding.EncodeToString(file.Data)
-							imageBlock := anthropic.NewImageBlockBase64(file.MediaType, base64Encoded)
-							if cacheControl != nil {
-								imageBlock.OfImage.CacheControl = anthropic.NewCacheControlEphemeralParam()
-							}
-							anthropicContent = append(anthropicContent, imageBlock)
 						}
 					}
 				} else if msg.Role == fantasy.MessageRoleTool {

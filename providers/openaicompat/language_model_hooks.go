@@ -209,6 +209,13 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 					}
 
 					switch {
+					case strings.HasPrefix(filePart.MediaType, "text/"):
+						base64Encoded := base64.StdEncoding.EncodeToString(filePart.Data)
+						documentBlock := openaisdk.ChatCompletionContentPartFileFileParam{
+							FileData: param.NewOpt(base64Encoded),
+						}
+						content = append(content, openaisdk.FileContentPart(documentBlock))
+
 					case strings.HasPrefix(filePart.MediaType, "image/"):
 						// Handle image files
 						base64Encoded := base64.StdEncoding.EncodeToString(filePart.Data)

@@ -176,7 +176,8 @@ func (o responsesLanguageModel) prepareParams(call fantasy.Call) (*responses.Res
 		params.PreviousResponseID = param.NewOpt(*openaiOptions.PreviousResponseID)
 	}
 
-	input, inputWarnings := toResponsesPrompt(call.Prompt, modelConfig.systemMessageMode)
+	storeEnabled := openaiOptions != nil && openaiOptions.Store != nil && *openaiOptions.Store
+	input, inputWarnings := toResponsesPrompt(call.Prompt, modelConfig.systemMessageMode, storeEnabled)
 	warnings = append(warnings, inputWarnings...)
 
 	var include []IncludeType
@@ -391,7 +392,7 @@ func responsesUsage(resp responses.Response) fantasy.Usage {
 	return usage
 }
 
-func toResponsesPrompt(prompt fantasy.Prompt, systemMessageMode string) (responses.ResponseInputParam, []fantasy.CallWarning) {
+func toResponsesPrompt(prompt fantasy.Prompt, systemMessageMode string, store bool) (responses.ResponseInputParam, []fantasy.CallWarning) {
 	var input responses.ResponseInputParam
 	var warnings []fantasy.CallWarning
 
@@ -560,6 +561,16 @@ func toResponsesPrompt(prompt fantasy.Prompt, systemMessageMode string) (respons
 					// recognised Responses API input type; skip.
 					continue
 				case fantasy.ContentTypeReasoning:
+					if store {
+						// When Store is enabled the API already has the
+						// reasoning persisted server-side. Replaying the
+						// full OfReasoning item causes a validation error
+						// ("reasoning was provided without its required
+						// following item") because the API cannot pair the
+						// reconstructed reasoning with the output item
+						// that followed it.
+						continue
+					}
 					reasoningMetadata := GetReasoningMetadata(c.Options())
 					if reasoningMetadata == nil || reasoningMetadata.ItemID == "" {
 						continue

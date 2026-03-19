@@ -20,6 +20,7 @@ func TestOpenAICompatibleCommon(t *testing.T) {
 		{"zai-glm-4-7-flash", builderZAIGLM47Flash, nil, nil},
 		{"huggingface-kimi-k2", builderHuggingFace, nil, nil},
 		{"llama-cpp-gpt-oss", builderLlamaCppGptOss, nil, nil},
+		{"avian-kimi", builderAvianKimi, nil, nil},
 	})
 }
 
@@ -41,6 +42,7 @@ func TestOpenAICompatibleThinking(t *testing.T) {
 		{"xai-grok-3-mini", builderXAIGrok3Mini, opts, nil},
 		{"zai-glm-4-7-flash", builderZAIGLM47Flash, opts, nil},
 		{"llama-cpp-gpt-oss", builderLlamaCppGptOss, opts, nil},
+		{"avian-kimi", builderAvianKimi, nil, nil},
 	}, testOpenAICompatThinking)
 }
 
@@ -139,4 +141,16 @@ func builderLlamaCppGptOss(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel
 		return nil, err
 	}
 	return provider.LanguageModel(t.Context(), "openai/gpt-oss-20b")
+}
+
+func builderAvianKimi(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
+	provider, err := openaicompat.New(
+		openaicompat.WithBaseURL("https://api.avian.io/v1"),
+		openaicompat.WithAPIKey(os.Getenv("FANTASY_AVIAN_API_KEY")),
+		openaicompat.WithHTTPClient(&http.Client{Transport: r}),
+	)
+	if err != nil {
+		return nil, err
+	}
+	return provider.LanguageModel(t.Context(), "moonshotai/kimi-k2.5")
 }

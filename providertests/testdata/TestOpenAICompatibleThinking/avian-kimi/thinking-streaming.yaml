@@ -1,0 +1,212 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 499
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence, Italy?","role":"user"}],"model":"moonshotai/kimi-k2.5","stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.15.0 (https://charm.land/fantasy)
+    url: https://api.avian.io/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id": "chatcmpl-6e0335f41a00481da298cc3f", "object": "chat.completion.chunk", "created": 1773932889, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"role": "assistant"}, "finish_reason": null}]}
+
+
+      data: {"id": "gen-1773932889-tco5qSg4D8Z94K6GPhdr", "object": "chat.completion.chunk", "created": 1773932889, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": "I", "format": "unknown", "index": 0}], "reasoning_content": "I"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932889-tco5qSg4D8Z94K6GPhdr", "object": "chat.completion.chunk", "created": 1773932889, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": " need to", "format": "unknown", "index": 0}], "reasoning_content": " need to"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932889-tco5qSg4D8Z94K6GPhdr", "object": "chat.completion.chunk", "created": 1773932889, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": " get the", "format": "unknown", "index": 0}], "reasoning_content": " get the"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932889-tco5qSg4D8Z94K6GPhdr", "object": "chat.completion.chunk", "created": 1773932889, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": " weather information", "format": "unknown", "index": 0}], "reasoning_content": " weather information"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932889-tco5qSg4D8Z94K6GPhdr", "object": "chat.completion.chunk", "created": 1773932889, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": " for Florence", "format": "unknown", "index": 0}], "reasoning_content": " for Florence"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932889-tco5qSg4D8Z94K6GPhdr", "object": "chat.completion.chunk", "created": 1773932889, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": ", Italy", "format": "unknown", "index": 0}], "reasoning_content": ", Italy"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932889-tco5qSg4D8Z94K6GPhdr", "object": "chat.completion.chunk", "created": 1773932889, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": ". I'll", "format": "unknown", "index": 0}], "reasoning_content": ". I'll"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932889-tco5qSg4D8Z94K6GPhdr", "object": "chat.completion.chunk", "created": 1773932889, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": " call", "format": "unknown", "index": 0}], "reasoning_content": " call"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932889-tco5qSg4D8Z94K6GPhdr", "object": "chat.completion.chunk", "created": 1773932889, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": " the weather", "format": "unknown", "index": 0}], "reasoning_content": " the weather"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932889-tco5qSg4D8Z94K6GPhdr", "object": "chat.completion.chunk", "created": 1773932889, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": " function with", "format": "unknown", "index": 0}], "reasoning_content": " function with"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932889-tco5qSg4D8Z94K6GPhdr", "object": "chat.completion.chunk", "created": 1773932889, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": " \"", "format": "unknown", "index": 0}], "reasoning_content": " \""}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932889-tco5qSg4D8Z94K6GPhdr", "object": "chat.completion.chunk", "created": 1773932889, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": "Fl", "format": "unknown", "index": 0}], "reasoning_content": "Fl"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932889-tco5qSg4D8Z94K6GPhdr", "object": "chat.completion.chunk", "created": 1773932889, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": "orence", "format": "unknown", "index": 0}], "reasoning_content": "orence"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932889-tco5qSg4D8Z94K6GPhdr", "object": "chat.completion.chunk", "created": 1773932889, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": "\"", "format": "unknown", "index": 0}], "reasoning_content": "\""}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932889-tco5qSg4D8Z94K6GPhdr", "object": "chat.completion.chunk", "created": 1773932889, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": " as the", "format": "unknown", "index": 0}], "reasoning_content": " as the"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932889-tco5qSg4D8Z94K6GPhdr", "object": "chat.completion.chunk", "created": 1773932889, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": " location parameter", "format": "unknown", "index": 0}], "reasoning_content": " location parameter"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932889-tco5qSg4D8Z94K6GPhdr", "object": "chat.completion.chunk", "created": 1773932889, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": ". ", "format": "unknown", "index": 0}], "reasoning_content": ". "}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932889-tco5qSg4D8Z94K6GPhdr", "object": "chat.completion.chunk", "created": 1773932889, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": " ", "role": "assistant"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932889-tco5qSg4D8Z94K6GPhdr", "object": "chat.completion.chunk", "created": 1773932889, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": " ", "role": "assistant"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932889-tco5qSg4D8Z94K6GPhdr", "object": "chat.completion.chunk", "created": 1773932889, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": null, "role": "assistant", "tool_calls": [{"index": 0, "id": "functions.weather:0", "type": "function", "function": {"name": "weather", "arguments": ""}}]}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932889-tco5qSg4D8Z94K6GPhdr", "object": "chat.completion.chunk", "created": 1773932889, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": null, "role": "assistant", "tool_calls": [{"index": 0, "function": {"arguments": "{\"location\": \"Florence\"}"}}]}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932889-tco5qSg4D8Z94K6GPhdr", "object": "chat.completion.chunk", "created": 1773932889, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": " ", "role": "assistant"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932889-tco5qSg4D8Z94K6GPhdr", "object": "chat.completion.chunk", "created": 1773932889, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_content": null}, "finish_reason": "tool_calls", "native_finish_reason": "tool_calls"}]}
+
+      data: {"id": "gen-1773932889-tco5qSg4D8Z94K6GPhdr", "object": "chat.completion.chunk", "created": 1773932889, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant"}, "finish_reason": "tool_calls", "native_finish_reason": "tool_calls"}], "usage": {"prompt_tokens": 76, "completion_tokens": 47, "total_tokens": 123, "cost": 0.0001232, "prompt_tokens_details": {"cached_tokens": 64, "cache_write_tokens": 0, "audio_tokens": 0, "video_tokens": 0}, "completion_tokens_details": {"reasoning_tokens": 34, "image_tokens": 0, "audio_tokens": 0}}}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream; charset=utf-8
+    status: 200 OK
+    code: 200
+    duration: 425.380292ms
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 897
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence, Italy?","role":"user"},{"content":" ","tool_calls":[{"id":"functions.weather:0","function":{"arguments":"{\"location\": \"Florence\"}","name":"weather"},"type":"function"}],"role":"assistant","reasoning_content":"I need to get the weather information for Florence, Italy. I''ll call the weather function with \"Florence\" as the location parameter. "},{"content":"40 C","tool_call_id":"functions.weather:0","role":"tool"}],"model":"moonshotai/kimi-k2.5","stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.15.0 (https://charm.land/fantasy)
+    url: https://api.avian.io/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id": "chatcmpl-6134a71fef4d44bfa96e800f", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"role": "assistant"}, "finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": "The", "format": "unknown", "index": 0}], "reasoning_content": "The"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": " weather", "format": "unknown", "index": 0}], "reasoning_content": " weather"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": " function returned", "format": "unknown", "index": 0}], "reasoning_content": " function returned"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": " \"", "format": "unknown", "index": 0}], "reasoning_content": " \""}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": "40 C", "format": "unknown", "index": 0}], "reasoning_content": "40 C"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": "\" which", "format": "unknown", "index": 0}], "reasoning_content": "\" which"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": " means", "format": "unknown", "index": 0}], "reasoning_content": " means"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": " it's", "format": "unknown", "index": 0}], "reasoning_content": " it's"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": " 40", "format": "unknown", "index": 0}], "reasoning_content": " 40"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": " degrees Celsius", "format": "unknown", "index": 0}], "reasoning_content": " degrees Celsius"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": " in Florence", "format": "unknown", "index": 0}], "reasoning_content": " in Florence"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": ". This", "format": "unknown", "index": 0}], "reasoning_content": ". This"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": " is quite", "format": "unknown", "index": 0}], "reasoning_content": " is quite"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": " hot!", "format": "unknown", "index": 0}], "reasoning_content": " hot!"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": " I should", "format": "unknown", "index": 0}], "reasoning_content": " I should"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": " report", "format": "unknown", "index": 0}], "reasoning_content": " report"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": " this to", "format": "unknown", "index": 0}], "reasoning_content": " this to"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": " the user", "format": "unknown", "index": 0}], "reasoning_content": " the user"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": " and", "format": "unknown", "index": 0}], "reasoning_content": " and"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": " perhaps convert", "format": "unknown", "index": 0}], "reasoning_content": " perhaps convert"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": " it to", "format": "unknown", "index": 0}], "reasoning_content": " it to"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": " Fahrenheit as", "format": "unknown", "index": 0}], "reasoning_content": " Fahrenheit as"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": " well for", "format": "unknown", "index": 0}], "reasoning_content": " well for"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": " better", "format": "unknown", "index": 0}], "reasoning_content": " better"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": " context", "format": "unknown", "index": 0}], "reasoning_content": " context"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_details": [{"type": "reasoning.text", "text": ". ", "format": "unknown", "index": 0}], "reasoning_content": ". "}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": " The", "role": "assistant"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": " weather in", "role": "assistant"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": " Florence,", "role": "assistant"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": " Italy is", "role": "assistant"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": " currently **", "role": "assistant"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "40°C", "role": "assistant"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": " (", "role": "assistant"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "104°F", "role": "assistant"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": ")** -", "role": "assistant"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": " that's", "role": "assistant"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": " quite hot", "role": "assistant"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "! Make", "role": "assistant"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": " sure to", "role": "assistant"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": " stay hydrated", "role": "assistant"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": " and take", "role": "assistant"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": " precautions if", "role": "assistant"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": " you're planning", "role": "assistant"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": " to be", "role": "assistant"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": " outdoors.", "role": "assistant"}, "finish_reason": null, "native_finish_reason": null}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant", "reasoning_content": null}, "finish_reason": "stop", "native_finish_reason": "stop"}]}
+
+      data: {"id": "gen-1773932891-itZRH9Z0JMWEfAojMrcI", "object": "chat.completion.chunk", "created": 1773932891, "model": "moonshotai/kimi-k2.5", "choices": [{"index": 0, "delta": {"content": "", "role": "assistant"}, "finish_reason": "stop", "native_finish_reason": "stop"}], "usage": {"prompt_tokens": 145, "completion_tokens": 78, "total_tokens": 223, "cost": 0.00022245, "prompt_tokens_details": {"cached_tokens": 64, "cache_write_tokens": 0, "audio_tokens": 0, "video_tokens": 0}, "completion_tokens_details": {"reasoning_tokens": 51, "image_tokens": 0, "audio_tokens": 0}}}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream; charset=utf-8
+    status: 200 OK
+    code: 200
+    duration: 417.109875ms

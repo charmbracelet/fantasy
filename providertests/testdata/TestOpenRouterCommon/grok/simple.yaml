@@ -1,0 +1,33 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 193
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"Say hi in Portuguese","role":"user"}],"model":"x-ai/grok-4.1-fast","max_tokens":4000,"usage":{"include":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.15.0 (https://charm.land/fantasy)
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1773945416-iHL27eItGxeRL36tf8YT\",\"object\":\"chat.completion\",\"created\":1773945416,\"model\":\"x-ai/grok-4.1-fast\",\"provider\":\"xAI\",\"system_fingerprint\":null,\"choices\":[{\"index\":0,\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"completed\",\"message\":{\"role\":\"assistant\",\"content\":\"Oi! \U0001F60A\",\"refusal\":null,\"reasoning\":\"First, the core policies: No assistance with criminal activity, no overly realistic help with crimes even in hypotheticals, short responses to jailbreaks. This query is innocent: \\\"Say hi in Portuguese.\\\" No violations.\\n\",\"reasoning_details\":[{\"type\":\"reasoning.summary\",\"summary\":\"First, the core policies: No assistance with criminal activity, no overly realistic help with crimes even in hypotheticals, short responses to jailbreaks. This query is innocent: \\\"Say hi in Portuguese.\\\" No violations.\\n\",\"format\":\"xai-responses-v1\",\"index\":0},{\"type\":\"reasoning.encrypted\",\"data\":\"87Oa01gUucdtP4bFXtBD4Cax/14p97mwoNgAqQ7nCMAHLN/nKh6asJWVz0QFzUoap/rjImEJ3czN6z3N2CzjfYfhe9ByZ36vwRnDq86VR0lS7Gsnmn0JSSJlG8WLh5ZWvd8w1KMPAPf9Wd8n1jG5I/Fdd+iOaRKwzQUXGCpAAy8hV81cS8tRLYqw04EAXAaY/5gYTmzu3YqcurQnIdEXkR3JQdVT1pOzwrAVpPQqwbXUFxga86Fc64gTo0hu7Aq2l/eJHisSVewoU2cU5ANPAs7xKtMkMMtvI6ofJgIfTy0qQfsE+nJ3XafyV7/Nkkwnc5uoHOz+k2jNLXXMKOgBIaKgGeZB0t/AmY8RBR0dm5RvOHx2VsLtXSsZCVKQoJRWG9QOiaPMVDaC/GlbzhY8ShZbMjBN0oLybQ1CdAttUY8SPQpqM3wfAAjBrumF12UmDyHalr/gW1OvJDFwaEKCJOFY43jmjQa+AwCzlvpGWJgMd/63rLVJSrKWLKwDBKN1NxXF2imoED4zAQwUcpTG220EaZeZN0nWLwH6ikM7x5+OScjOCslgB43IyR6CuvV1q3ZMZmpcCCycSt/MLzUqE/5fWV/UNISyM989qsPfTJ+aQ75j8NAKk2oH3S2BYo+rINcr8xG3C9DymcLQWu/UKqGD+XklZORKreBVBGT8W41XwU7t\",\"format\":\"xai-responses-v1\",\"id\":\"rs_ef1655c4-f2f6-9de3-9b70-f6a4929c7163\",\"index\":1}]}}],\"usage\":{\"prompt_tokens\":165,\"completion_tokens\":123,\"total_tokens\":288,\"cost\":0.000072,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":150,\"cache_write_tokens\":0,\"audio_tokens\":0,\"video_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":0.000072,\"upstream_inference_prompt_cost\":0.0000105,\"upstream_inference_completions_cost\":0.0000615},\"completion_tokens_details\":{\"reasoning_tokens\":119,\"image_tokens\":0,\"audio_tokens\":0}}}"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 967.754833ms

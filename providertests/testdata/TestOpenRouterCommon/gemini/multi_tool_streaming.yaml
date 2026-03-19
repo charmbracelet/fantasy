@@ -1,0 +1,121 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 903
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"}],"model":"google/gemini-3.1-flash-lite-preview","max_tokens":4000,"stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true},"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.15.0 (https://charm.land/fantasy)
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      : OPENROUTER PROCESSING
+
+      : OPENROUTER PROCESSING
+
+      : OPENROUTER PROCESSING
+
+      : OPENROUTER PROCESSING
+
+      : OPENROUTER PROCESSING
+
+      : OPENROUTER PROCESSING
+
+      : OPENROUTER PROCESSING
+
+      data: {"id":"gen-1773945409-GKBLGdVdfDpywrF53THX","object":"chat.completion.chunk","created":1773945409,"model":"google/gemini-3.1-flash-lite-preview-20260303","provider":"Google","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":null,"reasoning_details":[{"type":"reasoning.encrypted","data":"AY89a1+4ldhGjiNn8S1VuGpFQrS57EYj823FwVVWyxvAG0cE5Qi8Mh3qDl5zaYStVes=","format":"google-gemini-v1","id":"tool_add_sYdHLQ7pM4TsXu9boNT5","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945409-GKBLGdVdfDpywrF53THX","object":"chat.completion.chunk","created":1773945409,"model":"google/gemini-3.1-flash-lite-preview-20260303","provider":"Google","choices":[{"index":0,"delta":{"content":null,"role":"assistant","tool_calls":[{"index":0,"id":"tool_add_sYdHLQ7pM4TsXu9boNT5","type":"function","function":{"name":"add","arguments":""}}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945409-GKBLGdVdfDpywrF53THX","object":"chat.completion.chunk","created":1773945409,"model":"google/gemini-3.1-flash-lite-preview-20260303","provider":"Google","choices":[{"index":0,"delta":{"content":null,"role":"assistant","tool_calls":[{"index":0,"function":{"arguments":"{\"b\":3,\"a\":2}"}}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945409-GKBLGdVdfDpywrF53THX","object":"chat.completion.chunk","created":1773945409,"model":"google/gemini-3.1-flash-lite-preview-20260303","provider":"Google","choices":[{"index":0,"delta":{"content":null,"role":"assistant","tool_calls":[{"index":1,"id":"tool_multiply_M7nCvf8jvQADIkrw5YKS","type":"function","function":{"name":"multiply","arguments":""}}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945409-GKBLGdVdfDpywrF53THX","object":"chat.completion.chunk","created":1773945409,"model":"google/gemini-3.1-flash-lite-preview-20260303","provider":"Google","choices":[{"index":0,"delta":{"content":null,"role":"assistant","tool_calls":[{"index":1,"function":{"arguments":"{\"a\":2,\"b\":3}"}}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945409-GKBLGdVdfDpywrF53THX","object":"chat.completion.chunk","created":1773945409,"model":"google/gemini-3.1-flash-lite-preview-20260303","provider":"Google","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":null},"finish_reason":"tool_calls","native_finish_reason":"STOP"}]}
+
+      data: {"id":"gen-1773945409-GKBLGdVdfDpywrF53THX","object":"chat.completion.chunk","created":1773945409,"model":"google/gemini-3.1-flash-lite-preview-20260303","provider":"Google","choices":[{"index":0,"delta":{"content":"","role":"assistant"},"finish_reason":"tool_calls","native_finish_reason":"STOP"}],"usage":{"prompt_tokens":83,"completion_tokens":32,"total_tokens":115,"cost":0.00006875,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"cache_write_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":0.00006875,"upstream_inference_prompt_cost":0.00002075,"upstream_inference_completions_cost":0.000048},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0,"audio_tokens":0}}}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 3.101256s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1544
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"tool_calls":[{"id":"tool_add_sYdHLQ7pM4TsXu9boNT5","function":{"arguments":"{\"b\":3,\"a\":2}","name":"add"},"type":"function"},{"id":"tool_multiply_M7nCvf8jvQADIkrw5YKS","function":{"arguments":"{\"a\":2,\"b\":3}","name":"multiply"},"type":"function"}],"role":"assistant","reasoning_details":[{"data":"AY89a1+4ldhGjiNn8S1VuGpFQrS57EYj823FwVVWyxvAG0cE5Qi8Mh3qDl5zaYStVes=","format":"google-gemini-v1","id":"tool_add_sYdHLQ7pM4TsXu9boNT5","index":0,"type":"reasoning.encrypted"}]},{"content":"5","tool_call_id":"tool_add_sYdHLQ7pM4TsXu9boNT5","role":"tool"},{"content":"6","tool_call_id":"tool_multiply_M7nCvf8jvQADIkrw5YKS","role":"tool"}],"model":"google/gemini-3.1-flash-lite-preview","max_tokens":4000,"stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true},"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.15.0 (https://charm.land/fantasy)
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      : OPENROUTER PROCESSING
+
+      : OPENROUTER PROCESSING
+
+      : OPENROUTER PROCESSING
+
+      : OPENROUTER PROCESSING
+
+      : OPENROUTER PROCESSING
+
+      : OPENROUTER PROCESSING
+
+      : OPENROUTER PROCESSING
+
+      data: {"id":"gen-1773945413-SErDL8acdBEMsr0VlQOj","object":"chat.completion.chunk","created":1773945413,"model":"google/gemini-3.1-flash-lite-preview-20260303","provider":"Google","choices":[{"index":0,"delta":{"content":"The sum","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945413-SErDL8acdBEMsr0VlQOj","object":"chat.completion.chunk","created":1773945413,"model":"google/gemini-3.1-flash-lite-preview-20260303","provider":"Google","choices":[{"index":0,"delta":{"content":" of 2 and ","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945413-SErDL8acdBEMsr0VlQOj","object":"chat.completion.chunk","created":1773945413,"model":"google/gemini-3.1-flash-lite-preview-20260303","provider":"Google","choices":[{"index":0,"delta":{"content":"3 is 5, and the product of 2 and","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945413-SErDL8acdBEMsr0VlQOj","object":"chat.completion.chunk","created":1773945413,"model":"google/gemini-3.1-flash-lite-preview-20260303","provider":"Google","choices":[{"index":0,"delta":{"content":" 3 is 6.","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945413-SErDL8acdBEMsr0VlQOj","object":"chat.completion.chunk","created":1773945413,"model":"google/gemini-3.1-flash-lite-preview-20260303","provider":"Google","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":null,"reasoning_details":[{"type":"reasoning.encrypted","data":"AY89a18Arm6uvbtwsskpVED8BnueFZjjOLD5zxfz/ALu6B8EI7sgVUR6svb/kSSFRmM=","format":"google-gemini-v1","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945413-SErDL8acdBEMsr0VlQOj","object":"chat.completion.chunk","created":1773945413,"model":"google/gemini-3.1-flash-lite-preview-20260303","provider":"Google","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":null},"finish_reason":"stop","native_finish_reason":"STOP"}]}
+
+      data: {"id":"gen-1773945413-SErDL8acdBEMsr0VlQOj","object":"chat.completion.chunk","created":1773945413,"model":"google/gemini-3.1-flash-lite-preview-20260303","provider":"Google","choices":[{"index":0,"delta":{"content":"","role":"assistant"},"finish_reason":"stop","native_finish_reason":"STOP"}],"usage":{"prompt_tokens":150,"completion_tokens":25,"total_tokens":175,"cost":0.000075,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"cache_write_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":0.000075,"upstream_inference_prompt_cost":0.0000375,"upstream_inference_completions_cost":0.0000375},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0,"audio_tokens":0}}}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 3.220695416s

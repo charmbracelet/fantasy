@@ -1,0 +1,311 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 541
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"}],"model":"moonshotai/kimi-k2.5","max_tokens":4000,"stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"usage":{"include":true},"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.15.0 (https://charm.land/fantasy)
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      : OPENROUTER PROCESSING
+
+      : OPENROUTER PROCESSING
+
+      : OPENROUTER PROCESSING
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":"The","reasoning_details":[{"type":"reasoning.text","text":"The","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" user","reasoning_details":[{"type":"reasoning.text","text":" user","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" is","reasoning_details":[{"type":"reasoning.text","text":" is","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" asking","reasoning_details":[{"type":"reasoning.text","text":" asking","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" for","reasoning_details":[{"type":"reasoning.text","text":" for","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" the","reasoning_details":[{"type":"reasoning.text","text":" the","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" weather","reasoning_details":[{"type":"reasoning.text","text":" weather","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" in","reasoning_details":[{"type":"reasoning.text","text":" in","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" Florence","reasoning_details":[{"type":"reasoning.text","text":" Florence","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":",","reasoning_details":[{"type":"reasoning.text","text":",","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" Italy","reasoning_details":[{"type":"reasoning.text","text":" Italy","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":".","reasoning_details":[{"type":"reasoning.text","text":".","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" I","reasoning_details":[{"type":"reasoning.text","text":" I","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" should","reasoning_details":[{"type":"reasoning.text","text":" should","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" use","reasoning_details":[{"type":"reasoning.text","text":" use","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" the","reasoning_details":[{"type":"reasoning.text","text":" the","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" weather","reasoning_details":[{"type":"reasoning.text","text":" weather","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" function","reasoning_details":[{"type":"reasoning.text","text":" function","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" to","reasoning_details":[{"type":"reasoning.text","text":" to","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      : OPENROUTER PROCESSING
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" get","reasoning_details":[{"type":"reasoning.text","text":" get","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" this","reasoning_details":[{"type":"reasoning.text","text":" this","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" information","reasoning_details":[{"type":"reasoning.text","text":" information","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":".","reasoning_details":[{"type":"reasoning.text","text":".","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" I","reasoning_details":[{"type":"reasoning.text","text":" I","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" need","reasoning_details":[{"type":"reasoning.text","text":" need","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" to","reasoning_details":[{"type":"reasoning.text","text":" to","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" pass","reasoning_details":[{"type":"reasoning.text","text":" pass","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" \"","reasoning_details":[{"type":"reasoning.text","text":" \"","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":"Fl","reasoning_details":[{"type":"reasoning.text","text":"Fl","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":"ore","reasoning_details":[{"type":"reasoning.text","text":"ore","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":"nce","reasoning_details":[{"type":"reasoning.text","text":"nce","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":"\"","reasoning_details":[{"type":"reasoning.text","text":"\"","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" as","reasoning_details":[{"type":"reasoning.text","text":" as","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      : OPENROUTER PROCESSING
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" the","reasoning_details":[{"type":"reasoning.text","text":" the","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" location","reasoning_details":[{"type":"reasoning.text","text":" location","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" parameter","reasoning_details":[{"type":"reasoning.text","text":" parameter","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":".","reasoning_details":[{"type":"reasoning.text","text":".","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":null,"role":"assistant","tool_calls":[{"index":0,"id":"weather:0","type":"function","function":{"name":"weather","arguments":""}}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":null,"role":"assistant","tool_calls":[{"index":0,"function":{"arguments":"{\""}}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":null,"role":"assistant","tool_calls":[{"index":0,"function":{"arguments":"location"}}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":null,"role":"assistant","tool_calls":[{"index":0,"function":{"arguments":"\":"}}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":null,"role":"assistant","tool_calls":[{"index":0,"function":{"arguments":" \""}}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":null,"role":"assistant","tool_calls":[{"index":0,"function":{"arguments":"Fl"}}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":null,"role":"assistant","tool_calls":[{"index":0,"function":{"arguments":"ore"}}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":null,"role":"assistant","tool_calls":[{"index":0,"function":{"arguments":"nce"}}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":null,"role":"assistant","tool_calls":[{"index":0,"function":{"arguments":"\"}"}}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":null},"finish_reason":"tool_calls","native_finish_reason":"tool_calls"}]}
+
+      data: {"id":"gen-1773945481-OpjMSaZdXKWarQh8IgjM","object":"chat.completion.chunk","created":1773945481,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant"},"finish_reason":"tool_calls","native_finish_reason":"tool_calls"}],"usage":{"prompt_tokens":68,"completion_tokens":57,"total_tokens":125,"cost":0.000154252,"is_byok":false,"prompt_tokens_details":{"cached_tokens":68,"cache_write_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":0.000154252,"upstream_inference_prompt_cost":0.000006052,"upstream_inference_completions_cost":0.0001482},"completion_tokens_details":{"reasoning_tokens":42,"image_tokens":0,"audio_tokens":0}}}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 1.94277625s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 999
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"weather:0","function":{"arguments":"{\"location\": \"Florence\"}","name":"weather"},"type":"function"}],"role":"assistant","reasoning_details":[{"format":"unknown","index":0,"text":" user is asking for the weather in Florence, Italy. I should use the weather function to get this information. I need to pass \"Florence\" as the location parameter.","type":"reasoning.text"}]},{"content":"40 C","tool_call_id":"weather:0","role":"tool"}],"model":"moonshotai/kimi-k2.5","max_tokens":4000,"stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"usage":{"include":true},"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.15.0 (https://charm.land/fantasy)
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      : OPENROUTER PROCESSING
+
+      : OPENROUTER PROCESSING
+
+      : OPENROUTER PROCESSING
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":"The","reasoning_details":[{"type":"reasoning.text","text":"The","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" function","reasoning_details":[{"type":"reasoning.text","text":" function","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" returned","reasoning_details":[{"type":"reasoning.text","text":" returned","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" the","reasoning_details":[{"type":"reasoning.text","text":" the","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" weather","reasoning_details":[{"type":"reasoning.text","text":" weather","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" for","reasoning_details":[{"type":"reasoning.text","text":" for","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" Florence","reasoning_details":[{"type":"reasoning.text","text":" Florence","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" as","reasoning_details":[{"type":"reasoning.text","text":" as","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" ","reasoning_details":[{"type":"reasoning.text","text":" ","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":"40","reasoning_details":[{"type":"reasoning.text","text":"40","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":"°C","reasoning_details":[{"type":"reasoning.text","text":"°C","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":".","reasoning_details":[{"type":"reasoning.text","text":".","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" This","reasoning_details":[{"type":"reasoning.text","text":" This","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" is","reasoning_details":[{"type":"reasoning.text","text":" is","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" quite","reasoning_details":[{"type":"reasoning.text","text":" quite","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" hot","reasoning_details":[{"type":"reasoning.text","text":" hot","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":"!","reasoning_details":[{"type":"reasoning.text","text":"!","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" I","reasoning_details":[{"type":"reasoning.text","text":" I","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" should","reasoning_details":[{"type":"reasoning.text","text":" should","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" provide","reasoning_details":[{"type":"reasoning.text","text":" provide","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" this","reasoning_details":[{"type":"reasoning.text","text":" this","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" information","reasoning_details":[{"type":"reasoning.text","text":" information","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" to","reasoning_details":[{"type":"reasoning.text","text":" to","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" the","reasoning_details":[{"type":"reasoning.text","text":" the","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" user","reasoning_details":[{"type":"reasoning.text","text":" user","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" in","reasoning_details":[{"type":"reasoning.text","text":" in","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" a","reasoning_details":[{"type":"reasoning.text","text":" a","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" helpful","reasoning_details":[{"type":"reasoning.text","text":" helpful","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" way","reasoning_details":[{"type":"reasoning.text","text":" way","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":".","reasoning_details":[{"type":"reasoning.text","text":".","format":"unknown","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"The","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":" current","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":" temperature","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":" in","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":" Florence","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":",","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":" Italy","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":" is","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":" **","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"40","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"°C","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":" (","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"104","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"°F","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":")**","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":".","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":" That's","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":" quite","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":" hot","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"!","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":" Make","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":" sure","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":" to","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":" stay","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":" hydrated","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":" and","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":" seek","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":" shade","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":" if","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":" you're","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":" visiting","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":" the","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":" city","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":" today","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":".","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":null},"finish_reason":"stop","native_finish_reason":"stop"}]}
+
+      data: {"id":"gen-1773945484-SfZv5TJansZrMGHxA2ZN","object":"chat.completion.chunk","created":1773945484,"model":"moonshotai/kimi-k2.5-0127","provider":"AtlasCloud","system_fingerprint":"fpv0_e0c12c89","choices":[{"index":0,"delta":{"content":"","role":"assistant"},"finish_reason":"stop","native_finish_reason":"stop"}],"usage":{"prompt_tokens":143,"completion_tokens":68,"total_tokens":211,"cost":0.0002483,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"cache_write_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":0.0002483,"upstream_inference_prompt_cost":0.0000715,"upstream_inference_completions_cost":0.0001768},"completion_tokens_details":{"reasoning_tokens":36,"image_tokens":0,"audio_tokens":0}}}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 1.370857958s

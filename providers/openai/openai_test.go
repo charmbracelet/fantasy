@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"charm.land/fantasy"
-	"github.com/openai/openai-go/v3/packages/param"
+	"github.com/charmbracelet/openai-go/packages/param"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

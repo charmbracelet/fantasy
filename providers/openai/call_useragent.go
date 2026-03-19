@@ -3,7 +3,7 @@ package openai
 import (
 	"charm.land/fantasy"
 	"charm.land/fantasy/providers/internal/httpheaders"
-	"github.com/openai/openai-go/v3/option"
+	"github.com/charmbracelet/openai-go/option"
 )
 
 // callUARequestOptions returns per-request options that override the

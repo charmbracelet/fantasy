@@ -12,11 +12,11 @@ import (
 	"charm.land/fantasy"
 	"charm.land/fantasy/object"
 	"charm.land/fantasy/schema"
+	"github.com/charmbracelet/openai-go"
+	"github.com/charmbracelet/openai-go/packages/param"
+	"github.com/charmbracelet/openai-go/responses"
+	"github.com/charmbracelet/openai-go/shared"
 	"github.com/google/uuid"
-	"github.com/openai/openai-go/v3"
-	"github.com/openai/openai-go/v3/packages/param"
-	"github.com/openai/openai-go/v3/responses"
-	"github.com/openai/openai-go/v3/shared"
 )
 
 const topLogprobsMax = 20

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -11,32 +12,29 @@ import (
 	"charm.land/fantasy"
 	"charm.land/fantasy/object"
 	"charm.land/fantasy/schema"
+	"github.com/charmbracelet/openai-go"
+	"github.com/charmbracelet/openai-go/packages/param"
+	"github.com/charmbracelet/openai-go/responses"
+	"github.com/charmbracelet/openai-go/shared"
 	"github.com/google/uuid"
-	"github.com/openai/openai-go/v3"
-	"github.com/openai/openai-go/v3/packages/param"
-	"github.com/openai/openai-go/v3/responses"
-	"github.com/openai/openai-go/v3/shared"
 )
 
 const topLogprobsMax = 20
 
 type responsesLanguageModel struct {
-	provider           string
-	modelID            string
-	client             openai.Client
-	objectMode         fantasy.ObjectMode
-	noDefaultUserAgent bool
+	provider   string
+	modelID    string
+	client     openai.Client
+	objectMode fantasy.ObjectMode
 }
 
-// newResponsesLanguageModel implements a responses api model
-// INFO: (kujtim) currently we do not support stored parameter we default it to false.
-func newResponsesLanguageModel(modelID string, provider string, client openai.Client, objectMode fantasy.ObjectMode, noDefaultUserAgent bool) responsesLanguageModel {
+// newResponsesLanguageModel implements a responses api model.
+func newResponsesLanguageModel(modelID string, provider string, client openai.Client, objectMode fantasy.ObjectMode) responsesLanguageModel {
 	return responsesLanguageModel{
-		modelID:            modelID,
-		provider:           provider,
-		client:             client,
-		objectMode:         objectMode,
-		noDefaultUserAgent: noDefaultUserAgent,
+		modelID:    modelID,
+		provider:   provider,
+		client:     client,
+		objectMode: objectMode,
 	}
 }
 
@@ -121,11 +119,14 @@ func getResponsesModelConfig(modelID string) responsesModelConfig {
 	}
 }
 
-func (o responsesLanguageModel) prepareParams(call fantasy.Call) (*responses.ResponseNewParams, []fantasy.CallWarning) {
+const (
+	previousResponseIDHistoryError = "cannot combine previous_response_id with replayed conversation history; use either previous_response_id (server-side chaining) or explicit message replay, not both"
+	previousResponseIDStoreError   = "previous_response_id requires store to be true; the current response will not be stored and cannot be used for further chaining"
+)
+
+func (o responsesLanguageModel) prepareParams(call fantasy.Call) (*responses.ResponseNewParams, []fantasy.CallWarning, error) {
 	var warnings []fantasy.CallWarning
-	params := &responses.ResponseNewParams{
-		Store: param.NewOpt(false),
-	}
+	params := &responses.ResponseNewParams{}
 
 	modelConfig := getResponsesModelConfig(o.modelID)
 
@@ -157,7 +158,24 @@ func (o responsesLanguageModel) prepareParams(call fantasy.Call) (*responses.Res
 		}
 	}
 
-	input, inputWarnings := toResponsesPrompt(call.Prompt, modelConfig.systemMessageMode)
+	if openaiOptions != nil && openaiOptions.Store != nil {
+		params.Store = param.NewOpt(*openaiOptions.Store)
+	} else {
+		params.Store = param.NewOpt(false)
+	}
+
+	if openaiOptions != nil && openaiOptions.PreviousResponseID != nil && *openaiOptions.PreviousResponseID != "" {
+		if err := validatePreviousResponseIDPrompt(call.Prompt); err != nil {
+			return nil, warnings, err
+		}
+		if openaiOptions.Store == nil || !*openaiOptions.Store {
+			return nil, warnings, errors.New(previousResponseIDStoreError)
+		}
+		params.PreviousResponseID = param.NewOpt(*openaiOptions.PreviousResponseID)
+	}
+
+	storeEnabled := openaiOptions != nil && openaiOptions.Store != nil && *openaiOptions.Store
+	input, inputWarnings := toResponsesPrompt(call.Prompt, modelConfig.systemMessageMode, storeEnabled)
 	warnings = append(warnings, inputWarnings...)
 
 	var include []IncludeType
@@ -328,10 +346,51 @@ func (o responsesLanguageModel) prepareParams(call fantasy.Call) (*responses.Res
 		params.ToolChoice = toolChoice
 	}
 
-	return params, warnings
+	return params, warnings, nil
 }
 
-func toResponsesPrompt(prompt fantasy.Prompt, systemMessageMode string) (responses.ResponseInputParam, []fantasy.CallWarning) {
+func validatePreviousResponseIDPrompt(prompt fantasy.Prompt) error {
+	for _, msg := range prompt {
+		switch msg.Role {
+		case fantasy.MessageRoleSystem, fantasy.MessageRoleUser:
+			continue
+		default:
+			return errors.New(previousResponseIDHistoryError)
+		}
+	}
+	return nil
+}
+
+func responsesProviderMetadata(responseID string) fantasy.ProviderMetadata {
+	if responseID == "" {
+		return fantasy.ProviderMetadata{}
+	}
+
+	return fantasy.ProviderMetadata{
+		Name: &ResponsesProviderMetadata{
+			ResponseID: responseID,
+		},
+	}
+}
+
+func responsesUsage(resp responses.Response) fantasy.Usage {
+	// OpenAI reports input_tokens INCLUDING cached tokens. Subtract to avoid double-counting.
+	inputTokens := max(resp.Usage.InputTokens-resp.Usage.InputTokensDetails.CachedTokens, 0)
+	usage := fantasy.Usage{
+		InputTokens:  inputTokens,
+		OutputTokens: resp.Usage.OutputTokens,
+		TotalTokens:  resp.Usage.InputTokens + resp.Usage.OutputTokens,
+	}
+	if resp.Usage.OutputTokensDetails.ReasoningTokens != 0 {
+		usage.ReasoningTokens = resp.Usage.OutputTokensDetails.ReasoningTokens
+	}
+	if resp.Usage.InputTokensDetails.CachedTokens != 0 {
+		usage.CacheReadTokens = resp.Usage.InputTokensDetails.CachedTokens
+	}
+	return usage
+}
+
+func toResponsesPrompt(prompt fantasy.Prompt, systemMessageMode string, store bool) (responses.ResponseInputParam, []fantasy.CallWarning) {
 	var input responses.ResponseInputParam
 	var warnings []fantasy.CallWarning
 
@@ -500,6 +559,16 @@ func toResponsesPrompt(prompt fantasy.Prompt, systemMessageMode string) (respons
 					// recognised Responses API input type; skip.
 					continue
 				case fantasy.ContentTypeReasoning:
+					if store {
+						// When Store is enabled the API already has the
+						// reasoning persisted server-side. Replaying the
+						// full OfReasoning item causes a validation error
+						// ("reasoning was provided without its required
+						// following item") because the API cannot pair the
+						// reconstructed reasoning with the output item
+						// that followed it.
+						continue
+					}
 					reasoningMetadata := GetReasoningMetadata(c.Options())
 					if reasoningMetadata == nil || reasoningMetadata.ItemID == "" {
 						continue
@@ -512,7 +581,7 @@ func toResponsesPrompt(prompt fantasy.Prompt, systemMessageMode string) (respons
 						continue
 					}
 					// we want to always send an empty array
-					summary := []responses.ResponseReasoningItemSummaryParam{}
+					summary := make([]responses.ResponseReasoningItemSummaryParam, 0, len(reasoningMetadata.Summary))
 					for _, s := range reasoningMetadata.Summary {
 						summary = append(summary, responses.ResponseReasoningItemSummaryParam{
 							Type: "summary_text",
@@ -607,7 +676,7 @@ func hasVisibleResponsesUserContent(content responses.ResponseInputMessageConten
 func hasVisibleResponsesAssistantContent(items []responses.ResponseInputItemUnionParam, startIdx int) bool {
 	// Check if we added any assistant content parts from this message
 	for i := startIdx; i < len(items); i++ {
-		if items[i].OfMessage != nil || items[i].OfFunctionCall != nil {
+		if items[i].OfMessage != nil || items[i].OfFunctionCall != nil || items[i].OfItemReference != nil {
 			return true
 		}
 	}
@@ -695,8 +764,12 @@ func toResponsesTools(tools []fantasy.Tool, toolChoice *fantasy.ToolChoice, opti
 }
 
 func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call) (*fantasy.Response, error) {
-	params, warnings := o.prepareParams(call)
-	response, err := o.client.Responses.New(ctx, *params, callUARequestOptions(call, o.noDefaultUserAgent)...)
+	params, warnings, err := o.prepareParams(call)
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := o.client.Responses.New(ctx, *params, callUARequestOptions(call)...)
 	if err != nil {
 		return nil, toProviderErr(err)
 	}
@@ -812,26 +885,14 @@ func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call)
 		}
 	}
 
-	usage := fantasy.Usage{
-		InputTokens:  response.Usage.InputTokens,
-		OutputTokens: response.Usage.OutputTokens,
-		TotalTokens:  response.Usage.InputTokens + response.Usage.OutputTokens,
-	}
-
-	if response.Usage.OutputTokensDetails.ReasoningTokens != 0 {
-		usage.ReasoningTokens = response.Usage.OutputTokensDetails.ReasoningTokens
-	}
-	if response.Usage.InputTokensDetails.CachedTokens != 0 {
-		usage.CacheReadTokens = response.Usage.InputTokensDetails.CachedTokens
-	}
-
+	usage := responsesUsage(*response)
 	finishReason := mapResponsesFinishReason(response.IncompleteDetails.Reason, hasFunctionCall)
 
 	return &fantasy.Response{
 		Content:          content,
 		Usage:            usage,
 		FinishReason:     finishReason,
-		ProviderMetadata: fantasy.ProviderMetadata{},
+		ProviderMetadata: responsesProviderMetadata(response.ID),
 		Warnings:         warnings,
 	}, nil
 }
@@ -854,12 +915,21 @@ func mapResponsesFinishReason(reason string, hasFunctionCall bool) fantasy.Finis
 }
 
 func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.StreamResponse, error) {
-	params, warnings := o.prepareParams(call)
+	params, warnings, err := o.prepareParams(call)
+	if err != nil {
+		return nil, err
+	}
 
-	stream := o.client.Responses.NewStreaming(ctx, *params, callUARequestOptions(call, o.noDefaultUserAgent)...)
+	stream := o.client.Responses.NewStreaming(ctx, *params, callUARequestOptions(call)...)
 
 	finishReason := fantasy.FinishReasonUnknown
 	var usage fantasy.Usage
+	// responseID tracks the server-assigned response ID. It's first set from the
+	// response.created event and may be overwritten by response.completed or
+	// response.incomplete events. Per the OpenAI API contract, these IDs are
+	// identical; the overwrites ensure we have the final value even if an event
+	// is missed.
+	responseID := ""
 	ongoingToolCalls := make(map[int64]*ongoingToolCall)
 	hasFunctionCall := false
 	activeReasoning := make(map[string]*reasoningState)
@@ -879,7 +949,8 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 
 			switch event.Type {
 			case "response.created":
-				_ = event.AsResponseCreated()
+				created := event.AsResponseCreated()
+				responseID = created.Response.ID
 
 			case "response.output_item.added":
 				added := event.AsResponseOutputItemAdded()
@@ -1080,20 +1151,17 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 					}
 				}
 
-			case "response.completed", "response.incomplete":
+			case "response.completed":
 				completed := event.AsResponseCompleted()
+				responseID = completed.Response.ID
 				finishReason = mapResponsesFinishReason(completed.Response.IncompleteDetails.Reason, hasFunctionCall)
-				usage = fantasy.Usage{
-					InputTokens:  completed.Response.Usage.InputTokens,
-					OutputTokens: completed.Response.Usage.OutputTokens,
-					TotalTokens:  completed.Response.Usage.InputTokens + completed.Response.Usage.OutputTokens,
-				}
-				if completed.Response.Usage.OutputTokensDetails.ReasoningTokens != 0 {
-					usage.ReasoningTokens = completed.Response.Usage.OutputTokensDetails.ReasoningTokens
-				}
-				if completed.Response.Usage.InputTokensDetails.CachedTokens != 0 {
-					usage.CacheReadTokens = completed.Response.Usage.InputTokensDetails.CachedTokens
-				}
+				usage = responsesUsage(completed.Response)
+
+			case "response.incomplete":
+				incomplete := event.AsResponseIncomplete()
+				responseID = incomplete.Response.ID
+				finishReason = mapResponsesFinishReason(incomplete.Response.IncompleteDetails.Reason, hasFunctionCall)
+				usage = responsesUsage(incomplete.Response)
 
 			case "error":
 				errorEvent := event.AsError()
@@ -1117,9 +1185,10 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 		}
 
 		yield(fantasy.StreamPart{
-			Type:         fantasy.StreamPartTypeFinish,
-			Usage:        usage,
-			FinishReason: finishReason,
+			Type:             fantasy.StreamPartTypeFinish,
+			Usage:            usage,
+			FinishReason:     finishReason,
+			ProviderMetadata: responsesProviderMetadata(responseID),
 		})
 	}, nil
 }
@@ -1247,7 +1316,10 @@ func (o responsesLanguageModel) generateObjectWithJSONMode(ctx context.Context, 
 		ProviderOptions:  call.ProviderOptions,
 	}
 
-	params, warnings := o.prepareParams(fantasyCall)
+	params, warnings, err := o.prepareParams(fantasyCall)
+	if err != nil {
+		return nil, err
+	}
 
 	// Add structured output via Text.Format field
 	params.Text = responses.ResponseTextConfigParam{
@@ -1255,7 +1327,7 @@ func (o responsesLanguageModel) generateObjectWithJSONMode(ctx context.Context, 
 	}
 
 	// Make request
-	response, err := o.client.Responses.New(ctx, *params, objectCallUARequestOptions(call, o.noDefaultUserAgent)...)
+	response, err := o.client.Responses.New(ctx, *params, objectCallUARequestOptions(call)...)
 	if err != nil {
 		return nil, toProviderErr(err)
 	}
@@ -1303,18 +1375,7 @@ func (o responsesLanguageModel) generateObjectWithJSONMode(ctx context.Context, 
 		obj, err = schema.ParseAndValidate(jsonText, call.Schema)
 	}
 
-	usage := fantasy.Usage{
-		InputTokens:  response.Usage.InputTokens,
-		OutputTokens: response.Usage.OutputTokens,
-		TotalTokens:  response.Usage.InputTokens + response.Usage.OutputTokens,
-	}
-	if response.Usage.OutputTokensDetails.ReasoningTokens != 0 {
-		usage.ReasoningTokens = response.Usage.OutputTokensDetails.ReasoningTokens
-	}
-	if response.Usage.InputTokensDetails.CachedTokens != 0 {
-		usage.CacheReadTokens = response.Usage.InputTokensDetails.CachedTokens
-	}
-
+	usage := responsesUsage(*response)
 	finishReason := mapResponsesFinishReason(response.IncompleteDetails.Reason, false)
 
 	if err != nil {
@@ -1327,11 +1388,12 @@ func (o responsesLanguageModel) generateObjectWithJSONMode(ctx context.Context, 
 	}
 
 	return &fantasy.ObjectResponse{
-		Object:       obj,
-		RawText:      jsonText,
-		Usage:        usage,
-		FinishReason: finishReason,
-		Warnings:     warnings,
+		Object:           obj,
+		RawText:          jsonText,
+		Usage:            usage,
+		FinishReason:     finishReason,
+		Warnings:         warnings,
+		ProviderMetadata: responsesProviderMetadata(response.ID),
 	}, nil
 }
 
@@ -1358,14 +1420,17 @@ func (o responsesLanguageModel) streamObjectWithJSONMode(ctx context.Context, ca
 		ProviderOptions:  call.ProviderOptions,
 	}
 
-	params, warnings := o.prepareParams(fantasyCall)
+	params, warnings, err := o.prepareParams(fantasyCall)
+	if err != nil {
+		return nil, err
+	}
 
 	// Add structured output via Text.Format field
 	params.Text = responses.ResponseTextConfigParam{
 		Format: responses.ResponseFormatTextConfigParamOfJSONSchema(schemaName, jsonSchemaMap),
 	}
 
-	stream := o.client.Responses.NewStreaming(ctx, *params, objectCallUARequestOptions(call, o.noDefaultUserAgent)...)
+	stream := o.client.Responses.NewStreaming(ctx, *params, objectCallUARequestOptions(call)...)
 
 	return func(yield func(fantasy.ObjectStreamPart) bool) {
 		if len(warnings) > 0 {
@@ -1381,6 +1446,12 @@ func (o responsesLanguageModel) streamObjectWithJSONMode(ctx context.Context, ca
 		var lastParsedObject any
 		var usage fantasy.Usage
 		var finishReason fantasy.FinishReason
+		// responseID tracks the server-assigned response ID. It's first set from the
+		// response.created event and may be overwritten by response.completed or
+		// response.incomplete events. Per the OpenAI API contract, these IDs are
+		// identical; the overwrites ensure we have the final value even if an event
+		// is missed.
+		var responseID string
 		var streamErr error
 		hasFunctionCall := false
 
@@ -1388,6 +1459,10 @@ func (o responsesLanguageModel) streamObjectWithJSONMode(ctx context.Context, ca
 			event := stream.Current()
 
 			switch event.Type {
+			case "response.created":
+				created := event.AsResponseCreated()
+				responseID = created.Response.ID
+
 			case "response.output_text.delta":
 				textDelta := event.AsResponseOutputTextDelta()
 				accumulated += textDelta.Delta
@@ -1431,20 +1506,17 @@ func (o responsesLanguageModel) streamObjectWithJSONMode(ctx context.Context, ca
 					}
 				}
 
-			case "response.completed", "response.incomplete":
+			case "response.completed":
 				completed := event.AsResponseCompleted()
+				responseID = completed.Response.ID
 				finishReason = mapResponsesFinishReason(completed.Response.IncompleteDetails.Reason, hasFunctionCall)
-				usage = fantasy.Usage{
-					InputTokens:  completed.Response.Usage.InputTokens,
-					OutputTokens: completed.Response.Usage.OutputTokens,
-					TotalTokens:  completed.Response.Usage.InputTokens + completed.Response.Usage.OutputTokens,
-				}
-				if completed.Response.Usage.OutputTokensDetails.ReasoningTokens != 0 {
-					usage.ReasoningTokens = completed.Response.Usage.OutputTokensDetails.ReasoningTokens
-				}
-				if completed.Response.Usage.InputTokensDetails.CachedTokens != 0 {
-					usage.CacheReadTokens = completed.Response.Usage.InputTokensDetails.CachedTokens
-				}
+				usage = responsesUsage(completed.Response)
+
+			case "response.incomplete":
+				incomplete := event.AsResponseIncomplete()
+				responseID = incomplete.Response.ID
+				finishReason = mapResponsesFinishReason(incomplete.Response.IncompleteDetails.Reason, hasFunctionCall)
+				usage = responsesUsage(incomplete.Response)
 
 			case "error":
 				errorEvent := event.AsError()
@@ -1471,9 +1543,10 @@ func (o responsesLanguageModel) streamObjectWithJSONMode(ctx context.Context, ca
 		// Final validation and emit
 		if streamErr == nil && lastParsedObject != nil {
 			yield(fantasy.ObjectStreamPart{
-				Type:         fantasy.ObjectStreamPartTypeFinish,
-				Usage:        usage,
-				FinishReason: finishReason,
+				Type:             fantasy.ObjectStreamPartTypeFinish,
+				Usage:            usage,
+				FinishReason:     finishReason,
+				ProviderMetadata: responsesProviderMetadata(responseID),
 			})
 		} else if streamErr == nil && lastParsedObject == nil {
 			// No object was generated

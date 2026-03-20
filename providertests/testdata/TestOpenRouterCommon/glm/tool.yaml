@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 483
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"}],"model":"z-ai/glm-5-turbo","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.15.0 (https://charm.land/fantasy)
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1773945449-sZksq50wfVIXe94WMejJ\",\"object\":\"chat.completion\",\"created\":1773945449,\"model\":\"z-ai/glm-5-turbo-20260315\",\"provider\":\"Z.AI\",\"system_fingerprint\":null,\"choices\":[{\"index\":0,\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"native_finish_reason\":\"tool_calls\",\"message\":{\"role\":\"assistant\",\"content\":null,\"refusal\":null,\"reasoning\":\"The user wants to know the weather in Florence, Italy. Let me call the weather function.\",\"tool_calls\":[{\"type\":\"function\",\"index\":0,\"id\":\"call_3f8ba8d964264042b99c0403\",\"function\":{\"name\":\"weather\",\"arguments\":\"{\\\"location\\\":\\\"Florence, Italy\\\"}\"}}],\"reasoning_details\":[{\"type\":\"reasoning.text\",\"text\":\"The user wants to know the weather in Florence, Italy. Let me call the weather function.\",\"format\":\"unknown\",\"index\":0}]}}],\"usage\":{\"prompt_tokens\":173,\"completion_tokens\":33,\"total_tokens\":206,\"cost\":0.000239424,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":42,\"cache_write_tokens\":0,\"audio_tokens\":0,\"video_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":0.00029928,\"upstream_inference_prompt_cost\":0.00016728,\"upstream_inference_completions_cost\":0.000132},\"completion_tokens_details\":{\"reasoning_tokens\":19,\"image_tokens\":0,\"audio_tokens\":0}}}"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 2.0582665s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 910
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"call_3f8ba8d964264042b99c0403","function":{"arguments":"{\"location\":\"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant","reasoning_details":[{"format":"unknown","index":0,"text":"The user wants to know the weather in Florence, Italy. Let me call the weather function.","type":"reasoning.text"}]},{"content":"40 C","tool_call_id":"call_3f8ba8d964264042b99c0403","role":"tool"}],"model":"z-ai/glm-5-turbo","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.15.0 (https://charm.land/fantasy)
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "\n         \n\n         \n{\"id\":\"gen-1773945451-gwPNpv4Y8nMTdoaUTRjx\",\"object\":\"chat.completion\",\"created\":1773945451,\"model\":\"z-ai/glm-5-turbo-20260315\",\"provider\":\"Z.AI\",\"system_fingerprint\":null,\"choices\":[{\"index\":0,\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"stop\",\"message\":{\"role\":\"assistant\",\"content\":\"The current weather in **Florence, Italy** is quite scorching at **40°C (104°F)**! \U0001F321️\\n\\nIt's extremely hot, so if you're planning to be outdoors, be sure to:\\n\\n- \U0001F4A7 Stay hydrated\\n- \U0001F9F4 Wear sunscreen\\n- \U0001F9E2 Wear a hat and light clothing\\n- \U0001F333 Seek shade when possible\\n\\nWould you like to know the weather for any other locations?\",\"refusal\":null,\"reasoning\":\"The weather function returned 40°C for Florence, Italy. That's quite hot! Let me present this to the user.\",\"reasoning_details\":[{\"type\":\"reasoning.text\",\"text\":\"The weather function returned 40°C for Florence, Italy. That's quite hot! Let me present this to the user.\",\"format\":\"unknown\",\"index\":0}]}}],\"usage\":{\"prompt_tokens\":212,\"completion_tokens\":119,\"total_tokens\":331,\"cost\":0.000452224,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":172,\"cache_write_tokens\":0,\"audio_tokens\":0,\"video_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":0.00056528,\"upstream_inference_prompt_cost\":0.00008928,\"upstream_inference_completions_cost\":0.000476},\"completion_tokens_details\":{\"reasoning_tokens\":25,\"image_tokens\":0,\"audio_tokens\":0}}}"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 1.225640375s

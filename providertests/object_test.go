@@ -1,7 +1,6 @@
 package providertests
 
 import (
-	"context"
 	"strings"
 	"testing"
 
@@ -369,54 +368,4 @@ func testComplexObject(t *testing.T, pair builderPair) {
 		require.True(t, ok, "published_year should be a number")
 		require.Greater(t, year, 1900.0, "published_year should be after 1900")
 	})
-}
-
-// testObjectWithRepair tests object generation with custom repair functionality.
-func testObjectWithRepair(t *testing.T, pairs []builderPair) {
-	for _, pair := range pairs {
-		t.Run(pair.name, func(t *testing.T) {
-			t.Run("object with repair", func(t *testing.T) {
-				r := vcr.NewRecorder(t)
-
-				languageModel, err := pair.builder(t, r)
-				require.NoError(t, err, "failed to build language model")
-
-				minVal := 1.0
-				schema := fantasy.Schema{
-					Type: "object",
-					Properties: map[string]*fantasy.Schema{
-						"count": {
-							Type:        "integer",
-							Description: "A count that must be positive",
-							Minimum:     &minVal,
-						},
-					},
-					Required: []string{"count"},
-				}
-
-				prompt := fantasy.Prompt{
-					fantasy.NewUserMessage("Return a count of 5"),
-				}
-
-				repairFunc := func(ctx context.Context, text string, err error) (string, error) {
-					// Simple repair: if the JSON is malformed, try to fix it
-					// This is a placeholder - real repair would be more sophisticated
-					return text, nil
-				}
-
-				response, err := languageModel.GenerateObject(t.Context(), fantasy.ObjectCall{
-					Prompt:            prompt,
-					Schema:            schema,
-					SchemaName:        "Count",
-					SchemaDescription: "A simple count object",
-					MaxOutputTokens:   fantasy.Opt(int64(4000)),
-					RepairText:        repairFunc,
-					ProviderOptions:   pair.providerOptions,
-				})
-				require.NoError(t, err, "failed to generate object")
-				require.NotNil(t, response, "response should not be nil")
-				require.NotNil(t, response.Object, "object should not be nil")
-			})
-		})
-	}
 }

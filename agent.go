@@ -11,6 +11,7 @@ import (
 	"sync"
 
 	"charm.land/fantasy/schema"
+	"github.com/charmbracelet/x/exp/slice"
 )
 
 // StepResult represents the result of a single step in an agent execution.
@@ -1019,8 +1020,33 @@ func (a *agent) validateToolCall(toolCall ToolCallContent, availableTools []Agen
 }
 
 func (a *agent) createPrompt(system, prompt string, messages []Message, files ...FilePart) (Prompt, error) {
+	// Validation: empty prompt is only allowed when there are messages,
+	// no files to attach, and the last message is a user or tool message.
 	if prompt == "" {
-		return nil, &Error{Title: "invalid argument", Message: "prompt can't be empty"}
+		lastMessage, hasMessages := slice.Last(messages)
+
+		if !hasMessages {
+			return nil, &Error{
+				Title:   "invalid argument",
+				Message: "prompt can't be empty when there are no messages",
+			}
+		}
+
+		if len(files) > 0 {
+			return nil, &Error{
+				Title:   "invalid argument",
+				Message: "prompt can't be empty when there are files",
+			}
+		}
+
+		switch lastMessage.Role {
+		case MessageRoleUser, MessageRoleTool:
+		default:
+			return nil, &Error{
+				Title:   "invalid argument",
+				Message: "prompt can't be empty when the last message is not a user or tool message",
+			}
+		}
 	}
 
 	var preparedPrompt Prompt
@@ -1029,7 +1055,9 @@ func (a *agent) createPrompt(system, prompt string, messages []Message, files ..
 		preparedPrompt = append(preparedPrompt, NewSystemMessage(system))
 	}
 	preparedPrompt = append(preparedPrompt, messages...)
-	preparedPrompt = append(preparedPrompt, NewUserMessage(prompt, files...))
+	if prompt != "" {
+		preparedPrompt = append(preparedPrompt, NewUserMessage(prompt, files...))
+	}
 	return preparedPrompt, nil
 }
 

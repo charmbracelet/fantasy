@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 485
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"}],"model":"x-ai/grok-4.1-fast","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.15.0 (https://charm.land/fantasy)
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1773945419-B7eHmJDxysNFMtLKkMZY\",\"object\":\"chat.completion\",\"created\":1773945419,\"model\":\"x-ai/grok-4.1-fast\",\"provider\":\"xAI\",\"system_fingerprint\":null,\"choices\":[{\"index\":0,\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"native_finish_reason\":\"completed\",\"message\":{\"role\":\"assistant\",\"content\":null,\"refusal\":null,\"reasoning\":\"The user asked: \\\"What's the weather in Florence, Italy?\\\"\\n\",\"tool_calls\":[{\"type\":\"function\",\"index\":0,\"id\":\"call_68841502\",\"function\":{\"name\":\"weather\",\"arguments\":\"{\\\"location\\\":\\\"Florence, Italy\\\"}\"}}],\"reasoning_details\":[{\"type\":\"reasoning.summary\",\"summary\":\"The user asked: \\\"What's the weather in Florence, Italy?\\\"\\n\",\"format\":\"xai-responses-v1\",\"index\":0},{\"type\":\"reasoning.encrypted\",\"data\":\"fHkgS+wQkA1bUXJ0HSaC2Y9ZMVDsGW2yAT6oa5WxCXBZWukrrKczZ9LdQr8uXJVvoHLOE53IxI4ENsBRhMDWO4t4R5a1yvhBg6zuk0FgXDwqopE4a8roEClG6BFEd++893Pj+gGfKP2h4bSda689sU1UZFTZZAXiRRC3AEO+myT5Kiv/rkQL6Z//u/y+9Z9bfcU496FycNQ/2YtUSpCQBTqK7uIbV4nlKI5i7TlOVN7kwhiPQ7BC0ZlG0dXC2P1wV0nOOa2rJvlQIOF0R/zke9AyeRDZwF1iJRxW5b8SKtr4Y3h8iypdhia47vZF0Z89z/khiVt0gvMDAKgo8KbKTnlAK33ZcX/frpukwKGP1HyozTFNk9NqqEehGLxHIf30qKcDy8pXyziu+hd2y172rT1Zxp3wDBktea0ZJHQipWUKOT+DswQcpd0KhLPdhlG9MhNlZREjbq/Blj8dVrCAM9lvlwSACxbz6tGzxa0MOcFw2HAXzwnLYX1BBCAw8oyhZeZ6+aPA0baGuE0CZi2e2A9eLdbI3sNOdI1fr7pXYQ2Q5PaX77K8Vc/Gss+QsvNe5eEfXvN0nWQrq43fS2NK7scsFaRcFDpauxu2tIqG5PQJ+OzuKNZmyKGrzo2T/rSNbq14DRTS+i/VYP7v40525IFuyrrqucDorOnmSVaY345U3hsog/O9irIvvKJkA3VpDv3Pb5wAuIrqi7ZEcwXdQewj8x70TJmGQlp0dS2SKzl4WmMduPxvYoQGNi16Bgw+YIPfGrHQ+8DxPhMVgzGPFH8\",\"format\":\"xai-responses-v1\",\"id\":\"rs_bea13157-2ab5-9e37-9ed9-9c4f6c30e1ba\",\"index\":1}]}}],\"usage\":{\"prompt_tokens\":366,\"completion_tokens\":150,\"total_tokens\":516,\"cost\":0.0001254,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":152,\"cache_write_tokens\":0,\"audio_tokens\":0,\"video_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":0.0001254,\"upstream_inference_prompt_cost\":0.0000504,\"upstream_inference_completions_cost\":0.000075},\"completion_tokens_details\":{\"reasoning_tokens\":124,\"image_tokens\":0,\"audio_tokens\":0}}}"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 1.311699459s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 782
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"call_68841502","function":{"arguments":"{\"location\":\"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant","reasoning_details":[{"format":"unknown","index":0,"type":"reasoning.text"}]},{"content":"40 C","tool_call_id":"call_68841502","role":"tool"}],"model":"x-ai/grok-4.1-fast","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.15.0 (https://charm.land/fantasy)
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1773945421-GWyuWATaAb2ioqG6E9EP\",\"object\":\"chat.completion\",\"created\":1773945422,\"model\":\"x-ai/grok-4.1-fast\",\"provider\":\"xAI\",\"system_fingerprint\":null,\"choices\":[{\"index\":0,\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"completed\",\"message\":{\"role\":\"assistant\",\"content\":\"It's currently 40°C in Florence, Italy. That's quite hot—stay hydrated!\",\"refusal\":null,\"reasoning\":\"First, the user asked: \\\"What's the weather in Florence, Italy?\\\"\\n\",\"reasoning_details\":[{\"type\":\"reasoning.summary\",\"summary\":\"First, the user asked: \\\"What's the weather in Florence, Italy?\\\"\\n\",\"format\":\"xai-responses-v1\",\"index\":0},{\"type\":\"reasoning.encrypted\",\"data\":\"KFIVQ35FYLPvt9Dv5W3ZWg5GPDU63rn7mOtKS/FZzLsDZKmzVyhOvstu4+b5vI39XmtlzUhphxWvflbuZ3Ome+gB4xUmzeemaERj8992ObOnKg53ImLQkxzPOEig4nqNeBmDFSRjOR8/xq2QyVDt08sSEZ3jUNj2NxrfKIJbZ8VxUezjjtONXOPuL4CvzVAavErdXDdZEiDx6OL+BlAt5N85Bv5dna1c2HqiDp5nbTF0NuksO2GynUbSSpqQHMps+t17fZvBrJ2uiQi1hEBUGp5xDMn+OO/vBAsas+bz3O7LtmMskDQR4PJZxOf5/EN+W2wIZHIJAvU98aB9+WEGRK8o3iABcF69JOhDP2oxX1rXULpQSKdgPNEdEqX7qrBkAKUsg7qAfbPpE74CLtsaa1jlzx7SYGLhM3sNN33bvPjUHvhySbrCdWa1HfYF2M9aIOndDqALPS+PsMRj2aMu8DB8INQIFnlc3e9cdj2n/hDJXdSo1VtbnXomFIAsV2pQKrTqRYSaCG0NI8y2LuKKnZBGxnj76Vjs9sZ4NKg8tQ\",\"format\":\"xai-responses-v1\",\"id\":\"rs_3e07502a-15b6-9f12-819f-b67f426317c1\",\"index\":1}]}}],\"usage\":{\"prompt_tokens\":404,\"completion_tokens\":105,\"total_tokens\":509,\"cost\":0.0001105,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":152,\"cache_write_tokens\":0,\"audio_tokens\":0,\"video_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":0.0001105,\"upstream_inference_prompt_cost\":0.000058,\"upstream_inference_completions_cost\":0.0000525},\"completion_tokens_details\":{\"reasoning_tokens\":88,\"image_tokens\":0,\"audio_tokens\":0}}}"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 1.410118625s

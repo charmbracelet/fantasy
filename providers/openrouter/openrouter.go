@@ -6,7 +6,7 @@ import (
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/providers/openai"
-	"github.com/openai/openai-go/v3/option"
+	"github.com/charmbracelet/openai-go/option"
 )
 
 type options struct {
@@ -31,7 +31,6 @@ func New(opts ...Option) (fantasy.Provider, error) {
 		openaiOptions: []openai.Option{
 			openai.WithName(Name),
 			openai.WithBaseURL(DefaultURL),
-			openai.WithSkipUserAgent(),
 		},
 		languageModelOptions: []openai.LanguageModelOption{
 			openai.WithLanguageModelPrepareCallFunc(languagePrepareModelCall),

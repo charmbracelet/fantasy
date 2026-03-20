@@ -10,6 +10,7 @@ import (
 
 // Global type identifiers for OpenAI Responses API-specific data.
 const (
+	TypeResponsesProviderMetadata  = Name + ".responses.metadata"
 	TypeResponsesProviderOptions   = Name + ".responses.options"
 	TypeResponsesReasoningMetadata = Name + ".responses.reasoning_metadata"
 	TypeWebSearchCallMetadata      = Name + ".responses.web_search_call_metadata"
@@ -17,6 +18,13 @@ const (
 
 // Register OpenAI Responses API-specific types with the global registry.
 func init() {
+	fantasy.RegisterProviderType(TypeResponsesProviderMetadata, func(data []byte) (fantasy.ProviderOptionsData, error) {
+		var v ResponsesProviderMetadata
+		if err := json.Unmarshal(data, &v); err != nil {
+			return nil, err
+		}
+		return &v, nil
+	})
 	fantasy.RegisterProviderType(TypeResponsesProviderOptions, func(data []byte) (fantasy.ProviderOptionsData, error) {
 		var v ResponsesProviderOptions
 		if err := json.Unmarshal(data, &v); err != nil {
@@ -38,6 +46,34 @@ func init() {
 		}
 		return &v, nil
 	})
+}
+
+// ResponsesProviderMetadata contains response-level metadata from the OpenAI Responses API.
+// The ResponseID can be used as PreviousResponseID in follow-up requests to chain responses.
+type ResponsesProviderMetadata struct {
+	ResponseID string `json:"response_id"`
+}
+
+var _ fantasy.ProviderOptionsData = (*ResponsesProviderMetadata)(nil)
+
+// Options implements the ProviderOptions interface.
+func (*ResponsesProviderMetadata) Options() {}
+
+// MarshalJSON implements custom JSON marshaling with type info for ResponsesProviderMetadata.
+func (m ResponsesProviderMetadata) MarshalJSON() ([]byte, error) {
+	type plain ResponsesProviderMetadata
+	return fantasy.MarshalProviderType(TypeResponsesProviderMetadata, plain(m))
+}
+
+// UnmarshalJSON implements custom JSON unmarshaling with type info for ResponsesProviderMetadata.
+func (m *ResponsesProviderMetadata) UnmarshalJSON(data []byte) error {
+	type plain ResponsesProviderMetadata
+	var p plain
+	if err := fantasy.UnmarshalProviderType(data, &p); err != nil {
+		return err
+	}
+	*m = ResponsesProviderMetadata(p)
+	return nil
 }
 
 // ResponsesReasoningMetadata represents reasoning metadata for OpenAI Responses API.
@@ -105,20 +141,28 @@ const (
 
 // ResponsesProviderOptions represents additional options for OpenAI Responses API.
 type ResponsesProviderOptions struct {
-	Include           []IncludeType    `json:"include"`
-	Instructions      *string          `json:"instructions"`
-	Logprobs          any              `json:"logprobs"`
-	MaxToolCalls      *int64           `json:"max_tool_calls"`
-	Metadata          map[string]any   `json:"metadata"`
-	ParallelToolCalls *bool            `json:"parallel_tool_calls"`
-	PromptCacheKey    *string          `json:"prompt_cache_key"`
-	ReasoningEffort   *ReasoningEffort `json:"reasoning_effort"`
-	ReasoningSummary  *string          `json:"reasoning_summary"`
-	SafetyIdentifier  *string          `json:"safety_identifier"`
-	ServiceTier       *ServiceTier     `json:"service_tier"`
-	StrictJSONSchema  *bool            `json:"strict_json_schema"`
-	TextVerbosity     *TextVerbosity   `json:"text_verbosity"`
-	User              *string          `json:"user"`
+	Include           []IncludeType  `json:"include"`
+	Instructions      *string        `json:"instructions"`
+	Logprobs          any            `json:"logprobs"`
+	MaxToolCalls      *int64         `json:"max_tool_calls"`
+	Metadata          map[string]any `json:"metadata"`
+	ParallelToolCalls *bool          `json:"parallel_tool_calls"`
+	// PreviousResponseID chains this request to a prior stored response, enabling
+	// server-side conversation state. When set, the prompt should contain only the
+	// new incremental turn—not replayed assistant history.
+	PreviousResponseID *string          `json:"previous_response_id"`
+	PromptCacheKey     *string          `json:"prompt_cache_key"`
+	ReasoningEffort    *ReasoningEffort `json:"reasoning_effort"`
+	ReasoningSummary   *string          `json:"reasoning_summary"`
+	SafetyIdentifier   *string          `json:"safety_identifier"`
+	ServiceTier        *ServiceTier     `json:"service_tier"`
+	// Store indicates whether OpenAI should persist this response for future
+	// retrieval and chaining via PreviousResponseID. Defaults to false to prevent
+	// unintended storage of potentially sensitive conversations.
+	Store            *bool          `json:"store"`
+	StrictJSONSchema *bool          `json:"strict_json_schema"`
+	TextVerbosity    *TextVerbosity `json:"text_verbosity"`
+	User             *string        `json:"user"`
 }
 
 // Options implements the ProviderOptions interface.

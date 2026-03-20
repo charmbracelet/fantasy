@@ -1,6 +1,7 @@
 package openai
 
 import (
+	"cmp"
 	"context"
 	"encoding/json"
 	"errors"
@@ -410,20 +411,18 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 								toolCalls[toolCallDelta.Index] = existingToolCall
 							}
 						} else {
-							var err error
+							// Some provider like Ollama may send empty tool calls or miss some fields.
+							// We'll skip when we don't have enough info and also assume sane defaults.
+							if toolCallDelta.Function.Name == "" && toolCallDelta.Function.Arguments == "" {
+								continue
+							}
+							toolCallDelta.Type = cmp.Or(toolCallDelta.Type, "function")
+							toolCallDelta.ID = cmp.Or(toolCallDelta.ID, fmt.Sprintf("tool-call-%d", toolCallDelta.Index))
+
 							if toolCallDelta.Type != "function" {
-								err = &fantasy.Error{Title: "invalid provider response", Message: "expected 'function' type."}
-							}
-							if toolCallDelta.ID == "" {
-								err = &fantasy.Error{Title: "invalid provider response", Message: "expected 'id' to be a string."}
-							}
-							if toolCallDelta.Function.Name == "" {
-								err = &fantasy.Error{Title: "invalid provider response", Message: "expected 'function.name' to be a string."}
-							}
-							if err != nil {
 								yield(fantasy.StreamPart{
 									Type:  fantasy.StreamPartTypeError,
-									Error: toProviderErr(stream.Err()),
+									Error: &fantasy.Error{Title: "invalid provider response", Message: "expected 'function' type."},
 								})
 								return
 							}
@@ -453,7 +452,7 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 								if xjson.IsValid(toolCalls[toolCallDelta.Index].arguments) {
 									if !yield(fantasy.StreamPart{
 										Type: fantasy.StreamPartTypeToolInputEnd,
-										ID:   toolCallDelta.ID,
+										ID:   exTc.id,
 									}) {
 										return
 									}

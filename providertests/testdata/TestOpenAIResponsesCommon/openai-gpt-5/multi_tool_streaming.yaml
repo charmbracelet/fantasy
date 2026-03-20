@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/responses
     method: POST
   response:
@@ -25,86 +25,50 @@ interactions:
     content_length: -1
     body: |+
       event: response.created
-      data: {"type":"response.created","sequence_number":0,"response":{"id":"resp_09e381d930f3da290168f2380e007c819eb0824a9f89df2473","object":"response","created_at":1760704526,"status":"in_progress","background":false,"error":null,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-5-2025-08-07","output":[],"parallel_tool_calls":true,"previous_response_id":null,"prompt_cache_key":null,"reasoning":{"effort":"medium","summary":null},"safety_identifier":null,"service_tier":"auto","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"function","description":"Add two numbers","name":"add","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"strict":false},{"type":"function","description":"Multiply two numbers","name":"multiply","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"strict":false}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":null,"user":null,"metadata":{}}}
+      data: {"type":"response.created","response":{"id":"resp_07fb4e5ebba6750d0169b3195ab2b0819398ac0b66c9fc8101","object":"response","created_at":1773345114,"status":"in_progress","background":false,"completed_at":null,"error":null,"frequency_penalty":0.0,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-5-2025-08-07","output":[],"parallel_tool_calls":true,"presence_penalty":0.0,"previous_response_id":null,"prompt_cache_key":null,"prompt_cache_retention":null,"reasoning":{"effort":"medium","summary":null},"safety_identifier":null,"service_tier":"auto","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"function","description":"Add two numbers","name":"add","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"strict":false},{"type":"function","description":"Multiply two numbers","name":"multiply","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"strict":false}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":null,"user":null,"metadata":{}},"sequence_number":0}
 
       event: response.in_progress
-      data: {"type":"response.in_progress","sequence_number":1,"response":{"id":"resp_09e381d930f3da290168f2380e007c819eb0824a9f89df2473","object":"response","created_at":1760704526,"status":"in_progress","background":false,"error":null,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-5-2025-08-07","output":[],"parallel_tool_calls":true,"previous_response_id":null,"prompt_cache_key":null,"reasoning":{"effort":"medium","summary":null},"safety_identifier":null,"service_tier":"auto","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"function","description":"Add two numbers","name":"add","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"strict":false},{"type":"function","description":"Multiply two numbers","name":"multiply","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"strict":false}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":null,"user":null,"metadata":{}}}
+      data: {"type":"response.in_progress","response":{"id":"resp_07fb4e5ebba6750d0169b3195ab2b0819398ac0b66c9fc8101","object":"response","created_at":1773345114,"status":"in_progress","background":false,"completed_at":null,"error":null,"frequency_penalty":0.0,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-5-2025-08-07","output":[],"parallel_tool_calls":true,"presence_penalty":0.0,"previous_response_id":null,"prompt_cache_key":null,"prompt_cache_retention":null,"reasoning":{"effort":"medium","summary":null},"safety_identifier":null,"service_tier":"auto","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"function","description":"Add two numbers","name":"add","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"strict":false},{"type":"function","description":"Multiply two numbers","name":"multiply","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"strict":false}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":null,"user":null,"metadata":{}},"sequence_number":1}
 
       event: response.output_item.added
-      data: {"type":"response.output_item.added","sequence_number":2,"output_index":0,"item":{"id":"rs_09e381d930f3da290168f2380e6048819e8e16dbff603275ca","type":"reasoning","summary":[]}}
+      data: {"type":"response.output_item.added","item":{"id":"rs_07fb4e5ebba6750d0169b3195b0f18819380aebb13fb8c7ee3","type":"reasoning","summary":[]},"output_index":0,"sequence_number":2}
 
       event: response.output_item.done
-      data: {"type":"response.output_item.done","sequence_number":3,"output_index":0,"item":{"id":"rs_09e381d930f3da290168f2380e6048819e8e16dbff603275ca","type":"reasoning","summary":[]}}
+      data: {"type":"response.output_item.done","item":{"id":"rs_07fb4e5ebba6750d0169b3195b0f18819380aebb13fb8c7ee3","type":"reasoning","summary":[]},"output_index":0,"sequence_number":3}
 
       event: response.output_item.added
-      data: {"type":"response.output_item.added","sequence_number":4,"output_index":1,"item":{"id":"fc_09e381d930f3da290168f23811471c819e9b878cd97d590c70","type":"function_call","status":"in_progress","arguments":"","call_id":"call_mM0OA8cwZxVibTLUQ0tgfuRL","name":"add"}}
+      data: {"type":"response.output_item.added","item":{"id":"fc_07fb4e5ebba6750d0169b3195fdfd08193a96806479caa4789","type":"function_call","status":"in_progress","arguments":"","call_id":"call_65v82QHWb1nih7p5BEVjf7lH","name":"add"},"output_index":1,"sequence_number":4}
 
       event: response.function_call_arguments.delta
-      data: {"type":"response.function_call_arguments.delta","sequence_number":5,"item_id":"fc_09e381d930f3da290168f23811471c819e9b878cd97d590c70","output_index":1,"delta":"{","obfuscation":"A28LVm1DiTYj9iJ"}
-
-      event: response.function_call_arguments.delta
-      data: {"type":"response.function_call_arguments.delta","sequence_number":6,"item_id":"fc_09e381d930f3da290168f23811471c819e9b878cd97d590c70","output_index":1,"delta":"\"a","obfuscation":"JPXaoVvKkpCAKM"}
-
-      event: response.function_call_arguments.delta
-      data: {"type":"response.function_call_arguments.delta","sequence_number":7,"item_id":"fc_09e381d930f3da290168f23811471c819e9b878cd97d590c70","output_index":1,"delta":"\":","obfuscation":"uqXm9A6BWRrQW9"}
-
-      event: response.function_call_arguments.delta
-      data: {"type":"response.function_call_arguments.delta","sequence_number":8,"item_id":"fc_09e381d930f3da290168f23811471c819e9b878cd97d590c70","output_index":1,"delta":"2,","obfuscation":"rSjqV8JLpcXCyy"}
-
-      event: response.function_call_arguments.delta
-      data: {"type":"response.function_call_arguments.delta","sequence_number":9,"item_id":"fc_09e381d930f3da290168f23811471c819e9b878cd97d590c70","output_index":1,"delta":"\"b","obfuscation":"vHlTgn3pkcFggt"}
-
-      event: response.function_call_arguments.delta
-      data: {"type":"response.function_call_arguments.delta","sequence_number":10,"item_id":"fc_09e381d930f3da290168f23811471c819e9b878cd97d590c70","output_index":1,"delta":"\":","obfuscation":"FGSSNQEHMtsOQ9"}
-
-      event: response.function_call_arguments.delta
-      data: {"type":"response.function_call_arguments.delta","sequence_number":11,"item_id":"fc_09e381d930f3da290168f23811471c819e9b878cd97d590c70","output_index":1,"delta":"3}","obfuscation":"yQg8YUXPlb0xkd"}
+      data: {"type":"response.function_call_arguments.delta","delta":"{\"a\":2,\"b\":3}","item_id":"fc_07fb4e5ebba6750d0169b3195fdfd08193a96806479caa4789","obfuscation":"Rm5","output_index":1,"sequence_number":5}
 
       event: response.function_call_arguments.done
-      data: {"type":"response.function_call_arguments.done","sequence_number":12,"item_id":"fc_09e381d930f3da290168f23811471c819e9b878cd97d590c70","output_index":1,"arguments":"{\"a\":2,\"b\":3}"}
+      data: {"type":"response.function_call_arguments.done","arguments":"{\"a\":2,\"b\":3}","item_id":"fc_07fb4e5ebba6750d0169b3195fdfd08193a96806479caa4789","output_index":1,"sequence_number":6}
 
       event: response.output_item.done
-      data: {"type":"response.output_item.done","sequence_number":13,"output_index":1,"item":{"id":"fc_09e381d930f3da290168f23811471c819e9b878cd97d590c70","type":"function_call","status":"completed","arguments":"{\"a\":2,\"b\":3}","call_id":"call_mM0OA8cwZxVibTLUQ0tgfuRL","name":"add"}}
+      data: {"type":"response.output_item.done","item":{"id":"fc_07fb4e5ebba6750d0169b3195fdfd08193a96806479caa4789","type":"function_call","status":"completed","arguments":"{\"a\":2,\"b\":3}","call_id":"call_65v82QHWb1nih7p5BEVjf7lH","name":"add"},"output_index":1,"sequence_number":7}
 
       event: response.output_item.added
-      data: {"type":"response.output_item.added","sequence_number":14,"output_index":2,"item":{"id":"fc_09e381d930f3da290168f238115664819ea231c4078a5f0376","type":"function_call","status":"in_progress","arguments":"","call_id":"call_ZN5JKJlLQZfBL7JTpEHES3Sm","name":"multiply"}}
+      data: {"type":"response.output_item.added","item":{"id":"fc_07fb4e5ebba6750d0169b3195fdfe0819385836af19a472dad","type":"function_call","status":"in_progress","arguments":"","call_id":"call_vkCUfawj1PRERWMvw5PKhoB9","name":"multiply"},"output_index":2,"sequence_number":8}
 
       event: response.function_call_arguments.delta
-      data: {"type":"response.function_call_arguments.delta","sequence_number":15,"item_id":"fc_09e381d930f3da290168f238115664819ea231c4078a5f0376","output_index":2,"delta":"{","obfuscation":"8dJcK7PD3X9jvxe"}
-
-      event: response.function_call_arguments.delta
-      data: {"type":"response.function_call_arguments.delta","sequence_number":16,"item_id":"fc_09e381d930f3da290168f238115664819ea231c4078a5f0376","output_index":2,"delta":"\"a","obfuscation":"D9AcojCGoP0XoR"}
-
-      event: response.function_call_arguments.delta
-      data: {"type":"response.function_call_arguments.delta","sequence_number":17,"item_id":"fc_09e381d930f3da290168f238115664819ea231c4078a5f0376","output_index":2,"delta":"\":","obfuscation":"LWpcm2Co0t9wOb"}
-
-      event: response.function_call_arguments.delta
-      data: {"type":"response.function_call_arguments.delta","sequence_number":18,"item_id":"fc_09e381d930f3da290168f238115664819ea231c4078a5f0376","output_index":2,"delta":"2,","obfuscation":"mdBjj4nf2MtHzU"}
-
-      event: response.function_call_arguments.delta
-      data: {"type":"response.function_call_arguments.delta","sequence_number":19,"item_id":"fc_09e381d930f3da290168f238115664819ea231c4078a5f0376","output_index":2,"delta":"\"b","obfuscation":"TCZjctdZylEM7V"}
-
-      event: response.function_call_arguments.delta
-      data: {"type":"response.function_call_arguments.delta","sequence_number":20,"item_id":"fc_09e381d930f3da290168f238115664819ea231c4078a5f0376","output_index":2,"delta":"\":","obfuscation":"AW3CGCQsAgdcuq"}
-
-      event: response.function_call_arguments.delta
-      data: {"type":"response.function_call_arguments.delta","sequence_number":21,"item_id":"fc_09e381d930f3da290168f238115664819ea231c4078a5f0376","output_index":2,"delta":"3}","obfuscation":"woholi6rbpmqFw"}
+      data: {"type":"response.function_call_arguments.delta","delta":"{\"a\":2,\"b\":3}","item_id":"fc_07fb4e5ebba6750d0169b3195fdfe0819385836af19a472dad","obfuscation":"iAz","output_index":2,"sequence_number":9}
 
       event: response.function_call_arguments.done
-      data: {"type":"response.function_call_arguments.done","sequence_number":22,"item_id":"fc_09e381d930f3da290168f238115664819ea231c4078a5f0376","output_index":2,"arguments":"{\"a\":2,\"b\":3}"}
+      data: {"type":"response.function_call_arguments.done","arguments":"{\"a\":2,\"b\":3}","item_id":"fc_07fb4e5ebba6750d0169b3195fdfe0819385836af19a472dad","output_index":2,"sequence_number":10}
 
       event: response.output_item.done
-      data: {"type":"response.output_item.done","sequence_number":23,"output_index":2,"item":{"id":"fc_09e381d930f3da290168f238115664819ea231c4078a5f0376","type":"function_call","status":"completed","arguments":"{\"a\":2,\"b\":3}","call_id":"call_ZN5JKJlLQZfBL7JTpEHES3Sm","name":"multiply"}}
+      data: {"type":"response.output_item.done","item":{"id":"fc_07fb4e5ebba6750d0169b3195fdfe0819385836af19a472dad","type":"function_call","status":"completed","arguments":"{\"a\":2,\"b\":3}","call_id":"call_vkCUfawj1PRERWMvw5PKhoB9","name":"multiply"},"output_index":2,"sequence_number":11}
 
       event: response.completed
-      data: {"type":"response.completed","sequence_number":24,"response":{"id":"resp_09e381d930f3da290168f2380e007c819eb0824a9f89df2473","object":"response","created_at":1760704526,"status":"completed","background":false,"error":null,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-5-2025-08-07","output":[{"id":"rs_09e381d930f3da290168f2380e6048819e8e16dbff603275ca","type":"reasoning","summary":[]},{"id":"fc_09e381d930f3da290168f23811471c819e9b878cd97d590c70","type":"function_call","status":"completed","arguments":"{\"a\":2,\"b\":3}","call_id":"call_mM0OA8cwZxVibTLUQ0tgfuRL","name":"add"},{"id":"fc_09e381d930f3da290168f238115664819ea231c4078a5f0376","type":"function_call","status":"completed","arguments":"{\"a\":2,\"b\":3}","call_id":"call_ZN5JKJlLQZfBL7JTpEHES3Sm","name":"multiply"}],"parallel_tool_calls":true,"previous_response_id":null,"prompt_cache_key":null,"reasoning":{"effort":"medium","summary":null},"safety_identifier":null,"service_tier":"default","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"function","description":"Add two numbers","name":"add","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"strict":false},{"type":"function","description":"Multiply two numbers","name":"multiply","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"strict":false}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":{"input_tokens":56,"input_tokens_details":{"cached_tokens":0},"output_tokens":311,"output_tokens_details":{"reasoning_tokens":256},"total_tokens":367},"user":null,"metadata":{}}}
+      data: {"type":"response.completed","response":{"id":"resp_07fb4e5ebba6750d0169b3195ab2b0819398ac0b66c9fc8101","object":"response","created_at":1773345114,"status":"completed","background":false,"completed_at":1773345119,"error":null,"frequency_penalty":0.0,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-5-2025-08-07","output":[{"id":"rs_07fb4e5ebba6750d0169b3195b0f18819380aebb13fb8c7ee3","type":"reasoning","summary":[]},{"id":"fc_07fb4e5ebba6750d0169b3195fdfd08193a96806479caa4789","type":"function_call","status":"completed","arguments":"{\"a\":2,\"b\":3}","call_id":"call_65v82QHWb1nih7p5BEVjf7lH","name":"add"},{"id":"fc_07fb4e5ebba6750d0169b3195fdfe0819385836af19a472dad","type":"function_call","status":"completed","arguments":"{\"a\":2,\"b\":3}","call_id":"call_vkCUfawj1PRERWMvw5PKhoB9","name":"multiply"}],"parallel_tool_calls":true,"presence_penalty":0.0,"previous_response_id":null,"prompt_cache_key":null,"prompt_cache_retention":null,"reasoning":{"effort":"medium","summary":null},"safety_identifier":null,"service_tier":"default","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"function","description":"Add two numbers","name":"add","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"strict":false},{"type":"function","description":"Multiply two numbers","name":"multiply","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"strict":false}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":{"input_tokens":109,"input_tokens_details":{"cached_tokens":0},"output_tokens":272,"output_tokens_details":{"reasoning_tokens":192},"total_tokens":381},"user":null,"metadata":{}},"sequence_number":12}
 
     headers:
       Content-Type:
       - text/event-stream; charset=utf-8
     status: 200 OK
     code: 200
-    duration: 283.240959ms
+    duration: 258.1015ms
 - id: 1
   request:
     proto: HTTP/1.1
@@ -112,14 +76,14 @@ interactions:
     proto_minor: 1
     content_length: 1260
     host: ""
-    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"developer"},{"content":[{"text":"Add and multiply the number 2 and 3","type":"input_text"}],"role":"user"},{"arguments":"\"{\\\"a\\\":2,\\\"b\\\":3}\"","call_id":"call_mM0OA8cwZxVibTLUQ0tgfuRL","name":"add","type":"function_call"},{"arguments":"\"{\\\"a\\\":2,\\\"b\\\":3}\"","call_id":"call_ZN5JKJlLQZfBL7JTpEHES3Sm","name":"multiply","type":"function_call"},{"call_id":"call_mM0OA8cwZxVibTLUQ0tgfuRL","output":"5","type":"function_call_output"},{"call_id":"call_ZN5JKJlLQZfBL7JTpEHES3Sm","output":"6","type":"function_call_output"}],"model":"gpt-5","tool_choice":"auto","tools":[{"strict":false,"parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"name":"add","description":"Add two numbers","type":"function"},{"strict":false,"parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"name":"multiply","description":"Multiply two numbers","type":"function"}],"stream":true}'
+    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"developer"},{"content":[{"text":"Add and multiply the number 2 and 3","type":"input_text"}],"role":"user"},{"arguments":"\"{\\\"a\\\":2,\\\"b\\\":3}\"","call_id":"call_65v82QHWb1nih7p5BEVjf7lH","name":"add","type":"function_call"},{"arguments":"\"{\\\"a\\\":2,\\\"b\\\":3}\"","call_id":"call_vkCUfawj1PRERWMvw5PKhoB9","name":"multiply","type":"function_call"},{"call_id":"call_65v82QHWb1nih7p5BEVjf7lH","output":"5","type":"function_call_output"},{"call_id":"call_vkCUfawj1PRERWMvw5PKhoB9","output":"6","type":"function_call_output"}],"model":"gpt-5","tool_choice":"auto","tools":[{"strict":false,"parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"name":"add","description":"Add two numbers","type":"function"},{"strict":false,"parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"name":"multiply","description":"Multiply two numbers","type":"function"}],"stream":true}'
     headers:
       Accept:
       - application/json
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/responses
     method: POST
   response:
@@ -129,74 +93,68 @@ interactions:
     content_length: -1
     body: |+
       event: response.created
-      data: {"type":"response.created","sequence_number":0,"response":{"id":"resp_09bb7d797077bd810168f23811b088819fb2b1949e8dca30ed","object":"response","created_at":1760704529,"status":"in_progress","background":false,"error":null,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-5-2025-08-07","output":[],"parallel_tool_calls":true,"previous_response_id":null,"prompt_cache_key":null,"reasoning":{"effort":"medium","summary":null},"safety_identifier":null,"service_tier":"auto","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"function","description":"Add two numbers","name":"add","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"strict":false},{"type":"function","description":"Multiply two numbers","name":"multiply","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"strict":false}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":null,"user":null,"metadata":{}}}
+      data: {"type":"response.created","response":{"id":"resp_060c32d4ad52dd1b0169b319603c74819fba7d9eb0608667bf","object":"response","created_at":1773345120,"status":"in_progress","background":false,"completed_at":null,"error":null,"frequency_penalty":0.0,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-5-2025-08-07","output":[],"parallel_tool_calls":true,"presence_penalty":0.0,"previous_response_id":null,"prompt_cache_key":null,"prompt_cache_retention":null,"reasoning":{"effort":"medium","summary":null},"safety_identifier":null,"service_tier":"auto","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"function","description":"Add two numbers","name":"add","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"strict":false},{"type":"function","description":"Multiply two numbers","name":"multiply","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"strict":false}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":null,"user":null,"metadata":{}},"sequence_number":0}
 
       event: response.in_progress
-      data: {"type":"response.in_progress","sequence_number":1,"response":{"id":"resp_09bb7d797077bd810168f23811b088819fb2b1949e8dca30ed","object":"response","created_at":1760704529,"status":"in_progress","background":false,"error":null,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-5-2025-08-07","output":[],"parallel_tool_calls":true,"previous_response_id":null,"prompt_cache_key":null,"reasoning":{"effort":"medium","summary":null},"safety_identifier":null,"service_tier":"auto","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"function","description":"Add two numbers","name":"add","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"strict":false},{"type":"function","description":"Multiply two numbers","name":"multiply","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"strict":false}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":null,"user":null,"metadata":{}}}
+      data: {"type":"response.in_progress","response":{"id":"resp_060c32d4ad52dd1b0169b319603c74819fba7d9eb0608667bf","object":"response","created_at":1773345120,"status":"in_progress","background":false,"completed_at":null,"error":null,"frequency_penalty":0.0,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-5-2025-08-07","output":[],"parallel_tool_calls":true,"presence_penalty":0.0,"previous_response_id":null,"prompt_cache_key":null,"prompt_cache_retention":null,"reasoning":{"effort":"medium","summary":null},"safety_identifier":null,"service_tier":"auto","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"function","description":"Add two numbers","name":"add","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"strict":false},{"type":"function","description":"Multiply two numbers","name":"multiply","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"strict":false}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":null,"user":null,"metadata":{}},"sequence_number":1}
 
       event: response.output_item.added
-      data: {"type":"response.output_item.added","sequence_number":2,"output_index":0,"item":{"id":"msg_09bb7d797077bd810168f238125ad4819f84cc331e42e9f26c","type":"message","status":"in_progress","content":[],"role":"assistant"}}
+      data: {"type":"response.output_item.added","item":{"id":"msg_060c32d4ad52dd1b0169b31960f1a8819fa607eb963e4b2b01","type":"message","status":"in_progress","content":[],"role":"assistant"},"output_index":0,"sequence_number":2}
 
       event: response.content_part.added
-      data: {"type":"response.content_part.added","sequence_number":3,"item_id":"msg_09bb7d797077bd810168f238125ad4819f84cc331e42e9f26c","output_index":0,"content_index":0,"part":{"type":"output_text","annotations":[],"logprobs":[],"text":""}}
+      data: {"type":"response.content_part.added","content_index":0,"item_id":"msg_060c32d4ad52dd1b0169b31960f1a8819fa607eb963e4b2b01","output_index":0,"part":{"type":"output_text","annotations":[],"logprobs":[],"text":""},"sequence_number":3}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":4,"item_id":"msg_09bb7d797077bd810168f238125ad4819f84cc331e42e9f26c","output_index":0,"content_index":0,"delta":"Results","logprobs":[],"obfuscation":"6StWlhs3v"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":"Addition","item_id":"msg_060c32d4ad52dd1b0169b31960f1a8819fa607eb963e4b2b01","logprobs":[],"obfuscation":"vECP4wnX","output_index":0,"sequence_number":4}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":5,"item_id":"msg_09bb7d797077bd810168f238125ad4819f84cc331e42e9f26c","output_index":0,"content_index":0,"delta":":\n","logprobs":[],"obfuscation":"7HlDzzfB4tGg8e"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" result","item_id":"msg_060c32d4ad52dd1b0169b31960f1a8819fa607eb963e4b2b01","logprobs":[],"obfuscation":"DWVN7X0hy","output_index":0,"sequence_number":5}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":6,"item_id":"msg_09bb7d797077bd810168f238125ad4819f84cc331e42e9f26c","output_index":0,"content_index":0,"delta":"-","logprobs":[],"obfuscation":"aSgNiqlzrKxjwYJ"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":":","item_id":"msg_060c32d4ad52dd1b0169b31960f1a8819fa607eb963e4b2b01","logprobs":[],"obfuscation":"lmi55AuYocEnr7a","output_index":0,"sequence_number":6}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":7,"item_id":"msg_09bb7d797077bd810168f238125ad4819f84cc331e42e9f26c","output_index":0,"content_index":0,"delta":" Addition","logprobs":[],"obfuscation":"1kIs9Fe"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" ","item_id":"msg_060c32d4ad52dd1b0169b31960f1a8819fa607eb963e4b2b01","logprobs":[],"obfuscation":"yMned8Cq9YnQpOq","output_index":0,"sequence_number":7}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":8,"item_id":"msg_09bb7d797077bd810168f238125ad4819f84cc331e42e9f26c","output_index":0,"content_index":0,"delta":":","logprobs":[],"obfuscation":"N8ePsIjPQkwgIIm"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":"5","item_id":"msg_060c32d4ad52dd1b0169b31960f1a8819fa607eb963e4b2b01","logprobs":[],"obfuscation":"3rDBo7AQjM3kcoe","output_index":0,"sequence_number":8}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":9,"item_id":"msg_09bb7d797077bd810168f238125ad4819f84cc331e42e9f26c","output_index":0,"content_index":0,"delta":" ","logprobs":[],"obfuscation":"tDupEgp74kvVegn"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":"\n","item_id":"msg_060c32d4ad52dd1b0169b31960f1a8819fa607eb963e4b2b01","logprobs":[],"obfuscation":"911PdPNTDmw3zgS","output_index":0,"sequence_number":9}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":10,"item_id":"msg_09bb7d797077bd810168f238125ad4819f84cc331e42e9f26c","output_index":0,"content_index":0,"delta":"5","logprobs":[],"obfuscation":"TXGo0Bhtqs0YNF5"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":"Multip","item_id":"msg_060c32d4ad52dd1b0169b31960f1a8819fa607eb963e4b2b01","logprobs":[],"obfuscation":"nsz8t1oBSB","output_index":0,"sequence_number":10}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":11,"item_id":"msg_09bb7d797077bd810168f238125ad4819f84cc331e42e9f26c","output_index":0,"content_index":0,"delta":"\n","logprobs":[],"obfuscation":"sUe555ChDTIWxUy"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":"lication","item_id":"msg_060c32d4ad52dd1b0169b31960f1a8819fa607eb963e4b2b01","logprobs":[],"obfuscation":"qBMKXuX3","output_index":0,"sequence_number":11}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":12,"item_id":"msg_09bb7d797077bd810168f238125ad4819f84cc331e42e9f26c","output_index":0,"content_index":0,"delta":"-","logprobs":[],"obfuscation":"LnlsBondAJmfbak"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" result","item_id":"msg_060c32d4ad52dd1b0169b31960f1a8819fa607eb963e4b2b01","logprobs":[],"obfuscation":"i16z2RxV4","output_index":0,"sequence_number":12}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":13,"item_id":"msg_09bb7d797077bd810168f238125ad4819f84cc331e42e9f26c","output_index":0,"content_index":0,"delta":" Multip","logprobs":[],"obfuscation":"5vR7Ad1x4"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":":","item_id":"msg_060c32d4ad52dd1b0169b31960f1a8819fa607eb963e4b2b01","logprobs":[],"obfuscation":"n3Nf4afxOCFpEmF","output_index":0,"sequence_number":13}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":14,"item_id":"msg_09bb7d797077bd810168f238125ad4819f84cc331e42e9f26c","output_index":0,"content_index":0,"delta":"lication","logprobs":[],"obfuscation":"2tYg9jRB"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" ","item_id":"msg_060c32d4ad52dd1b0169b31960f1a8819fa607eb963e4b2b01","logprobs":[],"obfuscation":"WLV0YdqLA3iiuwh","output_index":0,"sequence_number":14}
 
       event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":15,"item_id":"msg_09bb7d797077bd810168f238125ad4819f84cc331e42e9f26c","output_index":0,"content_index":0,"delta":":","logprobs":[],"obfuscation":"35cmlvHPfcNwftK"}
-
-      event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":16,"item_id":"msg_09bb7d797077bd810168f238125ad4819f84cc331e42e9f26c","output_index":0,"content_index":0,"delta":" ","logprobs":[],"obfuscation":"paqGVy5mDHZwDrl"}
-
-      event: response.output_text.delta
-      data: {"type":"response.output_text.delta","sequence_number":17,"item_id":"msg_09bb7d797077bd810168f238125ad4819f84cc331e42e9f26c","output_index":0,"content_index":0,"delta":"6","logprobs":[],"obfuscation":"7GUVgOzItgYc95c"}
+      data: {"type":"response.output_text.delta","content_index":0,"delta":"6","item_id":"msg_060c32d4ad52dd1b0169b31960f1a8819fa607eb963e4b2b01","logprobs":[],"obfuscation":"mgFwGkBtk9ZLQJ8","output_index":0,"sequence_number":15}
 
       event: response.output_text.done
-      data: {"type":"response.output_text.done","sequence_number":18,"item_id":"msg_09bb7d797077bd810168f238125ad4819f84cc331e42e9f26c","output_index":0,"content_index":0,"text":"Results:\n- Addition: 5\n- Multiplication: 6","logprobs":[]}
+      data: {"type":"response.output_text.done","content_index":0,"item_id":"msg_060c32d4ad52dd1b0169b31960f1a8819fa607eb963e4b2b01","logprobs":[],"output_index":0,"sequence_number":16,"text":"Addition result: 5\nMultiplication result: 6"}
 
       event: response.content_part.done
-      data: {"type":"response.content_part.done","sequence_number":19,"item_id":"msg_09bb7d797077bd810168f238125ad4819f84cc331e42e9f26c","output_index":0,"content_index":0,"part":{"type":"output_text","annotations":[],"logprobs":[],"text":"Results:\n- Addition: 5\n- Multiplication: 6"}}
+      data: {"type":"response.content_part.done","content_index":0,"item_id":"msg_060c32d4ad52dd1b0169b31960f1a8819fa607eb963e4b2b01","output_index":0,"part":{"type":"output_text","annotations":[],"logprobs":[],"text":"Addition result: 5\nMultiplication result: 6"},"sequence_number":17}
 
       event: response.output_item.done
-      data: {"type":"response.output_item.done","sequence_number":20,"output_index":0,"item":{"id":"msg_09bb7d797077bd810168f238125ad4819f84cc331e42e9f26c","type":"message","status":"completed","content":[{"type":"output_text","annotations":[],"logprobs":[],"text":"Results:\n- Addition: 5\n- Multiplication: 6"}],"role":"assistant"}}
+      data: {"type":"response.output_item.done","item":{"id":"msg_060c32d4ad52dd1b0169b31960f1a8819fa607eb963e4b2b01","type":"message","status":"completed","content":[{"type":"output_text","annotations":[],"logprobs":[],"text":"Addition result: 5\nMultiplication result: 6"}],"role":"assistant"},"output_index":0,"sequence_number":18}
 
       event: response.completed
-      data: {"type":"response.completed","sequence_number":21,"response":{"id":"resp_09bb7d797077bd810168f23811b088819fb2b1949e8dca30ed","object":"response","created_at":1760704529,"status":"completed","background":false,"error":null,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-5-2025-08-07","output":[{"id":"msg_09bb7d797077bd810168f238125ad4819f84cc331e42e9f26c","type":"message","status":"completed","content":[{"type":"output_text","annotations":[],"logprobs":[],"text":"Results:\n- Addition: 5\n- Multiplication: 6"}],"role":"assistant"}],"parallel_tool_calls":true,"previous_response_id":null,"prompt_cache_key":null,"reasoning":{"effort":"medium","summary":null},"safety_identifier":null,"service_tier":"default","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"function","description":"Add two numbers","name":"add","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"strict":false},{"type":"function","description":"Multiply two numbers","name":"multiply","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"strict":false}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":{"input_tokens":172,"input_tokens_details":{"cached_tokens":0},"output_tokens":18,"output_tokens_details":{"reasoning_tokens":0},"total_tokens":190},"user":null,"metadata":{}}}
+      data: {"type":"response.completed","response":{"id":"resp_060c32d4ad52dd1b0169b319603c74819fba7d9eb0608667bf","object":"response","created_at":1773345120,"status":"completed","background":false,"completed_at":1773345121,"error":null,"frequency_penalty":0.0,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-5-2025-08-07","output":[{"id":"msg_060c32d4ad52dd1b0169b31960f1a8819fa607eb963e4b2b01","type":"message","status":"completed","content":[{"type":"output_text","annotations":[],"logprobs":[],"text":"Addition result: 5\nMultiplication result: 6"}],"role":"assistant"}],"parallel_tool_calls":true,"presence_penalty":0.0,"previous_response_id":null,"prompt_cache_key":null,"prompt_cache_retention":null,"reasoning":{"effort":"medium","summary":null},"safety_identifier":null,"service_tier":"default","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"function","description":"Add two numbers","name":"add","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"strict":false},{"type":"function","description":"Multiply two numbers","name":"multiply","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"strict":false}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":{"input_tokens":169,"input_tokens_details":{"cached_tokens":0},"output_tokens":16,"output_tokens_details":{"reasoning_tokens":0},"total_tokens":185},"user":null,"metadata":{}},"sequence_number":19}
 
     headers:
       Content-Type:
       - text/event-stream; charset=utf-8
     status: 200 OK
     code: 200
-    duration: 250.805041ms
+    duration: 238.775459ms

@@ -1,0 +1,169 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 547
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"}],"model":"anthropic/claude-haiku-4.5","max_tokens":4000,"stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"usage":{"include":true},"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.15.0 (https://charm.land/fantasy)
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      : OPENROUTER PROCESSING
+
+      : OPENROUTER PROCESSING
+
+      : OPENROUTER PROCESSING
+
+      : OPENROUTER PROCESSING
+
+      data: {"id":"gen-1773945354-XxuArfRtL105GrGucMsX","object":"chat.completion.chunk","created":1773945354,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":null,"role":"assistant","tool_calls":[{"index":0,"id":"toolu_bdrk_01Q8hMVuCxjhyQ5fPFaK2LHt","type":"function","function":{"name":"weather","arguments":""}}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945354-XxuArfRtL105GrGucMsX","object":"chat.completion.chunk","created":1773945354,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":null,"role":"assistant","tool_calls":[{"index":0,"function":{"arguments":""}}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945354-XxuArfRtL105GrGucMsX","object":"chat.completion.chunk","created":1773945354,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":null,"role":"assistant","tool_calls":[{"index":0,"function":{"arguments":""}}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945354-XxuArfRtL105GrGucMsX","object":"chat.completion.chunk","created":1773945354,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":null,"role":"assistant","tool_calls":[{"index":0,"function":{"arguments":"{\""}}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945354-XxuArfRtL105GrGucMsX","object":"chat.completion.chunk","created":1773945354,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":null,"role":"assistant","tool_calls":[{"index":0,"function":{"arguments":"location\":"}}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945354-XxuArfRtL105GrGucMsX","object":"chat.completion.chunk","created":1773945354,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":null,"role":"assistant","tool_calls":[{"index":0,"function":{"arguments":" \"Florence,"}}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945354-XxuArfRtL105GrGucMsX","object":"chat.completion.chunk","created":1773945354,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":null,"role":"assistant","tool_calls":[{"index":0,"function":{"arguments":" Italy\"}"}}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945354-XxuArfRtL105GrGucMsX","object":"chat.completion.chunk","created":1773945354,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant"},"finish_reason":"tool_calls","native_finish_reason":"tool_calls"}]}
+
+      data: {"id":"gen-1773945354-XxuArfRtL105GrGucMsX","object":"chat.completion.chunk","created":1773945354,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant"},"finish_reason":"tool_calls","native_finish_reason":"tool_calls"}],"usage":{"prompt_tokens":577,"completion_tokens":54,"total_tokens":631,"cost":0.000847,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"cache_write_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":0.000847,"upstream_inference_prompt_cost":0.000577,"upstream_inference_completions_cost":0.00027},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0,"audio_tokens":0}}}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 1.738503458s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 812
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"toolu_bdrk_01Q8hMVuCxjhyQ5fPFaK2LHt","function":{"arguments":"{\"location\": \"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"toolu_bdrk_01Q8hMVuCxjhyQ5fPFaK2LHt","role":"tool"}],"model":"anthropic/claude-haiku-4.5","max_tokens":4000,"stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"usage":{"include":true},"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.15.0 (https://charm.land/fantasy)
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      : OPENROUTER PROCESSING
+
+      : OPENROUTER PROCESSING
+
+      : OPENROUTER PROCESSING
+
+      : OPENROUTER PROCESSING
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"The weather in Florence, Italy is currently","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" **40°C (","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"104°F)**,","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" which","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" is quite","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" hot","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"!","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" \n\nThis","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" is typical","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" for Florence","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" during","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" the","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" summer months when","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" temperatures","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" can be","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" quite warm","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":".","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" I","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"'d recommend:","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"\n- Staying","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" hydrated\n- Wearing light,","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" breathable clothing\n- Using","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" sun","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" protection (","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"sun","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"screen, hat, sunglasses)","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"\n- Planning","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" outdoor activities for","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" early","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" morning or late evening","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" to","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" avoid the heat of","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" the day","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant"},"finish_reason":"stop","native_finish_reason":"stop"}]}
+
+      data: {"id":"gen-1773945356-69pREjI1t1LIACEkKHdK","object":"chat.completion.chunk","created":1773945356,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant"},"finish_reason":"stop","native_finish_reason":"stop"}],"usage":{"prompt_tokens":646,"completion_tokens":96,"total_tokens":742,"cost":0.001126,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"cache_write_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":0.001126,"upstream_inference_prompt_cost":0.000646,"upstream_inference_completions_cost":0.00048},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0,"audio_tokens":0}}}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 1.818862708s

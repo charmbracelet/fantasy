@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"iter"
+	"strings"
 )
 
 // Usage represents token usage statistics for a model call.
@@ -34,7 +35,9 @@ type ResponseContent []Content
 func (r ResponseContent) Text() string {
 	for _, c := range r {
 		if c.GetType() == ContentTypeText {
-			return c.(TextContent).Text
+			if textContent, ok := AsContentType[TextContent](c); ok {
+				return textContent.Text
+			}
 		}
 	}
 	return ""
@@ -55,11 +58,11 @@ func (r ResponseContent) Reasoning() []ReasoningContent {
 
 // ReasoningText returns all reasoning content as a concatenated string.
 func (r ResponseContent) ReasoningText() string {
-	var text string
+	var builder strings.Builder
 	for _, reasoning := range r.Reasoning() {
-		text += reasoning.Text
+		builder.WriteString(reasoning.Text)
 	}
-	return text
+	return builder.String()
 }
 
 // Files returns all file content parts.
@@ -214,6 +217,9 @@ type Call struct {
 	FrequencyPenalty *float64    `json:"frequency_penalty"`
 	Tools            []Tool      `json:"tools"`
 	ToolChoice       *ToolChoice `json:"tool_choice"`
+
+	// UserAgent overrides the provider-level User-Agent header for this call.
+	UserAgent string `json:"-"`
 
 	// for provider specific options, the key is the provider id
 	ProviderOptions ProviderOptions `json:"provider_options"`

@@ -1,0 +1,46 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 241
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"Say hi in Portuguese","role":"user"}],"model":"moonshotai/Kimi-K2-Instruct-0905:groq","max_tokens":4000,"stream_options":{"include_usage":true},"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+    url: https://router.huggingface.co/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      data: {"id":"chatcmpl-571992ac-2240-422e-ae6d-4df9328a902f","object":"chat.completion.chunk","created":1773347273,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_05df423bab","choices":[{"index":0,"delta":{"role":"assistant","content":""},"logprobs":null,"finish_reason":null}],"x_groq":{"id":"req_01kkhvqytef9tv8a2e4j8jrfsy","seed":1394299605}}
+
+      data: {"id":"chatcmpl-571992ac-2240-422e-ae6d-4df9328a902f","object":"chat.completion.chunk","created":1773347273,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_05df423bab","choices":[{"index":0,"delta":{"content":"Ol"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-571992ac-2240-422e-ae6d-4df9328a902f","object":"chat.completion.chunk","created":1773347273,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_05df423bab","choices":[{"index":0,"delta":{"content":"á"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-571992ac-2240-422e-ae6d-4df9328a902f","object":"chat.completion.chunk","created":1773347273,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_05df423bab","choices":[{"index":0,"delta":{"content":"!"},"logprobs":null,"finish_reason":null}]}
+
+      data: {"id":"chatcmpl-571992ac-2240-422e-ae6d-4df9328a902f","object":"chat.completion.chunk","created":1773347273,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_05df423bab","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"stop"}],"x_groq":{"id":"req_01kkhvqytef9tv8a2e4j8jrfsy","usage":{"queue_time":0.071626339,"prompt_tokens":20,"prompt_time":0.012551381,"completion_tokens":4,"completion_time":0.009086271,"total_tokens":24,"total_time":0.021637652}},"usage":{"queue_time":0.071626339,"prompt_tokens":20,"prompt_time":0.012551381,"completion_tokens":4,"completion_time":0.009086271,"total_tokens":24,"total_time":0.021637652}}
+
+      data: {"id":"chatcmpl-571992ac-2240-422e-ae6d-4df9328a902f","object":"chat.completion.chunk","created":1773347273,"model":"moonshotai/kimi-k2-instruct-0905","system_fingerprint":"fp_05df423bab","choices":[],"usage":{"queue_time":0.071626339,"prompt_tokens":20,"prompt_time":0.012551381,"completion_tokens":4,"completion_time":0.009086271,"total_tokens":24,"total_time":0.021637652},"service_tier":"on_demand"}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 318.281083ms

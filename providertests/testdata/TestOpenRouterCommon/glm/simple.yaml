@@ -1,0 +1,33 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 191
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"Say hi in Portuguese","role":"user"}],"model":"z-ai/glm-5-turbo","max_tokens":4000,"usage":{"include":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.15.0 (https://charm.land/fantasy)
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1773945441-rmYxEaMamyQYZcvTx0FA\",\"object\":\"chat.completion\",\"created\":1773945441,\"model\":\"z-ai/glm-5-turbo-20260315\",\"provider\":\"Z.AI\",\"system_fingerprint\":null,\"choices\":[{\"index\":0,\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"stop\",\"message\":{\"role\":\"assistant\",\"content\":\"Oi!\",\"refusal\":null,\"reasoning\":\"1.  **Identify the language**: Portuguese.\\n2.  **Identify the intent**: Say \\\"hi\\\".\\n3.  **Translate \\\"hi\\\" to Portuguese**: \\\"Oi\\\" is the most common and direct translation for \\\"hi\\\". \\\"Olá\\\" is also very common and translates to \\\"hello\\\".\\n4.  **Select the best option**: \\\"Oi\\\" fits the casualness of \\\"hi\\\" perfectly.\\n5.  **Output the result**: Oi!\",\"reasoning_details\":[{\"type\":\"reasoning.text\",\"text\":\"1.  **Identify the language**: Portuguese.\\n2.  **Identify the intent**: Say \\\"hi\\\".\\n3.  **Translate \\\"hi\\\" to Portuguese**: \\\"Oi\\\" is the most common and direct translation for \\\"hi\\\". \\\"Olá\\\" is also very common and translates to \\\"hello\\\".\\n4.  **Select the best option**: \\\"Oi\\\" fits the casualness of \\\"hi\\\" perfectly.\\n5.  **Output the result**: Oi!\",\"format\":\"unknown\",\"index\":0}]}}],\"usage\":{\"prompt_tokens\":15,\"completion_tokens\":100,\"total_tokens\":115,\"cost\":0.000331328,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":4,\"cache_write_tokens\":0,\"audio_tokens\":0,\"video_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":0.00041416,\"upstream_inference_prompt_cost\":0.00001416,\"upstream_inference_completions_cost\":0.0004},\"completion_tokens_details\":{\"reasoning_tokens\":96,\"image_tokens\":0,\"audio_tokens\":0}}}"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 2.758985083s

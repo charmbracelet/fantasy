@@ -9,6 +9,9 @@ import (
 	"maps"
 	"slices"
 	"sync"
+
+	"charm.land/fantasy/schema"
+	"github.com/charmbracelet/x/exp/slice"
 )
 
 // StepResult represents the result of a single step in an agent execution.
@@ -136,11 +139,12 @@ type agentSettings struct {
 	presencePenalty  *float64
 	frequencyPenalty *float64
 	headers          map[string]string
+	userAgent        string
 	providerOptions  ProviderOptions
 
-	// TODO: add support for provider tools
-	tools      []AgentTool
-	maxRetries *int
+	providerDefinedTools []ProviderDefinedTool
+	tools                []AgentTool
+	maxRetries           *int
 
 	model LanguageModel
 
@@ -426,7 +430,7 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 			}
 		}
 
-		preparedTools := a.prepareTools(stepTools, stepActiveTools, disableAllTools)
+		preparedTools := a.prepareTools(stepTools, a.settings.providerDefinedTools, stepActiveTools, disableAllTools)
 
 		retryOptions := DefaultRetryOptions()
 		if opts.MaxRetries != nil {
@@ -446,6 +450,7 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 				FrequencyPenalty: opts.FrequencyPenalty,
 				Tools:            preparedTools,
 				ToolChoice:       &stepToolChoice,
+				UserAgent:        a.settings.userAgent,
 				ProviderOptions:  opts.ProviderOptions,
 			})
 		})
@@ -460,7 +465,12 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 				if !ok {
 					continue
 				}
-
+				// Provider-executed tool calls (e.g. web search) are
+				// handled by the provider and should not be validated
+				// or executed by the agent.
+				if toolCall.ProviderExecuted {
+					continue
+				}
 				// Validate and potentially repair the tool call
 				validatedToolCall := a.validateAndRepairToolCall(ctx, toolCall, stepTools, stepSystemPrompt, stepInputMessages, a.settings.repairToolCall)
 				stepToolCalls = append(stepToolCalls, validatedToolCall)
@@ -469,22 +479,26 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 
 		toolResults, err := a.executeTools(ctx, stepTools, stepToolCalls, nil)
 
-		// Build step content with validated tool calls and tool results
+		// Build step content with validated tool calls and tool results.
+		// Provider-executed tool calls are kept as-is.
 		stepContent := []Content{}
 		toolCallIndex := 0
 		for _, content := range result.Content {
 			if content.GetType() == ContentTypeToolCall {
-				// Replace with validated tool call
+				tc, ok := AsContentType[ToolCallContent](content)
+				if ok && tc.ProviderExecuted {
+					stepContent = append(stepContent, content)
+					continue
+				}
+				// Replace with validated tool call.
 				if toolCallIndex < len(stepToolCalls) {
 					stepContent = append(stepContent, stepToolCalls[toolCallIndex])
 					toolCallIndex++
 				}
 			} else {
-				// Keep other content as-is
 				stepContent = append(stepContent, content)
 			}
-		}
-		// Add tool results
+		} // Add tool results
 		for _, result := range toolResults {
 			stepContent = append(stepContent, result)
 		}
@@ -597,11 +611,20 @@ func toResponseMessages(content []Content) []Message {
 			if !ok {
 				continue
 			}
-			toolParts = append(toolParts, ToolResultPart{
-				ToolCallID:      result.ToolCallID,
-				Output:          result.Result,
-				ProviderOptions: ProviderOptions(result.ProviderMetadata),
-			})
+			resultPart := ToolResultPart{
+				ToolCallID:       result.ToolCallID,
+				Output:           result.Result,
+				ProviderExecuted: result.ProviderExecuted,
+				ProviderOptions:  ProviderOptions(result.ProviderMetadata),
+			}
+			if result.ProviderExecuted {
+				// Provider-executed tool results (e.g. web search)
+				// belong in the assistant message alongside the
+				// server_tool_use block that produced them.
+				assistantParts = append(assistantParts, resultPart)
+			} else {
+				toolParts = append(toolParts, resultPart)
+			}
 		}
 	}
 
@@ -809,7 +832,7 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 			}
 		}
 
-		preparedTools := a.prepareTools(stepTools, stepActiveTools, disableAllTools)
+		preparedTools := a.prepareTools(stepTools, a.settings.providerDefinedTools, stepActiveTools, disableAllTools)
 
 		// Start step stream
 		if opts.OnStepStart != nil {
@@ -827,6 +850,7 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 			FrequencyPenalty: call.FrequencyPenalty,
 			Tools:            preparedTools,
 			ToolChoice:       &stepToolChoice,
+			UserAgent:        a.settings.userAgent,
 			ProviderOptions:  call.ProviderOptions,
 		}
 
@@ -897,8 +921,8 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 	return agentResult, nil
 }
 
-func (a *agent) prepareTools(tools []AgentTool, activeTools []string, disableAllTools bool) []Tool {
-	preparedTools := make([]Tool, 0, len(tools))
+func (a *agent) prepareTools(tools []AgentTool, providerDefinedTools []ProviderDefinedTool, activeTools []string, disableAllTools bool) []Tool {
+	preparedTools := make([]Tool, 0, len(tools)+len(providerDefinedTools))
 
 	// If explicitly disabling all tools, return no tools
 	if disableAllTools {
@@ -912,16 +936,26 @@ func (a *agent) prepareTools(tools []AgentTool, activeTools []string, disableAll
 			continue
 		}
 		info := tool.Info()
+		inputSchema := map[string]any{
+			"type":       "object",
+			"properties": info.Parameters,
+			"required":   info.Required,
+		}
+		schema.Normalize(inputSchema)
 		preparedTools = append(preparedTools, FunctionTool{
-			Name:        info.Name,
-			Description: info.Description,
-			InputSchema: map[string]any{
-				"type":       "object",
-				"properties": info.Parameters,
-				"required":   info.Required,
-			},
+			Name:            info.Name,
+			Description:     info.Description,
+			InputSchema:     inputSchema,
 			ProviderOptions: tool.ProviderOptions(),
 		})
+	}
+	for _, tool := range providerDefinedTools {
+		// If activeTools has items, only include tools in the list. If
+		// activeTools is empty, include all tools
+		if len(activeTools) > 0 && !slices.Contains(activeTools, tool.GetName()) {
+			continue
+		}
+		preparedTools = append(preparedTools, tool)
 	}
 	return preparedTools
 }
@@ -986,8 +1020,33 @@ func (a *agent) validateToolCall(toolCall ToolCallContent, availableTools []Agen
 }
 
 func (a *agent) createPrompt(system, prompt string, messages []Message, files ...FilePart) (Prompt, error) {
+	// Validation: empty prompt is only allowed when there are messages,
+	// no files to attach, and the last message is a user or tool message.
 	if prompt == "" {
-		return nil, &Error{Title: "invalid argument", Message: "prompt can't be empty"}
+		lastMessage, hasMessages := slice.Last(messages)
+
+		if !hasMessages {
+			return nil, &Error{
+				Title:   "invalid argument",
+				Message: "prompt can't be empty when there are no messages",
+			}
+		}
+
+		if len(files) > 0 {
+			return nil, &Error{
+				Title:   "invalid argument",
+				Message: "prompt can't be empty when there are files",
+			}
+		}
+
+		switch lastMessage.Role {
+		case MessageRoleUser, MessageRoleTool:
+		default:
+			return nil, &Error{
+				Title:   "invalid argument",
+				Message: "prompt can't be empty when the last message is not a user or tool message",
+			}
+		}
 	}
 
 	var preparedPrompt Prompt
@@ -996,7 +1055,9 @@ func (a *agent) createPrompt(system, prompt string, messages []Message, files ..
 		preparedPrompt = append(preparedPrompt, NewSystemMessage(system))
 	}
 	preparedPrompt = append(preparedPrompt, messages...)
-	preparedPrompt = append(preparedPrompt, NewUserMessage(prompt, files...))
+	if prompt != "" {
+		preparedPrompt = append(preparedPrompt, NewUserMessage(prompt, files...))
+	}
 	return preparedPrompt, nil
 }
 
@@ -1053,6 +1114,15 @@ func WithFrequencyPenalty(penalty float64) AgentOption {
 func WithTools(tools ...AgentTool) AgentOption {
 	return func(s *agentSettings) {
 		s.tools = append(s.tools, tools...)
+	}
+}
+
+// WithProviderDefinedTools sets the provider-defined tools for the agent.
+// These tools are executed by the provider (e.g. web search) rather
+// than by the client.
+func WithProviderDefinedTools(tools ...ProviderDefinedTool) AgentOption {
+	return func(s *agentSettings) {
+		s.providerDefinedTools = append(s.providerDefinedTools, tools...)
 	}
 }
 
@@ -1233,7 +1303,9 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 		case StreamPartTypeReasoningDelta:
 			if active, exists := activeReasoningContent[part.ID]; exists {
 				active.content += part.Delta
-				active.options = part.ProviderMetadata
+				if part.ProviderMetadata != nil {
+					active.options = part.ProviderMetadata
+				}
 				activeReasoningContent[part.ID] = active
 			}
 			if opts.OnReasoningDelta != nil {
@@ -1304,29 +1376,62 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 				ProviderMetadata: part.ProviderMetadata,
 			}
 
-			// Validate and potentially repair the tool call
-			validatedToolCall := a.validateAndRepairToolCall(ctx, toolCall, stepTools, a.settings.systemPrompt, nil, opts.RepairToolCall)
-			stepToolCalls = append(stepToolCalls, validatedToolCall)
-			stepContent = append(stepContent, validatedToolCall)
+			// Provider-executed tool calls are handled by the provider
+			// and should not be validated or executed by the agent.
+			if toolCall.ProviderExecuted {
+				stepContent = append(stepContent, toolCall)
+				if opts.OnToolCall != nil {
+					err := opts.OnToolCall(toolCall)
+					if err != nil {
+						return stepExecutionResult{}, err
+					}
+				}
+				delete(activeToolCalls, part.ID)
+			} else {
+				// Validate and potentially repair the tool call
+				validatedToolCall := a.validateAndRepairToolCall(ctx, toolCall, stepTools, a.settings.systemPrompt, nil, opts.RepairToolCall)
+				stepToolCalls = append(stepToolCalls, validatedToolCall)
+				stepContent = append(stepContent, validatedToolCall)
 
-			if opts.OnToolCall != nil {
-				err := opts.OnToolCall(validatedToolCall)
-				if err != nil {
-					return stepExecutionResult{}, err
+				if opts.OnToolCall != nil {
+					err := opts.OnToolCall(validatedToolCall)
+					if err != nil {
+						return stepExecutionResult{}, err
+					}
+				}
+
+				// Determine if tool can run in parallel
+				isParallel := false
+				if tool, exists := toolMap[validatedToolCall.ToolName]; exists {
+					isParallel = tool.Info().Parallel
+				}
+
+				// Send tool call to execution channel
+				toolChan <- toolExecutionRequest{toolCall: validatedToolCall, parallel: isParallel}
+
+				// Clean up active tool call
+				delete(activeToolCalls, part.ID)
+			}
+
+		case StreamPartTypeToolResult:
+			// Provider-executed tool results (e.g. web search)
+			// are emitted by the provider and added directly
+			// to the step content for multi-turn round-tripping.
+			if part.ProviderExecuted {
+				resultContent := ToolResultContent{
+					ToolCallID:       part.ID,
+					ToolName:         part.ToolCallName,
+					ProviderExecuted: true,
+					ProviderMetadata: part.ProviderMetadata,
+				}
+				stepContent = append(stepContent, resultContent)
+				if opts.OnToolResult != nil {
+					err := opts.OnToolResult(resultContent)
+					if err != nil {
+						return stepExecutionResult{}, err
+					}
 				}
 			}
-
-			// Determine if tool can run in parallel
-			isParallel := false
-			if tool, exists := toolMap[validatedToolCall.ToolName]; exists {
-				isParallel = tool.Info().Parallel
-			}
-
-			// Send tool call to execution channel
-			toolChan <- toolExecutionRequest{toolCall: validatedToolCall, parallel: isParallel}
-
-			// Clean up active tool call
-			delete(activeToolCalls, part.ID)
 
 		case StreamPartTypeSource:
 			sourceContent := SourceContent{
@@ -1411,6 +1516,14 @@ func addUsage(a, b Usage) Usage {
 func WithHeaders(headers map[string]string) AgentOption {
 	return func(s *agentSettings) {
 		s.headers = headers
+	}
+}
+
+// WithUserAgent sets the User-Agent header for the agent. This overrides any
+// provider-level User-Agent setting.
+func WithUserAgent(ua string) AgentOption {
+	return func(s *agentSettings) {
+		s.userAgent = ua
 	}
 }
 

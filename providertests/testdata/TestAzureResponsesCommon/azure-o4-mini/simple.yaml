@@ -15,23 +15,94 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.7.1
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://fantasy-playground-resource.openai.azure.com/openai/v1/responses
     method: POST
   response:
     proto: HTTP/2.0
     proto_major: 2
     proto_minor: 0
-    content_length: 1520
+    content_length: 3190
     body: |-
       {
-        "id": "resp_056c26e70a8e16d60169039987a9748195bc77169735bc7b98",
+        "id": "resp_0f4e883cc905fc1e0169b2ff7fc1e48193b221a8039d45d7f5",
         "object": "response",
-        "created_at": 1761843591,
+        "created_at": 1773338495,
         "status": "completed",
         "background": false,
-        "content_filters": null,
+        "completed_at": 1773338497,
+        "content_filters": [
+          {
+            "blocked": false,
+            "source_type": "prompt",
+            "content_filter_raw": [],
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "jailbreak": {
+                "detected": false,
+                "filtered": false
+              }
+            },
+            "content_filter_offsets": {
+              "start_offset": 0,
+              "end_offset": 53,
+              "check_offset": 0
+            }
+          },
+          {
+            "blocked": false,
+            "source_type": "completion",
+            "content_filter_raw": [],
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "protected_material_code": {
+                "detected": false,
+                "filtered": false
+              },
+              "protected_material_text": {
+                "detected": false,
+                "filtered": false
+              }
+            },
+            "content_filter_offsets": {
+              "start_offset": 0,
+              "end_offset": 258,
+              "check_offset": 0
+            }
+          }
+        ],
         "error": null,
+        "frequency_penalty": 0.0,
         "incomplete_details": null,
         "instructions": null,
         "max_output_tokens": 4000,
@@ -39,12 +110,12 @@ interactions:
         "model": "o4-mini",
         "output": [
           {
-            "id": "rs_056c26e70a8e16d601690399881f0c8195aa22699fa3be5974",
+            "id": "rs_0f4e883cc905fc1e0169b2ff80a02c8193ae05ac582273c1a1",
             "type": "reasoning",
             "summary": []
           },
           {
-            "id": "msg_056c26e70a8e16d601690399893da08195a98d7b4b749fcfe4",
+            "id": "msg_0f4e883cc905fc1e0169b2ff813c888193b2f274ebc8bfff99",
             "type": "message",
             "status": "completed",
             "content": [
@@ -59,8 +130,10 @@ interactions:
           }
         ],
         "parallel_tool_calls": true,
+        "presence_penalty": 0.0,
         "previous_response_id": null,
         "prompt_cache_key": null,
+        "prompt_cache_retention": null,
         "reasoning": {
           "effort": "medium",
           "summary": null
@@ -85,11 +158,11 @@ interactions:
           "input_tokens_details": {
             "cached_tokens": 0
           },
-          "output_tokens": 72,
+          "output_tokens": 83,
           "output_tokens_details": {
             "reasoning_tokens": 64
           },
-          "total_tokens": 91
+          "total_tokens": 102
         },
         "user": null,
         "metadata": {}
@@ -99,4 +172,4 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 1.899735709s
+    duration: 2.021153417s

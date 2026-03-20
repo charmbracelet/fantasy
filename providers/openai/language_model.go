@@ -12,11 +12,11 @@ import (
 	"charm.land/fantasy"
 	"charm.land/fantasy/object"
 	"charm.land/fantasy/schema"
+	"github.com/charmbracelet/openai-go"
+	"github.com/charmbracelet/openai-go/packages/param"
+	"github.com/charmbracelet/openai-go/shared"
 	xjson "github.com/charmbracelet/x/json"
 	"github.com/google/uuid"
-	"github.com/openai/openai-go/v2"
-	"github.com/openai/openai-go/v2/packages/param"
-	"github.com/openai/openai-go/v2/shared"
 )
 
 type languageModel struct {
@@ -246,7 +246,7 @@ func (o languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantas
 	if err != nil {
 		return nil, err
 	}
-	response, err := o.client.Chat.Completions.New(ctx, *params)
+	response, err := o.client.Chat.Completions.New(ctx, *params, callUARequestOptions(call)...)
 	if err != nil {
 		return nil, toProviderErr(err)
 	}
@@ -314,7 +314,7 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 		IncludeUsage: openai.Bool(true),
 	}
 
-	stream := o.client.Chat.Completions.NewStreaming(ctx, *params)
+	stream := o.client.Chat.Completions.NewStreaming(ctx, *params, callUARequestOptions(call)...)
 	isActiveText := false
 	toolCalls := make(map[int64]streamToolCall)
 
@@ -528,6 +528,28 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 				}
 			}
 
+			// Handle tool calls that finish with empty arguments (e.g., Copilot).
+			// Normalize empty args to "{}" and emit the tool call if valid.
+			for idx, tc := range toolCalls {
+				if tc.hasFinished {
+					continue
+				}
+				if tc.arguments == "" {
+					tc.arguments = "{}"
+					toolCalls[idx] = tc
+				}
+				if xjson.IsValid(tc.arguments) {
+					if !yield(fantasy.StreamPart{Type: fantasy.StreamPartTypeToolInputEnd, ID: tc.id}) {
+						return
+					}
+					if !yield(fantasy.StreamPart{Type: fantasy.StreamPartTypeToolCall, ID: tc.id, ToolCallName: tc.name, ToolCallInput: tc.arguments}) {
+						return
+					}
+					tc.hasFinished = true
+					toolCalls[idx] = tc
+				}
+			}
+
 			if len(acc.Choices) > 0 {
 				choice := acc.Choices[0]
 				providerMetadata = o.streamProviderMetadataFunc(choice, providerMetadata)
@@ -633,6 +655,10 @@ func toOpenAiTools(tools []fantasy.Tool, toolChoice *fantasy.ToolChoice) (openAi
 		openAiToolChoice = &openai.ChatCompletionToolChoiceOptionUnionParam{
 			OfAuto: param.NewOpt("none"),
 		}
+	case fantasy.ToolChoiceRequired:
+		openAiToolChoice = &openai.ChatCompletionToolChoiceOptionUnionParam{
+			OfAuto: param.NewOpt("required"),
+		}
 	default:
 		openAiToolChoice = &openai.ChatCompletionToolChoiceOptionUnionParam{
 			OfFunctionToolChoice: &openai.ChatCompletionNamedToolChoiceParam{
@@ -662,14 +688,18 @@ func parseAnnotationsFromDelta(delta openai.ChatCompletionChunkChoiceDelta) []op
 			if annotationMap, ok := annotationData.(map[string]any); ok {
 				if annotationType, ok := annotationMap["type"].(string); ok && annotationType == "url_citation" {
 					if urlCitationData, ok := annotationMap["url_citation"].(map[string]any); ok {
-						annotation := openai.ChatCompletionMessageAnnotation{
-							Type: "url_citation",
-							URLCitation: openai.ChatCompletionMessageAnnotationURLCitation{
-								URL:   urlCitationData["url"].(string),
-								Title: urlCitationData["title"].(string),
-							},
+						url, urlOk := urlCitationData["url"].(string)
+						title, titleOk := urlCitationData["title"].(string)
+						if urlOk && titleOk {
+							annotation := openai.ChatCompletionMessageAnnotation{
+								Type: "url_citation",
+								URLCitation: openai.ChatCompletionMessageAnnotationURLCitation{
+									URL:   url,
+									Title: title,
+								},
+							}
+							annotations = append(annotations, annotation)
 						}
-						annotations = append(annotations, annotation)
 					}
 				}
 			}
@@ -739,11 +769,10 @@ func (o languageModel) generateObjectWithJSONMode(ctx context.Context, call fant
 		},
 	}
 
-	response, err := o.client.Chat.Completions.New(ctx, *params)
+	response, err := o.client.Chat.Completions.New(ctx, *params, objectCallUARequestOptions(call)...)
 	if err != nil {
 		return nil, toProviderErr(err)
 	}
-
 	if len(response.Choices) == 0 {
 		usage, _ := o.usageFunc(*response)
 		return nil, &fantasy.NoObjectGeneratedError{
@@ -824,7 +853,7 @@ func (o languageModel) streamObjectWithJSONMode(ctx context.Context, call fantas
 		IncludeUsage: openai.Bool(true),
 	}
 
-	stream := o.client.Chat.Completions.NewStreaming(ctx, *params)
+	stream := o.client.Chat.Completions.NewStreaming(ctx, *params, objectCallUARequestOptions(call)...)
 
 	return func(yield func(fantasy.ObjectStreamPart) bool) {
 		if len(warnings) > 0 {

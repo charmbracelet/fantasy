@@ -8,9 +8,9 @@ import (
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/providers/openai"
-	openaisdk "github.com/openai/openai-go/v2"
-	"github.com/openai/openai-go/v2/packages/param"
-	"github.com/openai/openai-go/v2/shared"
+	openaisdk "github.com/charmbracelet/openai-go"
+	"github.com/charmbracelet/openai-go/packages/param"
+	"github.com/charmbracelet/openai-go/shared"
 )
 
 const reasoningStartedCtx = "reasoning_started"
@@ -209,6 +209,13 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 					}
 
 					switch {
+					case strings.HasPrefix(filePart.MediaType, "text/"):
+						base64Encoded := base64.StdEncoding.EncodeToString(filePart.Data)
+						documentBlock := openaisdk.ChatCompletionContentPartFileFileParam{
+							FileData: param.NewOpt(base64Encoded),
+						}
+						content = append(content, openaisdk.FileContentPart(documentBlock))
+
 					case strings.HasPrefix(filePart.MediaType, "image/"):
 						// Handle image files
 						base64Encoded := base64.StdEncoding.EncodeToString(filePart.Data)

@@ -1,0 +1,161 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 311
+    host: ""
+    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":"You are a helpful assistant","role":"system"},{"content":[{"text":"What is the current population of Tokyo? Cite your source.","type":"input_text"}],"role":"user"}],"model":"gpt-4.1","tool_choice":"auto","tools":[{"type":"web_search"}],"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.12.3 (https://charm.land/fantasy)
+    url: https://api.openai.com/v1/responses
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      event: response.created
+      data: {"type":"response.created","response":{"id":"resp_0dfea6230b48ad890169b960d9319881969c27da66ed1c1378","object":"response","created_at":1773756633,"status":"in_progress","background":false,"completed_at":null,"error":null,"frequency_penalty":0.0,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-4.1-2025-04-14","output":[],"parallel_tool_calls":true,"presence_penalty":0.0,"previous_response_id":null,"prompt_cache_key":null,"prompt_cache_retention":null,"reasoning":{"effort":null,"summary":null},"safety_identifier":null,"service_tier":"auto","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"web_search","search_context_size":"medium","user_location":{"type":"approximate","city":null,"country":"US","region":null,"timezone":null}}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":null,"user":null,"metadata":{}},"sequence_number":0}
+
+      event: response.in_progress
+      data: {"type":"response.in_progress","response":{"id":"resp_0dfea6230b48ad890169b960d9319881969c27da66ed1c1378","object":"response","created_at":1773756633,"status":"in_progress","background":false,"completed_at":null,"error":null,"frequency_penalty":0.0,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-4.1-2025-04-14","output":[],"parallel_tool_calls":true,"presence_penalty":0.0,"previous_response_id":null,"prompt_cache_key":null,"prompt_cache_retention":null,"reasoning":{"effort":null,"summary":null},"safety_identifier":null,"service_tier":"auto","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"web_search","search_context_size":"medium","user_location":{"type":"approximate","city":null,"country":"US","region":null,"timezone":null}}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":null,"user":null,"metadata":{}},"sequence_number":1}
+
+      event: response.output_item.added
+      data: {"type":"response.output_item.added","item":{"id":"ws_0dfea6230b48ad890169b960da1f848196860f801e11b24193","type":"web_search_call","status":"in_progress","action":{"type":"search"}},"output_index":0,"sequence_number":2}
+
+      event: response.web_search_call.in_progress
+      data: {"type":"response.web_search_call.in_progress","item_id":"ws_0dfea6230b48ad890169b960da1f848196860f801e11b24193","output_index":0,"sequence_number":3}
+
+      event: response.web_search_call.searching
+      data: {"type":"response.web_search_call.searching","item_id":"ws_0dfea6230b48ad890169b960da1f848196860f801e11b24193","output_index":0,"sequence_number":4}
+
+      event: response.web_search_call.completed
+      data: {"type":"response.web_search_call.completed","item_id":"ws_0dfea6230b48ad890169b960da1f848196860f801e11b24193","output_index":0,"sequence_number":5}
+
+      event: response.output_item.done
+      data: {"type":"response.output_item.done","item":{"id":"ws_0dfea6230b48ad890169b960da1f848196860f801e11b24193","type":"web_search_call","status":"completed","action":{"type":"search","queries":["current population of Tokyo 2024"],"query":"current population of Tokyo 2024"}},"output_index":0,"sequence_number":6}
+
+      event: response.output_item.added
+      data: {"type":"response.output_item.added","item":{"id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","type":"message","status":"in_progress","content":[],"role":"assistant"},"output_index":1,"sequence_number":7}
+
+      event: response.content_part.added
+      data: {"type":"response.content_part.added","content_index":0,"item_id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","output_index":1,"part":{"type":"output_text","annotations":[],"logprobs":[],"text":""},"sequence_number":8}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":"Here’s the most current and accurate information regarding the population","item_id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","logprobs":[],"obfuscation":"w0I9gLz","output_index":1,"sequence_number":9}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" of Tokyo as of March 17, ","item_id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","logprobs":[],"obfuscation":"OFMsBb","output_index":1,"sequence_number":10}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":"2026:\n\n- For the **Tokyo metropolitan area**","item_id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","logprobs":[],"obfuscation":"wGWX","output_index":1,"sequence_number":11}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":"—also referred to as Greater Tokyo, which includes the city","item_id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","logprobs":[],"obfuscation":"qBRGY","output_index":1,"sequence_number":12}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" proper along with its surrounding prefectures—the United Nations estimates","item_id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","logprobs":[],"obfuscation":"2HV4J","output_index":1,"sequence_number":13}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" the 2025 population at approximately **33.4","item_id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","logprobs":[],"obfuscation":"J17k","output_index":1,"sequence_number":14}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" million**. This makes it the **third-largest urban","item_id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","logprobs":[],"obfuscation":"wFYK9go4C5VzD","output_index":1,"sequence_number":15}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" agglomeration in the world**, following Jakarta and Dhaka","item_id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","logprobs":[],"obfuscation":"Xq5n8f","output_index":1,"sequence_number":16}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":". Estimates near **33 million** are commonly cited across reputable","item_id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","logprobs":[],"obfuscation":"FNtzTsTaOnDlq","output_index":1,"sequence_number":17}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" sources. ","item_id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","logprobs":[],"obfuscation":"2IKKku","output_index":1,"sequence_number":18}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":"([nippon.com](https://www.nippon.com/en/japan-data/h02639/tokyo-third-in-un-ranking-of-global-megacities-at-33-4-million.html?utm_source=openai)","item_id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","logprobs":[],"obfuscation":"","output_index":1,"sequence_number":19}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":")\n\n- However,","item_id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","logprobs":[],"obfuscation":"r2q","output_index":1,"sequence_number":20}
+
+      event: response.output_text.annotation.added
+      data: {"type":"response.output_text.annotation.added","annotation":{"type":"url_citation","end_index":652,"start_index":507,"title":"Tokyo Third in UN Ranking of Global Megacities at 33.4 Million | Nippon.com","url":"https://www.nippon.com/en/japan-data/h02639/tokyo-third-in-un-ranking-of-global-megacities-at-33-4-million.html?utm_source=openai"},"annotation_index":0,"content_index":0,"item_id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","output_index":1,"sequence_number":21}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" for the **Tokyo prefecture or “city proper”**","item_id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","logprobs":[],"obfuscation":"GW","output_index":1,"sequence_number":22}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":"—the 23 special wards and other administrative areas—the estimated","item_id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","logprobs":[],"obfuscation":"IuWuYpBPoq4jE6","output_index":1,"sequence_number":23}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" population for 2025 is **14,195","item_id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","logprobs":[],"obfuscation":"","output_index":1,"sequence_number":24}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":",730**. ","item_id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","logprobs":[],"obfuscation":"68Mp8WuT","output_index":1,"sequence_number":25}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":"([en.wikipedia.org](https://en.wikipedia.org/wiki/Demographics_of_Tokyo?utm_source=openai))\n\nTo clarify:\n\n- When","item_id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","logprobs":[],"obfuscation":"","output_index":1,"sequence_number":26}
+
+      event: response.output_text.annotation.added
+      data: {"type":"response.output_text.annotation.added","annotation":{"type":"url_citation","end_index":907,"start_index":816,"title":"Demographics of Tokyo","url":"https://en.wikipedia.org/wiki/Demographics_of_Tokyo?utm_source=openai"},"annotation_index":1,"content_index":0,"item_id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","output_index":1,"sequence_number":27}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" someone refers to **“Tokyo’s population,”** they may","item_id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","logprobs":[],"obfuscation":"LKfvzRMroEL","output_index":1,"sequence_number":28}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" mean one of two things:\n  ","item_id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","logprobs":[],"obfuscation":"eN1MP","output_index":1,"sequence_number":29}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":"1. The **metropolitan area**, which is the expansive","item_id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","logprobs":[],"obfuscation":"F1esowqlu7GO","output_index":1,"sequence_number":30}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" urban zone including suburban regions—around **33 million**","item_id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","logprobs":[],"obfuscation":"13js","output_index":1,"sequence_number":31}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" people.\n  2. The **administrative city/p","item_id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","logprobs":[],"obfuscation":"uRvlwpX","output_index":1,"sequence_number":32}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":"refecture itself**—about **14.2 million**","item_id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","logprobs":[],"obfuscation":"orK5bC1","output_index":1,"sequence_number":33}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" people.\n\nSo depending on your intended definition, both figures","item_id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","logprobs":[],"obfuscation":"","output_index":1,"sequence_number":34}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" are accurate for 2025—just measuring different scales","item_id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","logprobs":[],"obfuscation":"n6NvYi494h","output_index":1,"sequence_number":35}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":".\n\nLet me know if you’d like data on historical trends","item_id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","logprobs":[],"obfuscation":"a0fxr1kC00","output_index":1,"sequence_number":36}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":", future projections, or comparisons with other global megac","item_id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","logprobs":[],"obfuscation":"2Ba6","output_index":1,"sequence_number":37}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":"ities!","item_id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","logprobs":[],"obfuscation":"91BomkbK8p","output_index":1,"sequence_number":38}
+
+      event: response.output_text.done
+      data: {"type":"response.output_text.done","content_index":0,"item_id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","logprobs":[],"output_index":1,"sequence_number":39,"text":"Here’s the most current and accurate information regarding the population of Tokyo as of March 17, 2026:\n\n- For the **Tokyo metropolitan area**—also referred to as Greater Tokyo, which includes the city proper along with its surrounding prefectures—the United Nations estimates the 2025 population at approximately **33.4 million**. This makes it the **third-largest urban agglomeration in the world**, following Jakarta and Dhaka. Estimates near **33 million** are commonly cited across reputable sources. ([nippon.com](https://www.nippon.com/en/japan-data/h02639/tokyo-third-in-un-ranking-of-global-megacities-at-33-4-million.html?utm_source=openai))\n\n- However, for the **Tokyo prefecture or “city proper”**—the 23 special wards and other administrative areas—the estimated population for 2025 is **14,195,730**. ([en.wikipedia.org](https://en.wikipedia.org/wiki/Demographics_of_Tokyo?utm_source=openai))\n\nTo clarify:\n\n- When someone refers to **“Tokyo’s population,”** they may mean one of two things:\n  1. The **metropolitan area**, which is the expansive urban zone including suburban regions—around **33 million** people.\n  2. The **administrative city/prefecture itself**—about **14.2 million** people.\n\nSo depending on your intended definition, both figures are accurate for 2025—just measuring different scales.\n\nLet me know if you’d like data on historical trends, future projections, or comparisons with other global megacities!"}
+
+      event: response.content_part.done
+      data: {"type":"response.content_part.done","content_index":0,"item_id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","output_index":1,"part":{"type":"output_text","annotations":[{"type":"url_citation","end_index":652,"start_index":507,"title":"Tokyo Third in UN Ranking of Global Megacities at 33.4 Million | Nippon.com","url":"https://www.nippon.com/en/japan-data/h02639/tokyo-third-in-un-ranking-of-global-megacities-at-33-4-million.html?utm_source=openai"},{"type":"url_citation","end_index":907,"start_index":816,"title":"Demographics of Tokyo","url":"https://en.wikipedia.org/wiki/Demographics_of_Tokyo?utm_source=openai"}],"logprobs":[],"text":"Here’s the most current and accurate information regarding the population of Tokyo as of March 17, 2026:\n\n- For the **Tokyo metropolitan area**—also referred to as Greater Tokyo, which includes the city proper along with its surrounding prefectures—the United Nations estimates the 2025 population at approximately **33.4 million**. This makes it the **third-largest urban agglomeration in the world**, following Jakarta and Dhaka. Estimates near **33 million** are commonly cited across reputable sources. ([nippon.com](https://www.nippon.com/en/japan-data/h02639/tokyo-third-in-un-ranking-of-global-megacities-at-33-4-million.html?utm_source=openai))\n\n- However, for the **Tokyo prefecture or “city proper”**—the 23 special wards and other administrative areas—the estimated population for 2025 is **14,195,730**. ([en.wikipedia.org](https://en.wikipedia.org/wiki/Demographics_of_Tokyo?utm_source=openai))\n\nTo clarify:\n\n- When someone refers to **“Tokyo’s population,”** they may mean one of two things:\n  1. The **metropolitan area**, which is the expansive urban zone including suburban regions—around **33 million** people.\n  2. The **administrative city/prefecture itself**—about **14.2 million** people.\n\nSo depending on your intended definition, both figures are accurate for 2025—just measuring different scales.\n\nLet me know if you’d like data on historical trends, future projections, or comparisons with other global megacities!"},"sequence_number":40}
+
+      event: response.output_item.done
+      data: {"type":"response.output_item.done","item":{"id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","type":"message","status":"completed","content":[{"type":"output_text","annotations":[{"type":"url_citation","end_index":652,"start_index":507,"title":"Tokyo Third in UN Ranking of Global Megacities at 33.4 Million | Nippon.com","url":"https://www.nippon.com/en/japan-data/h02639/tokyo-third-in-un-ranking-of-global-megacities-at-33-4-million.html?utm_source=openai"},{"type":"url_citation","end_index":907,"start_index":816,"title":"Demographics of Tokyo","url":"https://en.wikipedia.org/wiki/Demographics_of_Tokyo?utm_source=openai"}],"logprobs":[],"text":"Here’s the most current and accurate information regarding the population of Tokyo as of March 17, 2026:\n\n- For the **Tokyo metropolitan area**—also referred to as Greater Tokyo, which includes the city proper along with its surrounding prefectures—the United Nations estimates the 2025 population at approximately **33.4 million**. This makes it the **third-largest urban agglomeration in the world**, following Jakarta and Dhaka. Estimates near **33 million** are commonly cited across reputable sources. ([nippon.com](https://www.nippon.com/en/japan-data/h02639/tokyo-third-in-un-ranking-of-global-megacities-at-33-4-million.html?utm_source=openai))\n\n- However, for the **Tokyo prefecture or “city proper”**—the 23 special wards and other administrative areas—the estimated population for 2025 is **14,195,730**. ([en.wikipedia.org](https://en.wikipedia.org/wiki/Demographics_of_Tokyo?utm_source=openai))\n\nTo clarify:\n\n- When someone refers to **“Tokyo’s population,”** they may mean one of two things:\n  1. The **metropolitan area**, which is the expansive urban zone including suburban regions—around **33 million** people.\n  2. The **administrative city/prefecture itself**—about **14.2 million** people.\n\nSo depending on your intended definition, both figures are accurate for 2025—just measuring different scales.\n\nLet me know if you’d like data on historical trends, future projections, or comparisons with other global megacities!"}],"role":"assistant"},"output_index":1,"sequence_number":41}
+
+      event: response.completed
+      data: {"type":"response.completed","response":{"id":"resp_0dfea6230b48ad890169b960d9319881969c27da66ed1c1378","object":"response","created_at":1773756633,"status":"completed","background":false,"completed_at":1773756637,"error":null,"frequency_penalty":0.0,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-4.1-2025-04-14","output":[{"id":"ws_0dfea6230b48ad890169b960da1f848196860f801e11b24193","type":"web_search_call","status":"completed","action":{"type":"search","queries":["current population of Tokyo 2024"],"query":"current population of Tokyo 2024"}},{"id":"msg_0dfea6230b48ad890169b960db86348196bfedf4dc41325e1e","type":"message","status":"completed","content":[{"type":"output_text","annotations":[{"type":"url_citation","end_index":652,"start_index":507,"title":"Tokyo Third in UN Ranking of Global Megacities at 33.4 Million | Nippon.com","url":"https://www.nippon.com/en/japan-data/h02639/tokyo-third-in-un-ranking-of-global-megacities-at-33-4-million.html?utm_source=openai"},{"type":"url_citation","end_index":907,"start_index":816,"title":"Demographics of Tokyo","url":"https://en.wikipedia.org/wiki/Demographics_of_Tokyo?utm_source=openai"}],"logprobs":[],"text":"Here’s the most current and accurate information regarding the population of Tokyo as of March 17, 2026:\n\n- For the **Tokyo metropolitan area**—also referred to as Greater Tokyo, which includes the city proper along with its surrounding prefectures—the United Nations estimates the 2025 population at approximately **33.4 million**. This makes it the **third-largest urban agglomeration in the world**, following Jakarta and Dhaka. Estimates near **33 million** are commonly cited across reputable sources. ([nippon.com](https://www.nippon.com/en/japan-data/h02639/tokyo-third-in-un-ranking-of-global-megacities-at-33-4-million.html?utm_source=openai))\n\n- However, for the **Tokyo prefecture or “city proper”**—the 23 special wards and other administrative areas—the estimated population for 2025 is **14,195,730**. ([en.wikipedia.org](https://en.wikipedia.org/wiki/Demographics_of_Tokyo?utm_source=openai))\n\nTo clarify:\n\n- When someone refers to **“Tokyo’s population,”** they may mean one of two things:\n  1. The **metropolitan area**, which is the expansive urban zone including suburban regions—around **33 million** people.\n  2. The **administrative city/prefecture itself**—about **14.2 million** people.\n\nSo depending on your intended definition, both figures are accurate for 2025—just measuring different scales.\n\nLet me know if you’d like data on historical trends, future projections, or comparisons with other global megacities!"}],"role":"assistant"}],"parallel_tool_calls":true,"presence_penalty":0.0,"previous_response_id":null,"prompt_cache_key":null,"prompt_cache_retention":null,"reasoning":{"effort":null,"summary":null},"safety_identifier":null,"service_tier":"default","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"web_search","search_context_size":"medium","user_location":{"type":"approximate","city":null,"country":"US","region":null,"timezone":null}}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":{"input_tokens":16828,"input_tokens_details":{"cached_tokens":0},"output_tokens":337,"output_tokens_details":{"reasoning_tokens":0},"total_tokens":17165},"user":null,"metadata":{}},"sequence_number":42}
+
+    headers:
+      Content-Type:
+      - text/event-stream; charset=utf-8
+    status: 200 OK
+    code: 200
+    duration: 768.756726ms

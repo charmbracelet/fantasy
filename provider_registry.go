@@ -38,7 +38,7 @@ func unmarshalProviderData(data []byte) (ProviderOptionsData, error) {
 		return nil, fmt.Errorf("unknown provider data type: %s", pj.Type)
 	}
 
-	unmarshalFn := val.(UnmarshalFunc)
+	unmarshalFn := val.(UnmarshalFunc) //nolint:forcetypeassert // type enforced by RegisterProviderType
 	return unmarshalFn(pj.Data)
 }
 

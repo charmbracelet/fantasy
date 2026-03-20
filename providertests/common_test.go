@@ -54,6 +54,10 @@ func testSimple(t *testing.T, pair builderPair) {
 	}
 
 	t.Run("simple", func(t *testing.T) {
+		if strings.HasPrefix(pair.name, "avian-") {
+			t.Skip("Avian only support streaming")
+		}
+
 		r := vcr.NewRecorder(t)
 
 		languageModel, err := pair.builder(t, r)
@@ -72,6 +76,7 @@ func testSimple(t *testing.T, pair builderPair) {
 		require.NoError(t, err, "failed to generate")
 		checkResult(t, result)
 	})
+
 	t.Run("simple streaming", func(t *testing.T) {
 		r := vcr.NewRecorder(t)
 
@@ -127,6 +132,10 @@ func testTool(t *testing.T, pair builderPair) {
 	}
 
 	t.Run("tool", func(t *testing.T) {
+		if strings.HasPrefix(pair.name, "avian-") {
+			t.Skip("Avian only support streaming")
+		}
+
 		r := vcr.NewRecorder(t)
 
 		languageModel, err := pair.builder(t, r)
@@ -146,6 +155,7 @@ func testTool(t *testing.T, pair builderPair) {
 		require.NoError(t, err, "failed to generate")
 		checkResult(t, result)
 	})
+
 	t.Run("tool streaming", func(t *testing.T) {
 		r := vcr.NewRecorder(t)
 
@@ -227,6 +237,10 @@ func testMultiTool(t *testing.T, pair builderPair) {
 	}
 
 	t.Run("multi tool", func(t *testing.T) {
+		if strings.HasPrefix(pair.name, "avian-") {
+			t.Skip("Avian only support streaming")
+		}
+
 		r := vcr.NewRecorder(t)
 
 		languageModel, err := pair.builder(t, r)
@@ -247,6 +261,7 @@ func testMultiTool(t *testing.T, pair builderPair) {
 		require.NoError(t, err, "failed to generate")
 		checkResult(t, result)
 	})
+
 	t.Run("multi tool streaming", func(t *testing.T) {
 		r := vcr.NewRecorder(t)
 
@@ -274,6 +289,10 @@ func testThinking(t *testing.T, pairs []builderPair, thinkChecks func(*testing.T
 	for _, pair := range pairs {
 		t.Run(pair.name, func(t *testing.T) {
 			t.Run("thinking", func(t *testing.T) {
+				if strings.HasPrefix(pair.name, "avian-") {
+					t.Skip("Avian only support streaming")
+				}
+
 				r := vcr.NewRecorder(t)
 
 				languageModel, err := pair.builder(t, r)
@@ -310,6 +329,7 @@ func testThinking(t *testing.T, pairs []builderPair, thinkChecks func(*testing.T
 
 				thinkChecks(t, result)
 			})
+
 			t.Run("thinking-streaming", func(t *testing.T) {
 				r := vcr.NewRecorder(t)
 

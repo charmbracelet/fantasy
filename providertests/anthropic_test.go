@@ -155,3 +155,122 @@ func anthropicBuilder(model string) builderFunc {
 		return provider.LanguageModel(t.Context(), model)
 	}
 }
+
+// TestAnthropicWebSearch tests web search tool support via the agent
+// using WithProviderDefinedTools.
+func TestAnthropicWebSearch(t *testing.T) {
+	model := "claude-sonnet-4-20250514"
+	webSearchTool := anthropic.WebSearchTool(nil)
+
+	t.Run("generate", func(t *testing.T) {
+		r := vcr.NewRecorder(t)
+
+		lm, err := anthropicBuilder(model)(t, r)
+		require.NoError(t, err)
+
+		agent := fantasy.NewAgent(
+			lm,
+			fantasy.WithSystemPrompt("You are a helpful assistant"),
+			fantasy.WithProviderDefinedTools(webSearchTool),
+		)
+
+		result, err := agent.Generate(t.Context(), fantasy.AgentCall{
+			Prompt:          "What is the current population of Tokyo? Cite your source.",
+			MaxOutputTokens: fantasy.Opt(int64(4000)),
+		})
+		require.NoError(t, err)
+
+		got := result.Response.Content.Text()
+		require.NotEmpty(t, got, "should have a text response")
+		require.Contains(t, got, "Tokyo", "response should mention Tokyo")
+
+		// Walk the steps and verify web search content was produced.
+		var sources []fantasy.SourceContent
+		var providerToolCalls []fantasy.ToolCallContent
+		for _, step := range result.Steps {
+			for _, c := range step.Content {
+				switch v := c.(type) {
+				case fantasy.ToolCallContent:
+					if v.ProviderExecuted {
+						providerToolCalls = append(providerToolCalls, v)
+					}
+				case fantasy.SourceContent:
+					sources = append(sources, v)
+				}
+			}
+		}
+
+		require.NotEmpty(t, providerToolCalls, "should have provider-executed tool calls")
+		require.Equal(t, "web_search", providerToolCalls[0].ToolName)
+		require.NotEmpty(t, sources, "should have source citations")
+		require.NotEmpty(t, sources[0].URL, "source should have a URL")
+	})
+
+	t.Run("stream", func(t *testing.T) {
+		r := vcr.NewRecorder(t)
+
+		lm, err := anthropicBuilder(model)(t, r)
+		require.NoError(t, err)
+
+		agent := fantasy.NewAgent(
+			lm,
+			fantasy.WithSystemPrompt("You are a helpful assistant"),
+			fantasy.WithProviderDefinedTools(webSearchTool),
+		)
+
+		// Turn 1: initial query triggers web search.
+		result, err := agent.Stream(t.Context(), fantasy.AgentStreamCall{
+			Prompt:          "What is the current population of Tokyo? Cite your source.",
+			MaxOutputTokens: fantasy.Opt(int64(4000)),
+		})
+		require.NoError(t, err)
+
+		got := result.Response.Content.Text()
+		require.NotEmpty(t, got, "should have a text response")
+		require.Contains(t, got, "Tokyo", "response should mention Tokyo")
+
+		// Verify provider-executed tool calls and results in steps.
+		var providerToolCalls []fantasy.ToolCallContent
+		var providerToolResults []fantasy.ToolResultContent
+		for _, step := range result.Steps {
+			for _, c := range step.Content {
+				switch v := c.(type) {
+				case fantasy.ToolCallContent:
+					if v.ProviderExecuted {
+						providerToolCalls = append(providerToolCalls, v)
+					}
+				case fantasy.ToolResultContent:
+					if v.ProviderExecuted {
+						providerToolResults = append(providerToolResults, v)
+					}
+				}
+			}
+		}
+		require.NotEmpty(t, providerToolCalls, "should have provider-executed tool calls")
+		require.Equal(t, "web_search", providerToolCalls[0].ToolName)
+		require.NotEmpty(t, providerToolResults, "should have provider-executed tool results")
+
+		// Turn 2: follow-up using step messages from turn 1.
+		// This verifies that the web_search_tool_result block
+		// round-trips correctly through toPrompt.
+		var history fantasy.Prompt
+		history = append(history, fantasy.Message{
+			Role:    fantasy.MessageRoleUser,
+			Content: []fantasy.MessagePart{fantasy.TextPart{Text: "What is the current population of Tokyo? Cite your source."}},
+		})
+		for _, step := range result.Steps {
+			history = append(history, step.Messages...)
+		}
+
+		result2, err := agent.Stream(t.Context(), fantasy.AgentStreamCall{
+			Messages:        history,
+			Prompt:          "How does that compare to Osaka?",
+			MaxOutputTokens: fantasy.Opt(int64(4000)),
+		})
+		require.NoError(t, err)
+
+		got2 := result2.Response.Content.Text()
+		require.NotEmpty(t, got2, "turn 2 should have a text response")
+		require.Contains(t, got2, "Osaka", "turn 2 response should mention Osaka")
+	})
+}

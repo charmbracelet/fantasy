@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.7.1
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.x.ai/v1/chat/completions
     method: POST
   response:
@@ -24,10 +24,10 @@ interactions:
     proto_minor: 0
     content_length: -1
     uncompressed: true
-    body: '{"id":"c507c7e0-9670-a02e-8c70-1df65c243406","object":"chat.completion","created":1762637614,"model":"grok-4-fast-reasoning","choices":[{"index":0,"message":{"role":"assistant","content":"","tool_calls":[{"id":"call_93127190","function":{"name":"Book","arguments":"{\"author\":{\"name\":\"J.R.R. Tolkien\",\"nationality\":\"British\"},\"genres\":[\"fantasy\",\"adventure\"],\"published_year\":1954,\"title\":\"The Lord of the Rings\"}"},"type":"function"}],"refusal":null},"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":468,"completion_tokens":83,"total_tokens":1122,"prompt_tokens_details":{"text_tokens":468,"audio_tokens":0,"image_tokens":0,"cached_tokens":305},"completion_tokens_details":{"reasoning_tokens":571,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0},"num_sources_used":0},"system_fingerprint":"fp_bfbe7bd0a2"}'
+    body: '{"id":"4d079f49-147e-8564-409e-78a6aac4aa19","object":"chat.completion","created":1773345647,"model":"grok-4-fast-reasoning","choices":[{"index":0,"message":{"role":"assistant","content":"","tool_calls":[{"id":"call_50222897","function":{"name":"Book","arguments":"{\"author\":{\"name\":\"J.R.R. Tolkien\",\"nationality\":\"British\"},\"genres\":[\"fantasy\",\"adventure\"],\"published_year\":1954,\"title\":\"The Lord of the Rings\"}"},"type":"function"}],"refusal":null},"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":468,"completion_tokens":82,"total_tokens":870,"prompt_tokens_details":{"text_tokens":468,"audio_tokens":0,"image_tokens":0,"cached_tokens":305},"completion_tokens_details":{"reasoning_tokens":320,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0},"num_sources_used":0,"cost_in_usd_ticks":2488500},"system_fingerprint":"fp_3d7ed3b779"}'
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 3.442305458s
+    duration: 4.112960917s

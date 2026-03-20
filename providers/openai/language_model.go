@@ -514,6 +514,8 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 				}
 			}
 
+			// Handle tool calls that finish with empty arguments (e.g., Copilot).
+			// Normalize empty args to "{}" and emit the tool call if valid.
 			for idx, tc := range toolCalls {
 				if tc.hasFinished {
 					continue

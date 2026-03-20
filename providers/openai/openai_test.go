@@ -3874,16 +3874,29 @@ func TestResponsesToPrompt_WebSearchProviderExecutedToolResults(t *testing.T) {
 		},
 	}
 
-	input, warnings := toResponsesPrompt(prompt, "system instructions", false)
+	t.Run("store false skips item reference", func(t *testing.T) {
+		t.Parallel()
 
-	require.Empty(t, warnings)
+		input, warnings := toResponsesPrompt(prompt, "system instructions", false)
 
-	// Expected input items: user message, item_reference (for
-	// provider-executed tool call; the ToolResultPart is skipped),
-	// and assistant text message. System instructions are passed
-	// via params.Instructions, not as an input item.
-	require.Len(t, input, 3,
-		"expected user + item_reference + assistant text")
+		require.Empty(t, warnings)
+		require.Len(t, input, 2,
+			"expected user + assistant text when store=false")
+		require.Nil(t, input[0].OfItemReference)
+		require.Nil(t, input[1].OfItemReference)
+	})
+
+	t.Run("store true uses item reference", func(t *testing.T) {
+		t.Parallel()
+
+		input, warnings := toResponsesPrompt(prompt, "system instructions", true)
+
+		require.Empty(t, warnings)
+		require.Len(t, input, 3,
+			"expected user + item_reference + assistant text when store=true")
+		require.NotNil(t, input[1].OfItemReference)
+		require.Equal(t, "ws_01", input[1].OfItemReference.ID)
+	})
 }
 
 func TestResponsesToPrompt_ReasoningWithStore(t *testing.T) {
@@ -3942,19 +3955,19 @@ func TestResponsesToPrompt_ReasoningWithStore(t *testing.T) {
 		}
 	})
 
-	t.Run("store false includes reasoning", func(t *testing.T) {
+	t.Run("store false skips reasoning", func(t *testing.T) {
 		t.Parallel()
 
 		input, warnings := toResponsesPrompt(prompt, "system", false)
 		require.Empty(t, warnings)
 
-		// With store=false: user, reasoning, assistant text,
-		// follow-up user.
-		require.Len(t, input, 4)
+		// With store=false: user, assistant text, follow-up user.
+		require.Len(t, input, 3)
 
-		// Second item should be the reasoning.
-		require.NotNil(t, input[1].OfReasoning)
-		require.Equal(t, reasoningItemID, input[1].OfReasoning.ID)
+		for _, item := range input {
+			require.Nil(t, item.OfReasoning,
+				"reasoning items must not appear when store=false")
+		}
 	})
 }
 

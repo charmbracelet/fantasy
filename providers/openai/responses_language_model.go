@@ -540,10 +540,16 @@ func toResponsesPrompt(prompt fantasy.Prompt, systemMessageMode string, store bo
 					}
 
 					if toolCallPart.ProviderExecuted {
-						// Round-trip provider-executed tools via
-						// item_reference, letting the API resolve
-						// the stored output item by ID.
-						input = append(input, responses.ResponseInputItemParamOfItemReference(toolCallPart.ToolCallID))
+						if store {
+							// Round-trip provider-executed tools via
+							// item_reference, letting the API resolve
+							// the stored output item by ID.
+							input = append(input, responses.ResponseInputItemParamOfItemReference(toolCallPart.ToolCallID))
+						}
+						// When store is disabled, server-side items are
+						// ephemeral and cannot be referenced. Skip the
+						// tool call; results are already omitted for
+						// provider-executed tools.
 						continue
 					}
 
@@ -562,45 +568,13 @@ func toResponsesPrompt(prompt fantasy.Prompt, systemMessageMode string, store bo
 					// recognised Responses API input type; skip.
 					continue
 				case fantasy.ContentTypeReasoning:
-					if store {
-						// When Store is enabled the API already has the
-						// reasoning persisted server-side. Replaying the
-						// full OfReasoning item causes a validation error
-						// ("reasoning was provided without its required
-						// following item") because the API cannot pair the
-						// reconstructed reasoning with the output item
-						// that followed it.
-						continue
-					}
-					reasoningMetadata := GetReasoningMetadata(c.Options())
-					if reasoningMetadata == nil || reasoningMetadata.ItemID == "" {
-						continue
-					}
-					if len(reasoningMetadata.Summary) == 0 && reasoningMetadata.EncryptedContent == nil {
-						warnings = append(warnings, fantasy.CallWarning{
-							Type:    fantasy.CallWarningTypeOther,
-							Message: "assistant message reasoning part does is empty",
-						})
-						continue
-					}
-					// we want to always send an empty array
-					summary := make([]responses.ResponseReasoningItemSummaryParam, 0, len(reasoningMetadata.Summary))
-					for _, s := range reasoningMetadata.Summary {
-						summary = append(summary, responses.ResponseReasoningItemSummaryParam{
-							Type: "summary_text",
-							Text: s,
-						})
-					}
-					reasoning := &responses.ResponseReasoningItemParam{
-						ID:      reasoningMetadata.ItemID,
-						Summary: summary,
-					}
-					if reasoningMetadata.EncryptedContent != nil {
-						reasoning.EncryptedContent = param.NewOpt(*reasoningMetadata.EncryptedContent)
-					}
-					input = append(input, responses.ResponseInputItemUnionParam{
-						OfReasoning: reasoning,
-					})
+					// Reasoning items are always skipped during replay.
+					// When store is enabled, the API already has them
+					// persisted server-side. When store is disabled, the
+					// item IDs are ephemeral and referencing them causes
+					// "Item not found" errors. In both cases, replaying
+					// reasoning inline is not supported by the API.
+					continue
 				}
 			}
 

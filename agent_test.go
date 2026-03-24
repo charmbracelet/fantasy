@@ -2,6 +2,7 @@ package fantasy
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -1717,7 +1718,7 @@ func TestAgent_MediaToolResponses(t *testing.T) {
 
 		mediaResult, ok := toolResults[0].Result.(ToolResultOutputContentMedia)
 		require.True(t, ok, "Expected media result")
-		require.Equal(t, string(imageData), mediaResult.Data)
+		require.Equal(t, base64.StdEncoding.EncodeToString(imageData), mediaResult.Data)
 		require.Equal(t, "image/png", mediaResult.MediaType)
 	})
 
@@ -1769,7 +1770,7 @@ func TestAgent_MediaToolResponses(t *testing.T) {
 
 		mediaResult, ok := toolResults[0].Result.(ToolResultOutputContentMedia)
 		require.True(t, ok, "Expected media result")
-		require.Equal(t, string(audioData), mediaResult.Data)
+		require.Equal(t, base64.StdEncoding.EncodeToString(audioData), mediaResult.Data)
 		require.Equal(t, "audio/wav", mediaResult.MediaType)
 	})
 
@@ -1823,7 +1824,7 @@ func TestAgent_MediaToolResponses(t *testing.T) {
 
 		mediaResult, ok := toolResults[0].Result.(ToolResultOutputContentMedia)
 		require.True(t, ok, "Expected media result")
-		require.Equal(t, string(imageData), mediaResult.Data)
+		require.Equal(t, base64.StdEncoding.EncodeToString(imageData), mediaResult.Data)
 		require.Equal(t, "image/png", mediaResult.MediaType)
 		require.Equal(t, "Screenshot captured successfully", mediaResult.Text)
 	})
@@ -1970,4 +1971,460 @@ func TestToResponseMessages_ProviderExecutedRouting(t *testing.T) {
 	require.True(t, ok)
 	require.Equal(t, "toolu_02", tr2.ToolCallID)
 	require.False(t, tr2.ProviderExecuted)
+}
+
+// TestAgent_Generate_ExecutableProviderTool verifies that an
+// ExecutableProviderTool registered via WithProviderDefinedTools is
+// executed by the agent when the model returns a matching tool call.
+func TestAgent_Generate_ExecutableProviderTool(t *testing.T) {
+	t.Parallel()
+
+	runCalled := false
+	execTool := NewExecutableProviderTool(
+		ProviderDefinedTool{
+			ID:   "test.computer",
+			Name: "computer",
+			Args: map[string]any{"display_width_px": 1920},
+		},
+		func(ctx context.Context, call ToolCall) (ToolResponse, error) {
+			runCalled = true
+			return NewTextResponse("screenshot taken"), nil
+		},
+	)
+
+	model := &mockLanguageModel{
+		generateFunc: func(ctx context.Context, call Call) (*Response, error) {
+			return &Response{
+				Content: []Content{
+					ToolCallContent{
+						ToolCallID: "call-1",
+						ToolName:   "computer",
+						Input:      `{"action":"screenshot"}`,
+					},
+				},
+				Usage:        Usage{TotalTokens: 10},
+				FinishReason: FinishReasonStop,
+			}, nil
+		},
+	}
+
+	agent := NewAgent(model, WithProviderDefinedTools(execTool))
+	result, err := agent.Generate(context.Background(), AgentCall{
+		Prompt: "take a screenshot",
+	})
+
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	require.True(t, runCalled, "expected Run func to be called")
+	require.Len(t, result.Steps, 1)
+
+	// Verify tool result is in the response.
+	var toolResults []ToolResultContent
+	for _, c := range result.Response.Content {
+		if tr, ok := AsContentType[ToolResultContent](c); ok {
+			toolResults = append(toolResults, tr)
+		}
+	}
+	require.Len(t, toolResults, 1)
+	require.Equal(t, "call-1", toolResults[0].ToolCallID)
+	require.Equal(t, "computer", toolResults[0].ToolName)
+
+	textResult, ok := toolResults[0].Result.(ToolResultOutputContentText)
+	require.True(t, ok)
+	require.Equal(t, "screenshot taken", textResult.Text)
+}
+
+// TestAgent_Generate_ExecutableProviderTool_ActiveTools verifies that
+// active tool filtering works for ExecutableProviderTool.
+func TestAgent_Generate_ExecutableProviderTool_ActiveTools(t *testing.T) {
+	t.Parallel()
+
+	execTool := NewExecutableProviderTool(
+		ProviderDefinedTool{
+			ID:   "test.computer",
+			Name: "computer",
+			Args: map[string]any{"display_width_px": 1920},
+		},
+		func(ctx context.Context, call ToolCall) (ToolResponse, error) {
+			return NewTextResponse("ok"), nil
+		},
+	)
+
+	model := &mockLanguageModel{
+		generateFunc: func(ctx context.Context, call Call) (*Response, error) {
+			// With ActiveTools=["other"], computer should be filtered out.
+			require.Empty(t, call.Tools)
+
+			return &Response{
+				Content:      []Content{TextContent{Text: "no tools"}},
+				Usage:        Usage{TotalTokens: 5},
+				FinishReason: FinishReasonStop,
+			}, nil
+		},
+	}
+
+	agent := NewAgent(model, WithProviderDefinedTools(execTool))
+	result, err := agent.Generate(context.Background(), AgentCall{
+		Prompt:      "test",
+		ActiveTools: []string{"other"},
+	})
+
+	require.NoError(t, err)
+	require.NotNil(t, result)
+}
+
+// TestAgent_Generate_ExecutableProviderTool_ActiveTools_Rejected
+// verifies that a hallucinated tool call for an EPT excluded by
+// activeTools is rejected at validation and execution time.
+func TestAgent_Generate_ExecutableProviderTool_ActiveTools_Rejected(t *testing.T) {
+	t.Parallel()
+
+	runCalled := false
+	execTool := NewExecutableProviderTool(
+		ProviderDefinedTool{
+			ID:   "test.computer",
+			Name: "computer",
+			Args: map[string]any{"display_width_px": 1920},
+		},
+		func(ctx context.Context, call ToolCall) (ToolResponse, error) {
+			runCalled = true
+			return NewTextResponse("ok"), nil
+		},
+	)
+
+	callCount := 0
+	model := &mockLanguageModel{
+		generateFunc: func(ctx context.Context, call Call) (*Response, error) {
+			callCount++
+			if callCount == 1 {
+				// Model hallucinates a call to the excluded tool.
+				return &Response{
+					Content: []Content{ToolCallContent{
+						ToolCallID: "call-1",
+						ToolName:   "computer",
+						Input:      `{"action":"screenshot"}`,
+					}},
+					Usage:        Usage{TotalTokens: 5},
+					FinishReason: FinishReasonToolCalls,
+				}, nil
+			}
+			// Second call: model stops.
+			return &Response{
+				Content:      []Content{TextContent{Text: "done"}},
+				Usage:        Usage{TotalTokens: 3},
+				FinishReason: FinishReasonStop,
+			}, nil
+		},
+	}
+
+	agent := NewAgent(model, WithProviderDefinedTools(execTool))
+	result, err := agent.Generate(context.Background(), AgentCall{
+		Prompt:      "test",
+		ActiveTools: []string{"other"},
+	})
+
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	require.False(t, runCalled, "excluded EPT should not have been executed")
+
+	// The tool call should have been marked invalid.
+	var foundInvalidToolResult bool
+	for _, step := range result.Steps {
+		for _, content := range step.Content {
+			if tr, ok := AsContentType[ToolResultContent](content); ok {
+				if errResult, ok := tr.Result.(ToolResultOutputContentError); ok {
+					require.Contains(t, errResult.Error.Error(), "tool not found")
+					foundInvalidToolResult = true
+				}
+			}
+		}
+	}
+	require.True(t, foundInvalidToolResult, "expected an error result for the excluded tool call")
+}
+
+// TestAgent_Stream_ExecutableProviderTool verifies that an
+// ExecutableProviderTool works through the Stream path.
+func TestAgent_Stream_ExecutableProviderTool(t *testing.T) {
+	t.Parallel()
+
+	runCalled := false
+	execTool := NewExecutableProviderTool(
+		ProviderDefinedTool{
+			ID:   "test.computer",
+			Name: "computer",
+			Args: map[string]any{"display_width_px": 1920},
+		},
+		func(ctx context.Context, call ToolCall) (ToolResponse, error) {
+			runCalled = true
+			return NewTextResponse("screenshot taken"), nil
+		},
+	)
+
+	model := &mockLanguageModel{
+		streamFunc: func(ctx context.Context, call Call) (StreamResponse, error) {
+			return func(yield func(StreamPart) bool) {
+				if !yield(StreamPart{
+					Type:          StreamPartTypeToolCall,
+					ID:            "call-1",
+					ToolCallName:  "computer",
+					ToolCallInput: `{"action":"screenshot"}`,
+				}) {
+					return
+				}
+				yield(StreamPart{
+					Type:         StreamPartTypeFinish,
+					FinishReason: FinishReasonStop,
+					Usage:        Usage{TotalTokens: 10},
+				})
+			}, nil
+		},
+	}
+
+	agent := NewAgent(model, WithProviderDefinedTools(execTool))
+	result, err := agent.Stream(context.Background(), AgentStreamCall{
+		Prompt: "take a screenshot",
+	})
+
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	require.True(t, runCalled, "expected Run func to be called")
+	require.Len(t, result.Steps, 1)
+
+	// Verify tool result is in the step content.
+	var toolResults []ToolResultContent
+	for _, c := range result.Steps[0].Content {
+		if tr, ok := AsContentType[ToolResultContent](c); ok {
+			toolResults = append(toolResults, tr)
+		}
+	}
+	require.Len(t, toolResults, 1)
+	require.Equal(t, "call-1", toolResults[0].ToolCallID)
+}
+
+// TestAgent_PrepareTools_ExecutableProviderTool verifies that
+// prepareTools emits a ProviderDefinedTool (not a FunctionTool) when
+// an ExecutableProviderTool is registered via WithProviderDefinedTools.
+func TestAgent_PrepareTools_ExecutableProviderTool(t *testing.T) {
+	t.Parallel()
+
+	execTool := NewExecutableProviderTool(
+		ProviderDefinedTool{
+			ID:   "test.computer",
+			Name: "computer",
+			Args: map[string]any{"display_width_px": 1920},
+		},
+		func(ctx context.Context, call ToolCall) (ToolResponse, error) {
+			return NewTextResponse("ok"), nil
+		},
+	)
+
+	model := &mockLanguageModel{
+		generateFunc: func(ctx context.Context, call Call) (*Response, error) {
+			// Verify the tool is emitted as a ProviderDefinedTool.
+			require.Len(t, call.Tools, 1)
+			pdt, ok := call.Tools[0].(ProviderDefinedTool)
+			require.True(t, ok, "expected ProviderDefinedTool, got %T", call.Tools[0])
+			require.Equal(t, "computer", pdt.Name)
+			require.Equal(t, "test.computer", pdt.ID)
+
+			return &Response{
+				Content:      []Content{TextContent{Text: "done"}},
+				Usage:        Usage{TotalTokens: 5},
+				FinishReason: FinishReasonStop,
+			}, nil
+		},
+	}
+
+	agent := NewAgent(model, WithProviderDefinedTools(execTool))
+	_, err := agent.Generate(context.Background(), AgentCall{
+		Prompt: "test",
+	})
+	require.NoError(t, err)
+}
+
+// TestAgent_ValidateToolCall_ExecutableProviderTool verifies that
+// schema validation is skipped for executable provider tools, but
+// JSON parsing is still checked.
+func TestAgent_ValidateToolCall_ExecutableProviderTool(t *testing.T) {
+	t.Parallel()
+
+	execTool := NewExecutableProviderTool(
+		ProviderDefinedTool{
+			ID:   "test.computer",
+			Name: "computer",
+		},
+		func(ctx context.Context, call ToolCall) (ToolResponse, error) {
+			return NewTextResponse("ok"), nil
+		},
+	)
+
+	a := &agent{
+		settings: agentSettings{
+			executableProviderTools: []ExecutableProviderTool{execTool},
+		},
+	}
+
+	// Valid JSON should pass even without required fields.
+	err := a.validateToolCall(ToolCallContent{
+		ToolName: "computer",
+		Input:    `{"action":"screenshot"}`,
+	}, []AgentTool{}, []ExecutableProviderTool{execTool})
+	require.NoError(t, err)
+
+	// Invalid JSON should still fail.
+	err = a.validateToolCall(ToolCallContent{
+		ToolName: "computer",
+		Input:    `not-json`,
+	}, []AgentTool{}, []ExecutableProviderTool{execTool})
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "invalid JSON")
+}
+
+// TestAgent_WithProviderDefinedTools_BackwardCompat verifies that
+// passing a plain ProviderDefinedTool to WithProviderDefinedTools
+// still works (web search path).
+func TestAgent_WithProviderDefinedTools_BackwardCompat(t *testing.T) {
+	t.Parallel()
+
+	webSearch := ProviderDefinedTool{
+		ID:   "anthropic.web_search",
+		Name: "web_search",
+		Args: map[string]any{"max_results": 5},
+	}
+
+	model := &mockLanguageModel{
+		generateFunc: func(ctx context.Context, call Call) (*Response, error) {
+			require.Len(t, call.Tools, 1)
+			pdt, ok := call.Tools[0].(ProviderDefinedTool)
+			require.True(t, ok, "expected ProviderDefinedTool, got %T", call.Tools[0])
+			require.Equal(t, "web_search", pdt.Name)
+			require.Equal(t, "anthropic.web_search", pdt.ID)
+
+			return &Response{
+				Content:      []Content{TextContent{Text: "search results"}},
+				Usage:        Usage{TotalTokens: 5},
+				FinishReason: FinishReasonStop,
+			}, nil
+		},
+	}
+
+	agent := NewAgent(model, WithProviderDefinedTools(webSearch))
+	result, err := agent.Generate(context.Background(), AgentCall{
+		Prompt: "search for something",
+	})
+
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	require.Equal(t, "search results", result.Response.Content.Text())
+}
+
+// TestAgent_Generate_ExecutableProviderTool_ImageBase64 verifies that
+// image data returned by an ExecutableProviderTool's run function is
+// base64-encoded when stored in ToolResultOutputContentMedia.Data.
+func TestAgent_Generate_ExecutableProviderTool_ImageBase64(t *testing.T) {
+	t.Parallel()
+
+	rawPNG := []byte{0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A}
+
+	execTool := NewExecutableProviderTool(
+		ProviderDefinedTool{
+			ID:   "test.computer",
+			Name: "computer",
+			Args: map[string]any{"display_width_px": 1920},
+		},
+		func(ctx context.Context, call ToolCall) (ToolResponse, error) {
+			return NewImageResponse(rawPNG, "image/png"), nil
+		},
+	)
+
+	callCount := 0
+	model := &mockLanguageModel{
+		generateFunc: func(ctx context.Context, call Call) (*Response, error) {
+			callCount++
+			if callCount == 1 {
+				return &Response{
+					Content: []Content{
+						ToolCallContent{
+							ToolCallID: "call-1",
+							ToolName:   "computer",
+							Input:      `{"action":"screenshot"}`,
+						},
+					},
+					Usage:        Usage{TotalTokens: 10},
+					FinishReason: FinishReasonToolCalls,
+				}, nil
+			}
+			return &Response{
+				Content:      []Content{TextContent{Text: "done"}},
+				Usage:        Usage{TotalTokens: 5},
+				FinishReason: FinishReasonStop,
+			}, nil
+		},
+	}
+
+	agent := NewAgent(model, WithProviderDefinedTools(execTool))
+	result, err := agent.Generate(context.Background(), AgentCall{
+		Prompt: "take a screenshot",
+	})
+
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	require.Len(t, result.Steps, 2)
+
+	// The tool result in the first step must have base64-encoded data.
+	toolResults := result.Steps[0].Content.ToolResults()
+	require.Len(t, toolResults, 1)
+
+	mediaResult, ok := toolResults[0].Result.(ToolResultOutputContentMedia)
+	require.True(t, ok, "expected media result")
+	require.Equal(t, base64.StdEncoding.EncodeToString(rawPNG), mediaResult.Data)
+	require.Equal(t, "image/png", mediaResult.MediaType)
+}
+
+// TestAgent_Generate_ExecutableProviderTool_CriticalError verifies
+// that a Go error returned from an ExecutableProviderTool's run
+// function is treated as a critical error, stopping the agent loop.
+func TestAgent_Generate_ExecutableProviderTool_CriticalError(t *testing.T) {
+	t.Parallel()
+
+	execTool := NewExecutableProviderTool(
+		ProviderDefinedTool{
+			ID:   "test.computer",
+			Name: "computer",
+			Args: map[string]any{"display_width_px": 1920},
+		},
+		func(ctx context.Context, call ToolCall) (ToolResponse, error) {
+			return ToolResponse{}, fmt.Errorf("vnc connection lost")
+		},
+	)
+
+	callCount := 0
+	model := &mockLanguageModel{
+		generateFunc: func(ctx context.Context, call Call) (*Response, error) {
+			callCount++
+			return &Response{
+				Content: []Content{
+					ToolCallContent{
+						ToolCallID: "call-1",
+						ToolName:   "computer",
+						Input:      `{"action":"screenshot"}`,
+					},
+				},
+				Usage:        Usage{TotalTokens: 10},
+				FinishReason: FinishReasonToolCalls,
+			}, nil
+		},
+	}
+
+	agent := NewAgent(model, WithProviderDefinedTools(execTool), WithStopConditions(StepCountIs(5)))
+	result, err := agent.Generate(context.Background(), AgentCall{
+		Prompt: "take a screenshot",
+	})
+
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	// The model should only be called once — the critical error stops
+	// the loop before a second model call.
+	require.Equal(t, 1, callCount)
+	require.Len(t, result.Steps, 1)
 }

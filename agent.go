@@ -3,6 +3,7 @@ package fantasy
 import (
 	"cmp"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -142,9 +143,10 @@ type agentSettings struct {
 	userAgent        string
 	providerOptions  ProviderOptions
 
-	providerDefinedTools []ProviderDefinedTool
-	tools                []AgentTool
-	maxRetries           *int
+	providerDefinedTools    []ProviderDefinedTool
+	executableProviderTools []ExecutableProviderTool
+	tools                   []AgentTool
+	maxRetries              *int
 
 	model LanguageModel
 
@@ -432,13 +434,17 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 
 		preparedTools := a.prepareTools(stepTools, a.settings.providerDefinedTools, stepActiveTools, disableAllTools)
 
+		// Filter executable provider tools by activeTools at the
+		// step level, consistent with how stepTools (AgentTools)
+		// are scoped before being passed to inner functions.
+		stepExecProviderTools := a.filterExecProviderTools(stepActiveTools)
+
 		retryOptions := DefaultRetryOptions()
 		if opts.MaxRetries != nil {
 			retryOptions.MaxRetries = *opts.MaxRetries
 		}
 		retryOptions.OnRetry = opts.OnRetry
 		retry := RetryWithExponentialBackoffRespectingRetryHeaders[*Response](retryOptions)
-
 		result, err := retry(ctx, func() (*Response, error) {
 			return stepModel.Generate(ctx, Call{
 				Prompt:           stepInputMessages,
@@ -472,15 +478,14 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 					continue
 				}
 				// Validate and potentially repair the tool call
-				validatedToolCall := a.validateAndRepairToolCall(ctx, toolCall, stepTools, stepSystemPrompt, stepInputMessages, a.settings.repairToolCall)
+				validatedToolCall := a.validateAndRepairToolCall(ctx, toolCall, stepTools, stepExecProviderTools, stepSystemPrompt, stepInputMessages, a.settings.repairToolCall)
 				stepToolCalls = append(stepToolCalls, validatedToolCall)
 			}
 		}
 
-		toolResults, err := a.executeTools(ctx, stepTools, stepToolCalls, nil)
+		toolResults, err := a.executeTools(ctx, stepTools, stepExecProviderTools, stepToolCalls, nil)
 
-		// Build step content with validated tool calls and tool results.
-		// Provider-executed tool calls are kept as-is.
+		// Build step content with validated tool calls and tool results.		// Provider-executed tool calls are kept as-is.
 		stepContent := []Content{}
 		toolCallIndex := 0
 		for _, content := range result.Content {
@@ -644,7 +649,7 @@ func toResponseMessages(content []Content) []Message {
 	return messages
 }
 
-func (a *agent) executeTools(ctx context.Context, allTools []AgentTool, toolCalls []ToolCallContent, toolResultCallback func(result ToolResultContent) error) ([]ToolResultContent, error) {
+func (a *agent) executeTools(ctx context.Context, allTools []AgentTool, execProviderTools []ExecutableProviderTool, toolCalls []ToolCallContent, toolResultCallback func(result ToolResultContent) error) ([]ToolResultContent, error) {
 	if len(toolCalls) == 0 {
 		return nil, nil
 	}
@@ -655,11 +660,16 @@ func (a *agent) executeTools(ctx context.Context, allTools []AgentTool, toolCall
 		toolMap[tool.Info().Name] = tool
 	}
 
+	execProviderToolMap := make(map[string]ExecutableProviderTool, len(execProviderTools))
+	for _, ept := range execProviderTools {
+		execProviderToolMap[ept.GetName()] = ept
+	}
+
 	// Execute all tool calls sequentially in order
 	results := make([]ToolResultContent, 0, len(toolCalls))
 
 	for _, toolCall := range toolCalls {
-		result, isCriticalError := a.executeSingleTool(ctx, toolMap, toolCall, toolResultCallback)
+		result, isCriticalError := a.executeSingleTool(ctx, toolMap, execProviderToolMap, toolCall, toolResultCallback)
 		results = append(results, result)
 		if isCriticalError {
 			if errorResult, ok := result.Result.(ToolResultOutputContentError); ok && errorResult.Error != nil {
@@ -672,7 +682,7 @@ func (a *agent) executeTools(ctx context.Context, allTools []AgentTool, toolCall
 }
 
 // executeSingleTool executes a single tool and returns its result and a critical error flag.
-func (a *agent) executeSingleTool(ctx context.Context, toolMap map[string]AgentTool, toolCall ToolCallContent, toolResultCallback func(result ToolResultContent) error) (ToolResultContent, bool) {
+func (a *agent) executeSingleTool(ctx context.Context, toolMap map[string]AgentTool, execProviderToolMap map[string]ExecutableProviderTool, toolCall ToolCallContent, toolResultCallback func(result ToolResultContent) error) (ToolResultContent, bool) {
 	result := ToolResultContent{
 		ToolCallID:       toolCall.ToolCallID,
 		ToolName:         toolCall.ToolName,
@@ -690,10 +700,17 @@ func (a *agent) executeSingleTool(ctx context.Context, toolMap map[string]AgentT
 		return result, false
 	}
 
-	tool, exists := toolMap[toolCall.ToolName]
-	if !exists {
+	// Find the run function — either from a regular AgentTool or an
+	// executable provider tool.
+	var runTool func(ctx context.Context, call ToolCall) (ToolResponse, error)
+	if tool, exists := toolMap[toolCall.ToolName]; exists {
+		runTool = tool.Run
+	} else if ept, ok := execProviderToolMap[toolCall.ToolName]; ok {
+		runTool = ept.Run
+	}
+	if runTool == nil {
 		result.Result = ToolResultOutputContentError{
-			Error: errors.New("Error: Tool not found: " + toolCall.ToolName),
+			Error: errors.New("tool not found: " + toolCall.ToolName),
 		}
 		if toolResultCallback != nil {
 			_ = toolResultCallback(result)
@@ -702,7 +719,7 @@ func (a *agent) executeSingleTool(ctx context.Context, toolMap map[string]AgentT
 	}
 
 	// Execute the tool
-	toolResult, err := tool.Run(ctx, ToolCall{
+	toolResult, err := runTool(ctx, ToolCall{
 		ID:    toolCall.ToolCallID,
 		Name:  toolCall.ToolName,
 		Input: toolCall.Input,
@@ -725,7 +742,7 @@ func (a *agent) executeSingleTool(ctx context.Context, toolMap map[string]AgentT
 		}
 	} else if toolResult.Type == "image" || toolResult.Type == "media" {
 		result.Result = ToolResultOutputContentMedia{
-			Data:      string(toolResult.Data),
+			Data:      base64.StdEncoding.EncodeToString(toolResult.Data),
 			MediaType: toolResult.MediaType,
 			Text:      toolResult.Content,
 		}
@@ -834,11 +851,15 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 
 		preparedTools := a.prepareTools(stepTools, a.settings.providerDefinedTools, stepActiveTools, disableAllTools)
 
+		// Filter executable provider tools by activeTools at the
+		// step level, consistent with how stepTools (AgentTools)
+		// are scoped before being passed to inner functions.
+		stepExecProviderTools := a.filterExecProviderTools(stepActiveTools)
+
 		// Start step stream
 		if opts.OnStepStart != nil {
 			_ = opts.OnStepStart(stepNumber)
 		}
-
 		// Create streaming call
 		streamCall := Call{
 			Prompt:           stepInputMessages,
@@ -870,11 +891,10 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 			}
 
 			// Process the stream
-			result, err := a.processStepStream(ctx, stream, opts, steps, stepTools)
+			result, err := a.processStepStream(ctx, stream, opts, steps, stepTools, stepExecProviderTools)
 			if err != nil {
 				return stepExecutionResult{}, err
 			}
-
 			return result, nil
 		})
 		if err != nil {
@@ -921,6 +941,22 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 	return agentResult, nil
 }
 
+// filterExecProviderTools returns the subset of executable provider
+// tools permitted by activeTools. When activeTools is empty every
+// tool is included (no filtering).
+func (a *agent) filterExecProviderTools(activeTools []string) []ExecutableProviderTool {
+	if len(activeTools) == 0 {
+		return a.settings.executableProviderTools
+	}
+	filtered := make([]ExecutableProviderTool, 0, len(a.settings.executableProviderTools))
+	for _, ept := range a.settings.executableProviderTools {
+		if slices.Contains(activeTools, ept.GetName()) {
+			filtered = append(filtered, ept)
+		}
+	}
+	return filtered
+}
+
 func (a *agent) prepareTools(tools []AgentTool, providerDefinedTools []ProviderDefinedTool, activeTools []string, disableAllTools bool) []Tool {
 	preparedTools := make([]Tool, 0, len(tools)+len(providerDefinedTools))
 
@@ -961,8 +997,8 @@ func (a *agent) prepareTools(tools []AgentTool, providerDefinedTools []ProviderD
 }
 
 // validateAndRepairToolCall validates a tool call and attempts repair if validation fails.
-func (a *agent) validateAndRepairToolCall(ctx context.Context, toolCall ToolCallContent, availableTools []AgentTool, systemPrompt string, messages []Message, repairFunc RepairToolCallFunction) ToolCallContent {
-	if err := a.validateToolCall(toolCall, availableTools); err == nil {
+func (a *agent) validateAndRepairToolCall(ctx context.Context, toolCall ToolCallContent, availableTools []AgentTool, execProviderTools []ExecutableProviderTool, systemPrompt string, messages []Message, repairFunc RepairToolCallFunction) ToolCallContent {
+	if err := a.validateToolCall(toolCall, availableTools, execProviderTools); err == nil {
 		return toolCall
 	} else { //nolint: revive
 		if repairFunc != nil {
@@ -975,7 +1011,7 @@ func (a *agent) validateAndRepairToolCall(ctx context.Context, toolCall ToolCall
 			}
 
 			if repairedToolCall, repairErr := repairFunc(ctx, repairOptions); repairErr == nil && repairedToolCall != nil {
-				if validateErr := a.validateToolCall(*repairedToolCall, availableTools); validateErr == nil {
+				if validateErr := a.validateToolCall(*repairedToolCall, availableTools, execProviderTools); validateErr == nil {
 					return *repairedToolCall
 				}
 			}
@@ -989,7 +1025,10 @@ func (a *agent) validateAndRepairToolCall(ctx context.Context, toolCall ToolCall
 }
 
 // validateToolCall validates a tool call against available tools and their schemas.
-func (a *agent) validateToolCall(toolCall ToolCallContent, availableTools []AgentTool) error {
+// Both availableTools and execProviderTools must already be filtered by the
+// caller (e.g. via activeTools); this function trusts that the slices
+// represent exactly the tools permitted for the current step.
+func (a *agent) validateToolCall(toolCall ToolCallContent, availableTools []AgentTool, execProviderTools []ExecutableProviderTool) error {
 	var tool AgentTool
 	for _, t := range availableTools {
 		if t.Info().Name == toolCall.ToolName {
@@ -999,6 +1038,18 @@ func (a *agent) validateToolCall(toolCall ToolCallContent, availableTools []Agen
 	}
 
 	if tool == nil {
+		// Check if this is an executable provider tool. Provider-
+		// defined tools have their schema enforced server-side, so
+		// we only validate that the input is parseable JSON.
+		for _, ept := range execProviderTools {
+			if ept.GetName() == toolCall.ToolName {
+				var input map[string]any
+				if err := json.Unmarshal([]byte(toolCall.Input), &input); err != nil {
+					return fmt.Errorf("invalid JSON input: %w", err)
+				}
+				return nil
+			}
+		}
 		return fmt.Errorf("tool not found: %s", toolCall.ToolName)
 	}
 
@@ -1117,12 +1168,25 @@ func WithTools(tools ...AgentTool) AgentOption {
 	}
 }
 
-// WithProviderDefinedTools sets the provider-defined tools for the agent.
-// These tools are executed by the provider (e.g. web search) rather
-// than by the client.
-func WithProviderDefinedTools(tools ...ProviderDefinedTool) AgentOption {
+// WithProviderDefinedTools registers provider-defined tools with the
+// agent. Provider-executed tools (e.g. web search) are passed through
+// to the API. Client-executed tools (ExecutableProviderTool) are also
+// registered for local execution.
+func WithProviderDefinedTools(tools ...ProviderTool) AgentOption {
 	return func(s *agentSettings) {
-		s.providerDefinedTools = append(s.providerDefinedTools, tools...)
+		for _, t := range tools {
+			// Every provider tool goes into providerDefinedTools
+			// for wire formatting.
+			s.providerDefinedTools = append(
+				s.providerDefinedTools, t.providerDefinedTool(),
+			)
+			// Executable ones also register for local execution.
+			if exec, ok := t.(ExecutableProviderTool); ok {
+				s.executableProviderTools = append(
+					s.executableProviderTools, exec,
+				)
+			}
+		}
 	}
 }
 
@@ -1162,7 +1226,7 @@ func WithOnRetry(callback OnRetryCallback) AgentOption {
 }
 
 // processStepStream processes a single step's stream and returns the step result.
-func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, opts AgentStreamCall, _ []StepResult, stepTools []AgentTool) (stepExecutionResult, error) {
+func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, opts AgentStreamCall, _ []StepResult, stepTools []AgentTool, execProviderTools []ExecutableProviderTool) (stepExecutionResult, error) {
 	var stepContent []Content
 	var stepToolCalls []ToolCallContent
 	var stepUsage Usage
@@ -1195,6 +1259,11 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 		toolMap[tool.Info().Name] = tool
 	}
 
+	execProviderToolMap := make(map[string]ExecutableProviderTool, len(execProviderTools))
+	for _, ept := range execProviderTools {
+		execProviderToolMap[ept.GetName()] = ept
+	}
+
 	// Semaphores for controlling parallelism
 	parallelSem := make(chan struct{}, 5)
 	var sequentialMu sync.Mutex
@@ -1206,7 +1275,7 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 				parallelSem <- struct{}{}
 				toolExecutionWg.Go(func() {
 					defer func() { <-parallelSem }()
-					result, isCriticalError := a.executeSingleTool(ctx, toolMap, req.toolCall, opts.OnToolResult)
+					result, isCriticalError := a.executeSingleTool(ctx, toolMap, execProviderToolMap, req.toolCall, opts.OnToolResult)
 					toolStateMu.Lock()
 					toolResults = append(toolResults, result)
 					if isCriticalError && toolExecutionErr == nil {
@@ -1218,7 +1287,7 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 				})
 			} else {
 				sequentialMu.Lock()
-				result, isCriticalError := a.executeSingleTool(ctx, toolMap, req.toolCall, opts.OnToolResult)
+				result, isCriticalError := a.executeSingleTool(ctx, toolMap, execProviderToolMap, req.toolCall, opts.OnToolResult)
 				toolStateMu.Lock()
 				toolResults = append(toolResults, result)
 				if isCriticalError && toolExecutionErr == nil {
@@ -1389,7 +1458,7 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 				delete(activeToolCalls, part.ID)
 			} else {
 				// Validate and potentially repair the tool call
-				validatedToolCall := a.validateAndRepairToolCall(ctx, toolCall, stepTools, a.settings.systemPrompt, nil, opts.RepairToolCall)
+				validatedToolCall := a.validateAndRepairToolCall(ctx, toolCall, stepTools, execProviderTools, a.settings.systemPrompt, nil, opts.RepairToolCall)
 				stepToolCalls = append(stepToolCalls, validatedToolCall)
 				stepContent = append(stepContent, validatedToolCall)
 

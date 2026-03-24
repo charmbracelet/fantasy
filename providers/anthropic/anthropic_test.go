@@ -8,6 +8,7 @@ import (
 	"math"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -15,6 +16,12 @@ import (
 	"github.com/charmbracelet/anthropic-sdk-go"
 	"github.com/stretchr/testify/require"
 )
+
+// noopComputerRun is a no-op run function for tests that only need
+// to inspect the tool definition, not execute it.
+var noopComputerRun = func(_ context.Context, _ fantasy.ToolCall) (fantasy.ToolResponse, error) {
+	return fantasy.ToolResponse{}, nil
+}
 
 func TestToPrompt_DropsEmptyMessages(t *testing.T) {
 	t.Parallel()
@@ -1363,4 +1370,921 @@ func TestGenerate_ToolChoiceNone(t *testing.T) {
 	toolChoice, ok := call.body["tool_choice"].(map[string]any)
 	require.True(t, ok, "request body should have tool_choice")
 	require.Equal(t, "none", toolChoice["type"], "tool_choice should be 'none'")
+}
+
+// --- Computer Use Tests ---
+
+// jsonRoundTripTool simulates a JSON round-trip on a
+// ProviderDefinedTool so that its Args map contains float64
+// values (as json.Unmarshal produces) rather than the int64
+// values that NewComputerUseTool stores directly. The
+// production toBetaTools code asserts float64.
+func jsonRoundTripTool(t *testing.T, tool fantasy.ExecutableProviderTool) fantasy.ProviderDefinedTool {
+	t.Helper()
+	pdt := tool.Definition()
+	data, err := json.Marshal(pdt.Args)
+	require.NoError(t, err)
+	var args map[string]any
+	require.NoError(t, json.Unmarshal(data, &args))
+	pdt.Args = args
+	return pdt
+}
+
+func TestNewComputerUseTool(t *testing.T) {
+	t.Parallel()
+
+	t.Run("creates tool with correct ID and name", func(t *testing.T) {
+		t.Parallel()
+		tool := NewComputerUseTool(ComputerUseToolOptions{
+			DisplayWidthPx:  1920,
+			DisplayHeightPx: 1080,
+			ToolVersion:     ComputerUse20250124,
+		}, noopComputerRun).Definition()
+		require.Equal(t, "anthropic.computer", tool.ID)
+		require.Equal(t, "computer", tool.Name)
+		require.Equal(t, int64(1920), tool.Args["display_width_px"])
+		require.Equal(t, int64(1080), tool.Args["display_height_px"])
+		require.Equal(t, string(ComputerUse20250124), tool.Args["tool_version"])
+	})
+
+	t.Run("includes optional fields when set", func(t *testing.T) {
+		t.Parallel()
+		displayNum := int64(1)
+		enableZoom := true
+		tool := NewComputerUseTool(ComputerUseToolOptions{
+			DisplayWidthPx:  1024,
+			DisplayHeightPx: 768,
+			DisplayNumber:   &displayNum,
+			EnableZoom:      &enableZoom,
+			ToolVersion:     ComputerUse20251124,
+			CacheControl:    &CacheControl{Type: "ephemeral"},
+		}, noopComputerRun).Definition()
+		require.Equal(t, int64(1), tool.Args["display_number"])
+		require.Equal(t, true, tool.Args["enable_zoom"])
+		require.NotNil(t, tool.Args["cache_control"])
+	})
+
+	t.Run("omits optional fields when nil", func(t *testing.T) {
+		t.Parallel()
+		tool := NewComputerUseTool(ComputerUseToolOptions{
+			DisplayWidthPx:  1920,
+			DisplayHeightPx: 1080,
+			ToolVersion:     ComputerUse20250124,
+		}, noopComputerRun).Definition()
+		_, hasDisplayNum := tool.Args["display_number"]
+		_, hasEnableZoom := tool.Args["enable_zoom"]
+		_, hasCacheControl := tool.Args["cache_control"]
+		require.False(t, hasDisplayNum)
+		require.False(t, hasEnableZoom)
+		require.False(t, hasCacheControl)
+	})
+}
+
+func TestIsComputerUseTool(t *testing.T) {
+	t.Parallel()
+
+	t.Run("returns true for computer use tool", func(t *testing.T) {
+		t.Parallel()
+		tool := NewComputerUseTool(ComputerUseToolOptions{
+			DisplayWidthPx:  1920,
+			DisplayHeightPx: 1080,
+			ToolVersion:     ComputerUse20250124,
+		}, noopComputerRun)
+		require.True(t, IsComputerUseTool(tool.Definition()))
+	})
+
+	t.Run("returns false for function tool", func(t *testing.T) {
+		t.Parallel()
+		tool := fantasy.FunctionTool{
+			Name:        "test",
+			Description: "test tool",
+		}
+		require.False(t, IsComputerUseTool(tool))
+	})
+
+	t.Run("returns false for other provider defined tool", func(t *testing.T) {
+		t.Parallel()
+		tool := fantasy.ProviderDefinedTool{
+			ID:   "other.tool",
+			Name: "other",
+		}
+		require.False(t, IsComputerUseTool(tool))
+	})
+}
+
+func TestNeedsBetaAPI(t *testing.T) {
+	t.Parallel()
+
+	lm := languageModel{options: options{}}
+
+	t.Run("returns false for empty tools", func(t *testing.T) {
+		t.Parallel()
+		_, _, _, betaFlags := lm.toTools(nil, nil, false)
+		require.Empty(t, betaFlags)
+		_, _, _, betaFlags = lm.toTools([]fantasy.Tool{}, nil, false)
+		require.Empty(t, betaFlags)
+	})
+
+	t.Run("returns false for only function tools", func(t *testing.T) {
+		t.Parallel()
+		tools := []fantasy.Tool{
+			fantasy.FunctionTool{Name: "test"},
+		}
+		_, _, _, betaFlags := lm.toTools(tools, nil, false)
+		require.Empty(t, betaFlags)
+	})
+
+	t.Run("returns beta flags when computer use tool present", func(t *testing.T) {
+		t.Parallel()
+		cuTool := jsonRoundTripTool(t, NewComputerUseTool(ComputerUseToolOptions{
+			DisplayWidthPx:  1920,
+			DisplayHeightPx: 1080,
+			ToolVersion:     ComputerUse20250124,
+		}, noopComputerRun))
+		tools := []fantasy.Tool{
+			fantasy.FunctionTool{Name: "test"},
+			cuTool,
+		}
+		_, _, _, betaFlags := lm.toTools(tools, nil, false)
+		require.NotEmpty(t, betaFlags)
+	})
+}
+
+func TestComputerUseToolJSON(t *testing.T) {
+	t.Parallel()
+
+	t.Run("builds JSON for version 20250124", func(t *testing.T) {
+		t.Parallel()
+		cuTool := jsonRoundTripTool(t, NewComputerUseTool(ComputerUseToolOptions{
+			DisplayWidthPx:  1920,
+			DisplayHeightPx: 1080,
+			ToolVersion:     ComputerUse20250124,
+		}, noopComputerRun))
+		data, err := computerUseToolJSON(cuTool)
+		require.NoError(t, err)
+		var m map[string]any
+		require.NoError(t, json.Unmarshal(data, &m))
+		require.Equal(t, "computer_20250124", m["type"])
+		require.Equal(t, "computer", m["name"])
+		require.InDelta(t, 1920, m["display_width_px"], 0)
+		require.InDelta(t, 1080, m["display_height_px"], 0)
+	})
+
+	t.Run("builds JSON for version 20251124 with enable_zoom", func(t *testing.T) {
+		t.Parallel()
+		enableZoom := true
+		cuTool := jsonRoundTripTool(t, NewComputerUseTool(ComputerUseToolOptions{
+			DisplayWidthPx:  1024,
+			DisplayHeightPx: 768,
+			EnableZoom:      &enableZoom,
+			ToolVersion:     ComputerUse20251124,
+		}, noopComputerRun))
+		data, err := computerUseToolJSON(cuTool)
+		require.NoError(t, err)
+		var m map[string]any
+		require.NoError(t, json.Unmarshal(data, &m))
+		require.Equal(t, "computer_20251124", m["type"])
+		require.Equal(t, true, m["enable_zoom"])
+	})
+
+	t.Run("handles int64 args without JSON round-trip", func(t *testing.T) {
+		t.Parallel()
+		// Direct construction stores int64 values.
+		cuTool := NewComputerUseTool(ComputerUseToolOptions{
+			DisplayWidthPx:  1920,
+			DisplayHeightPx: 1080,
+			ToolVersion:     ComputerUse20250124,
+		}, noopComputerRun)
+		data, err := computerUseToolJSON(cuTool.Definition())
+		require.NoError(t, err)
+		var m map[string]any
+		require.NoError(t, json.Unmarshal(data, &m))
+		require.InDelta(t, 1920, m["display_width_px"], 0)
+	})
+
+	t.Run("returns error when version is missing", func(t *testing.T) {
+		t.Parallel()
+		pdt := fantasy.ProviderDefinedTool{
+			ID:   "anthropic.computer",
+			Name: "computer",
+			Args: map[string]any{
+				"display_width_px":  float64(1920),
+				"display_height_px": float64(1080),
+			},
+		}
+		_, err := computerUseToolJSON(pdt)
+		require.Error(t, err)
+			require.Contains(t, err.Error(), "tool_version arg is missing")	})
+
+	t.Run("returns error for unsupported version", func(t *testing.T) {
+		t.Parallel()
+		pdt := fantasy.ProviderDefinedTool{
+			ID:   "anthropic.computer",
+			Name: "computer",
+			Args: map[string]any{
+				"display_width_px":  float64(1920),
+				"display_height_px": float64(1080),
+				"tool_version":      "computer_99991231",
+			},
+		}
+		_, err := computerUseToolJSON(pdt)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "unsupported")
+	})
+}
+
+func TestParseComputerUseInput_CoordinateValidation(t *testing.T) {
+	t.Parallel()
+
+	t.Run("rejects coordinate with 1 element", func(t *testing.T) {
+		t.Parallel()
+		_, err := ParseComputerUseInput(`{"action":"left_click","coordinate":[100]}`)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "coordinate")
+	})
+
+	t.Run("rejects coordinate with 3 elements", func(t *testing.T) {
+		t.Parallel()
+		_, err := ParseComputerUseInput(`{"action":"left_click","coordinate":[100,200,300]}`)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "coordinate")
+	})
+
+	t.Run("rejects start_coordinate with 1 element", func(t *testing.T) {
+		t.Parallel()
+		_, err := ParseComputerUseInput(`{"action":"left_click_drag","coordinate":[100,200],"start_coordinate":[50]}`)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "start_coordinate")
+	})
+
+	t.Run("rejects region with 3 elements", func(t *testing.T) {
+		t.Parallel()
+		_, err := ParseComputerUseInput(`{"action":"zoom","region":[10,20,30]}`)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "region")
+	})
+
+	t.Run("accepts valid coordinate", func(t *testing.T) {
+		t.Parallel()
+		result, err := ParseComputerUseInput(`{"action":"left_click","coordinate":[100,200]}`)
+		require.NoError(t, err)
+		require.Equal(t, [2]int64{100, 200}, result.Coordinate)
+	})
+
+	t.Run("accepts absent optional arrays", func(t *testing.T) {
+		t.Parallel()
+		result, err := ParseComputerUseInput(`{"action":"screenshot"}`)
+		require.NoError(t, err)
+		require.Equal(t, ActionScreenshot, result.Action)
+	})
+}
+
+func TestToTools_RawJSON(t *testing.T) {
+	t.Parallel()
+
+	lm := languageModel{options: options{}}
+
+	cuTool := jsonRoundTripTool(t, NewComputerUseTool(ComputerUseToolOptions{
+		DisplayWidthPx:  1920,
+		DisplayHeightPx: 1080,
+		ToolVersion:     ComputerUse20250124,
+	}, noopComputerRun))
+
+	tools := []fantasy.Tool{
+		fantasy.FunctionTool{
+			Name:        "weather",
+			Description: "Get weather",
+			InputSchema: map[string]any{
+				"properties": map[string]any{
+					"location": map[string]any{"type": "string"},
+				},
+				"required": []string{"location"},
+			},
+		},
+		WebSearchTool(nil),
+		cuTool,
+	}
+
+	rawTools, toolChoice, warnings, betaFlags := lm.toTools(tools, nil, false)
+
+	require.Len(t, rawTools, 3)
+	require.Nil(t, toolChoice)
+	require.Empty(t, warnings)
+	require.NotEmpty(t, betaFlags)
+
+	// Verify each raw tool is valid JSON.
+	for i, raw := range rawTools {
+		var m map[string]any
+		require.NoError(t, json.Unmarshal(raw, &m), "tool %d should be valid JSON", i)
+	}
+
+	// Check function tool.
+	var funcTool map[string]any
+	require.NoError(t, json.Unmarshal(rawTools[0], &funcTool))
+	require.Equal(t, "weather", funcTool["name"])
+
+	// Check web search tool.
+	var webTool map[string]any
+	require.NoError(t, json.Unmarshal(rawTools[1], &webTool))
+	require.Equal(t, "web_search_20250305", webTool["type"])
+
+	// Check computer use tool.
+	var cuToolJSON map[string]any
+	require.NoError(t, json.Unmarshal(rawTools[2], &cuToolJSON))
+	require.Equal(t, "computer_20250124", cuToolJSON["type"])
+	require.Equal(t, "computer", cuToolJSON["name"])
+}
+
+func TestGenerate_BetaAPI(t *testing.T) {
+	t.Parallel()
+
+	t.Run("sends beta header for computer use", func(t *testing.T) {
+		t.Parallel()
+
+		var capturedHeaders http.Header
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			capturedHeaders = r.Header.Clone()
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(mockAnthropicGenerateResponse())
+		}))
+		defer server.Close()
+
+		provider, err := New(
+			WithAPIKey("test-api-key"),
+			WithBaseURL(server.URL),
+		)
+		require.NoError(t, err)
+
+		model, err := provider.LanguageModel(context.Background(), "claude-sonnet-4-20250514")
+		require.NoError(t, err)
+
+		cuTool := jsonRoundTripTool(t, NewComputerUseTool(ComputerUseToolOptions{
+			DisplayWidthPx:  1920,
+			DisplayHeightPx: 1080,
+			ToolVersion:     ComputerUse20250124,
+		}, noopComputerRun))
+
+		_, err = model.Generate(context.Background(), fantasy.Call{
+			Prompt: testPrompt(),
+			Tools:  []fantasy.Tool{cuTool},
+		})
+		require.NoError(t, err)
+		require.Contains(t, capturedHeaders.Get("Anthropic-Beta"), "computer-use-2025-01-24")
+	})
+
+	t.Run("sends beta header for computer use 20251124", func(t *testing.T) {
+		t.Parallel()
+
+		var capturedHeaders http.Header
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			capturedHeaders = r.Header.Clone()
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(mockAnthropicGenerateResponse())
+		}))
+		defer server.Close()
+
+		provider, err := New(
+			WithAPIKey("test-api-key"),
+			WithBaseURL(server.URL),
+		)
+		require.NoError(t, err)
+
+		model, err := provider.LanguageModel(context.Background(), "claude-sonnet-4-20250514")
+		require.NoError(t, err)
+
+		cuTool := jsonRoundTripTool(t, NewComputerUseTool(ComputerUseToolOptions{
+			DisplayWidthPx:  1920,
+			DisplayHeightPx: 1080,
+			ToolVersion:     ComputerUse20251124,
+		}, noopComputerRun))
+
+		_, err = model.Generate(context.Background(), fantasy.Call{
+			Prompt: testPrompt(),
+			Tools:  []fantasy.Tool{cuTool},
+		})
+		require.NoError(t, err)
+		require.Contains(t, capturedHeaders.Get("Anthropic-Beta"), "computer-use-2025-11-24")
+	})
+
+	t.Run("returns tool use from beta response", func(t *testing.T) {
+		t.Parallel()
+
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(map[string]any{
+				"id":    "msg_01Test",
+				"type":  "message",
+				"role":  "assistant",
+				"model": "claude-sonnet-4-20250514",
+				"content": []any{
+					map[string]any{
+						"type":  "tool_use",
+						"id":    "toolu_01",
+						"name":  "computer",
+						"input": map[string]any{"action": "screenshot"},
+					},
+				},
+				"stop_reason": "tool_use",
+				"usage": map[string]any{
+					"input_tokens":  10,
+					"output_tokens": 5,
+					"cache_creation": map[string]any{
+						"ephemeral_1h_input_tokens": 0,
+						"ephemeral_5m_input_tokens": 0,
+					},
+					"cache_creation_input_tokens": 0,
+					"cache_read_input_tokens":     0,
+					"server_tool_use": map[string]any{
+						"web_search_requests": 0,
+					},
+					"service_tier": "standard",
+				},
+			})
+		}))
+		defer server.Close()
+
+		provider, err := New(
+			WithAPIKey("test-api-key"),
+			WithBaseURL(server.URL),
+		)
+		require.NoError(t, err)
+
+		model, err := provider.LanguageModel(context.Background(), "claude-sonnet-4-20250514")
+		require.NoError(t, err)
+
+		cuTool := jsonRoundTripTool(t, NewComputerUseTool(ComputerUseToolOptions{
+			DisplayWidthPx:  1920,
+			DisplayHeightPx: 1080,
+			ToolVersion:     ComputerUse20250124,
+		}, noopComputerRun))
+
+		resp, err := model.Generate(context.Background(), fantasy.Call{
+			Prompt: testPrompt(),
+			Tools:  []fantasy.Tool{cuTool},
+		})
+		require.NoError(t, err)
+
+		toolCalls := resp.Content.ToolCalls()
+		require.Len(t, toolCalls, 1)
+		require.Equal(t, "computer", toolCalls[0].ToolName)
+		require.Equal(t, "toolu_01", toolCalls[0].ToolCallID)
+		require.Contains(t, toolCalls[0].Input, "screenshot")
+		require.Equal(t, fantasy.FinishReasonToolCalls, resp.FinishReason)
+
+		// Verify typed parsing works on the tool call input.
+		parsed, err := ParseComputerUseInput(toolCalls[0].Input)
+		require.NoError(t, err)
+		require.Equal(t, ActionScreenshot, parsed.Action)
+	})
+}
+
+func TestStream_BetaAPI(t *testing.T) {
+	t.Parallel()
+
+	t.Run("streams via beta API for computer use", func(t *testing.T) {
+		t.Parallel()
+
+		var capturedHeaders http.Header
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			capturedHeaders = r.Header.Clone()
+			w.Header().Set("Content-Type", "text/event-stream")
+			w.Header().Set("Cache-Control", "no-cache")
+			w.WriteHeader(http.StatusOK)
+			chunks := []string{
+				"event: message_start\n",
+				"data: {\"type\":\"message_start\",\"message\":{}}\n\n",
+				"event: message_stop\n",
+				"data: {\"type\":\"message_stop\"}\n\n",
+			}
+			for _, chunk := range chunks {
+				_, _ = fmt.Fprint(w, chunk)
+				if flusher, ok := w.(http.Flusher); ok {
+					flusher.Flush()
+				}
+			}
+		}))
+		defer server.Close()
+
+		provider, err := New(
+			WithAPIKey("test-api-key"),
+			WithBaseURL(server.URL),
+		)
+		require.NoError(t, err)
+
+		model, err := provider.LanguageModel(context.Background(), "claude-sonnet-4-20250514")
+		require.NoError(t, err)
+
+		cuTool := jsonRoundTripTool(t, NewComputerUseTool(ComputerUseToolOptions{
+			DisplayWidthPx:  1920,
+			DisplayHeightPx: 1080,
+			ToolVersion:     ComputerUse20250124,
+		}, noopComputerRun))
+
+		stream, err := model.Stream(context.Background(), fantasy.Call{
+			Prompt: testPrompt(),
+			Tools:  []fantasy.Tool{cuTool},
+		})
+		require.NoError(t, err)
+
+		stream(func(fantasy.StreamPart) bool { return true })
+
+		require.Contains(t, capturedHeaders.Get("Anthropic-Beta"), "computer-use-2025-01-24")
+	})
+
+	t.Run("streams via beta API for computer use 20251124", func(t *testing.T) {
+		t.Parallel()
+
+		var capturedHeaders http.Header
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			capturedHeaders = r.Header.Clone()
+			w.Header().Set("Content-Type", "text/event-stream")
+			w.Header().Set("Cache-Control", "no-cache")
+			w.WriteHeader(http.StatusOK)
+			chunks := []string{
+				"event: message_start\n",
+				"data: {\"type\":\"message_start\",\"message\":{}}\n\n",
+				"event: message_stop\n",
+				"data: {\"type\":\"message_stop\"}\n\n",
+			}
+			for _, chunk := range chunks {
+				_, _ = fmt.Fprint(w, chunk)
+				if flusher, ok := w.(http.Flusher); ok {
+					flusher.Flush()
+				}
+			}
+		}))
+		defer server.Close()
+
+		provider, err := New(
+			WithAPIKey("test-api-key"),
+			WithBaseURL(server.URL),
+		)
+		require.NoError(t, err)
+
+		model, err := provider.LanguageModel(context.Background(), "claude-sonnet-4-20250514")
+		require.NoError(t, err)
+
+		cuTool := jsonRoundTripTool(t, NewComputerUseTool(ComputerUseToolOptions{
+			DisplayWidthPx:  1920,
+			DisplayHeightPx: 1080,
+			ToolVersion:     ComputerUse20251124,
+		}, noopComputerRun))
+
+		stream, err := model.Stream(context.Background(), fantasy.Call{
+			Prompt: testPrompt(),
+			Tools:  []fantasy.Tool{cuTool},
+		})
+		require.NoError(t, err)
+
+		stream(func(fantasy.StreamPart) bool { return true })
+
+		require.Contains(t, capturedHeaders.Get("Anthropic-Beta"), "computer-use-2025-11-24")
+	})
+}
+
+// TestGenerate_ComputerUseTool runs a multi-turn computer use session
+// via model.Generate, passing the ExecutableProviderTool directly into
+// Call.Tools (no .Definition(), no jsonRoundTripTool). The mock server
+// walks through a scripted sequence of actions — screenshot, click,
+// type, key, scroll — then finishes with a text reply. Each turn the
+// test parses the tool call, builds a screenshot result, and appends
+// both to the prompt for the next request.
+func TestGenerate_ComputerUseTool(t *testing.T) {
+	t.Parallel()
+
+	type actionStep struct {
+		input map[string]any
+		want  ComputerUseInput
+	}
+	steps := []actionStep{
+		{
+			input: map[string]any{"action": "screenshot"},
+			want:  ComputerUseInput{Action: ActionScreenshot},
+		},
+		{
+			input: map[string]any{"action": "left_click", "coordinate": []any{100, 200}},
+			want:  ComputerUseInput{Action: ActionLeftClick, Coordinate: [2]int64{100, 200}},
+		},
+		{
+			input: map[string]any{"action": "type", "text": "hello world"},
+			want:  ComputerUseInput{Action: ActionType, Text: "hello world"},
+		},
+		{
+			input: map[string]any{"action": "key", "text": "Return"},
+			want:  ComputerUseInput{Action: ActionKey, Text: "Return"},
+		},
+		{
+			input: map[string]any{
+				"action":           "scroll",
+				"coordinate":       []any{500, 300},
+				"scroll_direction": "down",
+				"scroll_amount":    3,
+			},
+			want: ComputerUseInput{
+				Action:          ActionScroll,
+				Coordinate:      [2]int64{500, 300},
+				ScrollDirection: "down",
+				ScrollAmount:    3,
+			},
+		},
+		{
+			input: map[string]any{"action": "screenshot"},
+			want:  ComputerUseInput{Action: ActionScreenshot},
+		},
+	}
+
+	var (
+		requestIdx  int
+		betaHeaders []string
+	)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		betaHeaders = append(betaHeaders, r.Header.Get("Anthropic-Beta"))
+		idx := requestIdx
+		requestIdx++
+
+		w.Header().Set("Content-Type", "application/json")
+		if idx < len(steps) {
+			_ = json.NewEncoder(w).Encode(map[string]any{
+				"id":    fmt.Sprintf("msg_%02d", idx),
+				"type":  "message",
+				"role":  "assistant",
+				"model": "claude-sonnet-4-20250514",
+				"content": []any{map[string]any{
+					"type":  "tool_use",
+					"id":    fmt.Sprintf("toolu_%02d", idx),
+					"name":  "computer",
+					"input": steps[idx].input,
+				}},
+				"stop_reason": "tool_use",
+				"usage":       map[string]any{"input_tokens": 10, "output_tokens": 5},
+			})
+			return
+		}
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"id":    "msg_final",
+			"type":  "message",
+			"role":  "assistant",
+			"model": "claude-sonnet-4-20250514",
+			"content": []any{map[string]any{
+				"type": "text",
+				"text": "Done! I have completed all the requested actions.",
+			}},
+			"stop_reason": "end_turn",
+			"usage":       map[string]any{"input_tokens": 10, "output_tokens": 15},
+		})
+	}))
+	defer server.Close()
+
+	provider, err := New(WithAPIKey("test-api-key"), WithBaseURL(server.URL))
+	require.NoError(t, err)
+
+	model, err := provider.LanguageModel(context.Background(), "claude-sonnet-4-20250514")
+	require.NoError(t, err)
+
+	// Pass the ExecutableProviderTool directly — the whole point is
+	// to verify that the Tool interface works without unwrapping.
+	cuTool := NewComputerUseTool(ComputerUseToolOptions{
+		DisplayWidthPx:  1920,
+		DisplayHeightPx: 1080,
+		ToolVersion:     ComputerUse20250124,
+	}, noopComputerRun)
+
+	var got []ComputerUseInput
+	prompt := testPrompt()
+	fakePNG := []byte("fake-screenshot-png")
+
+	for turn := 0; turn <= len(steps); turn++ {
+		resp, err := model.Generate(context.Background(), fantasy.Call{
+			Prompt: prompt,
+			Tools:  []fantasy.Tool{cuTool},
+		})
+		require.NoError(t, err, "turn %d", turn)
+
+		if resp.FinishReason != fantasy.FinishReasonToolCalls {
+			require.Equal(t, fantasy.FinishReasonStop, resp.FinishReason)
+			require.Contains(t, resp.Content.Text(), "Done")
+			break
+		}
+
+		toolCalls := resp.Content.ToolCalls()
+		require.Len(t, toolCalls, 1, "turn %d", turn)
+		require.Equal(t, "computer", toolCalls[0].ToolName, "turn %d", turn)
+
+		parsed, err := ParseComputerUseInput(toolCalls[0].Input)
+		require.NoError(t, err, "turn %d", turn)
+		got = append(got, parsed)
+
+		// Build the next prompt: append the assistant tool-call turn
+		// and the user screenshot-result turn.
+		prompt = append(prompt,
+			fantasy.Message{
+				Role: fantasy.MessageRoleAssistant,
+				Content: []fantasy.MessagePart{
+					fantasy.ToolCallPart{
+						ToolCallID: toolCalls[0].ToolCallID,
+						ToolName:   toolCalls[0].ToolName,
+						Input:      toolCalls[0].Input,
+					},
+				},
+			},
+			fantasy.Message{
+				// Use MessageRoleTool for tool results — this matches
+				// what the agent loop produces.
+				Role: fantasy.MessageRoleTool,
+				Content: []fantasy.MessagePart{
+					NewComputerUseScreenshotResult(toolCalls[0].ToolCallID, fakePNG),
+				},
+			},
+		)
+	}
+
+	// Every scripted action was received and parsed correctly.
+	require.Len(t, got, len(steps))
+	for i, step := range steps {
+		require.Equal(t, step.want.Action, got[i].Action, "step %d", i)
+		require.Equal(t, step.want.Coordinate, got[i].Coordinate, "step %d", i)
+		require.Equal(t, step.want.Text, got[i].Text, "step %d", i)
+		require.Equal(t, step.want.ScrollDirection, got[i].ScrollDirection, "step %d", i)
+		require.Equal(t, step.want.ScrollAmount, got[i].ScrollAmount, "step %d", i)
+	}
+
+	// Beta header was sent on every request.
+	require.Len(t, betaHeaders, len(steps)+1)
+	for i, h := range betaHeaders {
+		require.Contains(t, h, "computer-use-2025-01-24", "request %d", i)
+	}
+}
+
+// TestStream_ComputerUseTool runs a multi-turn computer use session
+// via model.Stream, verifying that the ExecutableProviderTool works
+// through the streaming path end-to-end.
+func TestStream_ComputerUseTool(t *testing.T) {
+	t.Parallel()
+
+	type streamStep struct {
+		input      map[string]any
+		wantAction ComputerAction
+	}
+	steps := []streamStep{
+		{input: map[string]any{"action": "screenshot"}, wantAction: ActionScreenshot},
+		{input: map[string]any{"action": "left_click", "coordinate": []any{150, 250}}, wantAction: ActionLeftClick},
+		{input: map[string]any{"action": "type", "text": "search query"}, wantAction: ActionType},
+	}
+
+	var (
+		requestIdx  int
+		betaHeaders []string
+	)
+
+	// streamToolUseChunks returns SSE chunks for a single
+	// computer-use tool_use content block.
+	streamToolUseChunks := func(id string, input map[string]any) []string {
+		inputJSON, _ := json.Marshal(input)
+		escaped := strings.ReplaceAll(string(inputJSON), `"`, `\"`)
+		return []string{
+			"event: message_start\n",
+			`data: {"type":"message_start","message":{"id":"` + id + `","type":"message","role":"assistant","content":[],"model":"claude-sonnet-4-20250514","stop_reason":null,"usage":{"input_tokens":10,"output_tokens":0}}}` + "\n\n",
+			"event: content_block_start\n",
+			`data: {"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"` + id + `","name":"computer","input":{}}}` + "\n\n",
+			"event: content_block_delta\n",
+			`data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"` + escaped + `"}}` + "\n\n",
+			"event: content_block_stop\n",
+			`data: {"type":"content_block_stop","index":0}` + "\n\n",
+			"event: message_delta\n",
+			`data: {"type":"message_delta","delta":{"stop_reason":"tool_use"},"usage":{"output_tokens":5}}` + "\n\n",
+			"event: message_stop\n",
+			`data: {"type":"message_stop"}` + "\n\n",
+		}
+	}
+
+	streamTextChunks := func() []string {
+		return []string{
+			"event: message_start\n",
+			`data: {"type":"message_start","message":{"id":"msg_final","type":"message","role":"assistant","content":[],"model":"claude-sonnet-4-20250514","stop_reason":null,"usage":{"input_tokens":10,"output_tokens":0}}}` + "\n\n",
+			"event: content_block_start\n",
+			`data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}` + "\n\n",
+			"event: content_block_delta\n",
+			`data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"All done."}}` + "\n\n",
+			"event: content_block_stop\n",
+			`data: {"type":"content_block_stop","index":0}` + "\n\n",
+			"event: message_delta\n",
+			`data: {"type":"message_delta","delta":{"stop_reason":"end_turn"},"usage":{"output_tokens":10}}` + "\n\n",
+			"event: message_stop\n",
+			`data: {"type":"message_stop"}` + "\n\n",
+		}
+	}
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		betaHeaders = append(betaHeaders, r.Header.Get("Anthropic-Beta"))
+		idx := requestIdx
+		requestIdx++
+
+		w.Header().Set("Content-Type", "text/event-stream")
+		w.Header().Set("Cache-Control", "no-cache")
+		w.WriteHeader(http.StatusOK)
+
+		var chunks []string
+		if idx < len(steps) {
+			chunks = streamToolUseChunks(
+				fmt.Sprintf("toolu_%02d", idx),
+				steps[idx].input,
+			)
+		} else {
+			chunks = streamTextChunks()
+		}
+		for _, chunk := range chunks {
+			_, _ = fmt.Fprint(w, chunk)
+			if f, ok := w.(http.Flusher); ok {
+				f.Flush()
+			}
+		}
+	}))
+	defer server.Close()
+
+	provider, err := New(WithAPIKey("test-api-key"), WithBaseURL(server.URL))
+	require.NoError(t, err)
+
+	model, err := provider.LanguageModel(context.Background(), "claude-sonnet-4-20250514")
+	require.NoError(t, err)
+
+	cuTool := NewComputerUseTool(ComputerUseToolOptions{
+		DisplayWidthPx:  1920,
+		DisplayHeightPx: 1080,
+		ToolVersion:     ComputerUse20250124,
+	}, noopComputerRun)
+
+	var gotActions []ComputerAction
+	prompt := testPrompt()
+	fakePNG := []byte("fake-screenshot-png")
+
+	for turn := 0; turn <= len(steps); turn++ {
+		stream, err := model.Stream(context.Background(), fantasy.Call{
+			Prompt: prompt,
+			Tools:  []fantasy.Tool{cuTool},
+		})
+		require.NoError(t, err, "turn %d", turn)
+
+		var (
+			toolCallName  string
+			toolCallID    string
+			toolCallInput string
+			finishReason  fantasy.FinishReason
+			gotText       string
+		)
+		stream(func(part fantasy.StreamPart) bool {
+			switch part.Type {
+			case fantasy.StreamPartTypeToolCall:
+				toolCallName = part.ToolCallName
+				toolCallID = part.ID
+				toolCallInput = part.ToolCallInput
+			case fantasy.StreamPartTypeFinish:
+				finishReason = part.FinishReason
+			case fantasy.StreamPartTypeTextDelta:
+				gotText += part.Delta
+			}
+			return true
+		})
+
+		if finishReason != fantasy.FinishReasonToolCalls {
+			require.Contains(t, gotText, "All done")
+			break
+		}
+
+		require.Equal(t, "computer", toolCallName, "turn %d", turn)
+
+		parsed, err := ParseComputerUseInput(toolCallInput)
+		require.NoError(t, err, "turn %d", turn)
+		gotActions = append(gotActions, parsed.Action)
+
+		prompt = append(prompt,
+			fantasy.Message{
+				Role: fantasy.MessageRoleAssistant,
+				Content: []fantasy.MessagePart{
+					fantasy.ToolCallPart{
+						ToolCallID: toolCallID,
+						ToolName:   toolCallName,
+						Input:      toolCallInput,
+					},
+				},
+			},
+			fantasy.Message{
+				// Use MessageRoleTool for tool results — this matches
+				// what the agent loop produces.
+				Role: fantasy.MessageRoleTool,
+				Content: []fantasy.MessagePart{
+					NewComputerUseScreenshotResult(toolCallID, fakePNG),
+				},
+			},
+		)
+	}
+
+	require.Len(t, gotActions, len(steps))
+	for i, step := range steps {
+		require.Equal(t, step.wantAction, gotActions[i], "step %d", i)
+	}
+
+	require.Len(t, betaHeaders, len(steps)+1)
+	for i, h := range betaHeaders {
+		require.Contains(t, h, "computer-use-2025-01-24", "request %d", i)
+	}
 }

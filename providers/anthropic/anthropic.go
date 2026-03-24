@@ -25,6 +25,37 @@ import (
 	"golang.org/x/oauth2/google"
 )
 
+// betaRequestOptions converts beta flag strings into request
+// options that enable the corresponding Anthropic beta APIs.
+func betaRequestOptions(flags []string) []option.RequestOption {
+	if len(flags) == 0 {
+		return nil
+	}
+	opts := []option.RequestOption{option.WithQuery("beta", "true")}
+	for _, flag := range flags {
+		opts = append(opts, option.WithHeaderAdd("anthropic-beta", flag))
+	}
+	return opts
+}
+
+// buildRequestOptions constructs the common request options shared
+// by Generate and Stream: user-agent, raw tool injection, and any
+// beta API flags.
+func buildRequestOptions(call fantasy.Call, rawTools []json.RawMessage, betaFlags []string) []option.RequestOption {
+	reqOpts := callUARequestOptions(call)
+	if len(rawTools) > 0 {
+		// Tools are injected as raw JSON rather than via params.Tools
+		// because the SDK doesn't model beta tool types (e.g. computer
+		// use). If the SDK adds validation that reads params.Tools,
+		// this will need updating.
+		reqOpts = append(reqOpts, option.WithJSONSet("tools", rawTools))
+	}
+	if len(betaFlags) > 0 {
+		reqOpts = append(reqOpts, betaRequestOptions(betaFlags)...)
+	}
+	return reqOpts
+}
+
 const (
 	// Name is the name of the Anthropic provider.
 	Name = "anthropic"
@@ -236,13 +267,19 @@ func (a languageModel) Provider() string {
 	return a.provider
 }
 
-func (a languageModel) prepareParams(call fantasy.Call) (*anthropic.MessageNewParams, []fantasy.CallWarning, error) {
-	params := &anthropic.MessageNewParams{}
+func (a languageModel) prepareParams(call fantasy.Call) (
+	params *anthropic.MessageNewParams,
+	rawTools []json.RawMessage,
+	warnings []fantasy.CallWarning,
+	betaFlags []string,
+	err error,
+) {
+	params = &anthropic.MessageNewParams{}
 	providerOptions := &ProviderOptions{}
 	if v, ok := call.ProviderOptions[Name]; ok {
 		providerOptions, ok = v.(*ProviderOptions)
 		if !ok {
-			return nil, nil, &fantasy.Error{Title: "invalid argument", Message: "anthropic provider options should be *anthropic.ProviderOptions"}
+			return nil, nil, nil, nil, &fantasy.Error{Title: "invalid argument", Message: "anthropic provider options should be *anthropic.ProviderOptions"}
 		}
 	}
 	sendReasoning := true
@@ -293,7 +330,7 @@ func (a languageModel) prepareParams(call fantasy.Call) (*anthropic.MessageNewPa
 		params.Thinking.OfAdaptive = &adaptive
 	case providerOptions.Thinking != nil:
 		if providerOptions.Thinking.BudgetTokens == 0 {
-			return nil, nil, &fantasy.Error{Title: "no budget", Message: "thinking requires budget"}
+			return nil, nil, nil, nil, &fantasy.Error{Title: "no budget", Message: "thinking requires budget"}
 		}
 		params.Thinking = anthropic.ThinkingConfigParamOfEnabled(providerOptions.Thinking.BudgetTokens)
 		if call.Temperature != nil {
@@ -327,15 +364,16 @@ func (a languageModel) prepareParams(call fantasy.Call) (*anthropic.MessageNewPa
 		if providerOptions.DisableParallelToolUse != nil {
 			disableParallelToolUse = *providerOptions.DisableParallelToolUse
 		}
-		tools, toolChoice, toolWarnings := a.toTools(call.Tools, call.ToolChoice, disableParallelToolUse)
-		params.Tools = tools
+		var toolChoice *anthropic.ToolChoiceUnionParam
+		var toolWarnings []fantasy.CallWarning
+		rawTools, toolChoice, toolWarnings, betaFlags = a.toTools(call.Tools, call.ToolChoice, disableParallelToolUse)
 		if toolChoice != nil {
 			params.ToolChoice = *toolChoice
 		}
 		warnings = append(warnings, toolWarnings...)
 	}
 
-	return params, warnings, nil
+	return params, rawTools, warnings, betaFlags, nil
 }
 
 func (a *provider) Name() string {
@@ -447,6 +485,19 @@ func anyToStringSlice(v any) []string {
 
 const maxExactIntFloat64 = float64(1<<53 - 1)
 
+// asProviderDefinedTool extracts the ProviderDefinedTool from a
+// Tool, handling both ProviderDefinedTool and
+// ExecutableProviderTool.
+func asProviderDefinedTool(tool fantasy.Tool) (fantasy.ProviderDefinedTool, bool) {
+	if pdt, ok := tool.(fantasy.ProviderDefinedTool); ok {
+		return pdt, true
+	}
+	if ept, ok := tool.(fantasy.ExecutableProviderTool); ok {
+		return ept.Definition(), true
+	}
+	return fantasy.ProviderDefinedTool{}, false
+}
+
 func anyToInt64(v any) (int64, bool) {
 	switch typed := v.(type) {
 	case int:
@@ -528,7 +579,7 @@ func anyToUserLocation(v any) *UserLocation {
 	}
 }
 
-func (a languageModel) toTools(tools []fantasy.Tool, toolChoice *fantasy.ToolChoice, disableParallelToolCalls bool) (anthropicTools []anthropic.ToolUnionParam, anthropicToolChoice *anthropic.ToolChoiceUnionParam, warnings []fantasy.CallWarning) {
+func (a languageModel) toTools(tools []fantasy.Tool, toolChoice *fantasy.ToolChoice, disableParallelToolCalls bool) (rawTools []json.RawMessage, anthropicToolChoice *anthropic.ToolChoiceUnionParam, warnings []fantasy.CallWarning, betaFlags []string) {
 	for _, tool := range tools {
 		if tool.GetType() == fantasy.ToolTypeFunction {
 			ft, ok := tool.(fantasy.FunctionTool)
@@ -558,11 +609,20 @@ func (a languageModel) toTools(tools []fantasy.Tool, toolChoice *fantasy.ToolCho
 			if cacheControl != nil {
 				anthropicTool.CacheControl = anthropic.NewCacheControlEphemeralParam()
 			}
-			anthropicTools = append(anthropicTools, anthropic.ToolUnionParam{OfTool: &anthropicTool})
+			raw, err := json.Marshal(anthropic.ToolUnionParam{OfTool: &anthropicTool})
+			if err != nil {
+				warnings = append(warnings, fantasy.CallWarning{
+					Type:    fantasy.CallWarningTypeOther,
+					Tool:    tool,
+					Message: fmt.Sprintf("failed to marshal function tool: %v", err),
+				})
+				continue
+			}
+			rawTools = append(rawTools, raw)
 			continue
 		}
 		if tool.GetType() == fantasy.ToolTypeProviderDefined {
-			pt, ok := tool.(fantasy.ProviderDefinedTool)
+			pt, ok := asProviderDefinedTool(tool)
 			if !ok {
 				continue
 			}
@@ -596,11 +656,52 @@ func (a languageModel) toTools(tools []fantasy.Tool, toolChoice *fantasy.ToolCho
 						webSearchTool.UserLocation = ulp
 					}
 				}
-				anthropicTools = append(anthropicTools, anthropic.ToolUnionParam{
+				raw, err := json.Marshal(anthropic.ToolUnionParam{
 					OfWebSearchTool20250305: &webSearchTool,
 				})
+				if err != nil {
+					warnings = append(warnings, fantasy.CallWarning{
+						Type:    fantasy.CallWarningTypeOther,
+						Tool:    tool,
+						Message: fmt.Sprintf("failed to marshal web search tool: %v", err),
+					})
+					continue
+				}
+				rawTools = append(rawTools, raw)
 				continue
 			}
+			if IsComputerUseTool(tool) {
+				raw, err := computerUseToolJSON(pt)
+				if err != nil {
+					warnings = append(warnings, fantasy.CallWarning{
+						Type:    fantasy.CallWarningTypeOther,
+						Tool:    tool,
+						Message: fmt.Sprintf("failed to build computer use tool: %v", err),
+					})
+					continue
+				}
+				version, ok := getComputerUseVersion(pt)
+				if ok {
+					flag, err := computerUseBetaFlag(version)
+					if err != nil {
+						warnings = append(warnings, fantasy.CallWarning{
+							Type:    fantasy.CallWarningTypeOther,
+							Tool:    tool,
+							Message: fmt.Sprintf("unsupported computer use version: %v", err),
+						})
+						continue
+					}
+					betaFlags = append(betaFlags, flag)
+				}
+				rawTools = append(rawTools, raw)
+				continue
+			}
+			warnings = append(warnings, fantasy.CallWarning{
+				Type:    fantasy.CallWarningTypeUnsupportedTool,
+				Tool:    tool,
+				Message: "tool is not supported",
+			})
+			continue
 		}
 		warnings = append(warnings, fantasy.CallWarning{
 			Type:    fantasy.CallWarningTypeUnsupportedTool,
@@ -624,7 +725,7 @@ func (a languageModel) toTools(tools []fantasy.Tool, toolChoice *fantasy.ToolCho
 				},
 			}
 		}
-		return anthropicTools, anthropicToolChoice, warnings
+		return rawTools, anthropicToolChoice, warnings, betaFlags
 	}
 
 	switch *toolChoice {
@@ -656,7 +757,7 @@ func (a languageModel) toTools(tools []fantasy.Tool, toolChoice *fantasy.ToolCho
 			},
 		}
 	}
-	return anthropicTools, anthropicToolChoice, warnings
+	return rawTools, anthropicToolChoice, warnings, betaFlags
 }
 
 func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBlockParam, []anthropic.MessageParam, []fantasy.CallWarning) {
@@ -1005,11 +1106,13 @@ func mapFinishReason(finishReason string) fantasy.FinishReason {
 
 // Generate implements fantasy.LanguageModel.
 func (a languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantasy.Response, error) {
-	params, warnings, err := a.prepareParams(call)
+	params, rawTools, warnings, betaFlags, err := a.prepareParams(call)
 	if err != nil {
 		return nil, err
 	}
-	response, err := a.client.Messages.New(ctx, *params, callUARequestOptions(call)...)
+	reqOpts := buildRequestOptions(call, rawTools, betaFlags)
+
+	response, err := a.client.Messages.New(ctx, *params, reqOpts...)
 	if err != nil {
 		return nil, toProviderErr(err)
 	}
@@ -1132,12 +1235,14 @@ func (a languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantas
 
 // Stream implements fantasy.LanguageModel.
 func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.StreamResponse, error) {
-	params, warnings, err := a.prepareParams(call)
+	params, rawTools, warnings, betaFlags, err := a.prepareParams(call)
 	if err != nil {
 		return nil, err
 	}
 
-	stream := a.client.Messages.NewStreaming(ctx, *params, callUARequestOptions(call)...)
+	reqOpts := buildRequestOptions(call, rawTools, betaFlags)
+
+	stream := a.client.Messages.NewStreaming(ctx, *params, reqOpts...)
 	acc := anthropic.Message{}
 	return func(yield func(fantasy.StreamPart) bool) {
 		if len(warnings) > 0 {

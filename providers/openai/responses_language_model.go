@@ -1087,6 +1087,43 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 					return
 				}
 
+			case "response.output_text.annotation.added":
+				added := event.AsResponseOutputTextAnnotationAdded()
+				// The Annotation field is typed as `any` in the SDK;
+				// it deserializes as map[string]interface{} from JSON.
+				annotationMap, ok := added.Annotation.(map[string]interface{})
+				if !ok {
+					break
+				}
+				annotationType, _ := annotationMap["type"].(string)
+				switch annotationType {
+				case "url_citation":
+					url, _ := annotationMap["url"].(string)
+					title, _ := annotationMap["title"].(string)
+					if !yield(fantasy.StreamPart{
+						Type:       fantasy.StreamPartTypeSource,
+						ID:         uuid.NewString(),
+						SourceType: fantasy.SourceTypeURL,
+						URL:        url,
+						Title:      title,
+					}) {
+						return
+					}
+				case "file_citation":
+					title := "Document"
+					if fn, ok := annotationMap["filename"].(string); ok && fn != "" {
+						title = fn
+					}
+					if !yield(fantasy.StreamPart{
+						Type:       fantasy.StreamPartTypeSource,
+						ID:         uuid.NewString(),
+						SourceType: fantasy.SourceTypeDocument,
+						Title:      title,
+					}) {
+						return
+					}
+				}
+
 			case "response.reasoning_summary_part.added":
 				added := event.AsResponseReasoningSummaryPartAdded()
 				state := activeReasoning[added.ItemID]

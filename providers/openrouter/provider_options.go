@@ -11,12 +11,18 @@ import (
 type ReasoningEffort string
 
 const (
+	// ReasoningEffortNone represents ReasoningEffortNone reasoning effort.
+	ReasoningEffortNone ReasoningEffort = "none"
+	// ReasoningEffortMinimal represents minimal reasoning effort.
+	ReasoningEffortMinimal ReasoningEffort = "minimal"
 	// ReasoningEffortLow represents low reasoning effort.
 	ReasoningEffortLow ReasoningEffort = "low"
 	// ReasoningEffortMedium represents medium reasoning effort.
 	ReasoningEffortMedium ReasoningEffort = "medium"
 	// ReasoningEffortHigh represents high reasoning effort.
 	ReasoningEffortHigh ReasoningEffort = "high"
+	// ReasoningEffortXHigh represents extra high reasoning effort.
+	ReasoningEffortXHigh ReasoningEffort = "xhigh"
 )
 
 // Global type identifiers for OpenRouter-specific provider data.

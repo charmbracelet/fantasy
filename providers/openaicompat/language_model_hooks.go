@@ -27,6 +27,8 @@ func PrepareCallFunc(_ fantasy.LanguageModel, params *openaisdk.ChatCompletionNe
 
 	if providerOptions.ReasoningEffort != nil {
 		switch *providerOptions.ReasoningEffort {
+		case openai.ReasoningEffortNone:
+			params.ReasoningEffort = shared.ReasoningEffortNone
 		case openai.ReasoningEffortMinimal:
 			params.ReasoningEffort = shared.ReasoningEffortMinimal
 		case openai.ReasoningEffortLow:
@@ -35,6 +37,8 @@ func PrepareCallFunc(_ fantasy.LanguageModel, params *openaisdk.ChatCompletionNe
 			params.ReasoningEffort = shared.ReasoningEffortMedium
 		case openai.ReasoningEffortHigh:
 			params.ReasoningEffort = shared.ReasoningEffortHigh
+		case openai.ReasoningEffortXHigh:
+			params.ReasoningEffort = shared.ReasoningEffortXhigh
 		default:
 			return nil, fmt.Errorf("reasoning model `%s` not supported", *providerOptions.ReasoningEffort)
 		}

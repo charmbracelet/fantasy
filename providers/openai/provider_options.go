@@ -12,6 +12,8 @@ import (
 type ReasoningEffort string
 
 const (
+	// ReasoningEffortNone represents ReasoningEffortNone reasoning effort.
+	ReasoningEffortNone ReasoningEffort = "none"
 	// ReasoningEffortMinimal represents minimal reasoning effort.
 	ReasoningEffortMinimal ReasoningEffort = "minimal"
 	// ReasoningEffortLow represents low reasoning effort.
@@ -20,6 +22,8 @@ const (
 	ReasoningEffortMedium ReasoningEffort = "medium"
 	// ReasoningEffortHigh represents high reasoning effort.
 	ReasoningEffortHigh ReasoningEffort = "high"
+	// ReasoningEffortXHigh represents extra-high reasoning effort.
+	ReasoningEffortXHigh ReasoningEffort = "xhigh"
 )
 
 // Global type identifiers for OpenAI-specific provider data.

@@ -1090,8 +1090,8 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 			case "response.output_text.annotation.added":
 				added := event.AsResponseOutputTextAnnotationAdded()
 				// The Annotation field is typed as `any` in the SDK;
-				// it deserializes as map[string]interface{} from JSON.
-				annotationMap, ok := added.Annotation.(map[string]interface{})
+				// it deserializes as map[string]any from JSON.
+				annotationMap, ok := added.Annotation.(map[string]any)
 				if !ok {
 					break
 				}

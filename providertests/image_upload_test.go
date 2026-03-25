@@ -90,7 +90,7 @@ func TestImageUploadAgent(t *testing.T) {
 				Prompt:          "Describe the image briefly in English.",
 				Files:           []fantasy.FilePart{file},
 				ProviderOptions: pair.providerOptions,
-				MaxOutputTokens: fantasy.Opt(int64(4000)),
+				MaxOutputTokens: new(int64(4000)),
 			})
 			require.NoError(t, err)
 			got := result.Response.Content.Text()
@@ -136,7 +136,7 @@ func TestImageUploadAgentStreaming(t *testing.T) {
 				Prompt:          "Describe the image briefly in English.",
 				Files:           []fantasy.FilePart{file},
 				ProviderOptions: pair.providerOptions,
-				MaxOutputTokens: fantasy.Opt(int64(4000)),
+				MaxOutputTokens: new(int64(4000)),
 			})
 			require.NoError(t, err)
 			got := result.Response.Content.Text()

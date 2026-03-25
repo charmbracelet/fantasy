@@ -122,8 +122,8 @@ func generateSchemaRecursive(t reflect.Type, visited map[reflect.Type]bool) Sche
 			Type:       "object",
 			Properties: make(map[string]*Schema),
 		}
-		for i := range t.NumField() {
-			field := t.Field(i)
+		for field := range t.Fields() {
+			field := field
 
 			if !field.IsExported() {
 				continue

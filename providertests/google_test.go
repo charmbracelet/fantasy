@@ -41,8 +41,8 @@ func TestGoogleThinking(t *testing.T) {
 	gemini2Opts := fantasy.ProviderOptions{
 		google.Name: &google.ProviderOptions{
 			ThinkingConfig: &google.ThinkingConfig{
-				ThinkingBudget:  fantasy.Opt(int64(100)),
-				IncludeThoughts: fantasy.Opt(true),
+				ThinkingBudget:  new(int64(100)),
+				IncludeThoughts: new(true),
 			},
 		},
 	}
@@ -50,7 +50,7 @@ func TestGoogleThinking(t *testing.T) {
 		google.Name: &google.ProviderOptions{
 			ThinkingConfig: &google.ThinkingConfig{
 				ThinkingLevel:   fantasy.Opt(google.ThinkingLevelHigh),
-				IncludeThoughts: fantasy.Opt(true),
+				IncludeThoughts: new(true),
 			},
 		},
 	}

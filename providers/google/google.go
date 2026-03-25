@@ -255,7 +255,7 @@ func (g languageModel) prepareParams(call fantasy.Call) (*genai.GenerateContentC
 				Type:    fantasy.CallWarningTypeOther,
 				Message: "The 'thinking_budget' option can not be under 128 and will be set to 128 by default",
 			})
-			providerOptions.ThinkingConfig.ThinkingBudget = fantasy.Opt(int64(128))
+			providerOptions.ThinkingConfig.ThinkingBudget = new(int64(128))
 		}
 
 		if providerOptions.ThinkingConfig.ThinkingLevel != nil &&

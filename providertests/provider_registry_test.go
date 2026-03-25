@@ -20,7 +20,7 @@ func TestProviderRegistry_Serialization_OpenAIOptions(t *testing.T) {
 			fantasy.TextPart{Text: "hi"},
 		},
 		ProviderOptions: fantasy.ProviderOptions{
-			openai.Name: &openai.ProviderOptions{User: fantasy.Opt("tester")},
+			openai.Name: &openai.ProviderOptions{User: new("tester")},
 		},
 	}
 
@@ -60,8 +60,8 @@ func TestProviderRegistry_Serialization_OpenAIResponses(t *testing.T) {
 		},
 		ProviderOptions: fantasy.ProviderOptions{
 			openai.Name: &openai.ResponsesProviderOptions{
-				PromptCacheKey:    fantasy.Opt("cache-key-1"),
-				ParallelToolCalls: fantasy.Opt(true),
+				PromptCacheKey:    new("cache-key-1"),
+				ParallelToolCalls: new(true),
 			},
 		},
 	}
@@ -215,7 +215,7 @@ func TestProviderRegistry_Serialization_OpenRouterOptions(t *testing.T) {
 		ProviderOptions: fantasy.ProviderOptions{
 			openrouter.Name: &openrouter.ProviderOptions{
 				IncludeUsage: &includeUsage,
-				User:         fantasy.Opt("test-user"),
+				User:         new("test-user"),
 			},
 		},
 	}
@@ -245,7 +245,7 @@ func TestProviderRegistry_Serialization_OpenAICompatOptions(t *testing.T) {
 		},
 		ProviderOptions: fantasy.ProviderOptions{
 			openaicompat.Name: &openaicompat.ProviderOptions{
-				User:            fantasy.Opt("test-user"),
+				User:            new("test-user"),
 				ReasoningEffort: &effort,
 			},
 		},
@@ -276,7 +276,7 @@ func TestProviderRegistry_MultiProvider(t *testing.T) {
 			fantasy.TextPart{Text: "test"},
 		},
 		ProviderOptions: fantasy.ProviderOptions{
-			openai.Name: &openai.ProviderOptions{User: fantasy.Opt("user1")},
+			openai.Name: &openai.ProviderOptions{User: new("user1")},
 			anthropic.Name: &anthropic.ProviderOptions{
 				SendReasoning: &sendReasoning,
 			},

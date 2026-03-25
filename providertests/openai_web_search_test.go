@@ -47,7 +47,7 @@ func TestOpenAIWebSearch(t *testing.T) {
 
 		result, err := agent.Generate(t.Context(), fantasy.AgentCall{
 			Prompt:          "What is the current population of Tokyo? Cite your source.",
-			MaxOutputTokens: fantasy.Opt(int64(4000)),
+			MaxOutputTokens: new(int64(4000)),
 		})
 		require.NoError(t, err)
 
@@ -96,7 +96,7 @@ func TestOpenAIWebSearch(t *testing.T) {
 		// Turn 1: initial query triggers web search.
 		result, err := agent.Stream(t.Context(), fantasy.AgentStreamCall{
 			Prompt:          "What is the current population of Tokyo? Cite your source.",
-			MaxOutputTokens: fantasy.Opt(int64(4000)),
+			MaxOutputTokens: new(int64(4000)),
 		})
 		require.NoError(t, err)
 

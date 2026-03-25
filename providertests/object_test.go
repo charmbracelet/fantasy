@@ -104,7 +104,7 @@ func testSimpleObject(t *testing.T, pair builderPair) {
 			Schema:            schema,
 			SchemaName:        "Person",
 			SchemaDescription: "A person with name, age, and city",
-			MaxOutputTokens:   fantasy.Opt(int64(4000)),
+			MaxOutputTokens:   new(int64(4000)),
 			ProviderOptions:   pair.providerOptions,
 		})
 		require.NoError(t, err, "failed to generate object")
@@ -127,7 +127,7 @@ func testSimpleObject(t *testing.T, pair builderPair) {
 			Schema:            schema,
 			SchemaName:        "Person",
 			SchemaDescription: "A person with name, age, and city",
-			MaxOutputTokens:   fantasy.Opt(int64(4000)),
+			MaxOutputTokens:   new(int64(4000)),
 			ProviderOptions:   pair.providerOptions,
 		})
 		require.NoError(t, err, "failed to create object stream")
@@ -277,7 +277,7 @@ func testComplexObject(t *testing.T, pair builderPair) {
 			Schema:            schema,
 			SchemaName:        "Book",
 			SchemaDescription: "A book with title, author, genres, and publication year",
-			MaxOutputTokens:   fantasy.Opt(int64(4000)),
+			MaxOutputTokens:   new(int64(4000)),
 			ProviderOptions:   pair.providerOptions,
 		})
 		require.NoError(t, err, "failed to generate object")
@@ -300,7 +300,7 @@ func testComplexObject(t *testing.T, pair builderPair) {
 			Schema:            schema,
 			SchemaName:        "Book",
 			SchemaDescription: "A book with title, author, genres, and publication year",
-			MaxOutputTokens:   fantasy.Opt(int64(4000)),
+			MaxOutputTokens:   new(int64(4000)),
 			ProviderOptions:   pair.providerOptions,
 		})
 		require.NoError(t, err, "failed to create object stream")

@@ -4061,8 +4061,12 @@ func TestResponsesStream_WebSearchResponse(t *testing.T) {
 			`data: {"type":"response.output_item.added","output_index":1,"item":{"type":"message","id":"msg_01","role":"assistant","status":"in_progress","content":[]}}` + "\n\n",
 		"event: response.output_text.delta\n" +
 			`data: {"type":"response.output_text.delta","output_index":1,"content_index":0,"delta":"Here are the results."}` + "\n\n",
+		"event: response.output_text.annotation.added\n" +
+			`data: {"type":"response.output_text.annotation.added","annotation":{"type":"url_citation","url":"https://example.com/ai-news","title":"Latest AI News","start_index":0,"end_index":21},"annotation_index":0,"content_index":0,"item_id":"msg_01","output_index":1,"sequence_number":10}` + "\n\n",
+		"event: response.output_text.annotation.added\n" +
+			`data: {"type":"response.output_text.annotation.added","annotation":{"type":"url_citation","url":"https://example.com/more-news","title":"More AI News","start_index":22,"end_index":40},"annotation_index":1,"content_index":0,"item_id":"msg_01","output_index":1,"sequence_number":11}` + "\n\n",
 		"event: response.output_item.done\n" +
-			`data: {"type":"response.output_item.done","output_index":1,"item":{"type":"message","id":"msg_01","role":"assistant","status":"completed","content":[{"type":"output_text","text":"Here are the results.","annotations":[{"type":"url_citation","url":"https://example.com/ai-news","title":"Latest AI News","start_index":0,"end_index":21}]}]}}` + "\n\n",
+			`data: {"type":"response.output_item.done","output_index":1,"item":{"type":"message","id":"msg_01","role":"assistant","status":"completed","content":[{"type":"output_text","text":"Here are the results.","annotations":[{"type":"url_citation","url":"https://example.com/ai-news","title":"Latest AI News","start_index":0,"end_index":21},{"type":"url_citation","url":"https://example.com/more-news","title":"More AI News","start_index":22,"end_index":40}]}]}}` + "\n\n",
 		"event: response.completed\n" +
 			`data: {"type":"response.completed","response":{"id":"resp_01","status":"completed","output":[],"usage":{"input_tokens":100,"output_tokens":50,"total_tokens":150}}}` + "\n\n",
 	}
@@ -4090,6 +4094,7 @@ func TestResponsesStream_WebSearchResponse(t *testing.T) {
 		toolCalls       []fantasy.StreamPart
 		toolResults     []fantasy.StreamPart
 		textDeltas      []fantasy.StreamPart
+		sources         []fantasy.StreamPart
 		finishes        []fantasy.StreamPart
 	)
 	for _, p := range parts {
@@ -4102,6 +4107,8 @@ func TestResponsesStream_WebSearchResponse(t *testing.T) {
 			toolResults = append(toolResults, p)
 		case fantasy.StreamPartTypeTextDelta:
 			textDeltas = append(textDeltas, p)
+		case fantasy.StreamPartTypeSource:
+			sources = append(sources, p)
 		case fantasy.StreamPartTypeFinish:
 			finishes = append(finishes, p)
 		}
@@ -4122,6 +4129,16 @@ func TestResponsesStream_WebSearchResponse(t *testing.T) {
 
 	require.NotEmpty(t, textDeltas, "should have text deltas")
 	require.Equal(t, "Here are the results.", textDeltas[0].Delta)
+
+	require.Len(t, sources, 2, "should have two source citations from annotation events")
+	require.Equal(t, fantasy.SourceTypeURL, sources[0].SourceType)
+	require.Equal(t, "https://example.com/ai-news", sources[0].URL)
+	require.Equal(t, "Latest AI News", sources[0].Title)
+	require.NotEmpty(t, sources[0].ID, "source should have an ID")
+	require.Equal(t, fantasy.SourceTypeURL, sources[1].SourceType)
+	require.Equal(t, "https://example.com/more-news", sources[1].URL)
+	require.Equal(t, "More AI News", sources[1].Title)
+	require.NotEmpty(t, sources[1].ID, "source should have an ID")
 
 	require.Len(t, finishes, 1)
 	responsesMeta, ok := finishes[0].ProviderMetadata[Name].(*ResponsesProviderMetadata)

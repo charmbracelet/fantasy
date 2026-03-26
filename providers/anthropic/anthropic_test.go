@@ -1838,6 +1838,36 @@ func TestGenerate_BetaAPI(t *testing.T) {
 	})
 }
 
+func TestBedrockRegionPrefixing(t *testing.T) {
+	t.Run("uses us prefix when region is unset", func(t *testing.T) {
+		t.Setenv("AWS_REGION", "")
+		t.Setenv("AWS_DEFAULT_REGION", "")
+		require.Equal(t, "us.anthropic.claude-sonnet-4-5-20250929-v1:0", bedrockPrefixModelWithRegion("anthropic.claude-sonnet-4-5-20250929-v1:0"))
+	})
+
+	t.Run("uses AWS_DEFAULT_REGION when AWS_REGION is unset", func(t *testing.T) {
+		t.Setenv("AWS_REGION", "")
+		t.Setenv("AWS_DEFAULT_REGION", "eu-west-1")
+		require.Equal(t, "eu.anthropic.claude-sonnet-4-5-20250929-v1:0", bedrockPrefixModelWithRegion("anthropic.claude-sonnet-4-5-20250929-v1:0"))
+	})
+
+	t.Run("keeps already-prefixed model IDs", func(t *testing.T) {
+		t.Setenv("AWS_REGION", "us-east-1")
+		t.Setenv("AWS_DEFAULT_REGION", "")
+		require.Equal(t, "global.anthropic.claude-sonnet-4-5-20250929-v1:0", bedrockPrefixModelWithRegion("global.anthropic.claude-sonnet-4-5-20250929-v1:0"))
+	})
+
+	t.Run("maps known regions to profile prefixes", func(t *testing.T) {
+		require.Equal(t, "us", bedrockRegionPrefix("us-west-2"))
+		require.Equal(t, "us", bedrockRegionPrefix("ca-central-1"))
+		require.Equal(t, "eu", bedrockRegionPrefix("eu-central-1"))
+		require.Equal(t, "jp", bedrockRegionPrefix("ap-northeast-1"))
+		require.Equal(t, "au", bedrockRegionPrefix("ap-southeast-2"))
+		require.Equal(t, "global", bedrockRegionPrefix("ap-south-1"))
+		require.Equal(t, "global", bedrockRegionPrefix("sa-east-1"))
+	})
+}
+
 func TestStream_BetaAPI(t *testing.T) {
 	t.Parallel()
 

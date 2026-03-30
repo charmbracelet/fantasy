@@ -3,8 +3,10 @@ package fantasy
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
@@ -594,4 +596,126 @@ func TestStreamingAgentSources(t *testing.T) {
 	// Verify sources are in final result
 	resultSources := result.Response.Content.Sources()
 	require.Equal(t, 2, len(resultSources))
+}
+
+// TestStreamingAgentIdleTimeout verifies that a hanging stream is cancelled
+// after the idle timeout fires.
+func TestStreamingAgentIdleTimeout(t *testing.T) {
+	t.Parallel()
+
+	mockModel := &mockLanguageModel{
+		streamFunc: func(ctx context.Context, call Call) (StreamResponse, error) {
+			return func(yield func(StreamPart) bool) {
+				if !yield(StreamPart{Type: StreamPartTypeTextStart, ID: "text-1"}) {
+					return
+				}
+				if !yield(StreamPart{Type: StreamPartTypeTextDelta, ID: "text-1", Delta: "Hello"}) {
+					return
+				}
+				// Simulate a hang: block until context is cancelled.
+				<-ctx.Done()
+			}, nil
+		},
+	}
+
+	agent := NewAgent(mockModel)
+	ctx := context.Background()
+
+	streamCall := AgentStreamCall{
+		Prompt:            "Say hello",
+		StreamIdleTimeout: 100 * time.Millisecond,
+	}
+
+	start := time.Now()
+	_, err := agent.Stream(ctx, streamCall)
+	elapsed := time.Since(start)
+
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "stream idle timeout exceeded")
+	require.Less(t, elapsed, 2*time.Second, "should not block for a long time")
+}
+
+// TestStreamingAgentIdleTimeoutResetsOnChunks verifies that the idle timer
+// resets with each chunk so a slow-but-active stream succeeds.
+func TestStreamingAgentIdleTimeoutResetsOnChunks(t *testing.T) {
+	t.Parallel()
+
+	mockModel := &mockLanguageModel{
+		streamFunc: func(ctx context.Context, call Call) (StreamResponse, error) {
+			return func(yield func(StreamPart) bool) {
+				if !yield(StreamPart{Type: StreamPartTypeTextStart, ID: "text-1"}) {
+					return
+				}
+				// Yield deltas with pauses shorter than the idle timeout.
+				for _, word := range []string{"Hello", ", ", "world", "!"} {
+					time.Sleep(30 * time.Millisecond)
+					if !yield(StreamPart{Type: StreamPartTypeTextDelta, ID: "text-1", Delta: word}) {
+						return
+					}
+				}
+				if !yield(StreamPart{Type: StreamPartTypeTextEnd, ID: "text-1"}) {
+					return
+				}
+				yield(StreamPart{
+					Type:         StreamPartTypeFinish,
+					Usage:        Usage{InputTokens: 3, OutputTokens: 4, TotalTokens: 7},
+					FinishReason: FinishReasonStop,
+				})
+			}, nil
+		},
+	}
+
+	agent := NewAgent(mockModel)
+	ctx := context.Background()
+
+	streamCall := AgentStreamCall{
+		Prompt:            "Say hello",
+		StreamIdleTimeout: 100 * time.Millisecond,
+	}
+
+	result, err := agent.Stream(ctx, streamCall)
+	require.NoError(t, err)
+	require.Equal(t, "Hello, world!", result.Response.Content.Text())
+}
+
+// TestStreamingAgentCallbackErrorCleanup verifies that an early return from a
+// callback error properly cleans up the tool coordinator goroutine (no leak).
+func TestStreamingAgentCallbackErrorCleanup(t *testing.T) {
+	t.Parallel()
+
+	callbackErr := errors.New("callback forced error")
+
+	mockModel := &mockLanguageModel{
+		streamFunc: func(ctx context.Context, call Call) (StreamResponse, error) {
+			return func(yield func(StreamPart) bool) {
+				if !yield(StreamPart{Type: StreamPartTypeTextStart, ID: "text-1"}) {
+					return
+				}
+				if !yield(StreamPart{Type: StreamPartTypeTextDelta, ID: "text-1", Delta: "Hello"}) {
+					return
+				}
+				if !yield(StreamPart{Type: StreamPartTypeTextEnd, ID: "text-1"}) {
+					return
+				}
+				yield(StreamPart{
+					Type:         StreamPartTypeFinish,
+					Usage:        Usage{InputTokens: 1, OutputTokens: 1, TotalTokens: 2},
+					FinishReason: FinishReasonStop,
+				})
+			}, nil
+		},
+	}
+
+	agent := NewAgent(mockModel)
+	ctx := context.Background()
+
+	streamCall := AgentStreamCall{
+		Prompt: "Say hello",
+		OnTextDelta: func(_, _ string) error {
+			return callbackErr
+		},
+	}
+
+	_, err := agent.Stream(ctx, streamCall)
+	require.ErrorIs(t, err, callbackErr)
 }

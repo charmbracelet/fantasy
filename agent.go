@@ -10,6 +10,8 @@ import (
 	"maps"
 	"slices"
 	"sync"
+	"sync/atomic"
+	"time"
 
 	"charm.land/fantasy/schema"
 	"github.com/charmbracelet/x/exp/slice"
@@ -172,9 +174,10 @@ type AgentCall struct {
 	OnRetry          OnRetryCallback
 	MaxRetries       *int
 
-	StopWhen       []StopCondition
-	PrepareStep    PrepareStepFunction
-	RepairToolCall RepairToolCallFunction
+	StopWhen          []StopCondition
+	PrepareStep       PrepareStepFunction
+	RepairToolCall    RepairToolCallFunction
+	StreamIdleTimeout time.Duration // Cancels the stream if no data arrives within this duration.
 }
 
 // Agent-level callbacks.
@@ -263,9 +266,10 @@ type AgentStreamCall struct {
 	OnRetry          OnRetryCallback
 	MaxRetries       *int
 
-	StopWhen       []StopCondition
-	PrepareStep    PrepareStepFunction
-	RepairToolCall RepairToolCallFunction
+	StopWhen          []StopCondition
+	PrepareStep       PrepareStepFunction
+	RepairToolCall    RepairToolCallFunction
+	StreamIdleTimeout time.Duration // Cancels the stream if no data arrives within this duration.
 
 	// Agent-level callbacks
 	OnAgentStart  OnAgentStartFunc  // Called when agent starts
@@ -761,22 +765,23 @@ func (a *agent) executeSingleTool(ctx context.Context, toolMap map[string]AgentT
 func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult, error) {
 	// Convert AgentStreamCall to AgentCall for preparation
 	call := AgentCall{
-		Prompt:           opts.Prompt,
-		Files:            opts.Files,
-		Messages:         opts.Messages,
-		MaxOutputTokens:  opts.MaxOutputTokens,
-		Temperature:      opts.Temperature,
-		TopP:             opts.TopP,
-		TopK:             opts.TopK,
-		PresencePenalty:  opts.PresencePenalty,
-		FrequencyPenalty: opts.FrequencyPenalty,
-		ActiveTools:      opts.ActiveTools,
-		ProviderOptions:  opts.ProviderOptions,
-		MaxRetries:       opts.MaxRetries,
-		OnRetry:          opts.OnRetry,
-		StopWhen:         opts.StopWhen,
-		PrepareStep:      opts.PrepareStep,
-		RepairToolCall:   opts.RepairToolCall,
+		Prompt:            opts.Prompt,
+		Files:             opts.Files,
+		Messages:          opts.Messages,
+		MaxOutputTokens:   opts.MaxOutputTokens,
+		Temperature:       opts.Temperature,
+		TopP:              opts.TopP,
+		TopK:              opts.TopK,
+		PresencePenalty:   opts.PresencePenalty,
+		FrequencyPenalty:  opts.FrequencyPenalty,
+		ActiveTools:       opts.ActiveTools,
+		ProviderOptions:   opts.ProviderOptions,
+		MaxRetries:        opts.MaxRetries,
+		OnRetry:           opts.OnRetry,
+		StopWhen:          opts.StopWhen,
+		PrepareStep:       opts.PrepareStep,
+		RepairToolCall:    opts.RepairToolCall,
+		StreamIdleTimeout: opts.StreamIdleTimeout,
 	}
 
 	call = a.prepareCall(call)
@@ -884,14 +889,28 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 		retry := RetryWithExponentialBackoffRespectingRetryHeaders[stepExecutionResult](retryOptions)
 
 		result, err := retry(ctx, func() (stepExecutionResult, error) {
-			// Create the stream
-			stream, err := stepModel.Stream(ctx, streamCall)
+			streamCtx := ctx
+			var streamCancel context.CancelFunc
+			if call.StreamIdleTimeout > 0 {
+				streamCtx, streamCancel = context.WithCancel(ctx)
+			}
+
+			stream, err := stepModel.Stream(streamCtx, streamCall)
 			if err != nil {
+				if streamCancel != nil {
+					streamCancel()
+				}
 				return stepExecutionResult{}, err
 			}
 
-			// Process the stream
+			if call.StreamIdleTimeout > 0 {
+				stream = withIdleTimeout(stream, call.StreamIdleTimeout, streamCancel)
+			}
+
 			result, err := a.processStepStream(ctx, stream, opts, steps, stepTools, stepExecProviderTools)
+			if streamCancel != nil {
+				streamCancel()
+			}
 			if err != nil {
 				return stepExecutionResult{}, err
 			}
@@ -1248,10 +1267,16 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 		parallel bool
 	}
 	toolChan := make(chan toolExecutionRequest, 10)
+	var closeToolChan sync.Once
 	var toolExecutionWg sync.WaitGroup
 	var toolStateMu sync.Mutex
 	toolResults := make([]ToolResultContent, 0)
 	var toolExecutionErr error
+
+	defer func() {
+		closeToolChan.Do(func() { close(toolChan) })
+		toolExecutionWg.Wait()
+	}()
 
 	// Create a map for quick tool lookup
 	toolMap := make(map[string]AgentTool)
@@ -1534,8 +1559,10 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 		}
 	}
 
-	// Close the tool execution channel and wait for all executions to complete
-	close(toolChan)
+	// Ensure the tool channel is closed and all tool executions complete.
+	// This is also handled by the deferred cleanup, but closing eagerly
+	// here allows us to inspect tool execution errors before returning.
+	closeToolChan.Do(func() { close(toolChan) })
 	toolExecutionWg.Wait()
 
 	// Check for tool execution errors
@@ -1600,5 +1627,41 @@ func WithUserAgent(ua string) AgentOption {
 func WithProviderOptions(providerOptions ProviderOptions) AgentOption {
 	return func(s *agentSettings) {
 		s.providerOptions = providerOptions
+	}
+}
+
+// withIdleTimeout wraps a StreamResponse so that if no stream part is
+// received within the given timeout, cancelFn is called to cancel the
+// underlying HTTP request context. Each received part resets the timer.
+// The timer goroutine exits when the wrapped iterator returns.
+func withIdleTimeout(stream StreamResponse, timeout time.Duration, cancelFn context.CancelFunc) StreamResponse {
+	return func(yield func(StreamPart) bool) {
+		timer := time.NewTimer(timeout)
+		done := make(chan struct{})
+		var timedOut atomic.Bool
+
+		go func() {
+			select {
+			case <-timer.C:
+				timedOut.Store(true)
+				cancelFn()
+			case <-done:
+			}
+			timer.Stop()
+		}()
+
+		defer close(done)
+
+		stream(func(part StreamPart) bool {
+			timer.Reset(timeout)
+			return yield(part)
+		})
+
+		if timedOut.Load() {
+			yield(StreamPart{
+				Type:  StreamPartTypeError,
+				Error: fmt.Errorf("stream idle timeout exceeded (%s)", timeout),
+			})
+		}
 	}
 }

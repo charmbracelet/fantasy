@@ -51,9 +51,15 @@ func getRetryDelayInMs(err error, exponentialBackoffDelay time.Duration) time.Du
 	return exponentialBackoffDelay
 }
 
-// isAbortError checks if the error is a context cancellation error.
-func isAbortError(err error) bool {
-	return errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded)
+// isAbortError checks whether the caller's context has been cancelled
+// (e.g. by the user) or the error is a deadline-exceeded. We inspect
+// ctx.Err() rather than the error value for context.Canceled because a
+// stream-idle-timeout cancels a *child* streamCtx, producing a
+// context.Canceled error even though the parent ctx is still alive.
+// Checking ctx.Err() avoids aborting retries on transient idle-timeout
+// cancellations.
+func isAbortError(ctx context.Context, err error) bool {
+	return ctx.Err() != nil || errors.Is(err, context.DeadlineExceeded)
 }
 
 // RetryWithExponentialBackoffRespectingRetryHeaders creates a retry function that retries
@@ -94,7 +100,7 @@ func retryWithExponentialBackoff[T any](ctx context.Context, fn RetryFn[T], opti
 		return result, nil
 	}
 
-	if isAbortError(err) {
+	if isAbortError(ctx, err) {
 		return zero, err // don't retry when the request was aborted
 	}
 
@@ -110,9 +116,10 @@ func retryWithExponentialBackoff[T any](ctx context.Context, fn RetryFn[T], opti
 	}
 
 	var providerErr *ProviderError
-	if errors.As(err, &providerErr) && providerErr.IsRetryable() && tryNumber <= options.MaxRetries {
+	isIdleTimeout := errors.Is(err, errStreamIdleTimeout)
+	if (errors.As(err, &providerErr) && providerErr.IsRetryable() || isIdleTimeout) && tryNumber <= options.MaxRetries {
 		delay := getRetryDelayInMs(err, options.InitialDelayIn)
-		if options.OnRetry != nil {
+		if options.OnRetry != nil && providerErr != nil {
 			options.OnRetry(providerErr, delay)
 		}
 

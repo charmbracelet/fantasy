@@ -114,6 +114,10 @@ func ErrorTitleForStatusCode(statusCode int) string {
 	return strings.ToLower(http.StatusText(statusCode))
 }
 
+// errStreamIdleTimeout is a sentinel used to identify stream-idle-timeout
+// errors so the retry logic can treat them as retryable.
+var errStreamIdleTimeout = errors.New("stream idle timeout")
+
 // NoObjectGeneratedError is returned when object generation fails
 // due to parsing errors, validation errors, or model failures.
 type NoObjectGeneratedError struct {

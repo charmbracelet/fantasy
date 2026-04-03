@@ -1655,6 +1655,14 @@ func withIdleTimeout(stream StreamResponse, timeout time.Duration, cancelFn cont
 		var stopped bool
 		stream(func(part StreamPart) bool {
 			timer.Reset(timeout)
+			// When the idle timeout fired and cancelled streamCtx, the
+			// provider will yield a StreamPartTypeError carrying
+			// context.Canceled.  Replace it with a descriptive,
+			// non-context error so the retry logic treats it as a
+			// retryable failure rather than a user-initiated abort.
+			if part.Type == StreamPartTypeError && timedOut.Load() {
+				part.Error = fmt.Errorf("%w: no data received for %s", errStreamIdleTimeout, timeout)
+			}
 			if !yield(part) {
 				stopped = true
 				return false
@@ -1665,7 +1673,7 @@ func withIdleTimeout(stream StreamResponse, timeout time.Duration, cancelFn cont
 		if timedOut.Load() && !stopped {
 			yield(StreamPart{
 				Type:  StreamPartTypeError,
-				Error: fmt.Errorf("stream idle timeout exceeded (%s)", timeout),
+				Error: fmt.Errorf("%w: no data received for %s", errStreamIdleTimeout, timeout),
 			})
 		}
 	}

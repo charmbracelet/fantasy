@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -599,12 +600,15 @@ func TestStreamingAgentSources(t *testing.T) {
 }
 
 // TestStreamingAgentIdleTimeout verifies that a hanging stream is cancelled
-// after the idle timeout fires.
+// after the idle timeout fires and that retries are attempted.
 func TestStreamingAgentIdleTimeout(t *testing.T) {
 	t.Parallel()
 
+	var attempts atomic.Int32
+
 	mockModel := &mockLanguageModel{
 		streamFunc: func(ctx context.Context, call Call) (StreamResponse, error) {
+			attempts.Add(1)
 			return func(yield func(StreamPart) bool) {
 				if !yield(StreamPart{Type: StreamPartTypeTextStart, ID: "text-1"}) {
 					return
@@ -631,8 +635,10 @@ func TestStreamingAgentIdleTimeout(t *testing.T) {
 	elapsed := time.Since(start)
 
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "stream idle timeout exceeded")
-	require.Less(t, elapsed, 2*time.Second, "should not block for a long time")
+	require.ErrorIs(t, err, errStreamIdleTimeout)
+	require.Less(t, elapsed, 10*time.Second, "should not block for a long time")
+	// Default retry is 2 retries, so 3 total attempts (1 initial + 2 retries).
+	require.Equal(t, int32(3), attempts.Load(), "should retry on idle timeout")
 }
 
 // TestStreamingAgentIdleTimeoutResetsOnChunks verifies that the idle timer

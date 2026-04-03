@@ -719,3 +719,46 @@ func TestStreamingAgentCallbackErrorCleanup(t *testing.T) {
 	_, err := agent.Stream(ctx, streamCall)
 	require.ErrorIs(t, err, callbackErr)
 }
+
+// TestStreamingAgentIdleTimeoutNoYieldAfterStop verifies that withIdleTimeout
+// does not call yield after the consumer has stopped iteration, which would
+// panic with "range function continued iteration after loop body returned false".
+func TestStreamingAgentIdleTimeoutNoYieldAfterStop(t *testing.T) {
+	t.Parallel()
+
+	mockModel := &mockLanguageModel{
+		streamFunc: func(ctx context.Context, call Call) (StreamResponse, error) {
+			return func(yield func(StreamPart) bool) {
+				if !yield(StreamPart{Type: StreamPartTypeTextStart, ID: "text-1"}) {
+					return
+				}
+				if !yield(StreamPart{Type: StreamPartTypeTextDelta, ID: "text-1", Delta: "Hello"}) {
+					return
+				}
+				// Simulate a hang so the idle timeout fires while we're blocked.
+				<-ctx.Done()
+				// After context cancellation, the provider may still yield an error.
+				yield(StreamPart{
+					Type:  StreamPartTypeError,
+					Error: ctx.Err(),
+				})
+			}, nil
+		},
+	}
+
+	agent := NewAgent(mockModel)
+	ctx := context.Background()
+
+	streamCall := AgentStreamCall{
+		Prompt:            "Say hello",
+		StreamIdleTimeout: 50 * time.Millisecond,
+		OnTextDelta: func(_, _ string) error {
+			return errors.New("consumer error")
+		},
+	}
+
+	// This must not panic with "range function continued iteration after
+	// loop body returned false".
+	_, err := agent.Stream(ctx, streamCall)
+	require.Error(t, err)
+}

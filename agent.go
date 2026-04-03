@@ -1652,12 +1652,17 @@ func withIdleTimeout(stream StreamResponse, timeout time.Duration, cancelFn cont
 
 		defer close(done)
 
+		var stopped bool
 		stream(func(part StreamPart) bool {
 			timer.Reset(timeout)
-			return yield(part)
+			if !yield(part) {
+				stopped = true
+				return false
+			}
+			return true
 		})
 
-		if timedOut.Load() {
+		if timedOut.Load() && !stopped {
 			yield(StreamPart{
 				Type:  StreamPartTypeError,
 				Error: fmt.Errorf("stream idle timeout exceeded (%s)", timeout),

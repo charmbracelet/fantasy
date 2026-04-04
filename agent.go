@@ -32,6 +32,8 @@ type stepExecutionResult struct {
 // StopCondition defines a function that determines when an agent should stop executing.
 type StopCondition = func(steps []StepResult) bool
 
+type responseGenerator = func(ctx context.Context, model LanguageModel, call Call) (*Response, error)
+
 // StepCountIs returns a stop condition that stops after the specified number of steps.
 func StepCountIs(stepCount int) StopCondition {
 	return func(steps []StepResult) bool {
@@ -343,6 +345,7 @@ func hasNonBlankText(content ResponseContent) bool {
 // Agent represents an AI agent that can generate responses and stream responses.
 type Agent interface {
 	Generate(context.Context, AgentCall) (*AgentResult, error)
+	GenerateObject(context.Context, schema.Schema, AgentCall) (*AgentResult, error)
 	Stream(context.Context, AgentStreamCall) (*AgentResult, error)
 }
 
@@ -411,13 +414,12 @@ func (a *agent) prepareCall(call AgentCall) AgentCall {
 	return call
 }
 
-// Generate implements Agent.
-func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, error) {
-	opts = a.prepareCall(opts)
-	initialPrompt, err := a.createPrompt(a.settings.systemPrompt, opts.Prompt, opts.Messages, opts.Files...)
-	if err != nil {
-		return nil, err
-	}
+func (a *agent) executeLoop(
+	ctx context.Context,
+	initialPrompt Prompt,
+	gen responseGenerator,
+	opts AgentCall,
+) ([]StepResult, error) {
 	var responseMessages []Message
 	var steps []StepResult
 
@@ -493,7 +495,7 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 		retryOptions.OnRetry = opts.OnRetry
 		retry := RetryWithExponentialBackoffRespectingRetryHeaders[*Response](retryOptions)
 		result, err := retry(ctx, func() (*Response, error) {
-			return stepModel.Generate(ctx, Call{
+			return gen(ctx, stepModel, Call{
 				Prompt:           stepInputMessages,
 				MaxOutputTokens:  opts.MaxOutputTokens,
 				Temperature:      opts.Temperature,
@@ -581,8 +583,12 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 		}
 	}
 
-	totalUsage := Usage{}
+	//nolint:nilerr // tool execution failure breaks the loop but does not prevent an answer from being returned
+	return steps, nil
+}
 
+func toAgentResult(steps []StepResult) *AgentResult {
+	totalUsage := Usage{}
 	for _, step := range steps {
 		usage := step.Usage
 		totalUsage.InputTokens += usage.InputTokens
@@ -593,12 +599,89 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 		totalUsage.TotalTokens += usage.TotalTokens
 	}
 
-	agentResult := &AgentResult{
+	return &AgentResult{
 		Steps:      steps,
 		Response:   finalResponse(steps),
 		TotalUsage: totalUsage,
 	}
-	return agentResult, nil
+}
+
+// Generate implements Agent.
+func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, error) {
+	opts = a.prepareCall(opts)
+	initialPrompt, err := a.createPrompt(a.settings.systemPrompt, opts.Prompt, opts.Messages, opts.Files...)
+	if err != nil {
+		return nil, err
+	}
+	steps, err := a.executeLoop(
+		ctx,
+		initialPrompt,
+		func(ctx context.Context, stepModel LanguageModel, call Call) (*Response, error) {
+			return stepModel.Generate(ctx, call)
+		},
+		opts,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return toAgentResult(steps), nil
+}
+
+func (a *agent) GenerateObject(ctx context.Context, s schema.Schema, opts AgentCall) (*AgentResult, error) {
+	opts = a.prepareCall(opts)
+	initialPrompt, err := a.createPrompt(a.settings.systemPrompt, opts.Prompt, opts.Messages, opts.Files...)
+	if err != nil {
+		return nil, err
+	}
+
+	steps, err := a.executeLoop(
+		ctx,
+		initialPrompt,
+		func(ctx context.Context, model LanguageModel, call Call) (*Response, error) {
+			res, err := model.GenerateObject(ctx, ObjectCall{
+				Prompt:           call.Prompt,
+				Schema:           s,
+				MaxOutputTokens:  call.MaxOutputTokens,
+				Temperature:      call.Temperature,
+				TopP:             call.TopP,
+				TopK:             call.TopK,
+				PresencePenalty:  call.PresencePenalty,
+				FrequencyPenalty: call.FrequencyPenalty,
+				UserAgent:        call.UserAgent,
+				ProviderOptions:  call.ProviderOptions,
+				RepairText:       nil,
+				Tools:            call.Tools,
+				ToolChoice:       call.ToolChoice,
+			})
+			if err != nil {
+				return nil, err
+			}
+
+			var content ResponseContent
+			for _, toolCall := range res.ToolCalls {
+				content = append(content, toolCall)
+			}
+
+			if res.RawText != "" {
+				content = append(content, TextContent{Text: res.RawText})
+			}
+
+			return &Response{
+				Content:          content,
+				FinishReason:     res.FinishReason,
+				Usage:            res.Usage,
+				Warnings:         res.Warnings,
+				ProviderMetadata: res.ProviderMetadata,
+			}, nil
+		},
+		opts,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return toAgentResult(steps), nil
 }
 
 func isStopConditionMet(conditions []StopCondition, steps []StepResult) bool {

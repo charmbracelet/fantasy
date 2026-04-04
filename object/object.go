@@ -51,6 +51,7 @@ func Generate[T any](
 		FinishReason:     resp.FinishReason,
 		Warnings:         resp.Warnings,
 		ProviderMetadata: resp.ProviderMetadata,
+		ToolCalls:        resp.ToolCalls,
 	}, nil
 }
 

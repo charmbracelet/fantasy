@@ -347,6 +347,61 @@ func TestToPromptFunc_DropsEmptyMessages(t *testing.T) {
 		require.Empty(t, warnings)
 	})
 
+	t.Run("should add empty reasoning_content to tool call messages when thinking is enabled", func(t *testing.T) {
+		t.Parallel()
+
+		// When thinking is enabled (reasoning parts exist in history),
+		// tool call messages without their own reasoning must still include
+		// reasoning_content. Providers like Kimi require it.
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "What is 2+2?"},
+				},
+			},
+			{
+				// First turn has reasoning
+				Role: fantasy.MessageRoleAssistant,
+				Content: []fantasy.MessagePart{
+					fantasy.ReasoningPart{Text: "Simple math."},
+					fantasy.TextPart{Text: "Four"},
+				},
+			},
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "Now try a tool call"},
+				},
+			},
+			{
+				// Tool call WITHOUT reasoning on this turn
+				Role: fantasy.MessageRoleAssistant,
+				Content: []fantasy.MessagePart{
+					fantasy.ToolCallPart{
+						ToolCallID: "call_1",
+						ToolName:   "execute",
+						Input:      `{"command":"echo 4"}`,
+					},
+				},
+			},
+		}
+
+		messages, warnings := ToPromptFunc(prompt, "", "")
+
+		require.Empty(t, warnings)
+		require.Len(t, messages, 4)
+
+		// Tool call message must have reasoning_content (empty) since
+		// thinking is enabled in this conversation
+		msg := messages[3].OfAssistant
+		require.NotNil(t, msg)
+		extraFields := msg.ExtraFields()
+		reasoningContent, hasReasoning := extraFields["reasoning_content"]
+		require.True(t, hasReasoning, "reasoning_content must be present on tool call messages when thinking is enabled")
+		require.Equal(t, "", reasoningContent)
+	})
+
 	t.Run("should drop user messages without visible content", func(t *testing.T) {
 		t.Parallel()
 

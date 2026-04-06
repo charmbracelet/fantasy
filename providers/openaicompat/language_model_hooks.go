@@ -58,9 +58,9 @@ func ExtraContentFunc(choice openaisdk.ChatCompletionChoice) []fantasy.Content {
 	if err != nil {
 		return content
 	}
-	if reasoningData.ReasoningContent != "" {
+	if rc := reasoningData.GetReasoningContent(); rc != "" {
 		content = append(content, fantasy.ReasoningContent{
-			Text: reasoningData.ReasoningContent,
+			Text: rc,
 		})
 	}
 	return content
@@ -114,11 +114,11 @@ func StreamExtraFunc(chunk openaisdk.ChatCompletionChunk, yield func(fantasy.Str
 				Delta: reasoningContent,
 			})
 		}
-		if reasoningData.ReasoningContent != "" {
+		if rc := reasoningData.GetReasoningContent(); rc != "" {
 			if !reasoningStarted {
 				ctx[reasoningStartedCtx] = true
 			}
-			return ctx, emitEvent(reasoningData.ReasoningContent)
+			return ctx, emitEvent(rc)
 		}
 		if reasoningStarted && (choice.Delta.Content != "" || len(choice.Delta.ToolCalls) > 0) {
 			ctx[reasoningStartedCtx] = false
@@ -137,6 +137,8 @@ func StreamExtraFunc(chunk openaisdk.ChatCompletionChunk, yield func(fantasy.Str
 func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletionMessageParamUnion, []fantasy.CallWarning) {
 	var messages []openaisdk.ChatCompletionMessageParamUnion
 	var warnings []fantasy.CallWarning
+	hasReasoning := false
+
 	for _, msg := range prompt {
 		switch msg.Role {
 		case fantasy.MessageRoleSystem:
@@ -348,6 +350,7 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 						continue
 					}
 					reasoningText = reasoningPart.Text
+					hasReasoning = true
 				case fantasy.ContentTypeToolCall:
 					toolCallPart, ok := fantasy.AsContentType[fantasy.ToolCallPart](c)
 					if !ok {
@@ -370,8 +373,10 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 						})
 				}
 			}
-			// Add reasoning_content field if present
-			if reasoningText != "" {
+			// Add reasoning_content field if present, or if thinking is enabled
+			// and the message has tool calls (some providers like Kimi require
+			// reasoning_content on all assistant messages when thinking is enabled).
+			if reasoningText != "" || (hasReasoning && len(assistantMsg.ToolCalls) > 0) {
 				assistantMsg.SetExtraFields(map[string]any{
 					"reasoning_content": reasoningText,
 				})

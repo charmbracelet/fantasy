@@ -3,8 +3,11 @@ package fantasy
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
@@ -595,3 +598,177 @@ func TestStreamingAgentSources(t *testing.T) {
 	resultSources := result.Response.Content.Sources()
 	require.Equal(t, 2, len(resultSources))
 }
+
+// TestStreamingAgentIdleTimeout verifies that a hanging stream is cancelled
+// after the idle timeout fires and that retries are attempted.
+func TestStreamingAgentIdleTimeout(t *testing.T) {
+	t.Parallel()
+
+	var attempts atomic.Int32
+
+	mockModel := &mockLanguageModel{
+		streamFunc: func(ctx context.Context, call Call) (StreamResponse, error) {
+			attempts.Add(1)
+			return func(yield func(StreamPart) bool) {
+				if !yield(StreamPart{Type: StreamPartTypeTextStart, ID: "text-1"}) {
+					return
+				}
+				if !yield(StreamPart{Type: StreamPartTypeTextDelta, ID: "text-1", Delta: "Hello"}) {
+					return
+				}
+				// Simulate a hang: block until context is cancelled.
+				<-ctx.Done()
+			}, nil
+		},
+	}
+
+	agent := NewAgent(mockModel)
+	ctx := context.Background()
+
+	streamCall := AgentStreamCall{
+		Prompt:            "Say hello",
+		StreamIdleTimeout: 100 * time.Millisecond,
+		MaxRetries:        ptrTo(2),
+	}
+
+	start := time.Now()
+	_, err := agent.Stream(ctx, streamCall)
+	elapsed := time.Since(start)
+
+	require.Error(t, err)
+	require.ErrorIs(t, err, errStreamIdleTimeout)
+	// 2 retries with 2s initial delay and 2x backoff (2+4 = 6s).
+	require.Less(t, elapsed, 10*time.Second, "should not block for a long time")
+	// 3 total attempts (1 initial + 2 retries).
+	require.Equal(t, int32(3), attempts.Load(), "should retry on idle timeout")
+}
+
+// TestStreamingAgentIdleTimeoutResetsOnChunks verifies that the idle timer
+// resets with each chunk so a slow-but-active stream succeeds.
+func TestStreamingAgentIdleTimeoutResetsOnChunks(t *testing.T) {
+	t.Parallel()
+
+	mockModel := &mockLanguageModel{
+		streamFunc: func(ctx context.Context, call Call) (StreamResponse, error) {
+			return func(yield func(StreamPart) bool) {
+				if !yield(StreamPart{Type: StreamPartTypeTextStart, ID: "text-1"}) {
+					return
+				}
+				// Yield deltas with pauses shorter than the idle timeout.
+				for _, word := range []string{"Hello", ", ", "world", "!"} {
+					time.Sleep(30 * time.Millisecond)
+					if !yield(StreamPart{Type: StreamPartTypeTextDelta, ID: "text-1", Delta: word}) {
+						return
+					}
+				}
+				if !yield(StreamPart{Type: StreamPartTypeTextEnd, ID: "text-1"}) {
+					return
+				}
+				yield(StreamPart{
+					Type:         StreamPartTypeFinish,
+					Usage:        Usage{InputTokens: 3, OutputTokens: 4, TotalTokens: 7},
+					FinishReason: FinishReasonStop,
+				})
+			}, nil
+		},
+	}
+
+	agent := NewAgent(mockModel)
+	ctx := context.Background()
+
+	streamCall := AgentStreamCall{
+		Prompt:            "Say hello",
+		StreamIdleTimeout: 100 * time.Millisecond,
+	}
+
+	result, err := agent.Stream(ctx, streamCall)
+	require.NoError(t, err)
+	require.Equal(t, "Hello, world!", result.Response.Content.Text())
+}
+
+// TestStreamingAgentCallbackErrorCleanup verifies that an early return from a
+// callback error properly cleans up the tool coordinator goroutine (no leak).
+func TestStreamingAgentCallbackErrorCleanup(t *testing.T) {
+	t.Parallel()
+
+	callbackErr := errors.New("callback forced error")
+
+	mockModel := &mockLanguageModel{
+		streamFunc: func(ctx context.Context, call Call) (StreamResponse, error) {
+			return func(yield func(StreamPart) bool) {
+				if !yield(StreamPart{Type: StreamPartTypeTextStart, ID: "text-1"}) {
+					return
+				}
+				if !yield(StreamPart{Type: StreamPartTypeTextDelta, ID: "text-1", Delta: "Hello"}) {
+					return
+				}
+				if !yield(StreamPart{Type: StreamPartTypeTextEnd, ID: "text-1"}) {
+					return
+				}
+				yield(StreamPart{
+					Type:         StreamPartTypeFinish,
+					Usage:        Usage{InputTokens: 1, OutputTokens: 1, TotalTokens: 2},
+					FinishReason: FinishReasonStop,
+				})
+			}, nil
+		},
+	}
+
+	agent := NewAgent(mockModel)
+	ctx := context.Background()
+
+	streamCall := AgentStreamCall{
+		Prompt: "Say hello",
+		OnTextDelta: func(_, _ string) error {
+			return callbackErr
+		},
+	}
+
+	_, err := agent.Stream(ctx, streamCall)
+	require.ErrorIs(t, err, callbackErr)
+}
+
+// TestStreamingAgentIdleTimeoutNoYieldAfterStop verifies that withIdleTimeout
+// does not call yield after the consumer has stopped iteration, which would
+// panic with "range function continued iteration after loop body returned false".
+func TestStreamingAgentIdleTimeoutNoYieldAfterStop(t *testing.T) {
+	t.Parallel()
+
+	mockModel := &mockLanguageModel{
+		streamFunc: func(ctx context.Context, call Call) (StreamResponse, error) {
+			return func(yield func(StreamPart) bool) {
+				if !yield(StreamPart{Type: StreamPartTypeTextStart, ID: "text-1"}) {
+					return
+				}
+				if !yield(StreamPart{Type: StreamPartTypeTextDelta, ID: "text-1", Delta: "Hello"}) {
+					return
+				}
+				// Simulate a hang so the idle timeout fires while we're blocked.
+				<-ctx.Done()
+				// After context cancellation, the provider may still yield an error.
+				yield(StreamPart{
+					Type:  StreamPartTypeError,
+					Error: ctx.Err(),
+				})
+			}, nil
+		},
+	}
+
+	agent := NewAgent(mockModel)
+	ctx := context.Background()
+
+	streamCall := AgentStreamCall{
+		Prompt:            "Say hello",
+		StreamIdleTimeout: 50 * time.Millisecond,
+		OnTextDelta: func(_, _ string) error {
+			return errors.New("consumer error")
+		},
+	}
+
+	// This must not panic with "range function continued iteration after
+	// loop body returned false".
+	_, err := agent.Stream(ctx, streamCall)
+	require.Error(t, err)
+}
+
+func ptrTo[T any](v T) *T { return &v }

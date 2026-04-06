@@ -83,10 +83,9 @@ type RetryOptions struct {
 type OnRetryCallback = func(err *ProviderError, delay time.Duration)
 
 // DefaultRetryOptions returns the default retry options.
-// DefaultRetryOptions returns the default retry options.
 func DefaultRetryOptions() RetryOptions {
 	return RetryOptions{
-		MaxRetries:     2,
+		MaxRetries:     5,
 		InitialDelayIn: 2000 * time.Millisecond,
 		BackoffFactor:  2.0,
 	}
@@ -119,7 +118,7 @@ func retryWithExponentialBackoff[T any](ctx context.Context, fn RetryFn[T], opti
 	isIdleTimeout := errors.Is(err, errStreamIdleTimeout)
 	if (errors.As(err, &providerErr) && providerErr.IsRetryable() || isIdleTimeout) && tryNumber <= options.MaxRetries {
 		delay := getRetryDelayInMs(err, options.InitialDelayIn)
-		if options.OnRetry != nil && providerErr != nil {
+		if options.OnRetry != nil {
 			options.OnRetry(providerErr, delay)
 		}
 

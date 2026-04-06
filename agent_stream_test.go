@@ -628,6 +628,7 @@ func TestStreamingAgentIdleTimeout(t *testing.T) {
 	streamCall := AgentStreamCall{
 		Prompt:            "Say hello",
 		StreamIdleTimeout: 100 * time.Millisecond,
+		MaxRetries:        ptrTo(2),
 	}
 
 	start := time.Now()
@@ -636,8 +637,9 @@ func TestStreamingAgentIdleTimeout(t *testing.T) {
 
 	require.Error(t, err)
 	require.ErrorIs(t, err, errStreamIdleTimeout)
+	// 2 retries with 2s initial delay and 2x backoff (2+4 = 6s).
 	require.Less(t, elapsed, 10*time.Second, "should not block for a long time")
-	// Default retry is 2 retries, so 3 total attempts (1 initial + 2 retries).
+	// 3 total attempts (1 initial + 2 retries).
 	require.Equal(t, int32(3), attempts.Load(), "should retry on idle timeout")
 }
 
@@ -768,3 +770,5 @@ func TestStreamingAgentIdleTimeoutNoYieldAfterStop(t *testing.T) {
 	_, err := agent.Stream(ctx, streamCall)
 	require.Error(t, err)
 }
+
+func ptrTo[T any](v T) *T { return &v }

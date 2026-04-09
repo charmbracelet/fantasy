@@ -262,6 +262,50 @@ func TestToPrompt_DropsEmptyMessages(t *testing.T) {
 		require.Empty(t, warnings)
 	})
 
+	t.Run("should keep user messages with PDF content", func(t *testing.T) {
+		t.Parallel()
+
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.FilePart{
+						Data:      []byte("fake pdf data"),
+						MediaType: "application/pdf",
+					},
+				},
+			},
+		}
+
+		systemBlocks, messages, warnings := toPrompt(prompt, true)
+
+		require.Empty(t, systemBlocks)
+		require.Len(t, messages, 1)
+		require.Empty(t, warnings)
+	})
+
+	t.Run("should keep user messages with text document content", func(t *testing.T) {
+		t.Parallel()
+
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.FilePart{
+						Data:      []byte("# Hello World\nSome markdown content"),
+						MediaType: "text/markdown",
+					},
+				},
+			},
+		}
+
+		systemBlocks, messages, warnings := toPrompt(prompt, true)
+
+		require.Empty(t, systemBlocks)
+		require.Len(t, messages, 1)
+		require.Empty(t, warnings)
+	})
+
 	t.Run("should drop user messages without visible content", func(t *testing.T) {
 		t.Parallel()
 
@@ -271,7 +315,7 @@ func TestToPrompt_DropsEmptyMessages(t *testing.T) {
 				Content: []fantasy.MessagePart{
 					fantasy.FilePart{
 						Data:      []byte("not supported"),
-						MediaType: "application/pdf",
+						MediaType: "application/zip",
 					},
 				},
 			},

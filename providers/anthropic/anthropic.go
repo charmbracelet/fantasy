@@ -831,7 +831,6 @@ func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBl
 							if !ok {
 								continue
 							}
-							// TODO: handle other file types
 							switch {
 							case strings.HasPrefix(file.MediaType, "image/"):
 								base64Encoded := base64.StdEncoding.EncodeToString(file.Data)
@@ -840,10 +839,22 @@ func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBl
 									imageBlock.OfImage.CacheControl = anthropic.NewCacheControlEphemeralParam()
 								}
 								anthropicContent = append(anthropicContent, imageBlock)
+							case file.MediaType == "application/pdf":
+								base64Encoded := base64.StdEncoding.EncodeToString(file.Data)
+								docBlock := anthropic.NewDocumentBlock(anthropic.Base64PDFSourceParam{
+									Data: base64Encoded,
+								})
+								if cacheControl != nil {
+									docBlock.OfDocument.CacheControl = anthropic.NewCacheControlEphemeralParam()
+								}
+								anthropicContent = append(anthropicContent, docBlock)
 							case strings.HasPrefix(file.MediaType, "text/"):
 								documentBlock := anthropic.NewDocumentBlock(anthropic.PlainTextSourceParam{
 									Data: string(file.Data),
 								})
+								if cacheControl != nil {
+									documentBlock.OfDocument.CacheControl = anthropic.NewCacheControlEphemeralParam()
+								}
 								anthropicContent = append(anthropicContent, documentBlock)
 							}
 						}
@@ -1050,7 +1061,7 @@ func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBl
 
 func hasVisibleUserContent(content []anthropic.ContentBlockParamUnion) bool {
 	for _, block := range content {
-		if block.OfText != nil || block.OfImage != nil || block.OfToolResult != nil {
+		if block.OfText != nil || block.OfImage != nil || block.OfDocument != nil || block.OfToolResult != nil {
 			return true
 		}
 	}

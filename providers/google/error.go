@@ -3,6 +3,7 @@ package google
 import (
 	"cmp"
 	"errors"
+	"io"
 	"regexp"
 	"strconv"
 
@@ -15,6 +16,20 @@ var googleContextPattern = regexp.MustCompile(`input token count.*?(\d+).*?excee
 func toProviderErr(err error) error {
 	var apiErr genai.APIError
 	if !errors.As(err, &apiErr) {
+		// Transient transport failures from the streaming decoder (most
+		// commonly io.ErrUnexpectedEOF from a mid-stream SSE disconnect)
+		// arrive here as plain errors that are not genai.APIError. Wrap
+		// them as ProviderError so that the retry loop in retry.go
+		// engages — ProviderError.IsRetryable already classifies
+		// io.ErrUnexpectedEOF as retryable, but that check is only
+		// reached if the error is a *ProviderError to begin with.
+		if errors.Is(err, io.ErrUnexpectedEOF) {
+			return &fantasy.ProviderError{
+				Title:   "stream transport error",
+				Message: err.Error(),
+				Cause:   err,
+			}
+		}
 		return err
 	}
 

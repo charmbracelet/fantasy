@@ -1248,6 +1248,7 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 		parallel bool
 	}
 	toolChan := make(chan toolExecutionRequest, 10)
+	var pendingDispatches []toolExecutionRequest
 	var toolExecutionWg sync.WaitGroup
 	var toolStateMu sync.Mutex
 	toolResults := make([]ToolResultContent, 0)
@@ -1475,8 +1476,9 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 					isParallel = tool.Info().Parallel
 				}
 
-				// Send tool call to execution channel
-				toolChan <- toolExecutionRequest{toolCall: validatedToolCall, parallel: isParallel}
+				// Buffer dispatch until stream is fully consumed so that all
+				// OnToolCall callbacks complete before any tool result is written.
+				pendingDispatches = append(pendingDispatches, toolExecutionRequest{toolCall: validatedToolCall, parallel: isParallel})
 
 				// Clean up active tool call
 				delete(activeToolCalls, part.ID)
@@ -1532,6 +1534,12 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 		case StreamPartTypeError:
 			return stepExecutionResult{}, part.Error
 		}
+	}
+
+	// Dispatch all buffered tool calls now that the complete set is known and
+	// every OnToolCall callback has been called.
+	for _, req := range pendingDispatches {
+		toolChan <- req
 	}
 
 	// Close the tool execution channel and wait for all executions to complete

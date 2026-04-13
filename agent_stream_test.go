@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -364,6 +366,90 @@ func TestStreamingAgentWithTools(t *testing.T) {
 	toolResults := firstStep.Content.ToolResults()
 	require.Equal(t, 1, len(toolResults))
 	require.Equal(t, "echo", toolResults[0].ToolName)
+}
+
+// TestStreamingAgentToolCallBeforeResult verifies that all OnToolCall callbacks
+// complete before any OnToolResult fires. This is the ordering guarantee
+// provided by buffering dispatches until the stream is fully consumed.
+func TestStreamingAgentToolCallBeforeResult(t *testing.T) {
+	t.Parallel()
+
+	stepCount := 0
+	mockModel := &mockLanguageModel{
+		streamFunc: func(ctx context.Context, call Call) (StreamResponse, error) {
+			stepCount++
+			return func(yield func(StreamPart) bool) {
+				if stepCount == 1 {
+					// Emit two tool calls in the same step.
+					for _, id := range []string{"tool-1", "tool-2"} {
+						if !yield(StreamPart{Type: StreamPartTypeToolInputStart, ID: id, ToolCallName: "echo"}) {
+							return
+						}
+						if !yield(StreamPart{Type: StreamPartTypeToolInputDelta, ID: id, Delta: `{"message": "` + id + `"}`}) {
+							return
+						}
+						if !yield(StreamPart{Type: StreamPartTypeToolInputEnd, ID: id}) {
+							return
+						}
+						if !yield(StreamPart{
+							Type:          StreamPartTypeToolCall,
+							ID:            id,
+							ToolCallName:  "echo",
+							ToolCallInput: `{"message": "` + id + `"}`,
+						}) {
+							return
+						}
+					}
+					yield(StreamPart{
+						Type:         StreamPartTypeFinish,
+						FinishReason: FinishReasonToolCalls,
+					})
+				} else {
+					yield(StreamPart{
+						Type:         StreamPartTypeFinish,
+						FinishReason: FinishReasonStop,
+					})
+				}
+			}, nil
+		},
+	}
+
+	agent := NewAgent(mockModel, WithTools(&EchoTool{}))
+
+	var mu sync.Mutex
+	var events []string
+
+	_, err := agent.Stream(context.Background(), AgentStreamCall{
+		Prompt: "echo twice",
+		OnToolCall: func(tc ToolCallContent) error {
+			mu.Lock()
+			events = append(events, "call:"+tc.ToolCallID)
+			mu.Unlock()
+			return nil
+		},
+		OnToolResult: func(tr ToolResultContent) error {
+			mu.Lock()
+			events = append(events, "result:"+tr.ToolCallID)
+			mu.Unlock()
+			return nil
+		},
+	})
+	require.NoError(t, err)
+
+	// Both OnToolCall events must appear before any OnToolResult event.
+	lastCallIdx := -1
+	firstResultIdx := len(events)
+	for i, e := range events {
+		if strings.HasPrefix(e, "call:") {
+			lastCallIdx = i
+		}
+		if strings.HasPrefix(e, "result:") && i < firstResultIdx {
+			firstResultIdx = i
+		}
+	}
+	require.Equal(t, 2, stepCount)
+	require.Less(t, lastCallIdx, firstResultIdx,
+		"all OnToolCall events must complete before the first OnToolResult; got %v", events)
 }
 
 // TestStreamingAgentTextDeltas tests text streaming (mirrors TS textStream tests)

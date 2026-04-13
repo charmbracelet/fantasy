@@ -1247,12 +1247,7 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 		toolCall ToolCallContent
 		parallel bool
 	}
-	toolChan := make(chan toolExecutionRequest, 10)
 	var pendingDispatches []toolExecutionRequest
-	var toolExecutionWg sync.WaitGroup
-	var toolStateMu sync.Mutex
-	toolResults := make([]ToolResultContent, 0)
-	var toolExecutionErr error
 
 	// Create a map for quick tool lookup
 	toolMap := make(map[string]AgentTool)
@@ -1264,43 +1259,6 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 	for _, ept := range execProviderTools {
 		execProviderToolMap[ept.GetName()] = ept
 	}
-
-	// Semaphores for controlling parallelism
-	parallelSem := make(chan struct{}, 5)
-	var sequentialMu sync.Mutex
-
-	// Single coordinator goroutine that dispatches tools
-	toolExecutionWg.Go(func() {
-		for req := range toolChan {
-			if req.parallel {
-				parallelSem <- struct{}{}
-				toolExecutionWg.Go(func() {
-					defer func() { <-parallelSem }()
-					result, isCriticalError := a.executeSingleTool(ctx, toolMap, execProviderToolMap, req.toolCall, opts.OnToolResult)
-					toolStateMu.Lock()
-					toolResults = append(toolResults, result)
-					if isCriticalError && toolExecutionErr == nil {
-						if errorResult, ok := result.Result.(ToolResultOutputContentError); ok && errorResult.Error != nil {
-							toolExecutionErr = errorResult.Error
-						}
-					}
-					toolStateMu.Unlock()
-				})
-			} else {
-				sequentialMu.Lock()
-				result, isCriticalError := a.executeSingleTool(ctx, toolMap, execProviderToolMap, req.toolCall, opts.OnToolResult)
-				toolStateMu.Lock()
-				toolResults = append(toolResults, result)
-				if isCriticalError && toolExecutionErr == nil {
-					if errorResult, ok := result.Result.(ToolResultOutputContentError); ok && errorResult.Error != nil {
-						toolExecutionErr = errorResult.Error
-					}
-				}
-				toolStateMu.Unlock()
-				sequentialMu.Unlock()
-			}
-		}
-	})
 
 	// Process stream parts
 	for part := range stream {
@@ -1536,13 +1494,58 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 		}
 	}
 
-	// Dispatch all buffered tool calls now that the complete set is known and
-	// every OnToolCall callback has been called.
+	// All tool calls are now collected. Create the execution channel sized to
+	// avoid blocking during dispatch, start the coordinator, then flush the batch.
+	toolChan := make(chan toolExecutionRequest, len(pendingDispatches))
+	var toolExecutionWg sync.WaitGroup
+	var toolStateMu sync.Mutex
+	toolResults := make([]ToolResultContent, 0, len(pendingDispatches))
+	var toolExecutionErr error
+
+	// Semaphores for controlling parallelism.
+	parallelSem := make(chan struct{}, 5)
+	var sequentialMu sync.Mutex
+
+	// Single coordinator goroutine that dispatches tools.
+	toolExecutionWg.Go(func() {
+		for req := range toolChan {
+			if req.parallel {
+				parallelSem <- struct{}{}
+				toolExecutionWg.Go(func() {
+					defer func() { <-parallelSem }()
+					result, isCriticalError := a.executeSingleTool(ctx, toolMap, execProviderToolMap, req.toolCall, opts.OnToolResult)
+					toolStateMu.Lock()
+					toolResults = append(toolResults, result)
+					if isCriticalError && toolExecutionErr == nil {
+						if errorResult, ok := result.Result.(ToolResultOutputContentError); ok && errorResult.Error != nil {
+							toolExecutionErr = errorResult.Error
+						}
+					}
+					toolStateMu.Unlock()
+				})
+			} else {
+				sequentialMu.Lock()
+				result, isCriticalError := a.executeSingleTool(ctx, toolMap, execProviderToolMap, req.toolCall, opts.OnToolResult)
+				toolStateMu.Lock()
+				toolResults = append(toolResults, result)
+				if isCriticalError && toolExecutionErr == nil {
+					if errorResult, ok := result.Result.(ToolResultOutputContentError); ok && errorResult.Error != nil {
+						toolExecutionErr = errorResult.Error
+					}
+				}
+				toolStateMu.Unlock()
+				sequentialMu.Unlock()
+			}
+		}
+	})
+
+	// Dispatch all buffered tool calls now that every OnToolCall callback has
+	// been called, then close and wait.
 	for _, req := range pendingDispatches {
 		toolChan <- req
 	}
 
-	// Close the tool execution channel and wait for all executions to complete
+	// Close the tool execution channel and wait for all executions to complete.
 	close(toolChan)
 	toolExecutionWg.Wait()
 

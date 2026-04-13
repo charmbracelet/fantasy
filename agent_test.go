@@ -2428,3 +2428,133 @@ func TestAgent_Generate_ExecutableProviderTool_CriticalError(t *testing.T) {
 	require.Equal(t, 1, callCount)
 	require.Len(t, result.Steps, 1)
 }
+
+func TestAgent_Generate_StopTurn(t *testing.T) {
+	t.Parallel()
+
+	type TestInput struct {
+		Value string `json:"value" description:"Test value"`
+	}
+
+	tool1 := NewAgentTool(
+		"tool1",
+		"Test tool",
+		func(ctx context.Context, input TestInput, _ ToolCall) (ToolResponse, error) {
+			resp := NewTextErrorResponse("permission denied: this tool call was blocked")
+			resp.StopTurn = true
+			return resp, nil
+		},
+	)
+
+	callCount := 0
+	model := &mockLanguageModel{
+		generateFunc: func(ctx context.Context, call Call) (*Response, error) {
+			callCount++
+			return &Response{
+				Content: []Content{
+					ToolCallContent{
+						ToolCallID: "call-1",
+						ToolName:   "tool1",
+						Input:      `{"value":"test"}`,
+					},
+				},
+				Usage: Usage{
+					InputTokens:  10,
+					OutputTokens: 5,
+					TotalTokens:  15,
+				},
+				FinishReason: FinishReasonToolCalls,
+			}, nil
+		},
+	}
+
+	agent := NewAgent(model, WithTools(tool1))
+	result, err := agent.Generate(context.Background(), AgentCall{
+		Prompt: "test-input",
+	})
+
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	// The model should only be called once — StopTurn prevents the second call.
+	require.Equal(t, 1, callCount)
+	require.Len(t, result.Steps, 1)
+
+	// The tool result should still be in the step content.
+	toolResults := result.Steps[0].Content.ToolResults()
+	require.Len(t, toolResults, 1)
+	require.Equal(t, "tool1", toolResults[0].ToolName)
+	require.True(t, toolResults[0].StopTurn)
+
+	// The final response also includes the stop-marked tool result.
+	responseResults := result.Response.Content.ToolResults()
+	require.Len(t, responseResults, 1)
+	require.True(t, responseResults[0].StopTurn)
+}
+
+func TestAgent_Generate_StopTurn_NotSet(t *testing.T) {
+	t.Parallel()
+
+	type TestInput struct {
+		Value string `json:"value" description:"Test value"`
+	}
+
+	tool1 := NewAgentTool(
+		"tool1",
+		"Test tool",
+		func(ctx context.Context, input TestInput, _ ToolCall) (ToolResponse, error) {
+			return NewTextErrorResponse("normal error"), nil
+		},
+	)
+
+	callCount := 0
+	model := &mockLanguageModel{
+		generateFunc: func(ctx context.Context, call Call) (*Response, error) {
+			callCount++
+			switch callCount {
+			case 1:
+				return &Response{
+					Content: []Content{
+						ToolCallContent{
+							ToolCallID: "call-1",
+							ToolName:   "tool1",
+							Input:      `{"value":"test"}`,
+						},
+					},
+					Usage: Usage{
+						InputTokens:  10,
+						OutputTokens: 5,
+						TotalTokens:  15,
+					},
+					FinishReason: FinishReasonToolCalls,
+				}, nil
+			case 2:
+				return &Response{
+					Content: []Content{
+						TextContent{Text: "Done"},
+					},
+					Usage:        Usage{InputTokens: 3, OutputTokens: 5, TotalTokens: 8},
+					FinishReason: FinishReasonStop,
+				}, nil
+			default:
+				t.Fatalf("Unexpected call count: %d", callCount)
+				return nil, nil
+			}
+		},
+	}
+
+	agent := NewAgent(model, WithTools(tool1))
+	result, err := agent.Generate(context.Background(), AgentCall{
+		Prompt: "test-input",
+	})
+
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	// Without StopTurn, the model gets a second call.
+	require.Equal(t, 2, callCount)
+	require.Len(t, result.Steps, 2)
+
+	// StopTurn should be false on the tool result.
+	toolResults := result.Steps[0].Content.ToolResults()
+	require.Len(t, toolResults, 1)
+	require.False(t, toolResults[0].StopTurn)
+}

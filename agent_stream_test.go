@@ -681,3 +681,83 @@ func TestStreamingAgentSources(t *testing.T) {
 	resultSources := result.Response.Content.Sources()
 	require.Equal(t, 2, len(resultSources))
 }
+
+func TestStreamingAgent_StopTurn(t *testing.T) {
+	t.Parallel()
+
+	stepCount := 0
+	mockModel := &mockLanguageModel{
+		streamFunc: func(ctx context.Context, call Call) (StreamResponse, error) {
+			stepCount++
+			return func(yield func(StreamPart) bool) {
+				if stepCount == 1 {
+					if !yield(StreamPart{Type: StreamPartTypeToolInputStart, ID: "tool-1", ToolCallName: "blocked_tool"}) {
+						return
+					}
+					if !yield(StreamPart{Type: StreamPartTypeToolInputDelta, ID: "tool-1", Delta: `{"message"`}) {
+						return
+					}
+					if !yield(StreamPart{Type: StreamPartTypeToolInputDelta, ID: "tool-1", Delta: `: "test"}`}) {
+						return
+					}
+					if !yield(StreamPart{Type: StreamPartTypeToolInputEnd, ID: "tool-1"}) {
+						return
+					}
+					if !yield(StreamPart{
+						Type:          StreamPartTypeToolCall,
+						ID:            "tool-1",
+						ToolCallName:  "blocked_tool",
+						ToolCallInput: `{"message": "test"}`,
+					}) {
+						return
+					}
+					yield(StreamPart{
+						Type:         StreamPartTypeFinish,
+						Usage:        Usage{InputTokens: 10, OutputTokens: 5, TotalTokens: 15},
+						FinishReason: FinishReasonToolCalls,
+					})
+				} else {
+					// Should not be reached because StopTurn prevents a second step
+					t.Fatal("model should not be called a second time after StopTurn")
+				}
+			}, nil
+		},
+	}
+
+	type BlockedInput struct {
+		Message string `json:"message" description:"Message"`
+	}
+
+	blockedTool := NewAgentTool(
+		"blocked_tool",
+		"A tool that stops the turn",
+		func(ctx context.Context, input BlockedInput, _ ToolCall) (ToolResponse, error) {
+			resp := NewTextErrorResponse("permission denied")
+			resp.StopTurn = true
+			return resp, nil
+		},
+	)
+
+	agent := NewAgent(mockModel, WithTools(blockedTool))
+
+	result, err := agent.Stream(context.Background(), AgentStreamCall{
+		Prompt: "test stop turn",
+	})
+	require.NoError(t, err)
+	require.NotNil(t, result)
+
+	// Only one step — StopTurn prevented the second model call.
+	require.Len(t, result.Steps, 1)
+	require.Equal(t, 1, stepCount)
+
+	// Tool result should be present with StopTurn=true.
+	toolResults := result.Steps[0].Content.ToolResults()
+	require.Len(t, toolResults, 1)
+	require.Equal(t, "blocked_tool", toolResults[0].ToolName)
+	require.True(t, toolResults[0].StopTurn)
+
+	// The final response also includes the stop-marked tool result.
+	responseResults := result.Response.Content.ToolResults()
+	require.Len(t, responseResults, 1)
+	require.True(t, responseResults[0].StopTurn)
+}

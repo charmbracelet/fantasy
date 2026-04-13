@@ -485,7 +485,12 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 
 		toolResults, err := a.executeTools(ctx, stepTools, stepExecProviderTools, stepToolCalls, nil)
 
-		// Build step content with validated tool calls and tool results.		// Provider-executed tool calls are kept as-is.
+		// If any tool result requested a stop, deliver all results but don't
+		// request another completion from the model.
+		stopTurnRequested := hasStopTurn(toolResults)
+
+		// Build step content with validated tool calls and tool results.
+		// Provider-executed tool calls are kept as-is.
 		stepContent := []Content{}
 		toolCallIndex := 0
 		for _, content := range result.Content {
@@ -523,7 +528,7 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 		steps = append(steps, stepResult)
 		shouldStop := isStopConditionMet(opts.StopWhen, steps)
 
-		if shouldStop || err != nil || len(stepToolCalls) == 0 || result.FinishReason != FinishReasonToolCalls {
+		if shouldStop || err != nil || stopTurnRequested || len(stepToolCalls) == 0 || result.FinishReason != FinishReasonToolCalls {
 			break
 		}
 	}
@@ -555,6 +560,15 @@ func isStopConditionMet(conditions []StopCondition, steps []StepResult) bool {
 
 	for _, condition := range conditions {
 		if condition(steps) {
+			return true
+		}
+	}
+	return false
+}
+
+func hasStopTurn(results []ToolResultContent) bool {
+	for _, r := range results {
+		if r.StopTurn {
 			return true
 		}
 	}
@@ -729,6 +743,7 @@ func (a *agent) executeSingleTool(ctx context.Context, toolMap map[string]AgentT
 			Error: err,
 		}
 		result.ClientMetadata = toolResult.Metadata
+		result.StopTurn = toolResult.StopTurn
 		if toolResultCallback != nil {
 			_ = toolResultCallback(result)
 		}
@@ -736,6 +751,7 @@ func (a *agent) executeSingleTool(ctx context.Context, toolMap map[string]AgentT
 	}
 
 	result.ClientMetadata = toolResult.Metadata
+	result.StopTurn = toolResult.StopTurn
 	if toolResult.IsError {
 		result.Result = ToolResultOutputContentError{
 			Error: errors.New(toolResult.Content),
@@ -1573,7 +1589,7 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 	}
 
 	// Determine if we should continue (has tool calls and not stopped)
-	shouldContinue := len(stepToolCalls) > 0 && stepFinishReason == FinishReasonToolCalls
+	shouldContinue := len(stepToolCalls) > 0 && stepFinishReason == FinishReasonToolCalls && !hasStopTurn(toolResults)
 
 	return stepExecutionResult{
 		StepResult:     stepResult,

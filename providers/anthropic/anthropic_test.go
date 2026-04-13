@@ -1574,7 +1574,8 @@ func TestComputerUseToolJSON(t *testing.T) {
 		}
 		_, err := computerUseToolJSON(pdt)
 		require.Error(t, err)
-			require.Contains(t, err.Error(), "tool_version arg is missing")	})
+		require.Contains(t, err.Error(), "tool_version arg is missing")
+	})
 
 	t.Run("returns error for unsupported version", func(t *testing.T) {
 		t.Parallel()

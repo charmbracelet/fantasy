@@ -154,6 +154,7 @@ type ResponsesProviderOptions struct {
 	PromptCacheKey     *string          `json:"prompt_cache_key"`
 	ReasoningEffort    *ReasoningEffort `json:"reasoning_effort"`
 	ReasoningSummary   *string          `json:"reasoning_summary"`
+	ResetChain         *bool            `json:"reset_chain"`
 	SafetyIdentifier   *string          `json:"safety_identifier"`
 	ServiceTier        *ServiceTier     `json:"service_tier"`
 	// Store indicates whether OpenAI should persist this response for future
@@ -163,6 +164,7 @@ type ResponsesProviderOptions struct {
 	StrictJSONSchema *bool          `json:"strict_json_schema"`
 	TextVerbosity    *TextVerbosity `json:"text_verbosity"`
 	User             *string        `json:"user"`
+	GenerateWarmup   *bool          `json:"generate_warmup"`
 }
 
 // Options implements the ProviderOptions interface.

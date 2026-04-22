@@ -34,12 +34,7 @@ func toProviderErr(err error) error {
 
 		return providerErr
 	}
-	// Transient transport failures from the streaming decoder (most commonly
-	// io.ErrUnexpectedEOF from a mid-stream SSE disconnect) arrive here as
-	// plain errors that are not *openai.Error. Wrap them as ProviderError
-	// so that the retry loop in retry.go engages — ProviderError.IsRetryable
-	// already classifies io.ErrUnexpectedEOF as retryable, but that check is
-	// only reached if the error is a *ProviderError to begin with.
+	// Wrap in a `ProviderError` so `.IsRetriable()` works.
 	if errors.Is(err, io.ErrUnexpectedEOF) {
 		return &fantasy.ProviderError{
 			Title:   "stream transport error",

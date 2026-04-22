@@ -19,6 +19,8 @@ const (
 	EffortMedium Effort = "medium"
 	// EffortHigh represents high output effort.
 	EffortHigh Effort = "high"
+	// EffortXHigh represents extra-high output effort.
+	EffortXHigh Effort = "xhigh"
 	// EffortMax represents maximum output effort.
 	EffortMax Effort = "max"
 )

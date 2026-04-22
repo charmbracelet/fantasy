@@ -38,6 +38,7 @@ type ToolResponse struct {
 	MediaType string `json:"media_type,omitempty"`
 	Metadata  string `json:"metadata,omitempty"`
 	IsError   bool   `json:"is_error"`
+	StopTurn  bool   `json:"stop_turn,omitempty"`
 }
 
 // NewTextResponse creates a text response.

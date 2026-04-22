@@ -463,6 +463,10 @@ type ToolResultContent struct {
 	ProviderExecuted bool `json:"provider_executed"`
 	// Additional provider-specific metadata for the tool result.
 	ProviderMetadata ProviderMetadata `json:"provider_metadata"`
+	// StopTurn indicates that the agent loop should stop after this result.
+	// The tool result is still delivered to the model's context, but the model
+	// does not get another chance to make tool calls in the same turn.
+	StopTurn bool `json:"stop_turn,omitempty"`
 }
 
 // GetType returns the type of the tool result content.

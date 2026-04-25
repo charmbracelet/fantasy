@@ -200,5 +200,5 @@ func (o *provider) LanguageModel(_ context.Context, modelID string) (fantasy.Lan
 }
 
 func (o *provider) Name() string {
-	return Name
+	return o.options.name
 }

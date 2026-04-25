@@ -25,6 +25,7 @@ type wsTransport struct {
 	apiKey         string
 	headers        map[string]string
 	lastResponseID string
+	lastInputLen   int // number of input items sent in the last successful request
 }
 
 // newWSTransport creates a new WebSocket transport for the OpenAI Responses API.
@@ -209,8 +210,6 @@ func (ws *wsTransport) applyWSOptions(body json.RawMessage, call fantasy.Call) j
 		ws.lastResponseID = ""
 		ws.lastInputLen = 0
 	}
-
-	var fullInputLen int
 
 	// Auto-chain with previous_response_id from transport state if not explicitly set
 	if _, hasPrevID := bodyMap["previous_response_id"]; !hasPrevID && ws.lastResponseID != "" {

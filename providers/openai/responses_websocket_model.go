@@ -7,9 +7,23 @@ import (
 	"strings"
 
 	"charm.land/fantasy"
-	"github.com/google/uuid"
 	"github.com/charmbracelet/openai-go/responses"
+	"github.com/google/uuid"
 )
+
+// wsErrorEvent represents the WebSocket error event structure from OpenAI.
+// This differs from ResponseErrorEvent which is used for HTTP streaming.
+// WebSocket errors nest the error details inside an "error" field.
+type wsErrorEvent struct {
+	Type   string `json:"type"`
+	Status int    `json:"status"`
+	Error  struct {
+		Type    string `json:"type"`
+		Code    string `json:"code"`
+		Message string `json:"message"`
+		Param   string `json:"param"`
+	} `json:"error"`
+}
 
 // generateViaWebSocket sends a response.create event over WebSocket and collects
 // the full response from streaming events.
@@ -130,13 +144,35 @@ func (o responsesLanguageModel) generateViaWebSocket(ctx context.Context, params
 				usage.CacheReadTokens = completed.Response.Usage.InputTokensDetails.CachedTokens
 			}
 
+		case "response.failed":
+			failed := streamEvent.AsResponseFailed()
+			// Clear state on failure - the server evicts the response from cache
+			o.wsTransport.lastResponseID = ""
+			o.wsTransport.lastInputLen = 0
+			responseErr = fmt.Errorf("response failed: %s (code: %s)",
+				failed.Response.Error.Message, failed.Response.Error.Code)
+
 		case "error":
-			errorEvent := streamEvent.AsError()
-			if errorEvent.Code == "previous_response_not_found" {
-				o.wsTransport.lastResponseID = ""
+			// WebSocket error events have a different structure than HTTP streaming errors.
+			// The error details are nested inside an "error" field.
+			var wsErr wsErrorEvent
+			var errMsg, errCode string
+			if err := json.Unmarshal(evt.Raw, &wsErr); err == nil && wsErr.Error.Code != "" {
+				errMsg = wsErr.Error.Message
+				errCode = wsErr.Error.Code
+			} else {
+				// Fallback to SDK parsing (for locally-generated errors)
+				errorEvent := streamEvent.AsError()
+				errMsg = errorEvent.Message
+				errCode = errorEvent.Code
+			}
+			// Clear state on any error - the server evicts failed responses from cache
+			o.wsTransport.lastResponseID = ""
+			o.wsTransport.lastInputLen = 0
+			if errCode == "previous_response_not_found" {
 				return nil, fmt.Errorf("previous_response_not_found")
 			}
-			responseErr = fmt.Errorf("%s (code: %s)", errorEvent.Message, errorEvent.Code)
+			responseErr = fmt.Errorf("%s (code: %s)", errMsg, errCode)
 		}
 	}
 
@@ -368,14 +404,39 @@ func (o responsesLanguageModel) streamViaWebSocket(ctx context.Context, params *
 					usage.CacheReadTokens = completed.Response.Usage.InputTokensDetails.CachedTokens
 				}
 
-			case "error":
-				errorEvent := event.AsError()
-				if errorEvent.Code == "previous_response_not_found" {
-					o.wsTransport.lastResponseID = ""
-				}
+			case "response.failed":
+				failed := event.AsResponseFailed()
+				// Clear state on failure - the server evicts the response from cache
+				o.wsTransport.lastResponseID = ""
+				o.wsTransport.lastInputLen = 0
 				if !yield(fantasy.StreamPart{
 					Type:  fantasy.StreamPartTypeError,
-					Error: fmt.Errorf("response error: %s (code: %s)", errorEvent.Message, errorEvent.Code),
+					Error: fmt.Errorf("response failed: %s (code: %s)", failed.Response.Error.Message, failed.Response.Error.Code),
+				}) {
+					return
+				}
+				return
+
+			case "error":
+				// WebSocket error events have a different structure than HTTP streaming errors.
+				// The error details are nested inside an "error" field.
+				var wsErr wsErrorEvent
+				var errMsg, errCode string
+				if err := json.Unmarshal(evt.Raw, &wsErr); err == nil && wsErr.Error.Code != "" {
+					errMsg = wsErr.Error.Message
+					errCode = wsErr.Error.Code
+				} else {
+					// Fallback to SDK parsing (for locally-generated errors)
+					errorEvent := event.AsError()
+					errMsg = errorEvent.Message
+					errCode = errorEvent.Code
+				}
+				// Clear state on any error - the server evicts failed responses from cache
+				o.wsTransport.lastResponseID = ""
+				o.wsTransport.lastInputLen = 0
+				if !yield(fantasy.StreamPart{
+					Type:  fantasy.StreamPartTypeError,
+					Error: fmt.Errorf("response error: %s (code: %s)", errMsg, errCode),
 				}) {
 					return
 				}

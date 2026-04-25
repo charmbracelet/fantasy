@@ -323,3 +323,72 @@ func TestWSURL(t *testing.T) {
 		}
 	}
 }
+
+func TestWSErrorEventParsing(t *testing.T) {
+	// Test that wsErrorEvent correctly parses WebSocket error events
+	// which have a different structure than HTTP streaming errors
+	tests := []struct {
+		name        string
+		rawJSON     string
+		wantCode    string
+		wantMessage string
+	}{
+		{
+			name: "previous_response_not_found",
+			rawJSON: `{
+				"type": "error",
+				"status": 400,
+				"error": {
+					"code": "previous_response_not_found",
+					"message": "Previous response with id 'resp_abc' not found.",
+					"param": "previous_response_id"
+				}
+			}`,
+			wantCode:    "previous_response_not_found",
+			wantMessage: "Previous response with id 'resp_abc' not found.",
+		},
+		{
+			name: "connection_limit_reached",
+			rawJSON: `{
+				"type": "error",
+				"status": 400,
+				"error": {
+					"type": "invalid_request_error",
+					"code": "websocket_connection_limit_reached",
+					"message": "Responses websocket connection limit reached (60 minutes). Create a new websocket connection to continue."
+				}
+			}`,
+			wantCode:    "websocket_connection_limit_reached",
+			wantMessage: "Responses websocket connection limit reached (60 minutes). Create a new websocket connection to continue.",
+		},
+		{
+			name: "invalid_prompt",
+			rawJSON: `{
+				"type": "error",
+				"status": 400,
+				"error": {
+					"code": "invalid_prompt",
+					"message": "The prompt contains invalid content."
+				}
+			}`,
+			wantCode:    "invalid_prompt",
+			wantMessage: "The prompt contains invalid content.",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var wsErr wsErrorEvent
+			if err := json.Unmarshal([]byte(tt.rawJSON), &wsErr); err != nil {
+				t.Fatalf("unmarshal: %v", err)
+			}
+
+			if wsErr.Error.Code != tt.wantCode {
+				t.Errorf("code = %q, want %q", wsErr.Error.Code, tt.wantCode)
+			}
+			if wsErr.Error.Message != tt.wantMessage {
+				t.Errorf("message = %q, want %q", wsErr.Error.Message, tt.wantMessage)
+			}
+		})
+	}
+}

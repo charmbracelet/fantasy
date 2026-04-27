@@ -13,6 +13,7 @@ import (
 	"charm.land/fantasy/providers/openai"
 	openaisdk "github.com/charmbracelet/openai-go"
 	"github.com/charmbracelet/openai-go/packages/param"
+	xstrings "github.com/charmbracelet/x/exp/strings"
 )
 
 const reasoningStartedCtx = "reasoning_started"

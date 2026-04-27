@@ -295,8 +295,7 @@ func languageModelStreamExtra(chunk openaisdk.ChatCompletionChunk, yield func(fa
 		currentState.format = detail.Format
 		ctx[reasoningStartedCtx] = currentState
 		delta := detail.Summary
-		if strings.HasPrefix(detail.Format, "google-gemini") ||
-			strings.HasPrefix(detail.Format, "anthropic-claude") {
+		if xstrings.ContainsAnyOf(detail.Format, "google-gemini", "anthropic-claude") {
 			delta = detail.Text
 		}
 		return ctx, yield(fantasy.StreamPart{

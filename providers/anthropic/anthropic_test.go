@@ -176,9 +176,14 @@ func TestToPrompt_DropsEmptyMessages(t *testing.T) {
 		require.Empty(t, warnings)
 	})
 
-	t.Run("should drop assistant messages with invalid tool input", func(t *testing.T) {
+	t.Run("should preserve tool_use block when input JSON is malformed", func(t *testing.T) {
 		t.Parallel()
 
+		// Anthropic's API rejects any request whose tool_result lacks a
+		// matching tool_use in the previous message. Dropping the tool_use
+		// because its input failed to parse leaves the next turn's
+		// tool_result orphaned and produces a 400. Emit the block with
+		// empty arguments instead, and surface the parse error as a warning.
 		prompt := fantasy.Prompt{
 			{
 				Role: fantasy.MessageRoleUser,
@@ -201,10 +206,56 @@ func TestToPrompt_DropsEmptyMessages(t *testing.T) {
 		systemBlocks, messages, warnings := toPrompt(prompt, true)
 
 		require.Empty(t, systemBlocks)
-		require.Len(t, messages, 1, "should only have user message")
+		require.Len(t, messages, 2, "user + assistant — assistant must be preserved so tool_result can pair")
+		assistant := messages[1]
+		require.Equal(t, anthropic.MessageParamRoleAssistant, assistant.Role)
+		require.Len(t, assistant.Content, 1)
+		toolUse := assistant.Content[0].OfToolUse
+		require.NotNil(t, toolUse, "tool_use block should be emitted even when input is malformed")
+		require.Equal(t, "call_123", toolUse.ID)
+		require.Equal(t, "get_weather", toolUse.Name)
 		require.Len(t, warnings, 1)
 		require.Equal(t, fantasy.CallWarningTypeOther, warnings[0].Type)
-		require.Contains(t, warnings[0].Message, "dropping empty assistant message")
+		require.Contains(t, warnings[0].Message, "malformed input JSON")
+		require.Contains(t, warnings[0].Message, "call_123")
+	})
+
+	t.Run("should preserve tool_use block when input is empty", func(t *testing.T) {
+		t.Parallel()
+
+		// Some upstream providers (notably DeepSeek's anthropic-compat
+		// endpoint) emit tool_use blocks with empty input for parameterless
+		// tool calls. Treat empty input as {} rather than dropping the
+		// block, since the next turn's tool_result still needs its pair.
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "Hi"},
+				},
+			},
+			{
+				Role: fantasy.MessageRoleAssistant,
+				Content: []fantasy.MessagePart{
+					fantasy.ToolCallPart{
+						ToolCallID: "call_empty",
+						ToolName:   "ping",
+						Input:      "",
+					},
+				},
+			},
+		}
+
+		systemBlocks, messages, warnings := toPrompt(prompt, true)
+
+		require.Empty(t, systemBlocks)
+		require.Empty(t, warnings, "empty input is a valid round-trip; no warning")
+		require.Len(t, messages, 2)
+		require.Equal(t, anthropic.MessageParamRoleAssistant, messages[1].Role)
+		toolUse := messages[1].Content[0].OfToolUse
+		require.NotNil(t, toolUse)
+		require.Equal(t, "call_empty", toolUse.ID)
+		require.Equal(t, "ping", toolUse.Name)
 	})
 
 	t.Run("should keep assistant messages with reasoning and text", func(t *testing.T) {

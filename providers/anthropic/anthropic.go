@@ -999,10 +999,9 @@ func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBl
 						if toolCall.ProviderExecuted {
 							// Reconstruct server_tool_use block for
 							// multi-turn round-tripping.
-							var inputAny any
-							err := json.Unmarshal([]byte(toolCall.Input), &inputAny)
-							if err != nil {
-								continue
+							inputAny, warning := decodeToolCallInputAny(toolCall)
+							if warning != nil {
+								warnings = append(warnings, *warning)
 							}
 							anthropicContent = append(anthropicContent, anthropic.ContentBlockParamUnion{
 								OfServerToolUse: &anthropic.ServerToolUseBlockParam{
@@ -1013,10 +1012,9 @@ func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBl
 							})
 							continue
 						}
-						var inputMap map[string]any
-						err := json.Unmarshal([]byte(toolCall.Input), &inputMap)
-						if err != nil {
-							continue
+						inputMap, warning := decodeToolCallInputMap(toolCall)
+						if warning != nil {
+							warnings = append(warnings, *warning)
 						}
 						toolUseBlock := anthropic.NewToolUseBlock(toolCall.ToolCallID, inputMap, toolCall.ToolName)
 						if cacheControl != nil {
@@ -1075,6 +1073,52 @@ func hasVisibleAssistantContent(content []anthropic.ContentBlockParamUnion) bool
 		}
 	}
 	return false
+}
+
+// decodeToolCallInputMap unmarshals a ToolCallPart.Input into a map for
+// reconstructing an Anthropic tool_use block. The Anthropic API rejects any
+// request whose tool_result lacks a matching tool_use in the previous
+// message, so this helper never drops the block: empty input becomes {},
+// and malformed input falls back to {} with a CallWarning. The caller still
+// emits a tool_use block with the original ToolCallID, preserving the pair.
+func decodeToolCallInputMap(toolCall fantasy.ToolCallPart) (map[string]any, *fantasy.CallWarning) {
+	if strings.TrimSpace(toolCall.Input) == "" {
+		return map[string]any{}, nil
+	}
+	var inputMap map[string]any
+	if err := json.Unmarshal([]byte(toolCall.Input), &inputMap); err != nil {
+		return map[string]any{}, &fantasy.CallWarning{
+			Type: fantasy.CallWarningTypeOther,
+			Message: fmt.Sprintf(
+				"tool call %q has malformed input JSON; emitting empty arguments to preserve tool_use ↔ tool_result pairing: %s",
+				toolCall.ToolCallID, err,
+			),
+		}
+	}
+	if inputMap == nil {
+		return map[string]any{}, nil
+	}
+	return inputMap, nil
+}
+
+// decodeToolCallInputAny is the server_tool_use counterpart to
+// decodeToolCallInputMap. ServerToolUseBlockParam.Input has type `any` so
+// nil is acceptable for the empty case.
+func decodeToolCallInputAny(toolCall fantasy.ToolCallPart) (any, *fantasy.CallWarning) {
+	if strings.TrimSpace(toolCall.Input) == "" {
+		return nil, nil
+	}
+	var inputAny any
+	if err := json.Unmarshal([]byte(toolCall.Input), &inputAny); err != nil {
+		return nil, &fantasy.CallWarning{
+			Type: fantasy.CallWarningTypeOther,
+			Message: fmt.Sprintf(
+				"server tool call %q has malformed input JSON; emitting empty arguments to preserve tool_use ↔ tool_result pairing: %s",
+				toolCall.ToolCallID, err,
+			),
+		}
+	}
+	return inputAny, nil
 }
 
 // buildWebSearchToolResultBlock constructs an Anthropic

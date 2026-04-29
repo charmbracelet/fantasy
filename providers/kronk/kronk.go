@@ -9,7 +9,7 @@ import (
 
 	"charm.land/fantasy"
 	"github.com/ardanlabs/kronk/sdk/kronk"
-	"github.com/ardanlabs/kronk/sdk/tools/catalog"
+	"github.com/ardanlabs/kronk/sdk/kronk/model"
 	"github.com/ardanlabs/kronk/sdk/tools/libs"
 	"github.com/ardanlabs/kronk/sdk/tools/models"
 )
@@ -102,7 +102,7 @@ func (p *provider) Close(ctx context.Context) error {
 	return nil
 }
 
-func (p *provider) installSystem(ctx context.Context, modelURL string) (models.Path, error) {
+func (p *provider) installSystem(ctx context.Context, modelSource string) (models.Path, error) {
 	logger := p.options.logger
 	if logger == nil {
 		logger = func(context.Context, string, ...any) {}
@@ -117,21 +117,12 @@ func (p *provider) installSystem(ctx context.Context, modelURL string) (models.P
 		return models.Path{}, fmt.Errorf("unable to install llama.cpp: %w", err)
 	}
 
-	ctlg, err := catalog.New()
-	if err != nil {
-		return models.Path{}, fmt.Errorf("unable to create catalog system: %w", err)
-	}
-
-	if err := ctlg.Download(ctx); err != nil {
-		return models.Path{}, fmt.Errorf("unable to download catalog: %w", err)
-	}
-
 	mdls, err := models.New()
 	if err != nil {
 		return models.Path{}, fmt.Errorf("unable to create models: %w", err)
 	}
 
-	mp, err := mdls.Download(ctx, models.Logger(logger), modelURL, "")
+	mp, err := mdls.Download(ctx, models.Logger(logger), modelSource)
 	if err != nil {
 		return models.Path{}, fmt.Errorf("unable to install model: %w", err)
 	}
@@ -147,7 +138,7 @@ func (p *provider) newKronk(mp models.Path) (*kronk.Kronk, error) {
 	cfg := p.options.modelConfig
 	cfg.ModelFiles = mp.ModelFiles
 
-	krn, err := kronk.New(cfg)
+	krn, err := kronk.New(model.WithConfig(cfg))
 	if err != nil {
 		return nil, fmt.Errorf("unable to create inference model: %w", err)
 	}

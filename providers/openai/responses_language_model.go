@@ -611,6 +611,7 @@ func toResponsesPrompt(prompt fantasy.Prompt, systemMessageMode string, store bo
 				}
 
 				var outputStr string
+				var followupParts responses.ResponseInputMessageContentListParam
 
 				switch toolResultPart.Output.GetType() {
 				case fantasy.ToolResultContentTypeText:
@@ -633,9 +634,50 @@ func toResponsesPrompt(prompt fantasy.Prompt, systemMessageMode string, store bo
 						continue
 					}
 					outputStr = output.Error.Error()
+				case fantasy.ToolResultContentTypeMedia:
+					output, ok := fantasy.AsToolResultOutputType[fantasy.ToolResultOutputContentMedia](toolResultPart.Output)
+					if !ok {
+						warnings = append(warnings, fantasy.CallWarning{
+							Type:    fantasy.CallWarningTypeOther,
+							Message: "tool result output does not have the right type",
+						})
+						continue
+					}
+					// The Responses API function_call_output only accepts a
+					// string. Emit a text placeholder (preserving any
+					// accompanying text) so the tool_call/tool_result pairing
+					// stays valid, then attach the media as a synthetic user
+					// input_image so vision-capable models still receive it.
+					outputStr = output.Text
+					if outputStr == "" {
+						outputStr = fmt.Sprintf("The tool returned %s content; see the following user message.", output.MediaType)
+					}
+					if strings.HasPrefix(output.MediaType, "image/") {
+						imageURL := fmt.Sprintf("data:%s;base64,%s", output.MediaType, output.Data)
+						followupParts = append(followupParts, responses.ResponseInputContentUnionParam{
+							OfInputImage: &responses.ResponseInputImageParam{
+								Type:     "input_image",
+								ImageURL: param.NewOpt(imageURL),
+							},
+						})
+					} else {
+						warnings = append(warnings, fantasy.CallWarning{
+							Type:    fantasy.CallWarningTypeOther,
+							Message: fmt.Sprintf("tool result media type %s not supported, sending text placeholder only", output.MediaType),
+						})
+					}
+				default:
+					warnings = append(warnings, fantasy.CallWarning{
+						Type:    fantasy.CallWarningTypeOther,
+						Message: fmt.Sprintf("tool result output type %q not supported", toolResultPart.Output.GetType()),
+					})
+					continue
 				}
 
 				input = append(input, responses.ResponseInputItemParamOfFunctionCallOutput(toolResultPart.ToolCallID, outputStr))
+				if len(followupParts) > 0 {
+					input = append(input, responses.ResponseInputItemParamOfMessage(followupParts, responses.EasyInputMessageRoleUser))
+				}
 			}
 		}
 	}

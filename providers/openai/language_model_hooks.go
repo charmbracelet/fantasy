@@ -564,11 +564,81 @@ func DefaultToPrompt(prompt fantasy.Prompt, _, _ string) ([]openai.ChatCompletio
 						continue
 					}
 					messages = append(messages, openai.ToolMessage(output.Error.Error(), toolResultPart.ToolCallID))
+				case fantasy.ToolResultContentTypeMedia:
+					output, ok := fantasy.AsToolResultOutputType[fantasy.ToolResultOutputContentMedia](toolResultPart.Output)
+					if !ok {
+						warnings = append(warnings, fantasy.CallWarning{
+							Type:    fantasy.CallWarningTypeOther,
+							Message: "tool result output does not have the right type",
+						})
+						continue
+					}
+					// OpenAI Chat Completions tool messages cannot carry image
+					// or audio content directly; the SDK's content union only
+					// accepts text. To keep the tool_call/tool_result pairing
+					// valid while still surfacing the media to vision-capable
+					// models, emit a text tool message with a placeholder (or
+					// any accompanying text) and follow it with a synthetic
+					// user message holding the actual media content part.
+					placeholder := output.Text
+					if placeholder == "" {
+						placeholder = fmt.Sprintf("The tool returned %s content; see the following user message.", output.MediaType)
+					}
+					messages = append(messages, openai.ToolMessage(placeholder, toolResultPart.ToolCallID))
+					mediaPart, mediaWarning, emit := toolResultMediaUserPart(output)
+					if mediaWarning != nil {
+						warnings = append(warnings, *mediaWarning)
+					}
+					if emit {
+						messages = append(messages, openai.UserMessage(
+							[]openai.ChatCompletionContentPartUnionParam{mediaPart},
+						))
+					}
+				default:
+					warnings = append(warnings, fantasy.CallWarning{
+						Type:    fantasy.CallWarningTypeOther,
+						Message: fmt.Sprintf("tool result output type %q not supported", toolResultPart.Output.GetType()),
+					})
 				}
 			}
 		}
 	}
 	return messages, warnings
+}
+
+// toolResultMediaUserPart maps a tool-result media output to an OpenAI chat
+// completions user content part. It returns the content part, an optional
+// warning, and whether the caller should emit the returned part.
+func toolResultMediaUserPart(output fantasy.ToolResultOutputContentMedia) (openai.ChatCompletionContentPartUnionParam, *fantasy.CallWarning, bool) {
+	switch {
+	case strings.HasPrefix(output.MediaType, "image/"):
+		data := "data:" + output.MediaType + ";base64," + output.Data
+		imageBlock := openai.ChatCompletionContentPartImageParam{
+			ImageURL: openai.ChatCompletionContentPartImageImageURLParam{URL: data},
+		}
+		return openai.ChatCompletionContentPartUnionParam{OfImageURL: &imageBlock}, nil, true
+	case output.MediaType == "audio/wav":
+		audioBlock := openai.ChatCompletionContentPartInputAudioParam{
+			InputAudio: openai.ChatCompletionContentPartInputAudioInputAudioParam{
+				Data:   output.Data,
+				Format: "wav",
+			},
+		}
+		return openai.ChatCompletionContentPartUnionParam{OfInputAudio: &audioBlock}, nil, true
+	case output.MediaType == "audio/mpeg" || output.MediaType == "audio/mp3":
+		audioBlock := openai.ChatCompletionContentPartInputAudioParam{
+			InputAudio: openai.ChatCompletionContentPartInputAudioInputAudioParam{
+				Data:   output.Data,
+				Format: "mp3",
+			},
+		}
+		return openai.ChatCompletionContentPartUnionParam{OfInputAudio: &audioBlock}, nil, true
+	default:
+		return openai.ChatCompletionContentPartUnionParam{}, &fantasy.CallWarning{
+			Type:    fantasy.CallWarningTypeOther,
+			Message: fmt.Sprintf("tool result media type %s not supported, sending text placeholder only", output.MediaType),
+		}, false
+	}
 }
 
 func hasVisibleUserContent(content []openai.ChatCompletionContentPartUnionParam) bool {

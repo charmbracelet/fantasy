@@ -1,3 +1,5 @@
+//go:build !nokronk
+
 package kronk
 
 import (

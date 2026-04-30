@@ -1,3 +1,5 @@
+//go:build !noazure
+
 // Package azure provides an implementation of the fantasy AI SDK for Azure's language models.
 package azure
 

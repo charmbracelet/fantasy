@@ -1,3 +1,5 @@
+//go:build !noazure
+
 package providertests
 
 import (

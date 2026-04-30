@@ -1,3 +1,5 @@
+//go:build !nogoogle
+
 // Package google provides an implementation of the fantasy AI SDK for Google's language models.
 package google
 

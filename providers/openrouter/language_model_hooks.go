@@ -1,3 +1,5 @@
+//go:build !noopenrouter
+
 package openrouter
 
 import (

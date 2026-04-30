@@ -1,3 +1,5 @@
+//go:build !noaws
+
 package providertests
 
 import (

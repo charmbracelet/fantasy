@@ -1,3 +1,5 @@
+//go:build !noazure
+
 package azure
 
 import (

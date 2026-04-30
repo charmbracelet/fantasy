@@ -1,3 +1,5 @@
+//go:build !novercel
+
 // Package vercel provides an implementation of the fantasy AI SDK for Vercel AI Gateway.
 package vercel
 

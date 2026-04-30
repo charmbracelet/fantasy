@@ -16,13 +16,9 @@ import (
 	"charm.land/fantasy"
 	"charm.land/fantasy/object"
 	"charm.land/fantasy/providers/internal/httpheaders"
-	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/charmbracelet/anthropic-sdk-go"
-	"github.com/charmbracelet/anthropic-sdk-go/bedrock"
 	"github.com/charmbracelet/anthropic-sdk-go/option"
 	"github.com/charmbracelet/anthropic-sdk-go/packages/param"
-	"github.com/charmbracelet/anthropic-sdk-go/vertex"
-	"golang.org/x/oauth2/google"
 )
 
 // betaRequestOptions converts beta flag strings into request
@@ -201,42 +197,17 @@ func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.L
 		clientOptions = append(clientOptions, option.WithHTTPClient(a.options.client))
 	}
 	if a.options.vertexProject != "" && a.options.vertexLocation != "" {
-		var credentials *google.Credentials
-		if a.options.skipAuth {
-			credentials = &google.Credentials{TokenSource: &googleDummyTokenSource{}}
-		} else {
-			var err error
-			credentials, err = google.FindDefaultCredentials(ctx, VertexAuthScope)
-			if err != nil {
-				return nil, err
-			}
+		var err error
+		clientOptions, err = a.configureVertexOptions(ctx, clientOptions)
+		if err != nil {
+			return nil, err
 		}
-
-		clientOptions = append(
-			clientOptions,
-			vertex.WithCredentials(
-				ctx,
-				a.options.vertexLocation,
-				a.options.vertexProject,
-				credentials,
-			),
-		)
 	}
 	if a.options.useBedrock {
-		modelID = bedrockPrefixModelWithRegion(modelID)
-
-		if a.options.skipAuth || a.options.apiKey != "" {
-			clientOptions = append(
-				clientOptions,
-				bedrock.WithConfig(bedrockBasicAuthConfig(a.options.apiKey)),
-			)
-		} else {
-			if cfg, err := config.LoadDefaultConfig(ctx); err == nil {
-				clientOptions = append(
-					clientOptions,
-					bedrock.WithConfig(cfg),
-				)
-			}
+		var err error
+		modelID, clientOptions, err = a.configureBedrockOptions(ctx, modelID, clientOptions)
+		if err != nil {
+			return nil, err
 		}
 		if a.options.baseURL != "" {
 			clientOptions = append(clientOptions, option.WithBaseURL(a.options.baseURL))

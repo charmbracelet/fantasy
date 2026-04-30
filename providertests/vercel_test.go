@@ -1,3 +1,5 @@
+//go:build !novercel
+
 package providertests
 
 import (

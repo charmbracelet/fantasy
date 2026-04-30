@@ -47,6 +47,9 @@ func PrepareCallFunc(model fantasy.LanguageModel, params *openaisdk.ChatCompleti
 	if providerOptions.User != nil {
 		params.User = param.NewOpt(*providerOptions.User)
 	}
+	if len(providerOptions.ExtraBody) > 0 {
+		params.SetExtraFields(providerOptions.ExtraBody)
+	}
 	return nil, nil
 }
 

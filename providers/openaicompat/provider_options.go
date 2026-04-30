@@ -28,6 +28,7 @@ func init() {
 type ProviderOptions struct {
 	User            *string                 `json:"user"`
 	ReasoningEffort *openai.ReasoningEffort `json:"reasoning_effort"`
+	ExtraBody       map[string]any          `json:"extra_body,omitempty"`
 }
 
 // ReasoningData represents reasoning data for OpenAI-compatible provider.

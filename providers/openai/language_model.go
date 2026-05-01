@@ -514,7 +514,10 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 			}
 
 			// Handle tool calls that finish with empty arguments (e.g., Copilot).
-			// Normalize empty args to "{}" and emit the tool call if valid.
+			// Normalize empty args to "{}" and emit the tool call.
+			// If the arguments are invalid JSON, we still yield the tool call
+			// so the consumer (agent) can handle the error rather than
+			// silently dropping it.
 			for idx, tc := range toolCalls {
 				if tc.hasFinished {
 					continue
@@ -523,16 +526,14 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 					tc.arguments = "{}"
 					toolCalls[idx] = tc
 				}
-				if xjson.IsValid(tc.arguments) {
-					if !yield(fantasy.StreamPart{Type: fantasy.StreamPartTypeToolInputEnd, ID: tc.id}) {
-						return
-					}
-					if !yield(fantasy.StreamPart{Type: fantasy.StreamPartTypeToolCall, ID: tc.id, ToolCallName: tc.name, ToolCallInput: tc.arguments}) {
-						return
-					}
-					tc.hasFinished = true
-					toolCalls[idx] = tc
+				if !yield(fantasy.StreamPart{Type: fantasy.StreamPartTypeToolInputEnd, ID: tc.id}) {
+					return
 				}
+				if !yield(fantasy.StreamPart{Type: fantasy.StreamPartTypeToolCall, ID: tc.id, ToolCallName: tc.name, ToolCallInput: tc.arguments}) {
+					return
+				}
+				tc.hasFinished = true
+				toolCalls[idx] = tc
 			}
 
 			if len(acc.Choices) > 0 {

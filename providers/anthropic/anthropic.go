@@ -1171,6 +1171,9 @@ func (a languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantas
 	if err != nil {
 		return nil, toProviderErr(err)
 	}
+	if response == nil {
+		return nil, &fantasy.Error{Title: "no response", Message: "provider returned nil response"}
+	}
 
 	var content []fantasy.Content
 	for _, block := range response.Content {

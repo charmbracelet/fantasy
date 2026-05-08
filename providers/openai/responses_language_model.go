@@ -789,6 +789,9 @@ func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call)
 	if err != nil {
 		return nil, toProviderErr(err)
 	}
+	if response == nil {
+		return nil, &fantasy.Error{Title: "no response", Message: "provider returned nil response"}
+	}
 
 	if response.Error.Message != "" {
 		return nil, &fantasy.Error{

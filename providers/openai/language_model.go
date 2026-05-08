@@ -251,6 +251,9 @@ func (o languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantas
 	if err != nil {
 		return nil, toProviderErr(err)
 	}
+	if response == nil {
+		return nil, &fantasy.Error{Title: "no response", Message: "provider returned nil response"}
+	}
 
 	if len(response.Choices) == 0 {
 		return nil, &fantasy.Error{Title: "no response", Message: "no response generated"}

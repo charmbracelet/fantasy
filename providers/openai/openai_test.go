@@ -2010,6 +2010,31 @@ func TestDoGenerate(t *testing.T) {
 		require.Equal(t, "ServiceTier", result.Warnings[0].Setting)
 		require.Contains(t, result.Warnings[0].Details, "priority processing is only available")
 	})
+
+	t.Run("should return error instead of panic on empty response body", func(t *testing.T) {
+		t.Parallel()
+
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			// Write empty body — some OpenAI-compatible endpoints may do this
+			// under edge conditions, causing the SDK to return (nil, nil).
+		}))
+		defer server.Close()
+
+		provider, err := New(
+			WithAPIKey("test-api-key"),
+			WithBaseURL(server.URL),
+		)
+		require.NoError(t, err)
+		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
+
+		require.NotPanics(t, func() {
+			_, _ = model.Generate(context.Background(), fantasy.Call{
+				Prompt: testPrompt,
+			})
+		})
+	})
 }
 
 type streamingMockServer struct {

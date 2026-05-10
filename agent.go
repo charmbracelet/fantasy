@@ -163,6 +163,8 @@ type agentSettings struct {
 
 // AgentCall represents a call to an agent.
 type AgentCall struct {
+	// SystemPrompt overrides the agent's system prompt for this call when non-nil.
+	SystemPrompt     *string    `json:"system_prompt"`
 	Prompt           string     `json:"prompt"`
 	Files            []FilePart `json:"files"`
 	Messages         []Message  `json:"messages"`
@@ -258,6 +260,8 @@ type (
 
 // AgentStreamCall represents a streaming call to an agent.
 type AgentStreamCall struct {
+	// SystemPrompt overrides the agent's system prompt for this call when non-nil.
+	SystemPrompt     *string    `json:"system_prompt"`
 	Prompt           string     `json:"prompt"`
 	Files            []FilePart `json:"files"`
 	Messages         []Message  `json:"messages"`
@@ -352,6 +356,10 @@ func (a *agent) prepareCall(ctx context.Context, call AgentCall) (context.Contex
 	call.MaxRetries = cmp.Or(call.MaxRetries, a.settings.maxRetries)
 	call.ToolChoice = cmp.Or(call.ToolChoice, a.settings.toolChoice)
 
+	if call.SystemPrompt == nil {
+		sp := a.settings.systemPrompt
+		call.SystemPrompt = &sp
+	}
 	if len(call.StopWhen) == 0 && len(a.settings.stopWhen) > 0 {
 		call.StopWhen = a.settings.stopWhen
 	}
@@ -391,6 +399,12 @@ func (a *agent) prepareCall(ctx context.Context, call AgentCall) (context.Contex
 		}
 	}
 
+	// Re-resolve in case the hook cleared SystemPrompt to opt back into the agent default.
+	if call.SystemPrompt == nil {
+		sp := a.settings.systemPrompt
+		call.SystemPrompt = &sp
+	}
+
 	return ctx, call, nil
 }
 
@@ -400,7 +414,9 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 	if err != nil {
 		return nil, err
 	}
-	initialPrompt, err := a.createPrompt(a.settings.systemPrompt, opts.Prompt, opts.Messages, opts.Files...)
+	// prepareCall guarantees SystemPrompt is non-nil at this point.
+	systemPrompt := *opts.SystemPrompt
+	initialPrompt, err := a.createPrompt(systemPrompt, opts.Prompt, opts.Messages, opts.Files...)
 	if err != nil {
 		return nil, err
 	}
@@ -410,7 +426,7 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 	for {
 		stepInputMessages := append(initialPrompt, responseMessages...)
 		stepModel := a.settings.model
-		stepSystemPrompt := a.settings.systemPrompt
+		stepSystemPrompt := systemPrompt
 		stepActiveTools := opts.ActiveTools
 		stepToolChoice := ToolChoiceAuto
 		if opts.ToolChoice != nil {
@@ -454,7 +470,7 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 		}
 
 		// Recreate prompt with potentially modified system prompt
-		if stepSystemPrompt != a.settings.systemPrompt {
+		if stepSystemPrompt != systemPrompt {
 			stepPrompt, err := a.createPrompt(stepSystemPrompt, opts.Prompt, opts.Messages, opts.Files...)
 			if err != nil {
 				return nil, err
@@ -810,6 +826,7 @@ func (a *agent) executeSingleTool(ctx context.Context, toolMap map[string]AgentT
 func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult, error) {
 	// Convert AgentStreamCall to AgentCall for preparation
 	call := AgentCall{
+		SystemPrompt:     opts.SystemPrompt,
 		Prompt:           opts.Prompt,
 		Files:            opts.Files,
 		Messages:         opts.Messages,
@@ -836,7 +853,9 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 		return nil, err
 	}
 
-	initialPrompt, err := a.createPrompt(a.settings.systemPrompt, call.Prompt, call.Messages, call.Files...)
+	// prepareCall guarantees SystemPrompt is non-nil at this point.
+	systemPrompt := *call.SystemPrompt
+	initialPrompt, err := a.createPrompt(systemPrompt, call.Prompt, call.Messages, call.Files...)
 	if err != nil {
 		return nil, err
 	}
@@ -853,7 +872,7 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 	for stepNumber := 0; ; stepNumber++ {
 		stepInputMessages := append(initialPrompt, responseMessages...)
 		stepModel := a.settings.model
-		stepSystemPrompt := a.settings.systemPrompt
+		stepSystemPrompt := systemPrompt
 		stepActiveTools := call.ActiveTools
 		stepToolChoice := ToolChoiceAuto
 		if call.ToolChoice != nil {
@@ -897,7 +916,7 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 		}
 
 		// Recreate prompt with potentially modified system prompt
-		if stepSystemPrompt != a.settings.systemPrompt {
+		if stepSystemPrompt != systemPrompt {
 			stepPrompt, err := a.createPrompt(stepSystemPrompt, call.Prompt, call.Messages, call.Files...)
 			if err != nil {
 				return nil, err
@@ -949,7 +968,7 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 			}
 
 			// Process the stream
-			result, err := a.processStepStream(ctx, stream, opts, steps, stepTools, stepExecProviderTools)
+			result, err := a.processStepStream(ctx, stream, opts, steps, stepSystemPrompt, stepTools, stepExecProviderTools)
 			if err != nil {
 				return stepExecutionResult{}, err
 			}
@@ -1299,7 +1318,7 @@ func WithOnRetry(callback OnRetryCallback) AgentOption {
 }
 
 // processStepStream processes a single step's stream and returns the step result.
-func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, opts AgentStreamCall, _ []StepResult, stepTools []AgentTool, execProviderTools []ExecutableProviderTool) (stepExecutionResult, error) {
+func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, opts AgentStreamCall, _ []StepResult, stepSystemPrompt string, stepTools []AgentTool, execProviderTools []ExecutableProviderTool) (stepExecutionResult, error) {
 	var stepContent []Content
 	var stepToolCalls []ToolCallContent
 	var stepUsage Usage
@@ -1490,7 +1509,7 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 				delete(activeToolCalls, part.ID)
 			} else {
 				// Validate and potentially repair the tool call
-				validatedToolCall := a.validateAndRepairToolCall(ctx, toolCall, stepTools, execProviderTools, a.settings.systemPrompt, nil, opts.RepairToolCall)
+				validatedToolCall := a.validateAndRepairToolCall(ctx, toolCall, stepTools, execProviderTools, stepSystemPrompt, nil, opts.RepairToolCall)
 				stepToolCalls = append(stepToolCalls, validatedToolCall)
 				stepContent = append(stepContent, validatedToolCall)
 

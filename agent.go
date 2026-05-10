@@ -129,6 +129,9 @@ type (
 
 	// RepairToolCallFunction defines a function that repairs a tool call.
 	RepairToolCallFunction = func(ctx context.Context, options ToolCallRepairOptions) (*ToolCallContent, error)
+
+	// PrepareCallFunction defines a function that prepares the call before the first model invocation.
+	PrepareCallFunction = func(ctx context.Context, call *AgentCall) (context.Context, error)
 )
 
 type agentSettings struct {
@@ -152,6 +155,7 @@ type agentSettings struct {
 	model LanguageModel
 
 	stopWhen       []StopCondition
+	prepareCall    PrepareCallFunction
 	prepareStep    PrepareStepFunction
 	repairToolCall RepairToolCallFunction
 	onRetry        OnRetryCallback
@@ -174,7 +178,11 @@ type AgentCall struct {
 	OnRetry          OnRetryCallback
 	MaxRetries       *int
 
+	// CallOptions carries application-defined data that PrepareCall can read.
+	CallOptions any
+
 	StopWhen       []StopCondition
+	PrepareCall    PrepareCallFunction
 	PrepareStep    PrepareStepFunction
 	RepairToolCall RepairToolCallFunction
 }
@@ -266,7 +274,11 @@ type AgentStreamCall struct {
 	OnRetry          OnRetryCallback
 	MaxRetries       *int
 
+	// CallOptions carries application-defined data that PrepareCall can read.
+	CallOptions any
+
 	StopWhen       []StopCondition
+	PrepareCall    PrepareCallFunction
 	PrepareStep    PrepareStepFunction
 	RepairToolCall RepairToolCallFunction
 
@@ -330,7 +342,7 @@ func NewAgent(model LanguageModel, opts ...AgentOption) Agent {
 	}
 }
 
-func (a *agent) prepareCall(call AgentCall) AgentCall {
+func (a *agent) prepareCall(ctx context.Context, call AgentCall) (context.Context, AgentCall, error) {
 	call.MaxOutputTokens = cmp.Or(call.MaxOutputTokens, a.settings.maxOutputTokens)
 	call.Temperature = cmp.Or(call.Temperature, a.settings.temperature)
 	call.TopP = cmp.Or(call.TopP, a.settings.topP)
@@ -368,12 +380,26 @@ func (a *agent) prepareCall(call AgentCall) AgentCall {
 		maps.Copy(headers, a.settings.headers)
 	}
 
-	return call
+	prepareFn := call.PrepareCall
+	if prepareFn == nil {
+		prepareFn = a.settings.prepareCall
+	}
+	if prepareFn != nil {
+		var err error
+		if ctx, err = prepareFn(ctx, &call); err != nil {
+			return ctx, call, err
+		}
+	}
+
+	return ctx, call, nil
 }
 
 // Generate implements Agent.
 func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, error) {
-	opts = a.prepareCall(opts)
+	ctx, opts, err := a.prepareCall(ctx, opts)
+	if err != nil {
+		return nil, err
+	}
 	initialPrompt, err := a.createPrompt(a.settings.systemPrompt, opts.Prompt, opts.Messages, opts.Files...)
 	if err != nil {
 		return nil, err
@@ -798,12 +824,17 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 		ProviderOptions:  opts.ProviderOptions,
 		MaxRetries:       opts.MaxRetries,
 		OnRetry:          opts.OnRetry,
+		CallOptions:      opts.CallOptions,
 		StopWhen:         opts.StopWhen,
+		PrepareCall:      opts.PrepareCall,
 		PrepareStep:      opts.PrepareStep,
 		RepairToolCall:   opts.RepairToolCall,
 	}
 
-	call = a.prepareCall(call)
+	ctx, call, err := a.prepareCall(ctx, call)
+	if err != nil {
+		return nil, err
+	}
 
 	initialPrompt, err := a.createPrompt(a.settings.systemPrompt, call.Prompt, call.Messages, call.Files...)
 	if err != nil {
@@ -1243,6 +1274,13 @@ func WithPrepareStep(fn PrepareStepFunction) AgentOption {
 func WithRepairToolCall(fn RepairToolCallFunction) AgentOption {
 	return func(s *agentSettings) {
 		s.repairToolCall = fn
+	}
+}
+
+// WithPrepareCall sets the prepare call function for the agent.
+func WithPrepareCall(fn PrepareCallFunction) AgentOption {
+	return func(s *agentSettings) {
+		s.prepareCall = fn
 	}
 }
 

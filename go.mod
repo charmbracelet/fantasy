@@ -20,7 +20,7 @@ require (
 	github.com/kaptinlin/jsonschema v0.7.13
 	github.com/stretchr/testify v1.11.1
 	golang.org/x/oauth2 v0.36.0
-	google.golang.org/genai v1.55.0
+	google.golang.org/genai v1.56.0
 )
 
 require (

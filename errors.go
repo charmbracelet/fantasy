@@ -90,6 +90,19 @@ func (m *ProviderError) IsContextTooLarge() bool {
 	return m.ContextTooLargeErr || m.ContextMaxTokens > 0 || m.ContextUsedTokens > 0
 }
 
+// NewIncompleteStreamError returns a retryable ProviderError indicating that
+// an upstream stream closed cleanly without delivering its terminal signal
+// (finish_reason, stop_reason, response.completed, candidate.finishReason,
+// etc.). The cause is io.ErrUnexpectedEOF so ProviderError.IsRetryable()
+// engages and the retry middleware re-runs the step.
+func NewIncompleteStreamError() *ProviderError {
+	return &ProviderError{
+		Title:   "stream transport error",
+		Message: io.ErrUnexpectedEOF.Error(),
+		Cause:   io.ErrUnexpectedEOF,
+	}
+}
+
 // RetryError represents an error that occurred during retry operations.
 type RetryError struct {
 	Errors []error

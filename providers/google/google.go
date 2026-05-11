@@ -867,7 +867,13 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 		if len(toolCalls) > 0 {
 			finishReason = fantasy.FinishReasonToolCalls
 		} else if finishReason == "" {
-			finishReason = fantasy.FinishReasonStop
+			// Truncated stream: no candidate emitted a finishReason before
+			// close. Surface as a retryable error.
+			yield(fantasy.StreamPart{
+				Type:  fantasy.StreamPartTypeError,
+				Error: fantasy.NewIncompleteStreamError(),
+			})
+			return
 		}
 
 		var finalUsage fantasy.Usage

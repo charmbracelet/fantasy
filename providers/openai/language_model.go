@@ -564,6 +564,16 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 					mappedFinishReason = fantasy.FinishReasonToolCalls
 				}
 			}
+			// Truncated stream: upstream closed without finish_reason and we
+			// can't infer a tool-call turn. Surface as a retryable error so
+			// the retry middleware re-runs the step.
+			if finishReason == "" && mappedFinishReason != fantasy.FinishReasonToolCalls {
+				yield(fantasy.StreamPart{
+					Type:  fantasy.StreamPartTypeError,
+					Error: fantasy.NewIncompleteStreamError(),
+				})
+				return
+			}
 			yield(fantasy.StreamPart{
 				Type:             fantasy.StreamPartTypeFinish,
 				Usage:            usage,

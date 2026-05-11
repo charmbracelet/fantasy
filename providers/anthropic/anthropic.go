@@ -1511,6 +1511,15 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 
 		err := stream.Err()
 		if err == nil || errors.Is(err, io.EOF) {
+			// Truncated stream: no terminal message_delta with stop_reason.
+			// Surface as a retryable error.
+			if acc.StopReason == "" {
+				yield(fantasy.StreamPart{
+					Type:  fantasy.StreamPartTypeError,
+					Error: fantasy.NewIncompleteStreamError(),
+				})
+				return
+			}
 			yield(fantasy.StreamPart{
 				Type:         fantasy.StreamPartTypeFinish,
 				ID:           acc.ID,

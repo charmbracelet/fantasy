@@ -1240,6 +1240,16 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 			return
 		}
 
+		// Truncated stream: no response.completed / response.incomplete event
+		// before close. Surface as a retryable error.
+		if finishReason == fantasy.FinishReasonUnknown {
+			yield(fantasy.StreamPart{
+				Type:  fantasy.StreamPartTypeError,
+				Error: fantasy.NewIncompleteStreamError(),
+			})
+			return
+		}
+
 		yield(fantasy.StreamPart{
 			Type:             fantasy.StreamPartTypeFinish,
 			Usage:            usage,

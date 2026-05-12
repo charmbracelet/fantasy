@@ -5,7 +5,7 @@ go 1.26.3
 require (
 	charm.land/x/vcr v0.1.1
 	cloud.google.com/go/auth v0.20.0
-	github.com/ardanlabs/kronk v1.25.0
+	github.com/ardanlabs/kronk v1.25.2
 	github.com/aws/aws-sdk-go-v2 v1.41.7
 	github.com/aws/aws-sdk-go-v2/config v1.32.17
 	github.com/aws/smithy-go v1.25.1
@@ -24,7 +24,7 @@ require (
 )
 
 require (
-	cel.dev/expr v0.25.1 // indirect
+	cel.dev/expr v0.25.2 // indirect
 	cloud.google.com/go v0.123.0 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.8 // indirect
 	cloud.google.com/go/compute/metadata v0.9.0 // indirect
@@ -78,7 +78,7 @@ require (
 	github.com/hashicorp/go-getter v1.8.6 // indirect
 	github.com/hashicorp/go-version v1.9.0 // indirect
 	github.com/hybridgroup/yzma v1.13.0 // indirect
-	github.com/jupiterrider/ffi v0.6.0 // indirect
+	github.com/jupiterrider/ffi v0.7.0 // indirect
 	github.com/kaptinlin/go-i18n v0.4.5 // indirect
 	github.com/kaptinlin/jsonpointer v0.4.20 // indirect
 	github.com/kaptinlin/messageformat-go v0.6.0 // indirect
@@ -111,11 +111,11 @@ require (
 	go.opentelemetry.io/proto/otlp v1.10.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
 	go.yaml.in/yaml/v4 v4.0.0-rc.3 // indirect
-	golang.org/x/crypto v0.50.0 // indirect
-	golang.org/x/net v0.53.0 // indirect
+	golang.org/x/crypto v0.51.0 // indirect
+	golang.org/x/net v0.54.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
-	golang.org/x/sys v0.43.0 // indirect
-	golang.org/x/text v0.36.0 // indirect
+	golang.org/x/sys v0.44.0 // indirect
+	golang.org/x/text v0.37.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
 	google.golang.org/api v0.278.0 // indirect
 	google.golang.org/genproto v0.0.0-20260504160031-60b97b32f348 // indirect

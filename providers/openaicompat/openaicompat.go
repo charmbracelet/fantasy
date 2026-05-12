@@ -122,3 +122,10 @@ func WithUseResponsesAPI() Option {
 		o.openaiOptions = append(o.openaiOptions, openai.WithUseResponsesAPI())
 	}
 }
+
+// WithResponsesAPIFunc sets a custom filter for which models use the Responses API.
+func WithResponsesAPIFunc(fn func(modelID string) bool) Option {
+	return func(o *options) {
+		o.openaiOptions = append(o.openaiOptions, openai.WithResponsesAPIFunc(fn))
+	}
+}

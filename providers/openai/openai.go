@@ -30,6 +30,7 @@ type options struct {
 	project              string
 	name                 string
 	useResponsesAPI      bool
+	responsesAPIFunc     func(modelID string) bool
 	headers              map[string]string
 	userAgent            string
 	client               option.HTTPClient
@@ -134,6 +135,14 @@ func WithUseResponsesAPI() Option {
 	}
 }
 
+// WithResponsesAPIFunc sets a custom filter for which models use the Responses API.
+// When set, this function is called instead of the default IsResponsesModel().
+func WithResponsesAPIFunc(fn func(modelID string) bool) Option {
+	return func(o *options) {
+		o.responsesAPIFunc = fn
+	}
+}
+
 // WithUserAgent sets an explicit User-Agent header, overriding the default and any
 // value set via WithHeaders.
 func WithUserAgent(ua string) Option {
@@ -179,7 +188,7 @@ func (o *provider) LanguageModel(_ context.Context, modelID string) (fantasy.Lan
 
 	client := openai.NewClient(openaiClientOptions...)
 
-	if o.options.useResponsesAPI && IsResponsesModel(modelID) {
+	if o.options.useResponsesAPI && o.isResponsesModel(modelID) {
 		// Not supported for responses API
 		objectMode := o.options.objectMode
 		if objectMode == fantasy.ObjectModeJSON {
@@ -201,4 +210,11 @@ func (o *provider) LanguageModel(_ context.Context, modelID string) (fantasy.Lan
 
 func (o *provider) Name() string {
 	return o.options.name
+}
+
+func (o *provider) isResponsesModel(modelID string) bool {
+	if o.options.responsesAPIFunc != nil {
+		return o.options.responsesAPIFunc(modelID)
+	}
+	return IsResponsesModel(modelID)
 }

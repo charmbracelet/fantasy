@@ -123,6 +123,8 @@ func DefaultPrepareCallFunc(model fantasy.LanguageModel, params *openai.ChatComp
 			params.ReasoningEffort = shared.ReasoningEffortHigh
 		case ReasoningEffortXHigh:
 			params.ReasoningEffort = shared.ReasoningEffortXhigh
+		case ReasoningEffortMax:
+			params.ReasoningEffort = shared.ReasoningEffort("max")
 		default:
 			return nil, fmt.Errorf("reasoning model `%s` not supported", *providerOptions.ReasoningEffort)
 		}

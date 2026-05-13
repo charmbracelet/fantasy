@@ -39,6 +39,8 @@ func PrepareCallFunc(model fantasy.LanguageModel, params *openaisdk.ChatCompleti
 			params.ReasoningEffort = shared.ReasoningEffortHigh
 		case openai.ReasoningEffortXHigh:
 			params.ReasoningEffort = shared.ReasoningEffortXhigh
+		case openai.ReasoningEffortMax:
+			params.ReasoningEffort = shared.ReasoningEffort("max")
 		default:
 			return nil, fmt.Errorf("reasoning model `%s` not supported", *providerOptions.ReasoningEffort)
 		}

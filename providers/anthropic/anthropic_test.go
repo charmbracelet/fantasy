@@ -658,6 +658,63 @@ func newAnthropicStreamingServer(chunks []string) (*httptest.Server, <-chan anth
 	return server, calls
 }
 
+func anthropicSSEEvent(event, data string) string {
+	return fmt.Sprintf("event: %s\ndata: %s\n\n", event, data)
+}
+
+func collectAnthropicStreamParts(stream fantasy.StreamResponse) []fantasy.StreamPart {
+	var parts []fantasy.StreamPart
+	stream(func(part fantasy.StreamPart) bool {
+		parts = append(parts, part)
+		return true
+	})
+	return parts
+}
+
+func streamAnthropicParts(t *testing.T, chunks []string, tools ...fantasy.Tool) []fantasy.StreamPart {
+	t.Helper()
+
+	server, calls := newAnthropicStreamingServer(chunks)
+	defer server.Close()
+
+	provider, err := New(
+		WithAPIKey("test-api-key"),
+		WithBaseURL(server.URL),
+	)
+	require.NoError(t, err)
+
+	model, err := provider.LanguageModel(context.Background(), "claude-sonnet-4-20250514")
+	require.NoError(t, err)
+
+	stream, err := model.Stream(context.Background(), fantasy.Call{
+		Prompt: testPrompt(),
+		Tools:  tools,
+	})
+	require.NoError(t, err)
+
+	parts := collectAnthropicStreamParts(stream)
+	_ = awaitAnthropicCall(t, calls)
+	return parts
+}
+
+func requireReasoningMetadata(t *testing.T, metadata fantasy.ProviderMetadata) *ReasoningOptionMetadata {
+	t.Helper()
+
+	reasoning := GetReasoningMetadata(fantasy.ProviderOptions(metadata))
+	require.NotNil(t, reasoning)
+	return reasoning
+}
+
+func streamPartsByType(parts []fantasy.StreamPart, typ fantasy.StreamPartType) []fantasy.StreamPart {
+	var matches []fantasy.StreamPart
+	for _, part := range parts {
+		if part.Type == typ {
+			matches = append(matches, part)
+		}
+	}
+	return matches
+}
+
 func awaitAnthropicCall(t *testing.T, calls <-chan anthropicCall) anthropicCall {
 	t.Helper()
 
@@ -1932,6 +1989,126 @@ func TestGenerate_BetaAPI(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, ActionScreenshot, parsed.Action)
 	})
+}
+
+func TestStream_RedactedThinkingEmitsStartAndEnd(t *testing.T) {
+	t.Parallel()
+
+	parts := streamAnthropicParts(t, []string{
+		anthropicSSEEvent("message_start", `{"type":"message_start","message":{"id":"msg_redacted","type":"message","role":"assistant","model":"claude-sonnet-4-20250514","content":[],"stop_reason":null,"usage":{"input_tokens":1,"output_tokens":0}}}`),
+		anthropicSSEEvent("content_block_start", `{"type":"content_block_start","index":0,"content_block":{"type":"redacted_thinking","data":"redacted_blob"}}`),
+		anthropicSSEEvent("content_block_stop", `{"type":"content_block_stop","index":0}`),
+		anthropicSSEEvent("message_stop", `{"type":"message_stop"}`),
+	})
+
+	starts := streamPartsByType(parts, fantasy.StreamPartTypeReasoningStart)
+	ends := streamPartsByType(parts, fantasy.StreamPartTypeReasoningEnd)
+	require.Len(t, starts, 1)
+	require.Len(t, ends, 1)
+	require.Equal(t, starts[0].ID, ends[0].ID)
+	require.Equal(t, "redacted_blob", requireReasoningMetadata(t, starts[0].ProviderMetadata).RedactedData)
+	require.Equal(t, "redacted_blob", requireReasoningMetadata(t, ends[0].ProviderMetadata).RedactedData)
+}
+
+func TestStream_ThinkingSignaturePresentOnEnd(t *testing.T) {
+	t.Parallel()
+
+	parts := streamAnthropicParts(t, []string{
+		anthropicSSEEvent("message_start", `{"type":"message_start","message":{"id":"msg_sig","type":"message","role":"assistant","model":"claude-sonnet-4-20250514","content":[],"stop_reason":null,"usage":{"input_tokens":1,"output_tokens":0}}}`),
+		anthropicSSEEvent("content_block_start", `{"type":"content_block_start","index":0,"content_block":{"type":"thinking","thinking":""}}`),
+		anthropicSSEEvent("content_block_delta", `{"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"first thought"}}`),
+		anthropicSSEEvent("content_block_delta", `{"type":"content_block_delta","index":0,"delta":{"type":"signature_delta","signature":"sig_123"}}`),
+		anthropicSSEEvent("content_block_stop", `{"type":"content_block_stop","index":0}`),
+		anthropicSSEEvent("message_stop", `{"type":"message_stop"}`),
+	})
+
+	deltas := streamPartsByType(parts, fantasy.StreamPartTypeReasoningDelta)
+	ends := streamPartsByType(parts, fantasy.StreamPartTypeReasoningEnd)
+	require.Len(t, deltas, 2)
+	require.Equal(t, "first thought", deltas[0].Delta)
+	require.Equal(t, "sig_123", requireReasoningMetadata(t, deltas[1].ProviderMetadata).Signature)
+	require.Len(t, ends, 1)
+	require.Equal(t, "sig_123", requireReasoningMetadata(t, ends[0].ProviderMetadata).Signature)
+}
+
+func TestStream_NilMetadataDeltaDoesNotEraseSignatureOnEnd(t *testing.T) {
+	t.Parallel()
+
+	parts := streamAnthropicParts(t, []string{
+		anthropicSSEEvent("message_start", `{"type":"message_start","message":{"id":"msg_sig_tail","type":"message","role":"assistant","model":"claude-sonnet-4-20250514","content":[],"stop_reason":null,"usage":{"input_tokens":1,"output_tokens":0}}}`),
+		anthropicSSEEvent("content_block_start", `{"type":"content_block_start","index":0,"content_block":{"type":"thinking","thinking":""}}`),
+		anthropicSSEEvent("content_block_delta", `{"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"first"}}`),
+		anthropicSSEEvent("content_block_delta", `{"type":"content_block_delta","index":0,"delta":{"type":"signature_delta","signature":"sig_tail"}}`),
+		anthropicSSEEvent("content_block_delta", `{"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"second"}}`),
+		anthropicSSEEvent("content_block_stop", `{"type":"content_block_stop","index":0}`),
+		anthropicSSEEvent("message_stop", `{"type":"message_stop"}`),
+	})
+
+	deltas := streamPartsByType(parts, fantasy.StreamPartTypeReasoningDelta)
+	ends := streamPartsByType(parts, fantasy.StreamPartTypeReasoningEnd)
+	require.Len(t, deltas, 3)
+	require.Equal(t, "first", deltas[0].Delta)
+	require.Len(t, deltas[0].ProviderMetadata, 0)
+	require.Equal(t, "sig_tail", requireReasoningMetadata(t, deltas[1].ProviderMetadata).Signature)
+	require.Equal(t, "second", deltas[2].Delta)
+	require.Len(t, deltas[2].ProviderMetadata, 0)
+	require.Len(t, ends, 1)
+	require.Equal(t, "sig_tail", requireReasoningMetadata(t, ends[0].ProviderMetadata).Signature)
+}
+
+func TestStream_InterleavedThinkingAndRedactedThinking(t *testing.T) {
+	t.Parallel()
+
+	parts := streamAnthropicParts(t, []string{
+		anthropicSSEEvent("message_start", `{"type":"message_start","message":{"id":"msg_interleaved","type":"message","role":"assistant","model":"claude-sonnet-4-20250514","content":[],"stop_reason":null,"usage":{"input_tokens":1,"output_tokens":0}}}`),
+		anthropicSSEEvent("content_block_start", `{"type":"content_block_start","index":0,"content_block":{"type":"redacted_thinking","data":"redacted_0"}}`),
+		anthropicSSEEvent("content_block_stop", `{"type":"content_block_stop","index":0}`),
+		anthropicSSEEvent("content_block_start", `{"type":"content_block_start","index":1,"content_block":{"type":"thinking","thinking":""}}`),
+		anthropicSSEEvent("content_block_delta", `{"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":"reasoning_1"}}`),
+		anthropicSSEEvent("content_block_delta", `{"type":"content_block_delta","index":1,"delta":{"type":"signature_delta","signature":"sig_1"}}`),
+		anthropicSSEEvent("content_block_stop", `{"type":"content_block_stop","index":1}`),
+		anthropicSSEEvent("content_block_start", `{"type":"content_block_start","index":2,"content_block":{"type":"redacted_thinking","data":"redacted_2"}}`),
+		anthropicSSEEvent("content_block_stop", `{"type":"content_block_stop","index":2}`),
+		anthropicSSEEvent("message_stop", `{"type":"message_stop"}`),
+	})
+
+	var reasoningParts []fantasy.StreamPart
+	for _, part := range parts {
+		switch part.Type {
+		case fantasy.StreamPartTypeReasoningStart, fantasy.StreamPartTypeReasoningDelta, fantasy.StreamPartTypeReasoningEnd:
+			reasoningParts = append(reasoningParts, part)
+		}
+	}
+
+	require.Len(t, reasoningParts, 8)
+	require.Equal(t, fantasy.StreamPartTypeReasoningStart, reasoningParts[0].Type)
+	require.Equal(t, "0", reasoningParts[0].ID)
+	require.Equal(t, "redacted_0", requireReasoningMetadata(t, reasoningParts[0].ProviderMetadata).RedactedData)
+
+	require.Equal(t, fantasy.StreamPartTypeReasoningEnd, reasoningParts[1].Type)
+	require.Equal(t, "0", reasoningParts[1].ID)
+	require.Equal(t, "redacted_0", requireReasoningMetadata(t, reasoningParts[1].ProviderMetadata).RedactedData)
+
+	require.Equal(t, fantasy.StreamPartTypeReasoningStart, reasoningParts[2].Type)
+	require.Equal(t, "1", reasoningParts[2].ID)
+	require.Len(t, reasoningParts[2].ProviderMetadata, 0)
+
+	require.Equal(t, fantasy.StreamPartTypeReasoningDelta, reasoningParts[3].Type)
+	require.Equal(t, "reasoning_1", reasoningParts[3].Delta)
+	require.Equal(t, fantasy.StreamPartTypeReasoningDelta, reasoningParts[4].Type)
+	require.Equal(t, "sig_1", requireReasoningMetadata(t, reasoningParts[4].ProviderMetadata).Signature)
+
+	require.Equal(t, fantasy.StreamPartTypeReasoningEnd, reasoningParts[5].Type)
+	require.Equal(t, "1", reasoningParts[5].ID)
+	require.Equal(t, "sig_1", requireReasoningMetadata(t, reasoningParts[5].ProviderMetadata).Signature)
+
+	require.Equal(t, fantasy.StreamPartTypeReasoningStart, reasoningParts[6].Type)
+	require.Equal(t, "2", reasoningParts[6].ID)
+	require.Equal(t, "redacted_2", requireReasoningMetadata(t, reasoningParts[6].ProviderMetadata).RedactedData)
+
+	require.Equal(t, fantasy.StreamPartTypeReasoningEnd, reasoningParts[7].Type)
+	require.Equal(t, "2", reasoningParts[7].ID)
+	require.Equal(t, "redacted_2", requireReasoningMetadata(t, reasoningParts[7].ProviderMetadata).RedactedData)
 }
 
 func TestStream_BetaAPI(t *testing.T) {

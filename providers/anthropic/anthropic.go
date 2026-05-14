@@ -400,6 +400,21 @@ func GetReasoningMetadata(providerOptions fantasy.ProviderOptions) *ReasoningOpt
 	return nil
 }
 
+func reasoningProviderMetadata(signature, redactedData string) fantasy.ProviderMetadata {
+	switch {
+	case signature != "":
+		return fantasy.ProviderMetadata{
+			Name: &ReasoningOptionMetadata{Signature: signature},
+		}
+	case redactedData != "":
+		return fantasy.ProviderMetadata{
+			Name: &ReasoningOptionMetadata{RedactedData: redactedData},
+		}
+	default:
+		return nil
+	}
+}
+
 type messageBlock struct {
 	Role     fantasy.MessageRole
 	Messages []fantasy.Message
@@ -1335,13 +1350,9 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 					}
 				case "redacted_thinking":
 					if !yield(fantasy.StreamPart{
-						Type: fantasy.StreamPartTypeReasoningStart,
-						ID:   fmt.Sprintf("%d", chunk.Index),
-						ProviderMetadata: fantasy.ProviderMetadata{
-							Name: &ReasoningOptionMetadata{
-								RedactedData: chunk.ContentBlock.Data,
-							},
-						},
+						Type:             fantasy.StreamPartTypeReasoningStart,
+						ID:               fmt.Sprintf("%d", chunk.Index),
+						ProviderMetadata: reasoningProviderMetadata("", chunk.ContentBlock.Data),
 					}) {
 						return
 					}
@@ -1380,8 +1391,17 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 					}
 				case "thinking":
 					if !yield(fantasy.StreamPart{
-						Type: fantasy.StreamPartTypeReasoningEnd,
-						ID:   fmt.Sprintf("%d", chunk.Index),
+						Type:             fantasy.StreamPartTypeReasoningEnd,
+						ID:               fmt.Sprintf("%d", chunk.Index),
+						ProviderMetadata: reasoningProviderMetadata(contentBlock.Signature, ""),
+					}) {
+						return
+					}
+				case "redacted_thinking":
+					if !yield(fantasy.StreamPart{
+						Type:             fantasy.StreamPartTypeReasoningEnd,
+						ID:               fmt.Sprintf("%d", chunk.Index),
+						ProviderMetadata: reasoningProviderMetadata("", contentBlock.Data),
 					}) {
 						return
 					}

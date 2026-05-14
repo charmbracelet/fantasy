@@ -1027,8 +1027,9 @@ func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBl
 							continue
 						}
 						if result.ProviderExecuted {
-							// Reconstruct web_search_tool_result block
-							// with encrypted_content for round-tripping.
+							// Reconstruct web_search_tool_result blocks,
+							// including encrypted content and errors, for
+							// round-tripping.
 							searchMeta := &WebSearchResultMetadata{}
 							if webMeta, ok := result.ProviderOptions[Name]; ok {
 								if typed, ok := webMeta.(*WebSearchResultMetadata); ok {
@@ -1124,24 +1125,37 @@ func decodeToolCallInputAny(toolCall fantasy.ToolCallPart) (any, *fantasy.CallWa
 // buildWebSearchToolResultBlock constructs an Anthropic
 // web_search_tool_result content block from structured metadata.
 func buildWebSearchToolResultBlock(toolCallID string, searchMeta *WebSearchResultMetadata) anthropic.ContentBlockParamUnion {
-	resultBlocks := make([]anthropic.WebSearchResultBlockParam, 0, len(searchMeta.Results))
-	for _, r := range searchMeta.Results {
-		block := anthropic.WebSearchResultBlockParam{
-			URL:              r.URL,
-			Title:            r.Title,
-			EncryptedContent: r.EncryptedContent,
+	var content anthropic.WebSearchToolResultBlockParamContentUnion
+	switch {
+	case searchMeta != nil && len(searchMeta.Results) > 0:
+		resultBlocks := make([]anthropic.WebSearchResultBlockParam, 0, len(searchMeta.Results))
+		for _, r := range searchMeta.Results {
+			block := anthropic.WebSearchResultBlockParam{
+				URL:              r.URL,
+				Title:            r.Title,
+				EncryptedContent: r.EncryptedContent,
+			}
+			if r.PageAge != "" {
+				block.PageAge = param.NewOpt(r.PageAge)
+			}
+			resultBlocks = append(resultBlocks, block)
 		}
-		if r.PageAge != "" {
-			block.PageAge = param.NewOpt(r.PageAge)
+		content = anthropic.WebSearchToolResultBlockParamContentUnion{
+			OfWebSearchToolResultBlockItem: resultBlocks,
 		}
-		resultBlocks = append(resultBlocks, block)
+	case searchMeta != nil && searchMeta.ErrorCode != "":
+		content = anthropic.NewWebSearchToolRequestError(
+			anthropic.WebSearchToolResultErrorCode(searchMeta.ErrorCode),
+		)
+	default:
+		content = anthropic.WebSearchToolResultBlockParamContentUnion{
+			OfWebSearchToolResultBlockItem: []anthropic.WebSearchResultBlockParam{},
+		}
 	}
 	return anthropic.ContentBlockParamUnion{
 		OfWebSearchToolResult: &anthropic.WebSearchToolResultBlockParam{
 			ToolUseID: toolCallID,
-			Content: anthropic.WebSearchToolResultBlockParamContentUnion{
-				OfWebSearchToolResultBlockItem: resultBlocks,
-			},
+			Content:   content,
 		},
 	}
 }
@@ -1269,6 +1283,12 @@ func (a languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantas
 				toolResult.ProviderMetadata = fantasy.ProviderMetadata{
 					Name: &WebSearchResultMetadata{
 						Results: metadataResults,
+					},
+				}
+			} else if webSearchResult.Content.ErrorCode != "" {
+				toolResult.ProviderMetadata = fantasy.ProviderMetadata{
+					Name: &WebSearchResultMetadata{
+						ErrorCode: string(webSearchResult.Content.ErrorCode),
 					},
 				}
 			}
@@ -1449,6 +1469,12 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 						providerMeta = fantasy.ProviderMetadata{
 							Name: &WebSearchResultMetadata{
 								Results: metadataResults,
+							},
+						}
+					} else if contentBlock.Content.ErrorCode != "" {
+						providerMeta = fantasy.ProviderMetadata{
+							Name: &WebSearchResultMetadata{
+								ErrorCode: string(contentBlock.Content.ErrorCode),
 							},
 						}
 					}

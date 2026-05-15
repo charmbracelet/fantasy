@@ -155,7 +155,7 @@ func TestStreamingAgentCallbacks(t *testing.T) {
 			callbacks["OnTextDelta"] = true
 			return nil
 		},
-		OnTextEnd: func(id string) error {
+		OnTextEnd: func(id, text string) error {
 			callbacks["OnTextEnd"] = true
 			return nil
 		},

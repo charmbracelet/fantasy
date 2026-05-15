@@ -215,7 +215,8 @@ type (
 	OnTextDeltaFunc func(id, text string) error
 
 	// OnTextEndFunc is called when text ends.
-	OnTextEndFunc func(id string) error
+	// text is the full accumulated text for this message.
+	OnTextEndFunc func(id, text string) error
 
 	// OnReasoningStartFunc is called when reasoning starts.
 	OnReasoningStartFunc func(id string, reasoning ReasoningContent) error
@@ -1336,15 +1337,17 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 			}
 
 		case StreamPartTypeTextEnd:
+			var accumulatedText string
 			if text, exists := activeTextContent[part.ID]; exists {
 				stepContent = append(stepContent, TextContent{
 					Text:             text,
 					ProviderMetadata: part.ProviderMetadata,
 				})
 				delete(activeTextContent, part.ID)
+				accumulatedText = text
 			}
 			if opts.OnTextEnd != nil {
-				err := opts.OnTextEnd(part.ID)
+				err := opts.OnTextEnd(part.ID, accumulatedText)
 				if err != nil {
 					return stepExecutionResult{}, err
 				}

@@ -3,6 +3,7 @@ package fantasy
 import (
 	"context"
 	"errors"
+	"net"
 	"strconv"
 	"time"
 )
@@ -54,6 +55,22 @@ func getRetryDelayInMs(err error, exponentialBackoffDelay time.Duration) time.Du
 // isAbortError checks if the error is a context cancellation error.
 func isAbortError(err error) bool {
 	return errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded)
+}
+
+// isRetryableError reports whether the error should be retried.
+// It checks for retryable ProviderError and also retries network-level
+// connection errors (DNS failures, TCP timeouts, connection refused, etc.)
+// that never produce an HTTP response and therefore aren't wrapped in ProviderError.
+func isRetryableError(err error) bool {
+	var providerErr *ProviderError
+	if errors.As(err, &providerErr) {
+		return providerErr.IsRetryable()
+	}
+	if isAbortError(err) {
+		return false
+	}
+	var netErr net.Error
+	return errors.As(err, &netErr)
 }
 
 // RetryWithExponentialBackoffRespectingRetryHeaders creates a retry function that retries
@@ -110,9 +127,10 @@ func retryWithExponentialBackoff[T any](ctx context.Context, fn RetryFn[T], opti
 	}
 
 	var providerErr *ProviderError
-	if errors.As(err, &providerErr) && providerErr.IsRetryable() && tryNumber <= options.MaxRetries {
+	if isRetryableError(err) && tryNumber <= options.MaxRetries {
 		delay := getRetryDelayInMs(err, options.InitialDelayIn)
 		if options.OnRetry != nil {
+			errors.As(err, &providerErr)
 			options.OnRetry(providerErr, delay)
 		}
 

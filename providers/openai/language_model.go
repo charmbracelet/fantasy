@@ -568,9 +568,13 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 			// can't infer a tool-call turn. Surface as a retryable error so
 			// the retry middleware re-runs the step.
 			if finishReason == "" && mappedFinishReason != fantasy.FinishReasonToolCalls {
+				err := ctx.Err()
+				if err == nil {
+					err = fantasy.NewIncompleteStreamError()
+				}
 				yield(fantasy.StreamPart{
 					Type:  fantasy.StreamPartTypeError,
-					Error: fantasy.NewIncompleteStreamError(),
+					Error: err,
 				})
 				return
 			}
@@ -868,8 +872,8 @@ func (o languageModel) streamObjectWithJSONMode(ctx context.Context, call fantas
 		var lastParsedObject any
 		var usage fantasy.Usage
 		var finishReason fantasy.FinishReason
+		var sawFinishReason bool
 		var providerMetadata fantasy.ProviderMetadata
-		var streamErr error
 
 		for stream.Next() {
 			chunk := stream.Current()
@@ -884,6 +888,7 @@ func (o languageModel) streamObjectWithJSONMode(ctx context.Context, call fantas
 			choice := chunk.Choices[0]
 			if choice.FinishReason != "" {
 				finishReason = o.mapFinishReasonFunc(choice.FinishReason)
+				sawFinishReason = true
 			}
 
 			if choice.Delta.Content != "" {
@@ -928,10 +933,21 @@ func (o languageModel) streamObjectWithJSONMode(ctx context.Context, call fantas
 
 		err := stream.Err()
 		if err != nil && !errors.Is(err, io.EOF) {
-			streamErr = toProviderErr(err)
 			yield(fantasy.ObjectStreamPart{
 				Type:  fantasy.ObjectStreamPartTypeError,
-				Error: streamErr,
+				Error: toProviderErr(err),
+			})
+			return
+		}
+
+		if !sawFinishReason {
+			err := ctx.Err()
+			if err == nil {
+				err = fantasy.NewIncompleteStreamError()
+			}
+			yield(fantasy.ObjectStreamPart{
+				Type:  fantasy.ObjectStreamPartTypeError,
+				Error: err,
 			})
 			return
 		}

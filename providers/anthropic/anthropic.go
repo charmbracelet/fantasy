@@ -1347,6 +1347,8 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 			}
 		}
 
+		sawMessageStop := false
+
 		for stream.Next() {
 			chunk := stream.Current()
 			_ = acc.Accumulate(chunk)
@@ -1552,41 +1554,47 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 					}
 				}
 			case "message_stop":
+				sawMessageStop = true
 			}
 		}
 
 		err := stream.Err()
-		if err == nil || errors.Is(err, io.EOF) {
-			// Truncated stream: no terminal message_delta with stop_reason.
-			// Surface as a retryable error.
-			if acc.StopReason == "" {
-				yield(fantasy.StreamPart{
-					Type:  fantasy.StreamPartTypeError,
-					Error: fantasy.NewIncompleteStreamError(),
-				})
-				return
-			}
-			yield(fantasy.StreamPart{
-				Type:         fantasy.StreamPartTypeFinish,
-				ID:           acc.ID,
-				FinishReason: mapFinishReason(string(acc.StopReason)),
-				Usage: fantasy.Usage{
-					InputTokens:         acc.Usage.InputTokens,
-					OutputTokens:        acc.Usage.OutputTokens,
-					TotalTokens:         acc.Usage.InputTokens + acc.Usage.OutputTokens,
-					CacheCreationTokens: acc.Usage.CacheCreationInputTokens,
-					CacheReadTokens:     acc.Usage.CacheReadInputTokens,
-				},
-				ProviderMetadata: fantasy.ProviderMetadata{},
-			})
-			return
-		} else { //nolint: revive
+		if err != nil && !errors.Is(err, io.EOF) {
 			yield(fantasy.StreamPart{
 				Type:  fantasy.StreamPartTypeError,
 				Error: toProviderErr(err),
 			})
 			return
 		}
+
+		// Anthropic's SSE protocol reports the stop_reason in message_delta
+		// and then terminates the message with message_stop. Require both so
+		// a socket close after only one of those signals is retried.
+		if !sawMessageStop || acc.StopReason == "" {
+			err := ctx.Err()
+			if err == nil {
+				err = fantasy.NewIncompleteStreamError()
+			}
+			yield(fantasy.StreamPart{
+				Type:  fantasy.StreamPartTypeError,
+				Error: err,
+			})
+			return
+		}
+
+		yield(fantasy.StreamPart{
+			Type:         fantasy.StreamPartTypeFinish,
+			ID:           acc.ID,
+			FinishReason: mapFinishReason(string(acc.StopReason)),
+			Usage: fantasy.Usage{
+				InputTokens:         acc.Usage.InputTokens,
+				OutputTokens:        acc.Usage.OutputTokens,
+				TotalTokens:         acc.Usage.InputTokens + acc.Usage.OutputTokens,
+				CacheCreationTokens: acc.Usage.CacheCreationInputTokens,
+				CacheReadTokens:     acc.Usage.CacheReadInputTokens,
+			},
+			ProviderMetadata: fantasy.ProviderMetadata{},
+		})
 	}, nil
 }
 

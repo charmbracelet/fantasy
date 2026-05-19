@@ -60,11 +60,11 @@ func getResponsesModelConfig(modelID string) responsesModelConfig {
 		strings.Contains(modelID, "-o3") || strings.Contains(modelID, "o4-mini") ||
 		(strings.Contains(modelID, "gpt-5") && !strings.Contains(modelID, "gpt-5-chat"))
 
-	supportsPriorityProcessing := strings.Contains(modelID, "gpt-4") ||
-		strings.Contains(modelID, "gpt-5-mini") ||
-		(strings.Contains(modelID, "gpt-5") &&
-			!strings.Contains(modelID, "gpt-5-nano") &&
-			!strings.Contains(modelID, "gpt-5-chat")) ||
+	supportsPriorityProcessing := strings.Contains(strings.ToLower(modelID), "gpt-4") ||
+		strings.Contains(strings.ToLower(modelID), "gpt-5-mini") ||
+		(strings.Contains(strings.ToLower(modelID), "gpt-5") &&
+			!strings.Contains(strings.ToLower(modelID), "gpt-5-nano") &&
+			!strings.Contains(strings.ToLower(modelID), "gpt-5-chat")) ||
 		strings.HasPrefix(modelID, "o3") ||
 		strings.Contains(modelID, "-o3") ||
 		strings.Contains(modelID, "o4-mini")
@@ -76,7 +76,7 @@ func getResponsesModelConfig(modelID string) responsesModelConfig {
 		supportsPriorityProcessing: supportsPriorityProcessing,
 	}
 
-	if strings.Contains(modelID, "gpt-5-chat") {
+	if strings.Contains(strings.ToLower(modelID), "gpt-5-chat") {
 		return responsesModelConfig{
 			isReasoningModel:           false,
 			systemMessageMode:          defaults.systemMessageMode,
@@ -90,8 +90,8 @@ func getResponsesModelConfig(modelID string) responsesModelConfig {
 		strings.HasPrefix(modelID, "o3") || strings.Contains(modelID, "-o3") ||
 		strings.HasPrefix(modelID, "o4") || strings.Contains(modelID, "-o4") ||
 		strings.HasPrefix(modelID, "oss") || strings.Contains(modelID, "-oss") ||
-		strings.Contains(modelID, "gpt-5") || strings.Contains(modelID, "codex-") ||
-		strings.Contains(modelID, "computer-use") {
+		strings.Contains(strings.ToLower(modelID), "gpt-5") ||
+		strings.Contains(modelID, "codex-") || strings.Contains(modelID, "computer-use") {
 		if strings.Contains(modelID, "o1-mini") || strings.Contains(modelID, "o1-preview") {
 			return responsesModelConfig{
 				isReasoningModel:           true,

@@ -8,6 +8,21 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func mustGetReasoningContent(t *testing.T, extraFields map[string]any) string {
+	t.Helper()
+	rc, ok := extraFields["reasoning_content"]
+	if !ok {
+		t.Fatal("expected reasoning_content key in extra fields")
+		return ""
+	}
+	s, ok := rc.(string)
+	if !ok {
+		t.Fatalf("expected reasoning_content to be string, got %T", rc)
+		return ""
+	}
+	return s
+}
+
 func TestToPromptFunc_ReasoningContent(t *testing.T) {
 	t.Parallel()
 
@@ -36,7 +51,8 @@ func TestToPromptFunc_ReasoningContent(t *testing.T) {
 			},
 		}
 
-		messages, warnings := ToPromptFunc(prompt, "", "")
+		toPrompt := NewToPromptFunc(true)
+		messages, warnings := toPrompt(prompt, "", "")
 
 		require.Empty(t, warnings)
 		require.Len(t, messages, 3)
@@ -347,7 +363,70 @@ func TestToPromptFunc_DropsEmptyMessages(t *testing.T) {
 		require.Empty(t, warnings)
 	})
 
-	t.Run("should add empty reasoning_content to tool call messages when thinking is enabled", func(t *testing.T) {
+	t.Run("should add reasoning_content to text-only messages after reasoning+tool call", func(t *testing.T) {
+		t.Parallel()
+
+		// When thinking was active earlier in the conversation (especially
+		// a reasoning+tool-call turn), DeepSeek requires reasoning_content
+		// on ALL subsequent assistant messages, including plain text
+		// responses that follow tool results.
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "read file"},
+				},
+			},
+			{
+				// Reasoning + tool call
+				Role: fantasy.MessageRoleAssistant,
+				Content: []fantasy.MessagePart{
+					fantasy.ReasoningPart{Text: "I will use the view tool."},
+					fantasy.ToolCallPart{
+						ToolCallID: "call_1",
+						ToolName:   "view",
+						Input:      `{"file_path":"/tmp/foo"}`,
+					},
+				},
+			},
+			{
+				Role: fantasy.MessageRoleTool,
+				Content: []fantasy.MessagePart{
+					fantasy.ToolResultPart{
+						ToolCallID: "call_1",
+						Output:     fantasy.ToolResultOutputContentText{Text: "hello"},
+					},
+				},
+			},
+			{
+				// Plain text response — must still have reasoning_content
+				Role: fantasy.MessageRoleAssistant,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "The file says hello."},
+				},
+			},
+		}
+
+		toPrompt := NewToPromptFunc(true)
+		messages, warnings := toPrompt(prompt, "", "")
+
+		require.Empty(t, warnings)
+		require.Len(t, messages, 4)
+
+		// Tool call message should have reasoning_content
+		toolMsg := messages[1].OfAssistant
+		require.NotNil(t, toolMsg)
+		require.NotEmpty(t, toolMsg.ToolCalls)
+		require.Equal(t, "I will use the view tool.", mustGetReasoningContent(t, toolMsg.ExtraFields()), "reasoning_content on tool call message")
+
+		// Text-only follow-up must also have reasoning_content
+		textMsg := messages[3].OfAssistant
+		require.NotNil(t, textMsg)
+		require.Equal(t, "The file says hello.", textMsg.Content.OfString.Value)
+		require.Equal(t, " ", mustGetReasoningContent(t, textMsg.ExtraFields()), "reasoning_content must be a space on text-only follow-up after thinking was active")
+	})
+
+	t.Run("should add placeholder reasoning_content to tool call messages when thinking is enabled", func(t *testing.T) {
 		t.Parallel()
 
 		// When thinking is enabled (reasoning parts exist in history),
@@ -387,19 +466,79 @@ func TestToPromptFunc_DropsEmptyMessages(t *testing.T) {
 			},
 		}
 
-		messages, warnings := ToPromptFunc(prompt, "", "")
+		toPrompt := NewToPromptFunc(true)
+		messages, warnings := toPrompt(prompt, "", "")
 
 		require.Empty(t, warnings)
 		require.Len(t, messages, 4)
 
-		// Tool call message must have reasoning_content (empty) since
-		// thinking is enabled in this conversation
+		// Tool call message must have reasoning_content (space) since
+		// thinking is enabled in this conversation — some providers
+		// reject empty string values
 		msg := messages[3].OfAssistant
 		require.NotNil(t, msg)
 		extraFields := msg.ExtraFields()
 		reasoningContent, hasReasoning := extraFields["reasoning_content"]
 		require.True(t, hasReasoning, "reasoning_content must be present on tool call messages when thinking is enabled")
-		require.Equal(t, "", reasoningContent)
+		require.Equal(t, " ", reasoningContent)
+	})
+
+	t.Run("should not inject reasoning_content when not required", func(t *testing.T) {
+		t.Parallel()
+
+		// Even when reasoning parts exist in history, providers that
+		// don't opt into RequireReasoningContent should not get
+		// placeholder reasoning_content injected on subsequent messages.
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "think"},
+				},
+			},
+			{
+				Role: fantasy.MessageRoleAssistant,
+				Content: []fantasy.MessagePart{
+					fantasy.ReasoningPart{Text: "thinking..."},
+					fantasy.TextPart{Text: "answer"},
+				},
+			},
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "now use a tool"},
+				},
+			},
+			{
+				Role: fantasy.MessageRoleAssistant,
+				Content: []fantasy.MessagePart{
+					fantasy.ToolCallPart{
+						ToolCallID: "call_1",
+						ToolName:   "execute",
+						Input:      `{"cmd":"ls"}`,
+					},
+				},
+			},
+		}
+
+		// Default ToPromptFunc does not require reasoning_content
+		messages, warnings := ToPromptFunc(prompt, "", "")
+
+		require.Empty(t, warnings)
+		require.Len(t, messages, 4)
+
+		// The message with actual reasoning should still have it
+		reasoningMsg := messages[1].OfAssistant
+		require.NotNil(t, reasoningMsg)
+		rc, ok := reasoningMsg.ExtraFields()["reasoning_content"]
+		require.True(t, ok, "message with reasoning part should have reasoning_content")
+		require.Equal(t, "thinking...", rc)
+
+		// Subsequent tool call without reasoning should NOT get placeholder
+		toolMsg := messages[3].OfAssistant
+		require.NotNil(t, toolMsg)
+		_, ok = toolMsg.ExtraFields()["reasoning_content"]
+		require.False(t, ok, "should not get placeholder reasoning_content when not required")
 	})
 
 	t.Run("should drop user messages without visible content", func(t *testing.T) {

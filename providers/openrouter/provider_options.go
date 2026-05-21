@@ -1,3 +1,5 @@
+//go:build !noopenrouter
+
 // Package openrouter provides an implementation of the fantasy AI SDK for OpenRouter's language models.
 package openrouter
 

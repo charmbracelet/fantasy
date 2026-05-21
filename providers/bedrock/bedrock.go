@@ -1,3 +1,5 @@
+//go:build !noaws
+
 // Package bedrock provides an implementation of the fantasy AI SDK for AWS Bedrock's language models.
 package bedrock
 

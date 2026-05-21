@@ -1,3 +1,5 @@
+//go:build !nogoogle
+
 package google
 
 func depointerSlice[T any](s []*T) []T {

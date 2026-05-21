@@ -1,3 +1,5 @@
+//go:build !nokronk
+
 // Package kronk provides an implementation of the fantasy AI SDK for local
 // models using the Kronk SDK.
 package kronk

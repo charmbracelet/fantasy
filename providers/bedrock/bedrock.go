@@ -78,3 +78,10 @@ func WithSkipAuth(skipAuth bool) Option {
 		o.skipAuth = skipAuth
 	}
 }
+
+// WithRegion sets the AWS region for the Bedrock provider.
+func WithRegion(region string) Option {
+	return func(o *options) {
+		o.anthropicOptions = append(o.anthropicOptions, anthropic.WithBedrockRegion(region))
+	}
+}

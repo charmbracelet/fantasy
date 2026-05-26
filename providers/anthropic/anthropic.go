@@ -77,7 +77,8 @@ type options struct {
 	vertexLocation string
 	skipAuth       bool
 
-	useBedrock bool
+	useBedrock    bool
+	bedrockRegion string
 
 	objectMode fantasy.ObjectMode
 }
@@ -139,6 +140,13 @@ func WithSkipAuth(skip bool) Option {
 func WithBedrock() Option {
 	return func(o *options) {
 		o.useBedrock = true
+	}
+}
+
+// WithBedrockRegion sets the AWS region for the Bedrock provider.
+func WithBedrockRegion(region string) Option {
+	return func(o *options) {
+		o.bedrockRegion = region
 	}
 }
 
@@ -226,7 +234,7 @@ func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.L
 		if a.options.skipAuth || a.options.apiKey != "" {
 			clientOptions = append(
 				clientOptions,
-				bedrock.WithConfig(bedrockBasicAuthConfig(a.options.apiKey)),
+				bedrock.WithConfig(bedrockBasicAuthConfig(a.options.apiKey, a.options.bedrockRegion)),
 			)
 		} else {
 			if cfg, err := config.LoadDefaultConfig(ctx); err == nil {

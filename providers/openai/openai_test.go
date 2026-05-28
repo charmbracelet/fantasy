@@ -3665,6 +3665,13 @@ func TestParseContextTooLargeError(t *testing.T) {
 			wantMax:  8192,
 		},
 		{
+			name:     "matches ionet format with of and tilde",
+			message:  "Your request exceeds this model's maximum context length of 204800 tokens. You requested ~269722 tokens (204186 input + 65536 output). Reduce your prompt length or max_tokens and retry.",
+			wantErr:  true,
+			wantUsed: 269722,
+			wantMax:  204800,
+		},
+		{
 			name:    "does not match unrelated error",
 			message: "invalid api key",
 			wantErr: false,

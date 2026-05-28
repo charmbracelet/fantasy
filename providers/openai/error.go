@@ -13,7 +13,7 @@ import (
 	"github.com/charmbracelet/openai-go"
 )
 
-var openaiContextPattern = regexp.MustCompile(`maximum context length is (\d+) tokens.*?(?:resulted in|requested) (\d+) tokens`)
+var openaiContextPattern = regexp.MustCompile(`maximum context length (?:is|of) (\d+) tokens.*?(?:resulted in|requested) ~?(\d+) tokens`)
 
 func toProviderErr(err error) error {
 	var apiErr *openai.Error

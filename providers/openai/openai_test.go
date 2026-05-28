@@ -3672,6 +3672,12 @@ func TestParseContextTooLargeError(t *testing.T) {
 			wantMax:  204800,
 		},
 		{
+			name:    "matches alibaba/qwen format",
+			message: "<400> InternalError.Algo.InvalidParameter: Range of input length should be [1, 245760]",
+			wantErr: true,
+			wantMax: 245760,
+		},
+		{
 			name:    "does not match unrelated error",
 			message: "invalid api key",
 			wantErr: false,

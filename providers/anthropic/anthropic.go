@@ -238,6 +238,7 @@ func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.L
 			)
 		} else {
 			if cfg, err := config.LoadDefaultConfig(ctx); err == nil {
+				cfg.Region = cmp.Or(a.options.bedrockRegion, cfg.Region)
 				clientOptions = append(
 					clientOptions,
 					bedrock.WithConfig(cfg),

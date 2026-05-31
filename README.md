@@ -93,3 +93,40 @@ Part of [Charm](https://charm.land).
 <a href="https://charm.land/"><img alt="The Charm logo" src="https://stuff.charm.sh/charm-banner-next.jpg" width="400"></a>
 
 Charm热爱开源 • Charm loves open source
+
+## FAQ
+
+### What is fantasy?
+
+Build AI agents with Go. Multi-provider, multi-model, one API.
+
+### Key Features
+
+| Feature | Description |
+|---------|-------------|
+| Multi-provider support | Available |
+| Multi-model support | Available |
+| Native machine code | Available |
+| Custom tools | Available |
+| Go-based SDK | Available |
+
+### Installation
+
+Go import: charm.land/fantasy + provider package
+
+### Is it free?
+
+Yes, open source and free to use.
+
+### How to contribute?
+
+Check the repository for contributing guidelines.
+
+### Where to get help?
+
+- GitHub Issues: https://github.com/charmbracelet/fantasy/issues
+- Documentation: Check README and docs folder
+
+### License
+
+Check the repository LICENSE file for details.

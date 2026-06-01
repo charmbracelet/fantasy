@@ -6,6 +6,7 @@ import (
 
 	"charm.land/fantasy"
 	"github.com/charmbracelet/openai-go"
+	"github.com/charmbracelet/openai-go/packages/respjson"
 )
 
 // ReasoningEffort represents the reasoning effort level for OpenAI models.
@@ -63,6 +64,40 @@ type ProviderMetadata struct {
 	Logprobs                 []openai.ChatCompletionTokenLogprob `json:"logprobs"`
 	AcceptedPredictionTokens int64                               `json:"accepted_prediction_tokens"`
 	RejectedPredictionTokens int64                               `json:"rejected_prediction_tokens"`
+	// ExtraFields captures non-standard fields from the usage object.
+	// Keys are field names, values are raw JSON.
+	ExtraFields map[string]json.RawMessage `json:"extra_fields,omitempty"`
+}
+
+// ExtraField parses an extra usage field into the provided target.
+// Returns false if the field is not present or cannot be parsed.
+func (m *ProviderMetadata) ExtraField(key string, target any) bool {
+	if m == nil || m.ExtraFields == nil {
+		return false
+	}
+	raw, ok := m.ExtraFields[key]
+	if !ok {
+		return false
+	}
+	return json.Unmarshal(raw, target) == nil
+}
+
+// ExtractExtraFields reads non-standard fields from the SDK's
+// ExtraFields map and returns them as a map of raw JSON values.
+func ExtractExtraFields(extraFields map[string]respjson.Field) map[string]json.RawMessage {
+	if len(extraFields) == 0 {
+		return nil
+	}
+	ext := make(map[string]json.RawMessage, len(extraFields))
+	for k, f := range extraFields {
+		if raw := f.Raw(); raw != "" && raw != "null" {
+			ext[k] = json.RawMessage(raw)
+		}
+	}
+	if len(ext) == 0 {
+		return nil
+	}
+	return ext
 }
 
 // Options implements the ProviderOptions interface.

@@ -129,3 +129,12 @@ func WithResponsesAPIFunc(fn func(modelID string) bool) Option {
 		o.openaiOptions = append(o.openaiOptions, openai.WithResponsesAPIFunc(fn))
 	}
 }
+
+// WithLanguageModelOptions appends language model options to the provider.
+// This allows callers to customize usage extraction, stream handling, and
+// other language model behaviors.
+func WithLanguageModelOptions(opts ...openai.LanguageModelOption) Option {
+	return func(o *options) {
+		o.languageModelOptions = append(o.languageModelOptions, opts...)
+	}
+}

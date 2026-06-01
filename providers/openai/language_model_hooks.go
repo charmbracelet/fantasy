@@ -219,6 +219,7 @@ func DefaultUsageFunc(response openai.ChatCompletion) (fantasy.Usage, fantasy.Pr
 	}
 	// OpenAI reports prompt_tokens INCLUDING cached tokens. Subtract to avoid double-counting.
 	inputTokens := max(response.Usage.PromptTokens-promptTokenDetails.CachedTokens, 0)
+	providerMetadata.ExtraFields = ExtractExtraFields(response.Usage.JSON.ExtraFields)
 	return fantasy.Usage{
 		InputTokens:     inputTokens,
 		OutputTokens:    response.Usage.CompletionTokens,
@@ -264,6 +265,8 @@ func DefaultStreamUsageFunc(chunk openai.ChatCompletionChunk, _ map[string]any, 
 			streamProviderMetadata.RejectedPredictionTokens = completionTokenDetails.RejectedPredictionTokens
 		}
 	}
+
+	streamProviderMetadata.ExtraFields = ExtractExtraFields(chunk.Usage.JSON.ExtraFields)
 
 	return usage, fantasy.ProviderMetadata{
 		Name: streamProviderMetadata,

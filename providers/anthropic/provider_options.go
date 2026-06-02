@@ -71,6 +71,7 @@ type ProviderOptions struct {
 	Thinking               *ThinkingProviderOption `json:"thinking"`
 	Effort                 *Effort                 `json:"effort"`
 	DisableParallelToolUse *bool                   `json:"disable_parallel_tool_use"`
+	ExtraBody              map[string]any          `json:"extra_body,omitempty"`
 }
 
 // Options implements the ProviderOptions interface.

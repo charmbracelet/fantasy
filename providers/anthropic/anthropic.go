@@ -42,6 +42,11 @@ func betaRequestOptions(flags []string) []option.RequestOption {
 // by Generate and Stream: user-agent, raw tool injection, and any
 // beta API flags.
 func buildRequestOptions(call fantasy.Call, rawTools []json.RawMessage, betaFlags []string) []option.RequestOption {
+	providerOptions := &ProviderOptions{}
+	if v, ok := call.ProviderOptions[Name]; ok {
+		providerOptions, _ = v.(*ProviderOptions)
+	}
+
 	reqOpts := callUARequestOptions(call)
 	if len(rawTools) > 0 {
 		// Tools are injected as raw JSON rather than via params.Tools
@@ -49,6 +54,9 @@ func buildRequestOptions(call fantasy.Call, rawTools []json.RawMessage, betaFlag
 		// use). If the SDK adds validation that reads params.Tools,
 		// this will need updating.
 		reqOpts = append(reqOpts, option.WithJSONSet("tools", rawTools))
+	}
+	for k, v := range providerOptions.ExtraBody {
+		reqOpts = append(reqOpts, option.WithJSONSet(k, v))
 	}
 	if len(betaFlags) > 0 {
 		reqOpts = append(reqOpts, betaRequestOptions(betaFlags)...)

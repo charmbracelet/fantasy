@@ -322,6 +322,7 @@ func TestToPrompt_DropsEmptyMessages(t *testing.T) {
 				Role: fantasy.MessageRoleUser,
 				Content: []fantasy.MessagePart{
 					fantasy.FilePart{
+						Filename:  "quarterly_report.v1.pdf",
 						Data:      []byte("fake pdf data"),
 						MediaType: "application/pdf",
 					},
@@ -333,6 +334,36 @@ func TestToPrompt_DropsEmptyMessages(t *testing.T) {
 
 		require.Empty(t, systemBlocks)
 		require.Len(t, messages, 1)
+		require.Len(t, messages[0].Content, 1)
+		require.NotNil(t, messages[0].Content[0].OfDocument)
+		require.Equal(t, "quarterly report v1 pdf", messages[0].Content[0].OfDocument.Title.Value)
+		require.True(t, messages[0].Content[0].OfDocument.Title.Valid())
+		require.Empty(t, warnings)
+	})
+
+	t.Run("should fall back to Document title when PDF filename is missing", func(t *testing.T) {
+		t.Parallel()
+
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.FilePart{
+						Data:      []byte("fake pdf data"),
+						MediaType: "application/pdf",
+					},
+				},
+			},
+		}
+
+		systemBlocks, messages, warnings := toPrompt(prompt, true)
+
+		require.Empty(t, systemBlocks)
+		require.Len(t, messages, 1)
+		require.Len(t, messages[0].Content, 1)
+		require.NotNil(t, messages[0].Content[0].OfDocument)
+		require.Equal(t, "Document", messages[0].Content[0].OfDocument.Title.Value)
+		require.True(t, messages[0].Content[0].OfDocument.Title.Valid())
 		require.Empty(t, warnings)
 	})
 

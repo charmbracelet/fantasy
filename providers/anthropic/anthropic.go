@@ -874,6 +874,7 @@ func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBl
 								docBlock := anthropic.NewDocumentBlock(anthropic.Base64PDFSourceParam{
 									Data: base64Encoded,
 								})
+								docBlock.OfDocument.Title = anthropic.String(sanitizeAnthropicDocumentTitle(file.Filename))
 								if cacheControl != nil {
 									docBlock.OfDocument.CacheControl = anthropic.NewCacheControlEphemeralParam()
 								}

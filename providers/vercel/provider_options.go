@@ -69,6 +69,8 @@ type GatewayProviderOptions struct {
 	Order []string `json:"order,omitempty"`
 	// Models is the list of fallback models to try if the primary model fails.
 	Models []string `json:"models,omitempty"`
+	// ZeroDataRetention control whether zero data retention is enforced.
+	ZeroDataRetention *bool `json:"zeroDataRetention,omitempty"`
 }
 
 // BYOKCredential represents a single provider credential for BYOK.

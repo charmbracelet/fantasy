@@ -883,10 +883,16 @@ func toPrompt(prompt fantasy.Prompt, sendReasoningData bool) ([]anthropic.TextBl
 								documentBlock := anthropic.NewDocumentBlock(anthropic.PlainTextSourceParam{
 									Data: string(file.Data),
 								})
+								documentBlock.OfDocument.Title = anthropic.String(sanitizeAnthropicDocumentTitle(file.Filename))
 								if cacheControl != nil {
 									documentBlock.OfDocument.CacheControl = anthropic.NewCacheControlEphemeralParam()
 								}
 								anthropicContent = append(anthropicContent, documentBlock)
+							default:
+								warnings = append(warnings, fantasy.CallWarning{
+									Type:    fantasy.CallWarningTypeOther,
+									Message: fmt.Sprintf("file part media type %s not supported", file.MediaType),
+								})
 							}
 						}
 					}

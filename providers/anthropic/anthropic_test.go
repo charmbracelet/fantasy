@@ -612,6 +612,7 @@ func TestParseOptions_Effort(t *testing.T) {
 		"send_reasoning":            true,
 		"thinking":                  map[string]any{"budget_tokens": int64(2048)},
 		"effort":                    "medium",
+		"thinking_display":          "summarized",
 		"disable_parallel_tool_use": true,
 	})
 	require.NoError(t, err)
@@ -621,6 +622,8 @@ func TestParseOptions_Effort(t *testing.T) {
 	require.Equal(t, int64(2048), options.Thinking.BudgetTokens)
 	require.NotNil(t, options.Effort)
 	require.Equal(t, EffortMedium, *options.Effort)
+	require.NotNil(t, options.ThinkingDisplay)
+	require.Equal(t, ThinkingDisplaySummarized, *options.ThinkingDisplay)
 	require.NotNil(t, options.DisableParallelToolUse)
 	require.True(t, *options.DisableParallelToolUse)
 }
@@ -653,6 +656,148 @@ func TestGenerate_SendsOutputConfigEffort(t *testing.T) {
 	require.Equal(t, "POST", call.method)
 	require.Equal(t, "/v1/messages", call.path)
 	requireAnthropicEffort(t, call.body, EffortMedium)
+}
+
+func TestGenerate_SendsThinkingDisplay(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name        string
+		model       string
+		options     func() *ProviderOptions
+		wantType    string
+		wantDisplay string
+		wantBudget  int64
+	}{
+		{
+			name:  "explicit display with adaptive thinking",
+			model: "claude-sonnet-4-20250514",
+			options: func() *ProviderOptions {
+				effort := EffortMedium
+				display := ThinkingDisplayOmitted
+				return &ProviderOptions{Effort: &effort, ThinkingDisplay: &display}
+			},
+			wantType:    "adaptive",
+			wantDisplay: "omitted",
+		},
+		{
+			name:  "explicit display with budget thinking",
+			model: "claude-sonnet-4-20250514",
+			options: func() *ProviderOptions {
+				display := ThinkingDisplaySummarized
+				return &ProviderOptions{
+					Thinking:        &ThinkingProviderOption{BudgetTokens: 2048},
+					ThinkingDisplay: &display,
+				}
+			},
+			wantType:    "enabled",
+			wantDisplay: "summarized",
+			wantBudget:  2048,
+		},
+		{
+			name:  "opus models default to summarized display",
+			model: "claude-opus-4-7-20260101",
+			options: func() *ProviderOptions {
+				effort := EffortHigh
+				return &ProviderOptions{Effort: &effort}
+			},
+			wantType:    "adaptive",
+			wantDisplay: "summarized",
+		},
+		{
+			name:  "bedrock opus models default to summarized display",
+			model: "us.anthropic.claude-opus-4-8-20260101-v1:0",
+			options: func() *ProviderOptions {
+				effort := EffortHigh
+				return &ProviderOptions{Effort: &effort}
+			},
+			wantType:    "adaptive",
+			wantDisplay: "summarized",
+		},
+		{
+			name:  "explicit display overrides opus default",
+			model: "claude-opus-4-8-20260101",
+			options: func() *ProviderOptions {
+				effort := EffortHigh
+				display := ThinkingDisplayOmitted
+				return &ProviderOptions{Effort: &effort, ThinkingDisplay: &display}
+			},
+			wantType:    "adaptive",
+			wantDisplay: "omitted",
+		},
+		{
+			name:  "older opus models keep provider default",
+			model: "claude-opus-4-6-20260101",
+			options: func() *ProviderOptions {
+				effort := EffortHigh
+				return &ProviderOptions{Effort: &effort}
+			},
+			wantType: "adaptive",
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			server, calls := newAnthropicJSONServer(mockAnthropicGenerateResponse())
+			defer server.Close()
+
+			provider, err := New(
+				WithAPIKey("test-api-key"),
+				WithBaseURL(server.URL),
+			)
+			require.NoError(t, err)
+
+			model, err := provider.LanguageModel(context.Background(), tt.model)
+			require.NoError(t, err)
+
+			_, err = model.Generate(context.Background(), fantasy.Call{
+				Prompt:          testPrompt(),
+				ProviderOptions: NewProviderOptions(tt.options()),
+			})
+			require.NoError(t, err)
+
+			call := awaitAnthropicCall(t, calls)
+			thinking, ok := call.body["thinking"].(map[string]any)
+			require.True(t, ok)
+			require.Equal(t, tt.wantType, thinking["type"])
+			if tt.wantDisplay == "" {
+				require.NotContains(t, thinking, "display")
+			} else {
+				require.Equal(t, tt.wantDisplay, thinking["display"])
+			}
+			if tt.wantBudget != 0 {
+				require.InDelta(t, tt.wantBudget, thinking["budget_tokens"], 0)
+			}
+		})
+	}
+}
+
+func TestDefaultsToOmittedThinkingDisplay(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name  string
+		model string
+		want  bool
+	}{
+		{name: "opus 4.7", model: "claude-opus-4-7-20260101", want: true},
+		{name: "opus 4.10", model: "claude-opus-4-10-20260101", want: true},
+		{name: "bedrock opus 4.8", model: "us.anthropic.claude-opus-4-8-20260101-v1:0", want: true},
+		{name: "opus 4.6", model: "claude-opus-4-6-20260101", want: false},
+		{name: "sonnet", model: "claude-sonnet-4-20250514", want: false},
+		{name: "no minor", model: "claude-opus-4", want: false},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			require.Equal(t, tt.want, defaultsToOmittedThinkingDisplay(tt.model))
+		})
+	}
 }
 
 func TestStream_SendsOutputConfigEffort(t *testing.T) {

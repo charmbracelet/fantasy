@@ -87,7 +87,6 @@ func TestRetryWithExponentialBackoff_ConnectionErrors(t *testing.T) {
 			}
 			return 42, nil
 		})
-
 		if err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}

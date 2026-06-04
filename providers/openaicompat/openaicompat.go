@@ -8,10 +8,11 @@ import (
 )
 
 type options struct {
-	openaiOptions        []openai.Option
-	languageModelOptions []openai.LanguageModelOption
-	sdkOptions           []option.RequestOption
-	objectMode           fantasy.ObjectMode
+	openaiOptions           []openai.Option
+	languageModelOptions    []openai.LanguageModelOption
+	sdkOptions              []option.RequestOption
+	objectMode              fantasy.ObjectMode
+	requireReasoningContent bool
 }
 
 const (
@@ -32,7 +33,6 @@ func New(opts ...Option) (fantasy.Provider, error) {
 			openai.WithLanguageModelPrepareCallFunc(PrepareCallFunc),
 			openai.WithLanguageModelStreamExtraFunc(StreamExtraFunc),
 			openai.WithLanguageModelExtraContentFunc(ExtraContentFunc),
-			openai.WithLanguageModelToPromptFunc(ToPromptFunc),
 		},
 		objectMode: fantasy.ObjectModeTool, // Default to tool mode for openai-compat
 	}
@@ -46,6 +46,13 @@ func New(opts ...Option) (fantasy.Provider, error) {
 	if objectMode == fantasy.ObjectModeAuto || objectMode == fantasy.ObjectModeJSON {
 		objectMode = fantasy.ObjectModeTool
 	}
+
+	// Build the ToPromptFunc with the reasoning content requirement.
+	toPromptFn := NewToPromptFunc(providerOptions.requireReasoningContent)
+	providerOptions.languageModelOptions = append(
+		providerOptions.languageModelOptions,
+		openai.WithLanguageModelToPromptFunc(toPromptFn),
+	)
 
 	providerOptions.openaiOptions = append(
 		providerOptions.openaiOptions,
@@ -127,5 +134,15 @@ func WithUseResponsesAPI() Option {
 func WithResponsesAPIFunc(fn func(modelID string) bool) Option {
 	return func(o *options) {
 		o.openaiOptions = append(o.openaiOptions, openai.WithResponsesAPIFunc(fn))
+	}
+}
+
+// WithRequireReasoningContent configures the provider to include
+// reasoning_content on all assistant messages once thinking has been
+// active. Required by DeepSeek and Kimi (Moonshot) which reject
+// requests where the field is missing from any assistant message.
+func WithRequireReasoningContent() Option {
+	return func(o *options) {
+		o.requireReasoningContent = true
 	}
 }

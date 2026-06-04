@@ -1,6 +1,7 @@
 package openaicompat
 
 import (
+	"cmp"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -14,6 +15,13 @@ import (
 )
 
 const reasoningStartedCtx = "reasoning_started"
+
+// reasoningContentPlaceholder is sent when a provider requires
+// reasoning_content on every assistant message but the current
+// message has no actual reasoning. DeepSeek and Kimi (Moonshot)
+// reject requests where the field is missing or empty once
+// thinking has been active in the conversation.
+const reasoningContentPlaceholder = " "
 
 // PrepareCallFunc prepares the call for the language model.
 func PrepareCallFunc(model fantasy.LanguageModel, params *openaisdk.ChatCompletionNewParams, call fantasy.Call) ([]fantasy.CallWarning, error) {
@@ -137,7 +145,24 @@ func StreamExtraFunc(chunk openaisdk.ChatCompletionChunk, yield func(fantasy.Str
 // ToPromptFunc converts a fantasy prompt to OpenAI format with reasoning support.
 // It handles fantasy.ContentTypeReasoning in assistant messages by adding the
 // reasoning_content field to the message JSON.
-func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletionMessageParamUnion, []fantasy.CallWarning) {
+//
+// By default, reasoning_content is only included on messages that carry actual
+// reasoning text. Use NewToPromptFunc(true) to require reasoning_content on all
+// assistant messages once thinking has been active — needed for DeepSeek and
+// Kimi (Moonshot) which reject requests where the field is missing.
+var ToPromptFunc = NewToPromptFunc(false)
+
+// NewToPromptFunc returns a LanguageModelToPromptFunc. When requireReasoning is
+// true, every assistant message after the first reasoning part will include a
+// reasoning_content field (using reasoningContentPlaceholder when no actual
+// reasoning text is present).
+func NewToPromptFunc(requireReasoning bool) openai.LanguageModelToPromptFunc {
+	return func(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletionMessageParamUnion, []fantasy.CallWarning) {
+		return toPrompt(prompt, requireReasoning)
+	}
+}
+
+func toPrompt(prompt fantasy.Prompt, requireReasoning bool) ([]openaisdk.ChatCompletionMessageParamUnion, []fantasy.CallWarning) {
 	var messages []openaisdk.ChatCompletionMessageParamUnion
 	var warnings []fantasy.CallWarning
 	hasReasoning := false
@@ -312,19 +337,6 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 			}
 			messages = append(messages, openaisdk.UserMessage(content))
 		case fantasy.MessageRoleAssistant:
-			// simple assistant message just text content
-			if len(msg.Content) == 1 && msg.Content[0].GetType() == fantasy.ContentTypeText {
-				textPart, ok := fantasy.AsContentType[fantasy.TextPart](msg.Content[0])
-				if !ok {
-					warnings = append(warnings, fantasy.CallWarning{
-						Type:    fantasy.CallWarningTypeOther,
-						Message: "assistant message text part does not have the right type",
-					})
-					continue
-				}
-				messages = append(messages, openaisdk.AssistantMessage(textPart.Text))
-				continue
-			}
 			assistantMsg := openaisdk.ChatCompletionAssistantMessageParam{
 				Role: "assistant",
 			}
@@ -376,12 +388,13 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 						})
 				}
 			}
-			// Add reasoning_content field if present, or if thinking is enabled
-			// and the message has tool calls (some providers like Kimi require
-			// reasoning_content on all assistant messages when thinking is enabled).
-			if reasoningText != "" || (hasReasoning && len(assistantMsg.ToolCalls) > 0) {
+			// Once thinking has been active, all subsequent assistant
+			// messages must carry reasoning_content. DeepSeek and Kimi
+			// reject requests where it's missing from any assistant
+			// message (text-only responses and tool calls alike).
+			if reasoningText != "" || (requireReasoning && hasReasoning) {
 				assistantMsg.SetExtraFields(map[string]any{
-					"reasoning_content": reasoningText,
+					"reasoning_content": cmp.Or(reasoningText, reasoningContentPlaceholder),
 				})
 			}
 			if !hasVisibleCompatAssistantContent(&assistantMsg) {

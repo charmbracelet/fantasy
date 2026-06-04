@@ -51,7 +51,11 @@ func thinkingDisplay(providerOptions *ProviderOptions, modelID string) (Thinking
 
 func defaultsToAdaptiveThinking(model string) bool {
 	model = strings.ToLower(strings.TrimSpace(model))
-	return strings.Contains(model, "claude-mythos-preview") || defaultsToOmittedOpusThinkingDisplay(model)
+	return strings.Contains(model, "claude-mythos-preview")
+}
+
+func requiresAdaptiveThinking(model string) bool {
+	return defaultsToAdaptiveThinking(model) || defaultsToOmittedOpusThinkingDisplay(model)
 }
 
 func setThinkingDisplay(param interface{ SetExtraFields(map[string]any) }, display ThinkingDisplay) {
@@ -60,7 +64,7 @@ func setThinkingDisplay(param interface{ SetExtraFields(map[string]any) }, displ
 
 func defaultsToOmittedThinkingDisplay(model string) bool {
 	model = strings.ToLower(strings.TrimSpace(model))
-	return defaultsToAdaptiveThinking(model)
+	return defaultsToAdaptiveThinking(model) || defaultsToOmittedOpusThinkingDisplay(model)
 }
 
 func defaultsToOmittedOpusThinkingDisplay(model string) bool {
@@ -392,7 +396,7 @@ func (a languageModel) prepareParams(call fantasy.Call) (
 		if providerOptions.Thinking.BudgetTokens == 0 {
 			return nil, nil, nil, nil, &fantasy.Error{Title: "no budget", Message: "thinking requires budget"}
 		}
-		if defaultsToAdaptiveThinking(a.modelID) {
+		if requiresAdaptiveThinking(a.modelID) {
 			adaptive := anthropic.NewThinkingConfigAdaptiveParam()
 			if display, ok := thinkingDisplay(providerOptions, a.modelID); ok {
 				setThinkingDisplay(&adaptive, display)

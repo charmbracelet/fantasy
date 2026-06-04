@@ -793,6 +793,28 @@ func TestGenerate_SendsThinkingDisplay(t *testing.T) {
 	}
 }
 
+func TestGenerate_DoesNotEnableThinkingForPlainOpus(t *testing.T) {
+	t.Parallel()
+
+	server, calls := newAnthropicJSONServer(mockAnthropicGenerateResponse())
+	defer server.Close()
+
+	provider, err := New(
+		WithAPIKey("test-api-key"),
+		WithBaseURL(server.URL),
+	)
+	require.NoError(t, err)
+
+	model, err := provider.LanguageModel(context.Background(), "claude-opus-4-7")
+	require.NoError(t, err)
+
+	_, err = model.Generate(context.Background(), fantasy.Call{Prompt: testPrompt()})
+	require.NoError(t, err)
+
+	call := awaitAnthropicCall(t, calls)
+	require.NotContains(t, call.body, "thinking")
+}
+
 func TestDefaultsToOmittedThinkingDisplay(t *testing.T) {
 	t.Parallel()
 

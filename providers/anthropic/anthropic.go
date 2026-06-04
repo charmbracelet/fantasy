@@ -391,9 +391,17 @@ func (a languageModel) prepareParams(call fantasy.Call) (
 		if providerOptions.Thinking.BudgetTokens == 0 {
 			return nil, nil, nil, nil, &fantasy.Error{Title: "no budget", Message: "thinking requires budget"}
 		}
-		params.Thinking = anthropic.ThinkingConfigParamOfEnabled(providerOptions.Thinking.BudgetTokens)
-		if display, ok := thinkingDisplay(providerOptions, a.modelID); ok {
-			setThinkingDisplay(params.Thinking.OfEnabled, display)
+		if defaultsToAdaptiveThinking(a.modelID) {
+			adaptive := anthropic.NewThinkingConfigAdaptiveParam()
+			if display, ok := thinkingDisplay(providerOptions, a.modelID); ok {
+				setThinkingDisplay(&adaptive, display)
+			}
+			params.Thinking.OfAdaptive = &adaptive
+		} else {
+			params.Thinking = anthropic.ThinkingConfigParamOfEnabled(providerOptions.Thinking.BudgetTokens)
+			if display, ok := thinkingDisplay(providerOptions, a.modelID); ok {
+				setThinkingDisplay(params.Thinking.OfEnabled, display)
+			}
 		}
 		if call.Temperature != nil {
 			params.Temperature = param.Opt[float64]{}

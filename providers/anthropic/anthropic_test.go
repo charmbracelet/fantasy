@@ -735,6 +735,15 @@ func TestGenerate_SendsThinkingDisplay(t *testing.T) {
 			wantDisplay: "summarized",
 		},
 		{
+			name:  "opus models use adaptive thinking when budget thinking configured",
+			model: "claude-opus-4-7",
+			options: func() *ProviderOptions {
+				return &ProviderOptions{Thinking: &ThinkingProviderOption{BudgetTokens: 2048}}
+			},
+			wantType:    "adaptive",
+			wantDisplay: "summarized",
+		},
+		{
 			name:  "older opus models keep provider default",
 			model: "claude-opus-4-6-20260101",
 			options: func() *ProviderOptions {

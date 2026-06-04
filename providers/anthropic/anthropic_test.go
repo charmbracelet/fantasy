@@ -726,6 +726,15 @@ func TestGenerate_SendsThinkingDisplay(t *testing.T) {
 			wantDisplay: "omitted",
 		},
 		{
+			name:  "mythos models default to adaptive thinking",
+			model: "claude-mythos-preview",
+			options: func() *ProviderOptions {
+				return &ProviderOptions{}
+			},
+			wantType:    "adaptive",
+			wantDisplay: "summarized",
+		},
+		{
 			name:  "older opus models keep provider default",
 			model: "claude-opus-4-6-20260101",
 			options: func() *ProviderOptions {

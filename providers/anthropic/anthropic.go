@@ -49,13 +49,18 @@ func thinkingDisplay(providerOptions *ProviderOptions, modelID string) (Thinking
 	return "", false
 }
 
+func defaultsToAdaptiveThinking(model string) bool {
+	model = strings.ToLower(strings.TrimSpace(model))
+	return strings.Contains(model, "claude-mythos-preview")
+}
+
 func setThinkingDisplay(param interface{ SetExtraFields(map[string]any) }, display ThinkingDisplay) {
 	param.SetExtraFields(map[string]any{"display": string(display)})
 }
 
 func defaultsToOmittedThinkingDisplay(model string) bool {
 	model = strings.ToLower(strings.TrimSpace(model))
-	if strings.Contains(model, "claude-mythos-preview") {
+	if defaultsToAdaptiveThinking(model) {
 		return true
 	}
 	_, suffix, ok := strings.Cut(model, "claude-opus-4-")
@@ -414,6 +419,12 @@ func (a languageModel) prepareParams(call fantasy.Call) (
 				Details: "TopK is not supported when thinking is enabled",
 			})
 		}
+	case defaultsToAdaptiveThinking(a.modelID):
+		adaptive := anthropic.NewThinkingConfigAdaptiveParam()
+		if display, ok := thinkingDisplay(providerOptions, a.modelID); ok {
+			setThinkingDisplay(&adaptive, display)
+		}
+		params.Thinking.OfAdaptive = &adaptive
 	}
 
 	if len(call.Tools) > 0 {

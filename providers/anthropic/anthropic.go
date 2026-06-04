@@ -55,6 +55,9 @@ func setThinkingDisplay(param interface{ SetExtraFields(map[string]any) }, displ
 
 func defaultsToOmittedThinkingDisplay(model string) bool {
 	model = strings.ToLower(strings.TrimSpace(model))
+	if strings.Contains(model, "claude-mythos-preview") {
+		return true
+	}
 	_, suffix, ok := strings.Cut(model, "claude-opus-4-")
 	if !ok {
 		return false

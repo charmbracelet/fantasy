@@ -51,7 +51,7 @@ func thinkingDisplay(providerOptions *ProviderOptions, modelID string) (Thinking
 
 func defaultsToAdaptiveThinking(model string) bool {
 	model = strings.ToLower(strings.TrimSpace(model))
-	return strings.Contains(model, "claude-mythos-preview")
+	return strings.Contains(model, "claude-mythos-preview") || defaultsToOmittedOpusThinkingDisplay(model)
 }
 
 func setThinkingDisplay(param interface{ SetExtraFields(map[string]any) }, display ThinkingDisplay) {
@@ -60,9 +60,10 @@ func setThinkingDisplay(param interface{ SetExtraFields(map[string]any) }, displ
 
 func defaultsToOmittedThinkingDisplay(model string) bool {
 	model = strings.ToLower(strings.TrimSpace(model))
-	if defaultsToAdaptiveThinking(model) {
-		return true
-	}
+	return defaultsToAdaptiveThinking(model)
+}
+
+func defaultsToOmittedOpusThinkingDisplay(model string) bool {
 	_, suffix, ok := strings.Cut(model, "claude-opus-4-")
 	if !ok {
 		return false

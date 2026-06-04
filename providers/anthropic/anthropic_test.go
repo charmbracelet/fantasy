@@ -783,10 +783,14 @@ func TestDefaultsToOmittedThinkingDisplay(t *testing.T) {
 		model string
 		want  bool
 	}{
+		{name: "opus 4.7 alias", model: "claude-opus-4-7", want: true},
 		{name: "opus 4.7", model: "claude-opus-4-7-20260101", want: true},
 		{name: "opus 4.10", model: "claude-opus-4-10-20260101", want: true},
+		{name: "bedrock opus 4.8 alias", model: "us.anthropic.claude-opus-4-8-v1", want: true},
 		{name: "bedrock opus 4.8", model: "us.anthropic.claude-opus-4-8-20260101-v1:0", want: true},
 		{name: "opus 4.6", model: "claude-opus-4-6-20260101", want: false},
+		{name: "opus 4 date only", model: "claude-opus-4-20250514", want: false},
+		{name: "bedrock opus 4 date only", model: "us.anthropic.claude-opus-4-20250514-v1:0", want: false},
 		{name: "sonnet", model: "claude-sonnet-4-20250514", want: false},
 		{name: "no minor", model: "claude-opus-4", want: false},
 	}

@@ -64,7 +64,7 @@ func defaultsToOmittedThinkingDisplay(model string) bool {
 	for versionEnd < len(suffix) && suffix[versionEnd] >= '0' && suffix[versionEnd] <= '9' {
 		versionEnd++
 	}
-	if versionEnd == 0 {
+	if versionEnd == 0 || versionEnd > 2 {
 		return false
 	}
 	minor, err := strconv.Atoi(suffix[:versionEnd])

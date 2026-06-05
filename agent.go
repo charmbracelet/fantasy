@@ -11,6 +11,7 @@ import (
 	"slices"
 	"sync"
 
+	"charm.land/fantasy/jsonrepair"
 	"charm.land/fantasy/schema"
 	"github.com/charmbracelet/x/exp/slice"
 )
@@ -1040,6 +1041,16 @@ func (a *agent) validateAndRepairToolCall(ctx context.Context, toolCall ToolCall
 			if repairedToolCall, repairErr := repairFunc(ctx, repairOptions); repairErr == nil && repairedToolCall != nil {
 				if validateErr := a.validateToolCall(*repairedToolCall, availableTools, execProviderTools); validateErr == nil {
 					return *repairedToolCall
+				}
+			}
+		} else {
+			// Default repair: try jsonrepair for malformed JSON when no
+			// custom repair function is configured.
+			if repaired, repairErr := jsonrepair.RepairJSON(toolCall.Input); repairErr == nil && repaired != toolCall.Input {
+				repairedCall := toolCall
+				repairedCall.Input = repaired
+				if validateErr := a.validateToolCall(repairedCall, availableTools, execProviderTools); validateErr == nil {
+					return repairedCall
 				}
 			}
 		}

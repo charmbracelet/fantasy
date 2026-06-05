@@ -11,6 +11,7 @@ import (
 	"io"
 	"maps"
 	"math"
+	"strconv"
 	"strings"
 
 	"charm.land/fantasy"
@@ -36,6 +37,51 @@ func betaRequestOptions(flags []string) []option.RequestOption {
 		opts = append(opts, option.WithHeaderAdd("anthropic-beta", flag))
 	}
 	return opts
+}
+
+func thinkingDisplay(providerOptions *ProviderOptions, modelID string) (ThinkingDisplay, bool) {
+	if providerOptions != nil && providerOptions.ThinkingDisplay != nil && *providerOptions.ThinkingDisplay != "" {
+		return *providerOptions.ThinkingDisplay, true
+	}
+	if defaultsToOmittedThinkingDisplay(modelID) {
+		return ThinkingDisplaySummarized, true
+	}
+	return "", false
+}
+
+func defaultsToAdaptiveThinking(model string) bool {
+	model = strings.ToLower(strings.TrimSpace(model))
+	return strings.Contains(model, "claude-mythos-preview")
+}
+
+func requiresAdaptiveThinking(model string) bool {
+	return defaultsToAdaptiveThinking(model) || defaultsToOmittedOpusThinkingDisplay(model)
+}
+
+func setThinkingDisplay(param interface{ SetExtraFields(map[string]any) }, display ThinkingDisplay) {
+	param.SetExtraFields(map[string]any{"display": string(display)})
+}
+
+func defaultsToOmittedThinkingDisplay(model string) bool {
+	model = strings.ToLower(strings.TrimSpace(model))
+	return defaultsToAdaptiveThinking(model) || defaultsToOmittedOpusThinkingDisplay(model)
+}
+
+func defaultsToOmittedOpusThinkingDisplay(model string) bool {
+	_, suffix, ok := strings.Cut(model, "claude-opus-4-")
+	if !ok {
+		return false
+	}
+
+	versionEnd := 0
+	for versionEnd < len(suffix) && suffix[versionEnd] >= '0' && suffix[versionEnd] <= '9' {
+		versionEnd++
+	}
+	if versionEnd == 0 || versionEnd > 2 {
+		return false
+	}
+	minor, err := strconv.Atoi(suffix[:versionEnd])
+	return err == nil && minor >= 7
 }
 
 // buildRequestOptions constructs the common request options shared
@@ -342,12 +388,26 @@ func (a languageModel) prepareParams(call fantasy.Call) (
 			Effort: anthropic.OutputConfigEffort(effort),
 		}
 		adaptive := anthropic.NewThinkingConfigAdaptiveParam()
+		if display, ok := thinkingDisplay(providerOptions, a.modelID); ok {
+			setThinkingDisplay(&adaptive, display)
+		}
 		params.Thinking.OfAdaptive = &adaptive
 	case providerOptions.Thinking != nil:
 		if providerOptions.Thinking.BudgetTokens == 0 {
 			return nil, nil, nil, nil, &fantasy.Error{Title: "no budget", Message: "thinking requires budget"}
 		}
-		params.Thinking = anthropic.ThinkingConfigParamOfEnabled(providerOptions.Thinking.BudgetTokens)
+		if requiresAdaptiveThinking(a.modelID) {
+			adaptive := anthropic.NewThinkingConfigAdaptiveParam()
+			if display, ok := thinkingDisplay(providerOptions, a.modelID); ok {
+				setThinkingDisplay(&adaptive, display)
+			}
+			params.Thinking.OfAdaptive = &adaptive
+		} else {
+			params.Thinking = anthropic.ThinkingConfigParamOfEnabled(providerOptions.Thinking.BudgetTokens)
+			if display, ok := thinkingDisplay(providerOptions, a.modelID); ok {
+				setThinkingDisplay(params.Thinking.OfEnabled, display)
+			}
+		}
 		if call.Temperature != nil {
 			params.Temperature = param.Opt[float64]{}
 			warnings = append(warnings, fantasy.CallWarning{
@@ -372,6 +432,12 @@ func (a languageModel) prepareParams(call fantasy.Call) (
 				Details: "TopK is not supported when thinking is enabled",
 			})
 		}
+	case defaultsToAdaptiveThinking(a.modelID):
+		adaptive := anthropic.NewThinkingConfigAdaptiveParam()
+		if display, ok := thinkingDisplay(providerOptions, a.modelID); ok {
+			setThinkingDisplay(&adaptive, display)
+		}
+		params.Thinking.OfAdaptive = &adaptive
 	}
 
 	if len(call.Tools) > 0 {

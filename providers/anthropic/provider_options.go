@@ -25,6 +25,16 @@ const (
 	EffortMax Effort = "max"
 )
 
+// ThinkingDisplay controls whether Anthropic returns visible thinking content.
+type ThinkingDisplay string
+
+const (
+	// ThinkingDisplaySummarized requests visible summarized thinking content.
+	ThinkingDisplaySummarized ThinkingDisplay = "summarized"
+	// ThinkingDisplayOmitted requests hidden thinking content.
+	ThinkingDisplayOmitted ThinkingDisplay = "omitted"
+)
+
 // Global type identifiers for Anthropic-specific provider data.
 const (
 	TypeProviderOptions         = Name + ".options"
@@ -70,6 +80,7 @@ type ProviderOptions struct {
 	SendReasoning          *bool                   `json:"send_reasoning"`
 	Thinking               *ThinkingProviderOption `json:"thinking"`
 	Effort                 *Effort                 `json:"effort"`
+	ThinkingDisplay        *ThinkingDisplay        `json:"thinking_display"`
 	DisableParallelToolUse *bool                   `json:"disable_parallel_tool_use"`
 	ExtraBody              map[string]any          `json:"extra_body,omitempty"`
 }

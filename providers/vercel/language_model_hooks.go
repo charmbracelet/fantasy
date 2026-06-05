@@ -490,10 +490,13 @@ func languageModelUsage(response openaisdk.ChatCompletion) (fantasy.Usage, fanta
 		Provider: provider,
 	}
 
+	// Vercel reports prompt_tokens INCLUDING cached tokens. Subtract to avoid double-counting.
+	inputTokens := max(usage.PromptTokens-promptTokenDetails.CachedTokens, 0)
+
 	return fantasy.Usage{
-		InputTokens:     usage.PromptTokens,
+		InputTokens:     inputTokens,
 		OutputTokens:    usage.CompletionTokens,
-		TotalTokens:     usage.TotalTokens,
+		TotalTokens:     inputTokens + usage.CompletionTokens + promptTokenDetails.CachedTokens,
 		ReasoningTokens: completionTokenDetails.ReasoningTokens,
 		CacheReadTokens: promptTokenDetails.CachedTokens,
 	}, providerMetadata
@@ -521,10 +524,14 @@ func languageModelStreamUsage(chunk openaisdk.ChatCompletionChunk, _ map[string]
 
 	completionTokenDetails := usage.CompletionTokensDetails
 	promptTokenDetails := usage.PromptTokensDetails
+
+	// Vercel reports prompt_tokens INCLUDING cached tokens. Subtract to avoid double-counting.
+	inputTokens := max(usage.PromptTokens-promptTokenDetails.CachedTokens, 0)
+
 	aiUsage := fantasy.Usage{
-		InputTokens:     usage.PromptTokens,
+		InputTokens:     inputTokens,
 		OutputTokens:    usage.CompletionTokens,
-		TotalTokens:     usage.TotalTokens,
+		TotalTokens:     inputTokens + usage.CompletionTokens + promptTokenDetails.CachedTokens,
 		ReasoningTokens: completionTokenDetails.ReasoningTokens,
 		CacheReadTokens: promptTokenDetails.CachedTokens,
 	}

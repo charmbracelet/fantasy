@@ -235,7 +235,7 @@ func (g languageModel) prepareParams(call fantasy.Call) (*genai.GenerateContentC
 		}
 	}
 
-	systemInstructions, content, warnings := toGooglePrompt(call.Prompt)
+	systemInstructions, content, warnings := toGooglePrompt(call.Prompt, g.providerOptions.backend == genai.BackendVertexAI)
 
 	if providerOptions.ThinkingConfig != nil {
 		if providerOptions.ThinkingConfig.IncludeThoughts != nil &&
@@ -347,7 +347,7 @@ func (g languageModel) prepareParams(call fantasy.Call) (*genai.GenerateContentC
 	return config, content, warnings, nil
 }
 
-func toGooglePrompt(prompt fantasy.Prompt) (*genai.Content, []*genai.Content, []fantasy.CallWarning) { //nolint: unparam
+func toGooglePrompt(prompt fantasy.Prompt, isVertexAI bool) (*genai.Content, []*genai.Content, []fantasy.CallWarning) { //nolint: unparam
 	var systemInstructions *genai.Content
 	var content []*genai.Content
 	var warnings []fantasy.CallWarning
@@ -455,12 +455,22 @@ func toGooglePrompt(prompt fantasy.Prompt) (*genai.Content, []*genai.Content, []
 					if err != nil {
 						continue
 					}
-					geminiPart := &genai.Part{
-						FunctionCall: &genai.FunctionCall{
-							ID:   toolCall.ToolCallID,
-							Name: toolCall.ToolName,
-							Args: result,
-						},
+					var geminiPart *genai.Part
+					if isVertexAI {
+						geminiPart = &genai.Part{
+							FunctionCall: &genai.FunctionCall{
+								Name: toolCall.ToolName,
+								Args: result,
+							},
+						}
+					} else {
+						geminiPart = &genai.Part{
+							FunctionCall: &genai.FunctionCall{
+								ID:   toolCall.ToolCallID,
+								Name: toolCall.ToolName,
+								Args: result,
+							},
+						}
 					}
 					if currentReasoningMetadata != nil {
 						geminiPart.ThoughtSignature = []byte(currentReasoningMetadata.Signature)
@@ -506,12 +516,23 @@ func toGooglePrompt(prompt fantasy.Prompt) (*genai.Content, []*genai.Content, []
 							continue
 						}
 						response := map[string]any{"result": content.Text}
-						parts = append(parts, &genai.Part{
-							FunctionResponse: &genai.FunctionResponse{
+
+						var functionResponse *genai.FunctionResponse
+						if isVertexAI {
+							functionResponse = &genai.FunctionResponse{
+								Response: response,
+								Name:     toolCall.ToolName,
+							}
+						} else {
+							functionResponse = &genai.FunctionResponse{
 								ID:       result.ToolCallID,
 								Response: response,
 								Name:     toolCall.ToolName,
-							},
+							}
+						}
+
+						parts = append(parts, &genai.Part{
+							FunctionResponse: functionResponse,
 						})
 
 					case fantasy.ToolResultContentTypeError:
@@ -520,12 +541,21 @@ func toGooglePrompt(prompt fantasy.Prompt) (*genai.Content, []*genai.Content, []
 							continue
 						}
 						response := map[string]any{"result": content.Error.Error()}
-						parts = append(parts, &genai.Part{
-							FunctionResponse: &genai.FunctionResponse{
+						var functionResponse *genai.FunctionResponse
+						if isVertexAI {
+							functionResponse = &genai.FunctionResponse{
+								Response: response,
+								Name:     toolCall.ToolName,
+							}
+						} else {
+							functionResponse = &genai.FunctionResponse{
 								ID:       result.ToolCallID,
 								Response: response,
 								Name:     toolCall.ToolName,
-							},
+							}
+						}
+						parts = append(parts, &genai.Part{
+							FunctionResponse: functionResponse,
 						})
 					}
 				}

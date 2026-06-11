@@ -349,8 +349,7 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 				if choice.FinishReason != "" {
 					finishReason = choice.FinishReason
 				}
-				switch {
-				case choice.Delta.Content != "":
+				if choice.Delta.Content != "" {
 					if !isActiveText {
 						isActiveText = true
 						if !yield(fantasy.StreamPart{
@@ -367,7 +366,8 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 					}) {
 						return
 					}
-				case len(choice.Delta.ToolCalls) > 0:
+				}
+				if len(choice.Delta.ToolCalls) > 0 {
 					if isActiveText {
 						isActiveText = false
 						if !yield(fantasy.StreamPart{

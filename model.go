@@ -31,7 +31,7 @@ func (u Usage) String() string {
 // ResponseContent represents the content of a model response.
 type ResponseContent []Content
 
-// Text returns the text content of the response.
+// Text returns the first text content of the response.
 func (r ResponseContent) Text() string {
 	for _, c := range r {
 		if c.GetType() == ContentTypeText {

@@ -850,6 +850,167 @@ func TestResponseContent_Getters_MultipleItems(t *testing.T) {
 	require.Equal(t, "image/png", files[1].MediaType)
 }
 
+func TestHasNonBlankText(t *testing.T) {
+	t.Parallel()
+
+	t.Run("single text block", func(t *testing.T) {
+		content := ResponseContent{TextContent{Text: "hello"}}
+		require.True(t, hasNonBlankText(content))
+	})
+
+	t.Run("text among tool calls", func(t *testing.T) {
+		content := ResponseContent{
+			TextContent{Text: "preamble"},
+			ToolCallContent{ToolCallID: "c1", ToolName: "t", Input: "{}"},
+			TextContent{Text: "final answer"},
+		}
+		require.True(t, hasNonBlankText(content))
+	})
+
+	t.Run("whitespace-only is blank", func(t *testing.T) {
+		content := ResponseContent{
+			TextContent{Text: "   "},
+		}
+		require.False(t, hasNonBlankText(content))
+	})
+
+	t.Run("mixed whitespace and real text", func(t *testing.T) {
+		content := ResponseContent{
+			TextContent{Text: "   "},
+			TextContent{Text: "real"},
+		}
+		require.True(t, hasNonBlankText(content))
+	})
+
+	t.Run("empty content", func(t *testing.T) {
+		require.False(t, hasNonBlankText(ResponseContent{}))
+	})
+
+	t.Run("no text blocks", func(t *testing.T) {
+		content := ResponseContent{
+			ToolCallContent{ToolCallID: "c1", ToolName: "t", Input: "{}"},
+		}
+		require.False(t, hasNonBlankText(content))
+	})
+}
+
+func TestFinalResponse(t *testing.T) {
+	t.Parallel()
+
+	t.Run("last step has text", func(t *testing.T) {
+		steps := []StepResult{
+			{Response: Response{Content: ResponseContent{TextContent{Text: "earlier"}}}},
+			{Response: Response{Content: ResponseContent{TextContent{Text: "final"}}}},
+		}
+		resp := finalResponse(steps)
+		require.Equal(t, "final", resp.Content.Text())
+	})
+
+	t.Run("last step tool-only falls back to earlier text", func(t *testing.T) {
+		steps := []StepResult{
+			{Response: Response{Content: ResponseContent{TextContent{Text: "has text"}}}},
+			{Response: Response{Content: ResponseContent{
+				ToolCallContent{ToolCallID: "c1", ToolName: "t", Input: "{}"},
+			}}},
+		}
+		resp := finalResponse(steps)
+		require.Equal(t, "has text", resp.Content.Text())
+	})
+
+	t.Run("all steps tool-only returns last", func(t *testing.T) {
+		steps := []StepResult{
+			{Response: Response{Content: ResponseContent{
+				ToolCallContent{ToolCallID: "c1", ToolName: "t1", Input: "{}"},
+			}}},
+			{Response: Response{Content: ResponseContent{
+				ToolCallContent{ToolCallID: "c2", ToolName: "t2", Input: "{}"},
+			}}},
+		}
+		resp := finalResponse(steps)
+		toolCalls := resp.Content.ToolCalls()
+		require.Len(t, toolCalls, 1)
+		require.Equal(t, "c2", toolCalls[0].ToolCallID)
+	})
+
+	t.Run("empty steps", func(t *testing.T) {
+		resp := finalResponse(nil)
+		require.Equal(t, "", resp.Content.Text())
+	})
+
+	t.Run("single step with text", func(t *testing.T) {
+		steps := []StepResult{
+			{Response: Response{Content: ResponseContent{TextContent{Text: "only"}}}},
+		}
+		resp := finalResponse(steps)
+		require.Equal(t, "only", resp.Content.Text())
+	})
+
+	t.Run("skips whitespace-only steps", func(t *testing.T) {
+		steps := []StepResult{
+			{Response: Response{Content: ResponseContent{TextContent{Text: "real"}}}},
+			{Response: Response{Content: ResponseContent{TextContent{Text: "   "}}}},
+		}
+		resp := finalResponse(steps)
+		require.Equal(t, "real", resp.Content.Text())
+	})
+}
+
+func TestAgent_Generate_ToolOnlyFinalStep_PreservesEarlierText(t *testing.T) {
+	t.Parallel()
+
+	type TestInput struct {
+		Value string `json:"value" description:"Test value"`
+	}
+
+	tool := NewAgentTool(
+		"mytool",
+		"A test tool",
+		func(ctx context.Context, input TestInput, _ ToolCall) (ToolResponse, error) {
+			return ToolResponse{Content: "done", IsError: false}, nil
+		},
+	)
+
+	callCount := 0
+	model := &mockLanguageModel{
+		generateFunc: func(ctx context.Context, call Call) (*Response, error) {
+			callCount++
+			switch callCount {
+			case 1:
+				// First step: text + tool call (model explains then acts).
+				return &Response{
+					Content: []Content{
+						TextContent{Text: "Let me check that."},
+						ToolCallContent{
+							ToolCallID: "call-1",
+							ToolName:   "mytool",
+							Input:      `{"value":"x"}`,
+						},
+					},
+					FinishReason: FinishReasonToolCalls,
+				}, nil
+			case 2:
+				// Second step: tool result only, no text. Model stops here.
+				return &Response{
+					Content:      []Content{},
+					FinishReason: FinishReasonStop,
+				}, nil
+			default:
+				t.Fatalf("unexpected call count: %d", callCount)
+				return nil, nil
+			}
+		},
+	}
+
+	agent := NewAgent(model, WithTools(tool))
+	result, err := agent.Generate(context.Background(), AgentCall{Prompt: "test"})
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	require.Len(t, result.Steps, 2)
+
+	// Response should carry text from step 1 even though step 2 is empty.
+	require.Equal(t, "Let me check that.", result.Response.Content.Text())
+}
+
 func TestStopConditions(t *testing.T) {
 	t.Parallel()
 

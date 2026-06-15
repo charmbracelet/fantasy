@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"maps"
 	"slices"
+	"strings"
 	"sync"
 
 	"charm.land/fantasy/jsonrepair"
@@ -300,9 +301,42 @@ type AgentStreamCall struct {
 // AgentResult represents the result of an agent execution.
 type AgentResult struct {
 	Steps []StepResult
-	// Final response
+	// Final response. When the last step is tool-only (no text content),
+	// this is the response from the most recent step that contained text,
+	// so callers always see meaningful output without walking Steps manually.
 	Response   Response
 	TotalUsage Usage
+}
+
+// finalResponse picks the best Response from a slice of steps. It walks
+// backwards to find the most recent step with non-blank text content. If no
+// step has text content (e.g. all steps were tool calls), the last step's
+// response is returned as-is.
+func finalResponse(steps []StepResult) Response {
+	for i := len(steps) - 1; i >= 0; i-- {
+		if hasNonBlankText(steps[i].Content) {
+			return steps[i].Response
+		}
+	}
+	if len(steps) > 0 {
+		return steps[len(steps)-1].Response
+	}
+	return Response{}
+}
+
+// hasNonBlankText reports whether content contains at least one text block
+// with non-whitespace characters.
+func hasNonBlankText(content ResponseContent) bool {
+	for _, c := range content {
+		if c.GetType() == ContentTypeText {
+			if tc, ok := AsContentType[TextContent](c); ok {
+				if strings.TrimSpace(tc.Text) != "" {
+					return true
+				}
+			}
+		}
+	}
+	return false
 }
 
 // Agent represents an AI agent that can generate responses and stream responses.
@@ -555,7 +589,7 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 
 	agentResult := &AgentResult{
 		Steps:      steps,
-		Response:   steps[len(steps)-1].Response,
+		Response:   finalResponse(steps),
 		TotalUsage: totalUsage,
 	}
 	return agentResult, nil
@@ -954,7 +988,7 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 	// Finish agent stream
 	agentResult := &AgentResult{
 		Steps:      steps,
-		Response:   steps[len(steps)-1].Response,
+		Response:   finalResponse(steps),
 		TotalUsage: totalUsage,
 	}
 

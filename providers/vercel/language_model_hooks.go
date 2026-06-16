@@ -338,12 +338,16 @@ func languageModelStreamExtra(chunk openaisdk.ChatCompletionChunk, yield func(fa
 		ctx[reasoningStartedCtx] = currentState
 		delta := reasoningData.Reasoning
 		if len(reasoningData.ReasoningDetails) > 0 {
-			delta = reasoningData.ReasoningDetails[0].Summary
-			if strings.HasPrefix(reasoningData.ReasoningDetails[0].Format, "google-gemini") {
-				delta = reasoningData.ReasoningDetails[0].Text
-			}
-			if strings.HasPrefix(reasoningData.ReasoningDetails[0].Format, "anthropic-claude") {
-				delta = reasoningData.ReasoningDetails[0].Text
+			detail := reasoningData.ReasoningDetails[0]
+			switch {
+			case strings.HasPrefix(detail.Format, "google-gemini"):
+				delta = detail.Text
+			case strings.HasPrefix(detail.Format, "anthropic-claude"):
+				delta = detail.Text
+			case detail.Summary != "":
+				delta = detail.Summary
+			default:
+				delta = detail.Text
 			}
 		}
 		return ctx, yield(fantasy.StreamPart{

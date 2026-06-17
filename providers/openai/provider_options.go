@@ -24,6 +24,8 @@ const (
 	ReasoningEffortHigh ReasoningEffort = "high"
 	// ReasoningEffortXHigh represents extra-high reasoning effort.
 	ReasoningEffortXHigh ReasoningEffort = "xhigh"
+	// ReasoningEffortMax represents maximum reasoning effort.
+	ReasoningEffortMax ReasoningEffort = "max"
 )
 
 // Global type identifiers for OpenAI-specific provider data.

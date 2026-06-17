@@ -295,15 +295,24 @@ func languageModelStreamExtra(chunk openaisdk.ChatCompletionChunk, yield func(fa
 
 		currentState.format = detail.Format
 		ctx[reasoningStartedCtx] = currentState
+		if !yield(fantasy.StreamPart{
+			Type:             fantasy.StreamPartTypeReasoningStart,
+			ID:               fmt.Sprintf("%d", inx),
+			ProviderMetadata: metadata,
+		}) {
+			return ctx, false
+		}
 		delta := detail.Summary
 		if xstrings.ContainsAnyOf(detail.Format, "google-gemini", "anthropic-claude") {
 			delta = detail.Text
 		}
+		if delta == "" {
+			return ctx, true
+		}
 		return ctx, yield(fantasy.StreamPart{
-			Type:             fantasy.StreamPartTypeReasoningStart,
-			ID:               fmt.Sprintf("%d", inx),
-			Delta:            delta,
-			ProviderMetadata: metadata,
+			Type:  fantasy.StreamPartTypeReasoningDelta,
+			ID:    fmt.Sprintf("%d", inx),
+			Delta: delta,
 		})
 	}
 	if len(reasoningData.ReasoningDetails) == 0 {

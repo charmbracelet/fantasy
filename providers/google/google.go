@@ -235,7 +235,8 @@ func (g languageModel) prepareParams(call fantasy.Call) (*genai.GenerateContentC
 		}
 	}
 
-	systemInstructions, content, warnings := toGooglePrompt(call.Prompt)
+	isVertexAI := g.providerOptions.backend == genai.BackendVertexAI
+	systemInstructions, content, warnings := toGooglePrompt(call.Prompt, isVertexAI)
 
 	if providerOptions.ThinkingConfig != nil {
 		if providerOptions.ThinkingConfig.IncludeThoughts != nil &&
@@ -347,7 +348,7 @@ func (g languageModel) prepareParams(call fantasy.Call) (*genai.GenerateContentC
 	return config, content, warnings, nil
 }
 
-func toGooglePrompt(prompt fantasy.Prompt) (*genai.Content, []*genai.Content, []fantasy.CallWarning) { //nolint: unparam
+func toGooglePrompt(prompt fantasy.Prompt, isVertexAI bool) (*genai.Content, []*genai.Content, []fantasy.CallWarning) { //nolint: unparam
 	var systemInstructions *genai.Content
 	var content []*genai.Content
 	var warnings []fantasy.CallWarning
@@ -462,6 +463,11 @@ func toGooglePrompt(prompt fantasy.Prompt) (*genai.Content, []*genai.Content, []
 							Args: result,
 						},
 					}
+
+					// Vertex breaks with a 400 if this field be present.
+					if isVertexAI {
+						geminiPart.FunctionCall.ID = ""
+					}
 					if currentReasoningMetadata != nil {
 						geminiPart.ThoughtSignature = []byte(currentReasoningMetadata.Signature)
 						currentReasoningMetadata = nil
@@ -506,12 +512,18 @@ func toGooglePrompt(prompt fantasy.Prompt) (*genai.Content, []*genai.Content, []
 							continue
 						}
 						response := map[string]any{"result": content.Text}
+						functionResponse := &genai.FunctionResponse{
+							ID:       result.ToolCallID,
+							Response: response,
+							Name:     toolCall.ToolName,
+						}
+
+						// Vertex breaks with a 400 if this field be present.
+						if isVertexAI {
+							functionResponse.ID = ""
+						}
 						parts = append(parts, &genai.Part{
-							FunctionResponse: &genai.FunctionResponse{
-								ID:       result.ToolCallID,
-								Response: response,
-								Name:     toolCall.ToolName,
-							},
+							FunctionResponse: functionResponse,
 						})
 
 					case fantasy.ToolResultContentTypeError:
@@ -520,12 +532,18 @@ func toGooglePrompt(prompt fantasy.Prompt) (*genai.Content, []*genai.Content, []
 							continue
 						}
 						response := map[string]any{"result": content.Error.Error()}
+						functionResponse := &genai.FunctionResponse{
+							ID:       result.ToolCallID,
+							Response: response,
+							Name:     toolCall.ToolName,
+						}
+
+						// Vertex breaks with a 400 if this field be present.
+						if isVertexAI {
+							functionResponse.ID = ""
+						}
 						parts = append(parts, &genai.Part{
-							FunctionResponse: &genai.FunctionResponse{
-								ID:       result.ToolCallID,
-								Response: response,
-								Name:     toolCall.ToolName,
-							},
+							FunctionResponse: functionResponse,
 						})
 					}
 				}

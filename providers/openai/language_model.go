@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"reflect"
+	"slices"
 	"strings"
 
 	"charm.land/fantasy"
@@ -16,7 +17,6 @@ import (
 	"github.com/charmbracelet/openai-go"
 	"github.com/charmbracelet/openai-go/packages/param"
 	"github.com/charmbracelet/openai-go/shared"
-	xjson "github.com/charmbracelet/x/json"
 	"github.com/google/uuid"
 )
 
@@ -380,39 +380,17 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 
 					for _, toolCallDelta := range choice.Delta.ToolCalls {
 						if existingToolCall, ok := toolCalls[toolCallDelta.Index]; ok {
-							if existingToolCall.hasFinished {
-								continue
-							}
 							if toolCallDelta.Function.Arguments != "" {
 								existingToolCall.arguments += toolCallDelta.Function.Arguments
-							}
-							if !yield(fantasy.StreamPart{
-								Type:  fantasy.StreamPartTypeToolInputDelta,
-								ID:    existingToolCall.id,
-								Delta: toolCallDelta.Function.Arguments,
-							}) {
-								return
+								if !yield(fantasy.StreamPart{
+									Type:  fantasy.StreamPartTypeToolInputDelta,
+									ID:    existingToolCall.id,
+									Delta: toolCallDelta.Function.Arguments,
+								}) {
+									return
+								}
 							}
 							toolCalls[toolCallDelta.Index] = existingToolCall
-							if xjson.IsValid(existingToolCall.arguments) {
-								if !yield(fantasy.StreamPart{
-									Type: fantasy.StreamPartTypeToolInputEnd,
-									ID:   existingToolCall.id,
-								}) {
-									return
-								}
-
-								if !yield(fantasy.StreamPart{
-									Type:          fantasy.StreamPartTypeToolCall,
-									ID:            existingToolCall.id,
-									ToolCallName:  existingToolCall.name,
-									ToolCallInput: existingToolCall.arguments,
-								}) {
-									return
-								}
-								existingToolCall.hasFinished = true
-								toolCalls[toolCallDelta.Index] = existingToolCall
-							}
 						} else {
 							// Some provider like Ollama may send empty tool calls or miss some fields.
 							// We'll skip when we don't have enough info and also assume sane defaults.
@@ -443,33 +421,13 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 								arguments: toolCallDelta.Function.Arguments,
 							}
 
-							exTc := toolCalls[toolCallDelta.Index]
-							if exTc.arguments != "" {
+							if toolCallDelta.Function.Arguments != "" {
 								if !yield(fantasy.StreamPart{
 									Type:  fantasy.StreamPartTypeToolInputDelta,
-									ID:    exTc.id,
-									Delta: exTc.arguments,
+									ID:    toolCallDelta.ID,
+									Delta: toolCallDelta.Function.Arguments,
 								}) {
 									return
-								}
-								if xjson.IsValid(toolCalls[toolCallDelta.Index].arguments) {
-									if !yield(fantasy.StreamPart{
-										Type: fantasy.StreamPartTypeToolInputEnd,
-										ID:   exTc.id,
-									}) {
-										return
-									}
-
-									if !yield(fantasy.StreamPart{
-										Type:          fantasy.StreamPartTypeToolCall,
-										ID:            exTc.id,
-										ToolCallName:  exTc.name,
-										ToolCallInput: exTc.arguments,
-									}) {
-										return
-									}
-									exTc.hasFinished = true
-									toolCalls[toolCallDelta.Index] = exTc
 								}
 							}
 							continue
@@ -516,12 +474,14 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 				}
 			}
 
-			// Handle tool calls that finish with empty arguments (e.g., Copilot).
-			// Normalize empty args to "{}" and emit the tool call.
-			// If the arguments are invalid JSON, we still yield the tool call
-			// so the consumer (agent) can handle the error rather than
-			// silently dropping it.
-			for idx, tc := range toolCalls {
+			// Finalize tool calls in index order after the stream completes.
+			indices := make([]int64, 0, len(toolCalls))
+			for idx := range toolCalls {
+				indices = append(indices, idx)
+			}
+			slices.Sort(indices)
+			for _, idx := range indices {
+				tc := toolCalls[idx]
 				if tc.hasFinished {
 					continue
 				}

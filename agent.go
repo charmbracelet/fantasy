@@ -1122,7 +1122,14 @@ func (a *agent) validateToolCall(toolCall ToolCallContent, availableTools []Agen
 				return nil
 			}
 		}
-		return fmt.Errorf("tool not found: %s", toolCall.ToolName)
+		names := make([]string, 0, len(availableTools)+len(execProviderTools))
+		for _, t := range availableTools {
+			names = append(names, t.Info().Name)
+		}
+		for _, ept := range execProviderTools {
+			names = append(names, ept.GetName())
+		}
+		return fmt.Errorf("tool not found: %s. Available tools: %s", toolCall.ToolName, strings.Join(names, ", "))
 	}
 
 	// Validate JSON parsing

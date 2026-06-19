@@ -4,6 +4,7 @@ package openai
 import (
 	"encoding/json"
 	"slices"
+	"strings"
 
 	"charm.land/fantasy"
 )
@@ -272,12 +273,16 @@ func ParseResponsesOptions(data map[string]any) (*ResponsesProviderOptions, erro
 
 // IsResponsesModel checks if a model ID is a Responses API model for OpenAI.
 func IsResponsesModel(modelID string) bool {
-	return slices.Contains(responsesModelIDs, modelID)
+	return slices.Contains(responsesModelIDs, modelID) ||
+		strings.Contains(strings.ToLower(modelID), "gpt-4") ||
+		strings.Contains(strings.ToLower(modelID), "gpt-5")
 }
 
 // IsResponsesReasoningModel checks if a model ID is a Responses API reasoning model for OpenAI.
 func IsResponsesReasoningModel(modelID string) bool {
-	return slices.Contains(responsesReasoningModelIDs, modelID)
+	return slices.Contains(responsesReasoningModelIDs, modelID) ||
+		strings.Contains(strings.ToLower(modelID), "gpt-4") ||
+		strings.Contains(strings.ToLower(modelID), "gpt-5")
 }
 
 // SearchContextSize controls how much context window space the

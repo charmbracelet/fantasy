@@ -174,6 +174,7 @@ type AgentCall struct {
 	ToolChoice       *ToolChoice `json:"tool_choice"`
 	ProviderOptions  ProviderOptions
 	OnRetry          OnRetryCallback
+	OnAuthRefresh    OnAuthRefreshFunc
 	MaxRetries       *int
 
 	StopWhen       []StopCondition
@@ -200,6 +201,16 @@ type (
 
 	// OnErrorFunc is called when an error occurs.
 	OnErrorFunc func(error)
+
+	// OnAuthRefreshFunc is called when a stream fails with an authentication
+	// error that the caller may be able to resolve (e.g. an expired SSO
+	// session or OAuth token). The function should perform whatever credential
+	// refresh is needed and return nil on success, in which case fantasy
+	// retries the operation transparently. Returning an error surfaces the
+	// original auth error to the caller without retry. The retry re-runs
+	// PrepareStep, so callers that rebuild a model during refresh can swap the
+	// fresh model in there.
+	OnAuthRefreshFunc func(ctx context.Context, err *ProviderError) error
 )
 
 // Stream part callbacks - called for each corresponding stream part type.
@@ -266,6 +277,7 @@ type AgentStreamCall struct {
 	Headers          map[string]string
 	ProviderOptions  ProviderOptions
 	OnRetry          OnRetryCallback
+	OnAuthRefresh    OnAuthRefreshFunc
 	MaxRetries       *int
 
 	StopWhen       []StopCondition
@@ -486,6 +498,9 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 			retryOptions.MaxRetries = *opts.MaxRetries
 		}
 		retryOptions.OnRetry = opts.OnRetry
+		if opts.OnAuthRefresh != nil {
+			retryOptions.OnAuthRefresh = opts.OnAuthRefresh
+		}
 		retry := RetryWithExponentialBackoffRespectingRetryHeaders[*Response](retryOptions)
 		result, err := retry(ctx, func() (*Response, error) {
 			return stepModel.Generate(ctx, Call{
@@ -833,6 +848,7 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 		ProviderOptions:  opts.ProviderOptions,
 		MaxRetries:       opts.MaxRetries,
 		OnRetry:          opts.OnRetry,
+		OnAuthRefresh:    opts.OnAuthRefresh,
 		StopWhen:         opts.StopWhen,
 		PrepareStep:      opts.PrepareStep,
 		RepairToolCall:   opts.RepairToolCall,
@@ -943,6 +959,9 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 			retryOptions.MaxRetries = *call.MaxRetries
 		}
 		retryOptions.OnRetry = call.OnRetry
+		if call.OnAuthRefresh != nil {
+			retryOptions.OnAuthRefresh = call.OnAuthRefresh
+		}
 		retry := RetryWithExponentialBackoffRespectingRetryHeaders[stepExecutionResult](retryOptions)
 
 		result, err := retry(ctx, func() (stepExecutionResult, error) {

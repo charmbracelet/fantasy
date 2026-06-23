@@ -142,3 +142,174 @@ func TestRetryWithExponentialBackoff_ConnectionErrors(t *testing.T) {
 		}
 	})
 }
+
+func TestRetryWithAuthRefresh(t *testing.T) {
+	t.Parallel()
+
+	authErr := func() error { return &ProviderError{StatusCode: 401, Message: "unauthorized"} }
+
+	t.Run("refreshes and retries transparently on 401", func(t *testing.T) {
+		t.Parallel()
+		attempts := 0
+		refreshed := 0
+		opts := RetryOptions{
+			MaxRetries:     2,
+			InitialDelayIn: 1 * time.Millisecond,
+			BackoffFactor:  2.0,
+			OnAuthRefresh: func(_ context.Context, _ *ProviderError) error {
+				refreshed++
+				return nil
+			},
+		}
+
+		retryFn := RetryWithExponentialBackoffRespectingRetryHeaders[int](opts)
+		result, err := retryFn(context.Background(), func() (int, error) {
+			attempts++
+			if attempts == 1 {
+				return 0, authErr()
+			}
+			return 7, nil
+		})
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		if result != 7 {
+			t.Fatalf("expected result 7, got %d", result)
+		}
+		if refreshed != 1 {
+			t.Fatalf("expected 1 refresh, got %d", refreshed)
+		}
+		if attempts != 2 {
+			t.Fatalf("expected 2 attempts, got %d", attempts)
+		}
+	})
+
+	t.Run("returns original error when refresh fails", func(t *testing.T) {
+		t.Parallel()
+		attempts := 0
+		opts := RetryOptions{
+			MaxRetries:     2,
+			InitialDelayIn: 1 * time.Millisecond,
+			BackoffFactor:  2.0,
+			OnAuthRefresh: func(_ context.Context, _ *ProviderError) error {
+				return errors.New("login canceled")
+			},
+		}
+
+		retryFn := RetryWithExponentialBackoffRespectingRetryHeaders[int](opts)
+		_, err := retryFn(context.Background(), func() (int, error) {
+			attempts++
+			return 0, authErr()
+		})
+
+		var providerErr *ProviderError
+		if !errors.As(err, &providerErr) || providerErr.StatusCode != 401 {
+			t.Fatalf("expected original 401 ProviderError, got %T: %v", err, err)
+		}
+		if attempts != 1 {
+			t.Fatalf("expected 1 attempt (no retry after failed refresh), got %d", attempts)
+		}
+	})
+
+	t.Run("attempts at most one refresh", func(t *testing.T) {
+		t.Parallel()
+		attempts := 0
+		refreshed := 0
+		opts := RetryOptions{
+			MaxRetries:     2,
+			InitialDelayIn: 1 * time.Millisecond,
+			BackoffFactor:  2.0,
+			OnAuthRefresh: func(_ context.Context, _ *ProviderError) error {
+				refreshed++
+				return nil
+			},
+		}
+
+		retryFn := RetryWithExponentialBackoffRespectingRetryHeaders[int](opts)
+		_, err := retryFn(context.Background(), func() (int, error) {
+			attempts++
+			return 0, authErr()
+		})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		if refreshed != 1 {
+			t.Fatalf("expected exactly 1 refresh, got %d", refreshed)
+		}
+		// 1 initial + 1 retry after refresh = 2 attempts.
+		if attempts != 2 {
+			t.Fatalf("expected 2 attempts, got %d", attempts)
+		}
+	})
+
+	t.Run("does not refresh on non-auth errors", func(t *testing.T) {
+		t.Parallel()
+		refreshed := 0
+		opts := RetryOptions{
+			MaxRetries:     2,
+			InitialDelayIn: 1 * time.Millisecond,
+			BackoffFactor:  2.0,
+			OnAuthRefresh: func(_ context.Context, _ *ProviderError) error {
+				refreshed++
+				return nil
+			},
+		}
+
+		retryFn := RetryWithExponentialBackoffRespectingRetryHeaders[int](opts)
+		_, _ = retryFn(context.Background(), func() (int, error) {
+			return 0, &ProviderError{StatusCode: 429, Message: "rate limited"}
+		})
+		if refreshed != 0 {
+			t.Fatalf("expected no refresh on 429, got %d", refreshed)
+		}
+	})
+
+	t.Run("auth retry does not consume general retry budget", func(t *testing.T) {
+		t.Parallel()
+		attempts := 0
+		opts := RetryOptions{
+			MaxRetries:     2,
+			InitialDelayIn: 1 * time.Millisecond,
+			BackoffFactor:  2.0,
+			OnAuthRefresh: func(_ context.Context, _ *ProviderError) error {
+				return nil
+			},
+		}
+
+		retryFn := RetryWithExponentialBackoffRespectingRetryHeaders[int](opts)
+		result, err := retryFn(context.Background(), func() (int, error) {
+			attempts++
+			switch attempts {
+			case 1:
+				return 0, authErr() // resolved via refresh, not the retry budget
+			case 2, 3:
+				return 0, &ProviderError{StatusCode: 500, Message: "server error"}
+			default:
+				return 99, nil
+			}
+		})
+		if err != nil {
+			t.Fatalf("expected success after auth refresh + 2 transport retries, got %v", err)
+		}
+		if result != 99 {
+			t.Fatalf("expected result 99, got %d", result)
+		}
+		if attempts != 4 {
+			t.Fatalf("expected 4 attempts, got %d", attempts)
+		}
+	})
+}
+
+func TestIsAuthError(t *testing.T) {
+	t.Parallel()
+
+	if !isAuthError(&ProviderError{StatusCode: 401}) {
+		t.Error("expected 401 to be an auth error")
+	}
+	if isAuthError(&ProviderError{StatusCode: 403}) {
+		t.Error("expected 403 to not be an auth error")
+	}
+	if isAuthError(&ProviderError{StatusCode: 500}) {
+		t.Error("expected 500 to not be an auth error")
+	}
+}

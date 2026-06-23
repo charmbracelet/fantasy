@@ -175,7 +175,14 @@ type AgentCall struct {
 	Headers          map[string]string
 	ProviderOptions  ProviderOptions
 	OnRetry          OnRetryCallback
+	OnAuthRefresh    OnAuthRefreshFunc
 	MaxRetries       *int
+
+	// ModelProvider, when non-nil, is called on each retry attempt to
+	// obtain the language model. This allows callers to swap in a
+	// refreshed model after OnAuthRefresh rebuilds credentials. When
+	// nil, the model captured at step preparation time is used.
+	ModelProvider func() LanguageModel
 
 	StopWhen       []StopCondition
 	PrepareStep    PrepareStepFunction
@@ -201,6 +208,16 @@ type (
 
 	// OnErrorFunc is called when an error occurs.
 	OnErrorFunc func(error)
+
+	// OnAuthRefreshFunc is called when a stream fails with an authentication
+	// error that the caller may be able to resolve (e.g. an expired SSO
+	// session or OAuth token). The function should perform whatever credential
+	// refresh is needed and return nil on success, in which case fantasy
+	// retries the operation transparently. Returning an error surfaces the
+	// original auth error to the caller without retry. Pair this with
+	// ModelProvider to supply a rebuilt model carrying the refreshed
+	// credentials on the retry attempt.
+	OnAuthRefreshFunc func(ctx context.Context, err *ProviderError) error
 )
 
 // Stream part callbacks - called for each corresponding stream part type.
@@ -267,7 +284,14 @@ type AgentStreamCall struct {
 	Headers          map[string]string
 	ProviderOptions  ProviderOptions
 	OnRetry          OnRetryCallback
+	OnAuthRefresh    OnAuthRefreshFunc
 	MaxRetries       *int
+
+	// ModelProvider, when non-nil, is called on each retry attempt to
+	// obtain the language model. This allows callers to swap in a
+	// refreshed model after OnAuthRefresh rebuilds credentials. When
+	// nil, the model captured at step preparation time is used.
+	ModelProvider func() LanguageModel
 
 	StopWhen       []StopCondition
 	PrepareStep    PrepareStepFunction
@@ -491,9 +515,17 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 			retryOptions.MaxRetries = *opts.MaxRetries
 		}
 		retryOptions.OnRetry = opts.OnRetry
+		retryOptions.OnAuthRefresh = opts.OnAuthRefresh
 		retry := RetryWithExponentialBackoffRespectingRetryHeaders[*Response](retryOptions)
 		result, err := retry(ctx, func() (*Response, error) {
-			return stepModel.Generate(ctx, Call{
+			// Re-read the model on each retry attempt so that
+			// OnAuthRefresh can swap in a model with fresh credentials.
+			retryModel := stepModel
+			if opts.ModelProvider != nil {
+				retryModel = opts.ModelProvider()
+			}
+
+			return retryModel.Generate(ctx, Call{
 				Prompt:           stepInputMessages,
 				MaxOutputTokens:  opts.MaxOutputTokens,
 				Temperature:      opts.Temperature,
@@ -840,6 +872,7 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 		ProviderOptions:  opts.ProviderOptions,
 		MaxRetries:       opts.MaxRetries,
 		OnRetry:          opts.OnRetry,
+		OnAuthRefresh:    opts.OnAuthRefresh,
 		StopWhen:         opts.StopWhen,
 		PrepareStep:      opts.PrepareStep,
 		RepairToolCall:   opts.RepairToolCall,
@@ -951,11 +984,19 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 			retryOptions.MaxRetries = *call.MaxRetries
 		}
 		retryOptions.OnRetry = call.OnRetry
+		retryOptions.OnAuthRefresh = call.OnAuthRefresh
 		retry := RetryWithExponentialBackoffRespectingRetryHeaders[stepExecutionResult](retryOptions)
 
 		result, err := retry(ctx, func() (stepExecutionResult, error) {
+			// Re-read the model on each retry attempt so that
+			// OnAuthRefresh can swap in a model with fresh credentials.
+			retryModel := stepModel
+			if call.ModelProvider != nil {
+				retryModel = call.ModelProvider()
+			}
+
 			// Create the stream
-			stream, err := stepModel.Stream(ctx, streamCall)
+			stream, err := retryModel.Stream(ctx, streamCall)
 			if err != nil {
 				return stepExecutionResult{}, err
 			}

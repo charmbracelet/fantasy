@@ -15,22 +15,22 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+      - Charm-Fantasy/0.33.1 (https://charm.land/fantasy)
     url: https://fantasy-playground-resource.openai.azure.com/openai/v1/responses
     method: POST
   response:
     proto: HTTP/2.0
     proto_major: 2
     proto_minor: 0
-    content_length: 3537
+    content_length: 3588
     body: |-
       {
-        "id": "resp_01732c78a43466ae0169b2ff6aa4d88194822bbea5c052ca9f",
+        "id": "resp_00e5a268bd4f498e016a3c11823910819387c4785f9425ba40",
         "object": "response",
-        "created_at": 1773338474,
+        "created_at": 1782321538,
         "status": "completed",
         "background": false,
-        "completed_at": 1773338481,
+        "completed_at": 1782321539,
         "content_filters": [
           {
             "blocked": false,
@@ -60,7 +60,7 @@ interactions:
             },
             "content_filter_offsets": {
               "start_offset": 0,
-              "end_offset": 70,
+              "end_offset": 1258,
               "check_offset": 0
             }
           },
@@ -96,7 +96,7 @@ interactions:
             },
             "content_filter_offsets": {
               "start_offset": 0,
-              "end_offset": 1395,
+              "end_offset": 302,
               "check_offset": 0
             }
           }
@@ -108,18 +108,19 @@ interactions:
         "max_output_tokens": 4000,
         "max_tool_calls": null,
         "model": "gpt-5-mini",
+        "moderation": null,
         "output": [
           {
-            "id": "rs_01732c78a43466ae0169b2ff7005048194875b5d3f92871d49",
+            "id": "rs_00e5a268bd4f498e016a3c118290cc8193ab6b25eefe0bb53c",
             "type": "reasoning",
             "summary": []
           },
           {
-            "id": "fc_01732c78a43466ae0169b2ff70e3948194a75b7cb3ef8e0d55",
+            "id": "fc_00e5a268bd4f498e016a3c11837d748193871672cbe1407d2c",
             "type": "function_call",
             "status": "completed",
             "arguments": "{\"location\":\"Florence, Italy\"}",
-            "call_id": "call_yTCy7OpPv0Z8Y7VNP0LiMnqv",
+            "call_id": "call_z1COPRxqJjjzIcXQ8ghwnioC",
             "name": "weather"
           }
         ],
@@ -127,8 +128,9 @@ interactions:
         "presence_penalty": 0.0,
         "previous_response_id": null,
         "prompt_cache_key": null,
-        "prompt_cache_retention": null,
+        "prompt_cache_retention": "in_memory",
         "reasoning": {
+          "context": null,
           "effort": "medium",
           "summary": null
         },
@@ -167,15 +169,15 @@ interactions:
         "top_p": 1.0,
         "truncation": "disabled",
         "usage": {
-          "input_tokens": 66,
+          "input_tokens": 63,
           "input_tokens_details": {
             "cached_tokens": 0
           },
-          "output_tokens": 85,
+          "output_tokens": 81,
           "output_tokens_details": {
             "reasoning_tokens": 0
           },
-          "total_tokens": 151
+          "total_tokens": 144
         },
         "user": null,
         "metadata": {}
@@ -185,37 +187,37 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 7.532447083s
+    duration: 1.841573875s
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 726
+    content_length: 714
     host: ""
-    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":"You are a helpful assistant","role":"developer"},{"content":[{"text":"What''s the weather in Florence,Italy?","type":"input_text"}],"role":"user"},{"arguments":"\"{\\\"location\\\":\\\"Florence, Italy\\\"}\"","call_id":"call_yTCy7OpPv0Z8Y7VNP0LiMnqv","name":"weather","type":"function_call"},{"call_id":"call_yTCy7OpPv0Z8Y7VNP0LiMnqv","output":"40 C","type":"function_call_output"}],"model":"gpt-5-mini","tool_choice":"auto","tools":[{"strict":false,"parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location","type":"function"}]}'
+    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":"You are a helpful assistant","role":"developer"},{"content":[{"text":"What''s the weather in Florence,Italy?","type":"input_text"}],"role":"user"},{"arguments":"{\"location\":\"Florence, Italy\"}","call_id":"call_z1COPRxqJjjzIcXQ8ghwnioC","name":"weather","type":"function_call"},{"call_id":"call_z1COPRxqJjjzIcXQ8ghwnioC","output":"40 C","type":"function_call_output"}],"model":"gpt-5-mini","tool_choice":"auto","tools":[{"strict":false,"parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location","type":"function"}]}'
     headers:
       Accept:
       - application/json
       Content-Type:
       - application/json
       User-Agent:
-      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+      - Charm-Fantasy/0.33.1 (https://charm.land/fantasy)
     url: https://fantasy-playground-resource.openai.azure.com/openai/v1/responses
     method: POST
   response:
     proto: HTTP/2.0
     proto_major: 2
     proto_minor: 0
-    content_length: 3333
+    content_length: 3058
     body: |-
       {
-        "id": "resp_0a4fc6712b6ac6210169b2ff72107c8197a726423119c97bf5",
+        "id": "resp_033e3c100fa2fc6e016a3c1184092c81949de8f93e90391a98",
         "object": "response",
-        "created_at": 1773338482,
+        "created_at": 1782321540,
         "status": "completed",
         "background": false,
-        "completed_at": 1773338488,
+        "completed_at": 1782321543,
         "content_filters": [
           {
             "blocked": false,
@@ -226,6 +228,10 @@ interactions:
                 "detected": false,
                 "filtered": false
               },
+              "protected_material_text": {
+                "detected": false,
+                "filtered": false
+              },
               "hate": {
                 "filtered": false,
                 "severity": "safe"
@@ -241,15 +247,11 @@ interactions:
               "self_harm": {
                 "filtered": false,
                 "severity": "safe"
-              },
-              "protected_material_text": {
-                "detected": false,
-                "filtered": false
               }
             },
             "content_filter_offsets": {
               "start_offset": 0,
-              "end_offset": 2664,
+              "end_offset": 920,
               "check_offset": 0
             }
           }
@@ -261,14 +263,15 @@ interactions:
         "max_output_tokens": 4000,
         "max_tool_calls": null,
         "model": "gpt-5-mini",
+        "moderation": null,
         "output": [
           {
-            "id": "rs_0a4fc6712b6ac6210169b2ff737f6c81978d25f7f4335790c0",
+            "id": "rs_033e3c100fa2fc6e016a3c11849d2c81949f004eabe29324b2",
             "type": "reasoning",
             "summary": []
           },
           {
-            "id": "msg_0a4fc6712b6ac6210169b2ff7654948197a45f97f3435a9e82",
+            "id": "msg_033e3c100fa2fc6e016a3c11871c3481949980e2cf1ab4e8e9",
             "type": "message",
             "status": "completed",
             "content": [
@@ -276,7 +279,7 @@ interactions:
                 "type": "output_text",
                 "annotations": [],
                 "logprobs": [],
-                "text": "Current temperature in Florence, Italy: 40 \u00b0C (104 \u00b0F).\n\nIt's very hot \u2014 tips:\n- Stay hydrated and avoid prolonged sun exposure.\n- Wear light, breathable clothing and sunscreen.\n- Take breaks in air-conditioned or shaded places; avoid strenuous outdoor activity around midday.\n- Check for local heat advisories if you\u2019ll be outside long.\n\nWould you like an hourly forecast, a multi-day outlook, or weather for a different location?"
+                "text": "Current temperature in Florence, Italy: 40\u00b0C (104\u00b0F).\n\nWould you like a forecast, or more details (humidity, wind, hourly)?"
               }
             ],
             "role": "assistant"
@@ -286,8 +289,9 @@ interactions:
         "presence_penalty": 0.0,
         "previous_response_id": null,
         "prompt_cache_key": null,
-        "prompt_cache_retention": null,
+        "prompt_cache_retention": "in_memory",
         "reasoning": {
+          "context": null,
           "effort": "medium",
           "summary": null
         },
@@ -326,15 +330,15 @@ interactions:
         "top_p": 1.0,
         "truncation": "disabled",
         "usage": {
-          "input_tokens": 97,
+          "input_tokens": 92,
           "input_tokens_details": {
             "cached_tokens": 0
           },
-          "output_tokens": 333,
+          "output_tokens": 223,
           "output_tokens_details": {
-            "reasoning_tokens": 192
+            "reasoning_tokens": 128
           },
-          "total_tokens": 430
+          "total_tokens": 315
         },
         "user": null,
         "metadata": {}
@@ -344,4 +348,4 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 6.493260459s
+    duration: 3.952764125s

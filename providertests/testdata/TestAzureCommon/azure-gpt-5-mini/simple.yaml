@@ -15,19 +15,19 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+      - Charm-Fantasy/0.33.1 (https://charm.land/fantasy)
     url: https://fantasy-playground-resource.openai.azure.com/openai/v1/chat/completions
     method: POST
   response:
     proto: HTTP/2.0
     proto_major: 2
     proto_minor: 0
-    content_length: 1237
+    content_length: 1454
     body: |
-      {"choices":[{"content_filter_results":{"hate":{"filtered":false,"severity":"safe"},"protected_material_code":{"detected":false,"filtered":false},"protected_material_text":{"detected":false,"filtered":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}},"finish_reason":"stop","index":0,"logprobs":null,"message":{"annotations":[],"content":"Olá! (Também pode dizer \"Oi!\")","refusal":null,"role":"assistant"}}],"created":1773338551,"id":"chatcmpl-DIeedLK38HDSQxHhwI3VIErqbd4qK","model":"gpt-5-mini-2025-08-07","object":"chat.completion","prompt_filter_results":[{"prompt_index":0,"content_filter_results":{"hate":{"filtered":false,"severity":"safe"},"jailbreak":{"detected":false,"filtered":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}}}],"system_fingerprint":null,"usage":{"completion_tokens":147,"completion_tokens_details":{"accepted_prediction_tokens":0,"audio_tokens":0,"reasoning_tokens":128,"rejected_prediction_tokens":0},"prompt_tokens":19,"prompt_tokens_details":{"audio_tokens":0,"cached_tokens":0},"total_tokens":166}}
+      {"choices":[{"content_filter_results":{"hate":{"filtered":false,"severity":"safe"},"protected_material_code":{"detected":false,"filtered":false},"protected_material_text":{"detected":false,"filtered":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}},"finish_reason":"stop","index":0,"logprobs":null,"message":{"annotations":[],"content":"Olá!","refusal":null,"role":"assistant"}}],"created":1782321611,"id":"chatcmpl-DuLYhiZehlyeMI3MQ9ixLY8FX1NBq","model":"gpt-5-mini-2025-08-07","object":"chat.completion","prompt_filter_results":[{"prompt_index":0,"content_filter_results":{"hate":{"filtered":false,"severity":"safe"},"jailbreak":{"detected":false,"filtered":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}}}],"service_tier":"default","system_fingerprint":null,"usage":{"completion_tokens":76,"completion_tokens_details":{"accepted_prediction_tokens":0,"audio_tokens":0,"reasoning_tokens":64,"rejected_prediction_tokens":0},"latency_checkpoint":{"engine_tbt_ms":12,"engine_ttft_ms":42,"engine_ttlt_ms":1604,"pre_inference_ms":221,"service_tbt_ms":12,"service_ttft_ms":341,"service_ttlt_ms":1872,"total_duration_ms":1661,"user_visible_ttft_ms":120},"prompt_tokens":19,"prompt_tokens_details":{"audio_tokens":0,"cached_tokens":0},"total_tokens":95}}
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 3.189707208s
+    duration: 2.495024042s

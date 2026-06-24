@@ -15,32 +15,28 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+      - Charm-Fantasy/0.33.1 (https://charm.land/fantasy)
     url: https://fantasy-playground-resource.openai.azure.com/openai/v1/responses
     method: POST
   response:
     proto: HTTP/2.0
     proto_major: 2
     proto_minor: 0
-    content_length: 3536
+    content_length: 3584
     body: |-
       {
-        "id": "resp_0d5a3f5fc3c510f50169b2ff847220819693f7f8870c970a80",
+        "id": "resp_019ff363f9805048016a3c119295bc81958013ee3edd24b8bb",
         "object": "response",
-        "created_at": 1773338500,
+        "created_at": 1782321554,
         "status": "completed",
         "background": false,
-        "completed_at": 1773338503,
+        "completed_at": 1782321555,
         "content_filters": [
           {
             "blocked": false,
             "source_type": "prompt",
             "content_filter_raw": [],
             "content_filter_results": {
-              "jailbreak": {
-                "detected": false,
-                "filtered": false
-              },
               "hate": {
                 "filtered": false,
                 "severity": "safe"
@@ -56,6 +52,10 @@ interactions:
               "self_harm": {
                 "filtered": false,
                 "severity": "safe"
+              },
+              "jailbreak": {
+                "detected": false,
+                "filtered": false
               }
             },
             "content_filter_offsets": {
@@ -69,6 +69,14 @@ interactions:
             "source_type": "completion",
             "content_filter_raw": [],
             "content_filter_results": {
+              "protected_material_code": {
+                "detected": false,
+                "filtered": false
+              },
+              "protected_material_text": {
+                "detected": false,
+                "filtered": false
+              },
               "hate": {
                 "filtered": false,
                 "severity": "safe"
@@ -84,19 +92,11 @@ interactions:
               "self_harm": {
                 "filtered": false,
                 "severity": "safe"
-              },
-              "protected_material_code": {
-                "detected": false,
-                "filtered": false
-              },
-              "protected_material_text": {
-                "detected": false,
-                "filtered": false
               }
             },
             "content_filter_offsets": {
               "start_offset": 0,
-              "end_offset": 924,
+              "end_offset": 219,
               "check_offset": 0
             }
           }
@@ -108,18 +108,19 @@ interactions:
         "max_output_tokens": 4000,
         "max_tool_calls": null,
         "model": "o4-mini",
+        "moderation": null,
         "output": [
           {
-            "id": "rs_0d5a3f5fc3c510f50169b2ff854c9c81969c28992fd9d7fbf5",
+            "id": "rs_019ff363f9805048016a3c11934d188195bc5a9bafbdee1a69",
             "type": "reasoning",
             "summary": []
           },
           {
-            "id": "fc_0d5a3f5fc3c510f50169b2ff8648ac81968ee858470612f8fb",
+            "id": "fc_019ff363f9805048016a3c1193bff081958dc43c8c346f97cd",
             "type": "function_call",
             "status": "completed",
             "arguments": "{\"location\":\"Florence, Italy\"}",
-            "call_id": "call_oRbm1gocfCvhluvIleM1B7gS",
+            "call_id": "call_IGW3vuAPuvzl8LXGlagSAxaT",
             "name": "weather"
           }
         ],
@@ -127,8 +128,9 @@ interactions:
         "presence_penalty": 0.0,
         "previous_response_id": null,
         "prompt_cache_key": null,
-        "prompt_cache_retention": null,
+        "prompt_cache_retention": "in_memory",
         "reasoning": {
+          "context": null,
           "effort": "medium",
           "summary": null
         },
@@ -167,15 +169,15 @@ interactions:
         "top_p": 1.0,
         "truncation": "disabled",
         "usage": {
-          "input_tokens": 61,
+          "input_tokens": 60,
           "input_tokens_details": {
             "cached_tokens": 0
           },
-          "output_tokens": 135,
+          "output_tokens": 63,
           "output_tokens_details": {
-            "reasoning_tokens": 64
+            "reasoning_tokens": 0
           },
-          "total_tokens": 196
+          "total_tokens": 123
         },
         "user": null,
         "metadata": {}
@@ -185,43 +187,51 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 3.199884959s
+    duration: 1.468080625s
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 723
+    content_length: 711
     host: ""
-    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":"You are a helpful assistant","role":"developer"},{"content":[{"text":"What''s the weather in Florence,Italy?","type":"input_text"}],"role":"user"},{"arguments":"\"{\\\"location\\\":\\\"Florence, Italy\\\"}\"","call_id":"call_oRbm1gocfCvhluvIleM1B7gS","name":"weather","type":"function_call"},{"call_id":"call_oRbm1gocfCvhluvIleM1B7gS","output":"40 C","type":"function_call_output"}],"model":"o4-mini","tool_choice":"auto","tools":[{"strict":false,"parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location","type":"function"}]}'
+    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":"You are a helpful assistant","role":"developer"},{"content":[{"text":"What''s the weather in Florence,Italy?","type":"input_text"}],"role":"user"},{"arguments":"{\"location\":\"Florence, Italy\"}","call_id":"call_IGW3vuAPuvzl8LXGlagSAxaT","name":"weather","type":"function_call"},{"call_id":"call_IGW3vuAPuvzl8LXGlagSAxaT","output":"40 C","type":"function_call_output"}],"model":"o4-mini","tool_choice":"auto","tools":[{"strict":false,"parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location","type":"function"}]}'
     headers:
       Accept:
       - application/json
       Content-Type:
       - application/json
       User-Agent:
-      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+      - Charm-Fantasy/0.33.1 (https://charm.land/fantasy)
     url: https://fantasy-playground-resource.openai.azure.com/openai/v1/responses
     method: POST
   response:
     proto: HTTP/2.0
     proto_major: 2
     proto_minor: 0
-    content_length: 2889
+    content_length: 3151
     body: |-
       {
-        "id": "resp_065b7e7b1587e20e0169b2ff87c14c8190b2868ef14a41003c",
+        "id": "resp_03a2815a6f4c20c0016a3c11941e208197b12b1fc83be2b4c6",
         "object": "response",
-        "created_at": 1773338503,
+        "created_at": 1782321556,
         "status": "completed",
         "background": false,
-        "completed_at": 1773338504,
+        "completed_at": 1782321557,
         "content_filters": [
           {
             "blocked": false,
             "source_type": "completion",
             "content_filter_raw": [],
             "content_filter_results": {
+              "protected_material_code": {
+                "detected": false,
+                "filtered": false
+              },
+              "protected_material_text": {
+                "detected": false,
+                "filtered": false
+              },
               "hate": {
                 "filtered": false,
                 "severity": "safe"
@@ -237,19 +247,11 @@ interactions:
               "self_harm": {
                 "filtered": false,
                 "severity": "safe"
-              },
-              "protected_material_code": {
-                "detected": false,
-                "filtered": false
-              },
-              "protected_material_text": {
-                "detected": false,
-                "filtered": false
               }
             },
             "content_filter_offsets": {
               "start_offset": 0,
-              "end_offset": 514,
+              "end_offset": 724,
               "check_offset": 0
             }
           }
@@ -261,9 +263,15 @@ interactions:
         "max_output_tokens": 4000,
         "max_tool_calls": null,
         "model": "o4-mini",
+        "moderation": null,
         "output": [
           {
-            "id": "msg_065b7e7b1587e20e0169b2ff8881a881908702d31895cc8a8e",
+            "id": "rs_03a2815a6f4c20c0016a3c119492688197b527a8dd992b87be",
+            "type": "reasoning",
+            "summary": []
+          },
+          {
+            "id": "msg_03a2815a6f4c20c0016a3c1195459c8197b3dfa450f26fa2e6",
             "type": "message",
             "status": "completed",
             "content": [
@@ -271,7 +279,7 @@ interactions:
                 "type": "output_text",
                 "annotations": [],
                 "logprobs": [],
-                "text": "The current temperature in Florence, Italy is 40\u00b0C. It's quite hot! Make sure to stay hydrated and seek shade during the hottest parts of the day."
+                "text": "Right now it\u2019s 40 \u00b0C (about 104 \u00b0F) in Florence \u2013 quite hot! Make sure to stay hydrated, seek shade or air\u2010conditioned spots when you can, and wear light, breathable clothing if you\u2019re heading outdoors."
               }
             ],
             "role": "assistant"
@@ -281,8 +289,9 @@ interactions:
         "presence_penalty": 0.0,
         "previous_response_id": null,
         "prompt_cache_key": null,
-        "prompt_cache_retention": null,
+        "prompt_cache_retention": "in_memory",
         "reasoning": {
+          "context": null,
           "effort": "medium",
           "summary": null
         },
@@ -321,15 +330,15 @@ interactions:
         "top_p": 1.0,
         "truncation": "disabled",
         "usage": {
-          "input_tokens": 92,
+          "input_tokens": 89,
           "input_tokens_details": {
             "cached_tokens": 0
           },
-          "output_tokens": 36,
+          "output_tokens": 184,
           "output_tokens_details": {
-            "reasoning_tokens": 0
+            "reasoning_tokens": 64
           },
-          "total_tokens": 128
+          "total_tokens": 273
         },
         "user": null,
         "metadata": {}
@@ -339,4 +348,4 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 1.600062084s
+    duration: 1.988858541s

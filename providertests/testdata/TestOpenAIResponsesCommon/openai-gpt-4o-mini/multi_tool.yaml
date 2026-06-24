@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+      - Charm-Fantasy/0.33.1 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/responses
     method: POST
   response:
@@ -26,15 +26,15 @@ interactions:
     uncompressed: true
     body: |-
       {
-        "id": "resp_06c9369658d47a830169b319286e2481978ee58c27688418a4",
+        "id": "resp_0080d7ac46927739016a3c1210cb8481a08ebce3627ac5b681",
         "object": "response",
-        "created_at": 1773345064,
+        "created_at": 1782321680,
         "status": "completed",
         "background": false,
         "billing": {
           "payer": "developer"
         },
-        "completed_at": 1773345066,
+        "completed_at": 1782321681,
         "error": null,
         "frequency_penalty": 0.0,
         "incomplete_details": null,
@@ -42,21 +42,22 @@ interactions:
         "max_output_tokens": 4000,
         "max_tool_calls": null,
         "model": "gpt-4o-mini-2024-07-18",
+        "moderation": null,
         "output": [
           {
-            "id": "fc_06c9369658d47a830169b3192a8aa88197a0e98a9b82410435",
+            "id": "fc_0080d7ac46927739016a3c1211ead881a0b79e8c154b90ea97",
             "type": "function_call",
             "status": "completed",
             "arguments": "{\"a\":2,\"b\":3}",
-            "call_id": "call_Ho1Mm8gWDYTudQDnyEQcs2af",
+            "call_id": "call_4duuhyRqgE5yacjdB7N3qLs3",
             "name": "add"
           },
           {
-            "id": "fc_06c9369658d47a830169b3192a8ab48197849a5cbfde111bab",
+            "id": "fc_0080d7ac46927739016a3c1211eae481a09556917026b86270",
             "type": "function_call",
             "status": "completed",
             "arguments": "{\"a\":2,\"b\":3}",
-            "call_id": "call_LyJki45I73XIhz3QOSFsOsd7",
+            "call_id": "call_R9NaXdicUFYsl6ROHrFdxe2A",
             "name": "multiply"
           }
         ],
@@ -64,8 +65,9 @@ interactions:
         "presence_penalty": 0.0,
         "previous_response_id": null,
         "prompt_cache_key": null,
-        "prompt_cache_retention": null,
+        "prompt_cache_retention": "in_memory",
         "reasoning": {
+          "context": null,
           "effort": null,
           "summary": null
         },
@@ -150,22 +152,22 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 3.200548834s
+    duration: 1.383639792s
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 1266
+    content_length: 1242
     host: ""
-    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":[{"text":"Add and multiply the number 2 and 3","type":"input_text"}],"role":"user"},{"arguments":"\"{\\\"a\\\":2,\\\"b\\\":3}\"","call_id":"call_Ho1Mm8gWDYTudQDnyEQcs2af","name":"add","type":"function_call"},{"arguments":"\"{\\\"a\\\":2,\\\"b\\\":3}\"","call_id":"call_LyJki45I73XIhz3QOSFsOsd7","name":"multiply","type":"function_call"},{"call_id":"call_Ho1Mm8gWDYTudQDnyEQcs2af","output":"5","type":"function_call_output"},{"call_id":"call_LyJki45I73XIhz3QOSFsOsd7","output":"6","type":"function_call_output"}],"model":"gpt-4o-mini","tool_choice":"auto","tools":[{"strict":false,"parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"name":"add","description":"Add two numbers","type":"function"},{"strict":false,"parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"name":"multiply","description":"Multiply two numbers","type":"function"}]}'
+    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":[{"text":"Add and multiply the number 2 and 3","type":"input_text"}],"role":"user"},{"arguments":"{\"a\":2,\"b\":3}","call_id":"call_4duuhyRqgE5yacjdB7N3qLs3","name":"add","type":"function_call"},{"arguments":"{\"a\":2,\"b\":3}","call_id":"call_R9NaXdicUFYsl6ROHrFdxe2A","name":"multiply","type":"function_call"},{"call_id":"call_4duuhyRqgE5yacjdB7N3qLs3","output":"5","type":"function_call_output"},{"call_id":"call_R9NaXdicUFYsl6ROHrFdxe2A","output":"6","type":"function_call_output"}],"model":"gpt-4o-mini","tool_choice":"auto","tools":[{"strict":false,"parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"name":"add","description":"Add two numbers","type":"function"},{"strict":false,"parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"name":"multiply","description":"Multiply two numbers","type":"function"}]}'
     headers:
       Accept:
       - application/json
       Content-Type:
       - application/json
       User-Agent:
-      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+      - Charm-Fantasy/0.33.1 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/responses
     method: POST
   response:
@@ -176,15 +178,15 @@ interactions:
     uncompressed: true
     body: |-
       {
-        "id": "resp_0f6225818e209e0a0169b3192ad504819dad012c3ce78900d1",
+        "id": "resp_04d1a373cc2cf018016a3c12123434819cb99f7203d1a18223",
         "object": "response",
-        "created_at": 1773345066,
+        "created_at": 1782321682,
         "status": "completed",
         "background": false,
         "billing": {
           "payer": "developer"
         },
-        "completed_at": 1773345067,
+        "completed_at": 1782321684,
         "error": null,
         "frequency_penalty": 0.0,
         "incomplete_details": null,
@@ -192,9 +194,10 @@ interactions:
         "max_output_tokens": 4000,
         "max_tool_calls": null,
         "model": "gpt-4o-mini-2024-07-18",
+        "moderation": null,
         "output": [
           {
-            "id": "msg_0f6225818e209e0a0169b3192b5a28819d8a7380e2cc5f43e3",
+            "id": "msg_04d1a373cc2cf018016a3c1213f5d0819c979f8a206a2cf048",
             "type": "message",
             "status": "completed",
             "content": [
@@ -202,7 +205,7 @@ interactions:
                 "type": "output_text",
                 "annotations": [],
                 "logprobs": [],
-                "text": "The results are as follows:\n\n- Addition of 2 and 3: **5**\n- Multiplication of 2 and 3: **6**"
+                "text": "The results are as follows:\n- **Addition**: 2 + 3 = 5\n- **Multiplication**: 2 \u00d7 3 = 6"
               }
             ],
             "role": "assistant"
@@ -212,8 +215,9 @@ interactions:
         "presence_penalty": 0.0,
         "previous_response_id": null,
         "prompt_cache_key": null,
-        "prompt_cache_retention": null,
+        "prompt_cache_retention": "in_memory",
         "reasoning": {
+          "context": null,
           "effort": null,
           "summary": null
         },
@@ -280,15 +284,15 @@ interactions:
         "top_p": 1.0,
         "truncation": "disabled",
         "usage": {
-          "input_tokens": 156,
+          "input_tokens": 154,
           "input_tokens_details": {
             "cached_tokens": 0
           },
-          "output_tokens": 33,
+          "output_tokens": 36,
           "output_tokens_details": {
             "reasoning_tokens": 0
           },
-          "total_tokens": 189
+          "total_tokens": 190
         },
         "user": null,
         "metadata": {}
@@ -298,4 +302,4 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 1.32445875s
+    duration: 2.623050083s

@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+      - Charm-Fantasy/0.33.1 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/responses
     method: POST
   response:
@@ -26,15 +26,15 @@ interactions:
     uncompressed: true
     body: |-
       {
-        "id": "resp_0e7dfdc132fa96a90169b3014c5470819eadf32151a0dbfd15",
+        "id": "resp_07592f42d0d2f1ac016a3c11f75bd081a1a99d083171a39f1f",
         "object": "response",
-        "created_at": 1773338956,
+        "created_at": 1782321655,
         "status": "completed",
         "background": false,
         "billing": {
           "payer": "developer"
         },
-        "completed_at": 1773338957,
+        "completed_at": 1782321657,
         "error": null,
         "frequency_penalty": 0.0,
         "incomplete_details": null,
@@ -42,9 +42,10 @@ interactions:
         "max_output_tokens": 4000,
         "max_tool_calls": null,
         "model": "gpt-4o-2024-08-06",
+        "moderation": null,
         "output": [
           {
-            "id": "msg_0e7dfdc132fa96a90169b3014db10c819ea5b69df79c7f2810",
+            "id": "msg_07592f42d0d2f1ac016a3c11f9002081a180824d7cd06bccbd",
             "type": "message",
             "status": "completed",
             "content": [
@@ -52,7 +53,7 @@ interactions:
                 "type": "output_text",
                 "annotations": [],
                 "logprobs": [],
-                "text": "Oi!"
+                "text": "Ol\u00e1!"
               }
             ],
             "role": "assistant"
@@ -62,8 +63,9 @@ interactions:
         "presence_penalty": 0.0,
         "previous_response_id": null,
         "prompt_cache_key": null,
-        "prompt_cache_retention": null,
+        "prompt_cache_retention": "in_memory",
         "reasoning": {
+          "context": null,
           "effort": null,
           "summary": null
         },
@@ -101,4 +103,4 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 2.574510083s
+    duration: 3.360262125s

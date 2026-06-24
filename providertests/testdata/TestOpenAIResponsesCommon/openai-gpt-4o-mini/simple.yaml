@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+      - Charm-Fantasy/0.33.1 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/responses
     method: POST
   response:
@@ -26,15 +26,15 @@ interactions:
     uncompressed: true
     body: |-
       {
-        "id": "resp_0fb1614857f93b000169b301608d788196b418da95b3216762",
+        "id": "resp_0f8d9108fdddf23b016a3c1209558c819f839aa6a3efc268a1",
         "object": "response",
-        "created_at": 1773338976,
+        "created_at": 1782321673,
         "status": "completed",
         "background": false,
         "billing": {
           "payer": "developer"
         },
-        "completed_at": 1773338977,
+        "completed_at": 1782321674,
         "error": null,
         "frequency_penalty": 0.0,
         "incomplete_details": null,
@@ -42,9 +42,10 @@ interactions:
         "max_output_tokens": 4000,
         "max_tool_calls": null,
         "model": "gpt-4o-mini-2024-07-18",
+        "moderation": null,
         "output": [
           {
-            "id": "msg_0fb1614857f93b000169b3016144c0819690589659acec505e",
+            "id": "msg_0f8d9108fdddf23b016a3c120a34d0819fbcfa0f2572ec6066",
             "type": "message",
             "status": "completed",
             "content": [
@@ -52,7 +53,7 @@ interactions:
                 "type": "output_text",
                 "annotations": [],
                 "logprobs": [],
-                "text": "Oi!"
+                "text": "Ol\u00e1!"
               }
             ],
             "role": "assistant"
@@ -62,8 +63,9 @@ interactions:
         "presence_penalty": 0.0,
         "previous_response_id": null,
         "prompt_cache_key": null,
-        "prompt_cache_retention": null,
+        "prompt_cache_retention": "in_memory",
         "reasoning": {
+          "context": null,
           "effort": null,
           "summary": null
         },
@@ -101,4 +103,4 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 963.122875ms
+    duration: 1.4557985s

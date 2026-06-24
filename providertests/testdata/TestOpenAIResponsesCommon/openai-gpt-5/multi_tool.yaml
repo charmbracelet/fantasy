@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+      - Charm-Fantasy/0.33.1 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/responses
     method: POST
   response:
@@ -26,15 +26,15 @@ interactions:
     uncompressed: true
     body: |-
       {
-        "id": "resp_03b3c71eed97b5600169b3194dbf748191bbde243b0983aa49",
+        "id": "resp_0adb81d1c2f6e68a016a3c1227ce4881a1b92723de5486dbfe",
         "object": "response",
-        "created_at": 1773345101,
+        "created_at": 1782321703,
         "status": "completed",
         "background": false,
         "billing": {
           "payer": "developer"
         },
-        "completed_at": 1773345112,
+        "completed_at": 1782321707,
         "error": null,
         "frequency_penalty": 0.0,
         "incomplete_details": null,
@@ -42,26 +42,28 @@ interactions:
         "max_output_tokens": 4000,
         "max_tool_calls": null,
         "model": "gpt-5-2025-08-07",
+        "moderation": null,
         "output": [
           {
-            "id": "rs_03b3c71eed97b5600169b3194e5d948191bebefe1e37f969d9",
+            "id": "rs_0adb81d1c2f6e68a016a3c12286a0081a184e1b23cca2ac02d",
             "type": "reasoning",
+            "content": [],
             "summary": []
           },
           {
-            "id": "fc_03b3c71eed97b5600169b3195844ac819186a843dc3f5705d0",
+            "id": "fc_0adb81d1c2f6e68a016a3c122b744481a197df0b5a6edff94b",
             "type": "function_call",
             "status": "completed",
             "arguments": "{\"a\":2,\"b\":3}",
-            "call_id": "call_SXMdSYIWhKweiIjoBRxUmzZw",
+            "call_id": "call_R52CnFTPli0v0yaGZbZYrvYA",
             "name": "add"
           },
           {
-            "id": "fc_03b3c71eed97b5600169b3195844b881918850ccf6295b1358",
+            "id": "fc_0adb81d1c2f6e68a016a3c122b745481a195d1638a76603374",
             "type": "function_call",
             "status": "completed",
             "arguments": "{\"a\":2,\"b\":3}",
-            "call_id": "call_wBPb8fIvZKT8tHxONHfs6iqq",
+            "call_id": "call_J4euPJS0XQZ9P3dO4Y7sCUF7",
             "name": "multiply"
           }
         ],
@@ -69,8 +71,9 @@ interactions:
         "presence_penalty": 0.0,
         "previous_response_id": null,
         "prompt_cache_key": null,
-        "prompt_cache_retention": null,
+        "prompt_cache_retention": "in_memory",
         "reasoning": {
+          "context": "current_turn",
           "effort": "medium",
           "summary": null
         },
@@ -141,11 +144,11 @@ interactions:
           "input_tokens_details": {
             "cached_tokens": 0
           },
-          "output_tokens": 482,
+          "output_tokens": 305,
           "output_tokens_details": {
-            "reasoning_tokens": 384
+            "reasoning_tokens": 192
           },
-          "total_tokens": 595
+          "total_tokens": 418
         },
         "user": null,
         "metadata": {}
@@ -155,22 +158,22 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 11.724504125s
+    duration: 4.014900209s
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 1263
+    content_length: 1239
     host: ""
-    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"developer"},{"content":[{"text":"Add and multiply the number 2 and 3","type":"input_text"}],"role":"user"},{"arguments":"\"{\\\"a\\\":2,\\\"b\\\":3}\"","call_id":"call_SXMdSYIWhKweiIjoBRxUmzZw","name":"add","type":"function_call"},{"arguments":"\"{\\\"a\\\":2,\\\"b\\\":3}\"","call_id":"call_wBPb8fIvZKT8tHxONHfs6iqq","name":"multiply","type":"function_call"},{"call_id":"call_SXMdSYIWhKweiIjoBRxUmzZw","output":"5","type":"function_call_output"},{"call_id":"call_wBPb8fIvZKT8tHxONHfs6iqq","output":"6","type":"function_call_output"}],"model":"gpt-5","tool_choice":"auto","tools":[{"strict":false,"parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"name":"add","description":"Add two numbers","type":"function"},{"strict":false,"parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"name":"multiply","description":"Multiply two numbers","type":"function"}]}'
+    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"developer"},{"content":[{"text":"Add and multiply the number 2 and 3","type":"input_text"}],"role":"user"},{"arguments":"{\"a\":2,\"b\":3}","call_id":"call_R52CnFTPli0v0yaGZbZYrvYA","name":"add","type":"function_call"},{"arguments":"{\"a\":2,\"b\":3}","call_id":"call_J4euPJS0XQZ9P3dO4Y7sCUF7","name":"multiply","type":"function_call"},{"call_id":"call_R52CnFTPli0v0yaGZbZYrvYA","output":"5","type":"function_call_output"},{"call_id":"call_J4euPJS0XQZ9P3dO4Y7sCUF7","output":"6","type":"function_call_output"}],"model":"gpt-5","tool_choice":"auto","tools":[{"strict":false,"parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"name":"add","description":"Add two numbers","type":"function"},{"strict":false,"parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"},"name":"multiply","description":"Multiply two numbers","type":"function"}]}'
     headers:
       Accept:
       - application/json
       Content-Type:
       - application/json
       User-Agent:
-      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+      - Charm-Fantasy/0.33.1 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/responses
     method: POST
   response:
@@ -181,15 +184,15 @@ interactions:
     uncompressed: true
     body: |-
       {
-        "id": "resp_090b2c2ec0612c180169b319590fc081979080b24b97425b44",
+        "id": "resp_0bdec949032fc441016a3c122bd45881a1989400cebff80a78",
         "object": "response",
-        "created_at": 1773345113,
+        "created_at": 1782321707,
         "status": "completed",
         "background": false,
         "billing": {
           "payer": "developer"
         },
-        "completed_at": 1773345114,
+        "completed_at": 1782321708,
         "error": null,
         "frequency_penalty": 0.0,
         "incomplete_details": null,
@@ -197,9 +200,10 @@ interactions:
         "max_output_tokens": 4000,
         "max_tool_calls": null,
         "model": "gpt-5-2025-08-07",
+        "moderation": null,
         "output": [
           {
-            "id": "msg_090b2c2ec0612c180169b31959d5008197bc5cf5fcf895424d",
+            "id": "msg_0bdec949032fc441016a3c122c56f081a1a09e13fbe1654946",
             "type": "message",
             "status": "completed",
             "content": [
@@ -217,8 +221,9 @@ interactions:
         "presence_penalty": 0.0,
         "previous_response_id": null,
         "prompt_cache_key": null,
-        "prompt_cache_retention": null,
+        "prompt_cache_retention": "in_memory",
         "reasoning": {
+          "context": "current_turn",
           "effort": "medium",
           "summary": null
         },
@@ -285,7 +290,7 @@ interactions:
         "top_p": 1.0,
         "truncation": "disabled",
         "usage": {
-          "input_tokens": 173,
+          "input_tokens": 171,
           "input_tokens_details": {
             "cached_tokens": 0
           },
@@ -293,7 +298,7 @@ interactions:
           "output_tokens_details": {
             "reasoning_tokens": 0
           },
-          "total_tokens": 202
+          "total_tokens": 200
         },
         "user": null,
         "metadata": {}
@@ -303,4 +308,4 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 2.080252208s
+    duration: 1.1300935s

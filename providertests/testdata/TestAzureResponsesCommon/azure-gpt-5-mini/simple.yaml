@@ -15,22 +15,22 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+      - Charm-Fantasy/0.33.1 (https://charm.land/fantasy)
     url: https://fantasy-playground-resource.openai.azure.com/openai/v1/responses
     method: POST
   response:
     proto: HTTP/2.0
     proto_major: 2
     proto_minor: 0
-    content_length: 3194
+    content_length: 3279
     body: |-
       {
-        "id": "resp_07781033bdb3b0150169b2ff64410c8195840d5e5463a5edea",
+        "id": "resp_07f7b191c92ba150016a3c117b1cf081978145cbcb940b8a9c",
         "object": "response",
-        "created_at": 1773338468,
+        "created_at": 1782321531,
         "status": "completed",
         "background": false,
-        "completed_at": 1773338471,
+        "completed_at": 1782321534,
         "content_filters": [
           {
             "blocked": false,
@@ -60,7 +60,7 @@ interactions:
             },
             "content_filter_offsets": {
               "start_offset": 0,
-              "end_offset": 53,
+              "end_offset": 1153,
               "check_offset": 0
             }
           },
@@ -69,6 +69,14 @@ interactions:
             "source_type": "completion",
             "content_filter_raw": [],
             "content_filter_results": {
+              "protected_material_text": {
+                "detected": false,
+                "filtered": false
+              },
+              "protected_material_code": {
+                "detected": false,
+                "filtered": false
+              },
               "hate": {
                 "filtered": false,
                 "severity": "safe"
@@ -84,19 +92,11 @@ interactions:
               "self_harm": {
                 "filtered": false,
                 "severity": "safe"
-              },
-              "protected_material_code": {
-                "detected": false,
-                "filtered": false
-              },
-              "protected_material_text": {
-                "detected": false,
-                "filtered": false
               }
             },
             "content_filter_offsets": {
               "start_offset": 0,
-              "end_offset": 409,
+              "end_offset": 635,
               "check_offset": 0
             }
           }
@@ -108,14 +108,15 @@ interactions:
         "max_output_tokens": 4000,
         "max_tool_calls": null,
         "model": "gpt-5-mini",
+        "moderation": null,
         "output": [
           {
-            "id": "rs_07781033bdb3b0150169b2ff64cc648195856b2ada86d22dea",
+            "id": "rs_07f7b191c92ba150016a3c117b65c88197990fb91a1733bebc",
             "type": "reasoning",
             "summary": []
           },
           {
-            "id": "msg_07781033bdb3b0150169b2ff660a1c8195ae505f9842f3f5f2",
+            "id": "msg_07f7b191c92ba150016a3c117dc5bc819784ae68696a8cce14",
             "type": "message",
             "status": "completed",
             "content": [
@@ -123,7 +124,7 @@ interactions:
                 "type": "output_text",
                 "annotations": [],
                 "logprobs": [],
-                "text": "Ol\u00e1!"
+                "text": "Oi! (Tamb\u00e9m pode usar \"Ol\u00e1!\")"
               }
             ],
             "role": "assistant"
@@ -133,8 +134,9 @@ interactions:
         "presence_penalty": 0.0,
         "previous_response_id": null,
         "prompt_cache_key": null,
-        "prompt_cache_retention": null,
+        "prompt_cache_retention": "in_memory",
         "reasoning": {
+          "context": null,
           "effort": "medium",
           "summary": null
         },
@@ -158,11 +160,11 @@ interactions:
           "input_tokens_details": {
             "cached_tokens": 0
           },
-          "output_tokens": 112,
+          "output_tokens": 164,
           "output_tokens_details": {
-            "reasoning_tokens": 64
+            "reasoning_tokens": 128
           },
-          "total_tokens": 131
+          "total_tokens": 183
         },
         "user": null,
         "metadata": {}
@@ -172,4 +174,4 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 4.049976875s
+    duration: 3.879503334s

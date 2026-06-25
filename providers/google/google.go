@@ -522,7 +522,24 @@ func toGooglePrompt(prompt fantasy.Prompt, isVertexAI bool) (*genai.Content, []*
 						if isVertexAI {
 							functionResponse.ID = ""
 						}
+						
+						var thoughtSignature []byte
+						for _, m := range prompt {
+							if m.Role == fantasy.MessageRoleAssistant {
+								for _, c := range m.Content {
+									if reasoning, ok := fantasy.AsMessagePart[fantasy.ReasoningPart](c); ok {
+										if md, ok := reasoning.ProviderOptions[Name].(*ReasoningMetadata); ok {
+											if md.ToolID == result.ToolCallID {
+												thoughtSignature = []byte(md.Signature)
+											}
+										}
+									}
+								}
+							}
+						}
+						
 						parts = append(parts, &genai.Part{
+							ThoughtSignature: thoughtSignature,
 							FunctionResponse: functionResponse,
 						})
 
@@ -542,7 +559,24 @@ func toGooglePrompt(prompt fantasy.Prompt, isVertexAI bool) (*genai.Content, []*
 						if isVertexAI {
 							functionResponse.ID = ""
 						}
+						
+						var thoughtSignature []byte
+						for _, m := range prompt {
+							if m.Role == fantasy.MessageRoleAssistant {
+								for _, c := range m.Content {
+									if reasoning, ok := fantasy.AsMessagePart[fantasy.ReasoningPart](c); ok {
+										if md, ok := reasoning.ProviderOptions[Name].(*ReasoningMetadata); ok {
+											if md.ToolID == result.ToolCallID {
+												thoughtSignature = []byte(md.Signature)
+											}
+										}
+									}
+								}
+							}
+						}
+						
 						parts = append(parts, &genai.Part{
+							ThoughtSignature: thoughtSignature,
 							FunctionResponse: functionResponse,
 						})
 					}

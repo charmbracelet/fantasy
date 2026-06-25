@@ -1359,12 +1359,15 @@ func (g languageModel) mapResponse(response *genai.GenerateContentResponse, warn
 							if !ok {
 								continue
 							}
-							reasoningContent.ProviderMetadata = fantasy.ProviderMetadata{
-								Name: metadata,
+							// Only use it if it doesn't already have a signature!
+							if reasoningContent.ProviderMetadata == nil || reasoningContent.ProviderMetadata[Name] == nil {
+								reasoningContent.ProviderMetadata = fantasy.ProviderMetadata{
+									Name: metadata,
+								}
+								content[i] = reasoningContent
+								foundReasoning = true
+								break
 							}
-							content[i] = reasoningContent
-							foundReasoning = true
-							break
 						}
 					}
 					if !foundReasoning {

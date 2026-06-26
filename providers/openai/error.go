@@ -16,6 +16,7 @@ import (
 var (
 	openaiContextPattern  = regexp.MustCompile(`maximum context length (?:is|of) (\d+) tokens.*?(?:resulted in|requested) ~?(\d+) tokens`)
 	alibabaContextPattern = regexp.MustCompile(`Range of input length should be \[\d+,\s*(\d+)\]`)
+	vercelContextPattern  = regexp.MustCompile(`Input too long:\s*(\d+)\s*input tokens,\s*limit is\s*(\d+)`)
 )
 
 func toProviderErr(err error) error {
@@ -58,6 +59,12 @@ func parseContextTooLargeError(message string, providerErr *fantasy.ProviderErro
 	if matches := alibabaContextPattern.FindStringSubmatch(message); matches != nil {
 		providerErr.ContextTooLargeErr = true
 		providerErr.ContextMaxTokens, _ = strconv.Atoi(matches[1])
+		return
+	}
+	if matches := vercelContextPattern.FindStringSubmatch(message); matches != nil {
+		providerErr.ContextTooLargeErr = true
+		providerErr.ContextUsedTokens, _ = strconv.Atoi(matches[1])
+		providerErr.ContextMaxTokens, _ = strconv.Atoi(matches[2])
 	}
 }
 

@@ -3857,6 +3857,13 @@ func TestParseContextTooLargeError(t *testing.T) {
 			wantMax: 245760,
 		},
 		{
+			name:     "matches vercel format",
+			message:  "Input too long: 518063 input tokens, limit is 262144 for this model",
+			wantErr:  true,
+			wantUsed: 518063,
+			wantMax:  262144,
+		},
+		{
 			name:    "does not match unrelated error",
 			message: "invalid api key",
 			wantErr: false,

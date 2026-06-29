@@ -715,11 +715,13 @@ func (t ToolResultPart) MarshalJSON() ([]byte, error) {
 		Output           ToolResultOutputContent `json:"output"`
 		ProviderExecuted bool                    `json:"provider_executed"`
 		ProviderOptions  ProviderOptions         `json:"provider_options,omitempty"`
+		ClientMetadata   string                  `json:"client_metadata,omitempty"`
 	}{
 		ToolCallID:       t.ToolCallID,
 		Output:           t.Output,
 		ProviderExecuted: t.ProviderExecuted,
 		ProviderOptions:  t.ProviderOptions,
+		ClientMetadata:   t.ClientMetadata,
 	})
 	if err != nil {
 		return nil, err
@@ -743,6 +745,7 @@ func (t *ToolResultPart) UnmarshalJSON(data []byte) error {
 		Output           json.RawMessage            `json:"output"`
 		ProviderExecuted bool                       `json:"provider_executed"`
 		ProviderOptions  map[string]json.RawMessage `json:"provider_options,omitempty"`
+		ClientMetadata   string                     `json:"client_metadata,omitempty"`
 	}
 
 	if err := json.Unmarshal(mpj.Data, &aux); err != nil {
@@ -751,6 +754,7 @@ func (t *ToolResultPart) UnmarshalJSON(data []byte) error {
 
 	t.ToolCallID = aux.ToolCallID
 	t.ProviderExecuted = aux.ProviderExecuted
+	t.ClientMetadata = aux.ClientMetadata
 
 	// Unmarshal the Output field
 	output, err := UnmarshalToolResultOutputContent(aux.Output)

@@ -335,6 +335,17 @@ func (g languageModel) prepareParams(call fantasy.Call) (*genai.GenerateContentC
 	if providerOptions.CachedContent != "" {
 		config.CachedContent = providerOptions.CachedContent
 	}
+	if providerOptions.ServiceTier != "" {
+		if providerOptions.ServiceTier == ServiceTierFlex && !supportsFlexProcessing(g.modelID) {
+			warnings = append(warnings, fantasy.CallWarning{
+				Type:    fantasy.CallWarningTypeUnsupportedSetting,
+				Setting: "ServiceTier",
+				Details: "flex service tier is only available for Gemini 2.5 and Gemini 3 family models",
+			})
+		} else {
+			config.ServiceTier = genai.ServiceTier(providerOptions.ServiceTier)
+		}
+	}
 
 	if len(call.Tools) > 0 {
 		tools, toolChoice, toolWarnings := toGoogleTools(call.Tools, call.ToolChoice)
@@ -590,6 +601,13 @@ func (g *languageModel) Generate(ctx context.Context, call fantasy.Call) (*fanta
 // Model implements fantasy.LanguageModel.
 func (g *languageModel) Model() string {
 	return g.modelID
+}
+
+// supportsFlexProcessing reports whether the model supports the Flex service
+// tier. Per Google's docs, Flex is available for the Gemini 2.5 and Gemini 3
+// model families.
+func supportsFlexProcessing(modelID string) bool {
+	return strings.Contains(modelID, "gemini-2.5") || strings.Contains(modelID, "gemini-3")
 }
 
 // Provider implements fantasy.LanguageModel.

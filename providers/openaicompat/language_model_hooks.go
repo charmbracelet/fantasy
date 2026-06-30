@@ -15,6 +15,23 @@ import (
 
 const reasoningStartedCtx = "reasoning_started"
 
+// buildTextBlock creates a text content block, applying any provider-specific extra
+// fields (e.g. Qwen's cache_control) onto it. Part-level fields override message-level
+// fields. Returns the block and whether any extra fields were applied; when they were,
+// the message content must be serialized in array form.
+func buildTextBlock(text string, partOpts, msgOpts fantasy.ProviderOptions) (*openaisdk.ChatCompletionContentPartTextParam, bool) {
+	block := &openaisdk.ChatCompletionContentPartTextParam{Text: text}
+	fields := getContentExtraFields(partOpts)
+	if len(fields) == 0 {
+		fields = getContentExtraFields(msgOpts)
+	}
+	if len(fields) > 0 {
+		block.SetExtraFields(fields)
+		return block, true
+	}
+	return block, false
+}
+
 // PrepareCallFunc prepares the call for the language model.
 func PrepareCallFunc(model fantasy.LanguageModel, params *openaisdk.ChatCompletionNewParams, call fantasy.Call) ([]fantasy.CallWarning, error) {
 	providerOptions := &ProviderOptions{}
@@ -147,7 +164,9 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 	for _, msg := range prompt {
 		switch msg.Role {
 		case fantasy.MessageRoleSystem:
-			var systemPromptParts []string
+			var blocks []openaisdk.ChatCompletionContentPartTextParam
+			useArrayForm := false
+
 			for _, c := range msg.Content {
 				if c.GetType() != fantasy.ContentTypeText {
 					warnings = append(warnings, fantasy.CallWarning{
@@ -164,22 +183,38 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 					})
 					continue
 				}
-				text := textPart.Text
-				if strings.TrimSpace(text) != "" {
-					systemPromptParts = append(systemPromptParts, textPart.Text)
+				if strings.TrimSpace(textPart.Text) == "" {
+					continue
 				}
+
+				block, hasExtra := buildTextBlock(textPart.Text, textPart.ProviderOptions, msg.ProviderOptions)
+				useArrayForm = useArrayForm || hasExtra
+				blocks = append(blocks, *block)
 			}
-			if len(systemPromptParts) == 0 {
+
+			if len(blocks) == 0 {
 				warnings = append(warnings, fantasy.CallWarning{
 					Type:    fantasy.CallWarningTypeOther,
 					Message: "system prompt has no text parts",
 				})
 				continue
 			}
-			messages = append(messages, openaisdk.SystemMessage(strings.Join(systemPromptParts, "\n")))
+
+			if useArrayForm {
+				messages = append(messages, openaisdk.SystemMessage(blocks))
+			} else {
+				texts := make([]string, len(blocks))
+				for i, b := range blocks {
+					texts[i] = b.Text
+				}
+				messages = append(messages, openaisdk.SystemMessage(strings.Join(texts, "\n")))
+			}
 		case fantasy.MessageRoleUser:
-			// simple user message just text content
-			if len(msg.Content) == 1 && msg.Content[0].GetType() == fantasy.ContentTypeText {
+			// simple user message just text content. Messages carrying extra
+			// content fields fall through to the array path below, which applies
+			// them via buildTextBlock.
+			if len(msg.Content) == 1 && msg.Content[0].GetType() == fantasy.ContentTypeText &&
+				!hasContentExtraFields(msg.Content[0].Options(), msg.ProviderOptions) {
 				textPart, ok := fantasy.AsContentType[fantasy.TextPart](msg.Content[0])
 				if !ok {
 					warnings = append(warnings, fantasy.CallWarning{
@@ -204,10 +239,9 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 						})
 						continue
 					}
+					textBlock, _ := buildTextBlock(textPart.Text, textPart.ProviderOptions, msg.ProviderOptions)
 					content = append(content, openaisdk.ChatCompletionContentPartUnionParam{
-						OfText: &openaisdk.ChatCompletionContentPartTextParam{
-							Text: textPart.Text,
-						},
+						OfText: textBlock,
 					})
 				case fantasy.ContentTypeFile:
 					filePart, ok := fantasy.AsContentType[fantasy.FilePart](c)
@@ -324,7 +358,15 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 					})
 					continue
 				}
-				messages = append(messages, openaisdk.AssistantMessage(textPart.Text))
+				// Extra content fields (e.g. cache_control) require array form.
+				textBlock, hasExtra := buildTextBlock(textPart.Text, textPart.ProviderOptions, msg.ProviderOptions)
+				if hasExtra {
+					messages = append(messages, openaisdk.AssistantMessage([]openaisdk.ChatCompletionAssistantMessageParamContentArrayOfContentPartUnion{
+						{OfText: textBlock},
+					}))
+				} else {
+					messages = append(messages, openaisdk.AssistantMessage(textPart.Text))
+				}
 				continue
 			}
 			assistantMsg := openaisdk.ChatCompletionAssistantMessageParam{
@@ -342,8 +384,17 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 						})
 						continue
 					}
-					assistantMsg.Content = openaisdk.ChatCompletionAssistantMessageParamContentUnion{
-						OfString: param.NewOpt(textPart.Text),
+					textBlock, hasExtra := buildTextBlock(textPart.Text, textPart.ProviderOptions, msg.ProviderOptions)
+					if hasExtra {
+						assistantMsg.Content = openaisdk.ChatCompletionAssistantMessageParamContentUnion{
+							OfArrayOfContentParts: []openaisdk.ChatCompletionAssistantMessageParamContentArrayOfContentPartUnion{
+								{OfText: textBlock},
+							},
+						}
+					} else {
+						assistantMsg.Content = openaisdk.ChatCompletionAssistantMessageParamContentUnion{
+							OfString: param.NewOpt(textPart.Text),
+						}
 					}
 				case fantasy.ContentTypeReasoning:
 					reasoningPart, ok := fantasy.AsContentType[fantasy.ReasoningPart](c)

@@ -5,7 +5,7 @@ go 1.26.4
 require (
 	charm.land/x/vcr v0.1.1
 	cloud.google.com/go/auth v0.20.0
-	github.com/ardanlabs/kronk v1.28.5
+	github.com/ardanlabs/kronk v1.28.6
 	github.com/aws/aws-sdk-go-v2 v1.42.1
 	github.com/aws/aws-sdk-go-v2/config v1.32.27
 	github.com/aws/smithy-go v1.27.3

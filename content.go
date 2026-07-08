@@ -1,6 +1,9 @@
 package fantasy
 
-import "encoding/json"
+import (
+	"context"
+	"encoding/json"
+)
 
 // ProviderOptionsData is an interface for provider-specific options data.
 // All implementations MUST also implement encoding/json.Marshaler and
@@ -252,9 +255,10 @@ func (t ToolCallPart) Options() ProviderOptions {
 
 // ToolResultPart represents a tool result in a message.
 type ToolResultPart struct {
-	ToolCallID      string                  `json:"tool_call_id"`
-	Output          ToolResultOutputContent `json:"output"`
-	ProviderOptions ProviderOptions         `json:"provider_options"`
+	ToolCallID       string                  `json:"tool_call_id"`
+	Output           ToolResultOutputContent `json:"output"`
+	ProviderExecuted bool                    `json:"provider_executed"`
+	ProviderOptions  ProviderOptions         `json:"provider_options"`
 }
 
 // GetType returns the type of the tool result part.
@@ -459,6 +463,10 @@ type ToolResultContent struct {
 	ProviderExecuted bool `json:"provider_executed"`
 	// Additional provider-specific metadata for the tool result.
 	ProviderMetadata ProviderMetadata `json:"provider_metadata"`
+	// StopTurn indicates that the agent loop should stop after this result.
+	// The tool result is still delivered to the model's context, but the model
+	// does not get another chance to make tool calls in the same turn.
+	StopTurn bool `json:"stop_turn,omitempty"`
 }
 
 // GetType returns the type of the tool result content.
@@ -511,6 +519,16 @@ func (f FunctionTool) GetName() string {
 	return f.Name
 }
 
+// ProviderTool is a tool whose schema and wire format are defined by
+// the model provider. Both pure provider-executed tools
+// (ProviderDefinedTool) and client-executed provider tools
+// (ExecutableProviderTool) implement this interface. The unexported
+// method seals this interface to the types in this package.
+// External packages should use NewExecutableProviderTool instead.
+type ProviderTool interface {
+	providerDefinedTool() ProviderDefinedTool
+}
+
 // ProviderDefinedTool represents the configuration of a tool that is defined by the provider.
 type ProviderDefinedTool struct {
 	// ID of the tool. Should follow the format `<provider-name>.<unique-tool-name>`.
@@ -531,13 +549,57 @@ func (p ProviderDefinedTool) GetName() string {
 	return p.Name
 }
 
+func (p ProviderDefinedTool) providerDefinedTool() ProviderDefinedTool {
+	return p
+}
+
+// ExecutableProviderTool pairs a ProviderDefinedTool with a
+// client-side execution function. Use this for provider-defined tools
+// that require local execution (e.g. Anthropic computer use). Register
+// it via WithProviderDefinedTools.
+type ExecutableProviderTool struct {
+	pdt ProviderDefinedTool
+	run func(ctx context.Context, call ToolCall) (ToolResponse, error)
+}
+
+func (e ExecutableProviderTool) providerDefinedTool() ProviderDefinedTool {
+	return e.pdt
+}
+
+// GetType returns the type of the underlying ProviderDefinedTool.
+func (e ExecutableProviderTool) GetType() ToolType {
+	return e.pdt.GetType()
+}
+
+// GetName returns the name of the underlying ProviderDefinedTool.
+func (e ExecutableProviderTool) GetName() string {
+	return e.pdt.GetName()
+}
+
+// Definition returns the underlying ProviderDefinedTool.
+func (e ExecutableProviderTool) Definition() ProviderDefinedTool {
+	return e.pdt
+}
+
+// Run executes the tool's client-side function.
+func (e ExecutableProviderTool) Run(ctx context.Context, call ToolCall) (ToolResponse, error) {
+	return e.run(ctx, call)
+}
+
+// NewExecutableProviderTool creates a provider-defined tool with
+// client-side execution. The tool is sent to the API using the
+// provider's native wire format, but executed locally by run.
+func NewExecutableProviderTool(
+	pdt ProviderDefinedTool,
+	run func(ctx context.Context, call ToolCall) (ToolResponse, error),
+) ExecutableProviderTool {
+	return ExecutableProviderTool{pdt: pdt, run: run}
+}
+
 // NewUserMessage creates a new user message with the given prompt and optional files.
 func NewUserMessage(prompt string, files ...FilePart) Message {
-	content := []MessagePart{
-		TextPart{
-			Text: prompt,
-		},
-	}
+	content := make([]MessagePart, 0, len(files)+1)
+	content = append(content, TextPart{Text: prompt})
 
 	for _, f := range files {
 		content = append(content, f)

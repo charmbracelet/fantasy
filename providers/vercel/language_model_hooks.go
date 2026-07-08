@@ -11,8 +11,8 @@ import (
 	"charm.land/fantasy/providers/anthropic"
 	"charm.land/fantasy/providers/google"
 	openaipkg "charm.land/fantasy/providers/openai"
-	openaisdk "github.com/openai/openai-go/v2"
-	"github.com/openai/openai-go/v2/packages/param"
+	openaisdk "github.com/charmbracelet/openai-go"
+	"github.com/charmbracelet/openai-go/packages/param"
 )
 
 const reasoningStartedCtx = "reasoning_started"
@@ -336,21 +336,34 @@ func languageModelStreamExtra(chunk openaisdk.ChatCompletionChunk, yield func(fa
 		}
 
 		ctx[reasoningStartedCtx] = currentState
-		delta := reasoningData.Reasoning
-		if len(reasoningData.ReasoningDetails) > 0 {
-			delta = reasoningData.ReasoningDetails[0].Summary
-			if strings.HasPrefix(reasoningData.ReasoningDetails[0].Format, "google-gemini") {
-				delta = reasoningData.ReasoningDetails[0].Text
-			}
-			if strings.HasPrefix(reasoningData.ReasoningDetails[0].Format, "anthropic-claude") {
-				delta = reasoningData.ReasoningDetails[0].Text
-			}
-		}
-		return ctx, yield(fantasy.StreamPart{
+		if !yield(fantasy.StreamPart{
 			Type:             fantasy.StreamPartTypeReasoningStart,
 			ID:               fmt.Sprintf("%d", inx),
-			Delta:            delta,
 			ProviderMetadata: metadata,
+		}) {
+			return ctx, false
+		}
+		delta := reasoningData.Reasoning
+		if len(reasoningData.ReasoningDetails) > 0 {
+			detail := reasoningData.ReasoningDetails[0]
+			switch {
+			case strings.HasPrefix(detail.Format, "google-gemini"):
+				delta = detail.Text
+			case strings.HasPrefix(detail.Format, "anthropic-claude"):
+				delta = detail.Text
+			case detail.Summary != "":
+				delta = detail.Summary
+			default:
+				delta = detail.Text
+			}
+		}
+		if delta == "" {
+			return ctx, true
+		}
+		return ctx, yield(fantasy.StreamPart{
+			Type:  fantasy.StreamPartTypeReasoningDelta,
+			ID:    fmt.Sprintf("%d", inx),
+			Delta: delta,
 		})
 	}
 
@@ -490,10 +503,13 @@ func languageModelUsage(response openaisdk.ChatCompletion) (fantasy.Usage, fanta
 		Provider: provider,
 	}
 
+	// Vercel reports prompt_tokens INCLUDING cached tokens. Subtract to avoid double-counting.
+	inputTokens := max(usage.PromptTokens-promptTokenDetails.CachedTokens, 0)
+
 	return fantasy.Usage{
-		InputTokens:     usage.PromptTokens,
+		InputTokens:     inputTokens,
 		OutputTokens:    usage.CompletionTokens,
-		TotalTokens:     usage.TotalTokens,
+		TotalTokens:     inputTokens + usage.CompletionTokens + promptTokenDetails.CachedTokens,
 		ReasoningTokens: completionTokenDetails.ReasoningTokens,
 		CacheReadTokens: promptTokenDetails.CachedTokens,
 	}, providerMetadata
@@ -521,10 +537,14 @@ func languageModelStreamUsage(chunk openaisdk.ChatCompletionChunk, _ map[string]
 
 	completionTokenDetails := usage.CompletionTokensDetails
 	promptTokenDetails := usage.PromptTokensDetails
+
+	// Vercel reports prompt_tokens INCLUDING cached tokens. Subtract to avoid double-counting.
+	inputTokens := max(usage.PromptTokens-promptTokenDetails.CachedTokens, 0)
+
 	aiUsage := fantasy.Usage{
-		InputTokens:     usage.PromptTokens,
+		InputTokens:     inputTokens,
 		OutputTokens:    usage.CompletionTokens,
-		TotalTokens:     usage.TotalTokens,
+		TotalTokens:     inputTokens + usage.CompletionTokens + promptTokenDetails.CachedTokens,
 		ReasoningTokens: completionTokenDetails.ReasoningTokens,
 		CacheReadTokens: promptTokenDetails.CachedTokens,
 	}
@@ -874,12 +894,14 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 								Index:   inx,
 							})
 						}
-						reasoningDetails = append(reasoningDetails, ReasoningDetail{
-							Type:   "reasoning.encrypted",
-							Format: "openai-responses-v1",
-							Data:   *metadata.EncryptedContent,
-							ID:     metadata.ItemID,
-						})
+						if metadata.EncryptedContent != nil {
+							reasoningDetails = append(reasoningDetails, ReasoningDetail{
+								Type:   "reasoning.encrypted",
+								Format: "openai-responses-v1",
+								Data:   *metadata.EncryptedContent,
+								ID:     metadata.ItemID,
+							})
+						}
 						data, _ := json.Marshal(reasoningDetails)
 						reasoningDetailsMap := []map[string]any{}
 						_ = json.Unmarshal(data, &reasoningDetailsMap)

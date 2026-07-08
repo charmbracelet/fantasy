@@ -1,0 +1,170 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 297
+    host: ""
+    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":"You are a helpful assistant","role":"system"},{"content":[{"text":"What is the current population of Tokyo? Cite your source.","type":"input_text"}],"role":"user"}],"model":"gpt-4.1","tool_choice":"auto","tools":[{"type":"web_search"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.33.1 (https://charm.land/fantasy)
+    url: https://api.openai.com/v1/responses
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: |-
+      {
+        "id": "resp_032814a9038cfb27016a3c13acb58c8192925156b4193041ea",
+        "object": "response",
+        "created_at": 1782322092,
+        "status": "completed",
+        "background": false,
+        "billing": {
+          "payer": "developer"
+        },
+        "completed_at": 1782322099,
+        "error": null,
+        "frequency_penalty": 0.0,
+        "incomplete_details": null,
+        "instructions": null,
+        "max_output_tokens": 4000,
+        "max_tool_calls": null,
+        "model": "gpt-4.1-2025-04-14",
+        "moderation": null,
+        "output": [
+          {
+            "id": "ws_032814a9038cfb27016a3c13ad26608192bf08bba827aa04d2",
+            "type": "web_search_call",
+            "status": "completed",
+            "action": {
+              "type": "search",
+              "queries": [
+                "current population of Tokyo 2024"
+              ],
+              "query": "current population of Tokyo 2024"
+            }
+          },
+          {
+            "id": "msg_032814a9038cfb27016a3c13b1005481928ac017f3e5b8f7eb",
+            "type": "message",
+            "status": "completed",
+            "content": [
+              {
+                "type": "output_text",
+                "annotations": [
+                  {
+                    "type": "url_citation",
+                    "end_index": 474,
+                    "start_index": 367,
+                    "title": "\u4f4f\u6c11\u57fa\u672c\u53f0\u5e33\u306b\u3088\u308b\u4e16\u5e2f\u3068\u4eba\u53e3 7\u5e741\u6708\u73fe\u5728|3\u6708|\u90fd\u5e81\u7dcf\u5408\u30db\u30fc\u30e0\u30da\u30fc\u30b8",
+                    "url": "https://www.metro.tokyo.lg.jp/information/press/2025/03/2025031902?utm_source=openai"
+                  },
+                  {
+                    "type": "url_citation",
+                    "end_index": 898,
+                    "start_index": 671,
+                    "title": "Fact Check: The Tokyo Metropolitan Government reports an official population of 14,094,034 residents as of September 2025, encompassing the 23 special wards and Tokyo Prefecture | AIME by AInvest",
+                    "url": "https://www.ainvest.com/aime/share/fact-check-tokyo-metropolitan-government-reports-official-population-14094034-residents-september-2025-encompassing-23-special-wards-tokyo-prefecture-54f325/?utm_source=openai"
+                  },
+                  {
+                    "type": "url_citation",
+                    "end_index": 1496,
+                    "start_index": 1395,
+                    "title": "Tokyo Population 2026",
+                    "url": "https://worldpopulationreview.com/cities/japan/tokyo?utm_source=openai"
+                  },
+                  {
+                    "type": "url_citation",
+                    "end_index": 1817,
+                    "start_index": 1590,
+                    "title": "Fact Check: The Tokyo Metropolitan Government reports an official population of 14,094,034 residents as of September 2025, encompassing the 23 special wards and Tokyo Prefecture | AIME by AInvest",
+                    "url": "https://www.ainvest.com/aime/share/fact-check-tokyo-metropolitan-government-reports-official-population-14094034-residents-september-2025-encompassing-23-special-wards-tokyo-prefecture-54f325/?utm_source=openai"
+                  },
+                  {
+                    "type": "url_citation",
+                    "end_index": 1988,
+                    "start_index": 1881,
+                    "title": "\u4f4f\u6c11\u57fa\u672c\u53f0\u5e33\u306b\u3088\u308b\u4e16\u5e2f\u3068\u4eba\u53e3 7\u5e741\u6708\u73fe\u5728|3\u6708|\u90fd\u5e81\u7dcf\u5408\u30db\u30fc\u30e0\u30da\u30fc\u30b8",
+                    "url": "https://www.metro.tokyo.lg.jp/information/press/2025/03/2025031902?utm_source=openai"
+                  }
+                ],
+                "logprobs": [],
+                "text": "Here are the most reliable and up-to-date figures for Tokyo\u2019s current population, based on the latest official data:\n\n\u2022 As of **January 1, 2025**, the **Tokyo Metropolis** (equivalent to Tokyo Prefecture, including the 23 special wards, western Tama area, islands, etc.) had a population of **14,002,534** residents, according to the Basic Resident Register (\u4f4f\u6c11\u57fa\u672c\u53f0\u5e33) ([metro.tokyo.lg.jp](https://www.metro.tokyo.lg.jp/information/press/2025/03/2025031902?utm_source=openai)).\n\n\u2022 Meanwhile, the Tokyo Metropolitan Government\u2019s official \u201cPopulation of Tokyo (estimate)\u201d for **September 1, 2025** reports a slightly higher figure of **14,263,372** for the entire Metropolis ([ainvest.com](https://www.ainvest.com/aime/share/fact-check-tokyo-metropolitan-government-reports-official-population-14094034-residents-september-2025-encompassing-23-special-wards-tokyo-prefecture-54f325/?utm_source=openai)).\n\nBecause these values come from the same source (the Tokyo Metropolitan Government), the September 2025 figure is the most recent official estimate. Therefore, the current population of Tokyo Metropolis is approximately **14.26 million**.\n\nIf you're specifically interested in the population of Tokyo\u2019s central **23 special wards** (sometimes referred to as \u201ccity proper\u201d), that number is considerably lower and typically around 9.7 to 10.3 million depending on the source and estimation method ([worldpopulationreview.com](https://worldpopulationreview.com/cities/japan/tokyo?utm_source=openai)).\n\nIn summary:\n\n- Tokyo Metropolis total population (as of September 1, 2025): **14,263,372** ([ainvest.com](https://www.ainvest.com/aime/share/fact-check-tokyo-metropolitan-government-reports-official-population-14094034-residents-september-2025-encompassing-23-special-wards-tokyo-prefecture-54f325/?utm_source=openai))  \n- Verified earlier data from January 1, 2025: **14,002,534** ([metro.tokyo.lg.jp](https://www.metro.tokyo.lg.jp/information/press/2025/03/2025031902?utm_source=openai))\n\nThus, the most current and authoritative estimate is approximately **14.26 million residents**.\n\nLet me know if you\u2019d like a breakdown by wards, the greater metro area figures, or trends over time!"
+              }
+            ],
+            "role": "assistant"
+          }
+        ],
+        "parallel_tool_calls": true,
+        "presence_penalty": 0.0,
+        "previous_response_id": null,
+        "prompt_cache_key": null,
+        "prompt_cache_retention": "in_memory",
+        "reasoning": {
+          "context": null,
+          "effort": null,
+          "summary": null
+        },
+        "safety_identifier": null,
+        "service_tier": "default",
+        "store": false,
+        "temperature": 1.0,
+        "text": {
+          "format": {
+            "type": "text"
+          },
+          "verbosity": "medium"
+        },
+        "tool_choice": "auto",
+        "tools": [
+          {
+            "type": "web_search",
+            "return_token_budget": "default",
+            "search_content_types": [
+              "text"
+            ],
+            "search_context_size": "medium",
+            "user_location": {
+              "type": "approximate",
+              "city": null,
+              "country": "US",
+              "region": null,
+              "timezone": null
+            }
+          }
+        ],
+        "top_logprobs": 0,
+        "top_p": 1.0,
+        "truncation": "disabled",
+        "usage": {
+          "input_tokens": 17432,
+          "input_tokens_details": {
+            "cached_tokens": 0
+          },
+          "output_tokens": 438,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 17870
+        },
+        "user": null,
+        "metadata": {}
+      }
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 7.581892042s

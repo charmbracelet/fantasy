@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - Charm-Fantasy/0.33.1 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/responses
     method: POST
   response:
@@ -26,39 +26,46 @@ interactions:
     uncompressed: true
     body: |-
       {
-        "id": "resp_063e69ebba23c6e60168f238176014819580347bfecdcc350e",
+        "id": "resp_0ba36516ed812a52016a3c12380f80819f93a925db8fd1b650",
         "object": "response",
-        "created_at": 1760704535,
+        "created_at": 1782321720,
         "status": "completed",
         "background": false,
         "billing": {
           "payer": "developer"
         },
+        "completed_at": 1782321722,
         "error": null,
+        "frequency_penalty": 0.0,
         "incomplete_details": null,
         "instructions": null,
         "max_output_tokens": 4000,
         "max_tool_calls": null,
         "model": "o4-mini-2025-04-16",
+        "moderation": null,
         "output": [
           {
-            "id": "rs_063e69ebba23c6e60168f2381811ac8195bb719fa83683583a",
+            "id": "rs_0ba36516ed812a52016a3c1239082c819fa520dcf530ba1d0f",
             "type": "reasoning",
+            "content": [],
             "summary": []
           },
           {
-            "id": "fc_063e69ebba23c6e60168f238191b248195a04018e0d0c747bb",
+            "id": "fc_0ba36516ed812a52016a3c1239f854819f9cedba1904c99cfc",
             "type": "function_call",
             "status": "completed",
             "arguments": "{\"location\":\"Florence, Italy\"}",
-            "call_id": "call_3gTKulKFbPDpkRO7k5I0ffH2",
+            "call_id": "call_mNRPdaouMLQT0VFAO0oChvBL",
             "name": "weather"
           }
         ],
         "parallel_tool_calls": true,
+        "presence_penalty": 0.0,
         "previous_response_id": null,
         "prompt_cache_key": null,
+        "prompt_cache_retention": "in_memory",
         "reasoning": {
+          "context": "current_turn",
           "effort": "medium",
           "summary": null
         },
@@ -101,11 +108,11 @@ interactions:
           "input_tokens_details": {
             "cached_tokens": 0
           },
-          "output_tokens": 150,
+          "output_tokens": 176,
           "output_tokens_details": {
             "reasoning_tokens": 128
           },
-          "total_tokens": 210
+          "total_tokens": 236
         },
         "user": null,
         "metadata": {}
@@ -115,22 +122,22 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 2.194950333s
+    duration: 2.386423958s
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 723
+    content_length: 711
     host: ""
-    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":"You are a helpful assistant","role":"developer"},{"content":[{"text":"What''s the weather in Florence,Italy?","type":"input_text"}],"role":"user"},{"arguments":"\"{\\\"location\\\":\\\"Florence, Italy\\\"}\"","call_id":"call_3gTKulKFbPDpkRO7k5I0ffH2","name":"weather","type":"function_call"},{"call_id":"call_3gTKulKFbPDpkRO7k5I0ffH2","output":"40 C","type":"function_call_output"}],"model":"o4-mini","tool_choice":"auto","tools":[{"strict":false,"parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location","type":"function"}]}'
+    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":"You are a helpful assistant","role":"developer"},{"content":[{"text":"What''s the weather in Florence,Italy?","type":"input_text"}],"role":"user"},{"arguments":"{\"location\":\"Florence, Italy\"}","call_id":"call_mNRPdaouMLQT0VFAO0oChvBL","name":"weather","type":"function_call"},{"call_id":"call_mNRPdaouMLQT0VFAO0oChvBL","output":"40 C","type":"function_call_output"}],"model":"o4-mini","tool_choice":"auto","tools":[{"strict":false,"parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location","type":"function"}]}'
     headers:
       Accept:
       - application/json
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - Charm-Fantasy/0.33.1 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/responses
     method: POST
   response:
@@ -141,23 +148,26 @@ interactions:
     uncompressed: true
     body: |-
       {
-        "id": "resp_0bed20b0e88328550168f238198a5c81a0947a649d11fb2237",
+        "id": "resp_02f1d06fe2b66751016a3c123a6d5481a0bf4f10dddcb4574f",
         "object": "response",
-        "created_at": 1760704537,
+        "created_at": 1782321722,
         "status": "completed",
         "background": false,
         "billing": {
           "payer": "developer"
         },
+        "completed_at": 1782321723,
         "error": null,
+        "frequency_penalty": 0.0,
         "incomplete_details": null,
         "instructions": null,
         "max_output_tokens": 4000,
         "max_tool_calls": null,
         "model": "o4-mini-2025-04-16",
+        "moderation": null,
         "output": [
           {
-            "id": "msg_0bed20b0e88328550168f23819fad081a090a3ce83d605449e",
+            "id": "msg_02f1d06fe2b66751016a3c123ad80881a089811753d80bdd48",
             "type": "message",
             "status": "completed",
             "content": [
@@ -165,16 +175,19 @@ interactions:
                 "type": "output_text",
                 "annotations": [],
                 "logprobs": [],
-                "text": "The current temperature in Florence, Italy is 40\u00b0C. It\u2019s quite hot! Make sure to stay hydrated, wear light clothing, and seek shade or air-conditioned places when possible. If you plan to be outdoors, consider going early in the morning or later in the evening to avoid peak heat."
+                "text": "The current temperature in Florence, Italy, is 40\u00b0C. It\u2019s quite hot\u2014be sure to stay hydrated and avoid prolonged sun exposure during peak afternoon hours. If you need more details like humidity, wind speed, or a forecast, just let me know!"
               }
             ],
             "role": "assistant"
           }
         ],
         "parallel_tool_calls": true,
+        "presence_penalty": 0.0,
         "previous_response_id": null,
         "prompt_cache_key": null,
+        "prompt_cache_retention": "in_memory",
         "reasoning": {
+          "context": "current_turn",
           "effort": "medium",
           "summary": null
         },
@@ -213,15 +226,15 @@ interactions:
         "top_p": 1.0,
         "truncation": "disabled",
         "usage": {
-          "input_tokens": 91,
+          "input_tokens": 89,
           "input_tokens_details": {
             "cached_tokens": 0
           },
-          "output_tokens": 64,
+          "output_tokens": 57,
           "output_tokens_details": {
             "reasoning_tokens": 0
           },
-          "total_tokens": 155
+          "total_tokens": 146
         },
         "user": null,
         "metadata": {}
@@ -231,4 +244,4 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 1.272683542s
+    duration: 1.358084458s

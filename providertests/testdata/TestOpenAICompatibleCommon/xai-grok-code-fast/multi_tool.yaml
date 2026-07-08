@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.7.1
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.x.ai/v1/chat/completions
     method: POST
   response:
@@ -24,28 +24,28 @@ interactions:
     proto_minor: 0
     content_length: -1
     uncompressed: true
-    body: '{"id":"9874b007-2b46-d81c-99af-a1e5f79ad5f8","object":"chat.completion","created":1762854965,"model":"grok-code-fast-1","choices":[{"index":0,"message":{"role":"assistant","content":"","tool_calls":[{"id":"call_20392219","function":{"name":"add","arguments":"{\"a\":2,\"b\":3}"},"type":"function"},{"id":"call_35218664","function":{"name":"multiply","arguments":"{\"a\":2,\"b\":3}"},"type":"function"}],"refusal":null},"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":471,"completion_tokens":68,"total_tokens":773,"prompt_tokens_details":{"text_tokens":471,"audio_tokens":0,"image_tokens":0,"cached_tokens":320},"completion_tokens_details":{"reasoning_tokens":234,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0},"num_sources_used":0},"system_fingerprint":"fp_10f00c862d"}'
+    body: '{"id":"9e68c68b-dc81-b4cc-2477-b238968f91ae","object":"chat.completion","created":1773345591,"model":"grok-code-fast-1","choices":[{"index":0,"message":{"role":"assistant","content":"","reasoning_content":"## Interpreting user request  \n- The user wants to add and multiply the numbers 2 and 3 together.  \n- The system prompt requires both addition and multiplication to be used simultaneously.  \n\n## Planning function calls  \n- Need to make separate calls for both add and multiply functions, using a=2 and b=3.  \n- Each function call should follow the format using <xai:function_call> tags.  \n\n## Preparing response  \n- The response will include two function calls: one for adding and one for multiplying.  \n- Results will be presented after executing both functions.","tool_calls":[{"id":"call_80180798","function":{"name":"add","arguments":"{\"a\":2,\"b\":3}"},"type":"function"},{"id":"call_25894979","function":{"name":"multiply","arguments":"{\"a\":2,\"b\":3}"},"type":"function"}],"refusal":null},"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":470,"completion_tokens":68,"total_tokens":723,"prompt_tokens_details":{"text_tokens":470,"audio_tokens":0,"image_tokens":0,"cached_tokens":192},"completion_tokens_details":{"reasoning_tokens":185,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0},"num_sources_used":0,"cost_in_usd_ticks":4389400},"system_fingerprint":"fp_99052e9f23"}'
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 2.281730792s
+    duration: 8.395704167s
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 1182
+    content_length: 1788
     host: ""
-    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"tool_calls":[{"id":"call_20392219","function":{"arguments":"{\"a\":2,\"b\":3}","name":"add"},"type":"function"},{"id":"call_35218664","function":{"arguments":"{\"a\":2,\"b\":3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"call_20392219","role":"tool"},{"content":"6","tool_call_id":"call_35218664","role":"tool"}],"model":"grok-code-fast-1","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"tool_calls":[{"id":"call_80180798","function":{"arguments":"{\"a\":2,\"b\":3}","name":"add"},"type":"function"},{"id":"call_25894979","function":{"arguments":"{\"a\":2,\"b\":3}","name":"multiply"},"type":"function"}],"role":"assistant","reasoning_content":"## Interpreting user request  \n- The user wants to add and multiply the numbers 2 and 3 together.  \n- The system prompt requires both addition and multiplication to be used simultaneously.  \n\n## Planning function calls  \n- Need to make separate calls for both add and multiply functions, using a=2 and b=3.  \n- Each function call should follow the format using \u003cxai:function_call\u003e tags.  \n\n## Preparing response  \n- The response will include two function calls: one for adding and one for multiplying.  \n- Results will be presented after executing both functions."},{"content":"5","tool_call_id":"call_80180798","role":"tool"},{"content":"6","tool_call_id":"call_25894979","role":"tool"}],"model":"grok-code-fast-1","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
     headers:
       Accept:
       - application/json
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.7.1
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
     url: https://api.x.ai/v1/chat/completions
     method: POST
   response:
@@ -54,10 +54,10 @@ interactions:
     proto_minor: 0
     content_length: -1
     uncompressed: true
-    body: '{"id":"7ecd4565-51f1-24db-578f-628fc2c2dc35","object":"chat.completion","created":1762854968,"model":"grok-code-fast-1","choices":[{"index":0,"message":{"role":"assistant","content":"2 + 3 = 5  \n2 * 3 = 6","refusal":null},"finish_reason":"stop"}],"usage":{"prompt_tokens":791,"completion_tokens":15,"total_tokens":849,"prompt_tokens_details":{"text_tokens":791,"audio_tokens":0,"image_tokens":0,"cached_tokens":320},"completion_tokens_details":{"reasoning_tokens":43,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0},"num_sources_used":0},"system_fingerprint":"fp_10f00c862d"}'
+    body: '{"id":"1645853d-f873-d90a-956d-e04428f2fc8e","object":"chat.completion","created":1773345599,"model":"grok-code-fast-1","choices":[{"index":0,"message":{"role":"assistant","content":"2 + 3 = 5  \n2 * 3 = 6","reasoning_content":"## Calculating Results  \n- Adding 2 and 3 gives a result of 5.  \n- Multiplying 2 and 3 gives a result of 6.  \n\n## Presenting Answer  \n- The final answer combines both operations: 2 + 3 = 5, and 2 * 3 = 6.  \n- This fulfills the task of providing both addition and multiplication results.","refusal":null},"finish_reason":"stop"}],"usage":{"prompt_tokens":741,"completion_tokens":15,"total_tokens":866,"prompt_tokens_details":{"text_tokens":741,"audio_tokens":0,"image_tokens":0,"cached_tokens":640},"completion_tokens_details":{"reasoning_tokens":110,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0},"num_sources_used":0,"cost_in_usd_ticks":2205000},"system_fingerprint":"fp_99052e9f23"}'
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 1.158569583s
+    duration: 7.994554542s

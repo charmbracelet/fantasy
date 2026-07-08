@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - Charm-Fantasy/0.33.1 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/responses
     method: POST
   response:
@@ -26,34 +26,40 @@ interactions:
     uncompressed: true
     body: |-
       {
-        "id": "resp_010f0015da2b88280168f237ea6c18819e8ce2b72d44ac08b4",
+        "id": "resp_0d9e9b38807e0d8a016a3c120baedc81a18f24ab933f2193f9",
         "object": "response",
-        "created_at": 1760704490,
+        "created_at": 1782321675,
         "status": "completed",
         "background": false,
         "billing": {
           "payer": "developer"
         },
+        "completed_at": 1782321676,
         "error": null,
+        "frequency_penalty": 0.0,
         "incomplete_details": null,
         "instructions": null,
         "max_output_tokens": 4000,
         "max_tool_calls": null,
         "model": "gpt-4o-mini-2024-07-18",
+        "moderation": null,
         "output": [
           {
-            "id": "fc_010f0015da2b88280168f237eb2b7c819eae6470cdee55da77",
+            "id": "fc_0d9e9b38807e0d8a016a3c120cb92c81a193e05ae6e58246c3",
             "type": "function_call",
             "status": "completed",
             "arguments": "{\"location\":\"Florence, Italy\"}",
-            "call_id": "call_59vzLlFlML0RoHvlJxgWZZ7m",
+            "call_id": "call_XX4zIshrJWNnM1Z3n6XsaSxP",
             "name": "weather"
           }
         ],
         "parallel_tool_calls": true,
+        "presence_penalty": 0.0,
         "previous_response_id": null,
         "prompt_cache_key": null,
+        "prompt_cache_retention": "in_memory",
         "reasoning": {
+          "context": null,
           "effort": null,
           "summary": null
         },
@@ -110,22 +116,22 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 1.0454615s
+    duration: 1.491003458s
 - id: 1
   request:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 724
+    content_length: 712
     host: ""
-    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":"You are a helpful assistant","role":"system"},{"content":[{"text":"What''s the weather in Florence,Italy?","type":"input_text"}],"role":"user"},{"arguments":"\"{\\\"location\\\":\\\"Florence, Italy\\\"}\"","call_id":"call_59vzLlFlML0RoHvlJxgWZZ7m","name":"weather","type":"function_call"},{"call_id":"call_59vzLlFlML0RoHvlJxgWZZ7m","output":"40 C","type":"function_call_output"}],"model":"gpt-4o-mini","tool_choice":"auto","tools":[{"strict":false,"parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location","type":"function"}]}'
+    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":"You are a helpful assistant","role":"system"},{"content":[{"text":"What''s the weather in Florence,Italy?","type":"input_text"}],"role":"user"},{"arguments":"{\"location\":\"Florence, Italy\"}","call_id":"call_XX4zIshrJWNnM1Z3n6XsaSxP","name":"weather","type":"function_call"},{"call_id":"call_XX4zIshrJWNnM1Z3n6XsaSxP","output":"40 C","type":"function_call_output"}],"model":"gpt-4o-mini","tool_choice":"auto","tools":[{"strict":false,"parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location","type":"function"}]}'
     headers:
       Accept:
       - application/json
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - Charm-Fantasy/0.33.1 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/responses
     method: POST
   response:
@@ -136,23 +142,26 @@ interactions:
     uncompressed: true
     body: |-
       {
-        "id": "resp_0de529b5396cb7cc0168f237eb7d9c81a3aca3fef6a9749a5f",
+        "id": "resp_039f329dbed97aa5016a3c120d2fc081a3b9e3bec252760583",
         "object": "response",
-        "created_at": 1760704491,
+        "created_at": 1782321677,
         "status": "completed",
         "background": false,
         "billing": {
           "payer": "developer"
         },
+        "completed_at": 1782321678,
         "error": null,
+        "frequency_penalty": 0.0,
         "incomplete_details": null,
         "instructions": null,
         "max_output_tokens": 4000,
         "max_tool_calls": null,
         "model": "gpt-4o-mini-2024-07-18",
+        "moderation": null,
         "output": [
           {
-            "id": "msg_0de529b5396cb7cc0168f237ebf0ec81a39a23afc61ca30582",
+            "id": "msg_039f329dbed97aa5016a3c120df12c81a3b04a662a9626e5e9",
             "type": "message",
             "status": "completed",
             "content": [
@@ -160,16 +169,19 @@ interactions:
                 "type": "output_text",
                 "annotations": [],
                 "logprobs": [],
-                "text": "The current temperature in Florence, Italy, is 40\u00b0C. If you need more details like humidity or forecast, just let me know!"
+                "text": "The weather in Florence, Italy, is currently 40\u00b0C."
               }
             ],
             "role": "assistant"
           }
         ],
         "parallel_tool_calls": true,
+        "presence_penalty": 0.0,
         "previous_response_id": null,
         "prompt_cache_key": null,
+        "prompt_cache_retention": "in_memory",
         "reasoning": {
+          "context": null,
           "effort": null,
           "summary": null
         },
@@ -208,15 +220,15 @@ interactions:
         "top_p": 1.0,
         "truncation": "disabled",
         "usage": {
-          "input_tokens": 83,
+          "input_tokens": 81,
           "input_tokens_details": {
             "cached_tokens": 0
           },
-          "output_tokens": 30,
+          "output_tokens": 15,
           "output_tokens_details": {
             "reasoning_tokens": 0
           },
-          "total_tokens": 113
+          "total_tokens": 96
         },
         "user": null,
         "metadata": {}
@@ -226,4 +238,4 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 1.421569667s
+    duration: 1.1742705s

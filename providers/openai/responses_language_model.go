@@ -3,19 +3,20 @@ package openai
 import (
 	"context"
 	"encoding/base64"
-	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"reflect"
 	"strings"
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/object"
 	"charm.land/fantasy/schema"
+	"github.com/charmbracelet/openai-go"
+	"github.com/charmbracelet/openai-go/packages/param"
+	"github.com/charmbracelet/openai-go/responses"
+	"github.com/charmbracelet/openai-go/shared"
 	"github.com/google/uuid"
-	"github.com/openai/openai-go/v2"
-	"github.com/openai/openai-go/v2/packages/param"
-	"github.com/openai/openai-go/v2/responses"
-	"github.com/openai/openai-go/v2/shared"
 )
 
 const topLogprobsMax = 20
@@ -27,8 +28,7 @@ type responsesLanguageModel struct {
 	objectMode fantasy.ObjectMode
 }
 
-// newResponsesLanguageModel implements a responses api model
-// INFO: (kujtim) currently we do not support stored parameter we default it to false.
+// newResponsesLanguageModel implements a responses api model.
 func newResponsesLanguageModel(modelID string, provider string, client openai.Client, objectMode fantasy.ObjectMode) responsesLanguageModel {
 	return responsesLanguageModel{
 		modelID:    modelID,
@@ -59,11 +59,11 @@ func getResponsesModelConfig(modelID string) responsesModelConfig {
 		strings.Contains(modelID, "-o3") || strings.Contains(modelID, "o4-mini") ||
 		(strings.Contains(modelID, "gpt-5") && !strings.Contains(modelID, "gpt-5-chat"))
 
-	supportsPriorityProcessing := strings.Contains(modelID, "gpt-4") ||
-		strings.Contains(modelID, "gpt-5-mini") ||
-		(strings.Contains(modelID, "gpt-5") &&
-			!strings.Contains(modelID, "gpt-5-nano") &&
-			!strings.Contains(modelID, "gpt-5-chat")) ||
+	supportsPriorityProcessing := strings.Contains(strings.ToLower(modelID), "gpt-4") ||
+		strings.Contains(strings.ToLower(modelID), "gpt-5-mini") ||
+		(strings.Contains(strings.ToLower(modelID), "gpt-5") &&
+			!strings.Contains(strings.ToLower(modelID), "gpt-5-nano") &&
+			!strings.Contains(strings.ToLower(modelID), "gpt-5-chat")) ||
 		strings.HasPrefix(modelID, "o3") ||
 		strings.Contains(modelID, "-o3") ||
 		strings.Contains(modelID, "o4-mini")
@@ -75,7 +75,7 @@ func getResponsesModelConfig(modelID string) responsesModelConfig {
 		supportsPriorityProcessing: supportsPriorityProcessing,
 	}
 
-	if strings.Contains(modelID, "gpt-5-chat") {
+	if strings.Contains(strings.ToLower(modelID), "gpt-5-chat") {
 		return responsesModelConfig{
 			isReasoningModel:           false,
 			systemMessageMode:          defaults.systemMessageMode,
@@ -89,8 +89,8 @@ func getResponsesModelConfig(modelID string) responsesModelConfig {
 		strings.HasPrefix(modelID, "o3") || strings.Contains(modelID, "-o3") ||
 		strings.HasPrefix(modelID, "o4") || strings.Contains(modelID, "-o4") ||
 		strings.HasPrefix(modelID, "oss") || strings.Contains(modelID, "-oss") ||
-		strings.Contains(modelID, "gpt-5") || strings.Contains(modelID, "codex-") ||
-		strings.Contains(modelID, "computer-use") {
+		strings.Contains(strings.ToLower(modelID), "gpt-5") ||
+		strings.Contains(modelID, "codex-") || strings.Contains(modelID, "computer-use") {
 		if strings.Contains(modelID, "o1-mini") || strings.Contains(modelID, "o1-preview") {
 			return responsesModelConfig{
 				isReasoningModel:           true,
@@ -119,11 +119,14 @@ func getResponsesModelConfig(modelID string) responsesModelConfig {
 	}
 }
 
-func (o responsesLanguageModel) prepareParams(call fantasy.Call) (*responses.ResponseNewParams, []fantasy.CallWarning) {
+const (
+	previousResponseIDHistoryError = "cannot combine previous_response_id with replayed conversation history; use either previous_response_id (server-side chaining) or explicit message replay, not both"
+	previousResponseIDStoreError   = "previous_response_id requires store to be true; the current response will not be stored and cannot be used for further chaining"
+)
+
+func (o responsesLanguageModel) prepareParams(call fantasy.Call) (*responses.ResponseNewParams, []fantasy.CallWarning, error) {
 	var warnings []fantasy.CallWarning
-	params := &responses.ResponseNewParams{
-		Store: param.NewOpt(false),
-	}
+	params := &responses.ResponseNewParams{}
 
 	modelConfig := getResponsesModelConfig(o.modelID)
 
@@ -155,7 +158,24 @@ func (o responsesLanguageModel) prepareParams(call fantasy.Call) (*responses.Res
 		}
 	}
 
-	input, inputWarnings := toResponsesPrompt(call.Prompt, modelConfig.systemMessageMode)
+	if openaiOptions != nil && openaiOptions.Store != nil {
+		params.Store = param.NewOpt(*openaiOptions.Store)
+	} else {
+		params.Store = param.NewOpt(false)
+	}
+
+	if openaiOptions != nil && openaiOptions.PreviousResponseID != nil && *openaiOptions.PreviousResponseID != "" {
+		if err := validatePreviousResponseIDPrompt(call.Prompt); err != nil {
+			return nil, warnings, err
+		}
+		if openaiOptions.Store == nil || !*openaiOptions.Store {
+			return nil, warnings, errors.New(previousResponseIDStoreError)
+		}
+		params.PreviousResponseID = param.NewOpt(*openaiOptions.PreviousResponseID)
+	}
+
+	storeEnabled := openaiOptions != nil && openaiOptions.Store != nil && *openaiOptions.Store
+	input, inputWarnings := toResponsesPrompt(call.Prompt, modelConfig.systemMessageMode, storeEnabled)
 	warnings = append(warnings, inputWarnings...)
 
 	var include []IncludeType
@@ -326,10 +346,51 @@ func (o responsesLanguageModel) prepareParams(call fantasy.Call) (*responses.Res
 		params.ToolChoice = toolChoice
 	}
 
-	return params, warnings
+	return params, warnings, nil
 }
 
-func toResponsesPrompt(prompt fantasy.Prompt, systemMessageMode string) (responses.ResponseInputParam, []fantasy.CallWarning) {
+func validatePreviousResponseIDPrompt(prompt fantasy.Prompt) error {
+	for _, msg := range prompt {
+		switch msg.Role {
+		case fantasy.MessageRoleSystem, fantasy.MessageRoleUser:
+			continue
+		default:
+			return errors.New(previousResponseIDHistoryError)
+		}
+	}
+	return nil
+}
+
+func responsesProviderMetadata(responseID string) fantasy.ProviderMetadata {
+	if responseID == "" {
+		return fantasy.ProviderMetadata{}
+	}
+
+	return fantasy.ProviderMetadata{
+		Name: &ResponsesProviderMetadata{
+			ResponseID: responseID,
+		},
+	}
+}
+
+func responsesUsage(resp responses.Response) fantasy.Usage {
+	// OpenAI reports input_tokens INCLUDING cached tokens. Subtract to avoid double-counting.
+	inputTokens := max(resp.Usage.InputTokens-resp.Usage.InputTokensDetails.CachedTokens, 0)
+	usage := fantasy.Usage{
+		InputTokens:  inputTokens,
+		OutputTokens: resp.Usage.OutputTokens,
+		TotalTokens:  resp.Usage.InputTokens + resp.Usage.OutputTokens,
+	}
+	if resp.Usage.OutputTokensDetails.ReasoningTokens != 0 {
+		usage.ReasoningTokens = resp.Usage.OutputTokensDetails.ReasoningTokens
+	}
+	if resp.Usage.InputTokensDetails.CachedTokens != 0 {
+		usage.CacheReadTokens = resp.Usage.InputTokensDetails.CachedTokens
+	}
+	return usage
+}
+
+func toResponsesPrompt(prompt fantasy.Prompt, systemMessageMode string, store bool) (responses.ResponseInputParam, []fantasy.CallWarning) {
 	var input responses.ResponseInputParam
 	var warnings []fantasy.CallWarning
 
@@ -476,49 +537,32 @@ func toResponsesPrompt(prompt fantasy.Prompt, systemMessageMode string) (respons
 					}
 
 					if toolCallPart.ProviderExecuted {
+						if store {
+							// Round-trip provider-executed tools via
+							// item_reference, letting the API resolve
+							// the stored output item by ID.
+							input = append(input, responses.ResponseInputItemParamOfItemReference(toolCallPart.ToolCallID))
+						}
+						// When store is disabled, server-side items are
+						// ephemeral and cannot be referenced. Skip the
+						// tool call; results are already omitted for
+						// provider-executed tools.
 						continue
 					}
 
-					inputJSON, err := json.Marshal(toolCallPart.Input)
-					if err != nil {
-						warnings = append(warnings, fantasy.CallWarning{
-							Type:    fantasy.CallWarningTypeOther,
-							Message: fmt.Sprintf("failed to marshal tool call input: %v", err),
-						})
-						continue
-					}
-
-					input = append(input, responses.ResponseInputItemParamOfFunctionCall(string(inputJSON), toolCallPart.ToolCallID, toolCallPart.ToolName))
+					input = append(input, responses.ResponseInputItemParamOfFunctionCall(toolCallPart.Input, toolCallPart.ToolCallID, toolCallPart.ToolName))
+				case fantasy.ContentTypeSource:
+					// Source citations from web search are not a
+					// recognised Responses API input type; skip.
+					continue
 				case fantasy.ContentTypeReasoning:
-					reasoningMetadata := GetReasoningMetadata(c.Options())
-					if reasoningMetadata == nil || reasoningMetadata.ItemID == "" {
-						continue
-					}
-					if len(reasoningMetadata.Summary) == 0 && reasoningMetadata.EncryptedContent == nil {
-						warnings = append(warnings, fantasy.CallWarning{
-							Type:    fantasy.CallWarningTypeOther,
-							Message: "assistant message reasoning part does is empty",
-						})
-						continue
-					}
-					// we want to always send an empty array
-					summary := []responses.ResponseReasoningItemSummaryParam{}
-					for _, s := range reasoningMetadata.Summary {
-						summary = append(summary, responses.ResponseReasoningItemSummaryParam{
-							Type: "summary_text",
-							Text: s,
-						})
-					}
-					reasoning := &responses.ResponseReasoningItemParam{
-						ID:      reasoningMetadata.ItemID,
-						Summary: summary,
-					}
-					if reasoningMetadata.EncryptedContent != nil {
-						reasoning.EncryptedContent = param.NewOpt(*reasoningMetadata.EncryptedContent)
-					}
-					input = append(input, responses.ResponseInputItemUnionParam{
-						OfReasoning: reasoning,
-					})
+					// Reasoning items are always skipped during replay.
+					// When store is enabled, the API already has them
+					// persisted server-side. When store is disabled, the
+					// item IDs are ephemeral and referencing them causes
+					// "Item not found" errors. In both cases, replaying
+					// reasoning inline is not supported by the API.
+					continue
 				}
 			}
 
@@ -551,7 +595,15 @@ func toResponsesPrompt(prompt fantasy.Prompt, systemMessageMode string) (respons
 					continue
 				}
 
+				// Provider-executed tool results (e.g. web search)
+				// are already round-tripped via the tool call; skip.
+				if toolResultPart.ProviderExecuted {
+					continue
+				}
+
 				var outputStr string
+				var followupParts responses.ResponseInputMessageContentListParam
+
 				switch toolResultPart.Output.GetType() {
 				case fantasy.ToolResultContentTypeText:
 					output, ok := fantasy.AsToolResultOutputType[fantasy.ToolResultOutputContentText](toolResultPart.Output)
@@ -573,9 +625,50 @@ func toResponsesPrompt(prompt fantasy.Prompt, systemMessageMode string) (respons
 						continue
 					}
 					outputStr = output.Error.Error()
+				case fantasy.ToolResultContentTypeMedia:
+					output, ok := fantasy.AsToolResultOutputType[fantasy.ToolResultOutputContentMedia](toolResultPart.Output)
+					if !ok {
+						warnings = append(warnings, fantasy.CallWarning{
+							Type:    fantasy.CallWarningTypeOther,
+							Message: "tool result output does not have the right type",
+						})
+						continue
+					}
+					// The Responses API function_call_output only accepts a
+					// string. Emit a text placeholder (preserving any
+					// accompanying text) so the tool_call/tool_result pairing
+					// stays valid, then attach the media as a synthetic user
+					// input_image so vision-capable models still receive it.
+					outputStr = output.Text
+					if outputStr == "" {
+						outputStr = fmt.Sprintf("The tool returned %s content; see the following user message.", output.MediaType)
+					}
+					if strings.HasPrefix(output.MediaType, "image/") {
+						imageURL := fmt.Sprintf("data:%s;base64,%s", output.MediaType, output.Data)
+						followupParts = append(followupParts, responses.ResponseInputContentUnionParam{
+							OfInputImage: &responses.ResponseInputImageParam{
+								Type:     "input_image",
+								ImageURL: param.NewOpt(imageURL),
+							},
+						})
+					} else {
+						warnings = append(warnings, fantasy.CallWarning{
+							Type:    fantasy.CallWarningTypeOther,
+							Message: fmt.Sprintf("tool result media type %s not supported, sending text placeholder only", output.MediaType),
+						})
+					}
+				default:
+					warnings = append(warnings, fantasy.CallWarning{
+						Type:    fantasy.CallWarningTypeOther,
+						Message: fmt.Sprintf("tool result output type %q not supported", toolResultPart.Output.GetType()),
+					})
+					continue
 				}
 
 				input = append(input, responses.ResponseInputItemParamOfFunctionCallOutput(toolResultPart.ToolCallID, outputStr))
+				if len(followupParts) > 0 {
+					input = append(input, responses.ResponseInputItemParamOfMessage(followupParts, responses.EasyInputMessageRoleUser))
+				}
 			}
 		}
 	}
@@ -590,7 +683,7 @@ func hasVisibleResponsesUserContent(content responses.ResponseInputMessageConten
 func hasVisibleResponsesAssistantContent(items []responses.ResponseInputItemUnionParam, startIdx int) bool {
 	// Check if we added any assistant content parts from this message
 	for i := startIdx; i < len(items); i++ {
-		if items[i].OfMessage != nil || items[i].OfFunctionCall != nil {
+		if items[i].OfMessage != nil || items[i].OfFunctionCall != nil || items[i].OfItemReference != nil {
 			return true
 		}
 	}
@@ -626,6 +719,17 @@ func toResponsesTools(tools []fantasy.Tool, toolChoice *fantasy.ToolChoice, opti
 				},
 			})
 			continue
+		}
+		if tool.GetType() == fantasy.ToolTypeProviderDefined {
+			pt, ok := tool.(fantasy.ProviderDefinedTool)
+			if !ok {
+				continue
+			}
+			switch pt.ID {
+			case "web_search":
+				openaiTools = append(openaiTools, toWebSearchToolParam(pt))
+				continue
+			}
 		}
 
 		warnings = append(warnings, fantasy.CallWarning{
@@ -667,10 +771,18 @@ func toResponsesTools(tools []fantasy.Tool, toolChoice *fantasy.ToolChoice, opti
 }
 
 func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call) (*fantasy.Response, error) {
-	params, warnings := o.prepareParams(call)
-	response, err := o.client.Responses.New(ctx, *params)
+	params, warnings, err := o.prepareParams(call)
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := o.client.Responses.New(ctx, *params, callUARequestOptions(call)...)
 	if err != nil {
 		return nil, toProviderErr(err)
+	}
+
+	if response == nil {
+		return nil, &fantasy.Error{Title: "no response", Message: "provider returned nil response"}
 	}
 
 	if response.Error.Message != "" {
@@ -728,9 +840,31 @@ func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call)
 				ProviderExecuted: false,
 				ToolCallID:       outputItem.CallID,
 				ToolName:         outputItem.Name,
-				Input:            outputItem.Arguments,
+				Input:            outputItem.Arguments.OfString,
 			})
 
+		case "web_search_call":
+			// Provider-executed web search tool call. Emit both
+			// a ToolCallContent and ToolResultContent as a pair,
+			// matching the vercel/ai pattern for provider tools.
+			//
+			// Note: source citations come from url_citation annotations
+			// on the message text (handled in the "message" case above),
+			// not from the web_search_call action.
+			wsMeta := webSearchCallToMetadata(outputItem.ID, outputItem.Action)
+			content = append(content, fantasy.ToolCallContent{
+				ProviderExecuted: true,
+				ToolCallID:       outputItem.ID,
+				ToolName:         "web_search",
+			})
+			content = append(content, fantasy.ToolResultContent{
+				ProviderExecuted: true,
+				ToolCallID:       outputItem.ID,
+				ToolName:         "web_search",
+				ProviderMetadata: fantasy.ProviderMetadata{
+					Name: wsMeta,
+				},
+			})
 		case "reasoning":
 			metadata := &ResponsesReasoningMetadata{
 				ItemID: outputItem.ID,
@@ -762,26 +896,14 @@ func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call)
 		}
 	}
 
-	usage := fantasy.Usage{
-		InputTokens:  response.Usage.InputTokens,
-		OutputTokens: response.Usage.OutputTokens,
-		TotalTokens:  response.Usage.InputTokens + response.Usage.OutputTokens,
-	}
-
-	if response.Usage.OutputTokensDetails.ReasoningTokens != 0 {
-		usage.ReasoningTokens = response.Usage.OutputTokensDetails.ReasoningTokens
-	}
-	if response.Usage.InputTokensDetails.CachedTokens != 0 {
-		usage.CacheReadTokens = response.Usage.InputTokensDetails.CachedTokens
-	}
-
+	usage := responsesUsage(*response)
 	finishReason := mapResponsesFinishReason(response.IncompleteDetails.Reason, hasFunctionCall)
 
 	return &fantasy.Response{
 		Content:          content,
 		Usage:            usage,
 		FinishReason:     finishReason,
-		ProviderMetadata: fantasy.ProviderMetadata{},
+		ProviderMetadata: responsesProviderMetadata(response.ID),
 		Warnings:         warnings,
 	}, nil
 }
@@ -804,12 +926,22 @@ func mapResponsesFinishReason(reason string, hasFunctionCall bool) fantasy.Finis
 }
 
 func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.StreamResponse, error) {
-	params, warnings := o.prepareParams(call)
+	params, warnings, err := o.prepareParams(call)
+	if err != nil {
+		return nil, err
+	}
 
-	stream := o.client.Responses.NewStreaming(ctx, *params)
+	stream := o.client.Responses.NewStreaming(ctx, *params, callUARequestOptions(call)...)
 
 	finishReason := fantasy.FinishReasonUnknown
 	var usage fantasy.Usage
+	// responseID tracks the server-assigned response ID. It's first set from the
+	// response.created event and may be overwritten by response.completed or
+	// response.incomplete events. Per the OpenAI API contract, these IDs are
+	// identical; the overwrites ensure we have the final value even if an event
+	// is missed.
+	responseID := ""
+	sawTerminalEvent := false
 	ongoingToolCalls := make(map[int64]*ongoingToolCall)
 	hasFunctionCall := false
 	activeReasoning := make(map[string]*reasoningState)
@@ -829,7 +961,8 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 
 			switch event.Type {
 			case "response.created":
-				_ = event.AsResponseCreated()
+				created := event.AsResponseCreated()
+				responseID = created.Response.ID
 
 			case "response.output_item.added":
 				added := event.AsResponseOutputItemAdded()
@@ -843,6 +976,17 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 						Type:         fantasy.StreamPartTypeToolInputStart,
 						ID:           added.Item.CallID,
 						ToolCallName: added.Item.Name,
+					}) {
+						return
+					}
+
+				case "web_search_call":
+					// Provider-executed web search; emit start.
+					if !yield(fantasy.StreamPart{
+						Type:             fantasy.StreamPartTypeToolInputStart,
+						ID:               added.Item.ID,
+						ToolCallName:     "web_search",
+						ProviderExecuted: true,
 					}) {
 						return
 					}
@@ -897,12 +1041,43 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 							Type:          fantasy.StreamPartTypeToolCall,
 							ID:            done.Item.CallID,
 							ToolCallName:  done.Item.Name,
-							ToolCallInput: done.Item.Arguments,
+							ToolCallInput: done.Item.Arguments.OfString,
 						}) {
 							return
 						}
 					}
 
+				case "web_search_call":
+					// Provider-executed web search completed.
+					// Source citations come from url_citation annotations
+					// on the streamed message text, not from the action.
+					if !yield(fantasy.StreamPart{
+						Type: fantasy.StreamPartTypeToolInputEnd,
+						ID:   done.Item.ID,
+					}) {
+						return
+					}
+					if !yield(fantasy.StreamPart{
+						Type:             fantasy.StreamPartTypeToolCall,
+						ID:               done.Item.ID,
+						ToolCallName:     "web_search",
+						ProviderExecuted: true,
+					}) {
+						return
+					}
+					// Emit a ToolResult so the agent framework
+					// includes it in round-trip messages.
+					if !yield(fantasy.StreamPart{
+						Type:             fantasy.StreamPartTypeToolResult,
+						ID:               done.Item.ID,
+						ToolCallName:     "web_search",
+						ProviderExecuted: true,
+						ProviderMetadata: fantasy.ProviderMetadata{
+							Name: webSearchCallToMetadata(done.Item.ID, done.Item.Action),
+						},
+					}) {
+						return
+					}
 				case "message":
 					if !yield(fantasy.StreamPart{
 						Type: fantasy.StreamPartTypeTextEnd,
@@ -950,6 +1125,43 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 					return
 				}
 
+			case "response.output_text.annotation.added":
+				added := event.AsResponseOutputTextAnnotationAdded()
+				// The Annotation field is typed as `any` in the SDK;
+				// it deserializes as map[string]any from JSON.
+				annotationMap, ok := added.Annotation.(map[string]any)
+				if !ok {
+					break
+				}
+				annotationType, _ := annotationMap["type"].(string)
+				switch annotationType {
+				case "url_citation":
+					url, _ := annotationMap["url"].(string)
+					title, _ := annotationMap["title"].(string)
+					if !yield(fantasy.StreamPart{
+						Type:       fantasy.StreamPartTypeSource,
+						ID:         uuid.NewString(),
+						SourceType: fantasy.SourceTypeURL,
+						URL:        url,
+						Title:      title,
+					}) {
+						return
+					}
+				case "file_citation":
+					title := "Document"
+					if fn, ok := annotationMap["filename"].(string); ok && fn != "" {
+						title = fn
+					}
+					if !yield(fantasy.StreamPart{
+						Type:       fantasy.StreamPartTypeSource,
+						ID:         uuid.NewString(),
+						SourceType: fantasy.SourceTypeDocument,
+						Title:      title,
+					}) {
+						return
+					}
+				}
+
 			case "response.reasoning_summary_part.added":
 				added := event.AsResponseReasoningSummaryPartAdded()
 				state := activeReasoning[added.ItemID]
@@ -988,26 +1200,35 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 					}
 				}
 
-			case "response.completed", "response.incomplete":
+			case "response.completed":
+				sawTerminalEvent = true
 				completed := event.AsResponseCompleted()
+				responseID = completed.Response.ID
 				finishReason = mapResponsesFinishReason(completed.Response.IncompleteDetails.Reason, hasFunctionCall)
-				usage = fantasy.Usage{
-					InputTokens:  completed.Response.Usage.InputTokens,
-					OutputTokens: completed.Response.Usage.OutputTokens,
-					TotalTokens:  completed.Response.Usage.InputTokens + completed.Response.Usage.OutputTokens,
+				usage = responsesUsage(completed.Response)
+
+			case "response.incomplete":
+				sawTerminalEvent = true
+				incomplete := event.AsResponseIncomplete()
+				responseID = incomplete.Response.ID
+				finishReason = mapResponsesFinishReason(incomplete.Response.IncompleteDetails.Reason, hasFunctionCall)
+				usage = responsesUsage(incomplete.Response)
+
+			case "response.failed":
+				failed := event.AsResponseFailed()
+				if !yield(fantasy.StreamPart{
+					Type:  fantasy.StreamPartTypeError,
+					Error: responsesFailedStreamError(failed.Response.Error.Message, string(failed.Response.Error.Code)),
+				}) {
+					return
 				}
-				if completed.Response.Usage.OutputTokensDetails.ReasoningTokens != 0 {
-					usage.ReasoningTokens = completed.Response.Usage.OutputTokensDetails.ReasoningTokens
-				}
-				if completed.Response.Usage.InputTokensDetails.CachedTokens != 0 {
-					usage.CacheReadTokens = completed.Response.Usage.InputTokensDetails.CachedTokens
-				}
+				return
 
 			case "error":
 				errorEvent := event.AsError()
 				if !yield(fantasy.StreamPart{
 					Type:  fantasy.StreamPartTypeError,
-					Error: fmt.Errorf("response error: %s (code: %s)", errorEvent.Message, errorEvent.Code),
+					Error: responsesErrorStreamError(errorEvent.Message, errorEvent.Code),
 				}) {
 					return
 				}
@@ -1016,7 +1237,7 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 		}
 
 		err := stream.Err()
-		if err != nil {
+		if err != nil && !errors.Is(err, io.EOF) {
 			yield(fantasy.StreamPart{
 				Type:  fantasy.StreamPartTypeError,
 				Error: toProviderErr(err),
@@ -1024,12 +1245,100 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 			return
 		}
 
+		if !sawTerminalEvent {
+			err := ctx.Err()
+			if err == nil {
+				err = fantasy.NewIncompleteStreamError()
+			}
+			yield(fantasy.StreamPart{
+				Type:  fantasy.StreamPartTypeError,
+				Error: err,
+			})
+			return
+		}
+
 		yield(fantasy.StreamPart{
-			Type:         fantasy.StreamPartTypeFinish,
-			Usage:        usage,
-			FinishReason: finishReason,
+			Type:             fantasy.StreamPartTypeFinish,
+			Usage:            usage,
+			FinishReason:     finishReason,
+			ProviderMetadata: responsesProviderMetadata(responseID),
 		})
 	}, nil
+}
+
+// responsesFailedStreamError intentionally returns a provider-declared failure
+// instead of a retryable transport error. Only synthetic stream truncation
+// errors are wrapped with io.ErrUnexpectedEOF.
+func responsesFailedStreamError(message, code string) error {
+	return responsesStreamFailureError("response failed", message, code)
+}
+
+func responsesErrorStreamError(message, code string) error {
+	return responsesStreamFailureError("response error", message, code)
+}
+
+func responsesStreamFailureError(title, message, code string) error {
+	if code != "" {
+		message = fmt.Sprintf("%s (code: %s)", message, code)
+	}
+	return &fantasy.Error{Title: title, Message: message}
+}
+
+// toWebSearchToolParam converts a ProviderDefinedTool with ID
+// "web_search" into the OpenAI SDK's WebSearchToolParam.
+func toWebSearchToolParam(pt fantasy.ProviderDefinedTool) responses.ToolUnionParam {
+	wst := responses.WebSearchToolParam{
+		Type: responses.WebSearchToolTypeWebSearch,
+	}
+	if pt.Args != nil {
+		if size, ok := pt.Args["search_context_size"].(SearchContextSize); ok && size != "" {
+			wst.SearchContextSize = responses.WebSearchToolSearchContextSize(size)
+		}
+		// Also accept plain string for search_context_size.
+		if size, ok := pt.Args["search_context_size"].(string); ok && size != "" {
+			wst.SearchContextSize = responses.WebSearchToolSearchContextSize(size)
+		}
+		if domains, ok := pt.Args["allowed_domains"].([]string); ok && len(domains) > 0 {
+			wst.Filters.AllowedDomains = domains
+		}
+		if loc, ok := pt.Args["user_location"].(*WebSearchUserLocation); ok && loc != nil {
+			if loc.City != "" {
+				wst.UserLocation.City = param.NewOpt(loc.City)
+			}
+			if loc.Region != "" {
+				wst.UserLocation.Region = param.NewOpt(loc.Region)
+			}
+			if loc.Country != "" {
+				wst.UserLocation.Country = param.NewOpt(loc.Country)
+			}
+			if loc.Timezone != "" {
+				wst.UserLocation.Timezone = param.NewOpt(loc.Timezone)
+			}
+		}
+	}
+	return responses.ToolUnionParam{
+		OfWebSearch: &wst,
+	}
+}
+
+// webSearchCallToMetadata converts an OpenAI web search call output
+// into our structured metadata for round-tripping.
+func webSearchCallToMetadata(itemID string, action responses.ResponseOutputItemUnionAction) *WebSearchCallMetadata {
+	meta := &WebSearchCallMetadata{ItemID: itemID}
+	if action.Type != "" {
+		a := &WebSearchAction{
+			Type:  action.Type,
+			Query: action.Query,
+		}
+		for _, src := range action.Sources {
+			a.Sources = append(a.Sources, WebSearchSource{
+				Type: string(src.Type),
+				URL:  src.URL,
+			})
+		}
+		meta.Action = a
+	}
+	return meta
 }
 
 // GetReasoningMetadata extracts reasoning metadata from provider options for responses models.
@@ -1098,7 +1407,10 @@ func (o responsesLanguageModel) generateObjectWithJSONMode(ctx context.Context, 
 		ProviderOptions:  call.ProviderOptions,
 	}
 
-	params, warnings := o.prepareParams(fantasyCall)
+	params, warnings, err := o.prepareParams(fantasyCall)
+	if err != nil {
+		return nil, err
+	}
 
 	// Add structured output via Text.Format field
 	params.Text = responses.ResponseTextConfigParam{
@@ -1106,7 +1418,7 @@ func (o responsesLanguageModel) generateObjectWithJSONMode(ctx context.Context, 
 	}
 
 	// Make request
-	response, err := o.client.Responses.New(ctx, *params)
+	response, err := o.client.Responses.New(ctx, *params, objectCallUARequestOptions(call)...)
 	if err != nil {
 		return nil, toProviderErr(err)
 	}
@@ -1154,18 +1466,7 @@ func (o responsesLanguageModel) generateObjectWithJSONMode(ctx context.Context, 
 		obj, err = schema.ParseAndValidate(jsonText, call.Schema)
 	}
 
-	usage := fantasy.Usage{
-		InputTokens:  response.Usage.InputTokens,
-		OutputTokens: response.Usage.OutputTokens,
-		TotalTokens:  response.Usage.InputTokens + response.Usage.OutputTokens,
-	}
-	if response.Usage.OutputTokensDetails.ReasoningTokens != 0 {
-		usage.ReasoningTokens = response.Usage.OutputTokensDetails.ReasoningTokens
-	}
-	if response.Usage.InputTokensDetails.CachedTokens != 0 {
-		usage.CacheReadTokens = response.Usage.InputTokensDetails.CachedTokens
-	}
-
+	usage := responsesUsage(*response)
 	finishReason := mapResponsesFinishReason(response.IncompleteDetails.Reason, false)
 
 	if err != nil {
@@ -1178,11 +1479,12 @@ func (o responsesLanguageModel) generateObjectWithJSONMode(ctx context.Context, 
 	}
 
 	return &fantasy.ObjectResponse{
-		Object:       obj,
-		RawText:      jsonText,
-		Usage:        usage,
-		FinishReason: finishReason,
-		Warnings:     warnings,
+		Object:           obj,
+		RawText:          jsonText,
+		Usage:            usage,
+		FinishReason:     finishReason,
+		Warnings:         warnings,
+		ProviderMetadata: responsesProviderMetadata(response.ID),
 	}, nil
 }
 
@@ -1209,14 +1511,17 @@ func (o responsesLanguageModel) streamObjectWithJSONMode(ctx context.Context, ca
 		ProviderOptions:  call.ProviderOptions,
 	}
 
-	params, warnings := o.prepareParams(fantasyCall)
+	params, warnings, err := o.prepareParams(fantasyCall)
+	if err != nil {
+		return nil, err
+	}
 
 	// Add structured output via Text.Format field
 	params.Text = responses.ResponseTextConfigParam{
 		Format: responses.ResponseFormatTextConfigParamOfJSONSchema(schemaName, jsonSchemaMap),
 	}
 
-	stream := o.client.Responses.NewStreaming(ctx, *params)
+	stream := o.client.Responses.NewStreaming(ctx, *params, objectCallUARequestOptions(call)...)
 
 	return func(yield func(fantasy.ObjectStreamPart) bool) {
 		if len(warnings) > 0 {
@@ -1232,13 +1537,23 @@ func (o responsesLanguageModel) streamObjectWithJSONMode(ctx context.Context, ca
 		var lastParsedObject any
 		var usage fantasy.Usage
 		var finishReason fantasy.FinishReason
-		var streamErr error
+		// responseID tracks the server-assigned response ID. It's first set from the
+		// response.created event and may be overwritten by response.completed or
+		// response.incomplete events. Per the OpenAI API contract, these IDs are
+		// identical; the overwrites ensure we have the final value even if an event
+		// is missed.
+		var responseID string
+		var sawTerminalEvent bool
 		hasFunctionCall := false
 
 		for stream.Next() {
 			event := stream.Current()
 
 			switch event.Type {
+			case "response.created":
+				created := event.AsResponseCreated()
+				responseID = created.Response.ID
+
 			case "response.output_text.delta":
 				textDelta := event.AsResponseOutputTextDelta()
 				accumulated += textDelta.Delta
@@ -1282,27 +1597,35 @@ func (o responsesLanguageModel) streamObjectWithJSONMode(ctx context.Context, ca
 					}
 				}
 
-			case "response.completed", "response.incomplete":
+			case "response.completed":
+				sawTerminalEvent = true
 				completed := event.AsResponseCompleted()
+				responseID = completed.Response.ID
 				finishReason = mapResponsesFinishReason(completed.Response.IncompleteDetails.Reason, hasFunctionCall)
-				usage = fantasy.Usage{
-					InputTokens:  completed.Response.Usage.InputTokens,
-					OutputTokens: completed.Response.Usage.OutputTokens,
-					TotalTokens:  completed.Response.Usage.InputTokens + completed.Response.Usage.OutputTokens,
+				usage = responsesUsage(completed.Response)
+
+			case "response.incomplete":
+				sawTerminalEvent = true
+				incomplete := event.AsResponseIncomplete()
+				responseID = incomplete.Response.ID
+				finishReason = mapResponsesFinishReason(incomplete.Response.IncompleteDetails.Reason, hasFunctionCall)
+				usage = responsesUsage(incomplete.Response)
+
+			case "response.failed":
+				failed := event.AsResponseFailed()
+				if !yield(fantasy.ObjectStreamPart{
+					Type:  fantasy.ObjectStreamPartTypeError,
+					Error: responsesFailedStreamError(failed.Response.Error.Message, string(failed.Response.Error.Code)),
+				}) {
+					return
 				}
-				if completed.Response.Usage.OutputTokensDetails.ReasoningTokens != 0 {
-					usage.ReasoningTokens = completed.Response.Usage.OutputTokensDetails.ReasoningTokens
-				}
-				if completed.Response.Usage.InputTokensDetails.CachedTokens != 0 {
-					usage.CacheReadTokens = completed.Response.Usage.InputTokensDetails.CachedTokens
-				}
+				return
 
 			case "error":
 				errorEvent := event.AsError()
-				streamErr = fmt.Errorf("response error: %s (code: %s)", errorEvent.Message, errorEvent.Code)
 				if !yield(fantasy.ObjectStreamPart{
 					Type:  fantasy.ObjectStreamPartTypeError,
-					Error: streamErr,
+					Error: responsesErrorStreamError(errorEvent.Message, errorEvent.Code),
 				}) {
 					return
 				}
@@ -1311,7 +1634,7 @@ func (o responsesLanguageModel) streamObjectWithJSONMode(ctx context.Context, ca
 		}
 
 		err := stream.Err()
-		if err != nil {
+		if err != nil && !errors.Is(err, io.EOF) {
 			yield(fantasy.ObjectStreamPart{
 				Type:  fantasy.ObjectStreamPartTypeError,
 				Error: toProviderErr(err),
@@ -1319,14 +1642,27 @@ func (o responsesLanguageModel) streamObjectWithJSONMode(ctx context.Context, ca
 			return
 		}
 
-		// Final validation and emit
-		if streamErr == nil && lastParsedObject != nil {
+		if !sawTerminalEvent {
+			err := ctx.Err()
+			if err == nil {
+				err = fantasy.NewIncompleteStreamError()
+			}
 			yield(fantasy.ObjectStreamPart{
-				Type:         fantasy.ObjectStreamPartTypeFinish,
-				Usage:        usage,
-				FinishReason: finishReason,
+				Type:  fantasy.ObjectStreamPartTypeError,
+				Error: err,
 			})
-		} else if streamErr == nil && lastParsedObject == nil {
+			return
+		}
+
+		// Final validation and emit
+		if lastParsedObject != nil {
+			yield(fantasy.ObjectStreamPart{
+				Type:             fantasy.ObjectStreamPartTypeFinish,
+				Usage:            usage,
+				FinishReason:     finishReason,
+				ProviderMetadata: responsesProviderMetadata(responseID),
+			})
+		} else {
 			// No object was generated
 			yield(fantasy.ObjectStreamPart{
 				Type: fantasy.ObjectStreamPartTypeError,

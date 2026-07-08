@@ -6,9 +6,9 @@ import (
 	"strings"
 
 	"charm.land/fantasy"
-	"github.com/openai/openai-go/v2"
-	"github.com/openai/openai-go/v2/packages/param"
-	"github.com/openai/openai-go/v2/shared"
+	"github.com/charmbracelet/openai-go"
+	"github.com/charmbracelet/openai-go/packages/param"
+	"github.com/charmbracelet/openai-go/shared"
 )
 
 // LanguageModelPrepareCallFunc is a function that prepares the call for the language model.
@@ -111,6 +111,8 @@ func DefaultPrepareCallFunc(model fantasy.LanguageModel, params *openai.ChatComp
 
 	if providerOptions.ReasoningEffort != nil {
 		switch *providerOptions.ReasoningEffort {
+		case ReasoningEffortNone:
+			params.ReasoningEffort = shared.ReasoningEffortNone
 		case ReasoningEffortMinimal:
 			params.ReasoningEffort = shared.ReasoningEffortMinimal
 		case ReasoningEffortLow:
@@ -119,6 +121,10 @@ func DefaultPrepareCallFunc(model fantasy.LanguageModel, params *openai.ChatComp
 			params.ReasoningEffort = shared.ReasoningEffortMedium
 		case ReasoningEffortHigh:
 			params.ReasoningEffort = shared.ReasoningEffortHigh
+		case ReasoningEffortXHigh:
+			params.ReasoningEffort = shared.ReasoningEffortXhigh
+		case ReasoningEffortMax:
+			params.ReasoningEffort = shared.ReasoningEffortMax
 		default:
 			return nil, fmt.Errorf("reasoning model `%s` not supported", *providerOptions.ReasoningEffort)
 		}
@@ -211,8 +217,11 @@ func DefaultUsageFunc(response openai.ChatCompletion) (fantasy.Usage, fantasy.Pr
 			providerMetadata.RejectedPredictionTokens = completionTokenDetails.RejectedPredictionTokens
 		}
 	}
+	// OpenAI reports prompt_tokens INCLUDING cached tokens. Subtract to avoid double-counting.
+	inputTokens := max(response.Usage.PromptTokens-promptTokenDetails.CachedTokens, 0)
+	providerMetadata.ExtraFields = ExtractExtraFields(response.Usage.JSON.ExtraFields)
 	return fantasy.Usage{
-		InputTokens:     response.Usage.PromptTokens,
+		InputTokens:     inputTokens,
 		OutputTokens:    response.Usage.CompletionTokens,
 		TotalTokens:     response.Usage.TotalTokens,
 		ReasoningTokens: completionTokenDetails.ReasoningTokens,
@@ -237,8 +246,10 @@ func DefaultStreamUsageFunc(chunk openai.ChatCompletionChunk, _ map[string]any, 
 	// we do this here because the acc does not add prompt details
 	completionTokenDetails := chunk.Usage.CompletionTokensDetails
 	promptTokenDetails := chunk.Usage.PromptTokensDetails
+	// OpenAI reports prompt_tokens INCLUDING cached tokens. Subtract to avoid double-counting.
+	inputTokens := max(chunk.Usage.PromptTokens-promptTokenDetails.CachedTokens, 0)
 	usage := fantasy.Usage{
-		InputTokens:     chunk.Usage.PromptTokens,
+		InputTokens:     inputTokens,
 		OutputTokens:    chunk.Usage.CompletionTokens,
 		TotalTokens:     chunk.Usage.TotalTokens,
 		ReasoningTokens: completionTokenDetails.ReasoningTokens,
@@ -254,6 +265,8 @@ func DefaultStreamUsageFunc(chunk openai.ChatCompletionChunk, _ map[string]any, 
 			streamProviderMetadata.RejectedPredictionTokens = completionTokenDetails.RejectedPredictionTokens
 		}
 	}
+
+	streamProviderMetadata.ExtraFields = ExtractExtraFields(chunk.Usage.JSON.ExtraFields)
 
 	return usage, fantasy.ProviderMetadata{
 		Name: streamProviderMetadata,
@@ -359,6 +372,13 @@ func DefaultToPrompt(prompt fantasy.Prompt, _, _ string) ([]openai.ChatCompletio
 					}
 
 					switch {
+					case strings.HasPrefix(filePart.MediaType, "text/"):
+						base64Encoded := base64.StdEncoding.EncodeToString(filePart.Data)
+						documentBlock := openai.ChatCompletionContentPartFileFileParam{
+							FileData: param.NewOpt(base64Encoded),
+						}
+						content = append(content, openai.FileContentPart(documentBlock))
+
 					case strings.HasPrefix(filePart.MediaType, "image/"):
 						// Handle image files
 						base64Encoded := base64.StdEncoding.EncodeToString(filePart.Data)
@@ -549,11 +569,81 @@ func DefaultToPrompt(prompt fantasy.Prompt, _, _ string) ([]openai.ChatCompletio
 						continue
 					}
 					messages = append(messages, openai.ToolMessage(output.Error.Error(), toolResultPart.ToolCallID))
+				case fantasy.ToolResultContentTypeMedia:
+					output, ok := fantasy.AsToolResultOutputType[fantasy.ToolResultOutputContentMedia](toolResultPart.Output)
+					if !ok {
+						warnings = append(warnings, fantasy.CallWarning{
+							Type:    fantasy.CallWarningTypeOther,
+							Message: "tool result output does not have the right type",
+						})
+						continue
+					}
+					// OpenAI Chat Completions tool messages cannot carry image
+					// or audio content directly; the SDK's content union only
+					// accepts text. To keep the tool_call/tool_result pairing
+					// valid while still surfacing the media to vision-capable
+					// models, emit a text tool message with a placeholder (or
+					// any accompanying text) and follow it with a synthetic
+					// user message holding the actual media content part.
+					placeholder := output.Text
+					if placeholder == "" {
+						placeholder = fmt.Sprintf("The tool returned %s content; see the following user message.", output.MediaType)
+					}
+					messages = append(messages, openai.ToolMessage(placeholder, toolResultPart.ToolCallID))
+					mediaPart, mediaWarning, emit := toolResultMediaUserPart(output)
+					if mediaWarning != nil {
+						warnings = append(warnings, *mediaWarning)
+					}
+					if emit {
+						messages = append(messages, openai.UserMessage(
+							[]openai.ChatCompletionContentPartUnionParam{mediaPart},
+						))
+					}
+				default:
+					warnings = append(warnings, fantasy.CallWarning{
+						Type:    fantasy.CallWarningTypeOther,
+						Message: fmt.Sprintf("tool result output type %q not supported", toolResultPart.Output.GetType()),
+					})
 				}
 			}
 		}
 	}
 	return messages, warnings
+}
+
+// toolResultMediaUserPart maps a tool-result media output to an OpenAI chat
+// completions user content part. It returns the content part, an optional
+// warning, and whether the caller should emit the returned part.
+func toolResultMediaUserPart(output fantasy.ToolResultOutputContentMedia) (openai.ChatCompletionContentPartUnionParam, *fantasy.CallWarning, bool) {
+	switch {
+	case strings.HasPrefix(output.MediaType, "image/"):
+		data := "data:" + output.MediaType + ";base64," + output.Data
+		imageBlock := openai.ChatCompletionContentPartImageParam{
+			ImageURL: openai.ChatCompletionContentPartImageImageURLParam{URL: data},
+		}
+		return openai.ChatCompletionContentPartUnionParam{OfImageURL: &imageBlock}, nil, true
+	case output.MediaType == "audio/wav":
+		audioBlock := openai.ChatCompletionContentPartInputAudioParam{
+			InputAudio: openai.ChatCompletionContentPartInputAudioInputAudioParam{
+				Data:   output.Data,
+				Format: "wav",
+			},
+		}
+		return openai.ChatCompletionContentPartUnionParam{OfInputAudio: &audioBlock}, nil, true
+	case output.MediaType == "audio/mpeg" || output.MediaType == "audio/mp3":
+		audioBlock := openai.ChatCompletionContentPartInputAudioParam{
+			InputAudio: openai.ChatCompletionContentPartInputAudioInputAudioParam{
+				Data:   output.Data,
+				Format: "mp3",
+			},
+		}
+		return openai.ChatCompletionContentPartUnionParam{OfInputAudio: &audioBlock}, nil, true
+	default:
+		return openai.ChatCompletionContentPartUnionParam{}, &fantasy.CallWarning{
+			Type:    fantasy.CallWarningTypeOther,
+			Message: fmt.Sprintf("tool result media type %s not supported, sending text placeholder only", output.MediaType),
+		}, false
+	}
 }
 
 func hasVisibleUserContent(content []openai.ChatCompletionContentPartUnionParam) bool {

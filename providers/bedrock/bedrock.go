@@ -65,14 +65,24 @@ func (p *provider) Name() string {
 
 // LanguageModel routes to the appropriate SDK based on model ID prefix.
 func (p *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.LanguageModel, error) {
-	if strings.HasPrefix(modelID, "anthropic.") {
+	switch {
+	case isAnthropicBedrockModel(modelID):
 		// Use Anthropic SDK (existing behavior)
 		return p.anthropicProvider.LanguageModel(ctx, modelID)
-	} else if strings.HasPrefix(modelID, "amazon.") {
+	case isAmazonBedrockModel(modelID):
 		// Use AWS SDK Converse API (new behavior)
 		return p.createNovaModel(ctx, modelID)
+	default:
+		return nil, fmt.Errorf("unsupported model prefix for Bedrock: %s", modelID)
 	}
-	return nil, fmt.Errorf("unsupported model prefix for Bedrock: %s", modelID)
+}
+
+func isAnthropicBedrockModel(modelID string) bool {
+	return strings.HasPrefix(modelID, "anthropic.") || strings.Contains(modelID, ".anthropic.")
+}
+
+func isAmazonBedrockModel(modelID string) bool {
+	return strings.HasPrefix(modelID, "amazon.") || strings.Contains(modelID, ".amazon.")
 }
 
 // WithAPIKey sets the access token for the Bedrock provider.
@@ -98,6 +108,21 @@ func WithHTTPClient(client option.HTTPClient) Option {
 	}
 }
 
+// WithUserAgent sets an explicit User-Agent header, overriding the default and any
+// value set via WithHeaders.
+func WithUserAgent(ua string) Option {
+	return func(o *options) {
+		o.anthropicOptions = append(o.anthropicOptions, anthropic.WithUserAgent(ua))
+	}
+}
+
+// WithBaseURL sets the base URL for the Bedrock provider.
+func WithBaseURL(baseURL string) Option {
+	return func(o *options) {
+		o.anthropicOptions = append(o.anthropicOptions, anthropic.WithBaseURL(baseURL))
+	}
+}
+
 // WithSkipAuth configures whether to skip authentication for the Bedrock provider.
 func WithSkipAuth(skipAuth bool) Option {
 	return func(o *options) {
@@ -109,5 +134,6 @@ func WithSkipAuth(skipAuth bool) Option {
 func WithRegion(region string) Option {
 	return func(o *options) {
 		o.region = region
+		o.anthropicOptions = append(o.anthropicOptions, anthropic.WithBedrockRegion(region))
 	}
 }

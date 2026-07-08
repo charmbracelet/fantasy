@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 508
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence, Italy?","role":"user"}],"model":"anthropic/claude-haiku-4.5","tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"usage":{"include":true},"reasoning":{"effort":"medium"}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.21.0 (https://charm.land/fantasy)
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "\n         \n\n         \n{\"id\":\"gen-1777319947-Y45Z6u60MD4bK91UwvCd\",\"object\":\"chat.completion\",\"created\":1777319947,\"model\":\"anthropic/claude-4.5-haiku-20251001\",\"provider\":\"Amazon Bedrock\",\"system_fingerprint\":null,\"choices\":[{\"index\":0,\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"native_finish_reason\":\"tool_use\",\"message\":{\"role\":\"assistant\",\"content\":null,\"refusal\":null,\"reasoning\":\"The user is asking about the weather in Florence, Italy. I have access to a weather function that takes a location (city) as a parameter. I should call the weather function with \\\"Florence\\\" as the location.\",\"tool_calls\":[{\"type\":\"function\",\"index\":0,\"id\":\"toolu_bdrk_01AfMUr4SPqrUP7qb65GXqma\",\"function\":{\"name\":\"weather\",\"arguments\":\"{\\\"location\\\": \\\"Florence, Italy\\\"}\"}}],\"reasoning_details\":[{\"type\":\"reasoning.text\",\"text\":\"The user is asking about the weather in Florence, Italy. I have access to a weather function that takes a location (city) as a parameter. I should call the weather function with \\\"Florence\\\" as the location.\",\"format\":\"anthropic-claude-v1\",\"index\":0,\"signature\":\"EvgCCkgIDRABGAIqQKb/wFIBWhtfZLSnNhQwwG129YA/VzhXG3yrKKa8RDLsJF9Ou09wUxfl8aZAM4RrbMtgfJj0NqOwW6gR/IxJCaYSDCJGTmAZRCX8O6P0SxoMEclljJPZqUpkiTlSIjD8acYx0eq73rSidczytc6ya6Q2+Z6aQinyGI3qT0XFaNIuA5TjxTIo0eVOMfEl0k8q3QHMxOzt0C9P/6AgewciZFhw+tVmFCGWlzlbvNbHBKanZPOMVAA0p95QLWgZ0v1qbNGDaYlkL17bms+XBXmHNdZDBybYY4bjmFgiy60i90Ag/Kg8DxBfKET2tOMigbtJa1lpBc/e1m0QD/rR1UzqoKbvMg5NMqzdgARgEQS+udM6CnyXGcG3IrZS+HcBlp2CCBR9QKdhe+D+YX8xjuWF9UftT/H7xcx8E0Z24SFypKalibdT3jShS72rDdHShG6qFqwvIVzfCc932jEk9IDn0KBdK6Sj4ViB1+iEIAjfQhgB\"}]}}],\"usage\":{\"prompt_tokens\":607,\"completion_tokens\":105,\"total_tokens\":712,\"cost\":0.001132,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"cache_write_tokens\":0,\"audio_tokens\":0,\"video_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":0.001132,\"upstream_inference_prompt_cost\":0.000607,\"upstream_inference_completions_cost\":0.000525},\"completion_tokens_details\":{\"reasoning_tokens\":52,\"image_tokens\":0,\"audio_tokens\":0}}}"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 947.214916ms
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1824
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence, Italy?","role":"user"},{"tool_calls":[{"id":"toolu_bdrk_01AfMUr4SPqrUP7qb65GXqma","function":{"arguments":"{\"location\": \"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant","reasoning_details":[{"format":"anthropic-claude-v1","index":0,"signature":"EvgCCkgIDRABGAIqQKb/wFIBWhtfZLSnNhQwwG129YA/VzhXG3yrKKa8RDLsJF9Ou09wUxfl8aZAM4RrbMtgfJj0NqOwW6gR/IxJCaYSDCJGTmAZRCX8O6P0SxoMEclljJPZqUpkiTlSIjD8acYx0eq73rSidczytc6ya6Q2+Z6aQinyGI3qT0XFaNIuA5TjxTIo0eVOMfEl0k8q3QHMxOzt0C9P/6AgewciZFhw+tVmFCGWlzlbvNbHBKanZPOMVAA0p95QLWgZ0v1qbNGDaYlkL17bms+XBXmHNdZDBybYY4bjmFgiy60i90Ag/Kg8DxBfKET2tOMigbtJa1lpBc/e1m0QD/rR1UzqoKbvMg5NMqzdgARgEQS+udM6CnyXGcG3IrZS+HcBlp2CCBR9QKdhe+D+YX8xjuWF9UftT/H7xcx8E0Z24SFypKalibdT3jShS72rDdHShG6qFqwvIVzfCc932jEk9IDn0KBdK6Sj4ViB1+iEIAjfQhgB","text":"The user is asking about the weather in Florence, Italy. I have access to a weather function that takes a location (city) as a parameter. I should call the weather function with \"Florence\" as the location.","type":"reasoning.text"}],"reasoning":"The user is asking about the weather in Florence, Italy. I have access to a weather function that takes a location (city) as a parameter. I should call the weather function with \"Florence\" as the location."},{"content":"40 C","tool_call_id":"toolu_bdrk_01AfMUr4SPqrUP7qb65GXqma","role":"tool"}],"model":"anthropic/claude-haiku-4.5","tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"reasoning":{"effort":"medium"},"usage":{"include":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.21.0 (https://charm.land/fantasy)
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "\n         \n\n         \n\n         \n{\"id\":\"gen-1777319948-7H6B4qcHtbG3hqFZquj6\",\"object\":\"chat.completion\",\"created\":1777319948,\"model\":\"anthropic/claude-4.5-haiku-20251001\",\"provider\":\"Amazon Bedrock\",\"system_fingerprint\":null,\"choices\":[{\"index\":0,\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"end_turn\",\"message\":{\"role\":\"assistant\",\"content\":\"The weather in Florence, Italy is currently **40°C (104°F)**, which is quite hot! It's a warm day in Florence. Make sure to stay hydrated and take precautions against the heat if you're planning to visit or are already there.\",\"refusal\":null,\"reasoning\":null}}],\"usage\":{\"prompt_tokens\":727,\"completion_tokens\":59,\"total_tokens\":786,\"cost\":0.001022,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"cache_write_tokens\":0,\"audio_tokens\":0,\"video_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":0.001022,\"upstream_inference_prompt_cost\":0.000727,\"upstream_inference_completions_cost\":0.000295},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0,\"audio_tokens\":0}}}"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 1.074211583s

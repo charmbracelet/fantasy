@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 866
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"}],"model":"google/gemini-3.1-flash-lite-preview","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.21.0 (https://charm.land/fantasy)
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "\n         \n\n         \n{\"id\":\"gen-1777319828-9g0qMUWH3SuSHwnupAK1\",\"object\":\"chat.completion\",\"created\":1777319828,\"model\":\"google/gemini-3.1-flash-lite-preview-20260303\",\"provider\":\"Google AI Studio\",\"system_fingerprint\":null,\"choices\":[{\"index\":0,\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"native_finish_reason\":\"STOP\",\"message\":{\"role\":\"assistant\",\"content\":null,\"refusal\":null,\"reasoning\":null,\"tool_calls\":[{\"type\":\"function\",\"index\":0,\"id\":\"tool_add_jKPaCgS4LPe2mBG3Y6FJ\",\"function\":{\"name\":\"add\",\"arguments\":\"{\\\"a\\\":2,\\\"b\\\":3}\"}},{\"type\":\"function\",\"index\":1,\"id\":\"tool_multiply_3XqZzHkQQc6CxUmvuVM9\",\"function\":{\"name\":\"multiply\",\"arguments\":\"{\\\"a\\\":2,\\\"b\\\":3}\"}}],\"reasoning_details\":[{\"type\":\"reasoning.encrypted\",\"data\":\"EjQKMgEMOdbH2eMj+dYjjdjNbkXXXTIPpUzTOPCC+bZ37nGtyWyE8NoUU8ld/+jywjP4thv2\",\"format\":\"google-gemini-v1\",\"id\":\"tool_add_jKPaCgS4LPe2mBG3Y6FJ\",\"index\":0}]}}],\"usage\":{\"prompt_tokens\":161,\"completion_tokens\":32,\"total_tokens\":193,\"cost\":0.00008825,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"cache_write_tokens\":0,\"audio_tokens\":0,\"video_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":0.00008825,\"upstream_inference_prompt_cost\":0.00004025,\"upstream_inference_completions_cost\":0.000048},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0,\"audio_tokens\":0}}}"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 1.047780917s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1511
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"tool_calls":[{"id":"tool_add_jKPaCgS4LPe2mBG3Y6FJ","function":{"arguments":"{\"a\":2,\"b\":3}","name":"add"},"type":"function"},{"id":"tool_multiply_3XqZzHkQQc6CxUmvuVM9","function":{"arguments":"{\"a\":2,\"b\":3}","name":"multiply"},"type":"function"}],"role":"assistant","reasoning_details":[{"data":"EjQKMgEMOdbH2eMj+dYjjdjNbkXXXTIPpUzTOPCC+bZ37nGtyWyE8NoUU8ld/+jywjP4thv2","format":"google-gemini-v1","id":"tool_add_jKPaCgS4LPe2mBG3Y6FJ","index":0,"type":"reasoning.encrypted"}]},{"content":"5","tool_call_id":"tool_add_jKPaCgS4LPe2mBG3Y6FJ","role":"tool"},{"content":"6","tool_call_id":"tool_multiply_3XqZzHkQQc6CxUmvuVM9","role":"tool"}],"model":"google/gemini-3.1-flash-lite-preview","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.21.0 (https://charm.land/fantasy)
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "\n         \n\n         \n\n         \n{\"id\":\"gen-1777319829-6C61iC7kOsCAr4kC4FRp\",\"object\":\"chat.completion\",\"created\":1777319829,\"model\":\"google/gemini-3.1-flash-lite-preview-20260303\",\"provider\":\"Google AI Studio\",\"system_fingerprint\":null,\"choices\":[{\"index\":0,\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"STOP\",\"message\":{\"role\":\"assistant\",\"content\":\"The sum of 2 and 3 is 5, and the product of 2 and 3 is 6.\",\"refusal\":null,\"reasoning\":null,\"reasoning_details\":[{\"type\":\"reasoning.encrypted\",\"data\":\"EjQKMgEMOdbH6gxsIYFsLmcH6Cy95wupnskztNqfRhoa2P6HoxDNlUREApKCSyP4Pu6+jo8c\",\"format\":\"google-gemini-v1\",\"index\":0}]}}],\"usage\":{\"prompt_tokens\":252,\"completion_tokens\":25,\"total_tokens\":277,\"cost\":0.0001005,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":0,\"cache_write_tokens\":0,\"audio_tokens\":0,\"video_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":0.0001005,\"upstream_inference_prompt_cost\":0.000063,\"upstream_inference_completions_cost\":0.0000375},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"image_tokens\":0,\"audio_tokens\":0}}}"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 1.752077584s

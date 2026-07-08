@@ -15,36 +15,108 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.7.1
+      - Charm-Fantasy/0.33.1 (https://charm.land/fantasy)
     url: https://fantasy-playground-resource.openai.azure.com/openai/v1/responses
     method: POST
   response:
     proto: HTTP/2.0
     proto_major: 2
     proto_minor: 0
-    content_length: 1520
+    content_length: 3235
     body: |-
       {
-        "id": "resp_056c26e70a8e16d60169039987a9748195bc77169735bc7b98",
+        "id": "resp_0a58856642efb43f016a3c118ee2f88190ba0dbd3f7d288993",
         "object": "response",
-        "created_at": 1761843591,
+        "created_at": 1782321550,
         "status": "completed",
         "background": false,
-        "content_filters": null,
+        "completed_at": 1782321552,
+        "content_filters": [
+          {
+            "blocked": false,
+            "source_type": "prompt",
+            "content_filter_raw": [],
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "jailbreak": {
+                "detected": false,
+                "filtered": false
+              }
+            },
+            "content_filter_offsets": {
+              "start_offset": 0,
+              "end_offset": 624,
+              "check_offset": 0
+            }
+          },
+          {
+            "blocked": false,
+            "source_type": "completion",
+            "content_filter_raw": [],
+            "content_filter_results": {
+              "protected_material_code": {
+                "detected": false,
+                "filtered": false
+              },
+              "protected_material_text": {
+                "detected": false,
+                "filtered": false
+              },
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            },
+            "content_filter_offsets": {
+              "start_offset": 0,
+              "end_offset": 289,
+              "check_offset": 0
+            }
+          }
+        ],
         "error": null,
+        "frequency_penalty": 0.0,
         "incomplete_details": null,
         "instructions": null,
         "max_output_tokens": 4000,
         "max_tool_calls": null,
         "model": "o4-mini",
+        "moderation": null,
         "output": [
           {
-            "id": "rs_056c26e70a8e16d601690399881f0c8195aa22699fa3be5974",
+            "id": "rs_0a58856642efb43f016a3c118fa2188190af1762536f86bde1",
             "type": "reasoning",
             "summary": []
           },
           {
-            "id": "msg_056c26e70a8e16d601690399893da08195a98d7b4b749fcfe4",
+            "id": "msg_0a58856642efb43f016a3c11904448819098abb7f2f49a5464",
             "type": "message",
             "status": "completed",
             "content": [
@@ -52,16 +124,19 @@ interactions:
                 "type": "output_text",
                 "annotations": [],
                 "logprobs": [],
-                "text": "Ol\u00e1!"
+                "text": "Oi!"
               }
             ],
             "role": "assistant"
           }
         ],
         "parallel_tool_calls": true,
+        "presence_penalty": 0.0,
         "previous_response_id": null,
         "prompt_cache_key": null,
+        "prompt_cache_retention": "in_memory",
         "reasoning": {
+          "context": null,
           "effort": "medium",
           "summary": null
         },
@@ -85,11 +160,11 @@ interactions:
           "input_tokens_details": {
             "cached_tokens": 0
           },
-          "output_tokens": 72,
+          "output_tokens": 88,
           "output_tokens_details": {
             "reasoning_tokens": 64
           },
-          "total_tokens": 91
+          "total_tokens": 107
         },
         "user": null,
         "metadata": {}
@@ -99,4 +174,4 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 1.899735709s
+    duration: 1.907833417s

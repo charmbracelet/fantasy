@@ -2,7 +2,6 @@ package bedrock
 
 import (
 	"context"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -30,13 +29,13 @@ func TestProperty_SDKRoutingCorrectness(t *testing.T) {
 		model, err := provider.LanguageModel(ctx, modelID)
 
 		// Verify routing behavior based on prefix
-		if strings.HasPrefix(modelID, "anthropic.") {
+		if isAnthropicBedrockModel(modelID) {
 			// Should route to Anthropic SDK - will succeed or fail based on Anthropic SDK behavior
 			// We just verify it doesn't return the "unsupported model prefix" error
 			if err != nil {
 				require.NotContains(t, err.Error(), "unsupported model prefix")
 			}
-		} else if strings.HasPrefix(modelID, "amazon.") {
+		} else if isAmazonBedrockModel(modelID) {
 			// Should route to Nova implementation
 			// Should succeed in creating a model instance
 			require.NoError(t, err, "Nova model creation should succeed for: %s", modelID)

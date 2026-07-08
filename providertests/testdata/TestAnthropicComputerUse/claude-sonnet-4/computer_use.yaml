@@ -1,0 +1,69 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 323
+    host: ""
+    body: '{"max_tokens":4096,"messages":[{"content":[{"text":"Take a screenshot of the desktop","type":"text"}],"role":"user"}],"model":"claude-sonnet-4-20250514","system":[{"text":"You are a helpful assistant","type":"text"}],"tools":[{"display_height_px":1080,"display_width_px":1920,"name":"computer","type":"computer_20250124"}]}'
+    form:
+      beta:
+      - "true"
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.16.0 (https://charm.land/fantasy)
+    url: https://api.anthropic.com/v1/messages?beta=true
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"model":"claude-sonnet-4-20250514","id":"msg_01KHX677vLGXfeouAejAbGDD","type":"message","role":"assistant","content":[{"type":"text","text":"I''ll take a screenshot of the desktop for you."},{"type":"tool_use","id":"toolu_01MpnnLwjqpqYWLUQ5F5SixE","name":"computer","input":{"action":"screenshot"},"caller":{"type":"direct"}}],"stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":1652,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":63,"service_tier":"standard","inference_geo":"not_available"}}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 1.45399283s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 749
+    host: ""
+    body: '{"max_tokens":4096,"messages":[{"content":[{"text":"Take a screenshot of the desktop","type":"text"}],"role":"user"},{"content":[{"id":"toolu_01MpnnLwjqpqYWLUQ5F5SixE","input":{"action":"screenshot"},"name":"computer","type":"tool_use"}],"role":"assistant"},{"content":[{"tool_use_id":"toolu_01MpnnLwjqpqYWLUQ5F5SixE","content":[{"source":{"data":"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==","media_type":"image/png","type":"base64"},"type":"image"}],"type":"tool_result"}],"role":"user"}],"model":"claude-sonnet-4-20250514","system":[{"text":"You are a helpful assistant","type":"text"}],"tools":[{"display_height_px":1080,"display_width_px":1920,"name":"computer","type":"computer_20250124"}]}'
+    form:
+      beta:
+      - "true"
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.16.0 (https://charm.land/fantasy)
+    url: https://api.anthropic.com/v1/messages?beta=true
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: '{"model":"claude-sonnet-4-20250514","id":"msg_01Ute4pN6TgBst3zEx6h8nF4","type":"message","role":"assistant","content":[{"type":"text","text":"I''ve taken a screenshot of the desktop. The image shows a plain black desktop background without any visible icons, taskbar, or other desktop elements. This appears to be a minimal desktop environment. Is there anything specific you''d like me to do with the desktop or any applications you''d like me to open?"}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":1731,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":65,"service_tier":"standard","inference_geo":"not_available"}}'
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 2.613302152s

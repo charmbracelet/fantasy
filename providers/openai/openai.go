@@ -7,8 +7,9 @@ import (
 	"maps"
 
 	"charm.land/fantasy"
-	"github.com/openai/openai-go/v2"
-	"github.com/openai/openai-go/v2/option"
+	"charm.land/fantasy/providers/internal/httpheaders"
+	"github.com/charmbracelet/openai-go"
+	"github.com/charmbracelet/openai-go/option"
 )
 
 const (
@@ -29,7 +30,9 @@ type options struct {
 	project              string
 	name                 string
 	useResponsesAPI      bool
+	responsesAPIFunc     func(modelID string) bool
 	headers              map[string]string
+	userAgent            string
 	client               option.HTTPClient
 	sdkOptions           []option.RequestOption
 	objectMode           fantasy.ObjectMode
@@ -132,6 +135,22 @@ func WithUseResponsesAPI() Option {
 	}
 }
 
+// WithResponsesAPIFunc sets a custom filter for which models use the Responses API.
+// When set, this function is called instead of the default IsResponsesModel().
+func WithResponsesAPIFunc(fn func(modelID string) bool) Option {
+	return func(o *options) {
+		o.responsesAPIFunc = fn
+	}
+}
+
+// WithUserAgent sets an explicit User-Agent header, overriding the default and any
+// value set via WithHeaders.
+func WithUserAgent(ua string) Option {
+	return func(o *options) {
+		o.userAgent = ua
+	}
+}
+
 // WithObjectMode sets the object generation mode.
 func WithObjectMode(om fantasy.ObjectMode) Option {
 	return func(o *options) {
@@ -155,7 +174,9 @@ func (o *provider) LanguageModel(_ context.Context, modelID string) (fantasy.Lan
 		openaiClientOptions = append(openaiClientOptions, option.WithBaseURL(o.options.baseURL))
 	}
 
-	for key, value := range o.options.headers {
+	defaultUA := httpheaders.DefaultUserAgent(fantasy.Version)
+	resolved := httpheaders.ResolveHeaders(o.options.headers, o.options.userAgent, defaultUA)
+	for key, value := range resolved {
 		openaiClientOptions = append(openaiClientOptions, option.WithHeader(key, value))
 	}
 
@@ -167,7 +188,7 @@ func (o *provider) LanguageModel(_ context.Context, modelID string) (fantasy.Lan
 
 	client := openai.NewClient(openaiClientOptions...)
 
-	if o.options.useResponsesAPI && IsResponsesModel(modelID) {
+	if o.options.useResponsesAPI && o.isResponsesModel(modelID) {
 		// Not supported for responses API
 		objectMode := o.options.objectMode
 		if objectMode == fantasy.ObjectModeJSON {
@@ -176,16 +197,24 @@ func (o *provider) LanguageModel(_ context.Context, modelID string) (fantasy.Lan
 		return newResponsesLanguageModel(modelID, o.options.name, client, objectMode), nil
 	}
 
-	o.options.languageModelOptions = append(o.options.languageModelOptions, WithLanguageModelObjectMode(o.options.objectMode))
+	languageModelOptions := append([]LanguageModelOption{}, o.options.languageModelOptions...)
+	languageModelOptions = append(languageModelOptions, WithLanguageModelObjectMode(o.options.objectMode))
 
 	return newLanguageModel(
 		modelID,
 		o.options.name,
 		client,
-		o.options.languageModelOptions...,
+		languageModelOptions...,
 	), nil
 }
 
 func (o *provider) Name() string {
-	return Name
+	return o.options.name
+}
+
+func (o *provider) isResponsesModel(modelID string) bool {
+	if o.options.responsesAPIFunc != nil {
+		return o.options.responsesAPIFunc(modelID)
+	}
+	return IsResponsesModel(modelID)
 }

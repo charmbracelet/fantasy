@@ -1,0 +1,144 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 337
+    host: ""
+    body: '{"max_tokens":4096,"messages":[{"content":[{"text":"Take a screenshot of the desktop","type":"text"}],"role":"user"}],"model":"claude-sonnet-4-20250514","system":[{"text":"You are a helpful assistant","type":"text"}],"tools":[{"display_height_px":1080,"display_width_px":1920,"name":"computer","type":"computer_20250124"}],"stream":true}'
+    form:
+      beta:
+      - "true"
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.16.0 (https://charm.land/fantasy)
+    url: https://api.anthropic.com/v1/messages?beta=true
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: |+
+      event: message_start
+      data: {"type":"message_start","message":{"model":"claude-sonnet-4-20250514","id":"msg_019NrbUUum1q7ooQRs42Rzrz","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":1652,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":8,"service_tier":"standard","inference_geo":"not_available"}} }
+
+      event: content_block_start
+      data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}          }
+
+      event: ping
+      data: {"type": "ping"}
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"I'll take a screenshot of the desktop"}      }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" for you."}  }
+
+      event: content_block_stop
+      data: {"type":"content_block_stop","index":0         }
+
+      event: content_block_start
+      data: {"type":"content_block_start","index":1,"content_block":{"type":"tool_use","id":"toolu_01Y1QGhTQnPURqMEtY7RnsP1","name":"computer","input":{},"caller":{"type":"direct"}}              }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":""}      }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"{\"actio"} }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"n\": \"scree"}   }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"nshot\"}"}         }
+
+      event: content_block_stop
+      data: {"type":"content_block_stop","index":1  }
+
+      event: message_delta
+      data: {"type":"message_delta","delta":{"stop_reason":"tool_use","stop_sequence":null},"usage":{"input_tokens":1652,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":63}    }
+
+      event: message_stop
+      data: {"type":"message_stop"        }
+
+    headers:
+      Content-Type:
+      - text/event-stream; charset=utf-8
+    status: 200 OK
+    code: 200
+    duration: 1.328724866s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 763
+    host: ""
+    body: '{"max_tokens":4096,"messages":[{"content":[{"text":"Take a screenshot of the desktop","type":"text"}],"role":"user"},{"content":[{"id":"toolu_01Y1QGhTQnPURqMEtY7RnsP1","input":{"action":"screenshot"},"name":"computer","type":"tool_use"}],"role":"assistant"},{"content":[{"tool_use_id":"toolu_01Y1QGhTQnPURqMEtY7RnsP1","content":[{"source":{"data":"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==","media_type":"image/png","type":"base64"},"type":"image"}],"type":"tool_result"}],"role":"user"}],"model":"claude-sonnet-4-20250514","system":[{"text":"You are a helpful assistant","type":"text"}],"tools":[{"display_height_px":1080,"display_width_px":1920,"name":"computer","type":"computer_20250124"}],"stream":true}'
+    form:
+      beta:
+      - "true"
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.16.0 (https://charm.land/fantasy)
+    url: https://api.anthropic.com/v1/messages?beta=true
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: |+
+      event: message_start
+      data: {"type":"message_start","message":{"model":"claude-sonnet-4-20250514","id":"msg_01R839ZFF3M6X1k8BFQiH9Go","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":1731,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1,"service_tier":"standard","inference_geo":"not_available"}}             }
+
+      event: content_block_start
+      data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}       }
+
+      event: ping
+      data: {"type": "ping"}
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"I"}           }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"'ve taken a screenshot of the desktop. The desktop appears to be mostly black/dark, which could indicate"} }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" either a dark desktop background or that the screen is currently displaying"}      }
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" a blank/black background. This is the current state"}}
+
+      event: content_block_delta
+      data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" of the desktop as captured."}         }
+
+      event: content_block_stop
+      data: {"type":"content_block_stop","index":0       }
+
+      event: message_delta
+      data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"input_tokens":1731,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":54}   }
+
+      event: message_stop
+      data: {"type":"message_stop"              }
+
+    headers:
+      Content-Type:
+      - text/event-stream; charset=utf-8
+    status: 200 OK
+    code: 200
+    duration: 1.529686838s

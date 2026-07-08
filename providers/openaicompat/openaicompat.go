@@ -4,7 +4,7 @@ package openaicompat
 import (
 	"charm.land/fantasy"
 	"charm.land/fantasy/providers/openai"
-	"github.com/openai/openai-go/v2/option"
+	"github.com/charmbracelet/openai-go/option"
 )
 
 type options struct {
@@ -108,9 +108,33 @@ func WithObjectMode(om fantasy.ObjectMode) Option {
 	}
 }
 
+// WithUserAgent sets an explicit User-Agent header, overriding the default and any
+// value set via WithHeaders.
+func WithUserAgent(ua string) Option {
+	return func(o *options) {
+		o.openaiOptions = append(o.openaiOptions, openai.WithUserAgent(ua))
+	}
+}
+
 // WithUseResponsesAPI configures the provider to use the responses API for models that support it.
 func WithUseResponsesAPI() Option {
 	return func(o *options) {
 		o.openaiOptions = append(o.openaiOptions, openai.WithUseResponsesAPI())
+	}
+}
+
+// WithResponsesAPIFunc sets a custom filter for which models use the Responses API.
+func WithResponsesAPIFunc(fn func(modelID string) bool) Option {
+	return func(o *options) {
+		o.openaiOptions = append(o.openaiOptions, openai.WithResponsesAPIFunc(fn))
+	}
+}
+
+// WithLanguageModelOptions appends language model options to the provider.
+// This allows callers to customize usage extraction, stream handling, and
+// other language model behaviors.
+func WithLanguageModelOptions(opts ...openai.LanguageModelOption) Option {
+	return func(o *options) {
+		o.languageModelOptions = append(o.languageModelOptions, opts...)
 	}
 }

@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - Charm-Fantasy/0.33.1 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/responses
     method: POST
   response:
@@ -26,23 +26,26 @@ interactions:
     uncompressed: true
     body: |-
       {
-        "id": "resp_02fb59ed5cb3cadf0168f237e8ce908195baa9463cad5776cb",
+        "id": "resp_0f8d9108fdddf23b016a3c1209558c819f839aa6a3efc268a1",
         "object": "response",
-        "created_at": 1760704488,
+        "created_at": 1782321673,
         "status": "completed",
         "background": false,
         "billing": {
           "payer": "developer"
         },
+        "completed_at": 1782321674,
         "error": null,
+        "frequency_penalty": 0.0,
         "incomplete_details": null,
         "instructions": null,
         "max_output_tokens": 4000,
         "max_tool_calls": null,
         "model": "gpt-4o-mini-2024-07-18",
+        "moderation": null,
         "output": [
           {
-            "id": "msg_02fb59ed5cb3cadf0168f237e93f388195afee2cc6277cfaa0",
+            "id": "msg_0f8d9108fdddf23b016a3c120a34d0819fbcfa0f2572ec6066",
             "type": "message",
             "status": "completed",
             "content": [
@@ -50,16 +53,19 @@ interactions:
                 "type": "output_text",
                 "annotations": [],
                 "logprobs": [],
-                "text": "Oi!"
+                "text": "Ol\u00e1!"
               }
             ],
             "role": "assistant"
           }
         ],
         "parallel_tool_calls": true,
+        "presence_penalty": 0.0,
         "previous_response_id": null,
         "prompt_cache_key": null,
+        "prompt_cache_retention": "in_memory",
         "reasoning": {
+          "context": null,
           "effort": null,
           "summary": null
         },
@@ -97,4 +103,4 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 701.807792ms
+    duration: 1.4557985s

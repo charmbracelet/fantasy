@@ -347,6 +347,61 @@ func TestToPromptFunc_DropsEmptyMessages(t *testing.T) {
 		require.Empty(t, warnings)
 	})
 
+	t.Run("should add empty reasoning_content to tool call messages when thinking is enabled", func(t *testing.T) {
+		t.Parallel()
+
+		// When thinking is enabled (reasoning parts exist in history),
+		// tool call messages without their own reasoning must still include
+		// reasoning_content. Providers like Kimi require it.
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "What is 2+2?"},
+				},
+			},
+			{
+				// First turn has reasoning
+				Role: fantasy.MessageRoleAssistant,
+				Content: []fantasy.MessagePart{
+					fantasy.ReasoningPart{Text: "Simple math."},
+					fantasy.TextPart{Text: "Four"},
+				},
+			},
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "Now try a tool call"},
+				},
+			},
+			{
+				// Tool call WITHOUT reasoning on this turn
+				Role: fantasy.MessageRoleAssistant,
+				Content: []fantasy.MessagePart{
+					fantasy.ToolCallPart{
+						ToolCallID: "call_1",
+						ToolName:   "execute",
+						Input:      `{"command":"echo 4"}`,
+					},
+				},
+			},
+		}
+
+		messages, warnings := ToPromptFunc(prompt, "", "")
+
+		require.Empty(t, warnings)
+		require.Len(t, messages, 4)
+
+		// Tool call message must have reasoning_content (empty) since
+		// thinking is enabled in this conversation
+		msg := messages[3].OfAssistant
+		require.NotNil(t, msg)
+		extraFields := msg.ExtraFields()
+		reasoningContent, hasReasoning := extraFields["reasoning_content"]
+		require.True(t, hasReasoning, "reasoning_content must be present on tool call messages when thinking is enabled")
+		require.Equal(t, "", reasoningContent)
+	})
+
 	t.Run("should drop user messages without visible content", func(t *testing.T) {
 		t.Parallel()
 
@@ -430,5 +485,368 @@ func TestToPromptFunc_DropsEmptyMessages(t *testing.T) {
 
 		require.Len(t, messages, 1)
 		require.Empty(t, warnings)
+	})
+}
+
+func TestToPromptFunc_ContentExtraFields(t *testing.T) {
+	t.Parallel()
+
+	t.Run("should add cache_control to user message with content array", func(t *testing.T) {
+		t.Parallel()
+
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{
+						Text: "Analyze this document.",
+						ProviderOptions: fantasy.ProviderOptions{
+							Name: &ContentExtraFields{
+								Fields: map[string]any{"cache_control": map[string]string{"type": "ephemeral"}},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		messages, warnings := ToPromptFunc(prompt, "", "")
+
+		require.Empty(t, warnings)
+		require.Len(t, messages, 1)
+
+		msg := messages[0].OfUser
+		require.NotNil(t, msg)
+		// Should use content array format when cache_control is present
+		require.Equal(t, "", msg.Content.OfString.Value)
+		require.NotNil(t, msg.Content.OfArrayOfContentParts)
+		require.Len(t, msg.Content.OfArrayOfContentParts, 1)
+
+		textBlock := msg.Content.OfArrayOfContentParts[0].OfText
+		require.NotNil(t, textBlock)
+		require.Equal(t, "Analyze this document.", textBlock.Text)
+
+		// Check cache_control in extra fields
+		extraFields := textBlock.ExtraFields()
+		cacheControl, hasCacheControl := extraFields["cache_control"]
+		require.True(t, hasCacheControl)
+		cacheMap, ok := cacheControl.(map[string]string)
+		require.True(t, ok)
+		require.Equal(t, "ephemeral", cacheMap["type"])
+	})
+
+	t.Run("should add cache_control to system message with content array", func(t *testing.T) {
+		t.Parallel()
+
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleSystem,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{
+						Text: "You are a helpful assistant.",
+						ProviderOptions: fantasy.ProviderOptions{
+							Name: &ContentExtraFields{
+								Fields: map[string]any{"cache_control": map[string]string{"type": "ephemeral"}},
+							},
+						},
+					},
+				},
+			},
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "Hello"},
+				},
+			},
+		}
+
+		messages, warnings := ToPromptFunc(prompt, "", "")
+
+		require.Empty(t, warnings)
+		require.Len(t, messages, 2)
+
+		systemMsg := messages[0].OfSystem
+		require.NotNil(t, systemMsg)
+		// Should use content array format when cache_control is present
+		require.Equal(t, "", systemMsg.Content.OfString.Value)
+		require.NotNil(t, systemMsg.Content.OfArrayOfContentParts)
+		require.Len(t, systemMsg.Content.OfArrayOfContentParts, 1)
+
+		textBlock := systemMsg.Content.OfArrayOfContentParts[0]
+		require.Equal(t, "You are a helpful assistant.", textBlock.Text)
+
+		// Check cache_control in extra fields
+		extraFields := textBlock.ExtraFields()
+		cacheControl, hasCacheControl := extraFields["cache_control"]
+		require.True(t, hasCacheControl)
+		cacheMap, ok := cacheControl.(map[string]string)
+		require.True(t, ok)
+		require.Equal(t, "ephemeral", cacheMap["type"])
+	})
+
+	t.Run("should add cache_control to assistant message with content array", func(t *testing.T) {
+		t.Parallel()
+
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "Hello"},
+				},
+			},
+			{
+				Role: fantasy.MessageRoleAssistant,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{
+						Text: "Hi there!",
+						ProviderOptions: fantasy.ProviderOptions{
+							Name: &ContentExtraFields{
+								Fields: map[string]any{"cache_control": map[string]string{"type": "ephemeral"}},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		messages, warnings := ToPromptFunc(prompt, "", "")
+
+		require.Empty(t, warnings)
+		require.Len(t, messages, 2)
+
+		assistantMsg := messages[1].OfAssistant
+		require.NotNil(t, assistantMsg)
+		// Should use content array format when cache_control is present
+		require.Equal(t, "", assistantMsg.Content.OfString.Value)
+		require.NotNil(t, assistantMsg.Content.OfArrayOfContentParts)
+		require.Len(t, assistantMsg.Content.OfArrayOfContentParts, 1)
+
+		textBlock := assistantMsg.Content.OfArrayOfContentParts[0].OfText
+		require.NotNil(t, textBlock)
+		require.Equal(t, "Hi there!", textBlock.Text)
+
+		// Check cache_control in extra fields
+		extraFields := textBlock.ExtraFields()
+		cacheControl, hasCacheControl := extraFields["cache_control"]
+		require.True(t, hasCacheControl)
+		cacheMap, ok := cacheControl.(map[string]string)
+		require.True(t, ok)
+		require.Equal(t, "ephemeral", cacheMap["type"])
+	})
+
+	t.Run("should not use content array for messages without cache_control", func(t *testing.T) {
+		t.Parallel()
+
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "Hello"},
+				},
+			},
+		}
+
+		messages, warnings := ToPromptFunc(prompt, "", "")
+
+		require.Empty(t, warnings)
+		require.Len(t, messages, 1)
+
+		msg := messages[0].OfUser
+		require.NotNil(t, msg)
+		// Should use string format when no cache_control
+		require.NotEqual(t, "", msg.Content.OfString.Value)
+		require.Equal(t, "Hello", msg.Content.OfString.Value)
+		require.Nil(t, msg.Content.OfArrayOfContentParts)
+	})
+
+	t.Run("should handle multiple content parts with mixed cache_control", func(t *testing.T) {
+		t.Parallel()
+
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "Context: "},
+					fantasy.TextPart{
+						Text: "Large document here...",
+						ProviderOptions: fantasy.ProviderOptions{
+							Name: &ContentExtraFields{
+								Fields: map[string]any{"cache_control": map[string]string{"type": "ephemeral"}},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		messages, warnings := ToPromptFunc(prompt, "", "")
+
+		require.Empty(t, warnings)
+		require.Len(t, messages, 1)
+
+		msg := messages[0].OfUser
+		require.NotNil(t, msg)
+		// Should use content array format since one part has cache_control
+		require.Equal(t, "", msg.Content.OfString.Value)
+		require.NotNil(t, msg.Content.OfArrayOfContentParts)
+		require.Len(t, msg.Content.OfArrayOfContentParts, 2)
+
+		// First part should not have cache_control
+		firstBlock := msg.Content.OfArrayOfContentParts[0].OfText
+		require.NotNil(t, firstBlock)
+		require.Equal(t, "Context: ", firstBlock.Text)
+		require.Empty(t, firstBlock.ExtraFields())
+
+		// Second part should have cache_control
+		secondBlock := msg.Content.OfArrayOfContentParts[1].OfText
+		require.NotNil(t, secondBlock)
+		require.Equal(t, "Large document here...", secondBlock.Text)
+		extraFields := secondBlock.ExtraFields()
+		cacheControl, hasCacheControl := extraFields["cache_control"]
+		require.True(t, hasCacheControl)
+		cacheMap, ok := cacheControl.(map[string]string)
+		require.True(t, ok)
+		require.Equal(t, "ephemeral", cacheMap["type"])
+	})
+
+	t.Run("should fall back to message-level cache_control when part has none", func(t *testing.T) {
+		t.Parallel()
+
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{
+						Text: "Hello",
+						// No cache_control on this part
+					},
+				},
+				// But cache_control on the message itself
+				ProviderOptions: fantasy.ProviderOptions{
+					Name: &ContentExtraFields{
+						Fields: map[string]any{"cache_control": map[string]string{"type": "ephemeral"}},
+					},
+				},
+			},
+		}
+
+		messages, warnings := ToPromptFunc(prompt, "", "")
+
+		require.Empty(t, warnings)
+		require.Len(t, messages, 1)
+
+		msg := messages[0].OfUser
+		require.NotNil(t, msg)
+		// Should use content array format due to message-level cache_control
+		require.Equal(t, "", msg.Content.OfString.Value)
+		require.NotNil(t, msg.Content.OfArrayOfContentParts)
+		require.Len(t, msg.Content.OfArrayOfContentParts, 1)
+
+		textBlock := msg.Content.OfArrayOfContentParts[0].OfText
+		require.NotNil(t, textBlock)
+		require.Equal(t, "Hello", textBlock.Text)
+
+		// Check cache_control in extra fields
+		extraFields := textBlock.ExtraFields()
+		cacheControl, hasCacheControl := extraFields["cache_control"]
+		require.True(t, hasCacheControl)
+		cacheMap, ok := cacheControl.(map[string]string)
+		require.True(t, ok)
+		require.Equal(t, "ephemeral", cacheMap["type"])
+	})
+
+	t.Run("should prefer part-level cache_control over message-level", func(t *testing.T) {
+		t.Parallel()
+
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{
+						Text: "First part",
+						// Part-level cache_control with different type
+						ProviderOptions: fantasy.ProviderOptions{
+							Name: &ContentExtraFields{
+								Fields: map[string]any{"cache_control": map[string]string{"type": "ephemeral"}},
+							},
+						},
+					},
+					fantasy.TextPart{Text: "Second part"}, // No part-level
+				},
+				// Message-level cache_control
+				ProviderOptions: fantasy.ProviderOptions{
+					Name: &ContentExtraFields{
+						Fields: map[string]any{"cache_control": map[string]string{"type": "persistent"}},
+					},
+				},
+			},
+		}
+
+		messages, warnings := ToPromptFunc(prompt, "", "")
+
+		require.Empty(t, warnings)
+		require.Len(t, messages, 1)
+
+		msg := messages[0].OfUser
+		require.NotNil(t, msg)
+		require.NotNil(t, msg.Content.OfArrayOfContentParts)
+		require.Len(t, msg.Content.OfArrayOfContentParts, 2)
+
+		// First part should have ephemeral (part-level wins)
+		firstBlock := msg.Content.OfArrayOfContentParts[0].OfText
+		require.NotNil(t, firstBlock)
+		extraFields := firstBlock.ExtraFields()
+		cacheControl := extraFields["cache_control"].(map[string]string)
+		require.Equal(t, "ephemeral", cacheControl["type"])
+
+		// Second part should have persistent (message-level fallback)
+		secondBlock := msg.Content.OfArrayOfContentParts[1].OfText
+		require.NotNil(t, secondBlock)
+		extraFields = secondBlock.ExtraFields()
+		cacheControl = extraFields["cache_control"].(map[string]string)
+		require.Equal(t, "persistent", cacheControl["type"])
+	})
+
+	t.Run("should add cache_control to multi-part assistant message with tool calls", func(t *testing.T) {
+		t.Parallel()
+
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleAssistant,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{
+						Text: "Let me check that.",
+						ProviderOptions: fantasy.ProviderOptions{
+							Name: &ContentExtraFields{
+								Fields: map[string]any{"cache_control": map[string]string{"type": "ephemeral"}},
+							},
+						},
+					},
+					fantasy.ToolCallPart{
+						ToolCallID: "call_1",
+						ToolName:   "lookup",
+						Input:      "{}",
+					},
+				},
+			},
+		}
+
+		messages, warnings := ToPromptFunc(prompt, "", "")
+
+		require.Empty(t, warnings)
+		require.Len(t, messages, 1)
+
+		assistantMsg := messages[0].OfAssistant
+		require.NotNil(t, assistantMsg)
+		// Tool calls force the multi-part path; cache_control must still survive.
+		require.Equal(t, "", assistantMsg.Content.OfString.Value)
+		require.Len(t, assistantMsg.Content.OfArrayOfContentParts, 1)
+		require.Len(t, assistantMsg.ToolCalls, 1)
+
+		textBlock := assistantMsg.Content.OfArrayOfContentParts[0].OfText
+		require.NotNil(t, textBlock)
+		require.Equal(t, "Let me check that.", textBlock.Text)
+		cacheControl := textBlock.ExtraFields()["cache_control"].(map[string]string)
+		require.Equal(t, "ephemeral", cacheControl["type"])
 	})
 }

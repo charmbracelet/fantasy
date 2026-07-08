@@ -15,22 +15,22 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.7.1
+      - Charm-Fantasy/0.33.1 (https://charm.land/fantasy)
     url: https://fantasy-playground-resource.openai.azure.com/openai/v1/chat/completions
     method: POST
   response:
     proto: HTTP/2.0
     proto_major: 2
     proto_minor: 0
-    content_length: 1051
+    content_length: 1302
     body: |
-      {"choices":[{"content_filter_results":{},"finish_reason":"tool_calls","index":0,"logprobs":null,"message":{"annotations":[],"content":null,"refusal":null,"role":"assistant","tool_calls":[{"function":{"arguments":"{\"location\":\"Florence, Italy\"}","name":"weather"},"id":"call_DUlGZ00SpDPsuwZGXVWQyFFW","type":"function"}]}}],"created":1761842994,"id":"chatcmpl-CWQ8Q4JDZwBrx3DQx4ZSZHRxmmDZC","model":"gpt-5-mini-2025-08-07","object":"chat.completion","prompt_filter_results":[{"prompt_index":0,"content_filter_results":{"hate":{"filtered":false,"severity":"safe"},"jailbreak":{"filtered":false,"detected":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}}}],"system_fingerprint":null,"usage":{"completion_tokens":90,"completion_tokens_details":{"accepted_prediction_tokens":0,"audio_tokens":0,"reasoning_tokens":64,"rejected_prediction_tokens":0},"prompt_tokens":145,"prompt_tokens_details":{"audio_tokens":0,"cached_tokens":0},"total_tokens":235}}
+      {"choices":[{"content_filter_results":{},"finish_reason":"tool_calls","index":0,"logprobs":null,"message":{"annotations":[],"content":null,"refusal":null,"role":"assistant","tool_calls":[{"function":{"arguments":"{\"location\":\"Florence, Italy\"}","name":"weather"},"id":"call_tvEGAtC9EJdeiqYCz0S1vQST","type":"function"}]}}],"created":1782321630,"id":"chatcmpl-DuLZ0dgARywxlk2z1MS2qGUsf5mIi","model":"gpt-5-mini-2025-08-07","object":"chat.completion","prompt_filter_results":[{"prompt_index":0,"content_filter_results":{"hate":{"filtered":false,"severity":"safe"},"jailbreak":{"detected":false,"filtered":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}}}],"service_tier":"default","system_fingerprint":null,"usage":{"completion_tokens":154,"completion_tokens_details":{"accepted_prediction_tokens":0,"audio_tokens":0,"reasoning_tokens":128,"rejected_prediction_tokens":0},"latency_checkpoint":{"engine_tbt_ms":12,"engine_ttft_ms":54,"engine_ttlt_ms":2068,"pre_inference_ms":122,"service_tbt_ms":12,"service_ttft_ms":564,"service_ttlt_ms":2573,"total_duration_ms":2461,"user_visible_ttft_ms":443},"prompt_tokens":145,"prompt_tokens_details":{"audio_tokens":0,"cached_tokens":0},"total_tokens":299}}
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 3.366893959s
+    duration: 2.920321917s
 - id: 1
   request:
     proto: HTTP/1.1
@@ -38,26 +38,26 @@ interactions:
     proto_minor: 1
     content_length: 713
     host: ""
-    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence, Italy?","role":"user"},{"tool_calls":[{"id":"call_DUlGZ00SpDPsuwZGXVWQyFFW","function":{"arguments":"{\"location\":\"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"call_DUlGZ00SpDPsuwZGXVWQyFFW","role":"tool"}],"model":"gpt-5-mini","reasoning_effort":"high","tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence, Italy?","role":"user"},{"tool_calls":[{"id":"call_tvEGAtC9EJdeiqYCz0S1vQST","function":{"arguments":"{\"location\":\"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant"},{"content":"40 C","tool_call_id":"call_tvEGAtC9EJdeiqYCz0S1vQST","role":"tool"}],"model":"gpt-5-mini","reasoning_effort":"high","tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
     headers:
       Accept:
       - application/json
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.7.1
+      - Charm-Fantasy/0.33.1 (https://charm.land/fantasy)
     url: https://fantasy-playground-resource.openai.azure.com/openai/v1/chat/completions
     method: POST
   response:
     proto: HTTP/2.0
     proto_major: 2
     proto_minor: 0
-    content_length: 1344
+    content_length: 1483
     body: |
-      {"choices":[{"content_filter_results":{"hate":{"filtered":false,"severity":"safe"},"protected_material_text":{"filtered":false,"detected":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}},"finish_reason":"stop","index":0,"logprobs":null,"message":{"annotations":[],"content":"It's currently 40°C (104°F) in Florence, Italy — quite hot. Stay hydrated and avoid prolonged sun exposure during peak hours. Would you like the hourly forecast or the outlook for the next few days?","refusal":null,"role":"assistant"}}],"created":1761842997,"id":"chatcmpl-CWQ8TuzLOjG9vatDbmlnZ6mNdo29i","model":"gpt-5-mini-2025-08-07","object":"chat.completion","prompt_filter_results":[{"prompt_index":0,"content_filter_results":{"hate":{"filtered":false,"severity":"safe"},"jailbreak":{"filtered":false,"detected":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}}}],"system_fingerprint":null,"usage":{"completion_tokens":309,"completion_tokens_details":{"accepted_prediction_tokens":0,"audio_tokens":0,"reasoning_tokens":256,"rejected_prediction_tokens":0},"prompt_tokens":176,"prompt_tokens_details":{"audio_tokens":0,"cached_tokens":0},"total_tokens":485}}
+      {"choices":[{"content_filter_results":{"hate":{"filtered":false,"severity":"safe"},"protected_material_code":{"detected":false,"filtered":false},"protected_material_text":{"detected":false,"filtered":false},"self_harm":{"filtered":false,"severity":"safe"},"sexual":{"filtered":false,"severity":"safe"},"violence":{"filtered":false,"severity":"safe"}},"finish_reason":"stop","index":0,"logprobs":null,"message":{"annotations":[],"content":"Right now in Florence, Italy it’s 40°C (104°F). That’s very hot — stay hydrated, avoid strenuous outdoor activity during peak sun, seek shade or air conditioning, and use sun protection. Would you like an hourly forecast, a 7-day outlook, or anything else?","refusal":null,"role":"assistant"}}],"created":1782321633,"id":"chatcmpl-DuLZ3A454CecdGctWzmVa7Is5IZUT","model":"gpt-5-mini-2025-08-07","object":"chat.completion","prompt_filter_results":[{"prompt_index":0,"content_filter_results":{}}],"service_tier":"default","system_fingerprint":null,"usage":{"completion_tokens":645,"completion_tokens_details":{"accepted_prediction_tokens":0,"audio_tokens":0,"reasoning_tokens":576,"rejected_prediction_tokens":0},"latency_checkpoint":{"engine_tbt_ms":11,"engine_ttft_ms":40,"engine_ttlt_ms":7463,"pre_inference_ms":133,"service_tbt_ms":11,"service_ttft_ms":571,"service_ttlt_ms":7969,"total_duration_ms":7845,"user_visible_ttft_ms":438},"prompt_tokens":176,"prompt_tokens_details":{"audio_tokens":0,"cached_tokens":0},"total_tokens":821}}
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 7.677985209s
+    duration: 8.5358505s

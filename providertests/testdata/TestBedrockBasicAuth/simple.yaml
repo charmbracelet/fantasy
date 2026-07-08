@@ -15,18 +15,18 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - Anthropic/Go 1.14.0
-    url: https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-3-sonnet-20240229-v1%3A0/invoke
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+    url: https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-haiku-4-5-20251001-v1%3A0/invoke
     method: POST
   response:
     proto: HTTP/2.0
     proto_major: 2
     proto_minor: 0
-    content_length: 248
-    body: '{"id":"msg_bdrk_01SLPR8DXPtQG4ryAsmuQrA9","type":"message","role":"assistant","model":"claude-3-sonnet-20240229","content":[{"type":"text","text":"Olá!"}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":16,"output_tokens":7}}'
+    content_length: 423
+    body: "{\"model\":\"claude-haiku-4-5-20251001\",\"id\":\"msg_bdrk_013JdBa81deAqHUw1D4yCEyL\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Olá! \U0001F44B\\n\\nHow can I help you today?\"}],\"stop_reason\":\"end_turn\",\"stop_sequence\":null,\"usage\":{\"input_tokens\":16,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":18}}"
     headers:
       Content-Type:
       - application/json
     status: 200 OK
     code: 200
-    duration: 3.764905916s
+    duration: 1.784823583s

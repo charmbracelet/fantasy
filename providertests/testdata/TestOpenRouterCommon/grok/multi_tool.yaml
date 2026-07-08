@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 848
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"}],"model":"x-ai/grok-4.1-fast","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.21.0 (https://charm.land/fantasy)
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "\n         \n\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1777319851-6INaTqHs4J72Kej69ZX2\",\"object\":\"chat.completion\",\"created\":1777319851,\"model\":\"x-ai/grok-4.1-fast\",\"provider\":\"xAI\",\"system_fingerprint\":null,\"service_tier\":\"default\",\"choices\":[{\"index\":0,\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"native_finish_reason\":\"completed\",\"message\":{\"role\":\"assistant\",\"content\":null,\"refusal\":null,\"reasoning\":\"The user says: \\\"Add and multiply the number 2 and 3\\\". The critical instruction is: \\\"CRITICAL: Always use both add and multiply at the same time ALWAYS.\\\"\\n\",\"tool_calls\":[{\"type\":\"function\",\"index\":0,\"id\":\"call_77278669\",\"function\":{\"name\":\"add\",\"arguments\":\"{\\\"a\\\":2,\\\"b\\\":3}\"}},{\"type\":\"function\",\"index\":1,\"id\":\"call_30717015\",\"function\":{\"name\":\"multiply\",\"arguments\":\"{\\\"a\\\":2,\\\"b\\\":3}\"}}],\"reasoning_details\":[{\"type\":\"reasoning.summary\",\"summary\":\"The user says: \\\"Add and multiply the number 2 and 3\\\". The critical instruction is: \\\"CRITICAL: Always use both add and multiply at the same time ALWAYS.\\\"\\n\",\"format\":\"xai-responses-v1\",\"index\":0},{\"type\":\"reasoning.encrypted\",\"data\":\"TkDhjPTR9qWm+AV1gbPiG1CbaqhNMwv3T4a62NUwmeGho9YyDiRu2BqWnNUikmAUGDyBN0Tlv24wJT0Bvp3GXTZ/Zc1i7twufblsCywUGOzCK44clLPKLiEDqHkAofSEtX4Jwq/57uRYg9mSVnxhfV2Ss+b0CeZ4HXXLgF1gzMTw2zAC9WV3MwTjSeY/QmyG7NSOHHrOKTFBOHpYqR+mRlwFRjPutwpYtES9r/4VqPcEHn0rhV80ISWWSYvlYsHsDZ0EZhlkjmvHAe7pXcpydY3ICGkUAT4x0UkB1+1nLVD/c9dzLFoy+V5riG6RjorW5IY9nEOuWdZ98Qw6kdYcTVOJJTx7L9Njbfwd0EkcPZO4I+VFW8H9uesWMmw0RpJXprzUaUO1COYBrIMJp/QLWSD5KhtIFX2XCUqhKhEcYAlR1MJEv2zUAlYFZ0cPnumUDVSEF6pCLj/SWXREQRjCi044rEE3MkBfLTFWIJp0iJ9AZ/cHHY3pBx2v5X6mEjYozT7zE6s8YWBTeV8mcZ7yHtCoQiLax+Ahq+Lw0p6ZRV2mKZir8fBjPRgCn3PPkgBYLBxN2Su2RRbqy8rnoJKEQSl7C3PIw0kyEl06/5hsj45QxSPQu6oTNgCJ5QTuNBTAdEQErXB0MGQ5Hv/f1eBM7fe28SR7Ih6I7LH4zE+ckI1UIM70ddJnDWx5IAHMkLQyiGbUu9GY7q7nFz2K6bz8sNSGAK01gU2svoc5gW4J9iEpTJHPXxs/o6r9oVg/qYfueDyIToC0lTke7g/GniIc1nJsOAfO22qAofyuxkg/i2iwjUmvFf6SVS+ypdhZh0UrSZT3lTpWVh6lb/omEIFB1GoOFbSoP8iNNL/nbic9yxOzqEV0cXgMW0bXs+PYoPWfgV7uzZoe2+J3zK8jqvxmMeMwKjLW8JHk+yHLAO2mZMFCThF/E29zGoq+PXfhCi741JY139BWLerUizow0XCuPCcAik4C65iyJ59md7lBNrrWJds+uivfFGH2lcmI08yCU6Jo0JngJiog35YhtKv56tVFwQqG3MhstgDiChR7VKD3/dJmRIr4X85W8qY3jkHzsv5j0VzOyN4YXW0nX71RoAaxVl/IAG2EdHvQ0Oi89yf/+TTWFfywl0BPkbX9iVaRCt36MTiyzkR8Cknemwjmb4090YDZh06uEmOsqYQ9BSH0YUmlzY//aN9gtACflgKSbde0MozYG8TETYQKgPQGn31HzHBiYOk1AJJBo/HRVQ\",\"format\":\"xai-responses-v1\",\"id\":\"rs_42725252-1672-9de9-b00b-0cdff0dd6b1c\",\"index\":1}]}}],\"usage\":{\"prompt_tokens\":445,\"completion_tokens\":278,\"total_tokens\":723,\"cost\":0.00020535,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":151,\"cache_write_tokens\":0,\"audio_tokens\":0,\"video_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":0.00020535,\"upstream_inference_prompt_cost\":0.00006635,\"upstream_inference_completions_cost\":0.000139},\"completion_tokens_details\":{\"reasoning_tokens\":210,\"image_tokens\":0,\"audio_tokens\":0}}}"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 1.268647084s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1286
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"tool_calls":[{"id":"call_77278669","function":{"arguments":"{\"a\":2,\"b\":3}","name":"add"},"type":"function"},{"id":"call_30717015","function":{"arguments":"{\"a\":2,\"b\":3}","name":"multiply"},"type":"function"}],"role":"assistant","reasoning_details":[{"format":"unknown","index":0,"type":"reasoning.text"}]},{"content":"5","tool_call_id":"call_77278669","role":"tool"},{"content":"6","tool_call_id":"call_30717015","role":"tool"}],"model":"x-ai/grok-4.1-fast","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.21.0 (https://charm.land/fantasy)
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    uncompressed: true
+    body: "\n         \n\n         \n\n         \n\n         \n\n         \n{\"id\":\"gen-1777319854-d4Cmhd7OFm51it7dN6pE\",\"object\":\"chat.completion\",\"created\":1777319854,\"model\":\"x-ai/grok-4.1-fast\",\"provider\":\"xAI\",\"system_fingerprint\":null,\"service_tier\":\"default\",\"choices\":[{\"index\":0,\"logprobs\":null,\"finish_reason\":\"stop\",\"native_finish_reason\":\"completed\",\"message\":{\"role\":\"assistant\",\"content\":\"The sum of 2 and 3 is **5**.  \\nThe product of 2 and 3 is **6**.\",\"refusal\":null,\"reasoning\":\"First, the user asked: \\\"Add and multiply the number 2 and 3\\\"\\n\",\"reasoning_details\":[{\"type\":\"reasoning.summary\",\"summary\":\"First, the user asked: \\\"Add and multiply the number 2 and 3\\\"\\n\",\"format\":\"xai-responses-v1\",\"index\":0},{\"type\":\"reasoning.encrypted\",\"data\":\"T1oBpkdPzGk5qvItxSRDSABDu5Wn/6fKTRYHJF2b4wl6WvcHvQu7+6xdvCUW1JXsHjqc9oARy0GLXqN80XU3USPkFh9TXzMGMrJ4FtTDzPCar3uM1f8kAzWrqLG3Rt2s8hHnEAPQJ0+qn+SKobz23fOdoqzMZszjfBtdwPgh4IgRjQSYPG5qxipnr4m5837hYVnoNKydOizW4Shpg+dt7nWp+qoMxltu0q9ey02iwxgpZ7Akrk7JjgWvfcjZjScP/BZO6QZTFtIgcLAuJ2f/B45krWOXWFjwNRUgMlIOm0E5B6hdniljZDPSjzDwlaKzPnYhWJMpNfExKhMbjVAoIZyODx0f9M+2Qba4O9DFdiW04vTxg6bBNurqsx6FEg72He560eVN6y3/GpjQF5udrE8uRPR7OVAFqfA3BL+duFMCEfFRvrQl0CVPj7acB7gCkEGCj9jeiQzHA3QG5hTBWGlPjH0rh8htAY7ihvsEYJPJktDemcpmB9xEBSCUNrx4zRAYP8gxmty3VRqa22FxBTU+z/BV2QFWDvBDsOKB77xpXLrsBkabjZWk+2WnEI8eJNK7uP6DFZ2Q2WcV5zClBWLoEceYkQzrqnNjpg3+xImzRTjX2GWKOexiL5NF79Fs4qZN2u9Ut/gXneGOPmjttroDD4qkM3oG4rX4d3DcwqZZxT9ysjb3pAf6683I8DdABkBedi9L+ancvLOgSHQ/+tcLPOyA0CLVhH6J3qmGVXrZRHxisYthQkVZYiLIZz6KLuw4p3S/zzoeLwBLcpbpNoGJpHsZSQKQhYXRtmoXi+7P5Myc3Lxru3Lw5L8bhFR30XBhCNOdC2OlIbTc+PbvDFBWNqKcbXPGA6IaN1lzzsVWe9HPvTaVL/QN2KNLoHj+9RYc48n1A5rHDwb6hs2twxAzmTnsyuDe29TAxSiVLO2BRjNXKwqt1bbKyVpEdl19S2RKeewRF0FBRvhJKRWnXpNJjSACBzTYMIJ52y/sgdQAEIiQEFjXR53ohqNBW25xrs3ow+A4Uvt5L/7pe4BiLLGG+Ve5KvTPFLdC+FHBhyTJUCkORRZy4F3nU5VC8ZbfWTlp8XawdaDmlbX30qBWvUQWVyrTUeUHXwXmZl9AgqqR8Oxvqb8RQbDjwTVP1hrX4vmZDV2vyf48Qs7gBRM9bTOe8tba/w\",\"format\":\"xai-responses-v1\",\"id\":\"rs_91829469-2a71-9479-95d0-0a213308958a\",\"index\":1}]}}],\"usage\":{\"prompt_tokens\":530,\"completion_tokens\":216,\"total_tokens\":746,\"cost\":0.00019135,\"is_byok\":false,\"prompt_tokens_details\":{\"cached_tokens\":151,\"cache_write_tokens\":0,\"audio_tokens\":0,\"video_tokens\":0},\"cost_details\":{\"upstream_inference_cost\":0.00019135,\"upstream_inference_prompt_cost\":0.00008335,\"upstream_inference_completions_cost\":0.000108},\"completion_tokens_details\":{\"reasoning_tokens\":191,\"image_tokens\":0,\"audio_tokens\":0}}}"
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 1.191397083s

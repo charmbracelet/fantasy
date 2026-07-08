@@ -1,22 +1,23 @@
 package openai
 
 import (
+	"cmp"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"reflect"
+	"slices"
 	"strings"
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/object"
 	"charm.land/fantasy/schema"
-	xjson "github.com/charmbracelet/x/json"
+	"github.com/charmbracelet/openai-go"
+	"github.com/charmbracelet/openai-go/packages/param"
+	"github.com/charmbracelet/openai-go/shared"
 	"github.com/google/uuid"
-	"github.com/openai/openai-go/v2"
-	"github.com/openai/openai-go/v2/packages/param"
-	"github.com/openai/openai-go/v2/shared"
 )
 
 type languageModel struct {
@@ -246,9 +247,12 @@ func (o languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantas
 	if err != nil {
 		return nil, err
 	}
-	response, err := o.client.Chat.Completions.New(ctx, *params)
+	response, err := o.client.Chat.Completions.New(ctx, *params, callUARequestOptions(call)...)
 	if err != nil {
 		return nil, toProviderErr(err)
+	}
+	if response == nil {
+		return nil, &fantasy.Error{Title: "no response", Message: "provider returned nil response"}
 	}
 
 	if len(response.Choices) == 0 {
@@ -314,7 +318,7 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 		IncludeUsage: openai.Bool(true),
 	}
 
-	stream := o.client.Chat.Completions.NewStreaming(ctx, *params)
+	stream := o.client.Chat.Completions.NewStreaming(ctx, *params, callUARequestOptions(call)...)
 	isActiveText := false
 	toolCalls := make(map[int64]streamToolCall)
 
@@ -345,8 +349,7 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 				if choice.FinishReason != "" {
 					finishReason = choice.FinishReason
 				}
-				switch {
-				case choice.Delta.Content != "":
+				if choice.Delta.Content != "" {
 					if !isActiveText {
 						isActiveText = true
 						if !yield(fantasy.StreamPart{
@@ -363,7 +366,8 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 					}) {
 						return
 					}
-				case len(choice.Delta.ToolCalls) > 0:
+				}
+				if len(choice.Delta.ToolCalls) > 0 {
 					if isActiveText {
 						isActiveText = false
 						if !yield(fantasy.StreamPart{
@@ -381,51 +385,57 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 							}
 							if toolCallDelta.Function.Arguments != "" {
 								existingToolCall.arguments += toolCallDelta.Function.Arguments
-							}
-							if !yield(fantasy.StreamPart{
-								Type:  fantasy.StreamPartTypeToolInputDelta,
-								ID:    existingToolCall.id,
-								Delta: toolCallDelta.Function.Arguments,
-							}) {
-								return
+								if !yield(fantasy.StreamPart{
+									Type:  fantasy.StreamPartTypeToolInputDelta,
+									ID:    existingToolCall.id,
+									Delta: toolCallDelta.Function.Arguments,
+								}) {
+									return
+								}
 							}
 							toolCalls[toolCallDelta.Index] = existingToolCall
-							if xjson.IsValid(existingToolCall.arguments) {
-								if !yield(fantasy.StreamPart{
-									Type: fantasy.StreamPartTypeToolInputEnd,
-									ID:   existingToolCall.id,
-								}) {
-									return
-								}
-
-								if !yield(fantasy.StreamPart{
-									Type:          fantasy.StreamPartTypeToolCall,
-									ID:            existingToolCall.id,
-									ToolCallName:  existingToolCall.name,
-									ToolCallInput: existingToolCall.arguments,
-								}) {
-									return
-								}
-								existingToolCall.hasFinished = true
-								toolCalls[toolCallDelta.Index] = existingToolCall
-							}
 						} else {
-							var err error
+							// Some provider like Ollama may send empty tool calls or miss some fields.
+							// We'll skip when we don't have enough info and also assume sane defaults.
+							if toolCallDelta.Function.Name == "" && toolCallDelta.Function.Arguments == "" {
+								continue
+							}
+							toolCallDelta.Type = cmp.Or(toolCallDelta.Type, "function")
+							toolCallDelta.ID = cmp.Or(toolCallDelta.ID, fmt.Sprintf("tool-call-%d", toolCallDelta.Index))
+
 							if toolCallDelta.Type != "function" {
-								err = &fantasy.Error{Title: "invalid provider response", Message: "expected 'function' type."}
-							}
-							if toolCallDelta.ID == "" {
-								err = &fantasy.Error{Title: "invalid provider response", Message: "expected 'id' to be a string."}
-							}
-							if toolCallDelta.Function.Name == "" {
-								err = &fantasy.Error{Title: "invalid provider response", Message: "expected 'function.name' to be a string."}
-							}
-							if err != nil {
 								yield(fantasy.StreamPart{
 									Type:  fantasy.StreamPartTypeError,
-									Error: toProviderErr(stream.Err()),
+									Error: &fantasy.Error{Title: "invalid provider response", Message: "expected 'function' type."},
 								})
 								return
+							}
+
+							// A new tool call index means any previously opened
+							// calls are complete. Emit ToolInputEnd for each to
+							// preserve per-call framing during streaming so that
+							// consumers can reconstruct parallel tool calls from
+							// the stream order without buffering. Close them in
+							// index order for deterministic output.
+							priorIndices := make([]int64, 0, len(toolCalls))
+							for idx := range toolCalls {
+								priorIndices = append(priorIndices, idx)
+							}
+							slices.Sort(priorIndices)
+							for _, idx := range priorIndices {
+								tc := toolCalls[idx]
+								if idx >= toolCallDelta.Index || tc.hasFinished {
+									continue
+								}
+								if tc.arguments == "" {
+									tc.arguments = "{}"
+									toolCalls[idx] = tc
+								}
+								if !yield(fantasy.StreamPart{Type: fantasy.StreamPartTypeToolInputEnd, ID: tc.id}) {
+									return
+								}
+								tc.hasFinished = true
+								toolCalls[idx] = tc
 							}
 
 							if !yield(fantasy.StreamPart{
@@ -441,33 +451,13 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 								arguments: toolCallDelta.Function.Arguments,
 							}
 
-							exTc := toolCalls[toolCallDelta.Index]
-							if exTc.arguments != "" {
+							if toolCallDelta.Function.Arguments != "" {
 								if !yield(fantasy.StreamPart{
 									Type:  fantasy.StreamPartTypeToolInputDelta,
-									ID:    exTc.id,
-									Delta: exTc.arguments,
+									ID:    toolCallDelta.ID,
+									Delta: toolCallDelta.Function.Arguments,
 								}) {
 									return
-								}
-								if xjson.IsValid(toolCalls[toolCallDelta.Index].arguments) {
-									if !yield(fantasy.StreamPart{
-										Type: fantasy.StreamPartTypeToolInputEnd,
-										ID:   toolCallDelta.ID,
-									}) {
-										return
-									}
-
-									if !yield(fantasy.StreamPart{
-										Type:          fantasy.StreamPartTypeToolCall,
-										ID:            exTc.id,
-										ToolCallName:  exTc.name,
-										ToolCallInput: exTc.arguments,
-									}) {
-										return
-									}
-									exTc.hasFinished = true
-									toolCalls[toolCallDelta.Index] = exTc
 								}
 							}
 							continue
@@ -514,6 +504,30 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 				}
 			}
 
+			// Finalize tool calls in index order after the stream completes.
+			indices := make([]int64, 0, len(toolCalls))
+			for idx := range toolCalls {
+				indices = append(indices, idx)
+			}
+			slices.Sort(indices)
+			for _, idx := range indices {
+				tc := toolCalls[idx]
+				if !tc.hasFinished {
+					if tc.arguments == "" {
+						tc.arguments = "{}"
+						toolCalls[idx] = tc
+					}
+					if !yield(fantasy.StreamPart{Type: fantasy.StreamPartTypeToolInputEnd, ID: tc.id}) {
+						return
+					}
+				}
+				if !yield(fantasy.StreamPart{Type: fantasy.StreamPartTypeToolCall, ID: tc.id, ToolCallName: tc.name, ToolCallInput: tc.arguments}) {
+					return
+				}
+				tc.hasFinished = true
+				toolCalls[idx] = tc
+			}
+
 			if len(acc.Choices) > 0 {
 				choice := acc.Choices[0]
 				providerMetadata = o.streamProviderMetadataFunc(choice, providerMetadata)
@@ -539,6 +553,20 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 					mappedFinishReason = fantasy.FinishReasonToolCalls
 				}
 			}
+			// Truncated stream: upstream closed without finish_reason and we
+			// can't infer a tool-call turn. Surface as a retryable error so
+			// the retry middleware re-runs the step.
+			if finishReason == "" && mappedFinishReason != fantasy.FinishReasonToolCalls {
+				err := ctx.Err()
+				if err == nil {
+					err = fantasy.NewIncompleteStreamError()
+				}
+				yield(fantasy.StreamPart{
+					Type:  fantasy.StreamPartTypeError,
+					Error: err,
+				})
+				return
+			}
 			yield(fantasy.StreamPart{
 				Type:             fantasy.StreamPartTypeFinish,
 				Usage:            usage,
@@ -561,7 +589,7 @@ func isReasoningModel(modelID string) bool {
 		strings.HasPrefix(modelID, "o3") || strings.Contains(modelID, "-o3") ||
 		strings.HasPrefix(modelID, "o4") || strings.Contains(modelID, "-o4") ||
 		strings.HasPrefix(modelID, "oss") || strings.Contains(modelID, "-oss") ||
-		strings.Contains(modelID, "gpt-5") || strings.Contains(modelID, "gpt-5-chat")
+		strings.Contains(strings.ToLower(modelID), "gpt-5")
 }
 
 func isSearchPreviewModel(modelID string) bool {
@@ -570,13 +598,16 @@ func isSearchPreviewModel(modelID string) bool {
 
 func supportsFlexProcessing(modelID string) bool {
 	return strings.HasPrefix(modelID, "o3") || strings.Contains(modelID, "-o3") ||
-		strings.Contains(modelID, "o4-mini") || strings.Contains(modelID, "gpt-5")
+		strings.Contains(modelID, "o4-mini") ||
+		strings.Contains(strings.ToLower(modelID), "gpt-5")
 }
 
 func supportsPriorityProcessing(modelID string) bool {
-	return strings.Contains(modelID, "gpt-4") || strings.Contains(modelID, "gpt-5") ||
-		strings.Contains(modelID, "gpt-5-mini") || strings.HasPrefix(modelID, "o3") ||
-		strings.Contains(modelID, "-o3") || strings.Contains(modelID, "o4-mini")
+	return strings.Contains(strings.ToLower(modelID), "gpt-4") ||
+		strings.Contains(strings.ToLower(modelID), "gpt-5") ||
+		strings.HasPrefix(modelID, "o3") ||
+		strings.Contains(modelID, "-o3") ||
+		strings.Contains(modelID, "o4-mini")
 }
 
 func toOpenAiTools(tools []fantasy.Tool, toolChoice *fantasy.ToolChoice) (openAiTools []openai.ChatCompletionToolUnionParam, openAiToolChoice *openai.ChatCompletionToolChoiceOptionUnionParam, warnings []fantasy.CallWarning) {
@@ -733,11 +764,10 @@ func (o languageModel) generateObjectWithJSONMode(ctx context.Context, call fant
 		},
 	}
 
-	response, err := o.client.Chat.Completions.New(ctx, *params)
+	response, err := o.client.Chat.Completions.New(ctx, *params, objectCallUARequestOptions(call)...)
 	if err != nil {
 		return nil, toProviderErr(err)
 	}
-
 	if len(response.Choices) == 0 {
 		usage, _ := o.usageFunc(*response)
 		return nil, &fantasy.NoObjectGeneratedError{
@@ -818,7 +848,7 @@ func (o languageModel) streamObjectWithJSONMode(ctx context.Context, call fantas
 		IncludeUsage: openai.Bool(true),
 	}
 
-	stream := o.client.Chat.Completions.NewStreaming(ctx, *params)
+	stream := o.client.Chat.Completions.NewStreaming(ctx, *params, objectCallUARequestOptions(call)...)
 
 	return func(yield func(fantasy.ObjectStreamPart) bool) {
 		if len(warnings) > 0 {
@@ -834,8 +864,8 @@ func (o languageModel) streamObjectWithJSONMode(ctx context.Context, call fantas
 		var lastParsedObject any
 		var usage fantasy.Usage
 		var finishReason fantasy.FinishReason
+		var sawFinishReason bool
 		var providerMetadata fantasy.ProviderMetadata
-		var streamErr error
 
 		for stream.Next() {
 			chunk := stream.Current()
@@ -850,6 +880,7 @@ func (o languageModel) streamObjectWithJSONMode(ctx context.Context, call fantas
 			choice := chunk.Choices[0]
 			if choice.FinishReason != "" {
 				finishReason = o.mapFinishReasonFunc(choice.FinishReason)
+				sawFinishReason = true
 			}
 
 			if choice.Delta.Content != "" {
@@ -894,10 +925,21 @@ func (o languageModel) streamObjectWithJSONMode(ctx context.Context, call fantas
 
 		err := stream.Err()
 		if err != nil && !errors.Is(err, io.EOF) {
-			streamErr = toProviderErr(err)
 			yield(fantasy.ObjectStreamPart{
 				Type:  fantasy.ObjectStreamPartTypeError,
-				Error: streamErr,
+				Error: toProviderErr(err),
+			})
+			return
+		}
+
+		if !sawFinishReason {
+			err := ctx.Err()
+			if err == nil {
+				err = fantasy.NewIncompleteStreamError()
+			}
+			yield(fantasy.ObjectStreamPart{
+				Type:  fantasy.ObjectStreamPartTypeError,
+				Error: err,
 			})
 			return
 		}

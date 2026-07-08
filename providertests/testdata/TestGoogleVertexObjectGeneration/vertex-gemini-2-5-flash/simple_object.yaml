@@ -14,7 +14,8 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - google-genai-sdk/1.34.0 gl-go/go1.25.0
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+      - google-genai-sdk/1.49.0 gl-go/go1.26.1
     url: https://us-east5-aiplatform.googleapis.com/v1beta1/projects/fantasy-playground-472418/locations/us-east5/publishers/google/models/gemini-2.5-flash:generateContent
     method: POST
   response:
@@ -31,18 +32,18 @@ interactions:
               "role": "model",
               "parts": [
                 {
-                  "text": "{\"name\": \"Alice\", \"age\": 30, \"city\": \"Paris\"}"
+                  "text": "{\n  \"name\": \"Alice\",\n  \"age\": 30,\n  \"city\": \"Paris\"\n}"
                 }
               ]
             },
             "finishReason": "STOP",
-            "avgLogprobs": -0.57498173964651011
+            "avgLogprobs": -0.42256144114903044
           }
         ],
         "usageMetadata": {
           "promptTokenCount": 19,
-          "candidatesTokenCount": 19,
-          "totalTokenCount": 83,
+          "candidatesTokenCount": 28,
+          "totalTokenCount": 112,
           "trafficType": "ON_DEMAND",
           "promptTokensDetails": [
             {
@@ -53,18 +54,18 @@ interactions:
           "candidatesTokensDetails": [
             {
               "modality": "TEXT",
-              "tokenCount": 19
+              "tokenCount": 28
             }
           ],
-          "thoughtsTokenCount": 45
+          "thoughtsTokenCount": 65
         },
         "modelVersion": "gemini-2.5-flash",
-        "createTime": "2025-11-10T12:36:22.649878Z",
-        "responseId": "RtwRaZbVJ-zzptQPvOrxqQ8"
+        "createTime": "2026-03-12T18:08:05.417733Z",
+        "responseId": "BQGzacW_Gaavw-UPgoq9-Qs"
       }
     headers:
       Content-Type:
       - application/json; charset=UTF-8
     status: 200 OK
     code: 200
-    duration: 1.886921167s
+    duration: 1.519872458s

@@ -14,6 +14,7 @@ import (
 	"charm.land/fantasy"
 	"charm.land/fantasy/object"
 	"charm.land/fantasy/providers/anthropic"
+	"charm.land/fantasy/providers/internal/httpheaders"
 	"charm.land/fantasy/schema"
 	"cloud.google.com/go/auth"
 	"github.com/charmbracelet/x/exp/slice"
@@ -36,6 +37,7 @@ type options struct {
 	name           string
 	baseURL        string
 	headers        map[string]string
+	userAgent      string
 	client         *http.Client
 	backend        genai.Backend
 	project        string
@@ -132,6 +134,14 @@ func WithToolCallIDFunc(f ToolCallIDFunc) Option {
 	}
 }
 
+// WithUserAgent sets an explicit User-Agent header, overriding the default and any
+// value set via WithHeaders.
+func WithUserAgent(ua string) Option {
+	return func(o *options) {
+		o.userAgent = ua
+	}
+}
+
 // WithObjectMode sets the object generation mode for the Google provider.
 func WithObjectMode(om fantasy.ObjectMode) Option {
 	return func(o *options) {
@@ -154,11 +164,15 @@ type languageModel struct {
 // LanguageModel implements fantasy.Provider.
 func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.LanguageModel, error) {
 	if strings.Contains(modelID, "anthropic") || strings.Contains(modelID, "claude") {
-		p, err := anthropic.New(
+		anthropicOpts := []anthropic.Option{
 			anthropic.WithVertex(a.options.project, a.options.location),
 			anthropic.WithHTTPClient(a.options.client),
 			anthropic.WithSkipAuth(a.options.skipAuth),
-		)
+		}
+		if a.options.userAgent != "" {
+			anthropicOpts = append(anthropicOpts, anthropic.WithUserAgent(a.options.userAgent))
+		}
+		p, err := anthropic.New(anthropicOpts...)
 		if err != nil {
 			return nil, err
 		}
@@ -166,7 +180,7 @@ func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.L
 	}
 
 	cc := &genai.ClientConfig{
-		HTTPClient: a.options.client,
+		HTTPClient: wrapHTTPClient(a.options.client),
 		Backend:    a.options.backend,
 		APIKey:     a.options.apiKey,
 		Project:    a.options.project,
@@ -180,15 +194,16 @@ func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.L
 		}
 	}
 
-	if a.options.baseURL != "" || len(a.options.headers) > 0 {
-		headers := http.Header{}
-		for k, v := range a.options.headers {
-			headers.Add(k, v)
-		}
-		cc.HTTPOptions = genai.HTTPOptions{
-			BaseURL: a.options.baseURL,
-			Headers: headers,
-		}
+	defaultUA := httpheaders.DefaultUserAgent(fantasy.Version)
+	resolved := httpheaders.ResolveHeaders(a.options.headers, a.options.userAgent, defaultUA)
+
+	headers := http.Header{}
+	for k, v := range resolved {
+		headers.Set(k, v)
+	}
+	cc.HTTPOptions = genai.HTTPOptions{
+		BaseURL: a.options.baseURL,
+		Headers: headers,
 	}
 	client, err := genai.NewClient(ctx, cc)
 	if err != nil {
@@ -220,7 +235,8 @@ func (g languageModel) prepareParams(call fantasy.Call) (*genai.GenerateContentC
 		}
 	}
 
-	systemInstructions, content, warnings := toGooglePrompt(call.Prompt)
+	isVertexAI := g.providerOptions.backend == genai.BackendVertexAI
+	systemInstructions, content, warnings := toGooglePrompt(call.Prompt, isVertexAI)
 
 	if providerOptions.ThinkingConfig != nil {
 		if providerOptions.ThinkingConfig.IncludeThoughts != nil &&
@@ -240,7 +256,15 @@ func (g languageModel) prepareParams(call fantasy.Call) (*genai.GenerateContentC
 				Type:    fantasy.CallWarningTypeOther,
 				Message: "The 'thinking_budget' option can not be under 128 and will be set to 128 by default",
 			})
-			providerOptions.ThinkingConfig.ThinkingBudget = fantasy.Opt(int64(128))
+			providerOptions.ThinkingConfig.ThinkingBudget = new(int64(128))
+		}
+
+		if providerOptions.ThinkingConfig.ThinkingLevel != nil &&
+			providerOptions.ThinkingConfig.ThinkingBudget != nil {
+			return nil, nil, nil, &fantasy.Error{
+				Title:   "invalid argument",
+				Message: "thinking_level and thinking_budget are mutually exclusive",
+			}
 		}
 	}
 
@@ -298,6 +322,9 @@ func (g languageModel) prepareParams(call fantasy.Call) (*genai.GenerateContentC
 			tmp := int32(*providerOptions.ThinkingConfig.ThinkingBudget) //nolint: gosec
 			config.ThinkingConfig.ThinkingBudget = &tmp
 		}
+		if providerOptions.ThinkingConfig.ThinkingLevel != nil {
+			config.ThinkingConfig.ThinkingLevel = genai.ThinkingLevel(*providerOptions.ThinkingConfig.ThinkingLevel)
+		}
 	}
 	for _, safetySetting := range providerOptions.SafetySettings {
 		config.SafetySettings = append(config.SafetySettings, &genai.SafetySetting{
@@ -321,7 +348,7 @@ func (g languageModel) prepareParams(call fantasy.Call) (*genai.GenerateContentC
 	return config, content, warnings, nil
 }
 
-func toGooglePrompt(prompt fantasy.Prompt) (*genai.Content, []*genai.Content, []fantasy.CallWarning) { //nolint: unparam
+func toGooglePrompt(prompt fantasy.Prompt, isVertexAI bool) (*genai.Content, []*genai.Content, []fantasy.CallWarning) { //nolint: unparam
 	var systemInstructions *genai.Content
 	var content []*genai.Content
 	var warnings []fantasy.CallWarning
@@ -436,6 +463,11 @@ func toGooglePrompt(prompt fantasy.Prompt) (*genai.Content, []*genai.Content, []
 							Args: result,
 						},
 					}
+
+					// Vertex breaks with a 400 if this field be present.
+					if isVertexAI {
+						geminiPart.FunctionCall.ID = ""
+					}
 					if currentReasoningMetadata != nil {
 						geminiPart.ThoughtSignature = []byte(currentReasoningMetadata.Signature)
 						currentReasoningMetadata = nil
@@ -480,12 +512,18 @@ func toGooglePrompt(prompt fantasy.Prompt) (*genai.Content, []*genai.Content, []
 							continue
 						}
 						response := map[string]any{"result": content.Text}
+						functionResponse := &genai.FunctionResponse{
+							ID:       result.ToolCallID,
+							Response: response,
+							Name:     toolCall.ToolName,
+						}
+
+						// Vertex breaks with a 400 if this field be present.
+						if isVertexAI {
+							functionResponse.ID = ""
+						}
 						parts = append(parts, &genai.Part{
-							FunctionResponse: &genai.FunctionResponse{
-								ID:       result.ToolCallID,
-								Response: response,
-								Name:     toolCall.ToolName,
-							},
+							FunctionResponse: functionResponse,
 						})
 
 					case fantasy.ToolResultContentTypeError:
@@ -494,12 +532,18 @@ func toGooglePrompt(prompt fantasy.Prompt) (*genai.Content, []*genai.Content, []
 							continue
 						}
 						response := map[string]any{"result": content.Error.Error()}
+						functionResponse := &genai.FunctionResponse{
+							ID:       result.ToolCallID,
+							Response: response,
+							Name:     toolCall.ToolName,
+						}
+
+						// Vertex breaks with a 400 if this field be present.
+						if isVertexAI {
+							functionResponse.ID = ""
+						}
 						parts = append(parts, &genai.Part{
-							FunctionResponse: &genai.FunctionResponse{
-								ID:       result.ToolCallID,
-								Response: response,
-								Name:     toolCall.ToolName,
-							},
+							FunctionResponse: functionResponse,
 						})
 					}
 				}
@@ -519,6 +563,7 @@ func toGooglePrompt(prompt fantasy.Prompt) (*genai.Content, []*genai.Content, []
 
 // Generate implements fantasy.LanguageModel.
 func (g *languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantasy.Response, error) {
+	ctx = withCallUA(ctx, call)
 	config, contents, warnings, err := g.prepareParams(call)
 	if err != nil {
 		return nil, err
@@ -554,6 +599,7 @@ func (g *languageModel) Provider() string {
 
 // Stream implements fantasy.LanguageModel.
 func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.StreamResponse, error) {
+	ctx = withCallUA(ctx, call)
 	config, contents, warnings, err := g.prepareParams(call)
 	if err != nil {
 		return nil, err
@@ -839,7 +885,13 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 		if len(toolCalls) > 0 {
 			finishReason = fantasy.FinishReasonToolCalls
 		} else if finishReason == "" {
-			finishReason = fantasy.FinishReasonStop
+			// Truncated stream: no candidate emitted a finishReason before
+			// close. Surface as a retryable error.
+			yield(fantasy.StreamPart{
+				Type:  fantasy.StreamPartTypeError,
+				Error: fantasy.NewIncompleteStreamError(),
+			})
+			return
 		}
 
 		var finalUsage fantasy.Usage
@@ -880,6 +932,7 @@ func (g *languageModel) StreamObject(ctx context.Context, call fantasy.ObjectCal
 }
 
 func (g *languageModel) generateObjectWithJSONMode(ctx context.Context, call fantasy.ObjectCall) (*fantasy.ObjectResponse, error) {
+	ctx = withObjectCallUA(ctx, call)
 	// Convert our Schema to Google's JSON Schema format
 	jsonSchemaMap := schema.ToMap(call.Schema)
 
@@ -962,6 +1015,7 @@ func (g *languageModel) generateObjectWithJSONMode(ctx context.Context, call fan
 }
 
 func (g *languageModel) streamObjectWithJSONMode(ctx context.Context, call fantasy.ObjectCall) (fantasy.ObjectStreamResponse, error) {
+	ctx = withObjectCallUA(ctx, call)
 	// Convert our Schema to Google's JSON Schema format
 	jsonSchemaMap := schema.ToMap(call.Schema)
 
@@ -1305,12 +1359,15 @@ func (g languageModel) mapResponse(response *genai.GenerateContentResponse, warn
 							if !ok {
 								continue
 							}
-							reasoningContent.ProviderMetadata = fantasy.ProviderMetadata{
-								Name: metadata,
+							// Only use it if it doesn't already have a signature!
+							if reasoningContent.ProviderMetadata == nil || reasoningContent.ProviderMetadata[Name] == nil {
+								reasoningContent.ProviderMetadata = fantasy.ProviderMetadata{
+									Name: metadata,
+								}
+								content[i] = reasoningContent
+								foundReasoning = true
+								break
 							}
-							content[i] = reasoningContent
-							foundReasoning = true
-							break
 						}
 					}
 					if !foundReasoning {

@@ -1,0 +1,207 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 562
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence, Italy?","role":"user"}],"model":"anthropic/claude-haiku-4.5","stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"reasoning":{"effort":"medium"},"usage":{"include":true},"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.21.0 (https://charm.land/fantasy)
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      : OPENROUTER PROCESSING
+
+      : OPENROUTER PROCESSING
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":"The user is asking for","reasoning_details":[{"type":"reasoning.text","text":"The user is asking for","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" weather information in Florence, Italy. I","reasoning_details":[{"type":"reasoning.text","text":" weather information in Florence, Italy. I","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" have","reasoning_details":[{"type":"reasoning.text","text":" have","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" access","reasoning_details":[{"type":"reasoning.text","text":" access","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" to a weather function that takes a location","reasoning_details":[{"type":"reasoning.text","text":" to a weather function that takes a location","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" parameter. I shoul","reasoning_details":[{"type":"reasoning.text","text":" parameter. I shoul","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":"d call","reasoning_details":[{"type":"reasoning.text","text":"d call","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" the weather function with \"Florence, Italy","reasoning_details":[{"type":"reasoning.text","text":" the weather function with \"Florence, Italy","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":"\" or","reasoning_details":[{"type":"reasoning.text","text":"\" or","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" \"Florence\" as the location.","reasoning_details":[{"type":"reasoning.text","text":" \"Florence\" as the location.","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":"\n\nLet me call","reasoning_details":[{"type":"reasoning.text","text":"\n\nLet me call","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" the weather function with the location being","reasoning_details":[{"type":"reasoning.text","text":" the weather function with the location being","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" Florence","reasoning_details":[{"type":"reasoning.text","text":" Florence","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":", Italy (","reasoning_details":[{"type":"reasoning.text","text":", Italy (","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":"or I","reasoning_details":[{"type":"reasoning.text","text":"or I","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" could try","reasoning_details":[{"type":"reasoning.text","text":" could try","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" just","reasoning_details":[{"type":"reasoning.text","text":" just","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" \"Florence\" -","reasoning_details":[{"type":"reasoning.text","text":" \"Florence\" -","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" but","reasoning_details":[{"type":"reasoning.text","text":" but","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" \"","reasoning_details":[{"type":"reasoning.text","text":" \"","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":"Florence, Italy\" woul","reasoning_details":[{"type":"reasoning.text","text":"Florence, Italy\" woul","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":"d be more specific","reasoning_details":[{"type":"reasoning.text","text":"d be more specific","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":" an","reasoning_details":[{"type":"reasoning.text","text":" an","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":"d accurate).","reasoning_details":[{"type":"reasoning.text","text":"d accurate).","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning_details":[{"type":"reasoning.text","signature":"Eq0ECkgIDRABGAIqQM/zwzd9QrbMZ79kRrc7C/5+aoKK90YBv7ZbImUoagaaGZvOU3SP14cZRUHB0b+fLRHRC8LLhfcfaQiGOGAxwdoSDIbgptNVmRLyYm/sdhoMI7e1X+W59yUjKZVlIjAqlULqwvQixLC+CkI+RvLV4hHztMBsL/kzC5raPmOTiEVmCaQ5c7W4fXO3Mon1cZAqkgNVe2nmngGw6pcyT7NffJiTFdTsCng7MUiRRJEF/ewiBLEFGMIPyMN/yUsjQnMewYzwYtsnaf3NGiv15hJ3xrAwdn0YW5k6oU5Fw33QYby3cMAxJxO/Pfz4vQEqEz01veyKIUoIN1ohc/ntl59HQCBxblYiiOvenqc7FZXtTSamyK5aXDaV7chH1xYJYffZGDs4RBYEObRjWADgTi4r01G3RdXMA9UAPbJ2w4y0u85g18EFnIiqfJbm3TfQXtevWaRT8lFV8gaSqjzpqq0a6V3RbZWT/I2iJOVrWxRlVcZWR1/vaR9HkaJsz0d1Gi25UrfJHxsB4QnZKfvDHQ6DrX79FHPvGmfwvUb/BOxjrtARlnKKiMzd15nT9XiDhc1PuUKv7+4mM8XIlG47FQGcGO4MSZMr5hFQsYTlYPx/WfNKrayx+WJ3qPVelJ78+BFLzaoZ2JFjEQJqS+ULV1ZOjkYZNE5Ab/kjUpu6YklsKvdzjfdtBLA94m5g5L4zk6ygJMBjCIQ6ziSW4AAzYQeJjnyJOwYYAQ==","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":null,"role":"assistant","tool_calls":[{"index":0,"id":"toolu_bdrk_01N8hD5cYDw4WfvnjKXAkA2W","type":"function","function":{"name":"weather","arguments":""}}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":null,"role":"assistant","tool_calls":[{"index":0,"function":{"arguments":""}}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":null,"role":"assistant","tool_calls":[{"index":0,"function":{"arguments":""}}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":null,"role":"assistant","tool_calls":[{"index":0,"function":{"arguments":"{\"locat"}}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":null,"role":"assistant","tool_calls":[{"index":0,"function":{"arguments":"ion\": \"Flor"}}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":null,"role":"assistant","tool_calls":[{"index":0,"function":{"arguments":"en"}}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":null,"role":"assistant","tool_calls":[{"index":0,"function":{"arguments":"ce, Ital"}}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":null,"role":"assistant","tool_calls":[{"index":0,"function":{"arguments":"y\"}"}}]},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning":null},"finish_reason":"tool_calls","native_finish_reason":"tool_use"}]}
+
+      data: {"id":"gen-1777319950-BX6MCZRmFqpAw5lUPuhg","object":"chat.completion.chunk","created":1777319950,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant"},"finish_reason":"tool_calls","native_finish_reason":"tool_use"}],"usage":{"prompt_tokens":607,"completion_tokens":143,"total_tokens":750,"cost":0.001322,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"cache_write_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":0.001322,"upstream_inference_prompt_cost":0.000607,"upstream_inference_completions_cost":0.000715},"completion_tokens_details":{"reasoning_tokens":99,"image_tokens":0,"audio_tokens":0}}}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 1.369993583s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 2504
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence, Italy?","role":"user"},{"tool_calls":[{"id":"toolu_bdrk_01N8hD5cYDw4WfvnjKXAkA2W","function":{"arguments":"{\"location\": \"Florence, Italy\"}","name":"weather"},"type":"function"}],"role":"assistant","reasoning_details":[{"format":"anthropic-claude-v1","index":0,"signature":"Eq0ECkgIDRABGAIqQM/zwzd9QrbMZ79kRrc7C/5+aoKK90YBv7ZbImUoagaaGZvOU3SP14cZRUHB0b+fLRHRC8LLhfcfaQiGOGAxwdoSDIbgptNVmRLyYm/sdhoMI7e1X+W59yUjKZVlIjAqlULqwvQixLC+CkI+RvLV4hHztMBsL/kzC5raPmOTiEVmCaQ5c7W4fXO3Mon1cZAqkgNVe2nmngGw6pcyT7NffJiTFdTsCng7MUiRRJEF/ewiBLEFGMIPyMN/yUsjQnMewYzwYtsnaf3NGiv15hJ3xrAwdn0YW5k6oU5Fw33QYby3cMAxJxO/Pfz4vQEqEz01veyKIUoIN1ohc/ntl59HQCBxblYiiOvenqc7FZXtTSamyK5aXDaV7chH1xYJYffZGDs4RBYEObRjWADgTi4r01G3RdXMA9UAPbJ2w4y0u85g18EFnIiqfJbm3TfQXtevWaRT8lFV8gaSqjzpqq0a6V3RbZWT/I2iJOVrWxRlVcZWR1/vaR9HkaJsz0d1Gi25UrfJHxsB4QnZKfvDHQ6DrX79FHPvGmfwvUb/BOxjrtARlnKKiMzd15nT9XiDhc1PuUKv7+4mM8XIlG47FQGcGO4MSZMr5hFQsYTlYPx/WfNKrayx+WJ3qPVelJ78+BFLzaoZ2JFjEQJqS+ULV1ZOjkYZNE5Ab/kjUpu6YklsKvdzjfdtBLA94m5g5L4zk6ygJMBjCIQ6ziSW4AAzYQeJjnyJOwYYAQ==","text":"The user is asking for weather information in Florence, Italy. I have access to a weather function that takes a location parameter. I should call the weather function with \"Florence, Italy\" or \"Florence\" as the location.\n\nLet me call the weather function with the location being Florence, Italy (or I could try just \"Florence\" - but \"Florence, Italy\" would be more specific and accurate).","type":"reasoning.text"}],"reasoning":"The user is asking for weather information in Florence, Italy. I have access to a weather function that takes a location parameter. I should call the weather function with \"Florence, Italy\" or \"Florence\" as the location.\n\nLet me call the weather function with the location being Florence, Italy (or I could try just \"Florence\" - but \"Florence, Italy\" would be more specific and accurate)."},{"content":"40 C","tool_call_id":"toolu_bdrk_01N8hD5cYDw4WfvnjKXAkA2W","role":"tool"}],"model":"anthropic/claude-haiku-4.5","stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"reasoning":{"effort":"medium"},"usage":{"include":true},"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.21.0 (https://charm.land/fantasy)
+    url: https://openrouter.ai/api/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      : OPENROUTER PROCESSING
+
+      : OPENROUTER PROCESSING
+
+      : OPENROUTER PROCESSING
+
+      data: {"id":"gen-1777319952-fbyZefNGWUrY0N3vwtxP","object":"chat.completion.chunk","created":1777319952,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"The weather in Florence, Italy is currently","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319952-fbyZefNGWUrY0N3vwtxP","object":"chat.completion.chunk","created":1777319952,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" **","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319952-fbyZefNGWUrY0N3vwtxP","object":"chat.completion.chunk","created":1777319952,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"40°C (","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319952-fbyZefNGWUrY0N3vwtxP","object":"chat.completion.chunk","created":1777319952,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"104°F)**,","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319952-fbyZefNGWUrY0N3vwtxP","object":"chat.completion.chunk","created":1777319952,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" which","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319952-fbyZefNGWUrY0N3vwtxP","object":"chat.completion.chunk","created":1777319952,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" is quite","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319952-fbyZefNGWUrY0N3vwtxP","object":"chat.completion.chunk","created":1777319952,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" hot","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319952-fbyZefNGWUrY0N3vwtxP","object":"chat.completion.chunk","created":1777319952,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"!","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319952-fbyZefNGWUrY0N3vwtxP","object":"chat.completion.chunk","created":1777319952,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" This is typical","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319952-fbyZefNGWUrY0N3vwtxP","object":"chat.completion.chunk","created":1777319952,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" for Florence","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319952-fbyZefNGWUrY0N3vwtxP","object":"chat.completion.chunk","created":1777319952,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" during the","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319952-fbyZefNGWUrY0N3vwtxP","object":"chat.completion.chunk","created":1777319952,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" summer months.","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319952-fbyZefNGWUrY0N3vwtxP","object":"chat.completion.chunk","created":1777319952,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" If","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319952-fbyZefNGWUrY0N3vwtxP","object":"chat.completion.chunk","created":1777319952,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" you're planning to visit, make","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319952-fbyZefNGWUrY0N3vwtxP","object":"chat.completion.chunk","created":1777319952,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" sure to stay","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319952-fbyZefNGWUrY0N3vwtxP","object":"chat.completion.chunk","created":1777319952,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" hydrated,","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319952-fbyZefNGWUrY0N3vwtxP","object":"chat.completion.chunk","created":1777319952,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" wear","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319952-fbyZefNGWUrY0N3vwtxP","object":"chat.completion.chunk","created":1777319952,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" light clothing","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319952-fbyZefNGWUrY0N3vwtxP","object":"chat.completion.chunk","created":1777319952,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":", and use","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319952-fbyZefNGWUrY0N3vwtxP","object":"chat.completion.chunk","created":1777319952,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" sunscreen.","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319952-fbyZefNGWUrY0N3vwtxP","object":"chat.completion.chunk","created":1777319952,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" It","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319952-fbyZefNGWUrY0N3vwtxP","object":"chat.completion.chunk","created":1777319952,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"'s a goo","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319952-fbyZefNGWUrY0N3vwtxP","object":"chat.completion.chunk","created":1777319952,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"d idea to plan","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319952-fbyZefNGWUrY0N3vwtxP","object":"chat.completion.chunk","created":1777319952,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" outdoor","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319952-fbyZefNGWUrY0N3vwtxP","object":"chat.completion.chunk","created":1777319952,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" activities for early","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319952-fbyZefNGWUrY0N3vwtxP","object":"chat.completion.chunk","created":1777319952,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" morning or late evening","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319952-fbyZefNGWUrY0N3vwtxP","object":"chat.completion.chunk","created":1777319952,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" when it","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319952-fbyZefNGWUrY0N3vwtxP","object":"chat.completion.chunk","created":1777319952,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"'s a","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319952-fbyZefNGWUrY0N3vwtxP","object":"chat.completion.chunk","created":1777319952,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" bit cooler.","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+      data: {"id":"gen-1777319952-fbyZefNGWUrY0N3vwtxP","object":"chat.completion.chunk","created":1777319952,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant"},"finish_reason":"stop","native_finish_reason":"end_turn"}]}
+
+      data: {"id":"gen-1777319952-fbyZefNGWUrY0N3vwtxP","object":"chat.completion.chunk","created":1777319952,"model":"anthropic/claude-4.5-haiku-20251001","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant"},"finish_reason":"stop","native_finish_reason":"end_turn"}],"usage":{"prompt_tokens":764,"completion_tokens":82,"total_tokens":846,"cost":0.001174,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"cache_write_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":0.001174,"upstream_inference_prompt_cost":0.000764,"upstream_inference_completions_cost":0.00041},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0,"audio_tokens":0}}}
+
+      data: [DONE]
+
+    headers:
+      Content-Type:
+      - text/event-stream
+    status: 200 OK
+    code: 200
+    duration: 1.527412458s

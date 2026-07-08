@@ -1,0 +1,113 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 311
+    host: ""
+    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":"You are a helpful assistant","role":"system"},{"content":[{"text":"What is the current population of Tokyo? Cite your source.","type":"input_text"}],"role":"user"}],"model":"gpt-4.1","tool_choice":"auto","tools":[{"type":"web_search"}],"stream":true}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.33.1 (https://charm.land/fantasy)
+    url: https://api.openai.com/v1/responses
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |+
+      event: response.created
+      data: {"type":"response.created","response":{"id":"resp_0200025d411b0585016a3c13b4018c81a3852ca4fd5be2b6a6","object":"response","created_at":1782322100,"status":"in_progress","background":false,"completed_at":null,"error":null,"frequency_penalty":0.0,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-4.1-2025-04-14","moderation":null,"output":[],"parallel_tool_calls":true,"presence_penalty":0.0,"previous_response_id":null,"prompt_cache_key":null,"prompt_cache_retention":"in_memory","reasoning":{"context":null,"effort":null,"summary":null},"safety_identifier":null,"service_tier":"auto","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"web_search","return_token_budget":"default","search_content_types":["text"],"search_context_size":"medium","user_location":{"type":"approximate","city":null,"country":"US","region":null,"timezone":null}}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":null,"user":null,"metadata":{}},"sequence_number":0}
+
+      event: response.in_progress
+      data: {"type":"response.in_progress","response":{"id":"resp_0200025d411b0585016a3c13b4018c81a3852ca4fd5be2b6a6","object":"response","created_at":1782322100,"status":"in_progress","background":false,"completed_at":null,"error":null,"frequency_penalty":0.0,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-4.1-2025-04-14","moderation":null,"output":[],"parallel_tool_calls":true,"presence_penalty":0.0,"previous_response_id":null,"prompt_cache_key":null,"prompt_cache_retention":"in_memory","reasoning":{"context":null,"effort":null,"summary":null},"safety_identifier":null,"service_tier":"auto","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"web_search","return_token_budget":"default","search_content_types":["text"],"search_context_size":"medium","user_location":{"type":"approximate","city":null,"country":"US","region":null,"timezone":null}}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":null,"user":null,"metadata":{}},"sequence_number":1}
+
+      event: response.output_item.added
+      data: {"type":"response.output_item.added","item":{"id":"ws_0200025d411b0585016a3c13b4825c81a391999cec332e6f02","type":"web_search_call","status":"in_progress","action":{"type":"search"}},"output_index":0,"sequence_number":2}
+
+      event: response.web_search_call.in_progress
+      data: {"type":"response.web_search_call.in_progress","item_id":"ws_0200025d411b0585016a3c13b4825c81a391999cec332e6f02","output_index":0,"sequence_number":3}
+
+      event: response.web_search_call.searching
+      data: {"type":"response.web_search_call.searching","item_id":"ws_0200025d411b0585016a3c13b4825c81a391999cec332e6f02","output_index":0,"sequence_number":4}
+
+      event: response.web_search_call.completed
+      data: {"type":"response.web_search_call.completed","item_id":"ws_0200025d411b0585016a3c13b4825c81a391999cec332e6f02","output_index":0,"sequence_number":5}
+
+      event: response.output_item.done
+      data: {"type":"response.output_item.done","item":{"id":"ws_0200025d411b0585016a3c13b4825c81a391999cec332e6f02","type":"web_search_call","status":"completed","action":{"type":"search","queries":["current population of Tokyo 2024"],"query":"current population of Tokyo 2024"}},"output_index":0,"sequence_number":6}
+
+      event: response.output_item.added
+      data: {"type":"response.output_item.added","item":{"id":"msg_0200025d411b0585016a3c13b6174481a392b9817b2c15a5b4","type":"message","status":"in_progress","content":[],"role":"assistant"},"output_index":1,"sequence_number":7}
+
+      event: response.content_part.added
+      data: {"type":"response.content_part.added","content_index":0,"item_id":"msg_0200025d411b0585016a3c13b6174481a392b9817b2c15a5b4","output_index":1,"part":{"type":"output_text","annotations":[],"logprobs":[],"text":""},"sequence_number":8}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":"Here is the most recent and reliable","item_id":"msg_0200025d411b0585016a3c13b6174481a392b9817b2c15a5b4","logprobs":[],"obfuscation":"DQVHD6AboERE","output_index":1,"sequence_number":9}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" official estimate for the population of Tokyo:\n\nAs of **May ","item_id":"msg_0200025d411b0585016a3c13b6174481a392b9817b2c15a5b4","logprobs":[],"obfuscation":"0Qc","output_index":1,"sequence_number":10}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":"1, 2026**, the **","item_id":"msg_0200025d411b0585016a3c13b6174481a392b9817b2c15a5b4","logprobs":[],"obfuscation":"6cNsksSFn4eHSHI","output_index":1,"sequence_number":11}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":"Tokyo Metropolitan Government** reports that the total population of","item_id":"msg_0200025d411b0585016a3c13b6174481a392b9817b2c15a5b4","logprobs":[],"obfuscation":"uUpi7XJV1fGK","output_index":1,"sequence_number":12}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" Tokyo (the entire prefecture) is **","item_id":"msg_0200025d411b0585016a3c13b6174481a392b9817b2c15a5b4","logprobs":[],"obfuscation":"IMtFcLkykFF8","output_index":1,"sequence_number":13}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":"14,328,115** people. ","item_id":"msg_0200025d411b0585016a3c13b6174481a392b9817b2c15a5b4","logprobs":[],"obfuscation":"Wv8ISvft6Ve","output_index":1,"sequence_number":14}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":"([toukei.metro.tokyo.lg.jp](https://www.toukei.metro.tokyo.lg.jp/index.htm?utm_source=openai))\n","item_id":"msg_0200025d411b0585016a3c13b6174481a392b9817b2c15a5b4","logprobs":[],"obfuscation":"T","output_index":1,"sequence_number":15}
+
+      event: response.output_text.annotation.added
+      data: {"type":"response.output_text.annotation.added","annotation":{"type":"url_citation","end_index":333,"start_index":239,"title":"東京都の統計","url":"https://www.toukei.metro.tokyo.lg.jp/index.htm?utm_source=openai"},"annotation_index":0,"content_index":0,"item_id":"msg_0200025d411b0585016a3c13b6174481a392b9817b2c15a5b4","output_index":1,"sequence_number":16}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":"\nThis figure is the latest available from the metropolitan government’s","item_id":"msg_0200025d411b0585016a3c13b6174481a392b9817b2c15a5b4","logprobs":[],"obfuscation":"ZRp0P4A9Q","output_index":1,"sequence_number":17}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" statistical department. If you were asking about a different","item_id":"msg_0200025d411b0585016a3c13b6174481a392b9817b2c15a5b4","logprobs":[],"obfuscation":"99H","output_index":1,"sequence_number":18}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" area defined as \"Tokyo\" — such as just the ","item_id":"msg_0200025d411b0585016a3c13b6174481a392b9817b2c15a5b4","logprobs":[],"obfuscation":"dRK2","output_index":1,"sequence_number":19}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":"23 special wards (区部) or the","item_id":"msg_0200025d411b0585016a3c13b6174481a392b9817b2c15a5b4","logprobs":[],"obfuscation":"zzLe","output_index":1,"sequence_number":20}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":" broader metropolitan area — let me know, and I","item_id":"msg_0200025d411b0585016a3c13b6174481a392b9817b2c15a5b4","logprobs":[],"obfuscation":"u","output_index":1,"sequence_number":21}
+
+      event: response.output_text.delta
+      data: {"type":"response.output_text.delta","content_index":0,"delta":"’d be happy to provide that breakdown as well.","item_id":"msg_0200025d411b0585016a3c13b6174481a392b9817b2c15a5b4","logprobs":[],"obfuscation":"Hk","output_index":1,"sequence_number":22}
+
+      event: response.output_text.done
+      data: {"type":"response.output_text.done","content_index":0,"item_id":"msg_0200025d411b0585016a3c13b6174481a392b9817b2c15a5b4","logprobs":[],"output_index":1,"sequence_number":23,"text":"Here is the most recent and reliable official estimate for the population of Tokyo:\n\nAs of **May 1, 2026**, the **Tokyo Metropolitan Government** reports that the total population of Tokyo (the entire prefecture) is **14,328,115** people. ([toukei.metro.tokyo.lg.jp](https://www.toukei.metro.tokyo.lg.jp/index.htm?utm_source=openai))\n\nThis figure is the latest available from the metropolitan government’s statistical department. If you were asking about a different area defined as \"Tokyo\" — such as just the 23 special wards (区部) or the broader metropolitan area — let me know, and I’d be happy to provide that breakdown as well."}
+
+      event: response.content_part.done
+      data: {"type":"response.content_part.done","content_index":0,"item_id":"msg_0200025d411b0585016a3c13b6174481a392b9817b2c15a5b4","output_index":1,"part":{"type":"output_text","annotations":[{"type":"url_citation","end_index":333,"start_index":239,"title":"東京都の統計","url":"https://www.toukei.metro.tokyo.lg.jp/index.htm?utm_source=openai"}],"logprobs":[],"text":"Here is the most recent and reliable official estimate for the population of Tokyo:\n\nAs of **May 1, 2026**, the **Tokyo Metropolitan Government** reports that the total population of Tokyo (the entire prefecture) is **14,328,115** people. ([toukei.metro.tokyo.lg.jp](https://www.toukei.metro.tokyo.lg.jp/index.htm?utm_source=openai))\n\nThis figure is the latest available from the metropolitan government’s statistical department. If you were asking about a different area defined as \"Tokyo\" — such as just the 23 special wards (区部) or the broader metropolitan area — let me know, and I’d be happy to provide that breakdown as well."},"sequence_number":24}
+
+      event: response.output_item.done
+      data: {"type":"response.output_item.done","item":{"id":"msg_0200025d411b0585016a3c13b6174481a392b9817b2c15a5b4","type":"message","status":"completed","content":[{"type":"output_text","annotations":[{"type":"url_citation","end_index":333,"start_index":239,"title":"東京都の統計","url":"https://www.toukei.metro.tokyo.lg.jp/index.htm?utm_source=openai"}],"logprobs":[],"text":"Here is the most recent and reliable official estimate for the population of Tokyo:\n\nAs of **May 1, 2026**, the **Tokyo Metropolitan Government** reports that the total population of Tokyo (the entire prefecture) is **14,328,115** people. ([toukei.metro.tokyo.lg.jp](https://www.toukei.metro.tokyo.lg.jp/index.htm?utm_source=openai))\n\nThis figure is the latest available from the metropolitan government’s statistical department. If you were asking about a different area defined as \"Tokyo\" — such as just the 23 special wards (区部) or the broader metropolitan area — let me know, and I’d be happy to provide that breakdown as well."}],"role":"assistant"},"output_index":1,"sequence_number":25}
+
+      event: response.completed
+      data: {"type":"response.completed","response":{"id":"resp_0200025d411b0585016a3c13b4018c81a3852ca4fd5be2b6a6","object":"response","created_at":1782322100,"status":"completed","background":false,"completed_at":1782322103,"error":null,"frequency_penalty":0.0,"incomplete_details":null,"instructions":null,"max_output_tokens":4000,"max_tool_calls":null,"model":"gpt-4.1-2025-04-14","moderation":null,"output":[{"id":"ws_0200025d411b0585016a3c13b4825c81a391999cec332e6f02","type":"web_search_call","status":"completed","action":{"type":"search","queries":["current population of Tokyo 2024"],"query":"current population of Tokyo 2024"}},{"id":"msg_0200025d411b0585016a3c13b6174481a392b9817b2c15a5b4","type":"message","status":"completed","content":[{"type":"output_text","annotations":[{"type":"url_citation","end_index":333,"start_index":239,"title":"東京都の統計","url":"https://www.toukei.metro.tokyo.lg.jp/index.htm?utm_source=openai"}],"logprobs":[],"text":"Here is the most recent and reliable official estimate for the population of Tokyo:\n\nAs of **May 1, 2026**, the **Tokyo Metropolitan Government** reports that the total population of Tokyo (the entire prefecture) is **14,328,115** people. ([toukei.metro.tokyo.lg.jp](https://www.toukei.metro.tokyo.lg.jp/index.htm?utm_source=openai))\n\nThis figure is the latest available from the metropolitan government’s statistical department. If you were asking about a different area defined as \"Tokyo\" — such as just the 23 special wards (区部) or the broader metropolitan area — let me know, and I’d be happy to provide that breakdown as well."}],"role":"assistant"}],"parallel_tool_calls":true,"presence_penalty":0.0,"previous_response_id":null,"prompt_cache_key":null,"prompt_cache_retention":"in_memory","reasoning":{"context":null,"effort":null,"summary":null},"safety_identifier":null,"service_tier":"default","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tools":[{"type":"web_search","return_token_budget":"default","search_content_types":["text"],"search_context_size":"medium","user_location":{"type":"approximate","city":null,"country":"US","region":null,"timezone":null}}],"top_logprobs":0,"top_p":1.0,"truncation":"disabled","usage":{"input_tokens":17407,"input_tokens_details":{"cached_tokens":0},"output_tokens":164,"output_tokens_details":{"reasoning_tokens":0},"total_tokens":17571},"user":null,"metadata":{}},"sequence_number":26}
+
+    headers:
+      Content-Type:
+      - text/event-stream; charset=utf-8
+    status: 200 OK
+    code: 200
+    duration: 444.511042ms

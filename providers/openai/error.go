@@ -5,18 +5,27 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"charm.land/fantasy"
-	"github.com/openai/openai-go/v2"
+	"github.com/charmbracelet/openai-go"
+)
+
+var (
+	openaiContextPattern  = regexp.MustCompile(`maximum context length (?:is|of) (\d+) tokens.*?(?:resulted in|requested) ~?(\d+) tokens`)
+	alibabaContextPattern = regexp.MustCompile(`Range of input length should be \[\d+,\s*(\d+)\]`)
+	vercelContextPattern  = regexp.MustCompile(`Input too long:\s*(\d+)\s*input tokens,\s*limit is\s*(\d+)`)
 )
 
 func toProviderErr(err error) error {
 	var apiErr *openai.Error
 	if errors.As(err, &apiErr) {
-		return &fantasy.ProviderError{
+		message := toProviderErrMessage(apiErr)
+		providerErr := &fantasy.ProviderError{
 			Title:           cmp.Or(fantasy.ErrorTitleForStatusCode(apiErr.StatusCode), "provider request failed"),
-			Message:         toProviderErrMessage(apiErr),
+			Message:         message,
 			Cause:           apiErr,
 			URL:             apiErr.Request.URL.String(),
 			StatusCode:      apiErr.StatusCode,
@@ -24,8 +33,39 @@ func toProviderErr(err error) error {
 			ResponseHeaders: toHeaderMap(apiErr.Response.Header),
 			ResponseBody:    apiErr.DumpResponse(true),
 		}
+
+		parseContextTooLargeError(message, providerErr)
+
+		return providerErr
+	}
+	// Wrap in a `ProviderError` so `.IsRetriable()` works.
+	if errors.Is(err, io.ErrUnexpectedEOF) {
+		return &fantasy.ProviderError{
+			Title:   "stream transport error",
+			Message: err.Error(),
+			Cause:   err,
+		}
 	}
 	return err
+}
+
+func parseContextTooLargeError(message string, providerErr *fantasy.ProviderError) {
+	if matches := openaiContextPattern.FindStringSubmatch(message); matches != nil {
+		providerErr.ContextTooLargeErr = true
+		providerErr.ContextMaxTokens, _ = strconv.Atoi(matches[1])
+		providerErr.ContextUsedTokens, _ = strconv.Atoi(matches[2])
+		return
+	}
+	if matches := alibabaContextPattern.FindStringSubmatch(message); matches != nil {
+		providerErr.ContextTooLargeErr = true
+		providerErr.ContextMaxTokens, _ = strconv.Atoi(matches[1])
+		return
+	}
+	if matches := vercelContextPattern.FindStringSubmatch(message); matches != nil {
+		providerErr.ContextTooLargeErr = true
+		providerErr.ContextUsedTokens, _ = strconv.Atoi(matches[1])
+		providerErr.ContextMaxTokens, _ = strconv.Atoi(matches[2])
+	}
 }
 
 func toProviderErrMessage(apiErr *openai.Error) string {

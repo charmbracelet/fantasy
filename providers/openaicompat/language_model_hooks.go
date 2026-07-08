@@ -8,17 +8,34 @@ import (
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/providers/openai"
-	openaisdk "github.com/openai/openai-go/v2"
-	"github.com/openai/openai-go/v2/packages/param"
-	"github.com/openai/openai-go/v2/shared"
+	openaisdk "github.com/charmbracelet/openai-go"
+	"github.com/charmbracelet/openai-go/packages/param"
+	"github.com/charmbracelet/openai-go/shared"
 )
 
 const reasoningStartedCtx = "reasoning_started"
 
+// buildTextBlock creates a text content block, applying any provider-specific extra
+// fields (e.g. Qwen's cache_control) onto it. Part-level fields override message-level
+// fields. Returns the block and whether any extra fields were applied; when they were,
+// the message content must be serialized in array form.
+func buildTextBlock(text string, partOpts, msgOpts fantasy.ProviderOptions) (*openaisdk.ChatCompletionContentPartTextParam, bool) {
+	block := &openaisdk.ChatCompletionContentPartTextParam{Text: text}
+	fields := getContentExtraFields(partOpts)
+	if len(fields) == 0 {
+		fields = getContentExtraFields(msgOpts)
+	}
+	if len(fields) > 0 {
+		block.SetExtraFields(fields)
+		return block, true
+	}
+	return block, false
+}
+
 // PrepareCallFunc prepares the call for the language model.
-func PrepareCallFunc(_ fantasy.LanguageModel, params *openaisdk.ChatCompletionNewParams, call fantasy.Call) ([]fantasy.CallWarning, error) {
+func PrepareCallFunc(model fantasy.LanguageModel, params *openaisdk.ChatCompletionNewParams, call fantasy.Call) ([]fantasy.CallWarning, error) {
 	providerOptions := &ProviderOptions{}
-	if v, ok := call.ProviderOptions[Name]; ok {
+	if v, ok := call.ProviderOptions[model.Provider()]; ok {
 		providerOptions, ok = v.(*ProviderOptions)
 		if !ok {
 			return nil, &fantasy.Error{Title: "invalid argument", Message: "openai-compat provider options should be *openaicompat.ProviderOptions"}
@@ -27,6 +44,8 @@ func PrepareCallFunc(_ fantasy.LanguageModel, params *openaisdk.ChatCompletionNe
 
 	if providerOptions.ReasoningEffort != nil {
 		switch *providerOptions.ReasoningEffort {
+		case openai.ReasoningEffortNone:
+			params.ReasoningEffort = shared.ReasoningEffortNone
 		case openai.ReasoningEffortMinimal:
 			params.ReasoningEffort = shared.ReasoningEffortMinimal
 		case openai.ReasoningEffortLow:
@@ -35,6 +54,10 @@ func PrepareCallFunc(_ fantasy.LanguageModel, params *openaisdk.ChatCompletionNe
 			params.ReasoningEffort = shared.ReasoningEffortMedium
 		case openai.ReasoningEffortHigh:
 			params.ReasoningEffort = shared.ReasoningEffortHigh
+		case openai.ReasoningEffortXHigh:
+			params.ReasoningEffort = shared.ReasoningEffortXhigh
+		case openai.ReasoningEffortMax:
+			params.ReasoningEffort = shared.ReasoningEffortMax
 		default:
 			return nil, fmt.Errorf("reasoning model `%s` not supported", *providerOptions.ReasoningEffort)
 		}
@@ -42,6 +65,9 @@ func PrepareCallFunc(_ fantasy.LanguageModel, params *openaisdk.ChatCompletionNe
 
 	if providerOptions.User != nil {
 		params.User = param.NewOpt(*providerOptions.User)
+	}
+	if len(providerOptions.ExtraBody) > 0 {
+		params.SetExtraFields(providerOptions.ExtraBody)
 	}
 	return nil, nil
 }
@@ -54,9 +80,9 @@ func ExtraContentFunc(choice openaisdk.ChatCompletionChoice) []fantasy.Content {
 	if err != nil {
 		return content
 	}
-	if reasoningData.ReasoningContent != "" {
+	if rc := reasoningData.GetReasoningContent(); rc != "" {
 		content = append(content, fantasy.ReasoningContent{
-			Text: reasoningData.ReasoningContent,
+			Text: rc,
 		})
 	}
 	return content
@@ -110,11 +136,11 @@ func StreamExtraFunc(chunk openaisdk.ChatCompletionChunk, yield func(fantasy.Str
 				Delta: reasoningContent,
 			})
 		}
-		if reasoningData.ReasoningContent != "" {
+		if rc := reasoningData.GetReasoningContent(); rc != "" {
 			if !reasoningStarted {
 				ctx[reasoningStartedCtx] = true
 			}
-			return ctx, emitEvent(reasoningData.ReasoningContent)
+			return ctx, emitEvent(rc)
 		}
 		if reasoningStarted && (choice.Delta.Content != "" || len(choice.Delta.ToolCalls) > 0) {
 			ctx[reasoningStartedCtx] = false
@@ -133,10 +159,14 @@ func StreamExtraFunc(chunk openaisdk.ChatCompletionChunk, yield func(fantasy.Str
 func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletionMessageParamUnion, []fantasy.CallWarning) {
 	var messages []openaisdk.ChatCompletionMessageParamUnion
 	var warnings []fantasy.CallWarning
+	hasReasoning := false
+
 	for _, msg := range prompt {
 		switch msg.Role {
 		case fantasy.MessageRoleSystem:
-			var systemPromptParts []string
+			var blocks []openaisdk.ChatCompletionContentPartTextParam
+			useArrayForm := false
+
 			for _, c := range msg.Content {
 				if c.GetType() != fantasy.ContentTypeText {
 					warnings = append(warnings, fantasy.CallWarning{
@@ -153,22 +183,38 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 					})
 					continue
 				}
-				text := textPart.Text
-				if strings.TrimSpace(text) != "" {
-					systemPromptParts = append(systemPromptParts, textPart.Text)
+				if strings.TrimSpace(textPart.Text) == "" {
+					continue
 				}
+
+				block, hasExtra := buildTextBlock(textPart.Text, textPart.ProviderOptions, msg.ProviderOptions)
+				useArrayForm = useArrayForm || hasExtra
+				blocks = append(blocks, *block)
 			}
-			if len(systemPromptParts) == 0 {
+
+			if len(blocks) == 0 {
 				warnings = append(warnings, fantasy.CallWarning{
 					Type:    fantasy.CallWarningTypeOther,
 					Message: "system prompt has no text parts",
 				})
 				continue
 			}
-			messages = append(messages, openaisdk.SystemMessage(strings.Join(systemPromptParts, "\n")))
+
+			if useArrayForm {
+				messages = append(messages, openaisdk.SystemMessage(blocks))
+			} else {
+				texts := make([]string, len(blocks))
+				for i, b := range blocks {
+					texts[i] = b.Text
+				}
+				messages = append(messages, openaisdk.SystemMessage(strings.Join(texts, "\n")))
+			}
 		case fantasy.MessageRoleUser:
-			// simple user message just text content
-			if len(msg.Content) == 1 && msg.Content[0].GetType() == fantasy.ContentTypeText {
+			// simple user message just text content. Messages carrying extra
+			// content fields fall through to the array path below, which applies
+			// them via buildTextBlock.
+			if len(msg.Content) == 1 && msg.Content[0].GetType() == fantasy.ContentTypeText &&
+				!hasContentExtraFields(msg.Content[0].Options(), msg.ProviderOptions) {
 				textPart, ok := fantasy.AsContentType[fantasy.TextPart](msg.Content[0])
 				if !ok {
 					warnings = append(warnings, fantasy.CallWarning{
@@ -193,10 +239,9 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 						})
 						continue
 					}
+					textBlock, _ := buildTextBlock(textPart.Text, textPart.ProviderOptions, msg.ProviderOptions)
 					content = append(content, openaisdk.ChatCompletionContentPartUnionParam{
-						OfText: &openaisdk.ChatCompletionContentPartTextParam{
-							Text: textPart.Text,
-						},
+						OfText: textBlock,
 					})
 				case fantasy.ContentTypeFile:
 					filePart, ok := fantasy.AsContentType[fantasy.FilePart](c)
@@ -209,6 +254,13 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 					}
 
 					switch {
+					case strings.HasPrefix(filePart.MediaType, "text/"):
+						base64Encoded := base64.StdEncoding.EncodeToString(filePart.Data)
+						documentBlock := openaisdk.ChatCompletionContentPartFileFileParam{
+							FileData: param.NewOpt(base64Encoded),
+						}
+						content = append(content, openaisdk.FileContentPart(documentBlock))
+
 					case strings.HasPrefix(filePart.MediaType, "image/"):
 						// Handle image files
 						base64Encoded := base64.StdEncoding.EncodeToString(filePart.Data)
@@ -306,7 +358,15 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 					})
 					continue
 				}
-				messages = append(messages, openaisdk.AssistantMessage(textPart.Text))
+				// Extra content fields (e.g. cache_control) require array form.
+				textBlock, hasExtra := buildTextBlock(textPart.Text, textPart.ProviderOptions, msg.ProviderOptions)
+				if hasExtra {
+					messages = append(messages, openaisdk.AssistantMessage([]openaisdk.ChatCompletionAssistantMessageParamContentArrayOfContentPartUnion{
+						{OfText: textBlock},
+					}))
+				} else {
+					messages = append(messages, openaisdk.AssistantMessage(textPart.Text))
+				}
 				continue
 			}
 			assistantMsg := openaisdk.ChatCompletionAssistantMessageParam{
@@ -324,8 +384,17 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 						})
 						continue
 					}
-					assistantMsg.Content = openaisdk.ChatCompletionAssistantMessageParamContentUnion{
-						OfString: param.NewOpt(textPart.Text),
+					textBlock, hasExtra := buildTextBlock(textPart.Text, textPart.ProviderOptions, msg.ProviderOptions)
+					if hasExtra {
+						assistantMsg.Content = openaisdk.ChatCompletionAssistantMessageParamContentUnion{
+							OfArrayOfContentParts: []openaisdk.ChatCompletionAssistantMessageParamContentArrayOfContentPartUnion{
+								{OfText: textBlock},
+							},
+						}
+					} else {
+						assistantMsg.Content = openaisdk.ChatCompletionAssistantMessageParamContentUnion{
+							OfString: param.NewOpt(textPart.Text),
+						}
 					}
 				case fantasy.ContentTypeReasoning:
 					reasoningPart, ok := fantasy.AsContentType[fantasy.ReasoningPart](c)
@@ -337,6 +406,7 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 						continue
 					}
 					reasoningText = reasoningPart.Text
+					hasReasoning = true
 				case fantasy.ContentTypeToolCall:
 					toolCallPart, ok := fantasy.AsContentType[fantasy.ToolCallPart](c)
 					if !ok {
@@ -359,8 +429,10 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 						})
 				}
 			}
-			// Add reasoning_content field if present
-			if reasoningText != "" {
+			// Add reasoning_content field if present, or if thinking is enabled
+			// and the message has tool calls (some providers like Kimi require
+			// reasoning_content on all assistant messages when thinking is enabled).
+			if reasoningText != "" || (hasReasoning && len(assistantMsg.ToolCalls) > 0) {
 				assistantMsg.SetExtraFields(map[string]any{
 					"reasoning_content": reasoningText,
 				})

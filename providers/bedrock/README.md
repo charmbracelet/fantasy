@@ -1,7 +1,7 @@
 # Bedrock
 
 - Install the AWS CLI
-- Log in in `aws configure`
+- Log in with `aws login`
 
 To see available models, run:
 

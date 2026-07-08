@@ -1,0 +1,63 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 842
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"}],"model":"moonshotai/Kimi-K2-Instruct-0905:groq","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+    url: https://router.huggingface.co/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |
+      {"id":"chatcmpl-a1862f62-6066-4ac1-88e3-a97272337803","object":"chat.completion","created":1773347275,"model":"moonshotai/kimi-k2-instruct-0905","choices":[{"index":0,"message":{"role":"assistant","content":"I will perform both addition and multiplication on the numbers 2 and 3.","tool_calls":[{"id":"functions.add:0","type":"function","function":{"name":"add","arguments":"{\"a\":2,\"b\":3}"}},{"id":"functions.multiply:1","type":"function","function":{"name":"multiply","arguments":"{\"a\":2,\"b\":3}"}}]},"logprobs":null,"finish_reason":"tool_calls"}],"usage":{"queue_time":0.071642918,"prompt_tokens":205,"prompt_time":0.024722865,"completion_tokens":57,"completion_time":0.157808154,"total_tokens":262,"total_time":0.182531019},"usage_breakdown":null,"system_fingerprint":"fp_241bc7119c","x_groq":{"id":"req_01kkhvr0gve36tx885a3mzgs49","seed":96327555},"service_tier":"on_demand"}
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 457.16075ms
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1305
+    host: ""
+    body: '{"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"content":"I will perform both addition and multiplication on the numbers 2 and 3.","tool_calls":[{"id":"functions.add:0","function":{"arguments":"{\"a\":2,\"b\":3}","name":"add"},"type":"function"},{"id":"functions.multiply:1","function":{"arguments":"{\"a\":2,\"b\":3}","name":"multiply"},"type":"function"}],"role":"assistant"},{"content":"5","tool_call_id":"functions.add:0","role":"tool"},{"content":"6","tool_call_id":"functions.multiply:1","role":"tool"}],"model":"moonshotai/Kimi-K2-Instruct-0905:groq","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - Charm-Fantasy/0.12.2 (https://charm.land/fantasy)
+    url: https://router.huggingface.co/v1/chat/completions
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: -1
+    body: |
+      {"id":"chatcmpl-3026f7a6-c406-4e4d-b016-bfd925782af0","object":"chat.completion","created":1773347275,"model":"moonshotai/kimi-k2-instruct-0905","choices":[{"index":0,"message":{"role":"assistant","content":"The results are:\n- Addition: 2 + 3 = 5\n- Multiplication: 2 × 3 = 6"},"logprobs":null,"finish_reason":"stop"}],"usage":{"queue_time":0.065363187,"prompt_tokens":299,"prompt_time":0.029569493,"completion_tokens":29,"completion_time":0.062942563,"total_tokens":328,"total_time":0.092512056},"usage_breakdown":null,"system_fingerprint":"fp_00c37775b7","x_groq":{"id":"req_01kkhvr0z2eyhv5ns0rs648e58","seed":756091581},"service_tier":"on_demand"}
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 455.612041ms

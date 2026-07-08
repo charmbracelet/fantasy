@@ -15,7 +15,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAI/Go 2.3.0
+      - Charm-Fantasy/0.33.1 (https://charm.land/fantasy)
     url: https://api.openai.com/v1/responses
     method: POST
   response:
@@ -26,28 +26,32 @@ interactions:
     uncompressed: true
     body: |-
       {
-        "id": "resp_0b81ac5fdc5483560168f237f54ccc81968efa75aba7162889",
+        "id": "resp_0320e3f50879ffd0016a3c1217824881a09817355d0690c260",
         "object": "response",
-        "created_at": 1760704501,
+        "created_at": 1782321687,
         "status": "completed",
         "background": false,
         "billing": {
           "payer": "developer"
         },
+        "completed_at": 1782321689,
         "error": null,
+        "frequency_penalty": 0.0,
         "incomplete_details": null,
         "instructions": null,
         "max_output_tokens": 4000,
         "max_tool_calls": null,
         "model": "gpt-5-2025-08-07",
+        "moderation": null,
         "output": [
           {
-            "id": "rs_0b81ac5fdc5483560168f237f6618881968521aadd267daa6a",
+            "id": "rs_0320e3f50879ffd0016a3c1217f90c81a0bf64cc451638f3e6",
             "type": "reasoning",
+            "content": [],
             "summary": []
           },
           {
-            "id": "msg_0b81ac5fdc5483560168f237f84b6c81968619287b3bf9dee9",
+            "id": "msg_0320e3f50879ffd0016a3c1218fb1881a0881b261ab719bafa",
             "type": "message",
             "status": "completed",
             "content": [
@@ -55,16 +59,19 @@ interactions:
                 "type": "output_text",
                 "annotations": [],
                 "logprobs": [],
-                "text": "Oi!"
+                "text": "Ol\u00e1!"
               }
             ],
             "role": "assistant"
           }
         ],
         "parallel_tool_calls": true,
+        "presence_penalty": 0.0,
         "previous_response_id": null,
         "prompt_cache_key": null,
+        "prompt_cache_retention": "in_memory",
         "reasoning": {
+          "context": "current_turn",
           "effort": "medium",
           "summary": null
         },
@@ -88,11 +95,11 @@ interactions:
           "input_tokens_details": {
             "cached_tokens": 0
           },
-          "output_tokens": 136,
+          "output_tokens": 86,
           "output_tokens_details": {
-            "reasoning_tokens": 128
+            "reasoning_tokens": 64
           },
-          "total_tokens": 155
+          "total_tokens": 105
         },
         "user": null,
         "metadata": {}
@@ -102,4 +109,4 @@ interactions:
       - application/json
     status: 200 OK
     code: 200
-    duration: 3.478110792s
+    duration: 1.9655875s

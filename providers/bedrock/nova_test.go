@@ -345,3 +345,206 @@ func TestStream_WarningPropagation(t *testing.T) {
 	// Note: Warning propagation is tested more thoroughly in integration tests
 	// where we can provide calls with unsupported features that generate warnings
 }
+
+// Unit tests for Extended Thinking model validation
+
+func TestSupportsExtendedThinking(t *testing.T) {
+	t.Parallel()
+
+	testCases := []struct {
+		name      string
+		modelID   string
+		supported bool
+	}{
+		// Nova 2 models (support extended thinking)
+		{
+			name:      "nova-2-lite without region prefix",
+			modelID:   "amazon.nova-2-lite-v1:0",
+			supported: true,
+		},
+		{
+			name:      "nova-2-lite with us region prefix",
+			modelID:   "us.amazon.nova-2-lite-v1:0",
+			supported: true,
+		},
+		{
+			name:      "nova-2-lite with eu region prefix",
+			modelID:   "eu.amazon.nova-2-lite-v1:0",
+			supported: true,
+		},
+
+		// Nova 1 models (do NOT support extended thinking)
+		{
+			name:      "nova-micro",
+			modelID:   "amazon.nova-micro-v1:0",
+			supported: false,
+		},
+		{
+			name:      "nova-lite",
+			modelID:   "amazon.nova-lite-v1:0",
+			supported: false,
+		},
+		{
+			name:      "nova-pro",
+			modelID:   "amazon.nova-pro-v1:0",
+			supported: false,
+		},
+		{
+			name:      "nova-premier",
+			modelID:   "amazon.nova-premier-v1:0",
+			supported: false,
+		},
+		{
+			name:      "nova-pro with region prefix",
+			modelID:   "us.amazon.nova-pro-v1:0",
+			supported: false,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			result := supportsExtendedThinking(tc.modelID)
+			require.Equal(t, tc.supported, result,
+				"supportsExtendedThinking(%s) should return %v", tc.modelID, tc.supported)
+		})
+	}
+}
+
+func TestStripRegionPrefix(t *testing.T) {
+	t.Parallel()
+
+	testCases := []struct {
+		name     string
+		modelID  string
+		expected string
+	}{
+		{
+			name:     "us region prefix",
+			modelID:  "us.amazon.nova-pro-v1:0",
+			expected: "amazon.nova-pro-v1:0",
+		},
+		{
+			name:     "eu region prefix",
+			modelID:  "eu.amazon.nova-2-lite-v1:0",
+			expected: "amazon.nova-2-lite-v1:0",
+		},
+		{
+			name:     "ap region prefix",
+			modelID:  "ap.amazon.nova-premier-v1:0",
+			expected: "amazon.nova-premier-v1:0",
+		},
+		{
+			name:     "no region prefix",
+			modelID:  "amazon.nova-pro-v1:0",
+			expected: "amazon.nova-pro-v1:0",
+		},
+		{
+			name:     "invalid prefix (numbers)",
+			modelID:  "12.amazon.nova-pro-v1:0",
+			expected: "12.amazon.nova-pro-v1:0",
+		},
+		{
+			name:     "short model ID",
+			modelID:  "ab",
+			expected: "ab",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			result := stripRegionPrefix(tc.modelID)
+			require.Equal(t, tc.expected, result,
+				"stripRegionPrefix(%s) should return %s", tc.modelID, tc.expected)
+		})
+	}
+}
+
+func TestRequiresHighEffortRestrictions(t *testing.T) {
+	t.Parallel()
+
+	testCases := []struct {
+		name       string
+		effort     ReasoningEffort
+		restricted bool
+	}{
+		{
+			name:       "low effort",
+			effort:     ReasoningEffortLow,
+			restricted: false,
+		},
+		{
+			name:       "medium effort",
+			effort:     ReasoningEffortMedium,
+			restricted: false,
+		},
+		{
+			name:       "high effort",
+			effort:     ReasoningEffortHigh,
+			restricted: true,
+		},
+		{
+			name:       "empty effort",
+			effort:     "",
+			restricted: false,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			result := requiresHighEffortRestrictions(tc.effort)
+			require.Equal(t, tc.restricted, result,
+				"requiresHighEffortRestrictions(%s) should return %v", tc.effort, tc.restricted)
+		})
+	}
+}
+
+func TestGetReasoningTimeout(t *testing.T) {
+	t.Parallel()
+
+	testCases := []struct {
+		name           string
+		effort         ReasoningEffort
+		customTimeout  int
+		expectedMinutes int
+	}{
+		{
+			name:           "low effort default",
+			effort:         ReasoningEffortLow,
+			customTimeout:  0,
+			expectedMinutes: 10,
+		},
+		{
+			name:           "medium effort default",
+			effort:         ReasoningEffortMedium,
+			customTimeout:  0,
+			expectedMinutes: 30,
+		},
+		{
+			name:           "high effort default",
+			effort:         ReasoningEffortHigh,
+			customTimeout:  0,
+			expectedMinutes: 90,
+		},
+		{
+			name:           "custom timeout overrides default",
+			effort:         ReasoningEffortHigh,
+			customTimeout:  120,
+			expectedMinutes: 120,
+		},
+		{
+			name:           "empty effort defaults to medium",
+			effort:         "",
+			customTimeout:  0,
+			expectedMinutes: 30,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			result := getReasoningTimeout(tc.effort, tc.customTimeout)
+			expectedDuration := tc.expectedMinutes * 60 * 1000000000 // convert to nanoseconds
+			require.Equal(t, int64(expectedDuration), int64(result),
+				"getReasoningTimeout(%s, %d) should return %d minutes", tc.effort, tc.customTimeout, tc.expectedMinutes)
+		})
+	}
+}

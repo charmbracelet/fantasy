@@ -3,6 +3,8 @@ package bedrock
 import (
 	"context"
 	"fmt"
+	"strings"
+	"time"
 
 	"charm.land/fantasy"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -38,6 +40,17 @@ func (n *novaLanguageModel) Generate(ctx context.Context, call fantasy.Call) (*f
 		return nil, fmt.Errorf("failed to prepare converse request: %w", err)
 	}
 
+	// Apply extended thinking timeout if enabled
+	if thinkingEnabled(extractProviderOptions(call)) {
+		opts := extractProviderOptions(call)
+		effort := resolveReasoningEffort(opts)
+
+		timeout := getReasoningTimeout(effort, opts.Thinking.TimeoutMinutes)
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, timeout)
+		defer cancel()
+	}
+
 	// Invoke the Converse API
 	output, err := n.client.Converse(ctx, request)
 	if err != nil {
@@ -61,6 +74,17 @@ func (n *novaLanguageModel) Stream(ctx context.Context, call fantasy.Call) (fant
 	request, warnings, err := n.prepareConverseStreamRequest(call)
 	if err != nil {
 		return nil, fmt.Errorf("failed to prepare converse stream request: %w", err)
+	}
+
+	// Apply extended thinking timeout if enabled
+	if thinkingEnabled(extractProviderOptions(call)) {
+		opts := extractProviderOptions(call)
+		effort := resolveReasoningEffort(opts)
+
+		timeout := getReasoningTimeout(effort, opts.Thinking.TimeoutMinutes)
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, timeout)
+		defer cancel()
 	}
 
 	// Invoke the ConverseStream API
@@ -89,17 +113,16 @@ func (n *novaLanguageModel) StreamObject(ctx context.Context, call fantasy.Objec
 // It loads AWS configuration, applies region prefix to the model ID,
 // and creates a Bedrock Runtime client.
 func (p *provider) createNovaModel(ctx context.Context, modelID string) (fantasy.LanguageModel, error) {
-	// Load AWS configuration using default credential chain
-	// For tests, provide a default region if not configured
-	cfg, err := config.LoadDefaultConfig(ctx,
-		config.WithRegion("us-east-1"), // Default region for tests
-	)
+	cfgOpts := []func(*config.LoadOptions) error{}
+	if p.options.region != "" {
+		cfgOpts = append(cfgOpts, config.WithRegion(p.options.region))
+	}
+
+	cfg, err := config.LoadDefaultConfig(ctx, cfgOpts...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load AWS configuration: %w", err)
 	}
 
-	// Apply region prefix to model ID
-	// The region is obtained from the AWS config
 	prefixedModelID := applyRegionPrefix(modelID, cfg.Region)
 
 	// Create Bedrock Runtime client
@@ -111,4 +134,57 @@ func (p *provider) createNovaModel(ctx context.Context, modelID string) (fantasy
 		client:   client,
 		options:  p.options,
 	}, nil
+}
+
+// supportsExtendedThinking checks if a Nova model supports extended thinking.
+// Only Nova 2 Lite supports extended thinking (nova-2-lite-v1:0).
+// Nova Generation 1 models (Micro, Lite, Pro, Premier) do NOT support it.
+func supportsExtendedThinking(modelID string) bool {
+	// Remove region prefix using existing stripRegionPrefix function
+	modelID = stripRegionPrefix(modelID)
+
+	// Check for Nova 2 Lite
+	return strings.Contains(modelID, "nova-2-lite")
+}
+
+// stripRegionPrefix removes the region prefix from a model ID.
+// Reuses logic from applyRegionPrefix in region.go.
+// E.g., "us.amazon.nova-pro-v1:0" -> "amazon.nova-pro-v1:0"
+func stripRegionPrefix(modelID string) string {
+	// Region prefixes are always 2 letters followed by a dot (e.g., "us.", "eu.")
+	if len(modelID) >= 3 && modelID[2] == '.' {
+		firstTwo := modelID[:2]
+		// Check if it's a lowercase letter pattern (region code)
+		// Reuse isLowercaseLetters from region.go
+		if isLowercaseLetters(firstTwo) {
+			return modelID[3:]
+		}
+	}
+	return modelID
+}
+
+// requiresHighEffortRestrictions checks if high effort mode parameter restrictions apply.
+// In high effort mode, temperature, topP, and topK must not be set.
+func requiresHighEffortRestrictions(effort ReasoningEffort) bool {
+	return effort == ReasoningEffortHigh
+}
+
+// getReasoningTimeout returns the appropriate timeout duration based on reasoning effort.
+// AWS recommends 60+ minute timeouts for extended thinking operations.
+func getReasoningTimeout(effort ReasoningEffort, customTimeout int) time.Duration {
+	if customTimeout > 0 {
+		return time.Duration(customTimeout) * time.Minute
+	}
+
+	// Default timeouts based on AWS recommendations
+	switch effort {
+	case ReasoningEffortLow:
+		return 10 * time.Minute
+	case ReasoningEffortMedium:
+		return 30 * time.Minute
+	case ReasoningEffortHigh:
+		return 90 * time.Minute
+	default:
+		return 30 * time.Minute
+	}
 }

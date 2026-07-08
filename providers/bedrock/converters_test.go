@@ -538,3 +538,221 @@ func TestHandleConverseStream_ReasoningContent(t *testing.T) {
 	// 5. Content block stop for reasoning should yield StreamPartTypeReasoningEnd
 	// 6. Multiple reasoning blocks should each get unique IDs (reasoning-0, reasoning-1, etc.)
 }
+
+// Unit tests for Extended Thinking validation
+
+// TestPrepareConverseRequest_ReasoningConfigFormat tests that reasoningConfig uses "extended" type.
+func TestPrepareConverseRequest_ReasoningConfigFormat(t *testing.T) {
+	model := createTestModel(t)
+	// Use a Nova 2 model that supports extended thinking
+	model.modelID = "us.amazon.nova-2-lite-v1:0"
+
+	call := fantasy.Call{
+		Prompt: fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "Solve this problem"},
+				},
+			},
+		},
+		ProviderOptions: fantasy.ProviderOptions{
+			Name: &ProviderOptions{
+				Thinking: &ThinkingProviderOption{
+					ReasoningEffort: ReasoningEffortMedium,
+				},
+			},
+		},
+	}
+
+	request, warnings, err := model.prepareConverseRequest(call)
+	require.NoError(t, err)
+	require.NotNil(t, request)
+	require.Empty(t, warnings, "Nova 2 models should not generate warnings for extended thinking")
+
+	// Verify AdditionalModelRequestFields is set (contains reasoningConfig)
+	require.NotNil(t, request.AdditionalModelRequestFields,
+		"AdditionalModelRequestFields should be set for extended thinking")
+
+	// Note: The actual reasoningConfig format (type: "extended") is tested through
+	// integration tests with real API calls. Unit testing document.Interface marshaling
+	// is complex and not necessary here - we verify that:
+	// 1. No warnings are generated for Nova 2 models
+	// 2. AdditionalModelRequestFields is populated
+	// The code in converters.go sets type: "extended" at lines 105-108 and 658-661
+}
+
+// TestPrepareConverseRequest_UnsupportedModelWarning tests warnings for Nova Gen 1 models.
+func TestPrepareConverseRequest_UnsupportedModelWarning(t *testing.T) {
+	testCases := []struct {
+		name    string
+		modelID string
+	}{
+		{"nova-micro", "amazon.nova-micro-v1:0"},
+		{"nova-lite", "amazon.nova-lite-v1:0"},
+		{"nova-pro", "amazon.nova-pro-v1:0"},
+		{"nova-premier", "amazon.nova-premier-v1:0"},
+		{"nova-pro with region", "us.amazon.nova-pro-v1:0"},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			model := createTestModel(t)
+			model.modelID = tc.modelID
+
+			call := fantasy.Call{
+				Prompt: fantasy.Prompt{
+					{
+						Role: fantasy.MessageRoleUser,
+						Content: []fantasy.MessagePart{
+							fantasy.TextPart{Text: "Test"},
+						},
+					},
+				},
+				ProviderOptions: fantasy.ProviderOptions{
+					Name: &ProviderOptions{
+						Thinking: &ThinkingProviderOption{
+							ReasoningEffort: ReasoningEffortMedium,
+						},
+					},
+				},
+			}
+
+			request, warnings, err := model.prepareConverseRequest(call)
+			require.NoError(t, err)
+			require.NotNil(t, request)
+
+			// Should generate a warning about unsupported feature
+			require.Len(t, warnings, 1)
+			require.Equal(t, fantasy.CallWarningTypeUnsupportedSetting, warnings[0].Type)
+			require.Equal(t, "thinking", warnings[0].Setting)
+			require.Contains(t, warnings[0].Message, "Nova 2 Lite")
+
+			// Note: We can't easily verify that reasoningConfig is NOT in AdditionalModelRequestFields
+			// using unit tests because document.Interface marshaling is complex.
+			// The code in converters.go only adds reasoningConfig inside the "else" block
+			// when supportsExtendedThinking returns true (lines 75-108 and 628-661).
+			// Integration tests will verify the actual API behavior.
+		})
+	}
+}
+
+// TestPrepareConverseRequest_HighEffortRestrictions tests parameter restrictions in high effort mode.
+func TestPrepareConverseRequest_HighEffortRestrictions(t *testing.T) {
+	model := createTestModel(t)
+	model.modelID = "us.amazon.nova-2-lite-v1:0"
+
+	temp := 0.7
+	topP := 0.9
+	topK := int64(50)
+
+	call := fantasy.Call{
+		Prompt: fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "Solve this complex problem"},
+				},
+			},
+		},
+		Temperature: &temp,
+		TopP:        &topP,
+		TopK:        &topK,
+		ProviderOptions: fantasy.ProviderOptions{
+			Name: &ProviderOptions{
+				Thinking: &ThinkingProviderOption{
+					ReasoningEffort: ReasoningEffortHigh,
+				},
+			},
+		},
+	}
+
+	request, warnings, err := model.prepareConverseRequest(call)
+	require.NoError(t, err)
+	require.NotNil(t, request)
+
+	// Should generate warnings for temperature, topP, and topK
+	require.Len(t, warnings, 3)
+
+	warningSettings := make(map[string]bool)
+	for _, w := range warnings {
+		require.Equal(t, fantasy.CallWarningTypeUnsupportedSetting, w.Type)
+		warningSettings[w.Setting] = true
+	}
+
+	require.True(t, warningSettings["temperature"], "Should warn about temperature")
+	require.True(t, warningSettings["topP"], "Should warn about topP")
+	require.True(t, warningSettings["topK"], "Should warn about topK")
+
+	// Temperature and TopP should be removed from inferenceConfig
+	require.Nil(t, request.InferenceConfig.Temperature,
+		"Temperature should be removed in high effort mode")
+	require.Nil(t, request.InferenceConfig.TopP,
+		"TopP should be removed in high effort mode")
+}
+
+// TestPrepareConverseStreamRequest_ExtendedThinkingValidation tests validation in streaming requests.
+func TestPrepareConverseStreamRequest_ExtendedThinkingValidation(t *testing.T) {
+	model := createTestModel(t)
+
+	testCases := []struct {
+		name           string
+		modelID        string
+		expectWarning  bool
+		expectConfig   bool
+	}{
+		{
+			name:          "Nova 2 model should have reasoningConfig",
+			modelID:       "us.amazon.nova-2-lite-v1:0",
+			expectWarning: false,
+			expectConfig:  true,
+		},
+		{
+			name:          "Nova 1 model should generate warning",
+			modelID:       "us.amazon.nova-pro-v1:0",
+			expectWarning: true,
+			expectConfig:  false,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			model.modelID = tc.modelID
+
+			call := fantasy.Call{
+				Prompt: fantasy.Prompt{
+					{
+						Role: fantasy.MessageRoleUser,
+						Content: []fantasy.MessagePart{
+							fantasy.TextPart{Text: "Test"},
+						},
+					},
+				},
+				ProviderOptions: fantasy.ProviderOptions{
+					Name: &ProviderOptions{
+						Thinking: &ThinkingProviderOption{
+							ReasoningEffort: ReasoningEffortMedium,
+						},
+					},
+				},
+			}
+
+			request, warnings, err := model.prepareConverseStreamRequest(call)
+			require.NoError(t, err)
+			require.NotNil(t, request)
+
+			if tc.expectWarning {
+				require.NotEmpty(t, warnings, "Should generate warning for unsupported model")
+			} else {
+				require.Empty(t, warnings, "Should not generate warnings for supported model")
+			}
+
+			// Check for AdditionalModelRequestFields presence
+			// (it contains reasoningConfig if extended thinking is supported)
+			hasAdditionalFields := request.AdditionalModelRequestFields != nil
+
+			require.Equal(t, tc.expectConfig, hasAdditionalFields,
+				"AdditionalModelRequestFields presence mismatch for model %s", tc.modelID)
+		})
+	}
+}

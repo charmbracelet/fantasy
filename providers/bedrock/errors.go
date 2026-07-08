@@ -2,6 +2,7 @@ package bedrock
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"charm.land/fantasy"
@@ -20,9 +21,16 @@ func convertAWSError(err error) error {
 	var apiErr smithy.APIError
 	if errors.As(err, &apiErr) {
 		statusCode := getStatusCodeFromAWSError(apiErr)
+
+		// Add helpful context for extended thinking timeout errors
+		message := apiErr.ErrorMessage()
+		if apiErr.ErrorCode() == "ModelTimeoutException" {
+			message = fmt.Sprintf("%s. Extended thinking operations can take 60-120 minutes. Consider increasing the timeout using ThinkingProviderOption.TimeoutMinutes.", message)
+		}
+
 		return &fantasy.ProviderError{
 			Title:      fantasy.ErrorTitleForStatusCode(statusCode),
-			Message:    apiErr.ErrorMessage(),
+			Message:    message,
 			Cause:      err,
 			StatusCode: statusCode,
 		}
@@ -80,6 +88,16 @@ func getStatusCodeFromAWSError(apiErr smithy.APIError) int {
 		"ModelNotFoundException",
 		"NotFoundException":
 		return http.StatusNotFound
+
+	// Extended thinking specific errors
+	case "ModelTimeoutException":
+		return http.StatusGatewayTimeout // 504
+
+	case "ModelStreamErrorException":
+		return http.StatusInternalServerError // 500
+
+	case "ModelNotReadyException":
+		return http.StatusServiceUnavailable // 503
 
 	// Default to 500 for unknown errors
 	default:

@@ -76,6 +76,14 @@ type ThinkingProviderOption struct {
 	// Nova uses ReasoningEffort instead. If only BudgetTokens is set,
 	// it will be mapped to an effort level.
 	BudgetTokens int64 `json:"budget_tokens,omitempty"`
+
+	// TimeoutMinutes sets the timeout for extended thinking operations.
+	// Recommended values:
+	// - Low effort: 10-15 minutes
+	// - Medium effort: 30 minutes
+	// - High effort: 90 minutes
+	// If not set, defaults are applied based on effort level.
+	TimeoutMinutes int `json:"timeout_minutes,omitempty"`
 }
 
 // ReasoningOptionMetadata represents reasoning metadata for the Bedrock provider.

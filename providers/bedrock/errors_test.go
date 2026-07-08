@@ -315,4 +315,88 @@ func TestGetStatusCodeFromAWSError(t *testing.T) {
 	}
 }
 
+// Unit tests for Extended Thinking error codes
+
+func TestConvertAWSError_ExtendedThinkingErrors(t *testing.T) {
+	t.Parallel()
+
+	testCases := []struct {
+		name               string
+		errorCode          string
+		expectedStatusCode int
+		checkMessage       bool
+	}{
+		{
+			name:               "ModelTimeoutException",
+			errorCode:          "ModelTimeoutException",
+			expectedStatusCode: http.StatusGatewayTimeout,
+			checkMessage:       true, // Should include helpful context
+		},
+		{
+			name:               "ModelStreamErrorException",
+			errorCode:          "ModelStreamErrorException",
+			expectedStatusCode: http.StatusInternalServerError,
+			checkMessage:       false,
+		},
+		{
+			name:               "ModelNotReadyException",
+			errorCode:          "ModelNotReadyException",
+			expectedStatusCode: http.StatusServiceUnavailable,
+			checkMessage:       false,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			awsErr := &mockAPIError{
+				code:    tc.errorCode,
+				message: "Model operation failed",
+			}
+
+			convertedErr := convertAWSError(awsErr)
+			require.NotNil(t, convertedErr)
+
+			providerErr, ok := convertedErr.(*fantasy.ProviderError)
+			require.True(t, ok, "Expected ProviderError")
+			require.Equal(t, tc.expectedStatusCode, providerErr.StatusCode)
+			require.NotEmpty(t, providerErr.Title)
+			require.Equal(t, awsErr, providerErr.Cause)
+
+			if tc.checkMessage {
+				// ModelTimeoutException should include helpful context
+				require.Contains(t, providerErr.Message, "60-120 minutes",
+					"Timeout error should mention typical extended thinking duration")
+				require.Contains(t, providerErr.Message, "TimeoutMinutes",
+					"Timeout error should mention TimeoutMinutes configuration")
+			}
+		})
+	}
+}
+
+func TestGetStatusCodeFromAWSError_ExtendedThinking(t *testing.T) {
+	t.Parallel()
+
+	testCases := []struct {
+		errorCode          string
+		expectedStatusCode int
+	}{
+		{"ModelTimeoutException", http.StatusGatewayTimeout},
+		{"ModelStreamErrorException", http.StatusInternalServerError},
+		{"ModelNotReadyException", http.StatusServiceUnavailable},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.errorCode, func(t *testing.T) {
+			awsErr := &mockAPIError{
+				code:    tc.errorCode,
+				message: "test error",
+			}
+
+			statusCode := getStatusCodeFromAWSError(awsErr)
+			require.Equal(t, tc.expectedStatusCode, statusCode,
+				"Status code mismatch for error code: %s", tc.errorCode)
+		})
+	}
+}
+
 // Note: mockAPIError is defined in properties_test.go and shared across test files

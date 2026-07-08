@@ -13,6 +13,7 @@ import (
 
 type options struct {
 	skipAuth         bool
+	region           string
 	anthropicOptions []anthropic.Option
 	headers          map[string]string
 	client           option.HTTPClient
@@ -101,5 +102,12 @@ func WithHTTPClient(client option.HTTPClient) Option {
 func WithSkipAuth(skipAuth bool) Option {
 	return func(o *options) {
 		o.skipAuth = skipAuth
+	}
+}
+
+// WithRegion sets the AWS region for the Bedrock provider.
+func WithRegion(region string) Option {
+	return func(o *options) {
+		o.region = region
 	}
 }

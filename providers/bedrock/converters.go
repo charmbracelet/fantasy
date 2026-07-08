@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"charm.land/fantasy"
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -17,13 +18,7 @@ import (
 func (n *novaLanguageModel) prepareConverseRequest(call fantasy.Call) (*bedrockruntime.ConverseInput, []fantasy.CallWarning, error) {
 	var warnings []fantasy.CallWarning
 
-	// Extract provider options
-	providerOptions := &ProviderOptions{}
-	if v, ok := call.ProviderOptions[Name]; ok {
-		if opts, ok := v.(*ProviderOptions); ok {
-			providerOptions = opts
-		}
-	}
+	providerOptions := extractProviderOptions(call)
 
 	// Convert messages to Converse API format
 	messages, systemBlocks, err := convertMessages(call.Prompt)
@@ -46,32 +41,52 @@ func (n *novaLanguageModel) prepareConverseRequest(call fantasy.Call) (*bedrockr
 	// Build additional model request fields
 	additionalFieldsMap := make(map[string]interface{})
 
-	// Add thinking configuration if enabled (Nova uses reasoningConfig)
-	if providerOptions.Thinking != nil {
-		effort := providerOptions.Thinking.ReasoningEffort
-		// If no effort set but budget tokens provided, map to effort level
-		if effort == "" && providerOptions.Thinking.BudgetTokens > 0 {
-			switch {
-			case providerOptions.Thinking.BudgetTokens < 5000:
-				effort = ReasoningEffortLow
-			case providerOptions.Thinking.BudgetTokens < 15000:
-				effort = ReasoningEffortMedium
-			default:
-				effort = ReasoningEffortHigh
+	skipTopK := false
+	if thinkingEnabled(providerOptions) {
+		effort := resolveReasoningEffort(providerOptions)
+
+		if !supportsExtendedThinking(n.modelID) {
+			warnings = append(warnings, fantasy.CallWarning{
+				Type:    fantasy.CallWarningTypeUnsupportedSetting,
+				Setting: "thinking",
+				Message: fmt.Sprintf("Extended thinking is only supported by Nova 2 Lite (nova-2-lite). Model %s does not support this feature.", n.modelID),
+			})
+		} else {
+			if requiresHighEffortRestrictions(effort) {
+				if call.Temperature != nil {
+					inferenceConfig.Temperature = nil
+					warnings = append(warnings, fantasy.CallWarning{
+						Type:    fantasy.CallWarningTypeUnsupportedSetting,
+						Setting: "temperature",
+						Message: "Temperature parameter is not supported in high effort extended thinking mode and will be ignored",
+					})
+				}
+				if call.TopP != nil {
+					inferenceConfig.TopP = nil
+					warnings = append(warnings, fantasy.CallWarning{
+						Type:    fantasy.CallWarningTypeUnsupportedSetting,
+						Setting: "topP",
+						Message: "TopP parameter is not supported in high effort extended thinking mode and will be ignored",
+					})
+				}
+				if call.TopK != nil {
+					skipTopK = true
+					warnings = append(warnings, fantasy.CallWarning{
+						Type:    fantasy.CallWarningTypeUnsupportedSetting,
+						Setting: "topK",
+						Message: "TopK parameter is not supported in high effort extended thinking mode and will be ignored",
+					})
+				}
 			}
-		}
-		// Default to medium if thinking is enabled but no effort specified
-		if effort == "" {
-			effort = ReasoningEffortMedium
-		}
-		additionalFieldsMap["reasoningConfig"] = map[string]interface{}{
-			"type":               "enabled",
-			"maxReasoningEffort": string(effort),
+
+			additionalFieldsMap["reasoningConfig"] = map[string]interface{}{
+				"type":               "enabled",
+				"maxReasoningEffort": string(effort),
+			}
 		}
 	}
 
-	// Add top_k if specified (though Nova doesn't support it)
-	if call.TopK != nil {
+	if call.TopK != nil && !skipTopK {
 		additionalFieldsMap["top_k"] = *call.TopK
 		warnings = append(warnings, fantasy.CallWarning{
 			Type:    fantasy.CallWarningTypeUnsupportedSetting,
@@ -274,6 +289,7 @@ func convertToolCall(toolCallPart fantasy.ToolCallPart) (types.ContentBlock, err
 // convertToolResult converts a fantasy ToolResultPart to a Converse tool result block.
 func convertToolResult(toolResultPart fantasy.ToolResultPart) (types.ContentBlock, error) {
 	var contentBlocks []types.ToolResultContentBlock
+	status := types.ToolResultStatusSuccess
 
 	switch output := toolResultPart.Output.(type) {
 	case fantasy.ToolResultOutputContentText:
@@ -282,6 +298,7 @@ func convertToolResult(toolResultPart fantasy.ToolResultPart) (types.ContentBloc
 		})
 
 	case fantasy.ToolResultOutputContentError:
+		status = types.ToolResultStatusError
 		errorText := "Error"
 		if output.Error != nil {
 			errorText = output.Error.Error()
@@ -332,6 +349,7 @@ func convertToolResult(toolResultPart fantasy.ToolResultPart) (types.ContentBloc
 		Value: types.ToolResultBlock{
 			ToolUseId: aws.String(toolResultPart.ToolCallID),
 			Content:   contentBlocks,
+			Status:    status,
 		},
 	}, nil
 }
@@ -502,6 +520,16 @@ func convertContentBlock(block types.ContentBlock) (fantasy.Content, error) {
 			Data:      data,
 		}, nil
 
+	case *types.ContentBlockMemberReasoningContent:
+		text, metadata := reasoningTextFromBlock(b.Value)
+		content := fantasy.ReasoningContent{Text: text}
+		if metadata != nil {
+			content.ProviderMetadata = fantasy.ProviderMetadata{
+				Name: metadata,
+			}
+		}
+		return content, nil
+
 	default:
 		// Unknown content block type, skip it
 		return nil, nil
@@ -531,13 +559,7 @@ func convertStopReason(stopReason types.StopReason) fantasy.FinishReason {
 func (n *novaLanguageModel) prepareConverseStreamRequest(call fantasy.Call) (*bedrockruntime.ConverseStreamInput, []fantasy.CallWarning, error) {
 	var warnings []fantasy.CallWarning
 
-	// Extract provider options
-	providerOptions := &ProviderOptions{}
-	if v, ok := call.ProviderOptions[Name]; ok {
-		if opts, ok := v.(*ProviderOptions); ok {
-			providerOptions = opts
-		}
-	}
+	providerOptions := extractProviderOptions(call)
 
 	// Convert messages to Converse API format
 	messages, systemBlocks, err := convertMessages(call.Prompt)
@@ -560,32 +582,52 @@ func (n *novaLanguageModel) prepareConverseStreamRequest(call fantasy.Call) (*be
 	// Build additional model request fields
 	additionalFieldsMap := make(map[string]interface{})
 
-	// Add thinking configuration if enabled (Nova uses reasoningConfig)
-	if providerOptions.Thinking != nil {
-		effort := providerOptions.Thinking.ReasoningEffort
-		// If no effort set but budget tokens provided, map to effort level
-		if effort == "" && providerOptions.Thinking.BudgetTokens > 0 {
-			switch {
-			case providerOptions.Thinking.BudgetTokens < 5000:
-				effort = ReasoningEffortLow
-			case providerOptions.Thinking.BudgetTokens < 15000:
-				effort = ReasoningEffortMedium
-			default:
-				effort = ReasoningEffortHigh
+	skipTopK := false
+	if thinkingEnabled(providerOptions) {
+		effort := resolveReasoningEffort(providerOptions)
+
+		if !supportsExtendedThinking(n.modelID) {
+			warnings = append(warnings, fantasy.CallWarning{
+				Type:    fantasy.CallWarningTypeUnsupportedSetting,
+				Setting: "thinking",
+				Message: fmt.Sprintf("Extended thinking is only supported by Nova 2 Lite (nova-2-lite). Model %s does not support this feature.", n.modelID),
+			})
+		} else {
+			if requiresHighEffortRestrictions(effort) {
+				if call.Temperature != nil {
+					inferenceConfig.Temperature = nil
+					warnings = append(warnings, fantasy.CallWarning{
+						Type:    fantasy.CallWarningTypeUnsupportedSetting,
+						Setting: "temperature",
+						Message: "Temperature parameter is not supported in high effort extended thinking mode and will be ignored",
+					})
+				}
+				if call.TopP != nil {
+					inferenceConfig.TopP = nil
+					warnings = append(warnings, fantasy.CallWarning{
+						Type:    fantasy.CallWarningTypeUnsupportedSetting,
+						Setting: "topP",
+						Message: "TopP parameter is not supported in high effort extended thinking mode and will be ignored",
+					})
+				}
+				if call.TopK != nil {
+					skipTopK = true
+					warnings = append(warnings, fantasy.CallWarning{
+						Type:    fantasy.CallWarningTypeUnsupportedSetting,
+						Setting: "topK",
+						Message: "TopK parameter is not supported in high effort extended thinking mode and will be ignored",
+					})
+				}
 			}
-		}
-		// Default to medium if thinking is enabled but no effort specified
-		if effort == "" {
-			effort = ReasoningEffortMedium
-		}
-		additionalFieldsMap["reasoningConfig"] = map[string]interface{}{
-			"type":               "enabled",
-			"maxReasoningEffort": string(effort),
+
+			additionalFieldsMap["reasoningConfig"] = map[string]interface{}{
+				"type":               "enabled",
+				"maxReasoningEffort": string(effort),
+			}
 		}
 	}
 
-	// Add top_k if specified (though Nova doesn't support it)
-	if call.TopK != nil {
+	if call.TopK != nil && !skipTopK {
 		additionalFieldsMap["top_k"] = *call.TopK
 		warnings = append(warnings, fantasy.CallWarning{
 			Type:    fantasy.CallWarningTypeUnsupportedSetting,
@@ -856,9 +898,19 @@ func (n *novaLanguageModel) handleConverseStream(output *bedrockruntime.Converse
 
 		// Check for stream errors
 		if err := stream.Err(); err != nil {
+			// Convert AWS error with enhanced context
+			convertedErr := convertAWSError(err)
+
+			// Add additional context for streaming errors
+			if providerErr, ok := convertedErr.(*fantasy.ProviderError); ok {
+				if providerErr.StatusCode == http.StatusInternalServerError {
+					providerErr.Message = fmt.Sprintf("Stream error: %s. This may be due to tool call failures or model timeouts.", providerErr.Message)
+				}
+			}
+
 			yield(fantasy.StreamPart{
 				Type:  fantasy.StreamPartTypeError,
-				Error: convertAWSError(err),
+				Error: convertedErr,
 			})
 			return
 		}

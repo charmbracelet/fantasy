@@ -1,6 +1,7 @@
 name: lint
 on:
   push:
+    branches: [main]
   pull_request:
 
 jobs:
@@ -10,3 +11,4 @@ jobs:
       golangci_path: .golangci.yml
       golangci_version: v2.9
       timeout: 10m
+      os: '["ubuntu-latest"]'

@@ -247,7 +247,7 @@ func (o languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantas
 	if err != nil {
 		return nil, err
 	}
-	response, err := o.client.Chat.Completions.New(ctx, *params, callUARequestOptions(call)...)
+	response, err := o.client.Chat.Completions.New(ctx, *params, append(callUARequestOptions(call), callHeadersRequestOptions(call)...)...)
 	if err != nil {
 		return nil, toProviderErr(err)
 	}
@@ -318,7 +318,7 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 		IncludeUsage: openai.Bool(true),
 	}
 
-	stream := o.client.Chat.Completions.NewStreaming(ctx, *params, callUARequestOptions(call)...)
+	stream := o.client.Chat.Completions.NewStreaming(ctx, *params, append(callUARequestOptions(call), callHeadersRequestOptions(call)...)...)
 	isActiveText := false
 	toolCalls := make(map[int64]streamToolCall)
 
@@ -764,7 +764,7 @@ func (o languageModel) generateObjectWithJSONMode(ctx context.Context, call fant
 		},
 	}
 
-	response, err := o.client.Chat.Completions.New(ctx, *params, objectCallUARequestOptions(call)...)
+	response, err := o.client.Chat.Completions.New(ctx, *params, append(objectCallUARequestOptions(call), objectCallHeadersRequestOptions(call)...)...)
 	if err != nil {
 		return nil, toProviderErr(err)
 	}
@@ -848,7 +848,7 @@ func (o languageModel) streamObjectWithJSONMode(ctx context.Context, call fantas
 		IncludeUsage: openai.Bool(true),
 	}
 
-	stream := o.client.Chat.Completions.NewStreaming(ctx, *params, objectCallUARequestOptions(call)...)
+	stream := o.client.Chat.Completions.NewStreaming(ctx, *params, append(objectCallUARequestOptions(call), objectCallHeadersRequestOptions(call)...)...)
 
 	return func(yield func(fantasy.ObjectStreamPart) bool) {
 		if len(warnings) > 0 {

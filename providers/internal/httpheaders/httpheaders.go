@@ -58,3 +58,13 @@ func CallUserAgent(callUA string) (string, bool) {
 	}
 	return "", false
 }
+
+// CallHeaders resolves per-call headers. It returns the headers map and true
+// if per-call headers should be applied, or nil and false if the client-level
+// headers should be used as-is.
+func CallHeaders(headers map[string]string) (map[string]string, bool) {
+	if len(headers) > 0 {
+		return headers, true
+	}
+	return nil, false
+}

@@ -44,6 +44,9 @@ type ObjectCall struct {
 	// UserAgent overrides the provider-level User-Agent header for this call.
 	UserAgent string `json:"-"`
 
+	// Headers overrides matching provider-level headers for this call.
+	Headers map[string]string `json:"-"`
+
 	ProviderOptions ProviderOptions
 
 	RepairText schema.ObjectRepairFunc

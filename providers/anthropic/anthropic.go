@@ -94,6 +94,7 @@ func buildRequestOptions(call fantasy.Call, rawTools []json.RawMessage, betaFlag
 	}
 
 	reqOpts := callUARequestOptions(call)
+	reqOpts = append(reqOpts, callHeadersRequestOptions(call)...)
 	if len(rawTools) > 0 {
 		// Tools are injected as raw JSON rather than via params.Tools
 		// because the SDK doesn't model beta tool types (e.g. computer

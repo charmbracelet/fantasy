@@ -776,7 +776,7 @@ func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call)
 		return nil, err
 	}
 
-	response, err := o.client.Responses.New(ctx, *params, callUARequestOptions(call)...)
+	response, err := o.client.Responses.New(ctx, *params, append(callUARequestOptions(call), callHeadersRequestOptions(call)...)...)
 	if err != nil {
 		return nil, toProviderErr(err)
 	}
@@ -931,7 +931,7 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 		return nil, err
 	}
 
-	stream := o.client.Responses.NewStreaming(ctx, *params, callUARequestOptions(call)...)
+	stream := o.client.Responses.NewStreaming(ctx, *params, append(callUARequestOptions(call), callHeadersRequestOptions(call)...)...)
 
 	finishReason := fantasy.FinishReasonUnknown
 	var usage fantasy.Usage
@@ -1418,7 +1418,7 @@ func (o responsesLanguageModel) generateObjectWithJSONMode(ctx context.Context, 
 	}
 
 	// Make request
-	response, err := o.client.Responses.New(ctx, *params, objectCallUARequestOptions(call)...)
+	response, err := o.client.Responses.New(ctx, *params, append(objectCallUARequestOptions(call), objectCallHeadersRequestOptions(call)...)...)
 	if err != nil {
 		return nil, toProviderErr(err)
 	}
@@ -1521,7 +1521,7 @@ func (o responsesLanguageModel) streamObjectWithJSONMode(ctx context.Context, ca
 		Format: responses.ResponseFormatTextConfigParamOfJSONSchema(schemaName, jsonSchemaMap),
 	}
 
-	stream := o.client.Responses.NewStreaming(ctx, *params, objectCallUARequestOptions(call)...)
+	stream := o.client.Responses.NewStreaming(ctx, *params, append(objectCallUARequestOptions(call), objectCallHeadersRequestOptions(call)...)...)
 
 	return func(yield func(fantasy.ObjectStreamPart) bool) {
 		if len(warnings) > 0 {

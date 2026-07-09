@@ -8,6 +8,7 @@ require (
 	github.com/ardanlabs/kronk v1.28.6
 	github.com/aws/aws-sdk-go-v2 v1.42.1
 	github.com/aws/aws-sdk-go-v2/config v1.32.27
+	github.com/aws/aws-sdk-go-v2/service/bedrockruntime v1.47.2
 	github.com/aws/smithy-go v1.27.3
 	github.com/charmbracelet/anthropic-sdk-go v0.0.0-20260223140439-63879b0b8dab
 	github.com/charmbracelet/openai-go v0.0.0-20260617131321-5e4b9c18c4be
@@ -21,6 +22,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	golang.org/x/oauth2 v0.36.0
 	google.golang.org/genai v1.62.0
+	pgregory.net/rapid v1.2.0
 )
 
 require (

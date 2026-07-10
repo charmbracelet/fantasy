@@ -50,6 +50,9 @@ type ObjectCall struct {
 	ProviderOptions ProviderOptions
 
 	RepairText schema.ObjectRepairFunc
+
+	Tools      []Tool      `json:"tools"`
+	ToolChoice *ToolChoice `json:"tool_choice"`
 }
 
 // ObjectResponse represents the response from a structured object generation.
@@ -60,6 +63,7 @@ type ObjectResponse struct {
 	FinishReason     FinishReason
 	Warnings         []CallWarning
 	ProviderMetadata ProviderMetadata
+	ToolCalls        []ToolCallContent
 }
 
 // ObjectStreamPartType indicates the type of stream part.
@@ -102,6 +106,7 @@ type ObjectResult[T any] struct {
 	FinishReason     FinishReason
 	Warnings         []CallWarning
 	ProviderMetadata ProviderMetadata
+	ToolCalls        []ToolCallContent
 }
 
 // StreamObjectResult provides typed access to a streaming object generation result.

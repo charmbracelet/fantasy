@@ -1405,6 +1405,8 @@ func (o responsesLanguageModel) generateObjectWithJSONMode(ctx context.Context, 
 		PresencePenalty:  call.PresencePenalty,
 		FrequencyPenalty: call.FrequencyPenalty,
 		ProviderOptions:  call.ProviderOptions,
+		Tools:            call.Tools,
+		ToolChoice:       call.ToolChoice,
 	}
 
 	params, warnings, err := o.prepareParams(fantasyCall)
@@ -1430,8 +1432,8 @@ func (o responsesLanguageModel) generateObjectWithJSONMode(ctx context.Context, 
 		}
 	}
 
-	// Extract JSON text from response
 	var jsonText string
+	var toolCalls []fantasy.ToolCallContent
 	for _, outputItem := range response.Output {
 		if outputItem.Type == "message" {
 			for _, contentPart := range outputItem.Content {
@@ -1441,21 +1443,35 @@ func (o responsesLanguageModel) generateObjectWithJSONMode(ctx context.Context, 
 				}
 			}
 		}
+		if outputItem.Type == "function_call" {
+			toolCalls = append(toolCalls, fantasy.ToolCallContent{
+				ProviderExecuted: false,
+				ToolCallID:       outputItem.CallID,
+				ToolName:         outputItem.Name,
+				Input:            outputItem.Arguments.OfString,
+			})
+		}
 	}
 
-	if jsonText == "" {
-		usage := fantasy.Usage{
-			InputTokens:  response.Usage.InputTokens,
-			OutputTokens: response.Usage.OutputTokens,
-			TotalTokens:  response.Usage.InputTokens + response.Usage.OutputTokens,
-		}
-		finishReason := mapResponsesFinishReason(response.IncompleteDetails.Reason, false)
+	usage := responsesUsage(*response)
+	hasFunctionCall := len(toolCalls) > 0
+	finishReason := mapResponsesFinishReason(response.IncompleteDetails.Reason, hasFunctionCall)
+
+	if jsonText == "" && len(toolCalls) == 0 {
 		return nil, &fantasy.NoObjectGeneratedError{
 			RawText:      "",
 			ParseError:   fmt.Errorf("no text content in response"),
 			Usage:        usage,
 			FinishReason: finishReason,
 		}
+	}
+
+	if jsonText == "" && len(toolCalls) > 0 {
+		return &fantasy.ObjectResponse{
+			Usage:        usage,
+			FinishReason: finishReason,
+			ToolCalls:    toolCalls,
+		}, nil
 	}
 
 	// Parse and validate
@@ -1465,9 +1481,6 @@ func (o responsesLanguageModel) generateObjectWithJSONMode(ctx context.Context, 
 	} else {
 		obj, err = schema.ParseAndValidate(jsonText, call.Schema)
 	}
-
-	usage := responsesUsage(*response)
-	finishReason := mapResponsesFinishReason(response.IncompleteDetails.Reason, false)
 
 	if err != nil {
 		// Add usage info to error
@@ -1485,6 +1498,7 @@ func (o responsesLanguageModel) generateObjectWithJSONMode(ctx context.Context, 
 		FinishReason:     finishReason,
 		Warnings:         warnings,
 		ProviderMetadata: responsesProviderMetadata(response.ID),
+		ToolCalls:        toolCalls,
 	}, nil
 }
 

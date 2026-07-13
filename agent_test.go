@@ -2719,3 +2719,176 @@ func TestAgent_Generate_StopTurn_NotSet(t *testing.T) {
 	require.Len(t, toolResults, 1)
 	require.False(t, toolResults[0].StopTurn)
 }
+
+func TestPrepareCall(t *testing.T) {
+	t.Parallel()
+
+	systemFromCall := func(call Call) string {
+		if len(call.Prompt) == 0 || call.Prompt[0].Role != MessageRoleSystem {
+			return ""
+		}
+		if len(call.Prompt[0].Content) == 0 {
+			return ""
+		}
+		text, ok := AsContentType[TextPart](call.Prompt[0].Content[0])
+		if !ok {
+			return ""
+		}
+		return text.Text
+	}
+
+	t.Run("hook can override system prompt via CallOptions", func(t *testing.T) {
+		t.Parallel()
+
+		var captured string
+		model := &mockLanguageModel{
+			generateFunc: func(_ context.Context, call Call) (*Response, error) {
+				captured = systemFromCall(call)
+				return &Response{
+					Content:      ResponseContent{TextContent{Text: "ok"}},
+					Usage:        Usage{TotalTokens: 1},
+					FinishReason: FinishReasonStop,
+				}, nil
+			},
+		}
+
+		type promptRef struct{ Name string }
+		hook := func(ctx context.Context, c *AgentCall) (context.Context, error) {
+			ref, ok := c.CallOptions.(promptRef)
+			require.True(t, ok)
+			require.NotNil(t, c.SystemPrompt, "prepareCall should resolve SystemPrompt before the hook")
+			require.Equal(t, "agent default", *c.SystemPrompt)
+			s := "fetched: " + ref.Name
+			c.SystemPrompt = &s
+			return ctx, nil
+		}
+
+		agent := NewAgent(model, WithSystemPrompt("agent default"), WithPrepareCall(hook))
+
+		_, err := agent.Generate(context.Background(), AgentCall{
+			Prompt:      "user input",
+			CallOptions: promptRef{Name: "support-bot"},
+		})
+
+		require.NoError(t, err)
+		require.Equal(t, "fetched: support-bot", captured)
+	})
+
+	t.Run("explicit SystemPrompt without hook bypasses agent default", func(t *testing.T) {
+		t.Parallel()
+
+		var captured string
+		model := &mockLanguageModel{
+			generateFunc: func(_ context.Context, call Call) (*Response, error) {
+				captured = systemFromCall(call)
+				return &Response{
+					Content:      ResponseContent{TextContent{Text: "ok"}},
+					Usage:        Usage{TotalTokens: 1},
+					FinishReason: FinishReasonStop,
+				}, nil
+			},
+		}
+
+		agent := NewAgent(model, WithSystemPrompt("agent default"))
+
+		override := "explicit per-call system"
+		_, err := agent.Generate(context.Background(), AgentCall{
+			SystemPrompt: &override,
+			Prompt:       "user input",
+		})
+
+		require.NoError(t, err)
+		require.Equal(t, "explicit per-call system", captured)
+	})
+
+	t.Run("PrepareStep can still override the prepared system", func(t *testing.T) {
+		t.Parallel()
+
+		var captured string
+		model := &mockLanguageModel{
+			generateFunc: func(_ context.Context, call Call) (*Response, error) {
+				captured = systemFromCall(call)
+				return &Response{
+					Content:      ResponseContent{TextContent{Text: "ok"}},
+					Usage:        Usage{TotalTokens: 1},
+					FinishReason: FinishReasonStop,
+				}, nil
+			},
+		}
+
+		hook := func(ctx context.Context, c *AgentCall) (context.Context, error) {
+			s := "from prepare call"
+			c.SystemPrompt = &s
+			return ctx, nil
+		}
+		prepareStep := func(ctx context.Context, _ PrepareStepFunctionOptions) (context.Context, PrepareStepResult, error) {
+			s := "from prepare step"
+			return ctx, PrepareStepResult{System: &s}, nil
+		}
+
+		agent := NewAgent(model, WithSystemPrompt("agent default"), WithPrepareCall(hook))
+
+		_, err := agent.Generate(context.Background(), AgentCall{
+			Prompt:      "user input",
+			PrepareStep: prepareStep,
+		})
+
+		require.NoError(t, err)
+		require.Equal(t, "from prepare step", captured)
+	})
+
+	t.Run("hook clearing SystemPrompt falls back to agent default", func(t *testing.T) {
+		t.Parallel()
+
+		var captured string
+		model := &mockLanguageModel{
+			generateFunc: func(_ context.Context, call Call) (*Response, error) {
+				captured = systemFromCall(call)
+				return &Response{
+					Content:      ResponseContent{TextContent{Text: "ok"}},
+					Usage:        Usage{TotalTokens: 1},
+					FinishReason: FinishReasonStop,
+				}, nil
+			},
+		}
+
+		hook := func(ctx context.Context, c *AgentCall) (context.Context, error) {
+			c.SystemPrompt = nil
+			return ctx, nil
+		}
+
+		agent := NewAgent(model, WithSystemPrompt("agent default"), WithPrepareCall(hook))
+
+		_, err := agent.Generate(context.Background(), AgentCall{Prompt: "user input"})
+		require.NoError(t, err)
+		require.Equal(t, "agent default", captured)
+	})
+
+	t.Run("Stream forwards explicit SystemPrompt through AgentCall conversion", func(t *testing.T) {
+		t.Parallel()
+
+		var captured string
+		model := &mockLanguageModel{
+			streamFunc: func(_ context.Context, call Call) (StreamResponse, error) {
+				captured = systemFromCall(call)
+				return func(yield func(StreamPart) bool) {
+					yield(StreamPart{
+						Type:         StreamPartTypeFinish,
+						Usage:        Usage{TotalTokens: 1},
+						FinishReason: FinishReasonStop,
+					})
+				}, nil
+			},
+		}
+
+		agent := NewAgent(model, WithSystemPrompt("agent default"))
+
+		override := "explicit per-call system"
+		_, err := agent.Stream(context.Background(), AgentStreamCall{
+			SystemPrompt: &override,
+			Prompt:       "user input",
+		})
+		require.NoError(t, err)
+		require.Equal(t, "explicit per-call system", captured)
+	})
+}

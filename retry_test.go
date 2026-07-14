@@ -64,6 +64,35 @@ func TestIsRetryableError(t *testing.T) {
 			t.Error("expected generic error to not be retryable")
 		}
 	})
+
+	t.Run("HTTP/2 stream error is retryable", func(t *testing.T) {
+		t.Parallel()
+		err := errors.New("stream error: stream ID 27; INTERNAL_ERROR; received from peer")
+		if !isRetryableError(err) {
+			t.Error("expected HTTP/2 stream error to be retryable")
+		}
+	})
+
+	t.Run("HTTP/2 connection error is retryable", func(t *testing.T) {
+		t.Parallel()
+		err := errors.New("connection error: INTERNAL_ERROR")
+		if !isRetryableError(err) {
+			t.Error("expected HTTP/2 connection error to be retryable")
+		}
+	})
+
+	t.Run("ProviderError wrapping HTTP/2 stream error is retryable", func(t *testing.T) {
+		t.Parallel()
+		rawErr := errors.New("stream error: stream ID 5; REFUSED_STREAM")
+		err := &ProviderError{
+			Title:   "stream transport error",
+			Message: "REFUSED_STREAM",
+			Cause:   rawErr,
+		}
+		if !isRetryableError(err) {
+			t.Error("expected ProviderError wrapping HTTP/2 stream error to be retryable")
+		}
+	})
 }
 
 func TestRetryWithExponentialBackoff_ConnectionErrors(t *testing.T) {
@@ -139,6 +168,35 @@ func TestRetryWithExponentialBackoff_ConnectionErrors(t *testing.T) {
 		var retryErr *RetryError
 		if !errors.As(err, &retryErr) {
 			t.Fatalf("expected RetryError, got %T: %v", err, err)
+		}
+	})
+
+	t.Run("retries on HTTP/2 stream error", func(t *testing.T) {
+		t.Parallel()
+		attempts := 0
+		opts := RetryOptions{
+			MaxRetries:     2,
+			InitialDelayIn: 1 * time.Millisecond,
+			BackoffFactor:  2.0,
+		}
+
+		retryFn := RetryWithExponentialBackoffRespectingRetryHeaders[int](opts)
+
+		result, err := retryFn(context.Background(), func() (int, error) {
+			attempts++
+			if attempts < 3 {
+				return 0, errors.New("stream error: stream ID 27; INTERNAL_ERROR; received from peer")
+			}
+			return 42, nil
+		})
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		if result != 42 {
+			t.Fatalf("expected result 42, got %d", result)
+		}
+		if attempts != 3 {
+			t.Fatalf("expected 3 attempts, got %d", attempts)
 		}
 	})
 }

@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"charm.land/fantasy"
-	"github.com/charmbracelet/openai-go"
+	"github.com/openai/openai-go/v3"
 )
 
 var (

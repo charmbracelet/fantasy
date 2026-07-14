@@ -8,8 +8,8 @@ import (
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/providers/internal/httpheaders"
-	"github.com/charmbracelet/openai-go"
-	"github.com/charmbracelet/openai-go/option"
+	"github.com/openai/openai-go/v3"
+	"github.com/openai/openai-go/v3/option"
 )
 
 const (

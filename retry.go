@@ -102,8 +102,8 @@ type OnRetryCallback = func(err *ProviderError, delay time.Duration)
 // DefaultRetryOptions returns the default retry options.
 func DefaultRetryOptions() RetryOptions {
 	return RetryOptions{
-		MaxRetries:     2,
-		InitialDelayIn: 2000 * time.Millisecond,
+		MaxRetries:     3,
+		InitialDelayIn: 5000 * time.Millisecond,
 		BackoffFactor:  2.0,
 	}
 }

@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 
 	"charm.land/fantasy"
-	"github.com/charmbracelet/openai-go"
-	"github.com/charmbracelet/openai-go/packages/respjson"
+	"github.com/openai/openai-go/v3"
+	"github.com/openai/openai-go/v3/packages/respjson"
 )
 
 // ReasoningEffort represents the reasoning effort level for OpenAI models.

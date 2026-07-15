@@ -8,8 +8,8 @@ import (
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/providers/openai"
-	"github.com/charmbracelet/openai-go/azure"
-	"github.com/charmbracelet/openai-go/option"
+	"github.com/openai/openai-go/v3/azure"
+	"github.com/openai/openai-go/v3/option"
 )
 
 type options struct {

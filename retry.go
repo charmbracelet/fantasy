@@ -96,7 +96,17 @@ type RetryOptions struct {
 	OnAuthRefresh OnAuthRefreshFunc
 }
 
-// OnRetryCallback defines a function that is called when a retry occurs.
+// OnRetryCallback is called before each retry attempt, after the retry
+// delay is chosen but before it elapses. err is the failure that triggered
+// the retry (nil if the failure was not a *ProviderError) and delay is how
+// long the middleware will wait before the next attempt.
+//
+// A retry re-runs the entire step from scratch: the stream is recreated and
+// the stream callbacks (OnTextStart, OnTextDelta, OnReasoningStart,
+// OnReasoningDelta, OnToolInputStart, etc.) fire again from the beginning of
+// the new response. Consumers that accumulate streamed content must reset
+// that accumulated state here, otherwise the retried response is appended to
+// the partial content from the failed attempt.
 type OnRetryCallback = func(err *ProviderError, delay time.Duration)
 
 // DefaultRetryOptions returns the default retry options.
@@ -166,9 +176,10 @@ func isAuthError(err *ProviderError) bool {
 }
 
 // isRetryableError reports whether the error should be retried.
-// It checks for retryable ProviderError and also retries network-level
-// connection errors (DNS failures, TCP timeouts, connection refused, etc.)
-// that never produce an HTTP response and therefore aren't wrapped in ProviderError.
+// It checks for retryable ProviderError, network-level connection errors
+// (DNS failures, TCP timeouts, connection refused), and HTTP/2 stream-
+// level transport errors. The latter two categories may not be wrapped
+// in ProviderError when they occur outside the provider's error handler.
 func isRetryableError(err error) bool {
 	var providerErr *ProviderError
 	if errors.As(err, &providerErr) {
@@ -178,7 +189,10 @@ func isRetryableError(err error) bool {
 		return false
 	}
 	var netErr net.Error
-	return errors.As(err, &netErr)
+	if errors.As(err, &netErr) {
+		return true
+	}
+	return IsTransportError(err)
 }
 
 // isAbortError checks if the error is a context cancellation error.

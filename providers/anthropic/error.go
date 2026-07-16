@@ -18,7 +18,7 @@ var anthropicContextPattern = regexp.MustCompile(`prompt is too long:\s*(\d+)\s*
 // failure. Bedrock runs through this provider, so when its SSO/role
 // credentials need refreshing the AWS SDK surfaces this message locally
 // rather than as an HTTP 401. Direct Anthropic API calls never produce it.
-const awsCredentialErrorFragment = "failed to refresh cached credentials"
+const awsCredentialErrorFragment = "failed to refresh cached credentials" //nolint:gosec // false positive: error message fragment, not a credential
 
 func toProviderErr(err error) error {
 	var apiErr *anthropic.Error

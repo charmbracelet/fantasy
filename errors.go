@@ -45,6 +45,12 @@ type ProviderError struct {
 	ContextUsedTokens  int
 	ContextMaxTokens   int
 	ContextTooLargeErr bool
+
+	// AuthError marks the error as an authentication failure a provider
+	// flagged as resolvable by refreshing credentials (e.g. re-running an
+	// interactive login). It covers auth failures that do not carry an HTTP
+	// 401 status, so a caller-supplied OnAuthRefresh hook still engages.
+	AuthError bool
 }
 
 func (m *ProviderError) Error() string {

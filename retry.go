@@ -172,7 +172,7 @@ func retryWithExponentialBackoff[T any](ctx context.Context, fn RetryFn[T], opti
 // isAuthError reports whether the error is an authentication failure that a
 // caller-supplied OnAuthRefresh hook may be able to resolve.
 func isAuthError(err *ProviderError) bool {
-	return err.StatusCode == http.StatusUnauthorized
+	return err.StatusCode == http.StatusUnauthorized || err.AuthError
 }
 
 // isRetryableError reports whether the error should be retried.

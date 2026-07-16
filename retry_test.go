@@ -206,6 +206,44 @@ func TestRetryWithAuthRefresh(t *testing.T) {
 
 	authErr := func() error { return &ProviderError{StatusCode: 401, Message: "unauthorized"} }
 
+	t.Run("refreshes and retries transparently on a flagged non-401 auth error", func(t *testing.T) {
+		t.Parallel()
+		attempts := 0
+		refreshed := 0
+		opts := RetryOptions{
+			MaxRetries:     2,
+			InitialDelayIn: 1 * time.Millisecond,
+			BackoffFactor:  2.0,
+			OnAuthRefresh: func(_ context.Context, _ *ProviderError) error {
+				refreshed++
+				return nil
+			},
+		}
+
+		retryFn := RetryWithExponentialBackoffRespectingRetryHeaders[int](opts)
+		result, err := retryFn(context.Background(), func() (int, error) {
+			attempts++
+			if attempts == 1 {
+				// No 401 status; classified as auth purely via the flag,
+				// mirroring an expired AWS SSO session.
+				return 0, &ProviderError{Message: "failed to refresh cached credentials", AuthError: true}
+			}
+			return 7, nil
+		})
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		if result != 7 {
+			t.Fatalf("expected result 7, got %d", result)
+		}
+		if refreshed != 1 {
+			t.Fatalf("expected 1 refresh, got %d", refreshed)
+		}
+		if attempts != 2 {
+			t.Fatalf("expected 2 attempts, got %d", attempts)
+		}
+	})
+
 	t.Run("refreshes and retries transparently on 401", func(t *testing.T) {
 		t.Parallel()
 		attempts := 0
@@ -369,5 +407,8 @@ func TestIsAuthError(t *testing.T) {
 	}
 	if isAuthError(&ProviderError{StatusCode: 500}) {
 		t.Error("expected 500 to not be an auth error")
+	}
+	if !isAuthError(&ProviderError{AuthError: true}) {
+		t.Error("expected an AuthError-flagged error to be an auth error")
 	}
 }

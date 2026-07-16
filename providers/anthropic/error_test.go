@@ -65,3 +65,29 @@ func TestToProviderErr_PassesThroughPlainEOF(t *testing.T) {
 		t.Errorf("toProviderErr wrapped io.EOF as ProviderError; should pass through")
 	}
 }
+
+func TestToProviderErr_FlagsExpiredBedrockCredentials(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		name string
+		err  error
+	}{
+		{"direct", errors.New("failed to refresh cached credentials")},
+		{"wrapped", fmt.Errorf("operation error Bedrock: %w", errors.New("failed to refresh cached credentials"))},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			var providerErr *fantasy.ProviderError
+			if !errors.As(toProviderErr(tc.err), &providerErr) {
+				t.Fatalf("toProviderErr did not wrap %v as *fantasy.ProviderError", tc.err)
+			}
+			if !providerErr.AuthError {
+				t.Error("expected AuthError flag so OnAuthRefresh engages")
+			}
+		})
+	}
+}

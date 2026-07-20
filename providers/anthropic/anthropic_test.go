@@ -3237,3 +3237,26 @@ func TestStream_TruncatedWithoutStopReason(t *testing.T) {
 	require.True(t, providerErr.IsRetryable())
 	require.ErrorIs(t, providerErr.Cause, io.ErrUnexpectedEOF)
 }
+
+func TestMapFinishReason(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		reason   string
+		expected fantasy.FinishReason
+	}{
+		{"end_turn", fantasy.FinishReasonStop},
+		{"pause_turn", fantasy.FinishReasonStop},
+		{"stop_sequence", fantasy.FinishReasonStop},
+		{"max_tokens", fantasy.FinishReasonLength},
+		{"model_context_window_exceeded", fantasy.FinishReasonLength},
+		{"tool_use", fantasy.FinishReasonToolCalls},
+		{"refusal", fantasy.FinishReasonContentFilter},
+		{"", fantasy.FinishReasonUnknown},
+		{"unrecognized_future_reason", fantasy.FinishReasonUnknown},
+	}
+
+	for _, tc := range tests {
+		require.Equal(t, tc.expected, mapFinishReason(tc.reason), "stop_reason %q", tc.reason)
+	}
+}

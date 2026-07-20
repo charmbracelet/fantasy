@@ -1268,10 +1268,12 @@ func mapFinishReason(finishReason string) fantasy.FinishReason {
 	switch finishReason {
 	case "end_turn", "pause_turn", "stop_sequence":
 		return fantasy.FinishReasonStop
-	case "max_tokens":
+	case "max_tokens", "model_context_window_exceeded":
 		return fantasy.FinishReasonLength
 	case "tool_use":
 		return fantasy.FinishReasonToolCalls
+	case "refusal":
+		return fantasy.FinishReasonContentFilter
 	default:
 		return fantasy.FinishReasonUnknown
 	}

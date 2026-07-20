@@ -8,7 +8,7 @@ require (
 	github.com/ardanlabs/kronk v1.28.7
 	github.com/aws/aws-sdk-go-v2 v1.42.1
 	github.com/aws/aws-sdk-go-v2/config v1.32.30
-	github.com/aws/smithy-go v1.27.3
+	github.com/aws/smithy-go v1.27.4
 	github.com/charmbracelet/anthropic-sdk-go v0.0.0-20260223140439-63879b0b8dab
 	github.com/charmbracelet/x/exp/slice v0.0.0-20250904123553-b4e2667e5ad5
 	github.com/charmbracelet/x/exp/strings v0.1.0
@@ -17,11 +17,11 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/kaptinlin/jsonschema v0.9.3
-	github.com/openai/openai-go/v3 v3.43.0
+	github.com/openai/openai-go/v3 v3.44.0
 	github.com/stretchr/testify v1.11.1
 	golang.org/x/net v0.57.0
 	golang.org/x/oauth2 v0.36.0
-	google.golang.org/genai v1.63.0
+	google.golang.org/genai v1.64.0
 )
 
 require (

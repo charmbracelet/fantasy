@@ -6,6 +6,7 @@ import (
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/providers/anthropic"
+	"charm.land/fantasy/providers/atlascloud"
 	"charm.land/fantasy/providers/google"
 	"charm.land/fantasy/providers/openai"
 	"charm.land/fantasy/providers/openaicompat"
@@ -354,6 +355,7 @@ func TestProviderRegistry_AllTypesRegistered(t *testing.T) {
 		{"Google Options", google.Name, &google.ProviderOptions{}},
 		{"OpenRouter Options", openrouter.Name, &openrouter.ProviderOptions{}},
 		{"OpenAICompat Options", openaicompat.Name, &openaicompat.ProviderOptions{}},
+		{"AtlasCloud Options", atlascloud.Name, &atlascloud.ProviderOptions{}},
 	}
 
 	for _, tc := range tests {

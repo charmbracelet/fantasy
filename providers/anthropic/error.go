@@ -48,8 +48,9 @@ func toProviderErr(err error) error {
 			AuthError: true,
 		}
 	}
-	// Wrap transient transport failures so `.IsRetryable()` works.
-	return fantasy.WrapTransportError(err)
+	// Wrap transient failures so `.IsRetryable()` works: error events
+	// delivered mid-stream first, then transport-level failures.
+	return fantasy.WrapTransportError(fantasy.WrapStreamError(err))
 }
 
 func parseContextTooLargeError(message string, providerErr *fantasy.ProviderError) {

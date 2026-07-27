@@ -1,6 +1,7 @@
 package fantasy
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -103,6 +104,128 @@ func TestNewTransportErrorWrapped(t *testing.T) {
 	}
 	if !err.IsRetryable() {
 		t.Error("expected wrapped HTTP/2 transport error to be retryable")
+	}
+}
+
+func TestWrapStreamError(t *testing.T) {
+	t.Parallel()
+
+	const prefix = "received error while streaming: "
+
+	tests := []struct {
+		name        string
+		err         error
+		wantWrapped bool
+		wantRetry   bool
+		wantTitle   string
+		wantMessage string
+	}{
+		{
+			name:        "anthropic overloaded",
+			err:         newTestError(prefix + `{"type":"error","error":{"details":null,"type":"overloaded_error","message":"Overloaded"}}`),
+			wantWrapped: true,
+			wantRetry:   true,
+			wantTitle:   "provider overloaded",
+			wantMessage: "Overloaded",
+		},
+		{
+			name:        "anthropic api error",
+			err:         newTestError(prefix + `{"type":"error","error":{"type":"api_error","message":"Internal server error"}}`),
+			wantWrapped: true,
+			wantRetry:   true,
+			wantTitle:   "api error",
+			wantMessage: "Internal server error",
+		},
+		{
+			name:        "openai unwrapped server error",
+			err:         newTestError(prefix + `{"message":"upstream unavailable","type":"server_error","code":null}`),
+			wantWrapped: true,
+			wantRetry:   true,
+			wantTitle:   "server error",
+			wantMessage: "upstream unavailable",
+		},
+		{
+			name:        "rate limit",
+			err:         newTestError(prefix + `{"type":"error","error":{"type":"rate_limit_error","message":"slow down"}}`),
+			wantWrapped: true,
+			wantRetry:   true,
+			wantTitle:   "rate limit exceeded",
+			wantMessage: "slow down",
+		},
+		{
+			name:        "permanent error is wrapped but not retried",
+			err:         newTestError(prefix + `{"type":"error","error":{"type":"invalid_request_error","message":"bad tool schema"}}`),
+			wantWrapped: true,
+			wantRetry:   false,
+			wantTitle:   "invalid request error",
+			wantMessage: "bad tool schema",
+		},
+		{
+			name:        "non-JSON payload naming a transient type",
+			err:         newTestError(prefix + "overloaded_error: capacity exhausted"),
+			wantWrapped: true,
+			wantRetry:   true,
+			wantTitle:   "provider overloaded",
+			wantMessage: "overloaded_error: capacity exhausted",
+		},
+		{
+			name:        "wrapped by an outer error",
+			err:         fmt.Errorf("anthropic: %w", newTestError(prefix+`{"type":"error","error":{"type":"overloaded_error","message":"Overloaded"}}`)),
+			wantWrapped: true,
+			wantRetry:   true,
+			wantTitle:   "provider overloaded",
+			wantMessage: "Overloaded",
+		},
+		{
+			name: "unrecognizable payload passes through",
+			err:  newTestError(prefix + "{}"),
+		},
+		{
+			name: "unrelated error passes through",
+			err:  newTestError("something went wrong"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			got := WrapStreamError(tt.err)
+
+			var providerErr *ProviderError
+			if !errors.As(got, &providerErr) {
+				if tt.wantWrapped {
+					t.Fatalf("WrapStreamError(%v) did not wrap as *ProviderError (got %T)", tt.err, got)
+				}
+				if got != tt.err {
+					t.Errorf("WrapStreamError mutated error: got %v, want %v", got, tt.err)
+				}
+				return
+			}
+			if !tt.wantWrapped {
+				t.Fatalf("WrapStreamError(%v) wrapped an error it should have passed through", tt.err)
+			}
+			if providerErr.IsRetryable() != tt.wantRetry {
+				t.Errorf("IsRetryable() = %v, want %v", providerErr.IsRetryable(), tt.wantRetry)
+			}
+			if providerErr.Title != tt.wantTitle {
+				t.Errorf("Title = %q, want %q", providerErr.Title, tt.wantTitle)
+			}
+			if providerErr.Message != tt.wantMessage {
+				t.Errorf("Message = %q, want %q", providerErr.Message, tt.wantMessage)
+			}
+			if !errors.Is(got, tt.err) {
+				t.Error("wrapped error must retain the original error in its chain")
+			}
+		})
+	}
+}
+
+func TestWrapStreamErrorNil(t *testing.T) {
+	t.Parallel()
+
+	if got := WrapStreamError(nil); got != nil {
+		t.Errorf("WrapStreamError(nil) = %v, want nil", got)
 	}
 }
 

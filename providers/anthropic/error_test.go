@@ -91,3 +91,23 @@ func TestToProviderErr_FlagsExpiredBedrockCredentials(t *testing.T) {
 		})
 	}
 }
+
+func TestToProviderErr_RetriesMidStreamOverload(t *testing.T) {
+	t.Parallel()
+
+	// Anthropic sheds load by sending an `error` event inside an
+	// already-open stream, so the HTTP response is a 200 and nothing but the
+	// payload marks the failure as temporary.
+	err := errors.New(`received error while streaming: {"type":"error","error":{"details":null,"type":"overloaded_error","message":"Overloaded"}}`)
+
+	var providerErr *fantasy.ProviderError
+	if !errors.As(toProviderErr(err), &providerErr) {
+		t.Fatalf("toProviderErr did not wrap %v as *fantasy.ProviderError", err)
+	}
+	if !providerErr.IsRetryable() {
+		t.Error("a mid-stream overload must be retryable so the step is re-run")
+	}
+	if providerErr.Message != "Overloaded" {
+		t.Errorf("Message = %q, want %q", providerErr.Message, "Overloaded")
+	}
+}

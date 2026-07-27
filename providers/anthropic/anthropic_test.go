@@ -903,6 +903,7 @@ func TestStream_RequiresMessageStopBeforeFinish(t *testing.T) {
 		chunks         []string
 		wantFinish     bool
 		wantRetryable  bool
+		wantTruncated  bool
 		wantErrContain string
 	}{
 		{
@@ -914,18 +915,31 @@ func TestStream_RequiresMessageStopBeforeFinish(t *testing.T) {
 			name:          "message_stop without stop_reason errors",
 			chunks:        missingStopReasonStream,
 			wantRetryable: true,
+			wantTruncated: true,
 		},
 		{
 			name:          "text stream closed before message_stop errors",
 			chunks:        completeTextStream[:len(completeTextStream)-1],
 			wantRetryable: true,
+			wantTruncated: true,
 		},
 		{
-			name: "provider error event is preserved",
+			// An api_error names a temporary fault on the provider's side,
+			// so it is worth another attempt even though it arrived inside
+			// a response that itself succeeded.
+			name: "provider error event is preserved and retried",
 			chunks: []string{
 				anthropicSSEEvent("error", `{"type":"error","error":{"type":"api_error","message":"stream down"}}`),
 			},
+			wantRetryable:  true,
 			wantErrContain: "stream down",
+		},
+		{
+			name: "permanent error event is not retried",
+			chunks: []string{
+				anthropicSSEEvent("error", `{"type":"error","error":{"type":"invalid_request_error","message":"bad request"}}`),
+			},
+			wantErrContain: "bad request",
 		},
 	}
 
@@ -978,7 +992,9 @@ func TestStream_RequiresMessageStopBeforeFinish(t *testing.T) {
 			if tt.wantRetryable {
 				require.ErrorAs(t, errorParts[0].Error, &providerErr)
 				require.True(t, providerErr.IsRetryable())
-				require.ErrorIs(t, providerErr.Cause, io.ErrUnexpectedEOF)
+				if tt.wantTruncated {
+					require.ErrorIs(t, providerErr.Cause, io.ErrUnexpectedEOF)
+				}
 			} else {
 				require.NotErrorIs(t, errorParts[0].Error, io.ErrUnexpectedEOF)
 				if errors.As(errorParts[0].Error, &providerErr) {
@@ -3236,4 +3252,47 @@ func TestStream_TruncatedWithoutStopReason(t *testing.T) {
 	require.ErrorAs(t, errPart.Error, &providerErr)
 	require.True(t, providerErr.IsRetryable())
 	require.ErrorIs(t, providerErr.Cause, io.ErrUnexpectedEOF)
+}
+
+func TestStream_MidStreamOverloadIsRetryable(t *testing.T) {
+	t.Parallel()
+
+	// A saturated provider sheds load partway through an accepted stream:
+	// the HTTP response is a 200 and the failure arrives as an `error` event.
+	server, _ := newAnthropicStreamingServer([]string{
+		"event: message_start\n",
+		`data: {"type":"message_start","message":{"id":"msg_01","type":"message","role":"assistant","model":"claude-sonnet-4-20250514","content":[],"stop_reason":null,"usage":{"input_tokens":10,"output_tokens":0}}}` + "\n\n",
+		"event: content_block_start\n",
+		`data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}` + "\n\n",
+		"event: content_block_delta\n",
+		`data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Hel"}}` + "\n\n",
+		"event: error\n",
+		`data: {"type":"error","error":{"details":null,"type":"overloaded_error","message":"Overloaded"}}` + "\n\n",
+	})
+	defer server.Close()
+
+	provider, err := New(WithAPIKey("test-api-key"), WithBaseURL(server.URL))
+	require.NoError(t, err)
+	model, err := provider.LanguageModel(context.Background(), "claude-sonnet-4-20250514")
+	require.NoError(t, err)
+
+	stream, err := model.Stream(context.Background(), fantasy.Call{Prompt: testPrompt()})
+	require.NoError(t, err)
+
+	var errPart *fantasy.StreamPart
+	stream(func(part fantasy.StreamPart) bool {
+		require.NotEqual(t, fantasy.StreamPartTypeFinish, part.Type)
+		if part.Type == fantasy.StreamPartTypeError {
+			p := part
+			errPart = &p
+		}
+		return true
+	})
+	require.NotNil(t, errPart)
+
+	var providerErr *fantasy.ProviderError
+	require.ErrorAs(t, errPart.Error, &providerErr)
+	require.True(t, providerErr.IsRetryable(), "mid-stream overload must be retryable")
+	require.Equal(t, "provider overloaded", providerErr.Title)
+	require.Equal(t, "Overloaded", providerErr.Message)
 }

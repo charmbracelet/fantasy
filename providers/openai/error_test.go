@@ -63,11 +63,8 @@ func TestToProviderErr_PassesThroughPlainEOF(t *testing.T) {
 	}
 }
 
-// Regression test for a real reported bug: a mid-stream in-band SSE error
-// event (the OpenAI-compatible provider's own envelope, not an HTTP-level
-// error) must be classified as retryable when it reports a transient
-// server_error, otherwise it silently skips retry.go entirely instead of
-// just being marked non-retryable.
+// A mid-stream in-band SSE error event must be classified as retryable when
+// it reports a transient server_error, otherwise it skips retry.go entirely.
 func TestToProviderErr_StreamErrorServerErrorIsRetryable(t *testing.T) {
 	t.Parallel()
 
@@ -87,11 +84,44 @@ func TestToProviderErr_StreamErrorServerErrorIsRetryable(t *testing.T) {
 	if !providerErr.IsRetryable() {
 		t.Error("server_error stream failure must be retryable so retry.go engages")
 	}
+	if !providerErr.TransientError {
+		t.Error("TransientError must be set for a transient stream error")
+	}
+	if providerErr.StatusCode != 0 {
+		t.Errorf("StatusCode = %d, want 0 (no HTTP status was returned)", providerErr.StatusCode)
+	}
 	if providerErr.Message != "Streaming response failed" {
 		t.Errorf("Message = %q, want the parsed error body message", providerErr.Message)
 	}
 	if !errors.Is(providerErr.Cause, streamErr) {
 		t.Errorf("Cause chain must include the original *ssestream.StreamError")
+	}
+}
+
+func TestToProviderErr_StreamErrorTransientTypes(t *testing.T) {
+	t.Parallel()
+
+	for _, errType := range []string{"server_error", "internal_error", "overloaded_error", "api_error", "rate_limit_error"} {
+		t.Run(errType, func(t *testing.T) {
+			t.Parallel()
+
+			streamErr := &ssestream.StreamError{
+				Message: "received error while streaming: ...",
+				Event: ssestream.Event{
+					Data: []byte(`{"error":{"message":"transient","type":"` + errType + `"}}`),
+				},
+			}
+
+			got := toProviderErr(streamErr)
+
+			var providerErr *fantasy.ProviderError
+			if !errors.As(got, &providerErr) {
+				t.Fatalf("toProviderErr did not wrap StreamError (got %T)", got)
+			}
+			if !providerErr.IsRetryable() {
+				t.Errorf("%s stream failure must be retryable", errType)
+			}
+		})
 	}
 }
 

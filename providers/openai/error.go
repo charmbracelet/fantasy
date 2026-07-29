@@ -41,13 +41,8 @@ func toProviderErr(err error) error {
 		return providerErr
 	}
 
-	// The SDK only wraps errors on the initial HTTP response as *openai.Error
-	// ("Other errors are not wrapped by this SDK" -- its own doc comment). An
-	// in-band SSE error event that arrives mid-stream, after the response
-	// already returned 200 OK, surfaces as a *ssestream.StreamError instead
-	// and would otherwise never reach ProviderError.IsRetryable(), so a
-	// transient upstream failure (e.g. "type":"server_error") silently skips
-	// retry entirely instead of just being classified non-retryable.
+	// Mid-stream SSE error events surface as *ssestream.StreamError, not
+	// *openai.Error, so they need their own classification path.
 	var streamErr *ssestream.StreamError
 	if errors.As(err, &streamErr) {
 		return toProviderErrFromStreamError(streamErr)
@@ -58,41 +53,29 @@ func toProviderErr(err error) error {
 }
 
 // streamErrorEnvelope mirrors the OpenAI-standard error envelope
-// (`{"error": {"code", "message", "param", "type"}}`) that arrives as an
-// in-band SSE event on stream failure.
+// (`{"error": {"code", "message", "type"}}`) that arrives as an in-band
+// SSE event on stream failure.
 type streamErrorEnvelope struct {
 	Error struct {
 		Code    string `json:"code"`
 		Message string `json:"message"`
-		Param   string `json:"param"`
 		Type    string `json:"type"`
 	} `json:"error"`
-}
-
-// retryableStreamErrorTypes are the "type"/"code" values documented as
-// transient, provider-side failures -- the in-stream equivalent of an HTTP
-// 5xx on the initial request.
-var retryableStreamErrorTypes = map[string]bool{
-	"server_error": true,
 }
 
 func toProviderErrFromStreamError(streamErr *ssestream.StreamError) *fantasy.ProviderError {
 	var envelope streamErrorEnvelope
 	_ = json.Unmarshal(streamErr.Event.Data, &envelope) // best-effort; falls back to the raw message on parse failure.
 
-	providerErr := &fantasy.ProviderError{
-		Title:   "stream error",
-		Message: cmp.Or(envelope.Error.Message, streamErr.Message),
-		Cause:   streamErr,
-	}
+	errType := cmp.Or(envelope.Error.Type, envelope.Error.Code)
 
-	if retryableStreamErrorTypes[envelope.Error.Type] || retryableStreamErrorTypes[envelope.Error.Code] {
-		// Synthesize a 5xx so the existing IsRetryable() status-code check
-		// covers this without needing its own special case.
-		providerErr.StatusCode = http.StatusInternalServerError
+	return &fantasy.ProviderError{
+		Title:          "stream error",
+		Message:        cmp.Or(envelope.Error.Message, streamErr.Message),
+		Cause:          streamErr,
+		ResponseBody:   streamErr.Event.Data,
+		TransientError: fantasy.TransientStreamErrorTypes[errType],
 	}
-
-	return providerErr
 }
 
 func parseContextTooLargeError(message string, providerErr *fantasy.ProviderError) {

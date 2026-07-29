@@ -921,11 +921,21 @@ func TestStream_RequiresMessageStopBeforeFinish(t *testing.T) {
 			wantRetryable: true,
 		},
 		{
-			name: "provider error event is preserved",
+			// api_error is a temporary provider-side fault, so it is worth
+			// retrying even though it arrived inside a 200 response.
+			name: "provider error event is preserved and retried",
 			chunks: []string{
 				anthropicSSEEvent("error", `{"type":"error","error":{"type":"api_error","message":"stream down"}}`),
 			},
+			wantRetryable: true,
 			wantErrContain: "stream down",
+		},
+		{
+			name: "permanent error event is not retried",
+			chunks: []string{
+				anthropicSSEEvent("error", `{"type":"error","error":{"type":"invalid_request_error","message":"bad request"}}`),
+			},
+			wantErrContain: "bad request",
 		},
 	}
 
@@ -978,7 +988,6 @@ func TestStream_RequiresMessageStopBeforeFinish(t *testing.T) {
 			if tt.wantRetryable {
 				require.ErrorAs(t, errorParts[0].Error, &providerErr)
 				require.True(t, providerErr.IsRetryable())
-				require.ErrorIs(t, providerErr.Cause, io.ErrUnexpectedEOF)
 			} else {
 				require.NotErrorIs(t, errorParts[0].Error, io.ErrUnexpectedEOF)
 				if errors.As(errorParts[0].Error, &providerErr) {

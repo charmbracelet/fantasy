@@ -259,6 +259,7 @@ type ToolResultPart struct {
 	Output           ToolResultOutputContent `json:"output"`
 	ProviderExecuted bool                    `json:"provider_executed"`
 	ProviderOptions  ProviderOptions         `json:"provider_options"`
+	ClientMetadata   string                  `json:"client_metadata,omitempty"`
 }
 
 // GetType returns the type of the tool result part.

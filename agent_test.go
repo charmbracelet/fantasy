@@ -2079,8 +2079,9 @@ func TestToResponseMessages_ProviderExecutedRouting(t *testing.T) {
 		},
 		// Regular tool result.
 		&ToolResultContent{
-			ToolCallID: "toolu_02",
-			Result:     ToolResultOutputContentText{Text: "2"},
+			ToolCallID:     "toolu_02",
+			Result:         ToolResultOutputContentText{Text: "2"},
+			ClientMetadata: `{"precision":"high"}`,
 		},
 		// Some trailing text.
 		&TextContent{Text: "Done."},
@@ -2128,9 +2129,11 @@ func TestToResponseMessages_ProviderExecutedRouting(t *testing.T) {
 	require.Equal(t, MessageRoleTool, toolMsg.Role)
 	require.Len(t, toolMsg.Content, 1)
 
+	// Verify regular tool result is in tool message and client metadata survived.
 	tr2, ok := AsMessagePart[ToolResultPart](toolMsg.Content[0])
 	require.True(t, ok)
 	require.Equal(t, "toolu_02", tr2.ToolCallID)
+	require.Equal(t, `{"precision":"high"}`, tr2.ClientMetadata)
 	require.False(t, tr2.ProviderExecuted)
 }
 

@@ -715,6 +715,7 @@ func toResponseMessages(content []Content) []Message {
 				Output:           result.Result,
 				ProviderExecuted: result.ProviderExecuted,
 				ProviderOptions:  ProviderOptions(result.ProviderMetadata),
+				ClientMetadata:   result.ClientMetadata,
 			}
 			if result.ProviderExecuted {
 				// Provider-executed tool results (e.g. web search)

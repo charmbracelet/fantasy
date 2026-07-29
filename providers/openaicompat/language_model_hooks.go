@@ -445,26 +445,12 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 					}
 					// OpenAI-compatible chat completions tool messages cannot
 					// carry image or audio content directly; the SDK's content
-					// union only accepts text. To keep the tool_call/tool_result
-					// pairing valid while still surfacing the media to
-					// vision-capable models, emit a text tool message with any
-					// accompanying text (or a placeholder) and follow it with a
-					// synthetic user message holding the actual media content
-					// part. This mirrors the behavior of the openai provider.
-					placeholder := output.Text
-					if placeholder == "" {
-						placeholder = fmt.Sprintf("The tool returned %s content; see the following user message.", output.MediaType)
-					}
-					messages = append(messages, openaisdk.ToolMessage(placeholder, toolResultPart.ToolCallID))
-					mediaPart, mediaWarning, emit := toolResultMediaUserPart(output)
-					if mediaWarning != nil {
-						warnings = append(warnings, *mediaWarning)
-					}
-					if emit {
-						messages = append(messages, openaisdk.UserMessage(
-							[]openaisdk.ChatCompletionContentPartUnionParam{mediaPart},
-						))
-					}
+					// union only accepts text. Reuse the openai provider's
+					// helper, which emits a text tool message plus a synthetic
+					// user message holding the media.
+					mediaMessages, mediaWarnings := openai.ToolResultMediaMessages(output, toolResultPart.ToolCallID)
+					messages = append(messages, mediaMessages...)
+					warnings = append(warnings, mediaWarnings...)
 				default:
 					warnings = append(warnings, fantasy.CallWarning{
 						Type:    fantasy.CallWarningTypeOther,
@@ -480,37 +466,6 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 // toolResultMediaUserPart maps a tool-result media output to an OpenAI chat
 // completions user content part. It returns the content part, an optional
 // warning, and whether the caller should emit the returned part.
-func toolResultMediaUserPart(output fantasy.ToolResultOutputContentMedia) (openaisdk.ChatCompletionContentPartUnionParam, *fantasy.CallWarning, bool) {
-	switch {
-	case strings.HasPrefix(output.MediaType, "image/"):
-		data := "data:" + output.MediaType + ";base64," + output.Data
-		imageBlock := openaisdk.ChatCompletionContentPartImageParam{
-			ImageURL: openaisdk.ChatCompletionContentPartImageImageURLParam{URL: data},
-		}
-		return openaisdk.ChatCompletionContentPartUnionParam{OfImageURL: &imageBlock}, nil, true
-	case output.MediaType == "audio/wav":
-		audioBlock := openaisdk.ChatCompletionContentPartInputAudioParam{
-			InputAudio: openaisdk.ChatCompletionContentPartInputAudioInputAudioParam{
-				Data:   output.Data,
-				Format: "wav",
-			},
-		}
-		return openaisdk.ChatCompletionContentPartUnionParam{OfInputAudio: &audioBlock}, nil, true
-	case output.MediaType == "audio/mpeg" || output.MediaType == "audio/mp3":
-		audioBlock := openaisdk.ChatCompletionContentPartInputAudioParam{
-			InputAudio: openaisdk.ChatCompletionContentPartInputAudioInputAudioParam{
-				Data:   output.Data,
-				Format: "mp3",
-			},
-		}
-		return openaisdk.ChatCompletionContentPartUnionParam{OfInputAudio: &audioBlock}, nil, true
-	default:
-		return openaisdk.ChatCompletionContentPartUnionParam{}, &fantasy.CallWarning{
-			Type:    fantasy.CallWarningTypeOther,
-			Message: fmt.Sprintf("tool result media type %s not supported, sending text placeholder only", output.MediaType),
-		}, false
-	}
-}
 
 func hasVisibleCompatUserContent(content []openaisdk.ChatCompletionContentPartUnionParam) bool {
 	for _, part := range content {

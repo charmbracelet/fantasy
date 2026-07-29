@@ -574,26 +574,10 @@ func DefaultToPrompt(prompt fantasy.Prompt, _, _ string) ([]openai.ChatCompletio
 						continue
 					}
 					// OpenAI Chat Completions tool messages cannot carry image
-					// or audio content directly; the SDK's content union only
-					// accepts text. To keep the tool_call/tool_result pairing
-					// valid while still surfacing the media to vision-capable
-					// models, emit a text tool message with a placeholder (or
-					// any accompanying text) and follow it with a synthetic
-					// user message holding the actual media content part.
-					placeholder := output.Text
-					if placeholder == "" {
-						placeholder = fmt.Sprintf("The tool returned %s content; see the following user message.", output.MediaType)
-					}
-					messages = append(messages, openai.ToolMessage(placeholder, toolResultPart.ToolCallID))
-					mediaPart, mediaWarning, emit := toolResultMediaUserPart(output)
-					if mediaWarning != nil {
-						warnings = append(warnings, *mediaWarning)
-					}
-					if emit {
-						messages = append(messages, openai.UserMessage(
-							[]openai.ChatCompletionContentPartUnionParam{mediaPart},
-						))
-					}
+					// or audio content directly; see ToolResultMediaMessages.
+					mediaMessages, mediaWarnings := ToolResultMediaMessages(output, toolResultPart.ToolCallID)
+					messages = append(messages, mediaMessages...)
+					warnings = append(warnings, mediaWarnings...)
 				default:
 					warnings = append(warnings, fantasy.CallWarning{
 						Type:    fantasy.CallWarningTypeOther,
@@ -604,6 +588,33 @@ func DefaultToPrompt(prompt fantasy.Prompt, _, _ string) ([]openai.ChatCompletio
 		}
 	}
 	return messages, warnings
+}
+
+// ToolResultMediaMessages maps a tool-result media output to the chat
+// completions messages that convey it. OpenAI tool messages can only carry
+// text, so this emits a text tool message (using any accompanying text, or a
+// placeholder describing the media) to keep the tool_call/tool_result pairing
+// valid, followed by a synthetic user message holding the actual image or
+// audio content part so vision- and audio-capable models can see it.
+//
+// Unsupported media types produce only the text tool message plus a warning.
+// This is shared with OpenAI-compatible providers, which face the same
+// constraint.
+func ToolResultMediaMessages(output fantasy.ToolResultOutputContentMedia, toolCallID string) ([]openai.ChatCompletionMessageParamUnion, []fantasy.CallWarning) {
+	placeholder := output.Text
+	if placeholder == "" {
+		placeholder = fmt.Sprintf("The tool returned %s content; see the following user message.", output.MediaType)
+	}
+	messages := []openai.ChatCompletionMessageParamUnion{openai.ToolMessage(placeholder, toolCallID)}
+
+	mediaPart, warning, emit := toolResultMediaUserPart(output)
+	if warning != nil {
+		return messages, []fantasy.CallWarning{*warning}
+	}
+	if emit {
+		messages = append(messages, openai.UserMessage([]openai.ChatCompletionContentPartUnionParam{mediaPart}))
+	}
+	return messages, nil
 }
 
 // toolResultMediaUserPart maps a tool-result media output to an OpenAI chat
@@ -617,19 +628,15 @@ func toolResultMediaUserPart(output fantasy.ToolResultOutputContentMedia) (opena
 			ImageURL: openai.ChatCompletionContentPartImageImageURLParam{URL: data},
 		}
 		return openai.ChatCompletionContentPartUnionParam{OfImageURL: &imageBlock}, nil, true
-	case output.MediaType == "audio/wav":
-		audioBlock := openai.ChatCompletionContentPartInputAudioParam{
-			InputAudio: openai.ChatCompletionContentPartInputAudioInputAudioParam{
-				Data:   output.Data,
-				Format: "wav",
-			},
+	case output.MediaType == "audio/wav", output.MediaType == "audio/mpeg", output.MediaType == "audio/mp3":
+		format := "wav"
+		if output.MediaType != "audio/wav" {
+			format = "mp3"
 		}
-		return openai.ChatCompletionContentPartUnionParam{OfInputAudio: &audioBlock}, nil, true
-	case output.MediaType == "audio/mpeg" || output.MediaType == "audio/mp3":
 		audioBlock := openai.ChatCompletionContentPartInputAudioParam{
 			InputAudio: openai.ChatCompletionContentPartInputAudioInputAudioParam{
 				Data:   output.Data,
-				Format: "mp3",
+				Format: format,
 			},
 		}
 		return openai.ChatCompletionContentPartUnionParam{OfInputAudio: &audioBlock}, nil, true

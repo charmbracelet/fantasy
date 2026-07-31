@@ -91,3 +91,86 @@ func TestToProviderErr_FlagsExpiredBedrockCredentials(t *testing.T) {
 		})
 	}
 }
+
+// A mid-stream SSE error event rides inside a 200 response, so only the
+// payload marks the failure as temporary.
+func TestToProviderErr_RetriesMidStreamOverload(t *testing.T) {
+	t.Parallel()
+
+	err := errors.New(`received error while streaming: {"type":"error","error":{"details":null,"type":"overloaded_error","message":"Overloaded"}}`)
+
+	var providerErr *fantasy.ProviderError
+	if !errors.As(toProviderErr(err), &providerErr) {
+		t.Fatalf("toProviderErr did not wrap %v as *fantasy.ProviderError", err)
+	}
+	if !providerErr.IsRetryable() {
+		t.Error("a mid-stream overload must be retryable so the step is re-run")
+	}
+	if !providerErr.TransientError {
+		t.Error("TransientError must be set for a transient stream error")
+	}
+	if providerErr.StatusCode != 0 {
+		t.Errorf("StatusCode = %d, want 0 (no HTTP status was returned)", providerErr.StatusCode)
+	}
+	if providerErr.Title != "provider overloaded" {
+		t.Errorf("Title = %q, want %q", providerErr.Title, "provider overloaded")
+	}
+	if providerErr.Message != "Overloaded" {
+		t.Errorf("Message = %q, want %q", providerErr.Message, "Overloaded")
+	}
+	if !errors.Is(providerErr.Cause, err) {
+		t.Error("Cause chain must include the original error")
+	}
+}
+
+func TestToProviderErr_StreamErrorTransientTypes(t *testing.T) {
+	t.Parallel()
+
+	for _, errType := range []string{"overloaded_error", "api_error", "server_error", "internal_error", "rate_limit_error"} {
+		t.Run(errType, func(t *testing.T) {
+			t.Parallel()
+
+			err := errors.New(`received error while streaming: {"type":"error","error":{"type":"` + errType + `","message":"transient"}}`)
+
+			var providerErr *fantasy.ProviderError
+			if !errors.As(toProviderErr(err), &providerErr) {
+				t.Fatalf("toProviderErr did not wrap %v as *fantasy.ProviderError", err)
+			}
+			if !providerErr.IsRetryable() {
+				t.Errorf("%s stream failure must be retryable", errType)
+			}
+		})
+	}
+}
+
+func TestToProviderErr_PermanentStreamErrorNotRetried(t *testing.T) {
+	t.Parallel()
+
+	err := errors.New(`received error while streaming: {"type":"error","error":{"type":"invalid_request_error","message":"bad tool schema"}}`)
+
+	var providerErr *fantasy.ProviderError
+	if !errors.As(toProviderErr(err), &providerErr) {
+		t.Fatalf("toProviderErr did not wrap %v as *fantasy.ProviderError", err)
+	}
+	if providerErr.IsRetryable() {
+		t.Error("a permanent stream error type must not be retryable")
+	}
+	if providerErr.Message != "bad tool schema" {
+		t.Errorf("Message = %q, want %q", providerErr.Message, "bad tool schema")
+	}
+}
+
+func TestToProviderErr_StreamErrorWrappedByOuterError(t *testing.T) {
+	t.Parallel()
+
+	inner := errors.New(`received error while streaming: {"type":"error","error":{"type":"overloaded_error","message":"Overloaded"}}`)
+	err := fmt.Errorf("anthropic: %w", inner)
+
+	var providerErr *fantasy.ProviderError
+	if !errors.As(toProviderErr(err), &providerErr) {
+		t.Fatalf("toProviderErr did not wrap %v as *fantasy.ProviderError", err)
+	}
+	if !providerErr.IsRetryable() {
+		t.Error("a wrapped mid-stream overload must still be retryable")
+	}
+}

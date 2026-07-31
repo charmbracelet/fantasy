@@ -2,6 +2,7 @@ package openai
 
 import (
 	"cmp"
+	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 
 	"charm.land/fantasy"
 	"github.com/openai/openai-go/v3"
+	"github.com/openai/openai-go/v3/packages/ssestream"
 )
 
 var (
@@ -38,8 +40,42 @@ func toProviderErr(err error) error {
 
 		return providerErr
 	}
+
+	// Mid-stream SSE error events surface as *ssestream.StreamError, not
+	// *openai.Error, so they need their own classification path.
+	var streamErr *ssestream.StreamError
+	if errors.As(err, &streamErr) {
+		return toProviderErrFromStreamError(streamErr)
+	}
+
 	// Wrap transient transport failures so `.IsRetryable()` works.
 	return fantasy.WrapTransportError(err)
+}
+
+// streamErrorEnvelope mirrors the OpenAI-standard error envelope
+// (`{"error": {"code", "message", "type"}}`) that arrives as an in-band
+// SSE event on stream failure.
+type streamErrorEnvelope struct {
+	Error struct {
+		Code    string `json:"code"`
+		Message string `json:"message"`
+		Type    string `json:"type"`
+	} `json:"error"`
+}
+
+func toProviderErrFromStreamError(streamErr *ssestream.StreamError) *fantasy.ProviderError {
+	var envelope streamErrorEnvelope
+	_ = json.Unmarshal(streamErr.Event.Data, &envelope) // best-effort; falls back to the raw message on parse failure.
+
+	errType := cmp.Or(envelope.Error.Type, envelope.Error.Code)
+
+	return &fantasy.ProviderError{
+		Title:          "stream error",
+		Message:        cmp.Or(envelope.Error.Message, streamErr.Message),
+		Cause:          streamErr,
+		ResponseBody:   streamErr.Event.Data,
+		TransientError: fantasy.TransientStreamErrorTypes[errType],
+	}
 }
 
 func parseContextTooLargeError(message string, providerErr *fantasy.ProviderError) {

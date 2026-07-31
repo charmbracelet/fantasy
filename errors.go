@@ -51,6 +51,12 @@ type ProviderError struct {
 	// interactive login). It covers auth failures that do not carry an HTTP
 	// 401 status, so a caller-supplied OnAuthRefresh hook still engages.
 	AuthError bool
+
+	// TransientError marks a temporary server-side failure worth retrying
+	// despite carrying no retryable HTTP status code. Mid-stream SSE error
+	// events ride inside an already-successful 200 response, so the status
+	// code alone cannot signal that a retry may succeed.
+	TransientError bool
 }
 
 func (m *ProviderError) Error() string {
@@ -67,11 +73,15 @@ func (m *ProviderError) Unwrap() error {
 }
 
 // IsRetryable reports whether the error should be retried.
-// It returns true if the underlying cause is io.ErrUnexpectedEOF, if the
-// "x-should-retry" response header evaluates to true, if the HTTP status
-// code indicates a retryable condition (408, 409, 429, or any 5xx), or
-// if the cause is a transient HTTP/2 transport error.
+// It returns true if the error is flagged as transient, if the underlying
+// cause is io.ErrUnexpectedEOF, if the "x-should-retry" response header
+// evaluates to true, if the HTTP status code indicates a retryable
+// condition (408, 409, 429, or any 5xx), or if the cause is a transient
+// HTTP/2 transport error.
 func (m *ProviderError) IsRetryable() bool {
+	if m.TransientError {
+		return true
+	}
 	// We're mostly mimicking OpenAI's Go SDK here:
 	// https://github.com/openai/openai-go/blob/b9d280a37149430982e9dfeed16c41d27d45cfc5/internal/requestconfig/requestconfig.go#L244
 	if errors.Is(m.Cause, io.ErrUnexpectedEOF) {
@@ -173,6 +183,22 @@ func NewTransportError(err error) *ProviderError {
 		Message: extractHTTP2ErrorMessage(err),
 		Cause:   err,
 	}
+}
+
+// TransientStreamErrorTypes are provider error "type" (or "code") values
+// that name a temporary server-side condition worth retrying. Mid-stream
+// SSE error events ride inside an already-successful 200 response, so the
+// HTTP status code cannot signal retryability; providers classify the
+// payload against this set and set ProviderError.TransientError.
+//
+// This is the canonical list. Providers parse their SDK-specific error
+// shapes but defer the transient/permanent policy decision here.
+var TransientStreamErrorTypes = map[string]bool{
+	"server_error":     true,
+	"internal_error":   true,
+	"overloaded_error": true,
+	"api_error":        true,
+	"rate_limit_error": true,
 }
 
 // WrapTransportError wraps a transient transport failure in a retryable

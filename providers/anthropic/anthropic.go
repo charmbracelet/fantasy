@@ -1272,7 +1272,10 @@ func mapFinishReason(finishReason string) fantasy.FinishReason {
 		return fantasy.FinishReasonLength
 	case "tool_use":
 		return fantasy.FinishReasonToolCalls
-	case "refusal":
+	case "refusal", "content_filtered", "guardrail_intervened":
+		// "refusal" is the native Anthropic safety stop. Bedrock
+		// reports guardrail / content-filter blocks with its own
+		// stop reasons instead, so map those here too.
 		return fantasy.FinishReasonContentFilter
 	default:
 		return fantasy.FinishReasonUnknown

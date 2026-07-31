@@ -487,12 +487,38 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 						continue
 					}
 					messages = append(messages, openaisdk.ToolMessage(output.Error.Error(), toolResultPart.ToolCallID))
+				case fantasy.ToolResultContentTypeMedia:
+					output, ok := fantasy.AsToolResultOutputType[fantasy.ToolResultOutputContentMedia](toolResultPart.Output)
+					if !ok {
+						warnings = append(warnings, fantasy.CallWarning{
+							Type:    fantasy.CallWarningTypeOther,
+							Message: "tool result output does not have the right type",
+						})
+						continue
+					}
+					// OpenAI-compatible chat completions tool messages cannot
+					// carry image or audio content directly; the SDK's content
+					// union only accepts text. Reuse the openai provider's
+					// helper, which emits a text tool message plus a synthetic
+					// user message holding the media.
+					mediaMessages, mediaWarnings := openai.ToolResultMediaMessages(output, toolResultPart.ToolCallID)
+					messages = append(messages, mediaMessages...)
+					warnings = append(warnings, mediaWarnings...)
+				default:
+					warnings = append(warnings, fantasy.CallWarning{
+						Type:    fantasy.CallWarningTypeOther,
+						Message: fmt.Sprintf("tool result output type %q not supported", toolResultPart.Output.GetType()),
+					})
 				}
 			}
 		}
 	}
 	return messages, warnings
 }
+
+// toolResultMediaUserPart maps a tool-result media output to an OpenAI chat
+// completions user content part. It returns the content part, an optional
+// warning, and whether the caller should emit the returned part.
 
 func hasVisibleCompatUserContent(content []openaisdk.ChatCompletionContentPartUnionParam) bool {
 	for _, part := range content {

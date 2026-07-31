@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"maps"
+	"runtime/debug"
 	"slices"
 	"strings"
 	"sync"
@@ -813,8 +814,11 @@ func (a *agent) executeSingleTool(ctx context.Context, toolMap map[string]AgentT
 		return result, false
 	}
 
-	// Execute the tool
-	toolResult, err := runTool(ctx, ToolCall{
+	// Execute the tool, converting a panic into a failed tool result so a
+	// single misbehaving tool cannot take down the whole process. The panic
+	// value and stack are included so they survive in the transcript even
+	// when stderr is lost.
+	toolResult, err := runToolSafely(ctx, runTool, ToolCall{
 		ID:    toolCall.ToolCallID,
 		Name:  toolCall.ToolName,
 		Input: toolCall.Input,
@@ -852,6 +856,25 @@ func (a *agent) executeSingleTool(ctx context.Context, toolMap map[string]AgentT
 		_ = toolResultCallback(result)
 	}
 	return result, false
+}
+
+// runToolSafely invokes a tool's run function and converts any panic into a
+// failed tool result. Tool implementations run on goroutines spawned by the
+// agent's step processor where an unrecovered panic would crash the entire
+// host process, so this boundary is the last line of defense. The panic
+// value and stack trace are captured in the returned error so they are
+// preserved in the conversation transcript and any persisted logs.
+func runToolSafely(ctx context.Context, runTool func(ctx context.Context, call ToolCall) (ToolResponse, error), call ToolCall) (toolResult ToolResponse, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			stack := debug.Stack()
+			toolResult = NewTextErrorResponse(fmt.Sprintf(
+				"tool %q panicked: %v\n\n%s", call.Name, r, stack,
+			))
+			err = nil
+		}
+	}()
+	return runTool(ctx, call)
 }
 
 // Stream implements Agent.

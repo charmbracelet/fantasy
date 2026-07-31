@@ -2722,3 +2722,112 @@ func TestAgent_Generate_StopTurn_NotSet(t *testing.T) {
 	require.Len(t, toolResults, 1)
 	require.False(t, toolResults[0].StopTurn)
 }
+
+func TestAgent_Generate_ToolPanicBecomesFailedResult(t *testing.T) {
+	t.Parallel()
+
+	type PanicInput struct {
+		Value string `json:"value" description:"Test value"`
+	}
+
+	panickingTool := NewAgentTool(
+		"panicking_tool",
+		"A tool that always panics",
+		func(ctx context.Context, input PanicInput, _ ToolCall) (ToolResponse, error) {
+			panic("nil pointer in tool implementation")
+		},
+	)
+
+	model := &mockLanguageModel{
+		generateFunc: func(ctx context.Context, call Call) (*Response, error) {
+			return &Response{
+				Content: []Content{
+					ToolCallContent{
+						ToolCallID: "call-panic",
+						ToolName:   "panicking_tool",
+						Input:      `{"value":"boom"}`,
+					},
+				},
+				Usage:        Usage{InputTokens: 3, OutputTokens: 10, TotalTokens: 13},
+				FinishReason: FinishReasonStop,
+			}, nil
+		},
+	}
+
+	agent := NewAgent(model, WithTools(panickingTool))
+	result, err := agent.Generate(context.Background(), AgentCall{
+		Prompt: "test-input",
+	})
+
+	// The process must survive the panic and surface it as a failed tool
+	// result instead.
+	require.NoError(t, err)
+	require.NotNil(t, result)
+
+	var toolResults []ToolResultContent
+	for _, content := range result.Response.Content {
+		if toolResult, ok := AsContentType[ToolResultContent](content); ok {
+			toolResults = append(toolResults, toolResult)
+		}
+	}
+	require.Len(t, toolResults, 1)
+	require.Equal(t, "call-panic", toolResults[0].ToolCallID)
+
+	errResult, ok := toolResults[0].Result.(ToolResultOutputContentError)
+	require.True(t, ok, "expected error result, got %T", toolResults[0].Result)
+	require.ErrorContains(t, errResult.Error, "panicking_tool")
+	require.ErrorContains(t, errResult.Error, "nil pointer in tool implementation")
+}
+
+func TestAgent_Generate_ParallelToolPanicBecomesFailedResult(t *testing.T) {
+	t.Parallel()
+
+	type PanicInput struct {
+		Value string `json:"value" description:"Test value"`
+	}
+
+	panickingTool := NewParallelAgentTool(
+		"panicking_parallel_tool",
+		"A parallel tool that always panics",
+		func(ctx context.Context, input PanicInput, _ ToolCall) (ToolResponse, error) {
+			panic("parallel boom")
+		},
+	)
+
+	model := &mockLanguageModel{
+		generateFunc: func(ctx context.Context, call Call) (*Response, error) {
+			return &Response{
+				Content: []Content{
+					ToolCallContent{
+						ToolCallID: "call-parallel-panic",
+						ToolName:   "panicking_parallel_tool",
+						Input:      `{"value":"boom"}`,
+					},
+				},
+				Usage:        Usage{InputTokens: 3, OutputTokens: 10, TotalTokens: 13},
+				FinishReason: FinishReasonStop,
+			}, nil
+		},
+	}
+
+	agent := NewAgent(model, WithTools(panickingTool))
+	result, err := agent.Generate(context.Background(), AgentCall{
+		Prompt: "test-input",
+	})
+
+	require.NoError(t, err)
+	require.NotNil(t, result)
+
+	var toolResults []ToolResultContent
+	for _, content := range result.Response.Content {
+		if toolResult, ok := AsContentType[ToolResultContent](content); ok {
+			toolResults = append(toolResults, toolResult)
+		}
+	}
+	require.Len(t, toolResults, 1)
+
+	errResult, ok := toolResults[0].Result.(ToolResultOutputContentError)
+	require.True(t, ok, "expected error result, got %T", toolResults[0].Result)
+	require.ErrorContains(t, errResult.Error, "panicking_parallel_tool")
+	require.ErrorContains(t, errResult.Error, "parallel boom")
+}

@@ -16,12 +16,12 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
-	github.com/kaptinlin/jsonschema v0.9.3
-	github.com/openai/openai-go/v3 v3.46.0
+	github.com/kaptinlin/jsonschema v0.9.6
+	github.com/openai/openai-go/v3 v3.48.0
 	github.com/stretchr/testify v1.11.1
 	golang.org/x/net v0.57.0
 	golang.org/x/oauth2 v0.36.0
-	google.golang.org/genai v1.65.0
+	google.golang.org/genai v1.66.0
 )
 
 require (
@@ -80,7 +80,7 @@ require (
 	github.com/hashicorp/go-version v1.9.0 // indirect
 	github.com/hybridgroup/yzma v1.21.0 // indirect
 	github.com/jupiterrider/ffi v0.7.0 // indirect
-	github.com/kaptinlin/jsonpointer v0.4.27 // indirect
+	github.com/kaptinlin/jsonpointer v0.4.28 // indirect
 	github.com/klauspost/compress v1.19.1 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect

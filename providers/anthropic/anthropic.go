@@ -87,21 +87,21 @@ func isModernOpusFamilyModel(model string) bool {
 	m := strings.ToLower(strings.TrimSpace(model))
 
 	// Named major lines: claude-opus-5, claude-opus-5-..., bedrock variants.
-	if _, after, ok := cutAfter(m, "claude-opus-"); ok {
+	if after, ok := cutAfter(m, "claude-opus-"); ok {
 		if major, ok := leadingInt(after); ok && major >= 5 {
 			return true
 		}
 	}
 
 	// Numbered 4.x minors: claude-opus-4-7, claude-opus-4.8, bedrock forms.
-	if _, after, ok := cutAfter(m, "claude-opus-4-"); ok {
+	if after, ok := cutAfter(m, "claude-opus-4-"); ok {
 		if minor, ok := leadingInt(after); ok && minor >= 7 && minor <= 99 {
 			// Reject date-stamped original GA IDs like claude-opus-4-20250514
 			// (leading int would be 20250514, already excluded by <= 99).
 			return true
 		}
 	}
-	if _, after, ok := cutAfter(m, "claude-opus-4."); ok {
+	if after, ok := cutAfter(m, "claude-opus-4."); ok {
 		if minor, ok := leadingInt(after); ok && minor >= 7 && minor <= 99 {
 			return true
 		}
@@ -123,7 +123,7 @@ func isLegacyManualThinkingClaudeModel(model string) bool {
 	}
 	// Claude 5+ non-opus lines (sonnet-5, etc.).
 	for _, family := range []string{"claude-sonnet-", "claude-haiku-"} {
-		if _, after, ok := cutAfter(m, family); ok {
+		if after, ok := cutAfter(m, family); ok {
 			if major, ok := leadingInt(after); ok && major >= 5 {
 				return false
 			}
@@ -139,12 +139,12 @@ func isLegacyManualThinkingClaudeModel(model string) bool {
 	return true
 }
 
-func cutAfter(s, sep string) (string, string, bool) {
+func cutAfter(s, sep string) (string, bool) {
 	i := strings.Index(s, sep)
 	if i < 0 {
-		return "", "", false
+		return "", false
 	}
-	return s[:i], s[i+len(sep):], true
+	return s[i+len(sep):], true
 }
 
 func leadingInt(s string) (int, bool) {

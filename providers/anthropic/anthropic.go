@@ -50,12 +50,16 @@ func thinkingDisplay(providerOptions *ProviderOptions, modelID string) (Thinking
 }
 
 func defaultsToAdaptiveThinking(model string) bool {
-	model = strings.ToLower(strings.TrimSpace(model))
-	return strings.Contains(model, "claude-mythos-preview")
+	// Mythos-class models enable adaptive thinking by default even when the
+	// caller does not pass thinking options.
+	return isMythosClassModel(model)
 }
 
 func requiresAdaptiveThinking(model string) bool {
-	return defaultsToAdaptiveThinking(model) || defaultsToOmittedOpusThinkingDisplay(model)
+	// When a caller enables thinking via budget_tokens, upgrade to adaptive
+	// for every modern Claude model that rejects thinking.type=enabled.
+	// Older Claude families keep the legacy enabled+budget path.
+	return isClaudeModel(model) && !isLegacyManualThinkingClaudeModel(model)
 }
 
 func setThinkingDisplay(param interface{ SetExtraFields(map[string]any) }, display ThinkingDisplay) {
@@ -63,25 +67,96 @@ func setThinkingDisplay(param interface{ SetExtraFields(map[string]any) }, displ
 }
 
 func defaultsToOmittedThinkingDisplay(model string) bool {
-	model = strings.ToLower(strings.TrimSpace(model))
-	return defaultsToAdaptiveThinking(model) || defaultsToOmittedOpusThinkingDisplay(model)
+	// Models whose API default for thinking.display is "omitted" need an
+	// explicit summarized display so callers still receive reasoning text.
+	return isMythosClassModel(model) || isModernOpusFamilyModel(model)
 }
 
-func defaultsToOmittedOpusThinkingDisplay(model string) bool {
-	_, suffix, ok := strings.Cut(model, "claude-opus-4-")
-	if !ok {
-		return false
+func isClaudeModel(model string) bool {
+	return strings.Contains(strings.ToLower(strings.TrimSpace(model)), "claude")
+}
+
+func isMythosClassModel(model string) bool {
+	m := strings.ToLower(strings.TrimSpace(model))
+	return strings.Contains(m, "claude-mythos") || strings.Contains(m, "claude-fable")
+}
+
+// isModernOpusFamilyModel reports whether model is an Opus release that uses
+// the modern adaptive thinking contract (Opus 4.7+ and Opus 5+).
+func isModernOpusFamilyModel(model string) bool {
+	m := strings.ToLower(strings.TrimSpace(model))
+
+	// Named major lines: claude-opus-5, claude-opus-5-..., bedrock variants.
+	if after, ok := cutAfter(m, "claude-opus-"); ok {
+		if major, ok := leadingInt(after); ok && major >= 5 {
+			return true
+		}
 	}
 
-	versionEnd := 0
-	for versionEnd < len(suffix) && suffix[versionEnd] >= '0' && suffix[versionEnd] <= '9' {
-		versionEnd++
+	// Numbered 4.x minors: claude-opus-4-7, claude-opus-4.8, bedrock forms.
+	if after, ok := cutAfter(m, "claude-opus-4-"); ok {
+		if minor, ok := leadingInt(after); ok && minor >= 7 && minor <= 99 {
+			// Reject date-stamped original GA IDs like claude-opus-4-20250514
+			// (leading int would be 20250514, already excluded by <= 99).
+			return true
+		}
 	}
-	if versionEnd == 0 || versionEnd > 2 {
+	if after, ok := cutAfter(m, "claude-opus-4."); ok {
+		if minor, ok := leadingInt(after); ok && minor >= 7 && minor <= 99 {
+			return true
+		}
+	}
+	return false
+}
+
+// isLegacyManualThinkingClaudeModel reports Claude families that still require
+// thinking.type=enabled + budget_tokens. Unknown/future Claude models default
+// to the modern adaptive contract.
+func isLegacyManualThinkingClaudeModel(model string) bool {
+	m := strings.ToLower(strings.TrimSpace(model))
+	if !strings.Contains(m, "claude") {
 		return false
 	}
-	minor, err := strconv.Atoi(suffix[:versionEnd])
-	return err == nil && minor >= 7
+	// Anything modern is not legacy.
+	if isMythosClassModel(m) || isModernOpusFamilyModel(m) {
+		return false
+	}
+	// Claude 5+ non-opus lines (sonnet-5, etc.).
+	for _, family := range []string{"claude-sonnet-", "claude-haiku-"} {
+		if after, ok := cutAfter(m, family); ok {
+			if major, ok := leadingInt(after); ok && major >= 5 {
+				return false
+			}
+		}
+	}
+	// Adaptive-capable 4.6 family.
+	if strings.Contains(m, "claude-opus-4-6") || strings.Contains(m, "claude-opus-4.6") ||
+		strings.Contains(m, "claude-sonnet-4-6") || strings.Contains(m, "claude-sonnet-4.6") {
+		return false
+	}
+	// Remaining Claude IDs (3.x, 4.0/4.1/4.5, bare opus/sonnet-4, haiku-4.5)
+	// still use manual budget thinking when thinking is requested.
+	return true
+}
+
+func cutAfter(s, sep string) (string, bool) {
+	i := strings.Index(s, sep)
+	if i < 0 {
+		return "", false
+	}
+	return s[i+len(sep):], true
+}
+
+func leadingInt(s string) (int, bool) {
+	end := 0
+	for end < len(s) && s[end] >= '0' && s[end] <= '9' {
+		end++
+	}
+	if end == 0 {
+		return 0, false
+	}
+	n, err := strconv.Atoi(s[:end])
+	return n, err == nil
 }
 
 // buildRequestOptions constructs the common request options shared

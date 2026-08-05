@@ -1,4 +1,4 @@
-// Package openrouter provides an implementation of the fantasy AI SDK for OpenRouter's language models.
+// Package openrouter provides an implementation of the fantasy AI SDK for OpenRouter's language and embedding models.
 package openrouter
 
 import (

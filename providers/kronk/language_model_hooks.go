@@ -33,6 +33,38 @@ func DefaultPrepareCallFunc(_ fantasy.LanguageModel, d model.D, call fantasy.Cal
 		}
 	}
 
+	if providerOptions.AdaptivePDecay != nil {
+		d["adaptive_p_decay"] = *providerOptions.AdaptivePDecay
+	}
+
+	if providerOptions.AdaptivePTarget != nil {
+		d["adaptive_p_target"] = *providerOptions.AdaptivePTarget
+	}
+
+	if providerOptions.DryAllowedLen != nil {
+		d["dry_allowed_length"] = *providerOptions.DryAllowedLen
+	}
+
+	if providerOptions.DryBase != nil {
+		d["dry_base"] = *providerOptions.DryBase
+	}
+
+	if providerOptions.DryMultiplier != nil {
+		d["dry_multiplier"] = *providerOptions.DryMultiplier
+	}
+
+	if providerOptions.DryPenaltyLast != nil {
+		d["dry_penalty_last_n"] = *providerOptions.DryPenaltyLast
+	}
+
+	if providerOptions.Grammar != nil {
+		d["grammar"] = *providerOptions.Grammar
+	}
+
+	if providerOptions.Logprobs != nil {
+		d["logprobs"] = *providerOptions.Logprobs
+	}
+
 	if providerOptions.TopK != nil {
 		d["top_k"] = *providerOptions.TopK
 	}
@@ -50,11 +82,39 @@ func DefaultPrepareCallFunc(_ fantasy.LanguageModel, d model.D, call fantasy.Cal
 	}
 
 	if providerOptions.NumPredict != nil {
-		d["num_predict"] = *providerOptions.NumPredict
+		d["max_tokens"] = *providerOptions.NumPredict
+	}
+
+	if providerOptions.ReasoningEffort != nil {
+		d["reasoning_effort"] = *providerOptions.ReasoningEffort
+	}
+
+	if providerOptions.RepeatLastN != nil {
+		d["repeat_last_n"] = *providerOptions.RepeatLastN
 	}
 
 	if providerOptions.Stop != nil {
 		d["stop"] = providerOptions.Stop
+	}
+
+	if providerOptions.Thinking != nil {
+		d["enable_thinking"] = *providerOptions.Thinking
+	}
+
+	if providerOptions.TopLogprobs != nil {
+		d["top_logprobs"] = *providerOptions.TopLogprobs
+	}
+
+	if providerOptions.XtcMinKeep != nil {
+		d["xtc_min_keep"] = *providerOptions.XtcMinKeep
+	}
+
+	if providerOptions.XtcProbability != nil {
+		d["xtc_probability"] = *providerOptions.XtcProbability
+	}
+
+	if providerOptions.XtcThreshold != nil {
+		d["xtc_threshold"] = *providerOptions.XtcThreshold
 	}
 
 	return warnings, nil
@@ -65,6 +125,9 @@ func DefaultMapFinishReasonFunc(finishReason string) fantasy.FinishReason {
 	switch finishReason {
 	case string(model.FinishReasonStop):
 		return fantasy.FinishReasonStop
+
+	case string(model.FinishReasonLength):
+		return fantasy.FinishReasonLength
 
 	case string(model.FinishReasonTool):
 		return fantasy.FinishReasonToolCalls

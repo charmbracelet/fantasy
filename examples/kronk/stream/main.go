@@ -59,9 +59,10 @@ func run() error {
 	defer cancel()
 
 	// Create the provider with optional logging.
-	provider, err := kronk.New(
+	provider, err := kronk.NewProvider(
 		kronk.WithName("kronk"),
 		kronk.WithLogger(kronk.FmtLogger),
+		kronk.WithAutoTune(true),
 	)
 	if err != nil {
 		return fmt.Errorf("unable to create provider: %w", err)
@@ -70,10 +71,8 @@ func run() error {
 	// Clean up when done.
 	defer func() {
 		fmt.Println("\nUnloading Kronk")
-		if closer, ok := provider.(interface{ Close(context.Context) error }); ok {
-			if err := closer.Close(context.Background()); err != nil {
-				fmt.Printf("failed to close provider: %v\n", err)
-			}
+		if err := provider.Close(context.Background()); err != nil {
+			fmt.Printf("failed to close provider: %v\n", err)
 		}
 	}()
 
@@ -124,6 +123,12 @@ func run() error {
 			return nil
 		},
 
+		// When the final response starts.
+		OnTextStart: func(id string) error {
+			fmt.Print("[Response]\n")
+			return nil
+		},
+
 		// When we receive a chunk of streaming data.
 		OnTextDelta: func(id, text string) error {
 			_, fmtErr := fmt.Print(text)
@@ -157,11 +162,11 @@ func run() error {
 	fmt.Println("Generating...")
 
 	// Finally, let's stream everything!
-	_, err = agent.Stream(ctx, streamCall)
+	result, err := agent.Stream(ctx, streamCall)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error generating response: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("agent stream failed: %w", err)
 	}
+	fmt.Printf("\nUsage: %s\n", result.TotalUsage)
 
 	return nil
 }

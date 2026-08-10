@@ -80,9 +80,9 @@ func ExtraContentFunc(choice openaisdk.ChatCompletionChoice) []fantasy.Content {
 	if err != nil {
 		return content
 	}
-	if rc := reasoningData.GetReasoningContent(); rc != "" {
+	if hasReasoningField(choice.Message.RawJSON()) {
 		content = append(content, fantasy.ReasoningContent{
-			Text: rc,
+			Text: reasoningData.GetReasoningContent(),
 		})
 	}
 	return content
@@ -136,7 +136,7 @@ func StreamExtraFunc(chunk openaisdk.ChatCompletionChunk, yield func(fantasy.Str
 				Delta: reasoningContent,
 			})
 		}
-		if rc := reasoningData.GetReasoningContent(); rc != "" {
+		if rc := reasoningData.GetReasoningContent(); rc != "" || hasReasoningField(choice.Delta.RawJSON()) {
 			if !reasoningStarted {
 				ctx[reasoningStartedCtx] = true
 			}
@@ -159,7 +159,6 @@ func StreamExtraFunc(chunk openaisdk.ChatCompletionChunk, yield func(fantasy.Str
 func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletionMessageParamUnion, []fantasy.CallWarning) {
 	var messages []openaisdk.ChatCompletionMessageParamUnion
 	var warnings []fantasy.CallWarning
-	hasReasoning := false
 
 	for _, msg := range prompt {
 		switch msg.Role {
@@ -373,6 +372,7 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 				Role: "assistant",
 			}
 			var reasoningText string
+			reasoningPresent := false
 			for _, c := range msg.Content {
 				switch c.GetType() {
 				case fantasy.ContentTypeText:
@@ -406,7 +406,7 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 						continue
 					}
 					reasoningText = reasoningPart.Text
-					hasReasoning = true
+					reasoningPresent = true
 				case fantasy.ContentTypeToolCall:
 					toolCallPart, ok := fantasy.AsContentType[fantasy.ToolCallPart](c)
 					if !ok {
@@ -429,10 +429,12 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 						})
 				}
 			}
-			// Add reasoning_content field if present, or if thinking is enabled
-			// and the message has tool calls (some providers like Kimi require
-			// reasoning_content on all assistant messages when thinking is enabled).
-			if reasoningText != "" || (hasReasoning && len(assistantMsg.ToolCalls) > 0) {
+			// Add reasoning_content field if the message carries a reasoning
+			// part, even when its text is empty: presence must mirror what the
+			// model emitted so resubmitted history stays byte-stable for prefix
+			// caching. Providers like Kimi require the field on assistant
+			// tool-call messages when thinking is enabled.
+			if reasoningPresent {
 				assistantMsg.SetExtraFields(map[string]any{
 					"reasoning_content": reasoningText,
 				})

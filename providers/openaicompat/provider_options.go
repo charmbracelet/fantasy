@@ -54,6 +54,20 @@ func (r ReasoningData) GetReasoningContent() string {
 	return r.Reasoning
 }
 
+// hasReasoningField reports whether raw JSON contains a reasoning field
+// ("reasoning_content" or "reasoning"), even when its value is empty.
+func hasReasoningField(rawJSON string) bool {
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal([]byte(rawJSON), &fields); err != nil {
+		return false
+	}
+	if _, ok := fields["reasoning_content"]; ok {
+		return true
+	}
+	_, ok := fields["reasoning"]
+	return ok
+}
+
 // Options implements the ProviderOptions interface.
 func (*ProviderOptions) Options() {}
 

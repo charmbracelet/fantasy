@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"charm.land/fantasy"
-	"github.com/charmbracelet/anthropic-sdk-go"
+	"github.com/anthropics/anthropic-sdk-go"
 )
 
 var anthropicContextPattern = regexp.MustCompile(`prompt is too long:\s*(\d+)\s*tokens?\s*>\s*(\d+)\s*maximum`)
@@ -33,6 +33,7 @@ func toProviderErr(err error) error {
 			RequestBody:     apiErr.DumpRequest(true),
 			ResponseHeaders: toHeaderMap(apiErr.Response.Header),
 			ResponseBody:    apiErr.DumpResponse(true),
+			TransientError:  fantasy.TransientStreamErrorTypes[string(apiErr.Type())],
 		}
 
 		parseContextTooLargeError(apiErr.Error(), providerErr)

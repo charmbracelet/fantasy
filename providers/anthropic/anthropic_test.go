@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"charm.land/fantasy"
-	"github.com/charmbracelet/anthropic-sdk-go"
+	"github.com/anthropics/anthropic-sdk-go"
 	"github.com/stretchr/testify/require"
 )
 
@@ -927,7 +927,7 @@ func TestStream_RequiresMessageStopBeforeFinish(t *testing.T) {
 			chunks: []string{
 				anthropicSSEEvent("error", `{"type":"error","error":{"type":"api_error","message":"stream down"}}`),
 			},
-			wantRetryable: true,
+			wantRetryable:  true,
 			wantErrContain: "stream down",
 		},
 		{

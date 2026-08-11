@@ -109,7 +109,7 @@ func (s StreamPart) MarshalJSON() ([]byte, error) {
 		alias
 		Error string `json:"error,omitempty"`
 	}{
-		alias: (alias)(s),
+		alias: alias(s),
 	}
 
 	// Marshal error to string

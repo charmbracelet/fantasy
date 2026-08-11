@@ -52,7 +52,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	agent := fantasy.NewAgent(model,
+	agent := fantasy.NewAgent(
+		model,
 		fantasy.WithProviderDefinedTools(webSearch),
 	)
 

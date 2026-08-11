@@ -47,7 +47,8 @@ func main() {
 	cuteDogTool := fantasy.NewAgentTool("cute_dog_tool", "Provide up-to-date info on cute dogs.", fetchCuteDogInfo)
 
 	// Equip your agent.
-	agent := fantasy.NewAgent(model,
+	agent := fantasy.NewAgent(
+		model,
 		fantasy.WithSystemPrompt("You are a moderately helpful, dog-centric assistant."),
 		fantasy.WithTools(cuteDogTool),
 	)

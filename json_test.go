@@ -315,7 +315,8 @@ func TestHelperFunctions(t *testing.T) {
 	})
 
 	t.Run("NewUserMessage - with files", func(t *testing.T) {
-		msg := NewUserMessage("Check this image",
+		msg := NewUserMessage(
+			"Check this image",
 			FilePart{
 				Filename:  "image1.jpg",
 				Data:      []byte{0xFF, 0xD8, 0xFF},

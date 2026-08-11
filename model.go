@@ -18,7 +18,8 @@ type Usage struct {
 }
 
 func (u Usage) String() string {
-	return fmt.Sprintf("Usage{Input: %d, Output: %d, Total: %d, Reasoning: %d, CacheCreation: %d, CacheRead: %d}",
+	return fmt.Sprintf(
+		"Usage{Input: %d, Output: %d, Total: %d, Reasoning: %d, CacheCreation: %d, CacheRead: %d}",
 		u.InputTokens,
 		u.OutputTokens,
 		u.TotalTokens,

@@ -25,8 +25,21 @@ type provider struct {
 	kronks  map[string]*kronk.Kronk
 }
 
+// Provider is a Fantasy provider that owns local Kronk model resources.
+type Provider interface {
+	fantasy.Provider
+	Close(context.Context) error
+}
+
+var _ Provider = (*provider)(nil)
+
 // New creates a new Kronk provider with the given options.
 func New(opts ...Option) (fantasy.Provider, error) {
+	return NewProvider(opts...)
+}
+
+// NewProvider creates a Kronk provider with direct access to Close.
+func NewProvider(opts ...Option) (Provider, error) {
 	providerOptions := options{
 		languageModelOptions: make([]LanguageModelOption, 0),
 	}
@@ -65,12 +78,12 @@ func (p *provider) LanguageModel(ctx context.Context, modelURL string) (fantasy.
 
 	mp, err := p.installSystem(ctx, modelURL)
 	if err != nil {
-		return nil, fmt.Errorf("failed to install system: %w", err)
+		return nil, toOperationErr("kronk installation failed", err)
 	}
 
 	krn, err := p.newKronk(mp)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create kronk instance: %w", err)
+		return nil, toOperationErr("kronk model loading failed", err)
 	}
 
 	p.kronks[modelURL] = krn
@@ -135,8 +148,7 @@ func (p *provider) newKronk(mp models.Path) (*kronk.Kronk, error) {
 		return nil, fmt.Errorf("unable to init kronk: %w", err)
 	}
 
-	cfg := p.options.modelConfig
-	cfg.ModelFiles = mp.ModelFiles
+	cfg := p.modelConfig(mp)
 
 	krn, err := kronk.New(model.WithConfig(cfg))
 	if err != nil {
@@ -144,4 +156,17 @@ func (p *provider) newKronk(mp models.Path) (*kronk.Kronk, error) {
 	}
 
 	return krn, nil
+}
+
+func (p *provider) modelConfig(mp models.Path) model.Config {
+	cfg := model.NewConfig(p.options.modelOptions...)
+	cfg.ModelFiles = mp.ModelFiles
+	if cfg.ProjFile == "" {
+		cfg.ProjFile = mp.ProjFile
+	}
+	if cfg.MTPDrafterFile == "" {
+		cfg.MTPDrafterFile = mp.MTPFile
+	}
+
+	return cfg
 }

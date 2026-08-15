@@ -414,24 +414,31 @@ func toGooglePrompt(prompt fantasy.Prompt, isVertexAI bool) (*genai.Content, []*
 			}
 		case fantasy.MessageRoleAssistant:
 			var parts []*genai.Part
-			var currentReasoningMetadata *ReasoningMetadata
+
+			toolSignatures := make(map[string]*ReasoningMetadata)
+			var textSignatures []*ReasoningMetadata
+			var defaultSignature *ReasoningMetadata
 			for _, part := range msg.Content {
-				switch part.GetType() {
-				case fantasy.ContentTypeReasoning:
+				if part.GetType() == fantasy.ContentTypeReasoning {
 					reasoning, ok := fantasy.AsMessagePart[fantasy.ReasoningPart](part)
 					if !ok {
 						continue
 					}
+					rm := GetReasoningMetadata(reasoning.ProviderOptions)
+					if rm != nil && rm.Signature != "" {
+						if rm.ToolID != "" {
+							toolSignatures[rm.ToolID] = rm
+						} else {
+							textSignatures = append(textSignatures, rm)
+						}
+						defaultSignature = rm
+					}
+				}
+			}
 
-					metadata, ok := reasoning.ProviderOptions[Name]
-					if !ok {
-						continue
-					}
-					reasoningMetadata, ok := metadata.(*ReasoningMetadata)
-					if !ok {
-						continue
-					}
-					currentReasoningMetadata = reasoningMetadata
+			textSigIdx := 0
+			for _, part := range msg.Content {
+				switch part.GetType() {
 				case fantasy.ContentTypeText:
 					text, ok := fantasy.AsMessagePart[fantasy.TextPart](part)
 					if !ok || text.Text == "" {
@@ -440,9 +447,11 @@ func toGooglePrompt(prompt fantasy.Prompt, isVertexAI bool) (*genai.Content, []*
 					geminiPart := &genai.Part{
 						Text: text.Text,
 					}
-					if currentReasoningMetadata != nil {
-						geminiPart.ThoughtSignature = []byte(currentReasoningMetadata.Signature)
-						currentReasoningMetadata = nil
+					if textSigIdx < len(textSignatures) {
+						geminiPart.ThoughtSignature = []byte(textSignatures[textSigIdx].Signature)
+						textSigIdx++
+					} else if defaultSignature != nil && defaultSignature.Signature != "" && defaultSignature.ToolID == "" {
+						geminiPart.ThoughtSignature = []byte(defaultSignature.Signature)
 					}
 					parts = append(parts, geminiPart)
 				case fantasy.ContentTypeToolCall:
@@ -468,9 +477,10 @@ func toGooglePrompt(prompt fantasy.Prompt, isVertexAI bool) (*genai.Content, []*
 					if isVertexAI {
 						geminiPart.FunctionCall.ID = ""
 					}
-					if currentReasoningMetadata != nil {
-						geminiPart.ThoughtSignature = []byte(currentReasoningMetadata.Signature)
-						currentReasoningMetadata = nil
+					if sig, ok := toolSignatures[toolCall.ToolCallID]; ok && sig.Signature != "" {
+						geminiPart.ThoughtSignature = []byte(sig.Signature)
+					} else if defaultSignature != nil && defaultSignature.Signature != "" && defaultSignature.ToolID == "" {
+						geminiPart.ThoughtSignature = []byte(defaultSignature.Signature)
 					}
 					parts = append(parts, geminiPart)
 				}
@@ -715,16 +725,18 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 									metadata := &ReasoningMetadata{
 										Signature: string(part.ThoughtSignature),
 									}
+									blockID := fmt.Sprintf("%d", blockCounter)
+									blockCounter++
 
 									if !yield(fantasy.StreamPart{
 										Type: fantasy.StreamPartTypeReasoningStart,
-										ID:   currentReasoningBlockID,
+										ID:   blockID,
 									}) {
 										return
 									}
 									if !yield(fantasy.StreamPart{
 										Type: fantasy.StreamPartTypeReasoningEnd,
-										ID:   currentReasoningBlockID,
+										ID:   blockID,
 										ProviderMetadata: fantasy.ProviderMetadata{
 											Name: metadata,
 										},
@@ -776,16 +788,18 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 								Signature: string(part.ThoughtSignature),
 								ToolID:    toolCallID,
 							}
+							blockID := fmt.Sprintf("%d", blockCounter)
+							blockCounter++
 
 							if !yield(fantasy.StreamPart{
 								Type: fantasy.StreamPartTypeReasoningStart,
-								ID:   currentReasoningBlockID,
+								ID:   blockID,
 							}) {
 								return
 							}
 							if !yield(fantasy.StreamPart{
 								Type: fantasy.StreamPartTypeReasoningEnd,
-								ID:   currentReasoningBlockID,
+								ID:   blockID,
 								ProviderMetadata: fantasy.ProviderMetadata{
 									Name: metadata,
 								},
@@ -1367,6 +1381,9 @@ func (g languageModel) mapResponse(response *genai.GenerateContentResponse, warn
 								content[i] = reasoningContent
 								foundReasoning = true
 								break
+							} else if existing := GetReasoningMetadata(fantasy.ProviderOptions(reasoningContent.ProviderMetadata)); existing != nil && existing.Signature != "" {
+								foundReasoning = true
+								break
 							}
 						}
 					}
@@ -1400,12 +1417,24 @@ func (g languageModel) mapResponse(response *genai.GenerateContentResponse, warn
 						if !ok {
 							continue
 						}
-						reasoningContent.ProviderMetadata = fantasy.ProviderMetadata{
-							Name: metadata,
+						// Only use it if it doesn't already have a signature, or if it has an unassigned ToolID
+						if reasoningContent.ProviderMetadata == nil || reasoningContent.ProviderMetadata[Name] == nil {
+							reasoningContent.ProviderMetadata = fantasy.ProviderMetadata{
+								Name: metadata,
+							}
+							content[i] = reasoningContent
+							foundReasoning = true
+							break
+						} else if existing := GetReasoningMetadata(fantasy.ProviderOptions(reasoningContent.ProviderMetadata)); existing != nil && existing.ToolID == "" {
+							existing.ToolID = toolCallID
+							if existing.Signature == "" {
+								existing.Signature = string(part.ThoughtSignature)
+							}
+							reasoningContent.ProviderMetadata[Name] = existing
+							content[i] = reasoningContent
+							foundReasoning = true
+							break
 						}
-						content[i] = reasoningContent
-						foundReasoning = true
-						break
 					}
 				}
 				if !foundReasoning {
@@ -1477,6 +1506,9 @@ func mapFinishReason(reason genai.FinishReason) fantasy.FinishReason {
 }
 
 func mapUsage(usage *genai.GenerateContentResponseUsageMetadata) fantasy.Usage {
+	if usage == nil {
+		return fantasy.Usage{}
+	}
 	return fantasy.Usage{
 		InputTokens:         int64(usage.PromptTokenCount),
 		OutputTokens:        int64(usage.CandidatesTokenCount),

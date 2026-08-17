@@ -148,11 +148,6 @@ func WithModelFiles(v []string) Option {
 	return withModelOption(model.WithModelFiles(v))
 }
 
-// WithNBatch configures the logical batch size.
-func WithNBatch(v int) Option {
-	return withModelOption(model.WithNBatch(v))
-}
-
 // WithNGpuLayers configures the number of model layers offloaded to the GPU.
 func WithNGpuLayers(v int) Option {
 	return withModelOption(model.WithNGpuLayers(v))
@@ -173,11 +168,6 @@ func WithNThreadsBatch(v int) Option {
 	return withModelOption(model.WithNThreadsBatch(v))
 }
 
-// WithNUBatch configures the physical batch size.
-func WithNUBatch(v int) Option {
-	return withModelOption(model.WithNUBatch(v))
-}
-
 // WithNUMA configures the NUMA strategy.
 func WithNUMA(v string) Option {
 	return withModelOption(model.WithNUMA(v))
@@ -196,6 +186,11 @@ func WithOpOffload(v bool) Option {
 // WithOpOffloadMinBatch configures the minimum batch size for operation offloading.
 func WithOpOffloadMinBatch(v int) Option {
 	return withModelOption(model.WithOpOffloadMinBatch(v))
+}
+
+// WithPrefillBatchSize configures the maximum number of prompt tokens processed per decode iteration.
+func WithPrefillBatchSize(v int) Option {
+	return withModelOption(model.WithPrefillBatchSize(v))
 }
 
 // WithProjFile configures the multimodal projection file.

@@ -374,8 +374,10 @@ func responsesProviderMetadata(responseID string) fantasy.ProviderMetadata {
 }
 
 func responsesUsage(resp responses.Response) fantasy.Usage {
-	// OpenAI reports input_tokens INCLUDING cached tokens. Subtract to avoid double-counting.
-	inputTokens := max(resp.Usage.InputTokens-resp.Usage.InputTokensDetails.CachedTokens, 0)
+	details := resp.Usage.InputTokensDetails
+	// OpenAI reports input_tokens INCLUDING cached and cache-written tokens.
+	// Subtract both to avoid double-counting the disjoint cache categories.
+	inputTokens := max(resp.Usage.InputTokens-details.CachedTokens-details.CacheWriteTokens, 0)
 	usage := fantasy.Usage{
 		InputTokens:  inputTokens,
 		OutputTokens: resp.Usage.OutputTokens,
@@ -384,8 +386,11 @@ func responsesUsage(resp responses.Response) fantasy.Usage {
 	if resp.Usage.OutputTokensDetails.ReasoningTokens != 0 {
 		usage.ReasoningTokens = resp.Usage.OutputTokensDetails.ReasoningTokens
 	}
-	if resp.Usage.InputTokensDetails.CachedTokens != 0 {
-		usage.CacheReadTokens = resp.Usage.InputTokensDetails.CachedTokens
+	if details.CachedTokens != 0 {
+		usage.CacheReadTokens = details.CachedTokens
+	}
+	if details.CacheWriteTokens != 0 {
+		usage.CacheCreationTokens = details.CacheWriteTokens
 	}
 	return usage
 }
@@ -1444,11 +1449,7 @@ func (o responsesLanguageModel) generateObjectWithJSONMode(ctx context.Context, 
 	}
 
 	if jsonText == "" {
-		usage := fantasy.Usage{
-			InputTokens:  response.Usage.InputTokens,
-			OutputTokens: response.Usage.OutputTokens,
-			TotalTokens:  response.Usage.InputTokens + response.Usage.OutputTokens,
-		}
+		usage := responsesUsage(*response)
 		finishReason := mapResponsesFinishReason(response.IncompleteDetails.Reason, false)
 		return nil, &fantasy.NoObjectGeneratedError{
 			RawText:      "",

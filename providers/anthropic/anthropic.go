@@ -293,6 +293,14 @@ func (a *provider) LanguageModel(ctx context.Context, modelID string) (fantasy.L
 			)
 		} else {
 			if cfg, err := config.LoadDefaultConfig(ctx); err == nil {
+				// The upstream Anthropic SDK prioritizes a BearerAuthTokenProvider
+				// over SigV4 credentials. When using AWS SSO, the default config
+				// populates both, causing the SSO bearer token to be sent to
+				// Bedrock, which rejects it ("Invalid API Key format"). Clear
+				// the provider so the SDK falls back to SigV4 signing.
+				// AWS_BEARER_TOKEN_BEDROCK is still honored by bedrock.WithConfig
+				// when the provider is nil.
+				cfg.BearerAuthTokenProvider = nil
 				cfg.Region = cmp.Or(a.options.bedrockRegion, cfg.Region)
 				clientOptions = append(
 					clientOptions,

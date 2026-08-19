@@ -172,6 +172,7 @@ type AgentCall struct {
 	PresencePenalty  *float64    `json:"presence_penalty"`
 	FrequencyPenalty *float64    `json:"frequency_penalty"`
 	ActiveTools      []string    `json:"active_tools"`
+	DisableAllTools  bool        `json:"disable_all_tools"`
 	ToolChoice       *ToolChoice `json:"tool_choice"`
 	Headers          map[string]string
 	ProviderOptions  ProviderOptions
@@ -281,6 +282,7 @@ type AgentStreamCall struct {
 	PresencePenalty  *float64    `json:"presence_penalty"`
 	FrequencyPenalty *float64    `json:"frequency_penalty"`
 	ActiveTools      []string    `json:"active_tools"`
+	DisableAllTools  bool        `json:"disable_all_tools"`
 	ToolChoice       *ToolChoice `json:"tool_choice"`
 	Headers          map[string]string
 	ProviderOptions  ProviderOptions
@@ -455,7 +457,7 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 		if opts.ToolChoice != nil {
 			stepToolChoice = *opts.ToolChoice
 		}
-		disableAllTools := false
+		disableAllTools := opts.DisableAllTools
 		stepTools := a.settings.tools
 		if opts.PrepareStep != nil {
 			updatedCtx, prepared, err := opts.PrepareStep(ctx, PrepareStepFunctionOptions{
@@ -486,7 +488,7 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 			if len(prepared.ActiveTools) > 0 {
 				stepActiveTools = prepared.ActiveTools
 			}
-			disableAllTools = prepared.DisableAllTools
+			disableAllTools = disableAllTools || prepared.DisableAllTools
 			if prepared.Tools != nil {
 				stepTools = prepared.Tools
 			}
@@ -891,6 +893,7 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 		PresencePenalty:  opts.PresencePenalty,
 		FrequencyPenalty: opts.FrequencyPenalty,
 		ActiveTools:      opts.ActiveTools,
+		DisableAllTools:  opts.DisableAllTools,
 		ToolChoice:       opts.ToolChoice,
 		Headers:          opts.Headers,
 		ProviderOptions:  opts.ProviderOptions,
@@ -928,7 +931,7 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 		if call.ToolChoice != nil {
 			stepToolChoice = *call.ToolChoice
 		}
-		disableAllTools := false
+		disableAllTools := call.DisableAllTools
 		stepTools := a.settings.tools
 		// Apply step preparation if provided
 		if call.PrepareStep != nil {
@@ -959,7 +962,7 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 			if len(prepared.ActiveTools) > 0 {
 				stepActiveTools = prepared.ActiveTools
 			}
-			disableAllTools = prepared.DisableAllTools
+			disableAllTools = disableAllTools || prepared.DisableAllTools
 			if prepared.Tools != nil {
 				stepTools = prepared.Tools
 			}

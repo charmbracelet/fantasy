@@ -347,12 +347,14 @@ func TestToPromptFunc_DropsEmptyMessages(t *testing.T) {
 		require.Empty(t, warnings)
 	})
 
-	t.Run("should add empty reasoning_content to tool call messages when thinking is enabled", func(t *testing.T) {
+	t.Run("should add reasoning_content to tool call messages only when the message itself reasoned", func(t *testing.T) {
 		t.Parallel()
 
-		// When thinking is enabled (reasoning parts exist in history),
-		// tool call messages without their own reasoning must still include
-		// reasoning_content. Providers like Kimi require it.
+		// reasoning_content presence is decided per message from its own
+		// reasoning part, never from conversation history. This keeps
+		// resubmitted history byte-stable for prefix caches (see #330),
+		// while still emitting the (possibly empty) field that providers
+		// like Kimi require on assistant tool-call messages.
 		prompt := fantasy.Prompt{
 			{
 				Role: fantasy.MessageRoleUser,
@@ -392,13 +394,56 @@ func TestToPromptFunc_DropsEmptyMessages(t *testing.T) {
 		require.Empty(t, warnings)
 		require.Len(t, messages, 4)
 
-		// Tool call message must have reasoning_content (empty) since
-		// thinking is enabled in this conversation
+		// The reasoning turn keeps its reasoning_content.
+		reasoningMsg := messages[1].OfAssistant
+		require.NotNil(t, reasoningMsg)
+		rc, ok := reasoningMsg.ExtraFields()["reasoning_content"]
+		require.True(t, ok)
+		require.Equal(t, "Simple math.", rc)
+
+		// The tool-call message has no reasoning part of its own, so no
+		// reasoning_content is manufactured for it.
 		msg := messages[3].OfAssistant
 		require.NotNil(t, msg)
-		extraFields := msg.ExtraFields()
-		reasoningContent, hasReasoning := extraFields["reasoning_content"]
-		require.True(t, hasReasoning, "reasoning_content must be present on tool call messages when thinking is enabled")
+		_, hasReasoning := msg.ExtraFields()["reasoning_content"]
+		require.False(t, hasReasoning, "reasoning_content must not be synthesized from history (see #330)")
+	})
+
+	t.Run("should emit empty reasoning_content when the tool call message has an empty reasoning part", func(t *testing.T) {
+		t.Parallel()
+
+		// A present-but-empty reasoning part on the message itself still
+		// emits reasoning_content: "" (present), satisfying providers like
+		// Kimi while staying byte-stable.
+		prompt := fantasy.Prompt{
+			{
+				Role: fantasy.MessageRoleUser,
+				Content: []fantasy.MessagePart{
+					fantasy.TextPart{Text: "Run it"},
+				},
+			},
+			{
+				Role: fantasy.MessageRoleAssistant,
+				Content: []fantasy.MessagePart{
+					fantasy.ReasoningPart{Text: ""},
+					fantasy.ToolCallPart{
+						ToolCallID: "call_1",
+						ToolName:   "execute",
+						Input:      `{"command":"echo 4"}`,
+					},
+				},
+			},
+		}
+
+		messages, warnings := ToPromptFunc(prompt, "", "")
+
+		require.Empty(t, warnings)
+		require.Len(t, messages, 2)
+
+		msg := messages[1].OfAssistant
+		require.NotNil(t, msg)
+		reasoningContent, hasReasoning := msg.ExtraFields()["reasoning_content"]
+		require.True(t, hasReasoning, "present-but-empty reasoning part must emit reasoning_content")
 		require.Equal(t, "", reasoningContent)
 	})
 

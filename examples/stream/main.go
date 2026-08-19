@@ -14,6 +14,10 @@ import (
 	"charm.land/fantasy/providers/openai"
 )
 
+const (
+	modelId = "gpt-5"
+)
+
 const systemPrompt = `
 You are moderately helpful assistant with a new puppy named Chuck. Chuck is
 moody and ranges from very happy to very annoyed. He's pretty happy-go-lucky,
@@ -31,17 +35,6 @@ Missouri.
 // values as necessary.
 type dogInteraction struct {
 	OtherDogName string `json:"dogName" description:"Name of the other dog. Just make something up. All the dogs are named after Japanese cars from the 80s."`
-}
-
-// Here's a tool call. In this case it's a set of random barks.
-func letsBark(ctx context.Context, i dogInteraction, _ fantasy.ToolCall) (fantasy.ToolResponse, error) {
-	var r fantasy.ToolResponse
-	if rand.Float64() >= 0.5 {
-		r.Content = randomBarks(1, 3)
-	} else {
-		r.Content = randomBarks(5, 10)
-	}
-	return r, nil
 }
 
 func main() {
@@ -62,7 +55,7 @@ func main() {
 	ctx := context.Background()
 
 	// Choose the model.
-	model, err := provider.LanguageModel(ctx, "gpt-5")
+	model, err := provider.LanguageModel(ctx, modelId)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -125,6 +118,17 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error generating response: %v\n", err)
 		os.Exit(1)
 	}
+}
+
+// Here's a tool call. In this case it's a set of random barks.
+func letsBark(_ context.Context, _ dogInteraction, _ fantasy.ToolCall) (fantasy.ToolResponse, error) {
+	var r fantasy.ToolResponse
+	if rand.Float64() >= 0.5 {
+		r.Content = randomBarks(1, 3)
+	} else {
+		r.Content = randomBarks(5, 10)
+	}
+	return r, nil
 }
 
 // Return a random number of barks between low and high.

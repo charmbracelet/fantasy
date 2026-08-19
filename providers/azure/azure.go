@@ -1,4 +1,4 @@
-// Package azure provides an implementation of the fantasy AI SDK for Azure's language models.
+// Package azure provides an implementation of the fantasy AI SDK for Azure's language and embedding models.
 package azure
 
 import (

@@ -270,14 +270,33 @@ func (o languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantas
 		extraContent := o.extraContentFunc(choice)
 		content = append(content, extraContent...)
 	}
-	for _, tc := range choice.Message.ToolCalls {
-		toolCallID := tc.ID
-		content = append(content, fantasy.ToolCallContent{
-			ProviderExecuted: false,
-			ToolCallID:       toolCallID,
-			ToolName:         tc.Function.Name,
-			Input:            tc.Function.Arguments,
+
+	usage, providerMetadata := o.usageFunc(*response)
+
+	mappedFinishReason := o.mapFinishReasonFunc(choice.FinishReason)
+	truncatedWithToolCalls := len(choice.Message.ToolCalls) > 0 && mappedFinishReason == fantasy.FinishReasonLength
+	if len(choice.Message.ToolCalls) > 0 && !truncatedWithToolCalls {
+		mappedFinishReason = fantasy.FinishReasonToolCalls
+	}
+	if truncatedWithToolCalls {
+		warnings = append(warnings, fantasy.CallWarning{
+			Type:    fantasy.CallWarningTypeOther,
+			Message: "tool calls were returned but the model hit the token limit; arguments may be truncated",
 		})
+	}
+
+	// Suppress truncated tool-call content so agents don't dispatch
+	// calls with incomplete arguments.
+	if !truncatedWithToolCalls {
+		for _, tc := range choice.Message.ToolCalls {
+			toolCallID := tc.ID
+			content = append(content, fantasy.ToolCallContent{
+				ProviderExecuted: false,
+				ToolCallID:       toolCallID,
+				ToolName:         tc.Function.Name,
+				Input:            tc.Function.Arguments,
+			})
+		}
 	}
 	for _, annotation := range choice.Message.Annotations {
 		if annotation.Type == "url_citation" {
@@ -290,12 +309,6 @@ func (o languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantas
 		}
 	}
 
-	usage, providerMetadata := o.usageFunc(*response)
-
-	mappedFinishReason := o.mapFinishReasonFunc(choice.FinishReason)
-	if len(choice.Message.ToolCalls) > 0 {
-		mappedFinishReason = fantasy.FinishReasonToolCalls
-	}
 	return &fantasy.Response{
 		Content:      content,
 		Usage:        usage,
@@ -504,7 +517,22 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 				}
 			}
 
+			// Evaluate the finish reason before emitting tool calls so we can
+			// suppress them when the response was truncated (finish_reason=length).
+			// Emitting partial tool calls causes agents to dispatch them with
+			// invalid arguments before seeing the terminal reason.
+			mappedFinishReason := o.mapFinishReasonFunc(finishReason)
+			if len(acc.Choices) > 0 {
+				choice := acc.Choices[0]
+				if len(choice.Message.ToolCalls) > 0 && mappedFinishReason != fantasy.FinishReasonLength {
+					mappedFinishReason = fantasy.FinishReasonToolCalls
+				}
+			}
+			truncatedWithToolCalls := mappedFinishReason == fantasy.FinishReasonLength && len(toolCalls) > 0
+
 			// Finalize tool calls in index order after the stream completes.
+			// When truncated, skip ToolCall parts to prevent agents from
+			// dispatching calls with incomplete arguments.
 			indices := make([]int64, 0, len(toolCalls))
 			for idx := range toolCalls {
 				indices = append(indices, idx)
@@ -521,8 +549,10 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 						return
 					}
 				}
-				if !yield(fantasy.StreamPart{Type: fantasy.StreamPartTypeToolCall, ID: tc.id, ToolCallName: tc.name, ToolCallInput: tc.arguments}) {
-					return
+				if !truncatedWithToolCalls {
+					if !yield(fantasy.StreamPart{Type: fantasy.StreamPartTypeToolCall, ID: tc.id, ToolCallName: tc.name, ToolCallInput: tc.arguments}) {
+						return
+					}
 				}
 				tc.hasFinished = true
 				toolCalls[idx] = tc
@@ -546,13 +576,6 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 					}
 				}
 			}
-			mappedFinishReason := o.mapFinishReasonFunc(finishReason)
-			if len(acc.Choices) > 0 {
-				choice := acc.Choices[0]
-				if len(choice.Message.ToolCalls) > 0 {
-					mappedFinishReason = fantasy.FinishReasonToolCalls
-				}
-			}
 			// Truncated stream: upstream closed without finish_reason and we
 			// can't infer a tool-call turn. Surface as a retryable error so
 			// the retry middleware re-runs the step.
@@ -566,6 +589,15 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 					Error: err,
 				})
 				return
+			}
+			if truncatedWithToolCalls {
+				yield(fantasy.StreamPart{
+					Type: fantasy.StreamPartTypeWarnings,
+					Warnings: []fantasy.CallWarning{{
+						Type:    fantasy.CallWarningTypeOther,
+						Message: "tool calls were returned but the model hit the token limit; arguments may be truncated",
+					}},
+				})
 			}
 			yield(fantasy.StreamPart{
 				Type:             fantasy.StreamPartTypeFinish,

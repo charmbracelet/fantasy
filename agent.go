@@ -1433,7 +1433,7 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 
 		switch part.Type {
 		case StreamPartTypeWarnings:
-			stepWarnings = part.Warnings
+			stepWarnings = append(stepWarnings, part.Warnings...)
 			if opts.OnWarnings != nil {
 				err := opts.OnWarnings(part.Warnings)
 				if err != nil {
@@ -1701,9 +1701,13 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 	})
 
 	// Dispatch all buffered tool calls now that every OnToolCall callback has
-	// been called, then close and wait.
-	for _, req := range pendingDispatches {
-		toolChan <- req
+	// been called, then close and wait. Skip dispatch when the response was
+	// truncated (finish_reason=length) to avoid executing tool calls with
+	// incomplete arguments.
+	if stepFinishReason != FinishReasonLength {
+		for _, req := range pendingDispatches {
+			toolChan <- req
+		}
 	}
 
 	// Close the tool execution channel and wait for all executions to complete.

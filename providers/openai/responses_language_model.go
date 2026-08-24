@@ -794,6 +794,7 @@ func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call)
 
 	var content []fantasy.Content
 	hasFunctionCall := false
+	var pendingFunctionCalls []fantasy.ToolCallContent
 
 	for _, outputItem := range response.Output {
 		switch outputItem.Type {
@@ -836,7 +837,7 @@ func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call)
 
 		case "function_call":
 			hasFunctionCall = true
-			content = append(content, fantasy.ToolCallContent{
+			pendingFunctionCalls = append(pendingFunctionCalls, fantasy.ToolCallContent{
 				ProviderExecuted: false,
 				ToolCallID:       outputItem.CallID,
 				ToolName:         outputItem.Name,
@@ -898,6 +899,17 @@ func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call)
 
 	usage := responsesUsage(*response)
 	finishReason := mapResponsesFinishReason(response.IncompleteDetails.Reason, hasFunctionCall)
+	truncatedWithToolCalls := hasFunctionCall && finishReason == fantasy.FinishReasonLength
+	if truncatedWithToolCalls {
+		warnings = append(warnings, fantasy.CallWarning{
+			Type:    fantasy.CallWarningTypeOther,
+			Message: "tool calls were returned but the model hit the token limit; arguments may be truncated",
+		})
+	} else {
+		for _, tc := range pendingFunctionCalls {
+			content = append(content, tc)
+		}
+	}
 
 	return &fantasy.Response{
 		Content:          content,
@@ -909,12 +921,15 @@ func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call)
 }
 
 func mapResponsesFinishReason(reason string, hasFunctionCall bool) fantasy.FinishReason {
-	if hasFunctionCall {
+	if hasFunctionCall && reason != "max_tokens" && reason != "max_output_tokens" {
 		return fantasy.FinishReasonToolCalls
 	}
 
 	switch reason {
 	case "":
+		if hasFunctionCall {
+			return fantasy.FinishReasonToolCalls
+		}
 		return fantasy.FinishReasonStop
 	case "max_tokens", "max_output_tokens":
 		return fantasy.FinishReasonLength
@@ -1255,6 +1270,16 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 				Error: err,
 			})
 			return
+		}
+
+		if hasFunctionCall && finishReason == fantasy.FinishReasonLength {
+			yield(fantasy.StreamPart{
+				Type: fantasy.StreamPartTypeWarnings,
+				Warnings: []fantasy.CallWarning{{
+					Type:    fantasy.CallWarningTypeOther,
+					Message: "tool calls were returned but the model hit the token limit; arguments may be truncated",
+				}},
+			})
 		}
 
 		yield(fantasy.StreamPart{

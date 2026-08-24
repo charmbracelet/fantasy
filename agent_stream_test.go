@@ -761,3 +761,78 @@ func TestStreamingAgent_StopTurn(t *testing.T) {
 	require.Len(t, responseResults, 1)
 	require.True(t, responseResults[0].StopTurn)
 }
+
+func TestStreamingAgent_SkipsToolDispatchWhenTruncated(t *testing.T) {
+	t.Parallel()
+
+	var toolExecuted bool
+	mockModel := &mockLanguageModel{
+		streamFunc: func(ctx context.Context, call Call) (StreamResponse, error) {
+			return func(yield func(StreamPart) bool) {
+				// Emit a tool call with truncated arguments
+				if !yield(StreamPart{Type: StreamPartTypeToolInputStart, ID: "call-trunc", ToolCallName: "echo"}) {
+					return
+				}
+				if !yield(StreamPart{Type: StreamPartTypeToolInputDelta, ID: "call-trunc", Delta: `{"message":"tr`}) {
+					return
+				}
+				if !yield(StreamPart{Type: StreamPartTypeToolInputEnd, ID: "call-trunc"}) {
+					return
+				}
+				if !yield(StreamPart{
+					Type:          StreamPartTypeToolCall,
+					ID:            "call-trunc",
+					ToolCallName:  "echo",
+					ToolCallInput: `{"message":"tr`,
+				}) {
+					return
+				}
+				// Finish with length instead of tool_calls
+				yield(StreamPart{
+					Type:         StreamPartTypeFinish,
+					Usage:        Usage{InputTokens: 10, OutputTokens: 20, TotalTokens: 30},
+					FinishReason: FinishReasonLength,
+				})
+			}, nil
+		},
+	}
+
+	echoTool := &trackingEchoTool{onExecute: func() { toolExecuted = true }}
+	agent := NewAgent(
+		mockModel,
+		WithTools(echoTool),
+	)
+
+	result, err := agent.Stream(context.Background(), AgentStreamCall{
+		Prompt: "test",
+	})
+	require.NoError(t, err)
+	require.Equal(t, FinishReasonLength, result.Response.FinishReason)
+	require.False(t, toolExecuted, "tool must not be dispatched when finish_reason is length")
+	require.Len(t, result.Steps, 1)
+}
+
+// trackingEchoTool wraps EchoTool to track whether Run was called.
+type trackingEchoTool struct {
+	onExecute       func()
+	providerOptions ProviderOptions
+}
+
+func (t *trackingEchoTool) Info() ToolInfo {
+	return (&EchoTool{}).Info()
+}
+
+func (t *trackingEchoTool) Run(ctx context.Context, params ToolCall) (ToolResponse, error) {
+	if t.onExecute != nil {
+		t.onExecute()
+	}
+	return (&EchoTool{}).Run(ctx, params)
+}
+
+func (t *trackingEchoTool) ProviderOptions() ProviderOptions {
+	return t.providerOptions
+}
+
+func (t *trackingEchoTool) SetProviderOptions(opts ProviderOptions) {
+	t.providerOptions = opts
+}

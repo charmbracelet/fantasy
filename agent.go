@@ -564,7 +564,22 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 			}
 		}
 
-		toolResults, err := a.executeTools(ctx, stepTools, stepExecProviderTools, stepToolCalls, nil)
+		// Suppress dispatch on abnormal finishes — length, content filter,
+		// provider error, unknown — which can accompany arguments that were
+		// cut short; executing those is how truncated input reaches tools
+		// (CHARM-2020). This mirrors the provider layer's streaming
+		// suppression. FinishReasonStop with tool calls still dispatches:
+		// tolerated for providers that report stop on a tool turn. The
+		// validated tool-call content is recorded in the step below either
+		// way, so the step result reflects what the model tried to call.
+		var toolResults []ToolResultContent
+		suppressed := result.FinishReason == FinishReasonLength ||
+			result.FinishReason == FinishReasonError ||
+			result.FinishReason == FinishReasonContentFilter ||
+			result.FinishReason == FinishReasonUnknown
+		if !suppressed {
+			toolResults, err = a.executeTools(ctx, stepTools, stepExecProviderTools, stepToolCalls, nil)
+		}
 
 		// If any tool result requested a stop, deliver all results but don't
 		// request another completion from the model.

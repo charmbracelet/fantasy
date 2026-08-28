@@ -2326,6 +2326,22 @@ func TestAgent_Stream_ExecutableProviderTool(t *testing.T) {
 
 	model := &mockLanguageModel{
 		streamFunc: func(ctx context.Context, call Call) (StreamResponse, error) {
+			// First call issues the tool call; after the tool result comes
+			// back the model stops, so the agent loop terminates.
+			for _, msg := range call.Prompt {
+				if msg.Role == MessageRoleTool {
+					return func(yield func(StreamPart) bool) {
+						yield(StreamPart{Type: StreamPartTypeTextStart, ID: "t"})
+						yield(StreamPart{Type: StreamPartTypeTextDelta, ID: "t", Delta: "done"})
+						yield(StreamPart{Type: StreamPartTypeTextEnd, ID: "t"})
+						yield(StreamPart{
+							Type:         StreamPartTypeFinish,
+							FinishReason: FinishReasonStop,
+							Usage:        Usage{TotalTokens: 5},
+						})
+					}, nil
+				}
+			}
 			return func(yield func(StreamPart) bool) {
 				if !yield(StreamPart{
 					Type:          StreamPartTypeToolCall,
@@ -2337,7 +2353,7 @@ func TestAgent_Stream_ExecutableProviderTool(t *testing.T) {
 				}
 				yield(StreamPart{
 					Type:         StreamPartTypeFinish,
-					FinishReason: FinishReasonStop,
+					FinishReason: FinishReasonToolCalls,
 					Usage:        Usage{TotalTokens: 10},
 				})
 			}, nil
@@ -2352,7 +2368,7 @@ func TestAgent_Stream_ExecutableProviderTool(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, result)
 	require.True(t, runCalled, "expected Run func to be called")
-	require.Len(t, result.Steps, 1)
+	require.Len(t, result.Steps, 2)
 
 	// Verify tool result is in the step content.
 	var toolResults []ToolResultContent

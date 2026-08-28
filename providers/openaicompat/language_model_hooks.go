@@ -109,10 +109,15 @@ func StreamExtraFunc(chunk openaisdk.ChatCompletionChunk, yield func(fantasy.Str
 		return ctx, true
 	}
 
-	reasoningStarted := ctxBool(ctx, reasoningStartedCtx)
-	reasoningEnded := ctxBool(ctx, reasoningEndedCtx)
-
 	for inx, choice := range chunk.Choices {
+		// Reasoning state is tracked per choice index: the openai language
+		// model invokes this hook once per chunk, and a chunk may carry
+		// several choices.
+		startedKey := fmt.Sprintf("%s:%d", reasoningStartedCtx, inx)
+		endedKey := fmt.Sprintf("%s:%d", reasoningEndedCtx, inx)
+		reasoningStarted := ctxBool(ctx, startedKey)
+		reasoningEnded := ctxBool(ctx, endedKey)
+
 		reasoningData := ReasoningData{}
 		err := json.Unmarshal([]byte(choice.Delta.RawJSON()), &reasoningData)
 		if err != nil {
@@ -135,7 +140,7 @@ func StreamExtraFunc(chunk openaisdk.ChatCompletionChunk, yield func(fantasy.Str
 		if rc != "" || (hasField && !boundary && !reasoningEnded) {
 			if !reasoningStarted {
 				reasoningStarted = true
-				ctx[reasoningStartedCtx] = true
+				ctx[startedKey] = true
 				if !yield(fantasy.StreamPart{
 					Type: fantasy.StreamPartTypeReasoningStart,
 					ID:   fmt.Sprintf("%d", inx),
@@ -159,10 +164,8 @@ func StreamExtraFunc(chunk openaisdk.ChatCompletionChunk, yield func(fantasy.Str
 			// first content/tool-call token in the same delta.
 		}
 		if reasoningStarted && boundary {
-			reasoningStarted = false
-			ctx[reasoningStartedCtx] = false
-			ctx[reasoningEndedCtx] = true
-			reasoningEnded = true
+			ctx[startedKey] = false
+			ctx[endedKey] = true
 			// The openai main loop emits a chunk's text/tool-call parts before
 			// this hook runs, so on a batched boundary chunk the part order is
 			// ToolInputStart, ReasoningDelta(tail), ReasoningEnd. Parts are

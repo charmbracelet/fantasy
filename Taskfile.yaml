@@ -25,6 +25,7 @@ tasks:
     desc: Run tests for all packages
     cmds:
       - go test ./... -count=1 -timeout=30m {{.CLI_ARGS}}
+
   release:
     desc: Create and push a new tag following semver
     vars:

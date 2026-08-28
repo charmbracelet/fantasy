@@ -109,10 +109,12 @@ func StreamExtraFunc(chunk openaisdk.ChatCompletionChunk, yield func(fantasy.Str
 		return ctx, true
 	}
 
-	for inx, choice := range chunk.Choices {
-		// Reasoning state is tracked per choice index: the openai language
-		// model invokes this hook once per chunk, and a chunk may carry
-		// several choices.
+	for _, choice := range chunk.Choices {
+		// Reasoning state is tracked per choice: the openai language model
+		// invokes this hook once per chunk, a chunk may carry several
+		// choices, and providers may emit them in any slice order — key on
+		// the choice's own Index, not its position in the chunk.
+		inx := choice.Index
 		startedKey := fmt.Sprintf("%s:%d", reasoningStartedCtx, inx)
 		endedKey := fmt.Sprintf("%s:%d", reasoningEndedCtx, inx)
 		reasoningStarted := ctxBool(ctx, startedKey)

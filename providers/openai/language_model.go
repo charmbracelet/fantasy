@@ -477,16 +477,18 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 						}
 					}
 				}
-
-				if o.streamExtraFunc != nil {
-					updatedContext, shouldContinue := o.streamExtraFunc(chunk, yield, extraContext)
-					if !shouldContinue {
-						return
-					}
-					extraContext = updatedContext
-				}
 			}
 
+			// The extra hook receives the whole chunk and iterates choices
+			// itself; calling it per choice would duplicate its events once
+			// per additional choice.
+			if o.streamExtraFunc != nil {
+				updatedContext, shouldContinue := o.streamExtraFunc(chunk, yield, extraContext)
+				if !shouldContinue {
+					return
+				}
+				extraContext = updatedContext
+			}
 			for _, choice := range chunk.Choices {
 				if annotations := parseAnnotationsFromDelta(choice.Delta); len(annotations) > 0 {
 					for _, annotation := range annotations {
@@ -522,13 +524,34 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 			// Emitting partial tool calls causes agents to dispatch them with
 			// invalid arguments before seeing the terminal reason.
 			mappedFinishReason := o.mapFinishReasonFunc(finishReason)
+
+			// "Tool calls were seen" is not proof of a complete turn: when the
+			// upstream never sent a finish_reason, only infer a tool-call turn
+			// if every accumulated call's arguments parse as complete JSON.
+			// Otherwise the stream was cut mid-arguments and dispatching the
+			// call would execute truncated input (CHARM-2020).
+			var missingFinishWithBadArgs bool
+			var missingFinish bool
+			if finishReason == "" && len(toolCalls) > 0 {
+				missingFinish = true
+				for _, tc := range toolCalls {
+					if tc.arguments != "" && !json.Valid([]byte(tc.arguments)) {
+						missingFinishWithBadArgs = true
+						break
+					}
+				}
+			}
+
 			if len(acc.Choices) > 0 {
 				choice := acc.Choices[0]
-				if len(choice.Message.ToolCalls) > 0 && mappedFinishReason != fantasy.FinishReasonLength {
+				if len(choice.Message.ToolCalls) > 0 &&
+					mappedFinishReason != fantasy.FinishReasonLength &&
+					mappedFinishReason != fantasy.FinishReasonError &&
+					!missingFinishWithBadArgs {
 					mappedFinishReason = fantasy.FinishReasonToolCalls
 				}
 			}
-			truncatedWithToolCalls := mappedFinishReason == fantasy.FinishReasonLength && len(toolCalls) > 0
+			truncatedWithToolCalls := (mappedFinishReason == fantasy.FinishReasonLength || mappedFinishReason == fantasy.FinishReasonError || missingFinishWithBadArgs) && len(toolCalls) > 0
 
 			// Finalize tool calls in index order after the stream completes.
 			// When truncated, skip ToolCall parts to prevent agents from
@@ -590,7 +613,16 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 				})
 				return
 			}
-			if truncatedWithToolCalls {
+			if missingFinish && !missingFinishWithBadArgs {
+				yield(fantasy.StreamPart{
+					Type: fantasy.StreamPartTypeWarnings,
+					Warnings: []fantasy.CallWarning{{
+						Type:    fantasy.CallWarningTypeOther,
+						Message: "stream ended without finish_reason; assuming tool-call turn",
+					}},
+				})
+			}
+			if truncatedWithToolCalls && !missingFinishWithBadArgs {
 				yield(fantasy.StreamPart{
 					Type: fantasy.StreamPartTypeWarnings,
 					Warnings: []fantasy.CallWarning{{

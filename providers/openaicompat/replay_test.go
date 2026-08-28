@@ -470,3 +470,120 @@ func TestReplay_AgentReasoningOnlyTruncated(t *testing.T) {
 	require.Equal(t, "Thinking about it at length…", reasoning)
 	require.Equal(t, fantasy.FinishReasonLength, result.Steps[0].FinishReason)
 }
+
+// A chunk carrying two choices must not duplicate reasoning events:
+// StreamExtraFunc is invoked per choice by the openai language model but
+// iterates all choices itself, so without care each choice's reasoning is
+// emitted once per choice.
+const multiChoiceSSE = `{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{"reasoning_content":"a"},"finish_reason":null},{"index":1,"delta":{"reasoning_content":"b"},"finish_reason":null}]}
+{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{"content":"A"},"finish_reason":null},{"index":1,"delta":{"content":"B"},"finish_reason":null}]}
+{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{},"finish_reason":"stop"},{"index":1,"delta":{},"finish_reason":"stop"}]}`
+
+func TestReplay_MultiChoiceReasoningNotDuplicated(t *testing.T) {
+	srv, _ := serveSSE(t, multiChoiceSSE)
+	provider, err := New(WithBaseURL(srv.URL), WithAPIKey("x"))
+	require.NoError(t, err)
+	lm, err := provider.LanguageModel(context.Background(), "m")
+	require.NoError(t, err)
+
+	parts := streamParts(t, lm, fantasy.Prompt{
+		{Role: fantasy.MessageRoleUser, Content: []fantasy.MessagePart{fantasy.TextPart{Text: "hi"}}},
+	})
+	deltasByID := map[string]string{}
+	startsByID := map[string]int{}
+	for _, p := range parts {
+		switch p.Type {
+		case fantasy.StreamPartTypeReasoningStart:
+			startsByID[p.ID]++
+		case fantasy.StreamPartTypeReasoningDelta:
+			deltasByID[p.ID] += p.Delta
+		}
+	}
+	require.Equal(t, map[string]int{"0": 1, "1": 1}, startsByID, "types: %v", partTypes(parts))
+	require.Equal(t, map[string]string{"0": "a", "1": "b"}, deltasByID, "types: %v", partTypes(parts))
+}
+
+// A stream that ends cleanly ([DONE]) but never sent a finish_reason must
+// not dispatch tool calls whose arguments are incomplete: "tool calls were
+// seen" is not proof of a complete turn. Valid arguments keep today's
+// inferred tool-call turn, with a warning.
+const doneNoFinishTruncatedSSE = `{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"c1","type":"function","function":{"name":"f","arguments":"{\"pa"}}]},"finish_reason":null}]}`
+
+const doneNoFinishValidSSE = `{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"c1","type":"function","function":{"name":"f","arguments":"{}"}}]},"finish_reason":null}]}`
+
+func TestReplay_DoneWithoutFinishReason_TruncatedArgsSuppressed(t *testing.T) {
+	srv, _ := serveSSE(t, doneNoFinishTruncatedSSE)
+	provider, err := New(WithBaseURL(srv.URL), WithAPIKey("x"))
+	require.NoError(t, err)
+	lm, err := provider.LanguageModel(context.Background(), "m")
+	require.NoError(t, err)
+
+	parts := streamParts(t, lm, fantasy.Prompt{
+		{Role: fantasy.MessageRoleUser, Content: []fantasy.MessagePart{fantasy.TextPart{Text: "x"}}},
+	})
+	require.Equal(t, 0, countType(parts, fantasy.StreamPartTypeToolCall),
+		"truncated tool call must not be dispatched; types: %v", partTypes(parts))
+	var sawError bool
+	for _, p := range parts {
+		if p.Type == fantasy.StreamPartTypeError {
+			sawError = true
+		}
+	}
+	require.True(t, sawError, "expected an IncompleteStreamError part, types: %v", partTypes(parts))
+	require.Equal(t, 0, countType(parts, fantasy.StreamPartTypeFinish), "types: %v", partTypes(parts))
+}
+
+func TestReplay_DoneWithoutFinishReason_ValidArgsKeptWithWarning(t *testing.T) {
+	srv, _ := serveSSE(t, doneNoFinishValidSSE)
+	provider, err := New(WithBaseURL(srv.URL), WithAPIKey("x"))
+	require.NoError(t, err)
+	lm, err := provider.LanguageModel(context.Background(), "m")
+	require.NoError(t, err)
+
+	parts := streamParts(t, lm, fantasy.Prompt{
+		{Role: fantasy.MessageRoleUser, Content: []fantasy.MessagePart{fantasy.TextPart{Text: "x"}}},
+	})
+	require.Equal(t, 1, countType(parts, fantasy.StreamPartTypeToolCall), "types: %v", partTypes(parts))
+	var sawWarning bool
+	for _, p := range parts {
+		if p.Type == fantasy.StreamPartTypeWarnings {
+			sawWarning = true
+		}
+	}
+	require.True(t, sawWarning, "expected a CallWarning about the missing finish_reason, types: %v", partTypes(parts))
+	var finish *fantasy.StreamPart
+	for i := range parts {
+		if parts[i].Type == fantasy.StreamPartTypeFinish {
+			finish = &parts[i]
+		}
+	}
+	require.NotNil(t, finish)
+	require.Equal(t, fantasy.FinishReasonToolCalls, finish.FinishReason)
+}
+
+// insufficient_system_resource is a provider-side failure, not a completed
+// turn: it must map to an error finish and suppress any open tool calls.
+const insufficientResourceSSE = `{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"c1","type":"function","function":{"name":"f","arguments":"{}"}}]},"finish_reason":null}]}
+{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{},"finish_reason":"insufficient_system_resource"}]}`
+
+func TestReplay_InsufficientSystemResource_SuppressesToolCalls(t *testing.T) {
+	srv, _ := serveSSE(t, insufficientResourceSSE)
+	provider, err := New(WithBaseURL(srv.URL), WithAPIKey("x"))
+	require.NoError(t, err)
+	lm, err := provider.LanguageModel(context.Background(), "m")
+	require.NoError(t, err)
+
+	parts := streamParts(t, lm, fantasy.Prompt{
+		{Role: fantasy.MessageRoleUser, Content: []fantasy.MessagePart{fantasy.TextPart{Text: "x"}}},
+	})
+	require.Equal(t, 0, countType(parts, fantasy.StreamPartTypeToolCall),
+		"tool calls from a failed upstream must not be dispatched; types: %v", partTypes(parts))
+	var finish *fantasy.StreamPart
+	for i := range parts {
+		if parts[i].Type == fantasy.StreamPartTypeFinish {
+			finish = &parts[i]
+		}
+	}
+	require.NotNil(t, finish, "types: %v", partTypes(parts))
+	require.NotEqual(t, fantasy.FinishReasonToolCalls, finish.FinishReason)
+}

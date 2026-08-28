@@ -946,3 +946,64 @@ func TestStreamingAgent_ParallelToolResultsInCallOrder(t *testing.T) {
 	require.Equal(t, []string{"call-slow", "call-fast"}, order,
 		"results must follow call order, not completion order")
 }
+
+// TestStreamingAgent_NoRepairOrOnToolCallBeforeAbnormalFinish pins the
+// CHARM-2020 "never repair" requirement for the stream path: a provider
+// that emits a ToolCall part and only then finishes with length/error must
+// not have the call repaired (an extra model call) or exposed to
+// OnToolCall consumers.
+func TestStreamingAgent_NoRepairOrOnToolCallBeforeAbnormalFinish(t *testing.T) {
+	t.Parallel()
+
+	for _, reason := range []FinishReason{FinishReasonLength, FinishReasonError, FinishReasonContentFilter, FinishReasonUnknown} {
+		t.Run(string(reason), func(t *testing.T) {
+			t.Parallel()
+
+			var repaired, onToolCallFired, executed bool
+			model := &mockLanguageModel{
+				streamFunc: func(ctx context.Context, call Call) (StreamResponse, error) {
+					return func(yield func(StreamPart) bool) {
+						// ToolCall emitted BEFORE the finish part.
+						if !yield(StreamPart{Type: StreamPartTypeToolCall, ID: "call-x", ToolCallName: "echo", ToolCallInput: `{"message":"tr`}) {
+							return
+						}
+						yield(StreamPart{Type: StreamPartTypeFinish, FinishReason: reason, Usage: Usage{TotalTokens: 10}})
+					}, nil
+				},
+			}
+
+			agent := NewAgent(
+				model,
+				WithTools(&trackingEchoTool{onExecute: func() { executed = true }}),
+				WithRepairToolCall(func(ctx context.Context, options ToolCallRepairOptions) (*ToolCallContent, error) {
+					repaired = true
+					c := options.OriginalToolCall
+					c.Input = `{"message":"fixed"}`
+					return &c, nil
+				}),
+			)
+
+			result, err := agent.Stream(context.Background(), AgentStreamCall{
+				Prompt: "test",
+				OnToolCall: func(ToolCallContent) error {
+					onToolCallFired = true
+					return nil
+				},
+			})
+			require.NoError(t, err)
+			require.False(t, repaired, "repair must not run when finish is %s", reason)
+			require.False(t, onToolCallFired, "OnToolCall must not fire when finish is %s", reason)
+			require.False(t, executed, "tool must not execute when finish is %s", reason)
+			require.Len(t, result.Steps, 1)
+			// The raw call is still recorded for the step.
+			var calls []ToolCallContent
+			for _, c := range result.Steps[0].Content {
+				if tc, ok := AsContentType[ToolCallContent](c); ok {
+					calls = append(calls, tc)
+				}
+			}
+			require.Len(t, calls, 1)
+			require.Equal(t, `{"message":"tr`, calls[0].Input, "raw (unrepaired) input must be recorded")
+		})
+	}
+}

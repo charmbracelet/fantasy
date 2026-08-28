@@ -2847,3 +2847,87 @@ func TestAgent_Generate_ParallelToolPanicBecomesFailedResult(t *testing.T) {
 	require.ErrorContains(t, errResult.Error, "panicking_parallel_tool")
 	require.ErrorContains(t, errResult.Error, "parallel boom")
 }
+
+// TestAgent_SkipsToolDispatchOnAbnormalFinish_NonStreaming mirrors the
+// stream-path guard on Generate: a response carrying tool calls but ending
+// length, content-filter, or error must not execute them — the arguments
+// may have been cut short (CHARM-2020).
+func TestAgent_SkipsToolDispatchOnAbnormalFinish_NonStreaming(t *testing.T) {
+	t.Parallel()
+
+	for _, reason := range []FinishReason{FinishReasonLength, FinishReasonError, FinishReasonContentFilter, FinishReasonUnknown} {
+		t.Run(string(reason), func(t *testing.T) {
+			t.Parallel()
+
+			var toolExecuted bool
+			model := &mockLanguageModel{
+				generateFunc: func(ctx context.Context, call Call) (*Response, error) {
+					return &Response{
+						Content: []Content{
+							ToolCallContent{ToolCallID: "call-x", ToolName: "echo", Input: `{"message":"hi"}`},
+						},
+						FinishReason: reason,
+						Usage:        Usage{TotalTokens: 10},
+					}, nil
+				},
+			}
+
+			echoTool := &trackingEchoTool{onExecute: func() { toolExecuted = true }}
+			agent := NewAgent(model, WithTools(echoTool))
+
+			result, err := agent.Generate(context.Background(), AgentCall{Prompt: "test"})
+			require.NoError(t, err)
+			require.False(t, toolExecuted, "tool must not be dispatched when finish_reason is %s", reason)
+			require.Equal(t, reason, result.Response.FinishReason)
+			require.Len(t, result.Steps, 1)
+		})
+	}
+}
+
+// TestAgent_StopWithToolCallsStillDispatches documents the tolerated shape:
+// some providers report stop on a tool turn. Unlike abnormal finishes
+// (length/error/content-filter/unknown), stop carries no truncation risk,
+// so dispatch proceeds.
+func TestAgent_StopWithToolCallsStillDispatches(t *testing.T) {
+	t.Parallel()
+
+	var toolExecuted bool
+	model := &mockLanguageModel{
+		generateFunc: func(ctx context.Context, call Call) (*Response, error) {
+			for _, m := range call.Prompt {
+				if m.Role == MessageRoleTool {
+					return &Response{
+						Content:      []Content{TextContent{Text: "done"}},
+						FinishReason: FinishReasonStop,
+						Usage:        Usage{TotalTokens: 5},
+					}, nil
+				}
+			}
+			return &Response{
+				Content: []Content{
+					ToolCallContent{ToolCallID: "call-x", ToolName: "echo", Input: `{"message":"hi"}`},
+				},
+				FinishReason: FinishReasonStop,
+				Usage:        Usage{TotalTokens: 10},
+			}, nil
+		},
+	}
+
+	echoTool := &trackingEchoTool{onExecute: func() { toolExecuted = true }}
+	agent := NewAgent(model, WithTools(echoTool))
+
+	result, err := agent.Generate(context.Background(), AgentCall{Prompt: "test"})
+	require.NoError(t, err)
+	require.True(t, toolExecuted, "stop with tool calls must still dispatch")
+	// The loop stops after one step because the finish reason is stop, not
+	// tool_calls — but the tool result is recorded in the step content.
+	require.Len(t, result.Steps, 1)
+	var results []ToolResultContent
+	for _, c := range result.Steps[0].Content {
+		if tr, ok := AsContentType[ToolResultContent](c); ok {
+			results = append(results, tr)
+		}
+	}
+	require.Len(t, results, 1)
+	require.Equal(t, "call-x", results[0].ToolCallID)
+}

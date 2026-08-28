@@ -401,8 +401,15 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 			assistantMsg := openaisdk.ChatCompletionAssistantMessageParam{
 				Role: "assistant",
 			}
-			var reasoningText string
+			// A turn may carry several reasoning or text segments (a model that
+			// reasons, speaks, then reasons again). Concatenate in order rather
+			// than last-write-wins so no segment is silently dropped (F2,
+			// CHARM-2020). Segments carrying extra content fields force the
+			// array form, one block per part, to keep the fields attached.
+			var reasoningTexts []string
 			reasoningPresent := false
+			var textParts []string
+			var textBlocks []openaisdk.ChatCompletionAssistantMessageParamContentArrayOfContentPartUnion
 			for _, c := range msg.Content {
 				switch c.GetType() {
 				case fantasy.ContentTypeText:
@@ -416,15 +423,11 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 					}
 					textBlock, hasExtra := buildTextBlock(textPart.Text, textPart.ProviderOptions, msg.ProviderOptions)
 					if hasExtra {
-						assistantMsg.Content = openaisdk.ChatCompletionAssistantMessageParamContentUnion{
-							OfArrayOfContentParts: []openaisdk.ChatCompletionAssistantMessageParamContentArrayOfContentPartUnion{
-								{OfText: textBlock},
-							},
-						}
+						textBlocks = append(textBlocks, openaisdk.ChatCompletionAssistantMessageParamContentArrayOfContentPartUnion{
+							OfText: textBlock,
+						})
 					} else {
-						assistantMsg.Content = openaisdk.ChatCompletionAssistantMessageParamContentUnion{
-							OfString: param.NewOpt(textPart.Text),
-						}
+						textParts = append(textParts, textPart.Text)
 					}
 				case fantasy.ContentTypeReasoning:
 					reasoningPart, ok := fantasy.AsContentType[fantasy.ReasoningPart](c)
@@ -435,7 +438,7 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 						})
 						continue
 					}
-					reasoningText = reasoningPart.Text
+					reasoningTexts = append(reasoningTexts, reasoningPart.Text)
 					reasoningPresent = true
 				case fantasy.ContentTypeToolCall:
 					toolCallPart, ok := fantasy.AsContentType[fantasy.ToolCallPart](c)
@@ -459,6 +462,23 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 						})
 				}
 			}
+			// Text: array form when any segment carried extra fields (one block
+			// per segment, extras attached); otherwise the joined string.
+			if len(textBlocks) > 0 {
+				for _, tp := range textParts {
+					block, _ := buildTextBlock(tp, nil, nil)
+					textBlocks = append(textBlocks, openaisdk.ChatCompletionAssistantMessageParamContentArrayOfContentPartUnion{
+						OfText: block,
+					})
+				}
+				assistantMsg.Content = openaisdk.ChatCompletionAssistantMessageParamContentUnion{
+					OfArrayOfContentParts: textBlocks,
+				}
+			} else if len(textParts) > 0 {
+				assistantMsg.Content = openaisdk.ChatCompletionAssistantMessageParamContentUnion{
+					OfString: param.NewOpt(strings.Join(textParts, "\n")),
+				}
+			}
 			// Add reasoning_content field if the message carries a reasoning
 			// part, even when its text is empty: presence must mirror what the
 			// model emitted so resubmitted history stays byte-stable for prefix
@@ -466,7 +486,7 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 			// tool-call messages when thinking is enabled.
 			if reasoningPresent {
 				assistantMsg.SetExtraFields(map[string]any{
-					"reasoning_content": reasoningText,
+					"reasoning_content": strings.Join(reasoningTexts, "\n"),
 				})
 			}
 			if !hasVisibleCompatAssistantContent(&assistantMsg) {

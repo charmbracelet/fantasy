@@ -1007,3 +1007,52 @@ func TestStreamingAgent_NoRepairOrOnToolCallBeforeAbnormalFinish(t *testing.T) {
 		})
 	}
 }
+
+// TestStreamingAgent_ProviderExecutedToolCallGatedOnFinish extends the
+// late-binding guarantee to provider-executed calls: OnToolCall must not
+// fire for them before the finish reason is known either.
+func TestStreamingAgent_ProviderExecutedToolCallGatedOnFinish(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		reason       FinishReason
+		wantNotified bool
+	}{
+		{FinishReasonToolCalls, true},
+		{FinishReasonLength, false},
+		{FinishReasonError, false},
+	} {
+		t.Run(string(tc.reason), func(t *testing.T) {
+			t.Parallel()
+
+			var onToolCallFired bool
+			model := &mockLanguageModel{
+				streamFunc: func(ctx context.Context, call Call) (StreamResponse, error) {
+					return func(yield func(StreamPart) bool) {
+						// Provider-executed tool call (e.g. web search)
+						if !yield(StreamPart{Type: StreamPartTypeToolCall, ID: "ws-1", ToolCallName: "web_search", ToolCallInput: `{"q":"x"}`, ProviderExecuted: true}) {
+							return
+						}
+						if !yield(StreamPart{Type: StreamPartTypeToolResult, ID: "ws-1", ToolCallName: "web_search", ProviderExecuted: true}) {
+							return
+						}
+						yield(StreamPart{Type: StreamPartTypeFinish, FinishReason: tc.reason, Usage: Usage{TotalTokens: 10}})
+					}, nil
+				},
+			}
+
+			agent := NewAgent(model)
+			result, err := agent.Stream(context.Background(), AgentStreamCall{
+				Prompt: "test",
+				OnToolCall: func(ToolCallContent) error {
+					onToolCallFired = true
+					return nil
+				},
+			})
+			require.NoError(t, err)
+			require.Equal(t, tc.wantNotified, onToolCallFired,
+				"OnToolCall fired=%v for provider-executed call with finish %s", onToolCallFired, tc.reason)
+			require.Len(t, result.Steps, 1)
+		})
+	}
+}

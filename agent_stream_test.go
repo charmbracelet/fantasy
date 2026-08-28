@@ -7,6 +7,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
@@ -885,4 +886,63 @@ func TestStreamingAgent_SkipsToolDispatchOnAbnormalFinish(t *testing.T) {
 			require.Len(t, result.Steps, 1)
 		})
 	}
+}
+
+// TestStreamingAgent_ParallelToolResultsInCallOrder guards CHARM-2020 F6:
+// two parallel tools where the second finishes first must still append
+// results in the order the model called them. Providers that pair results
+// with calls positionally (and any diff of step content) depend on it.
+func TestStreamingAgent_ParallelToolResultsInCallOrder(t *testing.T) {
+	t.Parallel()
+
+	type input struct {
+		N int `json:"n"`
+	}
+	slow := NewParallelAgentTool("slow", "finishes last",
+		func(ctx context.Context, in input, call ToolCall) (ToolResponse, error) {
+			time.Sleep(50 * time.Millisecond)
+			return NewTextResponse("slow-result"), nil
+		})
+	fast := NewParallelAgentTool("fast", "finishes first",
+		func(ctx context.Context, in input, call ToolCall) (ToolResponse, error) {
+			return NewTextResponse("fast-result"), nil
+		})
+
+	mockModel := &mockLanguageModel{
+		streamFunc: func(ctx context.Context, call Call) (StreamResponse, error) {
+			for _, msg := range call.Prompt {
+				if msg.Role == MessageRoleTool {
+					return func(yield func(StreamPart) bool) {
+						yield(StreamPart{Type: StreamPartTypeTextStart, ID: "t"})
+						yield(StreamPart{Type: StreamPartTypeTextDelta, ID: "t", Delta: "done"})
+						yield(StreamPart{Type: StreamPartTypeTextEnd, ID: "t"})
+						yield(StreamPart{Type: StreamPartTypeFinish, FinishReason: FinishReasonStop, Usage: Usage{TotalTokens: 5}})
+					}, nil
+				}
+			}
+			return func(yield func(StreamPart) bool) {
+				if !yield(StreamPart{Type: StreamPartTypeToolCall, ID: "call-slow", ToolCallName: "slow", ToolCallInput: `{"n":1}`}) {
+					return
+				}
+				if !yield(StreamPart{Type: StreamPartTypeToolCall, ID: "call-fast", ToolCallName: "fast", ToolCallInput: `{"n":2}`}) {
+					return
+				}
+				yield(StreamPart{Type: StreamPartTypeFinish, FinishReason: FinishReasonToolCalls, Usage: Usage{TotalTokens: 10}})
+			}, nil
+		},
+	}
+
+	agent := NewAgent(mockModel, WithTools(slow, fast))
+	result, err := agent.Stream(context.Background(), AgentStreamCall{Prompt: "run both"})
+	require.NoError(t, err)
+	require.Len(t, result.Steps, 2)
+
+	var order []string
+	for _, c := range result.Steps[0].Content {
+		if tr, ok := AsContentType[ToolResultContent](c); ok {
+			order = append(order, tr.ToolCallID)
+		}
+	}
+	require.Equal(t, []string{"call-slow", "call-fast"}, order,
+		"results must follow call order, not completion order")
 }

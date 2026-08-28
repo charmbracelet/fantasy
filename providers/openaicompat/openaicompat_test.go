@@ -158,7 +158,7 @@ func TestToPromptFunc_ReasoningContent(t *testing.T) {
 		require.Equal(t, "Hello", userMsg.Content.OfString.Value)
 	})
 
-	t.Run("should use last assistant TextPart only", func(t *testing.T) {
+	t.Run("should concatenate assistant TextParts in order", func(t *testing.T) {
 		t.Parallel()
 
 		prompt := fantasy.Prompt{
@@ -171,8 +171,8 @@ func TestToPromptFunc_ReasoningContent(t *testing.T) {
 			{
 				Role: fantasy.MessageRoleAssistant,
 				Content: []fantasy.MessagePart{
-					fantasy.TextPart{Text: "First part. "},
-					fantasy.TextPart{Text: "Second part. "},
+					fantasy.TextPart{Text: "First part."},
+					fantasy.TextPart{Text: "Second part."},
 					fantasy.TextPart{Text: "Third part."},
 				},
 			},
@@ -183,10 +183,11 @@ func TestToPromptFunc_ReasoningContent(t *testing.T) {
 		require.Empty(t, warnings)
 		require.Len(t, messages, 2)
 
-		// Assistant message should use only the last TextPart (matching openai behavior)
+		// Multi-segment assistant turns concatenate (F2, CHARM-2020):
+		// last-write-wins silently dropped every segment but the last.
 		assistantMsg := messages[1].OfAssistant
 		require.NotNil(t, assistantMsg)
-		require.Equal(t, "Third part.", assistantMsg.Content.OfString.Value)
+		require.Equal(t, "First part.\nSecond part.\nThird part.", assistantMsg.Content.OfString.Value)
 	})
 
 	t.Run("should include user messages with only unsupported attachments", func(t *testing.T) {
@@ -894,4 +895,46 @@ func TestToPromptFunc_ContentExtraFields(t *testing.T) {
 		cacheControl := textBlock.ExtraFields()["cache_control"].(map[string]string)
 		require.Equal(t, "ephemeral", cacheControl["type"])
 	})
+}
+
+// TestToPromptFunc_MultiSegmentConcatenation covers the CHARM-2020 F2 case:
+// an assistant turn with interleaved reasoning segments (a model that
+// reasons, speaks, then reasons again) must not lose segments — text and
+// reasoning each concatenate in order instead of last-write-wins.
+func TestToPromptFunc_MultiSegmentConcatenation(t *testing.T) {
+	t.Parallel()
+
+	prompt := fantasy.Prompt{
+		{
+			Role: fantasy.MessageRoleUser,
+			Content: []fantasy.MessagePart{
+				fantasy.TextPart{Text: "hi"},
+			},
+		},
+		{
+			Role: fantasy.MessageRoleAssistant,
+			Content: []fantasy.MessagePart{
+				fantasy.ReasoningPart{Text: "a"},
+				fantasy.TextPart{Text: "x"},
+				fantasy.ToolCallPart{ToolCallID: "c1", ToolName: "f", Input: "{}"},
+				fantasy.ReasoningPart{Text: "b"},
+				fantasy.TextPart{Text: "y"},
+			},
+		},
+	}
+
+	messages, warnings := ToPromptFunc(prompt, "", "")
+	require.Empty(t, warnings)
+	require.Len(t, messages, 2)
+
+	msg := messages[1].OfAssistant
+	require.NotNil(t, msg)
+	require.Equal(t, "x\ny", msg.Content.OfString.Value, "text parts must concatenate, not overwrite")
+	require.Len(t, msg.ToolCalls, 1)
+	require.Equal(t, "c1", msg.ToolCalls[0].OfFunction.ID)
+
+	extraFields := msg.ExtraFields()
+	reasoningContent, hasReasoning := extraFields["reasoning_content"]
+	require.True(t, hasReasoning)
+	require.Equal(t, "a\nb", reasoningContent, "reasoning parts must concatenate, not overwrite")
 }

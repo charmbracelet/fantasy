@@ -1722,8 +1722,18 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 		return stepExecutionResult{}, toolExecutionErr
 	}
 
-	// Add tool results to content if any
+	// Add tool results to content in the order the model called the tools,
+	// not the order they completed in (F6, CHARM-2020). Results carry their
+	// call id; providers that pair results with calls positionally, and any
+	// consumer diffing step content, depend on call order.
 	if len(toolResults) > 0 {
+		positionByCallID := make(map[string]int, len(pendingDispatches))
+		for i, req := range pendingDispatches {
+			positionByCallID[req.toolCall.ToolCallID] = i
+		}
+		slices.SortStableFunc(toolResults, func(a, b ToolResultContent) int {
+			return cmp.Compare(positionByCallID[a.ToolCallID], positionByCallID[b.ToolCallID])
+		})
 		for _, result := range toolResults {
 			stepContent = append(stepContent, result)
 		}

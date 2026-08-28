@@ -1430,10 +1430,16 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 		parallel bool
 	}
 	var pendingDispatches []toolExecutionRequest
-	// Raw tool calls as emitted by the provider, before validation/repair.
-	// They are processed only after the stream ends and the finish reason
-	// is known (see below).
-	var rawToolCalls []ToolCallContent
+	// Raw tool calls as emitted by the provider, before validation/repair,
+	// each with the position in stepContent at which it was emitted. They
+	// are processed only after the stream ends and the finish reason is
+	// known (see below); the position preserves stream order in the
+	// recorded step content.
+	type rawToolCall struct {
+		contentIndex int
+		toolCall     ToolCallContent
+	}
+	var rawToolCalls []rawToolCall
 
 	// Create a map for quick tool lookup
 	toolMap := make(map[string]AgentTool)
@@ -1590,27 +1596,16 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 				ProviderMetadata: part.ProviderMetadata,
 			}
 
-			// Provider-executed tool calls are handled by the provider
-			// and should not be validated or executed by the agent.
-			if toolCall.ProviderExecuted {
-				stepContent = append(stepContent, toolCall)
-				if opts.OnToolCall != nil {
-					err := opts.OnToolCall(toolCall)
-					if err != nil {
-						return stepExecutionResult{}, err
-					}
-				}
-				delete(activeToolCalls, part.ID)
-			} else {
-				// Buffer the raw call. Validation, repair, and the
-				// OnToolCall callback all wait until the stream has ended
-				// and the finish reason is known: a provider that emits a
-				// ToolCall before a length/error finish must not have its
-				// possibly-truncated arguments repaired (repair may be an
-				// extra model call) or exposed to consumers (CHARM-2020).
-				rawToolCalls = append(rawToolCalls, toolCall)
-				delete(activeToolCalls, part.ID)
-			}
+			// Buffer the call. Validation, repair, and the OnToolCall
+			// callback all wait until the stream has ended and the finish
+			// reason is known: a provider that emits a ToolCall before a
+			// length/error finish must not have its possibly-truncated
+			// arguments repaired (repair may be an extra model call) or
+			// exposed to consumers — provider-executed calls included; the
+			// provider may run them, but consumers hear about them only for
+			// completed turns (CHARM-2020).
+			rawToolCalls = append(rawToolCalls, rawToolCall{contentIndex: len(stepContent), toolCall: toolCall})
+			delete(activeToolCalls, part.ID)
 
 		case StreamPartTypeToolResult:
 			// Provider-executed tool results (e.g. web search)
@@ -1718,16 +1713,44 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 		stepFinishReason == FinishReasonError ||
 		stepFinishReason == FinishReasonContentFilter ||
 		stepFinishReason == FinishReasonUnknown
-	for _, toolCall := range rawToolCalls {
+	// Splice each processed call into the position it was emitted at in the
+	// stream, so step content preserves the provider's ordering. Calls
+	// emitted back-to-back share the same recorded index; track insertions
+	// so they land in emission order, not reversed.
+	insertContent := func(at int, c Content) {
+		stepContent = append(stepContent, nil)
+		copy(stepContent[at+1:], stepContent[at:])
+		stepContent[at] = c
+	}
+	inserted := 0
+	for _, raw := range rawToolCalls {
+		at := raw.contentIndex + inserted
+		toolCall := raw.toolCall
 		if abnormalFinish {
 			stepToolCalls = append(stepToolCalls, toolCall)
-			stepContent = append(stepContent, toolCall)
+			insertContent(at, toolCall)
+			inserted++
+			continue
+		}
+		// Provider-executed tool calls (e.g. web search) were already run by
+		// the provider: record them and notify, but never validate, repair,
+		// or dispatch them.
+		if toolCall.ProviderExecuted {
+			insertContent(at, toolCall)
+			inserted++
+			if opts.OnToolCall != nil {
+				err := opts.OnToolCall(toolCall)
+				if err != nil {
+					return stepExecutionResult{}, err
+				}
+			}
 			continue
 		}
 		// Validate and potentially repair the tool call
 		validatedToolCall := a.validateAndRepairToolCall(ctx, toolCall, stepTools, execProviderTools, a.settings.systemPrompt, stepInputMessages, opts.RepairToolCall)
 		stepToolCalls = append(stepToolCalls, validatedToolCall)
-		stepContent = append(stepContent, validatedToolCall)
+		insertContent(at, validatedToolCall)
+		inserted++
 
 		if opts.OnToolCall != nil {
 			err := opts.OnToolCall(validatedToolCall)

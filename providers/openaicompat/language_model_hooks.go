@@ -13,7 +13,10 @@ import (
 	"github.com/openai/openai-go/v3/shared"
 )
 
-const reasoningStartedCtx = "reasoning_started"
+const (
+	reasoningStartedCtx = "reasoning_started"
+	reasoningEndedCtx   = "reasoning_ended"
+)
 
 // buildTextBlock creates a text content block, applying any provider-specific extra
 // fields (e.g. Qwen's cache_control) onto it. Part-level fields override message-level
@@ -88,12 +91,12 @@ func ExtraContentFunc(choice openaisdk.ChatCompletionChoice) []fantasy.Content {
 	return content
 }
 
-func extractReasoningContext(ctx map[string]any) bool {
-	reasoningStarted, ok := ctx[reasoningStartedCtx]
+func ctxBool(ctx map[string]any, key string) bool {
+	v, ok := ctx[key]
 	if !ok {
 		return false
 	}
-	b, ok := reasoningStarted.(bool)
+	b, ok := v.(bool)
 	if !ok {
 		return false
 	}
@@ -106,7 +109,8 @@ func StreamExtraFunc(chunk openaisdk.ChatCompletionChunk, yield func(fantasy.Str
 		return ctx, true
 	}
 
-	reasoningStarted := extractReasoningContext(ctx)
+	reasoningStarted := ctxBool(ctx, reasoningStartedCtx)
+	reasoningEnded := ctxBool(ctx, reasoningEndedCtx)
 
 	for inx, choice := range chunk.Choices {
 		reasoningData := ReasoningData{}
@@ -119,35 +123,56 @@ func StreamExtraFunc(chunk openaisdk.ChatCompletionChunk, yield func(fantasy.Str
 			return ctx, false
 		}
 
-		emitEvent := func(reasoningContent string) bool {
+		rc := reasoningData.GetReasoningContent()
+		hasField := hasReasoningField(choice.Delta.RawJSON())
+		boundary := choice.Delta.Content != "" || len(choice.Delta.ToolCalls) > 0 || choice.FinishReason != ""
+
+		// A reasoning delta carries non-empty reasoning text, or a
+		// present-but-empty field on a chunk that carries nothing else before
+		// any block was closed (Kimi's "thinking on, nothing to think"
+		// shape). A boundary chunk whose reasoning field is empty/null is
+		// never reasoning.
+		if rc != "" || (hasField && !boundary && !reasoningEnded) {
 			if !reasoningStarted {
-				shouldContinue := yield(fantasy.StreamPart{
+				reasoningStarted = true
+				ctx[reasoningStartedCtx] = true
+				if !yield(fantasy.StreamPart{
 					Type: fantasy.StreamPartTypeReasoningStart,
 					ID:   fmt.Sprintf("%d", inx),
-				})
-				if !shouldContinue {
-					return false
+				}) {
+					return ctx, false
 				}
 			}
-
-			return yield(fantasy.StreamPart{
-				Type:  fantasy.StreamPartTypeReasoningDelta,
-				ID:    fmt.Sprintf("%d", inx),
-				Delta: reasoningContent,
-			})
-		}
-		if rc := reasoningData.GetReasoningContent(); rc != "" || hasReasoningField(choice.Delta.RawJSON()) {
-			if !reasoningStarted {
-				ctx[reasoningStartedCtx] = true
+			// Skip empty deltas: a present-but-empty field opens the block so
+			// it replays as reasoning_content: "", but there is nothing to
+			// stream.
+			if rc != "" {
+				if !yield(fantasy.StreamPart{
+					Type:  fantasy.StreamPartTypeReasoningDelta,
+					ID:    fmt.Sprintf("%d", inx),
+					Delta: rc,
+				}) {
+					return ctx, false
+				}
 			}
-			return ctx, emitEvent(rc)
+			// Fall through: a batching host may put the reasoning tail and the
+			// first content/tool-call token in the same delta.
 		}
-		if reasoningStarted && (choice.Delta.Content != "" || len(choice.Delta.ToolCalls) > 0) {
+		if reasoningStarted && boundary {
+			reasoningStarted = false
 			ctx[reasoningStartedCtx] = false
-			return ctx, yield(fantasy.StreamPart{
+			ctx[reasoningEndedCtx] = true
+			reasoningEnded = true
+			// The openai main loop emits a chunk's text/tool-call parts before
+			// this hook runs, so on a batched boundary chunk the part order is
+			// ToolInputStart, ReasoningDelta(tail), ReasoningEnd. Parts are
+			// keyed by id, so consumers can still attribute them correctly.
+			if !yield(fantasy.StreamPart{
 				Type: fantasy.StreamPartTypeReasoningEnd,
 				ID:   fmt.Sprintf("%d", inx),
-			})
+			}) {
+				return ctx, false
+			}
 		}
 	}
 	return ctx, true

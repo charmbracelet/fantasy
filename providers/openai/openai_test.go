@@ -2730,14 +2730,14 @@ func TestDoStream(t *testing.T) {
 		parts, err := collectStreamParts(stream)
 		require.NoError(t, err)
 
-		// The framing contract: a tool call must be fully delimited
-		// (Start -> Deltas -> End) before the next one opens. No two calls
-		// may be open at once, and no delta may arrive for an already-ended
-		// call. This is what lets an order/index-keyed consumer reconstruct
-		// parallel calls without buffering the whole stream.
-		var openID string // currently open tool call, "" if none
+		// The integrity contract: every opened call is attributed deltas for
+		// its own id only, every call is ended exactly once, and every
+		// ToolCall carries the fully accumulated input. Interleaved
+		// providers may keep sending deltas for an earlier call after the
+		// next one has started, so an end is not required to precede the
+		// next start — but no delta may arrive after its call's end.
+		started := map[string]bool{}
 		ended := map[string]bool{}
-		seenStart := map[string]bool{}
 		argsByID := map[string]*strings.Builder{}
 		nameByID := map[string]string{}
 		var order []string
@@ -2745,24 +2745,19 @@ func TestDoStream(t *testing.T) {
 		for _, part := range parts {
 			switch part.Type {
 			case fantasy.StreamPartTypeToolInputStart:
-				require.Empty(t, openID,
-					"tool call %s opened while %s still open (interleaved framing)", part.ID, openID)
-				require.False(t, seenStart[part.ID], "duplicate start for %s", part.ID)
-				openID = part.ID
-				seenStart[part.ID] = true
+				require.False(t, started[part.ID], "duplicate start for %s", part.ID)
+				started[part.ID] = true
 				nameByID[part.ID] = part.ToolCallName
 				argsByID[part.ID] = &strings.Builder{}
 				order = append(order, part.ID)
 			case fantasy.StreamPartTypeToolInputDelta:
-				require.Equal(t, openID, part.ID,
-					"delta for %s but open call is %q", part.ID, openID)
+				require.True(t, started[part.ID], "delta for never-started call %s", part.ID)
 				require.False(t, ended[part.ID], "delta after end for %s", part.ID)
 				argsByID[part.ID].WriteString(part.Delta)
 			case fantasy.StreamPartTypeToolInputEnd:
-				require.Equal(t, openID, part.ID,
-					"end for %s but open call is %q", part.ID, openID)
+				require.True(t, started[part.ID], "end for never-started call %s", part.ID)
+				require.False(t, ended[part.ID], "duplicate end for %s", part.ID)
 				ended[part.ID] = true
-				openID = ""
 			case fantasy.StreamPartTypeToolCall:
 				require.True(t, ended[part.ID], "tool call %s finalized before end", part.ID)
 				nameByID[part.ID] = part.ToolCallName

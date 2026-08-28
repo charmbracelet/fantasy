@@ -82,14 +82,18 @@ func TestToPromptFunc_ReasoningContent(t *testing.T) {
 
 		messages, warnings := ToPromptFunc(prompt, "", "")
 
-		require.Len(t, warnings, 1)
-		require.Contains(t, warnings[0].Message, "dropping empty assistant message")
-		require.Len(t, messages, 1) // Only user message, assistant message dropped
+		// Reasoning-only turns are visible content: reasoning_content must
+		// round-trip for DeepSeek-family replay (CHARM-2020).
+		require.Empty(t, warnings)
+		require.Len(t, messages, 2)
 
-		// User message - unchanged
 		msg := messages[0].OfUser
 		require.NotNil(t, msg)
 		require.Equal(t, "Hello", msg.Content.OfString.Value)
+
+		assistantMsg := messages[1].OfAssistant
+		require.NotNil(t, assistantMsg)
+		require.Equal(t, "Internal reasoning only...", assistantMsg.ExtraFields()["reasoning_content"])
 	})
 
 	t.Run("should not add reasoning_content to messages without reasoning", func(t *testing.T) {
@@ -937,4 +941,62 @@ func TestToPromptFunc_MultiSegmentConcatenation(t *testing.T) {
 	reasoningContent, hasReasoning := extraFields["reasoning_content"]
 	require.True(t, hasReasoning)
 	require.Equal(t, "a\nb", reasoningContent, "reasoning parts must concatenate, not overwrite")
+}
+
+// Mixed plain and extra-field text segments must keep their original
+// order: A (plain), B (cached), C (plain) must serialize as A, B, C.
+func TestToPromptFunc_MixedTextSegmentOrder(t *testing.T) {
+	t.Parallel()
+
+	prompt := fantasy.Prompt{
+		{
+			Role: fantasy.MessageRoleAssistant,
+			Content: []fantasy.MessagePart{
+				fantasy.TextPart{Text: "A"},
+				fantasy.TextPart{
+					Text: "B",
+					ProviderOptions: fantasy.ProviderOptions{
+						Name: &ContentExtraFields{Fields: map[string]any{
+							"cache_control": map[string]string{"type": "ephemeral"},
+						}},
+					},
+				},
+				fantasy.TextPart{Text: "C"},
+			},
+		},
+	}
+
+	messages, warnings := ToPromptFunc(prompt, "", "")
+	require.Empty(t, warnings)
+	require.Len(t, messages, 1)
+
+	msg := messages[0].OfAssistant
+	require.NotNil(t, msg)
+	blocks := msg.Content.OfArrayOfContentParts
+	require.Len(t, blocks, 3, "expected array form with one block per segment, got %+v", msg.Content)
+	require.Equal(t, "A", blocks[0].OfText.Text)
+	require.Equal(t, "B", blocks[1].OfText.Text)
+	require.Equal(t, "C", blocks[2].OfText.Text)
+	require.Equal(t, map[string]any{"cache_control": map[string]string{"type": "ephemeral"}}, blocks[1].OfText.ExtraFields())
+}
+
+// A reasoning-only assistant turn must survive: reasoning_content is
+// visible content. Dropping it breaks DeepSeek's replay contract on
+// truncated thinking turns.
+func TestToPromptFunc_ReasoningOnlyTurnKept(t *testing.T) {
+	t.Parallel()
+
+	prompt := fantasy.Prompt{
+		{Role: fantasy.MessageRoleUser, Content: []fantasy.MessagePart{fantasy.TextPart{Text: "hi"}}},
+		{Role: fantasy.MessageRoleAssistant, Content: []fantasy.MessagePart{
+			fantasy.ReasoningPart{Text: "thinking…"},
+		}},
+	}
+
+	messages, warnings := ToPromptFunc(prompt, "", "")
+	require.Empty(t, warnings)
+	require.Len(t, messages, 2, "reasoning-only assistant turn must not be dropped")
+	msg := messages[1].OfAssistant
+	require.NotNil(t, msg)
+	require.Equal(t, "thinking…", msg.ExtraFields()["reasoning_content"])
 }

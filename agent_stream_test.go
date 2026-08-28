@@ -836,3 +836,53 @@ func (t *trackingEchoTool) ProviderOptions() ProviderOptions {
 func (t *trackingEchoTool) SetProviderOptions(opts ProviderOptions) {
 	t.providerOptions = opts
 }
+
+// TestStreamingAgent_SkipsToolDispatchOnAbnormalFinish generalizes the
+// truncation guard: any finish reason that is not an explicit tool-calls
+// turn must not dispatch, even if ToolCall parts were emitted (a buggy or
+// unusual provider path, or a finish reason the provider layer maps from
+// an upstream failure such as content_filter or
+// insufficient_system_resource). See CHARM-2020.
+func TestStreamingAgent_SkipsToolDispatchOnAbnormalFinish(t *testing.T) {
+	t.Parallel()
+
+	for _, reason := range []FinishReason{FinishReasonError, FinishReasonContentFilter, FinishReasonUnknown} {
+		t.Run(string(reason), func(t *testing.T) {
+			t.Parallel()
+
+			var toolExecuted bool
+			mockModel := &mockLanguageModel{
+				streamFunc: func(ctx context.Context, call Call) (StreamResponse, error) {
+					return func(yield func(StreamPart) bool) {
+						if !yield(StreamPart{Type: StreamPartTypeToolInputStart, ID: "call-x", ToolCallName: "echo"}) {
+							return
+						}
+						if !yield(StreamPart{Type: StreamPartTypeToolInputDelta, ID: "call-x", Delta: `{"message":"hi"}`}) {
+							return
+						}
+						if !yield(StreamPart{Type: StreamPartTypeToolInputEnd, ID: "call-x"}) {
+							return
+						}
+						if !yield(StreamPart{Type: StreamPartTypeToolCall, ID: "call-x", ToolCallName: "echo", ToolCallInput: `{"message":"hi"}`}) {
+							return
+						}
+						yield(StreamPart{
+							Type:         StreamPartTypeFinish,
+							Usage:        Usage{InputTokens: 10, OutputTokens: 20, TotalTokens: 30},
+							FinishReason: reason,
+						})
+					}, nil
+				},
+			}
+
+			echoTool := &trackingEchoTool{onExecute: func() { toolExecuted = true }}
+			agent := NewAgent(mockModel, WithTools(echoTool))
+
+			result, err := agent.Stream(context.Background(), AgentStreamCall{Prompt: "test"})
+			require.NoError(t, err)
+			require.False(t, toolExecuted, "tool must not be dispatched when finish_reason is %s", reason)
+			require.Equal(t, reason, result.Response.FinishReason)
+			require.Len(t, result.Steps, 1)
+		})
+	}
+}

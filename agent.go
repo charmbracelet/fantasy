@@ -1701,10 +1701,13 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 	})
 
 	// Dispatch all buffered tool calls now that every OnToolCall callback has
-	// been called, then close and wait. Skip dispatch when the response was
-	// truncated (finish_reason=length) to avoid executing tool calls with
-	// incomplete arguments.
-	if stepFinishReason != FinishReasonLength {
+	// been called, then close and wait. Dispatch only on an explicit
+	// tool-calls turn: any other finish reason (length, content filter,
+	// provider error, unknown) can accompany arguments that were cut short,
+	// and executing those is how truncated input reaches tools
+	// (CHARM-2020). The tool-call content stays in stepContent either way,
+	// so the step result records what the model tried to call.
+	if stepFinishReason == FinishReasonToolCalls {
 		for _, req := range pendingDispatches {
 			toolChan <- req
 		}

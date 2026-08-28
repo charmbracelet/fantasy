@@ -535,6 +535,21 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 				mappedFinishReason == fantasy.FinishReasonContentFilter ||
 				missingFinishWithBadArgs) && len(toolCalls) > 0
 
+			// A cut stream with unusable partial calls errors out before the
+			// finalizer runs: emitting ToolInputEnd after backfilling "{}" would
+			// present fabricated completed input to consumers (CHARM-2020).
+			if missingFinishWithBadArgs {
+				err := ctx.Err()
+				if err == nil {
+					err = fantasy.NewIncompleteStreamError()
+				}
+				yield(fantasy.StreamPart{
+					Type:  fantasy.StreamPartTypeError,
+					Error: err,
+				})
+				return
+			}
+
 			// Finalize tool calls in index order after the stream completes.
 			// When truncated, skip ToolCall parts to prevent agents from
 			// dispatching calls with incomplete arguments.

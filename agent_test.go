@@ -2931,3 +2931,45 @@ func TestAgent_StopWithToolCallsStillDispatches(t *testing.T) {
 	require.Len(t, results, 1)
 	require.Equal(t, "call-x", results[0].ToolCallID)
 }
+
+// TestAgent_NoRepairOnAbnormalFinish_NonStreaming guards CHARM-2020: when a
+// response ends abnormally, the agent must not invoke the repair callback —
+// which can be an extra model call — on arguments that may be truncated.
+func TestAgent_NoRepairOnAbnormalFinish_NonStreaming(t *testing.T) {
+	t.Parallel()
+
+	for _, reason := range []FinishReason{FinishReasonLength, FinishReasonError, FinishReasonContentFilter, FinishReasonUnknown} {
+		t.Run(string(reason), func(t *testing.T) {
+			t.Parallel()
+
+			var repaired bool
+			model := &mockLanguageModel{
+				generateFunc: func(ctx context.Context, call Call) (*Response, error) {
+					return &Response{
+						Content: []Content{
+							ToolCallContent{ToolCallID: "call-x", ToolName: "echo", Input: `{"message":"tr`},
+						},
+						FinishReason: reason,
+						Usage:        Usage{TotalTokens: 10},
+					}, nil
+				},
+			}
+
+			agent := NewAgent(
+				model,
+				WithTools(&trackingEchoTool{}),
+				WithRepairToolCall(func(ctx context.Context, options ToolCallRepairOptions) (*ToolCallContent, error) {
+					repaired = true
+					repairedCall := options.OriginalToolCall
+					repairedCall.Input = `{"message":"fixed"}`
+					return &repairedCall, nil
+				}),
+			)
+
+			result, err := agent.Generate(context.Background(), AgentCall{Prompt: "test"})
+			require.NoError(t, err)
+			require.False(t, repaired, "repair must not run when finish_reason is %s", reason)
+			require.Len(t, result.Steps, 1)
+		})
+	}
+}

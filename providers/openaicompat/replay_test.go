@@ -706,3 +706,29 @@ func TestReplay_InterleavedParallelToolCalls(t *testing.T) {
 		"glob": `{"path":"x"}`,
 	}, calls)
 }
+
+// On a cut stream, consumers must not see a ToolInputEnd that presents
+// fabricated "{}" input for a call that never sent arguments.
+func TestReplay_DoneWithoutFinishReason_NoFabricatedEnd(t *testing.T) {
+	srv, _ := serveSSE(t, doneNoFinishNoArgsSSE)
+	provider, err := New(WithBaseURL(srv.URL), WithAPIKey("x"))
+	require.NoError(t, err)
+	lm, err := provider.LanguageModel(context.Background(), "m")
+	require.NoError(t, err)
+
+	parts := streamParts(t, lm, fantasy.Prompt{
+		{Role: fantasy.MessageRoleUser, Content: []fantasy.MessagePart{fantasy.TextPart{Text: "x"}}},
+	})
+	for _, p := range parts {
+		require.NotEqual(t, fantasy.StreamPartTypeToolInputEnd, p.Type,
+			"no ToolInputEnd may be emitted on a cut stream; types: %v", partTypes(parts))
+		require.NotEqual(t, fantasy.StreamPartTypeToolCall, p.Type, "types: %v", partTypes(parts))
+	}
+	var sawError bool
+	for _, p := range parts {
+		if p.Type == fantasy.StreamPartTypeError {
+			sawError = true
+		}
+	}
+	require.True(t, sawError, "types: %v", partTypes(parts))
+}

@@ -545,6 +545,18 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 			return nil, err
 		}
 
+		// Abnormal finishes — length, content filter, provider error,
+		// unknown — can accompany arguments that were cut short. Skip
+		// validation and repair entirely (repair may be an extra model
+		// call), leave the raw tool-call content in the step, and do not
+		// execute (CHARM-2020). FinishReasonStop with tool calls still
+		// validates and dispatches: tolerated for providers that report
+		// stop on a tool turn.
+		suppressed := result.FinishReason == FinishReasonLength ||
+			result.FinishReason == FinishReasonError ||
+			result.FinishReason == FinishReasonContentFilter ||
+			result.FinishReason == FinishReasonUnknown
+
 		var stepToolCalls []ToolCallContent
 		for _, content := range result.Content {
 			if content.GetType() == ContentTypeToolCall {
@@ -558,25 +570,19 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 				if toolCall.ProviderExecuted {
 					continue
 				}
+				if suppressed {
+					// Keep the raw call for the step record; never repair
+					// or execute it.
+					stepToolCalls = append(stepToolCalls, toolCall)
+					continue
+				}
 				// Validate and potentially repair the tool call
 				validatedToolCall := a.validateAndRepairToolCall(ctx, toolCall, stepTools, stepExecProviderTools, stepSystemPrompt, stepInputMessages, a.settings.repairToolCall)
 				stepToolCalls = append(stepToolCalls, validatedToolCall)
 			}
 		}
 
-		// Suppress dispatch on abnormal finishes — length, content filter,
-		// provider error, unknown — which can accompany arguments that were
-		// cut short; executing those is how truncated input reaches tools
-		// (CHARM-2020). This mirrors the provider layer's streaming
-		// suppression. FinishReasonStop with tool calls still dispatches:
-		// tolerated for providers that report stop on a tool turn. The
-		// validated tool-call content is recorded in the step below either
-		// way, so the step result reflects what the model tried to call.
 		var toolResults []ToolResultContent
-		suppressed := result.FinishReason == FinishReasonLength ||
-			result.FinishReason == FinishReasonError ||
-			result.FinishReason == FinishReasonContentFilter ||
-			result.FinishReason == FinishReasonUnknown
 		if !suppressed {
 			toolResults, err = a.executeTools(ctx, stepTools, stepExecProviderTools, stepToolCalls, nil)
 		}

@@ -1430,6 +1430,10 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 		parallel bool
 	}
 	var pendingDispatches []toolExecutionRequest
+	// Raw tool calls as emitted by the provider, before validation/repair.
+	// They are processed only after the stream ends and the finish reason
+	// is known (see below).
+	var rawToolCalls []ToolCallContent
 
 	// Create a map for quick tool lookup
 	toolMap := make(map[string]AgentTool)
@@ -1598,29 +1602,13 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 				}
 				delete(activeToolCalls, part.ID)
 			} else {
-				// Validate and potentially repair the tool call
-				validatedToolCall := a.validateAndRepairToolCall(ctx, toolCall, stepTools, execProviderTools, a.settings.systemPrompt, stepInputMessages, opts.RepairToolCall)
-				stepToolCalls = append(stepToolCalls, validatedToolCall)
-				stepContent = append(stepContent, validatedToolCall)
-
-				if opts.OnToolCall != nil {
-					err := opts.OnToolCall(validatedToolCall)
-					if err != nil {
-						return stepExecutionResult{}, err
-					}
-				}
-
-				// Determine if tool can run in parallel
-				isParallel := false
-				if tool, exists := toolMap[validatedToolCall.ToolName]; exists {
-					isParallel = tool.Info().Parallel
-				}
-
-				// Buffer dispatch until stream is fully consumed so that all
-				// OnToolCall callbacks complete before any tool result is written.
-				pendingDispatches = append(pendingDispatches, toolExecutionRequest{toolCall: validatedToolCall, parallel: isParallel})
-
-				// Clean up active tool call
+				// Buffer the raw call. Validation, repair, and the
+				// OnToolCall callback all wait until the stream has ended
+				// and the finish reason is known: a provider that emits a
+				// ToolCall before a length/error finish must not have its
+				// possibly-truncated arguments repaired (repair may be an
+				// extra model call) or exposed to consumers (CHARM-2020).
+				rawToolCalls = append(rawToolCalls, toolCall)
 				delete(activeToolCalls, part.ID)
 			}
 
@@ -1720,6 +1708,44 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 			}
 		}
 	})
+
+	// Process buffered tool calls now that the finish reason is known.
+	// Abnormal finishes — length, content filter, provider error, unknown —
+	// can accompany arguments that were cut short: record the raw call in
+	// the step content, but never repair (repair may be an extra model
+	// call), never fire OnToolCall, and never dispatch (CHARM-2020).
+	abnormalFinish := stepFinishReason == FinishReasonLength ||
+		stepFinishReason == FinishReasonError ||
+		stepFinishReason == FinishReasonContentFilter ||
+		stepFinishReason == FinishReasonUnknown
+	for _, toolCall := range rawToolCalls {
+		if abnormalFinish {
+			stepToolCalls = append(stepToolCalls, toolCall)
+			stepContent = append(stepContent, toolCall)
+			continue
+		}
+		// Validate and potentially repair the tool call
+		validatedToolCall := a.validateAndRepairToolCall(ctx, toolCall, stepTools, execProviderTools, a.settings.systemPrompt, stepInputMessages, opts.RepairToolCall)
+		stepToolCalls = append(stepToolCalls, validatedToolCall)
+		stepContent = append(stepContent, validatedToolCall)
+
+		if opts.OnToolCall != nil {
+			err := opts.OnToolCall(validatedToolCall)
+			if err != nil {
+				return stepExecutionResult{}, err
+			}
+		}
+
+		// Determine if tool can run in parallel
+		isParallel := false
+		if tool, exists := toolMap[validatedToolCall.ToolName]; exists {
+			isParallel = tool.Info().Parallel
+		}
+
+		// Buffer dispatch until stream is fully consumed so that all
+		// OnToolCall callbacks complete before any tool result is written.
+		pendingDispatches = append(pendingDispatches, toolExecutionRequest{toolCall: validatedToolCall, parallel: isParallel})
+	}
 
 	// Dispatch all buffered tool calls now that every OnToolCall callback has
 	// been called, then close and wait. Dispatch only on an explicit

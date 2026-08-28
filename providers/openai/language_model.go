@@ -274,20 +274,27 @@ func (o languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantas
 	usage, providerMetadata := o.usageFunc(*response)
 
 	mappedFinishReason := o.mapFinishReasonFunc(choice.FinishReason)
-	truncatedWithToolCalls := len(choice.Message.ToolCalls) > 0 && mappedFinishReason == fantasy.FinishReasonLength
-	if len(choice.Message.ToolCalls) > 0 && !truncatedWithToolCalls {
+	// Terminal reasons that can cut output mid-call — length,
+	// content_filter, provider errors — must not be rewritten into a
+	// tool-call turn: dispatching their partial calls executes truncated
+	// input (CHARM-2020).
+	suppressedToolCalls := len(choice.Message.ToolCalls) > 0 &&
+		(mappedFinishReason == fantasy.FinishReasonLength ||
+			mappedFinishReason == fantasy.FinishReasonContentFilter ||
+			mappedFinishReason == fantasy.FinishReasonError)
+	if len(choice.Message.ToolCalls) > 0 && !suppressedToolCalls {
 		mappedFinishReason = fantasy.FinishReasonToolCalls
 	}
-	if truncatedWithToolCalls {
+	if suppressedToolCalls {
 		warnings = append(warnings, fantasy.CallWarning{
 			Type:    fantasy.CallWarningTypeOther,
-			Message: "tool calls were returned but the model hit the token limit; arguments may be truncated",
+			Message: "tool calls were returned but the turn ended abnormally (token limit, content filter, or provider error); arguments may be truncated",
 		})
 	}
 
 	// Suppress truncated tool-call content so agents don't dispatch
 	// calls with incomplete arguments.
-	if !truncatedWithToolCalls {
+	if !suppressedToolCalls {
 		for _, tc := range choice.Message.ToolCalls {
 			toolCallID := tc.ID
 			content = append(content, fantasy.ToolCallContent{
@@ -525,11 +532,14 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 			// invalid arguments before seeing the terminal reason.
 			mappedFinishReason := o.mapFinishReasonFunc(finishReason)
 
-			// "Tool calls were seen" is not proof of a complete turn: when the
-			// upstream never sent a finish_reason, only infer a tool-call turn
-			// if every accumulated call's arguments parse as complete JSON.
-			// Otherwise the stream was cut mid-arguments and dispatching the
-			// call would execute truncated input (CHARM-2020).
+			// "Tool calls were seen" is not proof of a complete turn. Infer a
+			// tool-call turn only when the upstream said tool_calls/function_call
+			// explicitly (kept verbatim by the mapper) or sent no finish reason
+			// at all and every accumulated call's arguments parse as complete
+			// JSON. Terminal reasons that can cut output mid-call — length,
+			// content_filter, provider errors — must never be rewritten into a
+			// tool-call turn: dispatching their partial calls executes truncated
+			// input (CHARM-2020).
 			var missingFinishWithBadArgs bool
 			var missingFinish bool
 			if finishReason == "" && len(toolCalls) > 0 {
@@ -542,16 +552,15 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 				}
 			}
 
-			if len(acc.Choices) > 0 {
-				choice := acc.Choices[0]
-				if len(choice.Message.ToolCalls) > 0 &&
-					mappedFinishReason != fantasy.FinishReasonLength &&
-					mappedFinishReason != fantasy.FinishReasonError &&
-					!missingFinishWithBadArgs {
+			if finishReason == "" && len(acc.Choices) > 0 && !missingFinishWithBadArgs {
+				if len(acc.Choices[0].Message.ToolCalls) > 0 {
 					mappedFinishReason = fantasy.FinishReasonToolCalls
 				}
 			}
-			truncatedWithToolCalls := (mappedFinishReason == fantasy.FinishReasonLength || mappedFinishReason == fantasy.FinishReasonError || missingFinishWithBadArgs) && len(toolCalls) > 0
+			suppressedWithToolCalls := (mappedFinishReason == fantasy.FinishReasonLength ||
+				mappedFinishReason == fantasy.FinishReasonError ||
+				mappedFinishReason == fantasy.FinishReasonContentFilter ||
+				missingFinishWithBadArgs) && len(toolCalls) > 0
 
 			// Finalize tool calls in index order after the stream completes.
 			// When truncated, skip ToolCall parts to prevent agents from
@@ -572,7 +581,7 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 						return
 					}
 				}
-				if !truncatedWithToolCalls {
+				if !suppressedWithToolCalls {
 					if !yield(fantasy.StreamPart{Type: fantasy.StreamPartTypeToolCall, ID: tc.id, ToolCallName: tc.name, ToolCallInput: tc.arguments}) {
 						return
 					}
@@ -622,12 +631,12 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 					}},
 				})
 			}
-			if truncatedWithToolCalls && !missingFinishWithBadArgs {
+			if suppressedWithToolCalls && !missingFinishWithBadArgs {
 				yield(fantasy.StreamPart{
 					Type: fantasy.StreamPartTypeWarnings,
 					Warnings: []fantasy.CallWarning{{
 						Type:    fantasy.CallWarningTypeOther,
-						Message: "tool calls were returned but the model hit the token limit; arguments may be truncated",
+						Message: "tool calls were returned but the turn ended abnormally (token limit, content filter, or provider error); arguments may be truncated",
 					}},
 				})
 			}

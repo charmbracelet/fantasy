@@ -587,3 +587,65 @@ func TestReplay_InsufficientSystemResource_SuppressesToolCalls(t *testing.T) {
 	require.NotNil(t, finish, "types: %v", partTypes(parts))
 	require.NotEqual(t, fantasy.FinishReasonToolCalls, finish.FinishReason)
 }
+
+// Choices may not arrive in slice order; reasoning state and part IDs must
+// follow choice.Index, not the slice position within a chunk.
+const reorderedChoicesSSE = `{"id":"x","created":1,"model":"m","choices":[{"index":1,"delta":{"reasoning_content":"B1"},"finish_reason":null},{"index":0,"delta":{"reasoning_content":"A1"},"finish_reason":null}]}
+{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{"reasoning_content":"A2"},"finish_reason":null},{"index":1,"delta":{"reasoning_content":"B2"},"finish_reason":null}]}
+{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{"content":"a"},"finish_reason":null},{"index":1,"delta":{"content":"b"},"finish_reason":null}]}
+{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{},"finish_reason":"stop"},{"index":1,"delta":{},"finish_reason":"stop"}]}`
+
+func TestReplay_ReorderedChoices(t *testing.T) {
+	srv, _ := serveSSE(t, reorderedChoicesSSE)
+	provider, err := New(WithBaseURL(srv.URL), WithAPIKey("x"))
+	require.NoError(t, err)
+	lm, err := provider.LanguageModel(context.Background(), "m")
+	require.NoError(t, err)
+
+	parts := streamParts(t, lm, fantasy.Prompt{
+		{Role: fantasy.MessageRoleUser, Content: []fantasy.MessagePart{fantasy.TextPart{Text: "hi"}}},
+	})
+	deltasByID := map[string]string{}
+	endsByID := map[string]int{}
+	startsByID := map[string]int{}
+	for _, p := range parts {
+		switch p.Type {
+		case fantasy.StreamPartTypeReasoningStart:
+			startsByID[p.ID]++
+		case fantasy.StreamPartTypeReasoningDelta:
+			deltasByID[p.ID] += p.Delta
+		case fantasy.StreamPartTypeReasoningEnd:
+			endsByID[p.ID]++
+		}
+	}
+	require.Equal(t, map[string]int{"0": 1, "1": 1}, startsByID, "types: %v", partTypes(parts))
+	require.Equal(t, map[string]string{"0": "A1A2", "1": "B1B2"}, deltasByID, "types: %v", partTypes(parts))
+	require.Equal(t, map[string]int{"0": 1, "1": 1}, endsByID, "types: %v", partTypes(parts))
+}
+
+// A content_filter finish can cut a tool call mid-arguments; like length,
+// it must not be rewritten to tool_calls and its calls must not dispatch.
+const contentFilterToolCallSSE = `{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"c1","type":"function","function":{"name":"f","arguments":"{}"}}]},"finish_reason":null}]}
+{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{},"finish_reason":"content_filter"}]}`
+
+func TestReplay_ContentFilter_SuppressesToolCalls(t *testing.T) {
+	srv, _ := serveSSE(t, contentFilterToolCallSSE)
+	provider, err := New(WithBaseURL(srv.URL), WithAPIKey("x"))
+	require.NoError(t, err)
+	lm, err := provider.LanguageModel(context.Background(), "m")
+	require.NoError(t, err)
+
+	parts := streamParts(t, lm, fantasy.Prompt{
+		{Role: fantasy.MessageRoleUser, Content: []fantasy.MessagePart{fantasy.TextPart{Text: "x"}}},
+	})
+	require.Equal(t, 0, countType(parts, fantasy.StreamPartTypeToolCall),
+		"tool calls from a filtered response must not be dispatched; types: %v", partTypes(parts))
+	var finish *fantasy.StreamPart
+	for i := range parts {
+		if parts[i].Type == fantasy.StreamPartTypeFinish {
+			finish = &parts[i]
+		}
+	}
+	require.NotNil(t, finish, "types: %v", partTypes(parts))
+	require.Equal(t, fantasy.FinishReasonContentFilter, finish.FinishReason)
+}

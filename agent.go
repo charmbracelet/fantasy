@@ -1027,7 +1027,7 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 			}
 
 			// Process the stream
-			result, err := a.processStepStream(ctx, stream, opts, steps, stepTools, stepExecProviderTools)
+			result, err := a.processStepStream(ctx, stream, opts, steps, stepTools, stepExecProviderTools, stepInputMessages)
 			if err != nil {
 				return stepExecutionResult{}, err
 			}
@@ -1387,7 +1387,7 @@ func WithOnRetry(callback OnRetryCallback) AgentOption {
 }
 
 // processStepStream processes a single step's stream and returns the step result.
-func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, opts AgentStreamCall, _ []StepResult, stepTools []AgentTool, execProviderTools []ExecutableProviderTool) (stepExecutionResult, error) {
+func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, opts AgentStreamCall, _ []StepResult, stepTools []AgentTool, execProviderTools []ExecutableProviderTool, stepInputMessages []Message) (stepExecutionResult, error) {
 	var stepContent []Content
 	var stepToolCalls []ToolCallContent
 	var stepUsage Usage
@@ -1578,7 +1578,7 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 				delete(activeToolCalls, part.ID)
 			} else {
 				// Validate and potentially repair the tool call
-				validatedToolCall := a.validateAndRepairToolCall(ctx, toolCall, stepTools, execProviderTools, a.settings.systemPrompt, nil, opts.RepairToolCall)
+				validatedToolCall := a.validateAndRepairToolCall(ctx, toolCall, stepTools, execProviderTools, a.settings.systemPrompt, stepInputMessages, opts.RepairToolCall)
 				stepToolCalls = append(stepToolCalls, validatedToolCall)
 				stepContent = append(stepContent, validatedToolCall)
 

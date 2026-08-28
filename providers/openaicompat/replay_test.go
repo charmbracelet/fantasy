@@ -649,3 +649,60 @@ func TestReplay_ContentFilter_SuppressesToolCalls(t *testing.T) {
 	require.NotNil(t, finish, "types: %v", partTypes(parts))
 	require.Equal(t, fantasy.FinishReasonContentFilter, finish.FinishReason)
 }
+
+// A stream with no finish_reason whose only tool call is a bare
+// declaration (no arguments at all) was cut before any argument arrived.
+// Inferring a complete "{}" call invents arguments the model never sent.
+const doneNoFinishNoArgsSSE = `{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"c1","type":"function","function":{"name":"f","arguments":""}}]},"finish_reason":null}]}`
+
+func TestReplay_DoneWithoutFinishReason_NoArgsSuppressed(t *testing.T) {
+	srv, _ := serveSSE(t, doneNoFinishNoArgsSSE)
+	provider, err := New(WithBaseURL(srv.URL), WithAPIKey("x"))
+	require.NoError(t, err)
+	lm, err := provider.LanguageModel(context.Background(), "m")
+	require.NoError(t, err)
+
+	parts := streamParts(t, lm, fantasy.Prompt{
+		{Role: fantasy.MessageRoleUser, Content: []fantasy.MessagePart{fantasy.TextPart{Text: "x"}}},
+	})
+	require.Equal(t, 0, countType(parts, fantasy.StreamPartTypeToolCall),
+		"a bare tool declaration is not a complete call; types: %v", partTypes(parts))
+	var sawError bool
+	for _, p := range parts {
+		if p.Type == fantasy.StreamPartTypeError {
+			sawError = true
+		}
+	}
+	require.True(t, sawError, "expected IncompleteStreamError, types: %v", partTypes(parts))
+}
+
+// Interleaved parallel tool calls: deltas for index 0 continue after index
+// 1 has started. Arguments for both must accumulate fully — closing index 0
+// when 1 first appears would drop its trailing deltas.
+const interleavedParallelSSE = `{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"c0","type":"function","function":{"name":"grep","arguments":"{\"pat"}}]},"finish_reason":null}]}
+{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{"tool_calls":[{"index":1,"id":"c1","type":"function","function":{"name":"glob","arguments":"{\"pa"}}]},"finish_reason":null}]}
+{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"tern\":\"foo\"}"}}]},"finish_reason":null}]}
+{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{"tool_calls":[{"index":1,"function":{"arguments":"th\":\"x\"}"}}]},"finish_reason":null}]}
+{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}]}`
+
+func TestReplay_InterleavedParallelToolCalls(t *testing.T) {
+	srv, _ := serveSSE(t, interleavedParallelSSE)
+	provider, err := New(WithBaseURL(srv.URL), WithAPIKey("x"))
+	require.NoError(t, err)
+	lm, err := provider.LanguageModel(context.Background(), "m")
+	require.NoError(t, err)
+
+	parts := streamParts(t, lm, fantasy.Prompt{
+		{Role: fantasy.MessageRoleUser, Content: []fantasy.MessagePart{fantasy.TextPart{Text: "x"}}},
+	})
+	calls := map[string]string{}
+	for _, p := range parts {
+		if p.Type == fantasy.StreamPartTypeToolCall {
+			calls[p.ToolCallName] = p.ToolCallInput
+		}
+	}
+	require.Equal(t, map[string]string{
+		"grep": `{"pattern":"foo"}`,
+		"glob": `{"path":"x"}`,
+	}, calls)
+}

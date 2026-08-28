@@ -404,12 +404,13 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 			// A turn may carry several reasoning or text segments (a model that
 			// reasons, speaks, then reasons again). Concatenate in order rather
 			// than last-write-wins so no segment is silently dropped (F2,
-			// CHARM-2020). Segments carrying extra content fields force the
-			// array form, one block per part, to keep the fields attached.
+			// CHARM-2020). Text segments are collected as ordered blocks; the
+			// string form is used only for a single segment with no extra
+			// fields, so mixed plain/extra turns keep their original order.
 			var reasoningTexts []string
 			reasoningPresent := false
-			var textParts []string
 			var textBlocks []openaisdk.ChatCompletionAssistantMessageParamContentArrayOfContentPartUnion
+			textHasExtra := false
 			for _, c := range msg.Content {
 				switch c.GetType() {
 				case fantasy.ContentTypeText:
@@ -422,13 +423,10 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 						continue
 					}
 					textBlock, hasExtra := buildTextBlock(textPart.Text, textPart.ProviderOptions, msg.ProviderOptions)
-					if hasExtra {
-						textBlocks = append(textBlocks, openaisdk.ChatCompletionAssistantMessageParamContentArrayOfContentPartUnion{
-							OfText: textBlock,
-						})
-					} else {
-						textParts = append(textParts, textPart.Text)
-					}
+					textHasExtra = textHasExtra || hasExtra
+					textBlocks = append(textBlocks, openaisdk.ChatCompletionAssistantMessageParamContentArrayOfContentPartUnion{
+						OfText: textBlock,
+					})
 				case fantasy.ContentTypeReasoning:
 					reasoningPart, ok := fantasy.AsContentType[fantasy.ReasoningPart](c)
 					if !ok {
@@ -462,21 +460,20 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 						})
 				}
 			}
-			// Text: array form when any segment carried extra fields (one block
-			// per segment, extras attached); otherwise the joined string.
-			if len(textBlocks) > 0 {
-				for _, tp := range textParts {
-					block, _ := buildTextBlock(tp, nil, nil)
-					textBlocks = append(textBlocks, openaisdk.ChatCompletionAssistantMessageParamContentArrayOfContentPartUnion{
-						OfText: block,
-					})
+			// Text: when no segment carries extra fields, join into the string
+			// form; otherwise emit the ordered blocks one per segment so mixed
+			// plain/extra turns keep their original order.
+			if len(textBlocks) > 0 && !textHasExtra {
+				texts := make([]string, len(textBlocks))
+				for i, b := range textBlocks {
+					texts[i] = b.OfText.Text
 				}
+				assistantMsg.Content = openaisdk.ChatCompletionAssistantMessageParamContentUnion{
+					OfString: param.NewOpt(strings.Join(texts, "\n")),
+				}
+			} else if len(textBlocks) > 0 {
 				assistantMsg.Content = openaisdk.ChatCompletionAssistantMessageParamContentUnion{
 					OfArrayOfContentParts: textBlocks,
-				}
-			} else if len(textParts) > 0 {
-				assistantMsg.Content = openaisdk.ChatCompletionAssistantMessageParamContentUnion{
-					OfString: param.NewOpt(strings.Join(textParts, "\n")),
 				}
 			}
 			// Add reasoning_content field if the message carries a reasoning
@@ -588,6 +585,12 @@ func hasVisibleCompatAssistantContent(msg *openaisdk.ChatCompletionAssistantMess
 	}
 	// Check if there are tool calls
 	if len(msg.ToolCalls) > 0 {
+		return true
+	}
+	// A reasoning-only turn is visible: reasoning_content must round-trip
+	// for DeepSeek-family replay, and dropping the turn breaks the
+	// conversation's message ordering.
+	if _, ok := msg.ExtraFields()["reasoning_content"]; ok {
 		return true
 	}
 	return false

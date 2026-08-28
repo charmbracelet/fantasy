@@ -400,9 +400,6 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 
 					for _, toolCallDelta := range choice.Delta.ToolCalls {
 						if existingToolCall, ok := toolCalls[toolCallDelta.Index]; ok {
-							if existingToolCall.hasFinished {
-								continue
-							}
 							if toolCallDelta.Function.Arguments != "" {
 								existingToolCall.arguments += toolCallDelta.Function.Arguments
 								if !yield(fantasy.StreamPart{
@@ -429,33 +426,6 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 									Error: &fantasy.Error{Title: "invalid provider response", Message: "expected 'function' type."},
 								})
 								return
-							}
-
-							// A new tool call index means any previously opened
-							// calls are complete. Emit ToolInputEnd for each to
-							// preserve per-call framing during streaming so that
-							// consumers can reconstruct parallel tool calls from
-							// the stream order without buffering. Close them in
-							// index order for deterministic output.
-							priorIndices := make([]int64, 0, len(toolCalls))
-							for idx := range toolCalls {
-								priorIndices = append(priorIndices, idx)
-							}
-							slices.Sort(priorIndices)
-							for _, idx := range priorIndices {
-								tc := toolCalls[idx]
-								if idx >= toolCallDelta.Index || tc.hasFinished {
-									continue
-								}
-								if tc.arguments == "" {
-									tc.arguments = "{}"
-									toolCalls[idx] = tc
-								}
-								if !yield(fantasy.StreamPart{Type: fantasy.StreamPartTypeToolInputEnd, ID: tc.id}) {
-									return
-								}
-								tc.hasFinished = true
-								toolCalls[idx] = tc
 							}
 
 							if !yield(fantasy.StreamPart{
@@ -545,7 +515,10 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 			if finishReason == "" && len(toolCalls) > 0 {
 				missingFinish = true
 				for _, tc := range toolCalls {
-					if tc.arguments != "" && !json.Valid([]byte(tc.arguments)) {
+					// A call with no arguments was cut before any argument
+					// arrived; filling in "{}" would invent arguments the model
+					// never sent.
+					if tc.arguments == "" || !json.Valid([]byte(tc.arguments)) {
 						missingFinishWithBadArgs = true
 						break
 					}

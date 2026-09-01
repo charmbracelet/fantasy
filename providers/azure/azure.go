@@ -8,7 +8,6 @@ import (
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/providers/openai"
-	"github.com/openai/openai-go/v3/azure"
 	"github.com/openai/openai-go/v3/option"
 )
 
@@ -52,7 +51,8 @@ func New(opts ...Option) (fantasy.Provider, error) {
 			openai.WithName(Name),
 			openai.WithBaseURL(o.baseURL),
 			openai.WithSDKOptions(
-				azure.WithAPIKey(o.apiKey),
+				option.WithHeaderDel("Authorization"),
+				option.WithHeader("Api-Key", o.apiKey),
 			),
 		)...,
 	)

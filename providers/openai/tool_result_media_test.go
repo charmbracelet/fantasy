@@ -199,7 +199,7 @@ func TestToResponsesPrompt_MediaToolResult_ImagePNG(t *testing.T) {
 
 	funcOut := input[1].OfFunctionCallOutput
 	require.NotNil(t, funcOut)
-	require.Equal(t, "img-resp-1", funcOut.CallID)
+	require.Equal(t, "img-resp-1", funcOut.CallID.Value)
 	require.Contains(t, funcOut.Output.OfString.Value, "image/png")
 
 	userMsg := input[2].OfMessage
@@ -241,7 +241,7 @@ func TestToResponsesPrompt_MediaToolResult_UnsupportedMediaType(t *testing.T) {
 	// image message.
 	require.Len(t, input, 2)
 	require.NotNil(t, input[1].OfFunctionCallOutput)
-	require.Equal(t, "vid-resp-1", input[1].OfFunctionCallOutput.CallID)
+	require.Equal(t, "vid-resp-1", input[1].OfFunctionCallOutput.CallID.Value)
 	require.Len(t, warnings, 1)
 	require.Contains(t, warnings[0].Message, "video/mp4")
 }

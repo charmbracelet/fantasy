@@ -665,7 +665,9 @@ func toResponsesPrompt(prompt fantasy.Prompt, systemMessageMode string, store bo
 					continue
 				}
 
-				input = append(input, responses.ResponseInputItemParamOfFunctionCallOutput(toolResultPart.ToolCallID, outputStr))
+				functionCallOutput := responses.ResponseInputItemParamOfFunctionCallOutput(outputStr)
+				functionCallOutput.OfFunctionCallOutput.CallID = param.NewOpt(toolResultPart.ToolCallID)
+				input = append(input, functionCallOutput)
 				if len(followupParts) > 0 {
 					input = append(input, responses.ResponseInputItemParamOfMessage(followupParts, responses.EasyInputMessageRoleUser))
 				}
@@ -1142,30 +1144,22 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 
 			case "response.output_text.annotation.added":
 				added := event.AsResponseOutputTextAnnotationAdded()
-				// The Annotation field is typed as `any` in the SDK;
-				// it deserializes as map[string]any from JSON.
-				annotationMap, ok := added.Annotation.(map[string]any)
-				if !ok {
-					break
-				}
-				annotationType, _ := annotationMap["type"].(string)
-				switch annotationType {
+				annotation := added.Annotation
+				switch annotation.Type {
 				case "url_citation":
-					url, _ := annotationMap["url"].(string)
-					title, _ := annotationMap["title"].(string)
 					if !yield(fantasy.StreamPart{
 						Type:       fantasy.StreamPartTypeSource,
 						ID:         uuid.NewString(),
 						SourceType: fantasy.SourceTypeURL,
-						URL:        url,
-						Title:      title,
+						URL:        annotation.URL,
+						Title:      annotation.Title,
 					}) {
 						return
 					}
 				case "file_citation":
 					title := "Document"
-					if fn, ok := annotationMap["filename"].(string); ok && fn != "" {
-						title = fn
+					if annotation.Filename != "" {
+						title = annotation.Filename
 					}
 					if !yield(fantasy.StreamPart{
 						Type:       fantasy.StreamPartTypeSource,

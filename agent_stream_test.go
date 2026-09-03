@@ -239,6 +239,35 @@ func TestStreamingAgentCallbacks(t *testing.T) {
 	require.False(t, callbacks["OnToolResult"], "OnToolResult should not be called without actual tool results")
 }
 
+func TestAgent_Stream_DisableAllTools(t *testing.T) {
+	t.Parallel()
+
+	model := &mockLanguageModel{
+		streamFunc: func(ctx context.Context, call Call) (StreamResponse, error) {
+			require.Empty(t, call.Tools)
+			return func(yield func(StreamPart) bool) {
+				yield(StreamPart{
+					Type:         StreamPartTypeFinish,
+					FinishReason: FinishReasonStop,
+				})
+			}, nil
+		},
+	}
+	tool := &EchoTool{}
+	providerTool := ProviderDefinedTool{ID: "provider.web_search", Name: "web_search"}
+	agent := NewAgent(model, WithTools(tool), WithProviderDefinedTools(providerTool))
+
+	result, err := agent.Stream(context.Background(), AgentStreamCall{
+		Prompt:          "test-input",
+		DisableAllTools: true,
+		PrepareStep: func(ctx context.Context, _ PrepareStepFunctionOptions) (context.Context, PrepareStepResult, error) {
+			return ctx, PrepareStepResult{}, nil
+		},
+	})
+	require.NoError(t, err)
+	require.NotNil(t, result)
+}
+
 // TestStreamingAgentWithTools tests streaming agent with tool calls (mirrors TS test patterns)
 func TestStreamingAgentWithTools(t *testing.T) {
 	t.Parallel()

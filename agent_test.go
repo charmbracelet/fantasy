@@ -754,6 +754,33 @@ func TestAgent_Generate_OptionsActiveTools_WithProviderDefinedTools(t *testing.T
 	require.NotNil(t, result)
 }
 
+func TestAgent_Generate_DisableAllTools(t *testing.T) {
+	t.Parallel()
+
+	model := &mockLanguageModel{
+		generateFunc: func(ctx context.Context, call Call) (*Response, error) {
+			require.Empty(t, call.Tools)
+			return &Response{
+				Content:      ResponseContent{TextContent{Text: "Response"}},
+				FinishReason: FinishReasonStop,
+			}, nil
+		},
+	}
+	tool := &mockTool{name: "tool1", description: "Test tool"}
+	providerTool := ProviderDefinedTool{ID: "provider.web_search", Name: "web_search"}
+	agent := NewAgent(model, WithTools(tool), WithProviderDefinedTools(providerTool))
+
+	result, err := agent.Generate(context.Background(), AgentCall{
+		Prompt:          "test-input",
+		DisableAllTools: true,
+		PrepareStep: func(ctx context.Context, _ PrepareStepFunctionOptions) (context.Context, PrepareStepResult, error) {
+			return ctx, PrepareStepResult{}, nil
+		},
+	})
+	require.NoError(t, err)
+	require.NotNil(t, result)
+}
+
 func TestResponseContent_Getters(t *testing.T) {
 	t.Parallel()
 

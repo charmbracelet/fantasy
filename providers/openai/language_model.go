@@ -7,6 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"maps"
+	"net/http"
 	"reflect"
 	"slices"
 	"strings"
@@ -16,6 +18,7 @@ import (
 	"charm.land/fantasy/schema"
 	"github.com/google/uuid"
 	"github.com/openai/openai-go/v3"
+	"github.com/openai/openai-go/v3/option"
 	"github.com/openai/openai-go/v3/packages/param"
 	"github.com/openai/openai-go/v3/shared"
 )
@@ -32,6 +35,7 @@ type languageModel struct {
 	streamUsageFunc            LanguageModelStreamUsageFunc
 	streamExtraFunc            LanguageModelStreamExtraFunc
 	streamProviderMetadataFunc LanguageModelStreamProviderMetadataFunc
+	headerFunc                 LanguageModelHeaderFunc
 	toPromptFunc               LanguageModelToPromptFunc
 }
 
@@ -80,6 +84,17 @@ func WithLanguageModelStreamUsageFunc(fn LanguageModelStreamUsageFunc) LanguageM
 	}
 }
 
+// WithLanguageModelHeaderFunc sets the response header function for the
+// language model. When set, the HTTP response headers of each call are
+// captured and passed to the function alongside the provider metadata,
+// which it may mutate (e.g. copying headers of interest into ExtraFields).
+// When unset, response headers are not captured at all.
+func WithLanguageModelHeaderFunc(fn LanguageModelHeaderFunc) LanguageModelOption {
+	return func(l *languageModel) {
+		l.headerFunc = fn
+	}
+}
+
 // WithLanguageModelToPromptFunc sets the to prompt function for the language model.
 func WithLanguageModelToPromptFunc(fn LanguageModelToPromptFunc) LanguageModelOption {
 	return func(l *languageModel) {
@@ -123,6 +138,112 @@ type streamToolCall struct {
 	name        string
 	arguments   string
 	hasFinished bool
+}
+
+// responseCapture holds the raw HTTP response of a call so response headers
+// can be surfaced through provider metadata. Capturing is only enabled when
+// a header func is configured on the language model.
+type responseCapture struct {
+	response *http.Response
+}
+
+// requestOptions returns the given per-call request options with the raw
+// HTTP response capture appended when the given header func is configured.
+func (c *responseCapture) requestOptions(headerFunc LanguageModelHeaderFunc, opts []option.RequestOption) []option.RequestOption {
+	if headerFunc == nil {
+		return opts
+	}
+	return append(opts,
+		option.WithResponseInto(&c.response),
+		option.WithMiddleware(drainOnCloseMiddleware),
+	)
+}
+
+// drainOnCloseMiddleware wraps the response body so that a close before
+// EOF — which the SSE stream does at its [DONE] sentinel — drains the
+// remaining bytes first. net/http parses HTTP trailers only once the body
+// has been read that far, so without the drain a trailer arriving after
+// the stream's terminal event would be discarded.
+func drainOnCloseMiddleware(req *http.Request, next option.MiddlewareNext) (*http.Response, error) {
+	res, err := next(req)
+	if err != nil || res == nil || res.Body == nil {
+		return res, err
+	}
+	res.Body = &drainOnCloseBody{ReadCloser: res.Body}
+	return res, err
+}
+
+// drainOnCloseBody reads the wrapped body to EOF before closing it.
+type drainOnCloseBody struct {
+	io.ReadCloser
+}
+
+func (b *drainOnCloseBody) Close() error {
+	_, _ = io.Copy(io.Discard, b.ReadCloser)
+	return b.ReadCloser.Close()
+}
+
+// header returns the captured response headers, with any HTTP trailers
+// merged in (trailer keys win on collision), or nil when no response was
+// captured. The header func runs after the response body has been fully
+// consumed, so trailers — which net/http populates only then — are visible.
+func (c *responseCapture) header() http.Header {
+	if c.response == nil {
+		return nil
+	}
+	if len(c.response.Trailer) == 0 {
+		return c.response.Header
+	}
+	merged := c.response.Header.Clone()
+	maps.Copy(merged, c.response.Trailer)
+	return merged
+}
+
+// languageModelHeaderFunc returns the header func configured through the
+// given language model options, if any. It is the only language model
+// option also honored by the responses language model.
+func languageModelHeaderFunc(opts []LanguageModelOption) LanguageModelHeaderFunc {
+	var lm languageModel
+	for _, opt := range opts {
+		opt(&lm)
+	}
+	return lm.headerFunc
+}
+
+// applyHeaders invokes the configured header func against the non-stream
+// provider metadata. It is a no-op when no header func is configured or no
+// response was captured.
+func (o languageModel) applyHeaders(header http.Header, providerMetadata fantasy.ProviderOptionsData) fantasy.ProviderOptionsData {
+	if o.headerFunc == nil || header == nil {
+		return providerMetadata
+	}
+	metadata, ok := providerMetadata.(*ProviderMetadata)
+	if !ok {
+		metadata = &ProviderMetadata{}
+		providerMetadata = metadata
+	}
+	o.headerFunc(header, metadata)
+	return providerMetadata
+}
+
+// applyHeadersStream invokes the configured header func against the stream
+// provider metadata, creating the metadata when the stream carried none.
+// It is a no-op when no header func is configured or no response was
+// captured. It must run once, after the stream loop, because
+// streamUsageFunc replaces the metadata on every chunk.
+func (o languageModel) applyHeadersStream(header http.Header, providerMetadata *fantasy.ProviderMetadata) {
+	if o.headerFunc == nil || header == nil {
+		return
+	}
+	if *providerMetadata == nil {
+		*providerMetadata = fantasy.ProviderMetadata{}
+	}
+	metadata, ok := (*providerMetadata)[Name].(*ProviderMetadata)
+	if !ok {
+		metadata = &ProviderMetadata{}
+		(*providerMetadata)[Name] = metadata
+	}
+	o.headerFunc(header, metadata)
 }
 
 // Model implements fantasy.LanguageModel.
@@ -243,11 +364,12 @@ func (o languageModel) prepareParams(call fantasy.Call) (*openai.ChatCompletionN
 
 // Generate implements fantasy.LanguageModel.
 func (o languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantasy.Response, error) {
+	capture := responseCapture{}
 	params, warnings, err := o.prepareParams(call)
 	if err != nil {
 		return nil, err
 	}
-	response, err := o.client.Chat.Completions.New(ctx, *params, append(callUARequestOptions(call), callHeadersRequestOptions(call)...)...)
+	response, err := o.client.Chat.Completions.New(ctx, *params, capture.requestOptions(o.headerFunc, append(callUARequestOptions(call), callHeadersRequestOptions(call)...))...)
 	if err != nil {
 		return nil, toProviderErr(err)
 	}
@@ -272,6 +394,7 @@ func (o languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantas
 	}
 
 	usage, providerMetadata := o.usageFunc(*response)
+	providerMetadata = o.applyHeaders(capture.header(), providerMetadata)
 
 	mappedFinishReason := o.mapFinishReasonFunc(choice.FinishReason)
 	// Terminal reasons that can cut output mid-call — length,
@@ -329,6 +452,7 @@ func (o languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantas
 
 // Stream implements fantasy.LanguageModel.
 func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.StreamResponse, error) {
+	capture := responseCapture{}
 	params, warnings, err := o.prepareParams(call)
 	if err != nil {
 		return nil, err
@@ -338,7 +462,7 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 		IncludeUsage: openai.Bool(true),
 	}
 
-	stream := o.client.Chat.Completions.NewStreaming(ctx, *params, append(callUARequestOptions(call), callHeadersRequestOptions(call)...)...)
+	stream := o.client.Chat.Completions.NewStreaming(ctx, *params, capture.requestOptions(o.headerFunc, append(callUARequestOptions(call), callHeadersRequestOptions(call)...))...)
 	isActiveText := false
 	toolCalls := make(map[int64]streamToolCall)
 
@@ -628,6 +752,7 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 					}},
 				})
 			}
+			o.applyHeadersStream(capture.header(), &providerMetadata)
 			yield(fantasy.StreamPart{
 				Type:             fantasy.StreamPartTypeFinish,
 				Usage:            usage,

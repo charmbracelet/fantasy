@@ -3,6 +3,7 @@ package openai
 import (
 	"encoding/base64"
 	"fmt"
+	"net/http"
 	"strings"
 
 	"charm.land/fantasy"
@@ -31,6 +32,12 @@ type LanguageModelStreamUsageFunc = func(chunk openai.ChatCompletionChunk, ctx m
 
 // LanguageModelStreamProviderMetadataFunc is a function that handles stream provider metadata for the language model.
 type LanguageModelStreamProviderMetadataFunc = func(choice openai.ChatCompletionChoice, metadata fantasy.ProviderMetadata) fantasy.ProviderMetadata
+
+// LanguageModelHeaderFunc is a function that receives the HTTP response
+// headers of a completed call. It may copy headers of interest into the
+// provider metadata, so they are surfaced to callers through
+// [fantasy.Response] and the terminal [fantasy.StreamPart].
+type LanguageModelHeaderFunc = func(header http.Header, metadata *ProviderMetadata)
 
 // LanguageModelToPromptFunc is a function that handles converting fantasy prompts to openai sdk messages.
 type LanguageModelToPromptFunc = func(prompt fantasy.Prompt, provider, model string) ([]openai.ChatCompletionMessageParamUnion, []fantasy.CallWarning)

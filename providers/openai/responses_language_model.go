@@ -3,9 +3,12 @@ package openai
 import (
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"maps"
+	"net/http"
 	"reflect"
 	"strings"
 
@@ -26,16 +29,46 @@ type responsesLanguageModel struct {
 	modelID    string
 	client     openai.Client
 	objectMode fantasy.ObjectMode
+	headerFunc LanguageModelHeaderFunc
 }
 
 // newResponsesLanguageModel implements a responses api model.
-func newResponsesLanguageModel(modelID string, provider string, client openai.Client, objectMode fantasy.ObjectMode) responsesLanguageModel {
+func newResponsesLanguageModel(modelID string, provider string, client openai.Client, objectMode fantasy.ObjectMode, headerFunc LanguageModelHeaderFunc) responsesLanguageModel {
 	return responsesLanguageModel{
 		modelID:    modelID,
 		provider:   provider,
 		client:     client,
 		objectMode: objectMode,
+		headerFunc: headerFunc,
 	}
+}
+
+// applyHeaders invokes the configured header func against a chat
+// completions metadata sink and copies the resulting extra fields into
+// the responses provider metadata, creating the entry when the call
+// carried none. It is a no-op when no header func is configured or no
+// response was captured.
+func (o responsesLanguageModel) applyHeaders(header http.Header, metadata *fantasy.ProviderMetadata) {
+	if o.headerFunc == nil || header == nil {
+		return
+	}
+	sink := &ProviderMetadata{}
+	o.headerFunc(header, sink)
+	if len(sink.ExtraFields) == 0 {
+		return
+	}
+	if *metadata == nil {
+		*metadata = fantasy.ProviderMetadata{}
+	}
+	responsesMetadata, ok := (*metadata)[Name].(*ResponsesProviderMetadata)
+	if !ok {
+		responsesMetadata = &ResponsesProviderMetadata{}
+		(*metadata)[Name] = responsesMetadata
+	}
+	if responsesMetadata.ExtraFields == nil {
+		responsesMetadata.ExtraFields = make(map[string]json.RawMessage)
+	}
+	maps.Copy(responsesMetadata.ExtraFields, sink.ExtraFields)
 }
 
 func (o responsesLanguageModel) Model() string {
@@ -773,12 +806,13 @@ func toResponsesTools(tools []fantasy.Tool, toolChoice *fantasy.ToolChoice, opti
 }
 
 func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call) (*fantasy.Response, error) {
+	capture := responseCapture{}
 	params, warnings, err := o.prepareParams(call)
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := o.client.Responses.New(ctx, *params, append(callUARequestOptions(call), callHeadersRequestOptions(call)...)...)
+	response, err := o.client.Responses.New(ctx, *params, capture.requestOptions(o.headerFunc, append(callUARequestOptions(call), callHeadersRequestOptions(call)...))...)
 	if err != nil {
 		return nil, toProviderErr(err)
 	}
@@ -913,11 +947,14 @@ func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call)
 		}
 	}
 
+	metadata := responsesProviderMetadata(response.ID)
+	o.applyHeaders(capture.header(), &metadata)
+
 	return &fantasy.Response{
 		Content:          content,
 		Usage:            usage,
 		FinishReason:     finishReason,
-		ProviderMetadata: responsesProviderMetadata(response.ID),
+		ProviderMetadata: metadata,
 		Warnings:         warnings,
 	}, nil
 }
@@ -943,12 +980,13 @@ func mapResponsesFinishReason(reason string, hasFunctionCall bool) fantasy.Finis
 }
 
 func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.StreamResponse, error) {
+	capture := responseCapture{}
 	params, warnings, err := o.prepareParams(call)
 	if err != nil {
 		return nil, err
 	}
 
-	stream := o.client.Responses.NewStreaming(ctx, *params, append(callUARequestOptions(call), callHeadersRequestOptions(call)...)...)
+	stream := o.client.Responses.NewStreaming(ctx, *params, capture.requestOptions(o.headerFunc, append(callUARequestOptions(call), callHeadersRequestOptions(call)...))...)
 
 	finishReason := fantasy.FinishReasonUnknown
 	var usage fantasy.Usage
@@ -1276,11 +1314,13 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 			})
 		}
 
+		metadata := responsesProviderMetadata(responseID)
+		o.applyHeaders(capture.header(), &metadata)
 		yield(fantasy.StreamPart{
 			Type:             fantasy.StreamPartTypeFinish,
 			Usage:            usage,
 			FinishReason:     finishReason,
-			ProviderMetadata: responsesProviderMetadata(responseID),
+			ProviderMetadata: metadata,
 		})
 	}, nil
 }
@@ -1437,7 +1477,8 @@ func (o responsesLanguageModel) generateObjectWithJSONMode(ctx context.Context, 
 	}
 
 	// Make request
-	response, err := o.client.Responses.New(ctx, *params, append(objectCallUARequestOptions(call), objectCallHeadersRequestOptions(call)...)...)
+	capture := responseCapture{}
+	response, err := o.client.Responses.New(ctx, *params, capture.requestOptions(o.headerFunc, append(objectCallUARequestOptions(call), objectCallHeadersRequestOptions(call)...))...)
 	if err != nil {
 		return nil, toProviderErr(err)
 	}
@@ -1497,13 +1538,16 @@ func (o responsesLanguageModel) generateObjectWithJSONMode(ctx context.Context, 
 		return nil, err
 	}
 
+	metadata := responsesProviderMetadata(response.ID)
+	o.applyHeaders(capture.header(), &metadata)
+
 	return &fantasy.ObjectResponse{
 		Object:           obj,
 		RawText:          jsonText,
 		Usage:            usage,
 		FinishReason:     finishReason,
 		Warnings:         warnings,
-		ProviderMetadata: responsesProviderMetadata(response.ID),
+		ProviderMetadata: metadata,
 	}, nil
 }
 
@@ -1540,7 +1584,8 @@ func (o responsesLanguageModel) streamObjectWithJSONMode(ctx context.Context, ca
 		Format: responses.ResponseFormatTextConfigParamOfJSONSchema(schemaName, jsonSchemaMap),
 	}
 
-	stream := o.client.Responses.NewStreaming(ctx, *params, append(objectCallUARequestOptions(call), objectCallHeadersRequestOptions(call)...)...)
+	capture := responseCapture{}
+	stream := o.client.Responses.NewStreaming(ctx, *params, capture.requestOptions(o.headerFunc, append(objectCallUARequestOptions(call), objectCallHeadersRequestOptions(call)...))...)
 
 	return func(yield func(fantasy.ObjectStreamPart) bool) {
 		if len(warnings) > 0 {
@@ -1675,11 +1720,13 @@ func (o responsesLanguageModel) streamObjectWithJSONMode(ctx context.Context, ca
 
 		// Final validation and emit
 		if lastParsedObject != nil {
+			metadata := responsesProviderMetadata(responseID)
+			o.applyHeaders(capture.header(), &metadata)
 			yield(fantasy.ObjectStreamPart{
 				Type:             fantasy.ObjectStreamPartTypeFinish,
 				Usage:            usage,
 				FinishReason:     finishReason,
-				ProviderMetadata: responsesProviderMetadata(responseID),
+				ProviderMetadata: metadata,
 			})
 		} else {
 			// No object was generated

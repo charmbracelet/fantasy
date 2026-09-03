@@ -194,7 +194,10 @@ func (o *provider) LanguageModel(_ context.Context, modelID string) (fantasy.Lan
 		if objectMode == fantasy.ObjectModeJSON {
 			objectMode = fantasy.ObjectModeAuto
 		}
-		return newResponsesLanguageModel(modelID, o.options.name, client, objectMode), nil
+		// The responses language model has its own parameter and usage
+		// handling; of the language model options, only the header hook
+		// is shared with the chat completions model.
+		return newResponsesLanguageModel(modelID, o.options.name, client, objectMode, languageModelHeaderFunc(o.options.languageModelOptions)), nil
 	}
 
 	languageModelOptions := append([]LanguageModelOption{}, o.options.languageModelOptions...)

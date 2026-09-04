@@ -1233,13 +1233,35 @@ func (a *agent) validateToolCall(toolCall ToolCallContent, availableTools []Agen
 		return fmt.Errorf("invalid JSON input: %w", err)
 	}
 
-	// Basic schema validation (check required fields)
+	// Basic schema validation (check required and unknown fields)
 	// TODO: more robust schema validation using JSON Schema or similar
 	toolInfo := tool.Info()
+	validationErrors := make([]string, 0, 2) //nolint:mnd
 	for _, required := range toolInfo.Required {
 		if _, exists := input[required]; !exists {
-			return fmt.Errorf("missing required parameter: %s", required)
+			validationErrors = append(validationErrors, fmt.Sprintf("missing required parameter: %s", required))
+			break
 		}
+	}
+
+	unknown := make([]string, 0)
+	_, acceptsAdditionalParameters := toolInfo.Parameters["*"]
+	if len(toolInfo.Parameters) > 0 && !acceptsAdditionalParameters {
+		for parameter := range input {
+			if _, exists := toolInfo.Parameters[parameter]; !exists {
+				unknown = append(unknown, parameter)
+			}
+		}
+	}
+	slices.Sort(unknown)
+	if len(unknown) == 1 {
+		validationErrors = append(validationErrors, fmt.Sprintf("unknown additional parameter: %s", unknown[0]))
+	} else if len(unknown) > 1 {
+		validationErrors = append(validationErrors, fmt.Sprintf("unknown additional parameters: %s", strings.Join(unknown, ", ")))
+	}
+
+	if len(validationErrors) > 0 {
+		return errors.New(strings.Join(validationErrors, "; "))
 	}
 	return nil
 }

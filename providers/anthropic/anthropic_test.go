@@ -744,6 +744,46 @@ func TestGenerate_SendsThinkingDisplay(t *testing.T) {
 			wantDisplay: "summarized",
 		},
 		{
+			name:  "opus 5 upgrades budget thinking to adaptive",
+			model: "claude-opus-5",
+			options: func() *ProviderOptions {
+				return &ProviderOptions{Thinking: &ThinkingProviderOption{BudgetTokens: 2048}}
+			},
+			wantType:    "adaptive",
+			wantDisplay: "summarized",
+		},
+		{
+			name:  "fable upgrades budget thinking to adaptive",
+			model: "claude-fable-5",
+			options: func() *ProviderOptions {
+				return &ProviderOptions{Thinking: &ThinkingProviderOption{BudgetTokens: 2048}}
+			},
+			wantType:    "adaptive",
+			wantDisplay: "summarized",
+		},
+		{
+			name:  "sonnet 5 upgrades budget thinking to adaptive",
+			model: "claude-sonnet-5",
+			options: func() *ProviderOptions {
+				display := ThinkingDisplaySummarized
+				return &ProviderOptions{
+					Thinking:        &ThinkingProviderOption{BudgetTokens: 2048},
+					ThinkingDisplay: &display,
+				}
+			},
+			wantType:    "adaptive",
+			wantDisplay: "summarized",
+		},
+		{
+			name:  "legacy sonnet 4.5 keeps enabled budget thinking",
+			model: "claude-sonnet-4-5-20250929",
+			options: func() *ProviderOptions {
+				return &ProviderOptions{Thinking: &ThinkingProviderOption{BudgetTokens: 2048}}
+			},
+			wantType:   "enabled",
+			wantBudget: 2048,
+		},
+		{
 			name:  "older opus models keep provider default",
 			model: "claude-opus-4-6-20260101",
 			options: func() *ProviderOptions {
@@ -826,14 +866,18 @@ func TestDefaultsToOmittedThinkingDisplay(t *testing.T) {
 		{name: "opus 4.7 alias", model: "claude-opus-4-7", want: true},
 		{name: "opus 4.7", model: "claude-opus-4-7-20260101", want: true},
 		{name: "opus 4.10", model: "claude-opus-4-10-20260101", want: true},
+		{name: "opus 5", model: "claude-opus-5", want: true},
+		{name: "bedrock opus 5", model: "us.anthropic.claude-opus-5-v1", want: true},
 		{name: "bedrock opus 4.8 alias", model: "us.anthropic.claude-opus-4-8-v1", want: true},
 		{name: "bedrock opus 4.8", model: "us.anthropic.claude-opus-4-8-20260101-v1:0", want: true},
 		{name: "mythos preview", model: "claude-mythos-preview", want: true},
 		{name: "bedrock mythos preview", model: "anthropic.claude-mythos-preview", want: true},
+		{name: "fable", model: "claude-fable-5", want: true},
 		{name: "opus 4.6", model: "claude-opus-4-6-20260101", want: false},
 		{name: "opus 4 date only", model: "claude-opus-4-20250514", want: false},
 		{name: "bedrock opus 4 date only", model: "us.anthropic.claude-opus-4-20250514-v1:0", want: false},
 		{name: "sonnet", model: "claude-sonnet-4-20250514", want: false},
+		{name: "sonnet 5", model: "claude-sonnet-5", want: false},
 		{name: "no minor", model: "claude-opus-4", want: false},
 	}
 
@@ -842,6 +886,41 @@ func TestDefaultsToOmittedThinkingDisplay(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			require.Equal(t, tt.want, defaultsToOmittedThinkingDisplay(tt.model))
+		})
+	}
+}
+
+func TestRequiresAdaptiveThinking(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name  string
+		model string
+		want  bool
+	}{
+		{name: "opus 5", model: "claude-opus-5", want: true},
+		{name: "fable 5", model: "claude-fable-5", want: true},
+		{name: "sonnet 5", model: "claude-sonnet-5", want: true},
+		{name: "opus 4.8", model: "claude-opus-4-8", want: true},
+		{name: "opus 4.7", model: "claude-opus-4-7", want: true},
+		{name: "opus 4.6", model: "claude-opus-4-6", want: true},
+		{name: "sonnet 4.6", model: "claude-sonnet-4-6", want: true},
+		{name: "mythos", model: "claude-mythos-preview", want: true},
+		{name: "bedrock opus 5", model: "us.anthropic.claude-opus-5-v1:0", want: true},
+		{name: "opus 4.5", model: "claude-opus-4-5", want: false},
+		{name: "sonnet 4.5", model: "claude-sonnet-4-5", want: false},
+		{name: "haiku 4.5", model: "claude-haiku-4-5", want: false},
+		{name: "opus 4 date", model: "claude-opus-4-20250514", want: false},
+		{name: "bare opus 4", model: "claude-opus-4", want: false},
+		{name: "claude 3.5", model: "claude-3-5-sonnet", want: false},
+		{name: "non claude", model: "minimax-m2", want: false},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			require.Equal(t, tt.want, requiresAdaptiveThinking(tt.model), tt.model)
 		})
 	}
 }

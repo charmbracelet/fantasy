@@ -53,6 +53,22 @@ func init() {
 // The ResponseID can be used as PreviousResponseID in follow-up requests to chain responses.
 type ResponsesProviderMetadata struct {
 	ResponseID string `json:"response_id"`
+	// ExtraFields holds non-standard response fields, including any
+	// captured via [LanguageModelHeaderFunc].
+	ExtraFields map[string]json.RawMessage `json:"extra_fields,omitempty"`
+}
+
+// ExtraField unmarshals the extra field with the given key, if present,
+// into target.
+func (m *ResponsesProviderMetadata) ExtraField(key string, target any) bool {
+	if m == nil || m.ExtraFields == nil {
+		return false
+	}
+	raw, ok := m.ExtraFields[key]
+	if !ok {
+		return false
+	}
+	return json.Unmarshal(raw, target) == nil
 }
 
 var _ fantasy.ProviderOptionsData = (*ResponsesProviderMetadata)(nil)

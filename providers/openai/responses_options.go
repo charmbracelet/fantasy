@@ -3,6 +3,7 @@ package openai
 
 import (
 	"encoding/json"
+	"regexp"
 	"slices"
 	"strings"
 
@@ -295,18 +296,22 @@ func ParseResponsesOptions(data map[string]any) (*ResponsesProviderOptions, erro
 	return &options, nil
 }
 
+// responsesGenerationPattern matches the model generations that only
+// speak the Responses API: gpt-4 and gpt-5 today, the newer generations
+// as they ship (gpt-6, gpt-10, ...), and never the legacy gpt-3 family
+// that predates it.
+var responsesGenerationPattern = regexp.MustCompile(`gpt-(?:[4-9]|[1-9]\d)`)
+
 // IsResponsesModel checks if a model ID is a Responses API model for OpenAI.
 func IsResponsesModel(modelID string) bool {
 	return slices.Contains(responsesModelIDs, modelID) ||
-		strings.Contains(strings.ToLower(modelID), "gpt-4") ||
-		strings.Contains(strings.ToLower(modelID), "gpt-5")
+		responsesGenerationPattern.MatchString(strings.ToLower(modelID))
 }
 
 // IsResponsesReasoningModel checks if a model ID is a Responses API reasoning model for OpenAI.
 func IsResponsesReasoningModel(modelID string) bool {
 	return slices.Contains(responsesReasoningModelIDs, modelID) ||
-		strings.Contains(strings.ToLower(modelID), "gpt-4") ||
-		strings.Contains(strings.ToLower(modelID), "gpt-5")
+		responsesGenerationPattern.MatchString(strings.ToLower(modelID))
 }
 
 // SearchContextSize controls how much context window space the

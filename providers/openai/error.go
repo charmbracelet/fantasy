@@ -16,9 +16,10 @@ import (
 )
 
 var (
-	openaiContextPattern  = regexp.MustCompile(`maximum context length (?:is|of) (\d+) tokens.*?(?:resulted in|requested) ~?(\d+) tokens`)
-	alibabaContextPattern = regexp.MustCompile(`Range of input length should be \[\d+,\s*(\d+)\]`)
-	vercelContextPattern  = regexp.MustCompile(`Input too long:\s*(\d+)\s*input tokens,\s*limit is\s*(\d+)`)
+	openaiContextPattern   = regexp.MustCompile(`maximum context length (?:is|of) (\d+) tokens.*?(?:resulted in|requested) ~?(\d+) tokens`)
+	alibabaContextPattern  = regexp.MustCompile(`Range of input length should be \[\d+,\s*(\d+)\]`)
+	vercelContextPattern   = regexp.MustCompile(`Input too long:\s*(\d+)\s*input tokens,\s*limit is\s*(\d+)`)
+	toolCallsCutoffPattern = regexp.MustCompile(`(?i)tool calls? cutoff by max_tokens`)
 )
 
 func toProviderErr(err error) error {
@@ -37,6 +38,7 @@ func toProviderErr(err error) error {
 		}
 
 		parseContextTooLargeError(message, providerErr)
+		parseToolCallsCutoffError(message, providerErr)
 
 		return providerErr
 	}
@@ -69,13 +71,15 @@ func toProviderErrFromStreamError(streamErr *ssestream.StreamError) *fantasy.Pro
 
 	errType := cmp.Or(envelope.Error.Type, envelope.Error.Code)
 
-	return &fantasy.ProviderError{
+	providerErr := &fantasy.ProviderError{
 		Title:          "stream error",
 		Message:        cmp.Or(envelope.Error.Message, streamErr.Message),
 		Cause:          streamErr,
 		ResponseBody:   streamErr.Event.Data,
 		TransientError: fantasy.TransientStreamErrorTypes[errType],
 	}
+	parseToolCallsCutoffError(providerErr.Message, providerErr)
+	return providerErr
 }
 
 func parseContextTooLargeError(message string, providerErr *fantasy.ProviderError) {
@@ -94,6 +98,12 @@ func parseContextTooLargeError(message string, providerErr *fantasy.ProviderErro
 		providerErr.ContextTooLargeErr = true
 		providerErr.ContextUsedTokens, _ = strconv.Atoi(matches[1])
 		providerErr.ContextMaxTokens, _ = strconv.Atoi(matches[2])
+	}
+}
+
+func parseToolCallsCutoffError(message string, providerErr *fantasy.ProviderError) {
+	if toolCallsCutoffPattern.MatchString(message) {
+		providerErr.ToolCallsCutoffErr = true
 	}
 }
 

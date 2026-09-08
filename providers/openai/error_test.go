@@ -167,3 +167,27 @@ func TestToProviderErr_StreamErrorMalformedBodyFallsBackToRawMessage(t *testing.
 		t.Error("unparseable stream error body must not be assumed retryable")
 	}
 }
+
+func TestToProviderErr_ToolCallsCutoff(t *testing.T) {
+	t.Parallel()
+
+	streamErr := &ssestream.StreamError{
+		Message: `received error while streaming: {"message":"Tool calls cutoff by max_tokens.","type":"invalid_request_error"}`,
+		Event: ssestream.Event{
+			Data: []byte(`{"error":{"message":"Tool calls cutoff by max_tokens.","type":"invalid_request_error"}}`),
+		},
+	}
+
+	got := toProviderErr(streamErr)
+
+	var providerErr *fantasy.ProviderError
+	if !errors.As(got, &providerErr) {
+		t.Fatalf("toProviderErr did not wrap StreamError as *fantasy.ProviderError (got %T)", got)
+	}
+	if !providerErr.IsToolCallsCutoff() {
+		t.Error("IsToolCallsCutoff() must be true for a tool-calls-cutoff stream error")
+	}
+	if providerErr.IsRetryable() {
+		t.Error("a tool-calls-cutoff error is a user-correctable input problem, not retryable")
+	}
+}

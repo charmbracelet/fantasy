@@ -46,6 +46,13 @@ type ProviderError struct {
 	ContextMaxTokens   int
 	ContextTooLargeErr bool
 
+	// ToolCallsCutoffErr marks the error as a request that was cut short
+	// because its generated tool calls exceeded the max_tokens limit. Some
+	// providers signal this as a hard error rather than a truncated
+	// finish_reason, and it is a user-correctable input problem, not a
+	// transient server failure.
+	ToolCallsCutoffErr bool
+
 	// AuthError marks the error as an authentication failure a provider
 	// flagged as resolvable by refreshing credentials (e.g. re-running an
 	// interactive login). It covers auth failures that do not carry an HTTP
@@ -115,6 +122,12 @@ func (m *ProviderError) shouldRetryHeader() bool {
 // IsContextTooLarge checks if the error is due to the context exceeding the model's limit.
 func (m *ProviderError) IsContextTooLarge() bool {
 	return m.ContextTooLargeErr || m.ContextMaxTokens > 0 || m.ContextUsedTokens > 0
+}
+
+// IsToolCallsCutoff checks if the error is due to tool calls being cut off
+// by the max_tokens limit.
+func (m *ProviderError) IsToolCallsCutoff() bool {
+	return m.ToolCallsCutoffErr
 }
 
 // NewIncompleteStreamError returns a retryable ProviderError indicating that

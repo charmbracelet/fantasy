@@ -18,6 +18,12 @@ func TestSplitSSE(t *testing.T) {
 
 	events = SplitSSE("event: ping\ndata: {\"type\":\"ping\"}\n\n")
 	require.Equal(t, []string{"event: ping\ndata: {\"type\":\"ping\"}"}, events)
+
+	events = SplitSSE("data: {\"a\":1}\r\n\r\ndata: [DONE]\r\n")
+	require.Equal(t, []string{`data: {"a":1}`, "data: [DONE]"}, events)
+
+	events = SplitSSE("data: {\"a\":1}\r\n\r\n<connection closed>\r\n")
+	require.Equal(t, []string{`data: {"a":1}`, connectionClosedMarker}, events)
 }
 
 func TestLoad(t *testing.T) {
@@ -134,12 +140,18 @@ func TestUnifiedDiff(t *testing.T) {
 	before := "a\nb\nc\n"
 	after := "a\nb\nx\n"
 	diff := UnifiedDiff(before, after)
-	require.Contains(t, diff, "@@ -1,3 +1,3 @@")
-	require.Contains(t, diff, "-c")
-	require.Contains(t, diff, "+x")
-	require.Contains(t, diff, " b")
+	require.Contains(t, diff, "@@ -1,3 +1,3 @@\n")
+	require.Contains(t, diff, "-c\n")
+	require.Contains(t, diff, "+x\n")
+	require.Contains(t, diff, " b\n")
 
 	data, err := json.Marshal([]PartRecord{{Type: "finish", Reason: "stop"}})
 	require.NoError(t, err)
 	require.JSONEq(t, `[{"type":"finish","reason":"stop"}]`, string(data))
+}
+
+func TestAssertGoldenToleratesCRLF(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "golden.json")
+	require.NoError(t, os.WriteFile(path, []byte("[\r\n  {\r\n    \"type\": \"finish\",\r\n    \"reason\": \"stop\"\r\n  }\r\n]\r\n"), 0o600))
+	AssertGolden(t, path, []PartRecord{{Type: "finish", Reason: "stop"}})
 }

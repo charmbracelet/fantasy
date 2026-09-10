@@ -41,7 +41,7 @@ func TestFixtureShapes(t *testing.T) {
 	sort.Strings(cases)
 
 	for _, dir := range cases {
-		t.Run(strings.TrimPrefix(dir, root+"/"), func(t *testing.T) {
+		t.Run(strings.TrimPrefix(filepath.ToSlash(dir), filepath.ToSlash(root)+"/"), func(t *testing.T) {
 			data, err := os.ReadFile(filepath.Join(dir, "meta.json"))
 			require.NoError(t, err)
 			var meta shapeMeta

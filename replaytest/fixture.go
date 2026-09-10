@@ -73,8 +73,11 @@ func Load(dir string) (*Fixture, error) {
 }
 
 // SplitSSE splits raw SSE text into events on blank-line boundaries. Each
-// event is kept verbatim, including its field prefixes.
+// event is kept verbatim, including its field prefixes. CRLF line endings
+// are normalized to LF first, so fixtures checked out by git with CRLF on
+// Windows still split into the same events.
 func SplitSSE(s string) []string {
+	s = strings.ReplaceAll(s, "\r\n", "\n")
 	blocks := strings.Split(s, "\n\n")
 	events := make([]string, 0, len(blocks))
 	for _, block := range blocks {

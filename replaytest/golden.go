@@ -18,6 +18,9 @@ var update = flag.Bool("update", false, "rewrite golden files with the observed 
 // -update the file is written and the assertion passes. On mismatch the
 // test fails with a unified diff.
 //
+// Both sides are normalized to LF line endings before comparing, so goldens
+// stay stable when git checks the files out with CRLF on Windows.
+//
 // The stable output is achieved by marshaling struct fields in declaration
 // order and map keys sorted; maps must not be relied on for ordering
 // anywhere records are built.
@@ -46,9 +49,16 @@ func AssertGolden(t testing.TB, path string, records any) {
 		}
 		t.Fatalf("replaytest: read golden %s: %v", path, err)
 	}
-	if !bytes.Equal(existing, data) {
-		t.Fatalf("replaytest: golden mismatch for %s:\n%s", path, UnifiedDiff(string(existing), string(data)))
+	if !bytes.Equal(normalizeEOL(existing), normalizeEOL(data)) {
+		t.Fatalf("replaytest: golden mismatch for %s:\n%s", path,
+			UnifiedDiff(string(normalizeEOL(existing)), string(normalizeEOL(data))))
 	}
+}
+
+// normalizeEOL rewrites CRLF line endings to LF so comparisons are stable
+// regardless of how git checked the files out.
+func normalizeEOL(data []byte) []byte {
+	return bytes.ReplaceAll(data, []byte("\r\n"), []byte("\n"))
 }
 
 // UnifiedDiff renders a unified diff (three lines of context) between two
@@ -64,11 +74,11 @@ func UnifiedDiff(before, after string) string {
 		for _, op := range hunk.ops {
 			switch op.kind {
 			case opEqual:
-				fmt.Fprintf(&out, " %s", op.text)
+				fmt.Fprintf(&out, " %s\n", op.text)
 			case opDelete:
-				fmt.Fprintf(&out, "-%s", op.text)
+				fmt.Fprintf(&out, "-%s\n", op.text)
 			case opInsert:
-				fmt.Fprintf(&out, "+%s", op.text)
+				fmt.Fprintf(&out, "+%s\n", op.text)
 			}
 		}
 	}

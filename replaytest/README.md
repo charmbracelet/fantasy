@@ -27,7 +27,9 @@ Each fixture directory contains:
 `response.sse` is split into events on blank-line boundaries; each event is
 kept verbatim (including its `data:`/`event:` prefixes) and written to the
 replay server one event at a time with a flush after each. Events are never
-merged or split. A fixture event consisting of exactly the line
+merged or split. CRLF line endings (as produced by git checkouts on Windows)
+are normalized to LF before splitting. A fixture event consisting of exactly
+the line
 `<connection closed>` makes the server flush what it has written and close
 the connection, simulating an upstream that dies mid-stream.
 
@@ -53,6 +55,9 @@ are omitted:
 - `metadata` carries provider metadata (and source fields for source parts)
 - `warnings` and `error` carry call warnings and provider errors; error text
   has the replay server's listener port normalized to `127.0.0.1:0`
+
+Golden comparisons normalize CRLF line endings to LF on both sides, so
+goldens stay byte-stable regardless of how git checked the files out.
 
 ## Running and updating goldens
 

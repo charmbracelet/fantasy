@@ -18,7 +18,6 @@ import (
 	"charm.land/fantasy/schema"
 	"cloud.google.com/go/auth"
 	"github.com/charmbracelet/x/exp/slice"
-	"github.com/google/uuid"
 	"google.golang.org/genai"
 )
 
@@ -55,7 +54,7 @@ func New(opts ...Option) (fantasy.Provider, error) {
 	options := options{
 		headers: map[string]string{},
 		toolCallIDFunc: func() string {
-			return uuid.NewString()
+			return fantasy.NewID()
 		},
 	}
 	for _, o := range opts {

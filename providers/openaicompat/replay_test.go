@@ -3,71 +3,37 @@ package openaicompat
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
-	"net/http/httptest"
+	"path/filepath"
 	"strings"
 	"testing"
 
 	"charm.land/fantasy"
+	"charm.land/fantasy/replaytest"
 	"github.com/stretchr/testify/require"
 )
 
-// serveSSE returns an httptest server that answers streaming POSTs with the
-// given SSE payloads in order (one per request), flushing after each event.
-// It records every request body it receives. The special marker line
-// "<connection closed>" hijacks and closes the connection without a [DONE].
-// Non-streaming requests get a canned JSON chat.completion reply.
-func serveSSE(t *testing.T, payloads ...string) (*httptest.Server, *[][]byte) {
+// cannedStopJSON answers the non-streaming second request of the manual
+// round-trip test with a complete stop turn.
+const cannedStopJSON = `{"id":"test-response","created":0,"model":"test-model","object":"chat.completion","choices":[{"index":0,"message":{"role":"assistant","content":"The date is 2026-08-28."},"finish_reason":"stop"}],"usage":{"prompt_tokens":200,"completion_tokens":10,"total_tokens":210}}`
+
+// shapesDir locates the shared shape fixtures: the same fixtures the
+// providertests golden harness replays, so every case here also has a
+// reviewed parts.golden.json.
+func shapeFixture(t *testing.T, shape, name string) *replaytest.Fixture {
 	t.Helper()
-	var bodies [][]byte
-	var calls int
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		body, err := io.ReadAll(r.Body)
-		require.NoError(t, err)
-		bodies = append(bodies, body)
+	dir := filepath.Join("..", "..", "providertests", "testdata", "shapes", shape, name)
+	fixture, err := replaytest.Load(dir)
+	require.NoError(t, err)
+	return fixture
+}
 
-		var reqShape struct {
-			Stream bool `json:"stream"`
-		}
-		_ = json.Unmarshal(body, &reqShape)
-		if !reqShape.Stream {
-			w.Header().Set("Content-Type", "application/json")
-			_, _ = fmt.Fprint(w, `{"id":"y","created":1,"model":"deepseek-v4-flash","object":"chat.completion","choices":[{"index":0,"message":{"role":"assistant","content":"The date is 2026-08-28."},"finish_reason":"stop"}],"usage":{"prompt_tokens":200,"completion_tokens":10,"total_tokens":210}}`)
-			return
-		}
-
-		payload := payloads[min(calls, len(payloads)-1)]
-		calls++
-
-		w.Header().Set("Content-Type", "text/event-stream")
-		rc := http.NewResponseController(w)
-		for event := range strings.Lines(payload) {
-			if strings.TrimSpace(event) == "<connection closed>" {
-				_ = rc.Flush()
-				hj, ok := w.(http.Hijacker)
-				if !ok {
-					return
-				}
-				conn, _, err := hj.Hijack()
-				if err != nil {
-					return
-				}
-				_ = conn.Close()
-				return
-			}
-			if strings.TrimSpace(event) == "" {
-				continue
-			}
-			fmt.Fprintf(w, "data: %s\n\n", strings.TrimSpace(event))
-			_ = rc.Flush()
-		}
-		_, _ = fmt.Fprint(w, "data: [DONE]\n\n")
-		_ = rc.Flush()
-	}))
-	t.Cleanup(srv.Close)
-	return srv, &bodies
+func providerOn(t testing.TB, server *replaytest.Server) fantasy.LanguageModel {
+	t.Helper()
+	provider, err := New(WithBaseURL(server.URL()), WithAPIKey("x"))
+	require.NoError(t, err)
+	lm, err := provider.LanguageModel(context.Background(), "test-model")
+	require.NoError(t, err)
+	return lm
 }
 
 func streamParts(t *testing.T, lm fantasy.LanguageModel, prompt fantasy.Prompt) []fantasy.StreamPart {
@@ -89,8 +55,8 @@ func partTypes(parts []fantasy.StreamPart) []fantasy.StreamPartType {
 	return types
 }
 
-// countParts counts parts of a type; for reasoning deltas it also
-// concatenates the deltas.
+// reasoningText concatenates the reasoning deltas; for reasoning deltas it
+// also detects empty deltas.
 func reasoningText(parts []fantasy.StreamPart) string {
 	var sb strings.Builder
 	for _, p := range parts {
@@ -111,31 +77,21 @@ func countType(parts []fantasy.StreamPart, typ fantasy.StreamPartType) int {
 	return n
 }
 
-// A.1 from CHARM-2020: DeepSeek-shaped thinking + tool call. Every delta
-// carries both keys; non-reasoning chunks have "reasoning_content": null.
-const deepseekThinkingToolCallSSE = `{"id":"x","created":1,"model":"deepseek-v4-flash","choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning_content":null},"finish_reason":null}]}
-{"id":"x","created":1,"model":"deepseek-v4-flash","choices":[{"index":0,"delta":{"content":null,"reasoning_content":"The user wants the date."},"finish_reason":null}]}
-{"id":"x","created":1,"model":"deepseek-v4-flash","choices":[{"index":0,"delta":{"content":null,"reasoning_content":" I'll call get_date."},"finish_reason":null}]}
-{"id":"x","created":1,"model":"deepseek-v4-flash","choices":[{"index":0,"delta":{"content":"Let me check.","reasoning_content":null},"finish_reason":null}]}
-{"id":"x","created":1,"model":"deepseek-v4-flash","choices":[{"index":0,"delta":{"content":null,"reasoning_content":null,"tool_calls":[{"index":0,"id":"call_00_abc","type":"function","function":{"name":"get_date","arguments":""}}]},"finish_reason":null}]}
-{"id":"x","created":1,"model":"deepseek-v4-flash","choices":[{"index":0,"delta":{"content":null,"reasoning_content":null,"tool_calls":[{"index":0,"function":{"arguments":"{}"}}]},"finish_reason":null}]}
-{"id":"x","created":1,"model":"deepseek-v4-flash","choices":[{"index":0,"delta":{"content":"","reasoning_content":null},"finish_reason":"tool_calls"}]}
-{"id":"x","created":1,"model":"deepseek-v4-flash","choices":[],"usage":{"prompt_tokens":120,"completion_tokens":40,"total_tokens":160}}`
+func finishPart(parts []fantasy.StreamPart) *fantasy.StreamPart {
+	for i, p := range parts {
+		if p.Type == fantasy.StreamPartTypeFinish {
+			return &parts[i]
+		}
+	}
+	return nil
+}
 
-const cannedStopReplySSE = `{"id":"y","created":1,"model":"deepseek-v4-flash","choices":[{"index":0,"delta":{"role":"assistant","content":"The date is 2026-08-28."},"finish_reason":null}]}
-{"id":"y","created":1,"model":"deepseek-v4-flash","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
-{"id":"y","created":1,"model":"deepseek-v4-flash","choices":[],"usage":{"prompt_tokens":200,"completion_tokens":10,"total_tokens":210}}`
-
-// TestReplay_DeepSeekThinkingToolCall drives fixture A.1 through a real
-// openaicompat model and asserts the reasoning block survives end-to-end:
-// exactly one ReasoningStart, the concatenated deltas, exactly one
-// ReasoningEnd before Finish, and no empty ReasoningDeltas.
+// TestReplay_DeepSeekThinkingToolCall drives the reasoning-then-toolcall
+// fixture through a real openaicompat model and asserts the reasoning block
+// survives end-to-end: exactly one ReasoningStart, the concatenated deltas,
+// exactly one ReasoningEnd before Finish, and no empty ReasoningDeltas.
 func TestReplay_DeepSeekThinkingToolCall(t *testing.T) {
-	srv, _ := serveSSE(t, deepseekThinkingToolCallSSE)
-	provider, err := New(WithBaseURL(srv.URL), WithAPIKey("x"))
-	require.NoError(t, err)
-	lm, err := provider.LanguageModel(context.Background(), "deepseek-v4-flash")
-	require.NoError(t, err)
+	lm := providerOn(t, replaytest.Serve(t, shapeFixture(t, "reasoning_then_toolcall", "interleaved_with_nulls")))
 
 	parts := streamParts(t, lm, fantasy.Prompt{
 		{Role: fantasy.MessageRoleUser, Content: []fantasy.MessagePart{fantasy.TextPart{Text: "date?"}}},
@@ -169,11 +125,9 @@ func TestReplay_DeepSeekThinkingToolCall(t *testing.T) {
 // back, byte-equal, on the assistant message carrying tool_calls in the next
 // request. We drive two steps manually (no agent) to keep the harness small.
 func TestReplay_DeepSeekReasoningRoundTripsToNextRequest(t *testing.T) {
-	srv, bodies := serveSSE(t, deepseekThinkingToolCallSSE, cannedStopReplySSE)
-	provider, err := New(WithBaseURL(srv.URL), WithAPIKey("x"))
-	require.NoError(t, err)
-	lm, err := provider.LanguageModel(context.Background(), "deepseek-v4-flash")
-	require.NoError(t, err)
+	fixture := shapeFixture(t, "reasoning_then_toolcall", "interleaved_with_nulls")
+	server := replaytest.Serve(t, fixture, replaytest.WithSubsequentJSON([]byte(cannedStopJSON)))
+	lm := providerOn(t, server)
 
 	// Step 1: collect reasoning + tool call from the stream.
 	parts := streamParts(t, lm, fantasy.Prompt{
@@ -206,8 +160,43 @@ func TestReplay_DeepSeekReasoningRoundTripsToNextRequest(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, resp)
 
-	require.Len(t, *bodies, 2)
-	var second struct {
+	requests := server.Requests()
+	require.Len(t, requests, 2)
+	assertReasoningRoundTrip(t, requests[1], reasoning)
+}
+
+// TestReplay_AgentReasoningRoundTrip is the regression test for crush#2696
+// and the client-side half of CHARM-2020: drive the reasoning-then-toolcall
+// fixture through a real agent (the loop Crush runs), let it dispatch the
+// tool, and assert on the SECOND request body — the assistant message
+// carrying tool_calls must carry reasoning_content byte-equal to the
+// concatenated reasoning deltas.
+func TestReplay_AgentReasoningRoundTrip(t *testing.T) {
+	fixture := shapeFixture(t, "reasoning_then_toolcall", "interleaved_with_nulls")
+	lm := providerOn(t, replaytest.Serve(t, fixture))
+
+	getDate := fantasy.NewAgentTool(
+		"get_date",
+		"Get the current date.",
+		func(_ context.Context, _ struct{}, _ fantasy.ToolCall) (fantasy.ToolResponse, error) {
+			return fantasy.NewTextResponse("2026-08-28"), nil
+		},
+	)
+
+	record := replaytest.RunAgentStep(t, lm, fixture, getDate)
+	require.Equal(t, []string{"get_date"}, record.ToolsDispatched)
+	require.Equal(t, fantasy.FinishReasonToolCalls, fantasy.FinishReason(record.FinishReason))
+	require.NotEmpty(t, record.NextRequest)
+	assertReasoningRoundTrip(t, []byte(record.NextRequest), "The user wants the date. I'll call get_date.")
+	replaytest.AssertGolden(t, filepath.Join(shapeFixture(t, "reasoning_then_toolcall", "interleaved_with_nulls").Dir, "step.golden.json"), record)
+}
+
+// assertReasoningRoundTrip asserts that the request body carries the
+// assistant message with reasoning_content byte-equal to the streamed
+// reasoning and the complete tool call.
+func assertReasoningRoundTrip(t *testing.T, body []byte, reasoning string) {
+	t.Helper()
+	var request struct {
 		Messages []struct {
 			Role             string  `json:"role"`
 			ReasoningContent *string `json:"reasoning_content"`
@@ -220,7 +209,7 @@ func TestReplay_DeepSeekReasoningRoundTripsToNextRequest(t *testing.T) {
 			} `json:"tool_calls"`
 		} `json:"messages"`
 	}
-	require.NoError(t, json.Unmarshal((*bodies)[1], &second))
+	require.NoError(t, json.Unmarshal(body, &request))
 	var assistant *struct {
 		Role             string  `json:"role"`
 		ReasoningContent *string `json:"reasoning_content"`
@@ -232,61 +221,42 @@ func TestReplay_DeepSeekReasoningRoundTripsToNextRequest(t *testing.T) {
 			} `json:"function"`
 		} `json:"tool_calls"`
 	}
-	for i := range second.Messages {
-		if second.Messages[i].Role == "assistant" {
-			assistant = &second.Messages[i]
+	for i := range request.Messages {
+		if request.Messages[i].Role == "assistant" {
+			assistant = &request.Messages[i]
 		}
 	}
-	require.NotNil(t, assistant)
-	require.NotNil(t, assistant.ReasoningContent, "reasoning_content missing on replayed assistant message: %s", (*bodies)[1])
+	require.NotNil(t, assistant, "no assistant message in request: %s", body)
+	require.NotNil(t, assistant.ReasoningContent,
+		"reasoning_content missing on the replayed assistant message — DeepSeek 400s this and other hosts loop: %s", body)
 	require.Equal(t, reasoning, *assistant.ReasoningContent, "reasoning_content must round-trip byte-for-byte")
 	require.Len(t, assistant.ToolCalls, 1)
-	require.Equal(t, "call_00_abc", assistant.ToolCalls[0].ID)
+	require.Equal(t, "call_test_1", assistant.ToolCalls[0].ID)
 	require.Equal(t, "get_date", assistant.ToolCalls[0].Function.Name)
 	require.Equal(t, "{}", assistant.ToolCalls[0].Function.Arguments)
 }
 
-// A.2: reasoning-only response truncated by length. ReasoningEnd must still
-// be emitted (on the finish chunk) and the reasoning kept.
-const deepseekReasoningOnlyLengthSSE = `{"id":"x","created":1,"model":"deepseek-v4-flash","choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning_content":null},"finish_reason":null}]}
-{"id":"x","created":1,"model":"deepseek-v4-flash","choices":[{"index":0,"delta":{"content":null,"reasoning_content":"Thinking about it"},"finish_reason":null}]}
-{"id":"x","created":1,"model":"deepseek-v4-flash","choices":[{"index":0,"delta":{"content":null,"reasoning_content":" at length…"},"finish_reason":null}]}
-{"id":"x","created":1,"model":"deepseek-v4-flash","choices":[{"index":0,"delta":{"content":"","reasoning_content":null},"finish_reason":"length"}]}`
-
+// TestReplay_DeepSeekReasoningOnlyTruncated: a reasoning-only response
+// truncated by length. ReasoningEnd must still be emitted (on the finish
+// chunk) and the reasoning kept.
 func TestReplay_DeepSeekReasoningOnlyTruncated(t *testing.T) {
-	srv, _ := serveSSE(t, deepseekReasoningOnlyLengthSSE)
-	provider, err := New(WithBaseURL(srv.URL), WithAPIKey("x"))
-	require.NoError(t, err)
-	lm, err := provider.LanguageModel(context.Background(), "deepseek-v4-flash")
-	require.NoError(t, err)
+	lm := providerOn(t, replaytest.Serve(t, shapeFixture(t, "reasoning_only", "finish_length")))
 
 	parts := streamParts(t, lm, fantasy.Prompt{
 		{Role: fantasy.MessageRoleUser, Content: []fantasy.MessagePart{fantasy.TextPart{Text: "hi"}}},
 	})
-	require.Equal(t, "Thinking about it at length…", reasoningText(parts))
+	require.Equal(t, "Thinking about it at length", reasoningText(parts))
 	require.Equal(t, 1, countType(parts, fantasy.StreamPartTypeReasoningEnd), "types: %v", partTypes(parts))
-	var finish *fantasy.StreamPart
-	for i, p := range parts {
-		if p.Type == fantasy.StreamPartTypeFinish {
-			finish = &parts[i]
-		}
-	}
+	finish := finishPart(parts)
 	require.NotNil(t, finish)
 	require.Equal(t, fantasy.FinishReasonLength, finish.FinishReason)
 }
 
-// A.3: a batching host puts the reasoning tail and the whole tool call in
-// one delta. The reasoning must be kept and the tool call intact.
-const deepseekBatchedBoundarySSE = `{"id":"x","created":1,"model":"deepseek-v4-flash","choices":[{"index":0,"delta":{"content":null,"reasoning_content":"Need the date."},"finish_reason":null}]}
-{"id":"x","created":1,"model":"deepseek-v4-flash","choices":[{"index":0,"delta":{"content":null,"reasoning_content":" Calling.","tool_calls":[{"index":0,"id":"call_00_x","type":"function","function":{"name":"get_date","arguments":"{}"}}]},"finish_reason":null}]}
-{"id":"x","created":1,"model":"deepseek-v4-flash","choices":[{"index":0,"delta":{"content":"","reasoning_content":null},"finish_reason":"tool_calls"}]}`
-
+// TestReplay_DeepSeekBatchedBoundaryChunk: a batching host puts the
+// reasoning tail and the whole tool call in one delta. The reasoning must be
+// kept and the tool call intact.
 func TestReplay_DeepSeekBatchedBoundaryChunk(t *testing.T) {
-	srv, _ := serveSSE(t, deepseekBatchedBoundarySSE)
-	provider, err := New(WithBaseURL(srv.URL), WithAPIKey("x"))
-	require.NoError(t, err)
-	lm, err := provider.LanguageModel(context.Background(), "deepseek-v4-flash")
-	require.NoError(t, err)
+	lm := providerOn(t, replaytest.Serve(t, shapeFixture(t, "reasoning_tail_batched_with_toolcall", "basic")))
 
 	parts := streamParts(t, lm, fantasy.Prompt{
 		{Role: fantasy.MessageRoleUser, Content: []fantasy.MessagePart{fantasy.TextPart{Text: "date?"}}},
@@ -295,20 +265,11 @@ func TestReplay_DeepSeekBatchedBoundaryChunk(t *testing.T) {
 	require.Equal(t, 1, countType(parts, fantasy.StreamPartTypeToolCall), "types: %v", partTypes(parts))
 }
 
-// A.5: Kimi/Avian shape. Reasoning chunks carry reasoning_content, content
-// chunks omit the key, the finish chunk has "reasoning_content": null —
-// which must not reopen a reasoning block.
-const kimiShapeSSE = `{"id":"x","created":1,"model":"kimi","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"first"},"finish_reason":null}]}
-{"id":"x","created":1,"model":"kimi","choices":[{"index":0,"delta":{"reasoning_content":" second"},"finish_reason":null}]}
-{"id":"x","created":1,"model":"kimi","choices":[{"index":0,"delta":{"content":"answer"},"finish_reason":null}]}
-{"id":"x","created":1,"model":"kimi","choices":[{"index":0,"delta":{"reasoning_content":null},"finish_reason":"stop"}]}`
-
+// TestReplay_KimiNullFinishDoesNotReopen: reasoning chunks carry
+// reasoning_content, content chunks omit the key, the finish chunk has
+// "reasoning_content": null — which must not reopen a reasoning block.
 func TestReplay_KimiNullFinishDoesNotReopen(t *testing.T) {
-	srv, _ := serveSSE(t, kimiShapeSSE)
-	provider, err := New(WithBaseURL(srv.URL), WithAPIKey("x"))
-	require.NoError(t, err)
-	lm, err := provider.LanguageModel(context.Background(), "kimi")
-	require.NoError(t, err)
+	lm := providerOn(t, replaytest.Serve(t, shapeFixture(t, "reasoning_then_text", "null_finish")))
 
 	parts := streamParts(t, lm, fantasy.Prompt{
 		{Role: fantasy.MessageRoleUser, Content: []fantasy.MessagePart{fantasy.TextPart{Text: "hi"}}},
@@ -323,19 +284,11 @@ func TestReplay_KimiNullFinishDoesNotReopen(t *testing.T) {
 	}
 }
 
-// Kimi present-but-empty: a chunk with "reasoning_content": "" before any
-// content starts an (empty) reasoning block that closes on the first
-// tool-call chunk and replays as "reasoning_content": "".
-const kimiEmptyReasoningSSE = `{"id":"x","created":1,"model":"kimi","choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning_content":""},"finish_reason":null}]}
-{"id":"x","created":1,"model":"kimi","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"call_1","type":"function","function":{"name":"f","arguments":"{}"}}]},"finish_reason":null}]}
-{"id":"x","created":1,"model":"kimi","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}]}`
-
+// TestReplay_KimiPresentButEmpty: a chunk with "reasoning_content": ""
+// before any content starts an (empty) reasoning block that closes on the
+// first tool-call chunk and replays as "reasoning_content": "".
 func TestReplay_KimiPresentButEmpty(t *testing.T) {
-	srv, _ := serveSSE(t, kimiEmptyReasoningSSE)
-	provider, err := New(WithBaseURL(srv.URL), WithAPIKey("x"))
-	require.NoError(t, err)
-	lm, err := provider.LanguageModel(context.Background(), "kimi")
-	require.NoError(t, err)
+	lm := providerOn(t, replaytest.Serve(t, shapeFixture(t, "reasoning_empty_then_toolcall", "basic")))
 
 	parts := streamParts(t, lm, fantasy.Prompt{
 		{Role: fantasy.MessageRoleUser, Content: []fantasy.MessagePart{fantasy.TextPart{Text: "hi"}}},
@@ -349,20 +302,11 @@ func TestReplay_KimiPresentButEmpty(t *testing.T) {
 	}
 }
 
-// A.4: a stream cut mid-arguments with no finish_reason and no [DONE] must
-// not surface a complete ToolCall: truncated arguments must never be
-// dispatched.
-const deepseekCutMidArgumentsSSE = `{"id":"x","created":1,"model":"deepseek-v4-flash","choices":[{"index":0,"delta":{"content":null,"reasoning_content":"Write the file."},"finish_reason":null}]}
-{"id":"x","created":1,"model":"deepseek-v4-flash","choices":[{"index":0,"delta":{"content":null,"reasoning_content":null,"tool_calls":[{"index":0,"id":"call_00_y","type":"function","function":{"name":"write","arguments":""}}]},"finish_reason":null}]}
-{"id":"x","created":1,"model":"deepseek-v4-flash","choices":[{"index":0,"delta":{"content":null,"reasoning_content":null,"tool_calls":[{"index":0,"function":{"arguments":"{\"path\":\"main.go\",\"content\":\"package ma"}}]},"finish_reason":null}]}
-<connection closed>`
-
+// TestReplay_CutStreamMidArguments_NotDispatched: a stream cut mid-arguments
+// with no finish_reason and no [DONE] must not surface a complete ToolCall:
+// truncated arguments must never be dispatched.
 func TestReplay_CutStreamMidArguments_NotDispatched(t *testing.T) {
-	srv, _ := serveSSE(t, deepseekCutMidArgumentsSSE)
-	provider, err := New(WithBaseURL(srv.URL), WithAPIKey("x"))
-	require.NoError(t, err)
-	lm, err := provider.LanguageModel(context.Background(), "deepseek-v4-flash")
-	require.NoError(t, err)
+	lm := providerOn(t, replaytest.Serve(t, shapeFixture(t, "toolcall", "connection_closed")))
 
 	parts := streamParts(t, lm, fantasy.Prompt{
 		{Role: fantasy.MessageRoleUser, Content: []fantasy.MessagePart{fantasy.TextPart{Text: "write main.go"}}},
@@ -378,113 +322,28 @@ func TestReplay_CutStreamMidArguments_NotDispatched(t *testing.T) {
 	require.True(t, sawIncomplete, "expected an error part (IncompleteStreamError), types: %v", partTypes(parts))
 }
 
-// TestReplay_AgentReasoningRoundTrip is the regression test for crush#2696
-// and the client-side half of CHARM-2020: drive fixture A.1 through a real
-// agent (the loop Crush runs), let it dispatch the tool, and assert on the
-// SECOND request body — the assistant message carrying tool_calls must
-// carry reasoning_content byte-equal to the concatenated reasoning deltas.
-func TestReplay_AgentReasoningRoundTrip(t *testing.T) {
-	srv, bodies := serveSSE(t, deepseekThinkingToolCallSSE, cannedStopReplySSE)
-	provider, err := New(WithBaseURL(srv.URL), WithAPIKey("x"))
-	require.NoError(t, err)
-	lm, err := provider.LanguageModel(context.Background(), "deepseek-v4-flash")
-	require.NoError(t, err)
-
-	var invocations []string
-	getDate := fantasy.NewAgentTool(
-		"get_date",
-		"Get the current date.",
-		func(_ context.Context, _ struct{}, _ fantasy.ToolCall) (fantasy.ToolResponse, error) {
-			invocations = append(invocations, "get_date")
-			return fantasy.NewTextResponse("2026-08-28"), nil
-		},
-	)
-
-	agent := fantasy.NewAgent(lm, fantasy.WithTools(getDate))
-	result, err := agent.Stream(context.Background(), fantasy.AgentStreamCall{Prompt: "what's the date?"})
-	require.NoError(t, err)
-	require.NotNil(t, result)
-	require.Equal(t, []string{"get_date"}, invocations)
-
-	require.Len(t, *bodies, 2)
-	var second struct {
-		Messages []struct {
-			Role             string  `json:"role"`
-			ReasoningContent *string `json:"reasoning_content"`
-			ToolCalls        []struct {
-				ID       string `json:"id"`
-				Function struct {
-					Name      string `json:"name"`
-					Arguments string `json:"arguments"`
-				} `json:"function"`
-			} `json:"tool_calls"`
-		} `json:"messages"`
-	}
-	require.NoError(t, json.Unmarshal((*bodies)[1], &second))
-	var assistant *struct {
-		Role             string  `json:"role"`
-		ReasoningContent *string `json:"reasoning_content"`
-		ToolCalls        []struct {
-			ID       string `json:"id"`
-			Function struct {
-				Name      string `json:"name"`
-				Arguments string `json:"arguments"`
-			} `json:"function"`
-		} `json:"tool_calls"`
-	}
-	for i := range second.Messages {
-		if second.Messages[i].Role == "assistant" {
-			assistant = &second.Messages[i]
-		}
-	}
-	require.NotNil(t, assistant, "no assistant message in second request: %s", (*bodies)[1])
-	require.NotNil(t, assistant.ReasoningContent,
-		"reasoning_content missing on the agent's replayed assistant message — DeepSeek 400s this and other hosts loop: %s", (*bodies)[1])
-	require.Equal(t, "The user wants the date. I'll call get_date.", *assistant.ReasoningContent)
-	require.Len(t, assistant.ToolCalls, 1)
-	require.Equal(t, "call_00_abc", assistant.ToolCalls[0].ID)
-	require.Equal(t, "{}", assistant.ToolCalls[0].Function.Arguments)
-}
-
-// A.2 at agent level: a reasoning-only response truncated by length. The
-// agent must surface the reasoning content in the step even though the
-// provider can only close the block on the finish chunk.
+// TestReplay_AgentReasoningOnlyTruncated: a reasoning-only response truncated
+// by length at agent level. The agent must surface the reasoning content in
+// the step even though the provider can only close the block on the finish
+// chunk.
 func TestReplay_AgentReasoningOnlyTruncated(t *testing.T) {
-	srv, _ := serveSSE(t, deepseekReasoningOnlyLengthSSE)
-	provider, err := New(WithBaseURL(srv.URL), WithAPIKey("x"))
-	require.NoError(t, err)
-	lm, err := provider.LanguageModel(context.Background(), "deepseek-v4-flash")
-	require.NoError(t, err)
+	fixture := shapeFixture(t, "reasoning_only", "finish_length")
+	lm := providerOn(t, replaytest.Serve(t, fixture))
 
-	agent := fantasy.NewAgent(lm)
-	result, err := agent.Stream(context.Background(), fantasy.AgentStreamCall{Prompt: "think"})
-	require.NoError(t, err)
-	require.NotNil(t, result)
-	require.NotEmpty(t, result.Steps)
-	var reasoning string
-	for _, c := range result.Steps[0].Content {
-		if rc, ok := fantasy.AsContentType[fantasy.ReasoningContent](c); ok {
-			reasoning += rc.Text
-		}
-	}
-	require.Equal(t, "Thinking about it at length…", reasoning)
-	require.Equal(t, fantasy.FinishReasonLength, result.Steps[0].FinishReason)
+	record := replaytest.RunAgentStep(t, lm, fixture)
+	require.Equal(t, fantasy.FinishReasonLength, fantasy.FinishReason(record.FinishReason))
+	require.Len(t, record.Content, 1)
+	require.Equal(t, "reasoning", record.Content[0].Type)
+	require.Equal(t, "Thinking about it at length", record.Content[0].Delta)
+	replaytest.AssertGolden(t, filepath.Join(shapeFixture(t, "reasoning_only", "finish_length").Dir, "step.golden.json"), record)
 }
 
-// A chunk carrying two choices must not duplicate reasoning events:
-// StreamExtraFunc is invoked per choice by the openai language model but
-// iterates all choices itself, so without care each choice's reasoning is
-// emitted once per choice.
-const multiChoiceSSE = `{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{"reasoning_content":"a"},"finish_reason":null},{"index":1,"delta":{"reasoning_content":"b"},"finish_reason":null}]}
-{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{"content":"A"},"finish_reason":null},{"index":1,"delta":{"content":"B"},"finish_reason":null}]}
-{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{},"finish_reason":"stop"},{"index":1,"delta":{},"finish_reason":"stop"}]}`
-
+// TestReplay_MultiChoiceReasoningNotDuplicated: a chunk carrying two choices
+// must not duplicate reasoning events: StreamExtraFunc is invoked per choice
+// by the openai language model but iterates all choices itself, so without
+// care each choice's reasoning is emitted once per choice.
 func TestReplay_MultiChoiceReasoningNotDuplicated(t *testing.T) {
-	srv, _ := serveSSE(t, multiChoiceSSE)
-	provider, err := New(WithBaseURL(srv.URL), WithAPIKey("x"))
-	require.NoError(t, err)
-	lm, err := provider.LanguageModel(context.Background(), "m")
-	require.NoError(t, err)
+	lm := providerOn(t, replaytest.Serve(t, shapeFixture(t, "multi_choice", "reasoning_two_choices")))
 
 	parts := streamParts(t, lm, fantasy.Prompt{
 		{Role: fantasy.MessageRoleUser, Content: []fantasy.MessagePart{fantasy.TextPart{Text: "hi"}}},
@@ -503,20 +362,12 @@ func TestReplay_MultiChoiceReasoningNotDuplicated(t *testing.T) {
 	require.Equal(t, map[string]string{"0": "a", "1": "b"}, deltasByID, "types: %v", partTypes(parts))
 }
 
-// A stream that ends cleanly ([DONE]) but never sent a finish_reason must
-// not dispatch tool calls whose arguments are incomplete: "tool calls were
-// seen" is not proof of a complete turn. Valid arguments keep today's
-// inferred tool-call turn, with a warning.
-const doneNoFinishTruncatedSSE = `{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"c1","type":"function","function":{"name":"f","arguments":"{\"pa"}}]},"finish_reason":null}]}`
-
-const doneNoFinishValidSSE = `{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"c1","type":"function","function":{"name":"f","arguments":"{}"}}]},"finish_reason":null}]}`
-
+// TestReplay_DoneWithoutFinishReason_TruncatedArgsSuppressed: a stream that
+// ends cleanly ([DONE]) but never sent a finish_reason must not dispatch tool
+// calls whose arguments are incomplete: "tool calls were seen" is not proof
+// of a complete turn.
 func TestReplay_DoneWithoutFinishReason_TruncatedArgsSuppressed(t *testing.T) {
-	srv, _ := serveSSE(t, doneNoFinishTruncatedSSE)
-	provider, err := New(WithBaseURL(srv.URL), WithAPIKey("x"))
-	require.NoError(t, err)
-	lm, err := provider.LanguageModel(context.Background(), "m")
-	require.NoError(t, err)
+	lm := providerOn(t, replaytest.Serve(t, shapeFixture(t, "toolcall", "finish_missing_truncated")))
 
 	parts := streamParts(t, lm, fantasy.Prompt{
 		{Role: fantasy.MessageRoleUser, Content: []fantasy.MessagePart{fantasy.TextPart{Text: "x"}}},
@@ -533,12 +384,10 @@ func TestReplay_DoneWithoutFinishReason_TruncatedArgsSuppressed(t *testing.T) {
 	require.Equal(t, 0, countType(parts, fantasy.StreamPartTypeFinish), "types: %v", partTypes(parts))
 }
 
+// TestReplay_DoneWithoutFinishReason_ValidArgsKeptWithWarning: valid
+// arguments keep today's inferred tool-call turn, with a warning.
 func TestReplay_DoneWithoutFinishReason_ValidArgsKeptWithWarning(t *testing.T) {
-	srv, _ := serveSSE(t, doneNoFinishValidSSE)
-	provider, err := New(WithBaseURL(srv.URL), WithAPIKey("x"))
-	require.NoError(t, err)
-	lm, err := provider.LanguageModel(context.Background(), "m")
-	require.NoError(t, err)
+	lm := providerOn(t, replaytest.Serve(t, shapeFixture(t, "toolcall", "finish_missing_valid")))
 
 	parts := streamParts(t, lm, fantasy.Prompt{
 		{Role: fantasy.MessageRoleUser, Content: []fantasy.MessagePart{fantasy.TextPart{Text: "x"}}},
@@ -551,56 +400,32 @@ func TestReplay_DoneWithoutFinishReason_ValidArgsKeptWithWarning(t *testing.T) {
 		}
 	}
 	require.True(t, sawWarning, "expected a CallWarning about the missing finish_reason, types: %v", partTypes(parts))
-	var finish *fantasy.StreamPart
-	for i := range parts {
-		if parts[i].Type == fantasy.StreamPartTypeFinish {
-			finish = &parts[i]
-		}
-	}
+	finish := finishPart(parts)
 	require.NotNil(t, finish)
 	require.Equal(t, fantasy.FinishReasonToolCalls, finish.FinishReason)
 }
 
+// TestReplay_InsufficientSystemResource_SuppressesToolCalls:
 // insufficient_system_resource is a provider-side failure, not a completed
 // turn: it must map to an error finish and suppress any open tool calls.
-const insufficientResourceSSE = `{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"c1","type":"function","function":{"name":"f","arguments":"{}"}}]},"finish_reason":null}]}
-{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{},"finish_reason":"insufficient_system_resource"}]}`
-
 func TestReplay_InsufficientSystemResource_SuppressesToolCalls(t *testing.T) {
-	srv, _ := serveSSE(t, insufficientResourceSSE)
-	provider, err := New(WithBaseURL(srv.URL), WithAPIKey("x"))
-	require.NoError(t, err)
-	lm, err := provider.LanguageModel(context.Background(), "m")
-	require.NoError(t, err)
+	lm := providerOn(t, replaytest.Serve(t, shapeFixture(t, "toolcall", "finish_insufficient_resource")))
 
 	parts := streamParts(t, lm, fantasy.Prompt{
 		{Role: fantasy.MessageRoleUser, Content: []fantasy.MessagePart{fantasy.TextPart{Text: "x"}}},
 	})
 	require.Equal(t, 0, countType(parts, fantasy.StreamPartTypeToolCall),
 		"tool calls from a failed upstream must not be dispatched; types: %v", partTypes(parts))
-	var finish *fantasy.StreamPart
-	for i := range parts {
-		if parts[i].Type == fantasy.StreamPartTypeFinish {
-			finish = &parts[i]
-		}
-	}
+	finish := finishPart(parts)
 	require.NotNil(t, finish, "types: %v", partTypes(parts))
 	require.NotEqual(t, fantasy.FinishReasonToolCalls, finish.FinishReason)
 }
 
-// Choices may not arrive in slice order; reasoning state and part IDs must
-// follow choice.Index, not the slice position within a chunk.
-const reorderedChoicesSSE = `{"id":"x","created":1,"model":"m","choices":[{"index":1,"delta":{"reasoning_content":"B1"},"finish_reason":null},{"index":0,"delta":{"reasoning_content":"A1"},"finish_reason":null}]}
-{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{"reasoning_content":"A2"},"finish_reason":null},{"index":1,"delta":{"reasoning_content":"B2"},"finish_reason":null}]}
-{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{"content":"a"},"finish_reason":null},{"index":1,"delta":{"content":"b"},"finish_reason":null}]}
-{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{},"finish_reason":"stop"},{"index":1,"delta":{},"finish_reason":"stop"}]}`
-
+// TestReplay_ReorderedChoices: choices may not arrive in slice order;
+// reasoning state and part IDs must follow choice.Index, not the slice
+// position within a chunk.
 func TestReplay_ReorderedChoices(t *testing.T) {
-	srv, _ := serveSSE(t, reorderedChoicesSSE)
-	provider, err := New(WithBaseURL(srv.URL), WithAPIKey("x"))
-	require.NoError(t, err)
-	lm, err := provider.LanguageModel(context.Background(), "m")
-	require.NoError(t, err)
+	lm := providerOn(t, replaytest.Serve(t, shapeFixture(t, "multi_choice", "reordered_choices")))
 
 	parts := streamParts(t, lm, fantasy.Prompt{
 		{Role: fantasy.MessageRoleUser, Content: []fantasy.MessagePart{fantasy.TextPart{Text: "hi"}}},
@@ -623,44 +448,28 @@ func TestReplay_ReorderedChoices(t *testing.T) {
 	require.Equal(t, map[string]int{"0": 1, "1": 1}, endsByID, "types: %v", partTypes(parts))
 }
 
-// A content_filter finish can cut a tool call mid-arguments; like length,
-// it must not be rewritten to tool_calls and its calls must not dispatch.
-const contentFilterToolCallSSE = `{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"c1","type":"function","function":{"name":"f","arguments":"{}"}}]},"finish_reason":null}]}
-{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{},"finish_reason":"content_filter"}]}`
-
+// TestReplay_ContentFilter_SuppressesToolCalls: a content_filter finish can
+// cut a tool call mid-arguments; like length, it must not be rewritten to
+// tool_calls and its calls must not dispatch.
 func TestReplay_ContentFilter_SuppressesToolCalls(t *testing.T) {
-	srv, _ := serveSSE(t, contentFilterToolCallSSE)
-	provider, err := New(WithBaseURL(srv.URL), WithAPIKey("x"))
-	require.NoError(t, err)
-	lm, err := provider.LanguageModel(context.Background(), "m")
-	require.NoError(t, err)
+	lm := providerOn(t, replaytest.Serve(t, shapeFixture(t, "toolcall", "finish_content_filter")))
 
 	parts := streamParts(t, lm, fantasy.Prompt{
 		{Role: fantasy.MessageRoleUser, Content: []fantasy.MessagePart{fantasy.TextPart{Text: "x"}}},
 	})
 	require.Equal(t, 0, countType(parts, fantasy.StreamPartTypeToolCall),
 		"tool calls from a filtered response must not be dispatched; types: %v", partTypes(parts))
-	var finish *fantasy.StreamPart
-	for i := range parts {
-		if parts[i].Type == fantasy.StreamPartTypeFinish {
-			finish = &parts[i]
-		}
-	}
+	finish := finishPart(parts)
 	require.NotNil(t, finish, "types: %v", partTypes(parts))
 	require.Equal(t, fantasy.FinishReasonContentFilter, finish.FinishReason)
 }
 
-// A stream with no finish_reason whose only tool call is a bare
-// declaration (no arguments at all) was cut before any argument arrived.
-// Inferring a complete "{}" call invents arguments the model never sent.
-const doneNoFinishNoArgsSSE = `{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"c1","type":"function","function":{"name":"f","arguments":""}}]},"finish_reason":null}]}`
-
+// TestReplay_DoneWithoutFinishReason_NoArgsSuppressed: a stream with no
+// finish_reason whose only tool call is a bare declaration (no arguments at
+// all) was cut before any argument arrived. Inferring a complete "{}" call
+// invents arguments the model never sent.
 func TestReplay_DoneWithoutFinishReason_NoArgsSuppressed(t *testing.T) {
-	srv, _ := serveSSE(t, doneNoFinishNoArgsSSE)
-	provider, err := New(WithBaseURL(srv.URL), WithAPIKey("x"))
-	require.NoError(t, err)
-	lm, err := provider.LanguageModel(context.Background(), "m")
-	require.NoError(t, err)
+	lm := providerOn(t, replaytest.Serve(t, shapeFixture(t, "toolcall", "finish_missing_no_args")))
 
 	parts := streamParts(t, lm, fantasy.Prompt{
 		{Role: fantasy.MessageRoleUser, Content: []fantasy.MessagePart{fantasy.TextPart{Text: "x"}}},
@@ -676,21 +485,12 @@ func TestReplay_DoneWithoutFinishReason_NoArgsSuppressed(t *testing.T) {
 	require.True(t, sawError, "expected IncompleteStreamError, types: %v", partTypes(parts))
 }
 
-// Interleaved parallel tool calls: deltas for index 0 continue after index
-// 1 has started. Arguments for both must accumulate fully — closing index 0
-// when 1 first appears would drop its trailing deltas.
-const interleavedParallelSSE = `{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"c0","type":"function","function":{"name":"grep","arguments":"{\"pat"}}]},"finish_reason":null}]}
-{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{"tool_calls":[{"index":1,"id":"c1","type":"function","function":{"name":"glob","arguments":"{\"pa"}}]},"finish_reason":null}]}
-{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"tern\":\"foo\"}"}}]},"finish_reason":null}]}
-{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{"tool_calls":[{"index":1,"function":{"arguments":"th\":\"x\"}"}}]},"finish_reason":null}]}
-{"id":"x","created":1,"model":"m","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}]}`
-
+// TestReplay_InterleavedParallelToolCalls: interleaved parallel tool calls:
+// deltas for index 0 continue after index 1 has started. Arguments for both
+// must accumulate fully — closing index 0 when 1 first appears would drop
+// its trailing deltas.
 func TestReplay_InterleavedParallelToolCalls(t *testing.T) {
-	srv, _ := serveSSE(t, interleavedParallelSSE)
-	provider, err := New(WithBaseURL(srv.URL), WithAPIKey("x"))
-	require.NoError(t, err)
-	lm, err := provider.LanguageModel(context.Background(), "m")
-	require.NoError(t, err)
+	lm := providerOn(t, replaytest.Serve(t, shapeFixture(t, "toolcall", "parallel_two")))
 
 	parts := streamParts(t, lm, fantasy.Prompt{
 		{Role: fantasy.MessageRoleUser, Content: []fantasy.MessagePart{fantasy.TextPart{Text: "x"}}},
@@ -707,14 +507,11 @@ func TestReplay_InterleavedParallelToolCalls(t *testing.T) {
 	}, calls)
 }
 
-// On a cut stream, consumers must not see a ToolInputEnd that presents
-// fabricated "{}" input for a call that never sent arguments.
+// TestReplay_DoneWithoutFinishReason_NoFabricatedEnd: on a cut stream,
+// consumers must not see a ToolInputEnd that presents fabricated "{}" input
+// for a call that never sent arguments.
 func TestReplay_DoneWithoutFinishReason_NoFabricatedEnd(t *testing.T) {
-	srv, _ := serveSSE(t, doneNoFinishNoArgsSSE)
-	provider, err := New(WithBaseURL(srv.URL), WithAPIKey("x"))
-	require.NoError(t, err)
-	lm, err := provider.LanguageModel(context.Background(), "m")
-	require.NoError(t, err)
+	lm := providerOn(t, replaytest.Serve(t, shapeFixture(t, "toolcall", "finish_missing_no_args")))
 
 	parts := streamParts(t, lm, fantasy.Prompt{
 		{Role: fantasy.MessageRoleUser, Content: []fantasy.MessagePart{fantasy.TextPart{Text: "x"}}},

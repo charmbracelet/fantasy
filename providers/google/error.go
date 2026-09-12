@@ -5,6 +5,8 @@ import (
 	"errors"
 	"regexp"
 	"strconv"
+	"strings"
+	"time"
 
 	"charm.land/fantasy"
 	"google.golang.org/genai"
@@ -20,16 +22,42 @@ func toProviderErr(err error) error {
 	}
 
 	providerErr := &fantasy.ProviderError{
-		Message:      apiErr.Message,
-		Title:        cmp.Or(fantasy.ErrorTitleForStatusCode(apiErr.Code), "provider request failed"),
-		Cause:        err,
-		StatusCode:   apiErr.Code,
-		ResponseBody: []byte(apiErr.Message),
+		Message:         apiErr.Message,
+		Title:           cmp.Or(fantasy.ErrorTitleForStatusCode(apiErr.Code), "provider request failed"),
+		Cause:           err,
+		StatusCode:      apiErr.Code,
+		ResponseBody:    []byte(apiErr.Message),
+		ResponseHeaders: retryHeadersFromDetails(apiErr.Details),
 	}
 
 	parseContextTooLargeError(apiErr.Message, providerErr)
 
 	return providerErr
+}
+
+// retryHeadersFromDetails looks for a google.rpc.RetryInfo entry in a
+// genai.APIError's Details — the structured hint Gemini actually uses to
+// report how long to wait on RESOURCE_EXHAUSTED (HTTP 429) — and, if found,
+// synthesizes a lowercase "retry-after" header from its retryDelay so
+// retry.go's getRetryDelayInMs picks it up the same way it does for the
+// other providers' real Retry-After headers.
+func retryHeadersFromDetails(details []map[string]any) map[string]string {
+	for _, detail := range details {
+		typ, _ := detail["@type"].(string)
+		if !strings.Contains(typ, "RetryInfo") {
+			continue
+		}
+		raw, _ := detail["retryDelay"].(string)
+		if raw == "" {
+			continue
+		}
+		if d, err := time.ParseDuration(raw); err == nil && d > 0 {
+			return map[string]string{
+				"retry-after": strconv.FormatFloat(d.Seconds(), 'f', -1, 64),
+			}
+		}
+	}
+	return nil
 }
 
 func parseContextTooLargeError(message string, providerErr *fantasy.ProviderError) {

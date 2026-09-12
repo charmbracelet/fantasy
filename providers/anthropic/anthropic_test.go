@@ -830,10 +830,22 @@ func TestDefaultsToOmittedThinkingDisplay(t *testing.T) {
 		{name: "bedrock opus 4.8", model: "us.anthropic.claude-opus-4-8-20260101-v1:0", want: true},
 		{name: "mythos preview", model: "claude-mythos-preview", want: true},
 		{name: "bedrock mythos preview", model: "anthropic.claude-mythos-preview", want: true},
+		// The 5 generation also defaults to an omitted display.
+		{name: "opus 5", model: "claude-opus-5", want: true},
+		{name: "opus 5 dated", model: "claude-opus-5-20260115", want: true},
+		{name: "bedrock opus 5", model: "us.anthropic.claude-opus-5-v1:0", want: true},
+		{name: "sonnet 5", model: "claude-sonnet-5", want: true},
+		{name: "fable 5", model: "claude-fable-5", want: true},
+		{name: "fable 5.1", model: "claude-fable-5-1", want: true},
+		{name: "mythos 5", model: "claude-mythos-5", want: true},
+		{name: "mythos 5.1", model: "claude-mythos-5-1", want: true},
+		{name: "uppercase and padded", model: "  CLAUDE-SONNET-5  ", want: true},
 		{name: "opus 4.6", model: "claude-opus-4-6-20260101", want: false},
 		{name: "opus 4 date only", model: "claude-opus-4-20250514", want: false},
 		{name: "bedrock opus 4 date only", model: "us.anthropic.claude-opus-4-20250514-v1:0", want: false},
 		{name: "sonnet", model: "claude-sonnet-4-20250514", want: false},
+		{name: "sonnet 4.5", model: "claude-sonnet-4-5", want: false},
+		{name: "haiku 4.5", model: "claude-haiku-4-5", want: false},
 		{name: "no minor", model: "claude-opus-4", want: false},
 	}
 
@@ -3315,4 +3327,25 @@ func TestStream_ForwardsKeepalivesDuringSilence(t *testing.T) {
 	// The content still arrives, in order, unaffected by the keepalives.
 	require.Contains(t, types, fantasy.StreamPartTypeTextDelta)
 	require.Contains(t, types, fantasy.StreamPartTypeFinish)
+}
+
+// An explicit caller preference always wins over the default.
+func TestThinkingDisplayRespectsCallerChoice(t *testing.T) {
+	t.Parallel()
+
+	omittedByChoice := ThinkingDisplayOmitted
+	display, ok := thinkingDisplay(&ProviderOptions{ThinkingDisplay: &omittedByChoice}, "claude-opus-5")
+	require.True(t, ok)
+	require.Equal(t, ThinkingDisplayOmitted, display)
+}
+
+// Widening the display default must not change which models get adaptive
+// thinking: that rewrites the request shape, where a display only adds a field.
+func TestDisplayDefaultDoesNotChangeThinkingMode(t *testing.T) {
+	t.Parallel()
+
+	require.False(t, requiresAdaptiveThinking("claude-opus-5"))
+	require.False(t, requiresAdaptiveThinking("claude-sonnet-5"))
+	require.True(t, requiresAdaptiveThinking("claude-opus-4-7"))
+	require.True(t, requiresAdaptiveThinking("claude-mythos-preview"))
 }

@@ -587,11 +587,13 @@ func hasVisibleCompatAssistantContent(msg *openaisdk.ChatCompletionAssistantMess
 	if len(msg.ToolCalls) > 0 {
 		return true
 	}
-	// A reasoning-only turn is visible: reasoning_content must round-trip
-	// for DeepSeek-family replay, and dropping the turn breaks the
-	// conversation's message ordering.
-	if _, ok := msg.ExtraFields()["reasoning_content"]; ok {
-		return true
-	}
+	// A reasoning-only turn is not visible: it carries neither content nor
+	// tool calls, and strict OpenAI-compatible upstreams reject such
+	// messages outright ("content or tool_calls must be set"), failing every
+	// subsequent request once one lands in history (charmbracelet/crush#3794).
+	// The DeepSeek/Kimi replay contract only requires reasoning_content on
+	// turns that also carry content or tool calls, which pass the checks
+	// above; a bare reasoning turn is a truncated or canceled turn with no
+	// completion to resume from, so dropping it is safe.
 	return false
 }

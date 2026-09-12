@@ -1653,6 +1653,25 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 				}
 			case "message_stop":
 				sawMessageStop = true
+			default:
+				// Every other event (ping, message_start, message_delta, and
+				// anything added later) carries no content of its own, but it
+				// is proof the stream is alive. Dropping them silently makes a
+				// working stream look dead to anything watching for activity,
+				// which matters most when display is "omitted" and a long
+				// reasoning turn produces no deltas at all.
+				//
+				// The API documents that streams "may also include any number
+				// of ping events" and that new event types may be added and
+				// "your code should handle unknown event types gracefully", so
+				// the catch-all is the documented contract rather than a guess
+				// at the current event list. Nothing here depends on how often
+				// keepalives arrive.
+				//
+				// https://platform.claude.com/docs/en/build-with-claude/streaming
+				if !yield(fantasy.StreamPart{Type: fantasy.StreamPartTypeKeepalive}) {
+					return
+				}
 			}
 		}
 

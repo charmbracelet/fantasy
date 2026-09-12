@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"charm.land/fantasy"
+	"github.com/openai/openai-go/v3/packages/param"
 	"github.com/stretchr/testify/require"
 )
 
@@ -62,7 +63,7 @@ func TestToPromptFunc_ReasoningContent(t *testing.T) {
 		require.Equal(t, "What about 3+3?", msg3.Content.OfString.Value)
 	})
 
-	t.Run("should handle assistant messages with only reasoning content", func(t *testing.T) {
+	t.Run("should drop assistant messages with only reasoning content", func(t *testing.T) {
 		t.Parallel()
 
 		prompt := fantasy.Prompt{
@@ -82,18 +83,17 @@ func TestToPromptFunc_ReasoningContent(t *testing.T) {
 
 		messages, warnings := ToPromptFunc(prompt, "", "")
 
-		// Reasoning-only turns are visible content: reasoning_content must
-		// round-trip for DeepSeek-family replay (CHARM-2020).
-		require.Empty(t, warnings)
-		require.Len(t, messages, 2)
+		// A reasoning-only turn carries neither content nor tool calls, and
+		// strict upstreams reject that shape (charmbracelet/crush#3794).
+		// The DeepSeek-family replay contract only covers turns that also
+		// carry content or tool calls, so dropping is safe.
+		require.Len(t, warnings, 1)
+		require.Contains(t, warnings[0].Message, "dropping empty assistant message")
+		require.Len(t, messages, 1)
 
 		msg := messages[0].OfUser
 		require.NotNil(t, msg)
 		require.Equal(t, "Hello", msg.Content.OfString.Value)
-
-		assistantMsg := messages[1].OfAssistant
-		require.NotNil(t, assistantMsg)
-		require.Equal(t, "Internal reasoning only...", assistantMsg.ExtraFields()["reasoning_content"])
 	})
 
 	t.Run("should not add reasoning_content to messages without reasoning", func(t *testing.T) {
@@ -980,10 +980,13 @@ func TestToPromptFunc_MixedTextSegmentOrder(t *testing.T) {
 	require.Equal(t, map[string]any{"cache_control": map[string]string{"type": "ephemeral"}}, blocks[1].OfText.ExtraFields())
 }
 
-// A reasoning-only assistant turn must survive: reasoning_content is
-// visible content. Dropping it breaks DeepSeek's replay contract on
-// truncated thinking turns.
-func TestToPromptFunc_ReasoningOnlyTurnKept(t *testing.T) {
+// A reasoning-only assistant turn must be dropped: it serializes with
+// neither content nor tool calls, which strict OpenAI-compatible upstreams
+// reject ("content or tool_calls must be set"), locking the session once
+// such a turn lands in history (charmbracelet/crush#3794). DeepSeek's
+// replay contract only requires reasoning_content on turns that also carry
+// content or tool calls; those are unaffected.
+func TestToPromptFunc_ReasoningOnlyTurnDropped(t *testing.T) {
 	t.Parallel()
 
 	prompt := fantasy.Prompt{
@@ -991,12 +994,68 @@ func TestToPromptFunc_ReasoningOnlyTurnKept(t *testing.T) {
 		{Role: fantasy.MessageRoleAssistant, Content: []fantasy.MessagePart{
 			fantasy.ReasoningPart{Text: "thinking…"},
 		}},
+		{Role: fantasy.MessageRoleUser, Content: []fantasy.MessagePart{fantasy.TextPart{Text: "still there?"}}},
 	}
 
 	messages, warnings := ToPromptFunc(prompt, "", "")
-	require.Empty(t, warnings)
-	require.Len(t, messages, 2, "reasoning-only assistant turn must not be dropped")
-	msg := messages[1].OfAssistant
-	require.NotNil(t, msg)
-	require.Equal(t, "thinking…", msg.ExtraFields()["reasoning_content"])
+	require.Len(t, warnings, 1)
+	require.Contains(t, warnings[0].Message, "dropping empty assistant message")
+	require.Len(t, messages, 2, "reasoning-only assistant turn must be dropped")
+	for _, m := range messages {
+		require.NotNil(t, m.OfUser, "only user messages remain")
+	}
+}
+
+// Regression test for charmbracelet/crush#3794: a turn canceled while the
+// model was still thinking persists as an assistant message whose only part
+// is reasoning. Re-sent in history it serializes with neither content nor
+// tool calls, which strict upstreams reject ("Invalid assistant message:
+// content or tool_calls must be set"), failing every later request. The
+// canceled turn must be dropped, while a completed reasoning+tool-call turn
+// in the same history keeps its reasoning_content (DeepSeek/Kimi replay).
+func TestToPromptFunc_CanceledThinkingTurnDropped(t *testing.T) {
+	t.Parallel()
+
+	prompt := fantasy.Prompt{
+		{Role: fantasy.MessageRoleUser, Content: []fantasy.MessagePart{fantasy.TextPart{Text: "check the date"}}},
+		{Role: fantasy.MessageRoleAssistant, Content: []fantasy.MessagePart{
+			fantasy.ReasoningPart{Text: "I should call get_date."},
+			fantasy.ToolCallPart{ToolCallID: "call_1", ToolName: "get_date", Input: "{}"},
+		}},
+		{Role: fantasy.MessageRoleTool, Content: []fantasy.MessagePart{
+			fantasy.ToolResultPart{
+				ToolCallID: "call_1",
+				Output:     fantasy.ToolResultOutputContentText{Text: "2026-09-12"},
+			},
+		}},
+		{Role: fantasy.MessageRoleUser, Content: []fantasy.MessagePart{fantasy.TextPart{Text: "and the weather?"}}},
+		{Role: fantasy.MessageRoleAssistant, Content: []fantasy.MessagePart{
+			fantasy.ReasoningPart{Text: "Thinking about weather…"}, // canceled mid-thought
+		}},
+		{Role: fantasy.MessageRoleUser, Content: []fantasy.MessagePart{fantasy.TextPart{Text: "are you there?"}}},
+	}
+
+	messages, warnings := ToPromptFunc(prompt, "", "")
+	require.Len(t, warnings, 1)
+	require.Contains(t, warnings[0].Message, "dropping empty assistant message")
+
+	// user, assistant(tool call), tool, user, user — the canceled turn is gone.
+	require.Len(t, messages, 5)
+
+	assistant := messages[1].OfAssistant
+	require.NotNil(t, assistant)
+	require.Len(t, assistant.ToolCalls, 1)
+	require.Equal(t, "I should call get_date.", assistant.ExtraFields()["reasoning_content"],
+		"completed tool-call turns keep reasoning_content")
+
+	// No assistant message may go out with neither content nor tool calls.
+	for i, m := range messages {
+		if m.OfAssistant == nil {
+			continue
+		}
+		valid := !param.IsOmitted(m.OfAssistant.Content.OfString) ||
+			len(m.OfAssistant.Content.OfArrayOfContentParts) > 0 ||
+			len(m.OfAssistant.ToolCalls) > 0
+		require.True(t, valid, "assistant message %d has neither content nor tool calls", i)
+	}
 }

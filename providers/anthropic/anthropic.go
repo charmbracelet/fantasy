@@ -55,6 +55,8 @@ func defaultsToAdaptiveThinking(model string) bool {
 	return strings.Contains(model, "claude-mythos-preview")
 }
 
+// requiresAdaptiveThinking reports whether the model rejects a manual
+// budget_tokens configuration and must be sent adaptive thinking instead.
 func requiresAdaptiveThinking(model string) bool {
 	return defaultsToAdaptiveThinking(model) || defaultsToOmittedOpusThinkingDisplay(model)
 }
@@ -63,9 +65,33 @@ func setThinkingDisplay(param interface{ SetExtraFields(map[string]any) }, displ
 	param.SetExtraFields(map[string]any{"display": string(display)})
 }
 
+// omittedThinkingDisplayFamilies are the model families that default to
+// display "omitted". Matched by substring so dated snapshots and
+// platform-qualified ids resolve the same as the bare alias. Keep in step
+// with the display list in the thinking docs:
+// https://platform.claude.com/docs/en/build-with-claude/thinking#controlling-thinking-display
+var omittedThinkingDisplayFamilies = []string{
+	"claude-opus-5",
+	"claude-sonnet-5",
+	"claude-fable-5",
+	"claude-mythos-5",
+}
+
+// defaultsToOmittedThinkingDisplay reports whether the model returns empty
+// thinking text unless a display is requested. Broader than
+// [requiresAdaptiveThinking] on purpose: a display is accepted alongside
+// either thinking type, so it is safe to list a model here.
 func defaultsToOmittedThinkingDisplay(model string) bool {
 	model = strings.ToLower(strings.TrimSpace(model))
-	return defaultsToAdaptiveThinking(model) || defaultsToOmittedOpusThinkingDisplay(model)
+	if defaultsToAdaptiveThinking(model) || defaultsToOmittedOpusThinkingDisplay(model) {
+		return true
+	}
+	for _, family := range omittedThinkingDisplayFamilies {
+		if strings.Contains(model, family) {
+			return true
+		}
+	}
+	return false
 }
 
 func defaultsToOmittedOpusThinkingDisplay(model string) bool {
@@ -1655,6 +1681,13 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 				}
 			case "message_stop":
 				sawMessageStop = true
+			default:
+				// Catch-all on purpose: Anthropic may add event types and
+				// documents that unknown ones should be handled gracefully.
+				// https://platform.claude.com/docs/en/build-with-claude/streaming
+				if !yield(fantasy.StreamPart{Type: fantasy.StreamPartTypeKeepalive}) {
+					return
+				}
 			}
 		}
 

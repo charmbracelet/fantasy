@@ -21,6 +21,45 @@ var (
 	vercelContextPattern  = regexp.MustCompile(`Input too long:\s*(\d+)\s*input tokens,\s*limit is\s*(\d+)`)
 )
 
+func (c *responseCapture) toProviderErr(err error) error {
+	var apiErr *openai.Error
+	if err == nil || errors.As(err, &apiErr) || c.response == nil || c.response.StatusCode < http.StatusBadRequest {
+		return toProviderErr(err)
+	}
+
+	response := c.response
+	var body []byte
+	if response.Body != nil {
+		body, _ = io.ReadAll(response.Body)
+		_ = response.Body.Close()
+	}
+	var envelope struct {
+		Error json.RawMessage `json:"error"`
+	}
+	var message string
+	if json.Unmarshal(body, &envelope) == nil {
+		var detail struct {
+			Message string `json:"message"`
+		}
+		if json.Unmarshal(envelope.Error, &message) != nil && json.Unmarshal(envelope.Error, &detail) == nil {
+			message = detail.Message
+		}
+	}
+	providerErr := &fantasy.ProviderError{
+		Title:           cmp.Or(fantasy.ErrorTitleForStatusCode(response.StatusCode), "provider request failed"),
+		Message:         cmp.Or(message, strings.TrimSpace(string(body)), http.StatusText(response.StatusCode)),
+		Cause:           err,
+		StatusCode:      response.StatusCode,
+		ResponseHeaders: toHeaderMap(response.Header),
+		ResponseBody:    body,
+	}
+	if response.Request != nil && response.Request.URL != nil {
+		providerErr.URL = response.Request.URL.String()
+	}
+	parseContextTooLargeError(providerErr.Message, providerErr)
+	return providerErr
+}
+
 func toProviderErr(err error) error {
 	var apiErr *openai.Error
 	if errors.As(err, &apiErr) {

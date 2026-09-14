@@ -140,23 +140,16 @@ type streamToolCall struct {
 	hasFinished bool
 }
 
-// responseCapture holds the raw HTTP response of a call so response headers
-// can be surfaced through provider metadata. Capturing is only enabled when
-// a header func is configured on the language model.
 type responseCapture struct {
 	response *http.Response
 }
 
-// requestOptions returns the given per-call request options with the raw
-// HTTP response capture appended when the given header func is configured.
 func (c *responseCapture) requestOptions(headerFunc LanguageModelHeaderFunc, opts []option.RequestOption) []option.RequestOption {
-	if headerFunc == nil {
-		return opts
+	opts = append(opts, option.WithResponseInto(&c.response))
+	if headerFunc != nil {
+		opts = append(opts, option.WithMiddleware(drainOnCloseMiddleware))
 	}
-	return append(opts,
-		option.WithResponseInto(&c.response),
-		option.WithMiddleware(drainOnCloseMiddleware),
-	)
+	return opts
 }
 
 // drainOnCloseMiddleware wraps the response body so that a close before
@@ -371,7 +364,7 @@ func (o languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantas
 	}
 	response, err := o.client.Chat.Completions.New(ctx, *params, capture.requestOptions(o.headerFunc, append(callUARequestOptions(call), callHeadersRequestOptions(call)...))...)
 	if err != nil {
-		return nil, toProviderErr(err)
+		return nil, capture.toProviderErr(err)
 	}
 	if response == nil {
 		return nil, &fantasy.Error{Title: "no response", Message: "provider returned nil response"}
@@ -763,7 +756,7 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 		} else { //nolint: revive
 			yield(fantasy.StreamPart{
 				Type:  fantasy.StreamPartTypeError,
-				Error: toProviderErr(err),
+				Error: capture.toProviderErr(err),
 			})
 			return
 		}
@@ -950,9 +943,10 @@ func (o languageModel) generateObjectWithJSONMode(ctx context.Context, call fant
 		},
 	}
 
-	response, err := o.client.Chat.Completions.New(ctx, *params, append(objectCallUARequestOptions(call), objectCallHeadersRequestOptions(call)...)...)
+	capture := responseCapture{}
+	response, err := o.client.Chat.Completions.New(ctx, *params, capture.requestOptions(o.headerFunc, append(objectCallUARequestOptions(call), objectCallHeadersRequestOptions(call)...))...)
 	if err != nil {
-		return nil, toProviderErr(err)
+		return nil, capture.toProviderErr(err)
 	}
 	if len(response.Choices) == 0 {
 		usage, _ := o.usageFunc(*response)
@@ -1034,7 +1028,8 @@ func (o languageModel) streamObjectWithJSONMode(ctx context.Context, call fantas
 		IncludeUsage: openai.Bool(true),
 	}
 
-	stream := o.client.Chat.Completions.NewStreaming(ctx, *params, append(objectCallUARequestOptions(call), objectCallHeadersRequestOptions(call)...)...)
+	capture := responseCapture{}
+	stream := o.client.Chat.Completions.NewStreaming(ctx, *params, capture.requestOptions(o.headerFunc, append(objectCallUARequestOptions(call), objectCallHeadersRequestOptions(call)...))...)
 
 	return func(yield func(fantasy.ObjectStreamPart) bool) {
 		if len(warnings) > 0 {
@@ -1113,7 +1108,7 @@ func (o languageModel) streamObjectWithJSONMode(ctx context.Context, call fantas
 		if err != nil && !errors.Is(err, io.EOF) {
 			yield(fantasy.ObjectStreamPart{
 				Type:  fantasy.ObjectStreamPartTypeError,
-				Error: toProviderErr(err),
+				Error: capture.toProviderErr(err),
 			})
 			return
 		}

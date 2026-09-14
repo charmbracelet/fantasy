@@ -814,7 +814,7 @@ func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call)
 
 	response, err := o.client.Responses.New(ctx, *params, capture.requestOptions(o.headerFunc, append(callUARequestOptions(call), callHeadersRequestOptions(call)...))...)
 	if err != nil {
-		return nil, toProviderErr(err)
+		return nil, capture.toProviderErr(err)
 	}
 
 	if response == nil {
@@ -1287,7 +1287,7 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 		if err != nil && !errors.Is(err, io.EOF) {
 			yield(fantasy.StreamPart{
 				Type:  fantasy.StreamPartTypeError,
-				Error: toProviderErr(err),
+				Error: capture.toProviderErr(err),
 			})
 			return
 		}
@@ -1480,7 +1480,7 @@ func (o responsesLanguageModel) generateObjectWithJSONMode(ctx context.Context, 
 	capture := responseCapture{}
 	response, err := o.client.Responses.New(ctx, *params, capture.requestOptions(o.headerFunc, append(objectCallUARequestOptions(call), objectCallHeadersRequestOptions(call)...))...)
 	if err != nil {
-		return nil, toProviderErr(err)
+		return nil, capture.toProviderErr(err)
 	}
 
 	if response.Error.Message != "" {
@@ -1701,7 +1701,7 @@ func (o responsesLanguageModel) streamObjectWithJSONMode(ctx context.Context, ca
 		if err != nil && !errors.Is(err, io.EOF) {
 			yield(fantasy.ObjectStreamPart{
 				Type:  fantasy.ObjectStreamPartTypeError,
-				Error: toProviderErr(err),
+				Error: capture.toProviderErr(err),
 			})
 			return
 		}

@@ -11,6 +11,7 @@ import (
 	"io"
 	"maps"
 	"math"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -1451,12 +1452,26 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 
 		sawMessageStop := false
 
+		// openToolBlocks holds tool_use blocks announced by
+		// content_block_start but not yet ended by content_block_stop, keyed
+		// by block index. The accumulator cannot serve this: it drops a block
+		// whose content_block_start it rejected, and a turn that stops at
+		// max_tokens never sends the stop event at all.
+		openToolBlocks := map[int64]*openToolBlock{}
+
 		for stream.Next() {
 			chunk := stream.Current()
 			_ = acc.Accumulate(chunk)
 			switch chunk.Type {
 			case "content_block_start":
 				contentBlockType := chunk.ContentBlock.Type
+				if contentBlockType == "tool_use" || contentBlockType == "server_tool_use" {
+					openToolBlocks[chunk.Index] = &openToolBlock{
+						id:               chunk.ContentBlock.ID,
+						name:             chunk.ContentBlock.Name,
+						providerExecuted: contentBlockType == "server_tool_use",
+					}
+				}
 				switch contentBlockType {
 				case "text":
 					if !yield(fantasy.StreamPart{
@@ -1501,6 +1516,15 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 					}
 				}
 			case "content_block_stop":
+				// Tool blocks end from openToolBlocks so that an accumulator
+				// that dropped the block cannot swallow the call.
+				if open, ok := openToolBlocks[chunk.Index]; ok {
+					delete(openToolBlocks, chunk.Index)
+					if !open.close(acc, chunk.Index, yield) {
+						return
+					}
+					continue
+				}
 				if len(acc.Content)-1 < int(chunk.Index) {
 					continue
 				}
@@ -1530,37 +1554,7 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 						return
 					}
 				case "tool_use":
-					if !yield(fantasy.StreamPart{
-						Type: fantasy.StreamPartTypeToolInputEnd,
-						ID:   contentBlock.ID,
-					}) {
-						return
-					}
-					if !yield(fantasy.StreamPart{
-						Type:          fantasy.StreamPartTypeToolCall,
-						ID:            contentBlock.ID,
-						ToolCallName:  contentBlock.Name,
-						ToolCallInput: string(contentBlock.Input),
-					}) {
-						return
-					}
-				case "server_tool_use":
-					if !yield(fantasy.StreamPart{
-						Type:             fantasy.StreamPartTypeToolInputEnd,
-						ID:               contentBlock.ID,
-						ProviderExecuted: true,
-					}) {
-						return
-					}
-					if !yield(fantasy.StreamPart{
-						Type:             fantasy.StreamPartTypeToolCall,
-						ID:               contentBlock.ID,
-						ToolCallName:     contentBlock.Name,
-						ToolCallInput:    string(contentBlock.Input),
-						ProviderExecuted: true,
-					}) {
-						return
-					}
+					// Handled above, from openToolBlocks.
 				case "web_search_tool_result":
 					// Read search results directly from the ContentBlockUnion
 					// struct fields instead of using AsAny(). The Anthropic SDK's
@@ -1643,13 +1637,17 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 						return
 					}
 				case "input_json_delta":
-					if len(acc.Content)-1 < int(chunk.Index) {
+					// Resolved from openToolBlocks, not the accumulator: the
+					// accumulator drops blocks it could not index, and a
+					// dropped delta silently shortens the tool call.
+					open, ok := openToolBlocks[chunk.Index]
+					if !ok {
 						continue
 					}
-					contentBlock := acc.Content[int(chunk.Index)]
+					open.input.WriteString(chunk.Delta.PartialJSON)
 					if !yield(fantasy.StreamPart{
 						Type:          fantasy.StreamPartTypeToolInputDelta,
-						ID:            contentBlock.ID,
+						ID:            open.id,
 						ToolCallInput: chunk.Delta.PartialJSON,
 					}) {
 						return
@@ -1684,6 +1682,19 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 			return
 		}
 
+		// A turn that stops at max_tokens ends with message_stop but no
+		// content_block_stop for the block it was writing. Emit the tool call
+		// for anything still open, with the arguments that did arrive, so the
+		// caller is not left holding a call that was started and never
+		// completed. Truncated arguments fail validation downstream, which
+		// reports the call as invalid rather than dropping it silently.
+		for _, index := range slices.Sorted(maps.Keys(openToolBlocks)) {
+			open := openToolBlocks[index]
+			if !open.close(acc, index, yield) {
+				return
+			}
+		}
+
 		yield(fantasy.StreamPart{
 			Type:         fantasy.StreamPartTypeFinish,
 			ID:           acc.ID,
@@ -1698,6 +1709,52 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 			ProviderMetadata: fantasy.ProviderMetadata{},
 		})
 	}, nil
+}
+
+// openToolBlock is a tool_use content block announced on the stream but not
+// yet ended. It carries the arguments seen so far so the call can still be
+// reported if the stream ends without a content_block_stop for it.
+type openToolBlock struct {
+	id               string
+	name             string
+	providerExecuted bool
+	input            strings.Builder
+}
+
+// close emits the end-of-input and tool call parts for the block. It reports
+// whether the consumer wants more parts.
+func (o *openToolBlock) close(acc anthropic.Message, index int64, yield func(fantasy.StreamPart) bool) bool {
+	if !yield(fantasy.StreamPart{
+		Type:             fantasy.StreamPartTypeToolInputEnd,
+		ID:               o.id,
+		ProviderExecuted: o.providerExecuted,
+	}) {
+		return false
+	}
+	return yield(fantasy.StreamPart{
+		Type:             fantasy.StreamPartTypeToolCall,
+		ID:               o.id,
+		ToolCallName:     o.name,
+		ToolCallInput:    o.arguments(acc, index),
+		ProviderExecuted: o.providerExecuted,
+	})
+}
+
+// arguments returns the tool call's arguments as JSON text. The deltas are
+// authoritative: they are what the model sent, truncation included. A block
+// that carried no deltas falls back to the accumulator and then to an empty
+// object, so a no-argument call reports valid JSON rather than an empty
+// string.
+func (o *openToolBlock) arguments(acc anthropic.Message, index int64) string {
+	if o.input.Len() > 0 {
+		return o.input.String()
+	}
+	if len(acc.Content)-1 >= int(index) {
+		if input := string(acc.Content[index].Input); input != "" {
+			return input
+		}
+	}
+	return "{}"
 }
 
 // GenerateObject implements fantasy.LanguageModel.

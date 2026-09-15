@@ -1,0 +1,23 @@
+{
+  "messages": [
+    {
+      "tool_calls": [
+        {
+          "id": "c1",
+          "function": {
+            "arguments": "{}",
+            "name": "view"
+          },
+          "type": "function"
+        }
+      ],
+      "role": "assistant"
+    },
+    {
+      "content": "tool blew up",
+      "tool_call_id": "c1",
+      "role": "tool"
+    }
+  ],
+  "warnings": []
+}

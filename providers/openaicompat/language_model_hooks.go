@@ -378,7 +378,7 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 					}
 				}
 			}
-			if !hasVisibleCompatUserContent(content) {
+			if !openai.HasVisibleUserContent(content) {
 				warnings = append(warnings, fantasy.CallWarning{
 					Type:    fantasy.CallWarningTypeOther,
 					Message: "dropping empty user message (contains neither user-facing content nor tool results)",
@@ -496,7 +496,7 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 					"reasoning_content": strings.Join(reasoningTexts, "\n"),
 				})
 			}
-			if !hasVisibleCompatAssistantContent(&assistantMsg) {
+			if !openai.HasVisibleAssistantContent(&assistantMsg) {
 				warnings = append(warnings, fantasy.CallWarning{
 					Type:    fantasy.CallWarningTypeOther,
 					Message: "dropping empty assistant message (contains neither user-facing content nor tool calls)",
@@ -575,37 +575,4 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 	}
 	messages = append(messages, deferredMedia...)
 	return messages, warnings
-}
-
-// toolResultMediaUserPart maps a tool-result media output to an OpenAI chat
-// completions user content part. It returns the content part, an optional
-// warning, and whether the caller should emit the returned part.
-
-func hasVisibleCompatUserContent(content []openaisdk.ChatCompletionContentPartUnionParam) bool {
-	for _, part := range content {
-		if part.OfText != nil || part.OfImageURL != nil || part.OfInputAudio != nil || part.OfFile != nil {
-			return true
-		}
-	}
-	return false
-}
-
-func hasVisibleCompatAssistantContent(msg *openaisdk.ChatCompletionAssistantMessageParam) bool {
-	// Check if there's text content
-	if !param.IsOmitted(msg.Content.OfString) || len(msg.Content.OfArrayOfContentParts) > 0 {
-		return true
-	}
-	// Check if there are tool calls
-	if len(msg.ToolCalls) > 0 {
-		return true
-	}
-	// A reasoning-only turn is not visible: it carries neither content nor
-	// tool calls, and strict OpenAI-compatible upstreams reject such
-	// messages outright ("content or tool_calls must be set"), failing every
-	// subsequent request once one lands in history (charmbracelet/crush#3794).
-	// The DeepSeek/Kimi replay contract only requires reasoning_content on
-	// turns that also carry content or tool calls, which pass the checks
-	// above; a bare reasoning turn is a truncated or canceled turn with no
-	// completion to resume from, so dropping it is safe.
-	return false
 }

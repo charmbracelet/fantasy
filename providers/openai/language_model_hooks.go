@@ -479,7 +479,7 @@ func DefaultToPrompt(prompt fantasy.Prompt, _, _ string) ([]openai.ChatCompletio
 					}
 				}
 			}
-			if !hasVisibleUserContent(content) {
+			if !HasVisibleUserContent(content) {
 				warnings = append(warnings, fantasy.CallWarning{
 					Type:    fantasy.CallWarningTypeOther,
 					Message: "dropping empty user message (contains neither user-facing content nor tool results)",
@@ -540,7 +540,7 @@ func DefaultToPrompt(prompt fantasy.Prompt, _, _ string) ([]openai.ChatCompletio
 						})
 				}
 			}
-			if !hasVisibleAssistantContent(&assistantMsg) {
+			if !HasVisibleAssistantContent(&assistantMsg) {
 				warnings = append(warnings, fantasy.CallWarning{
 					Type:    fantasy.CallWarningTypeOther,
 					Message: "dropping empty assistant message (contains neither user-facing content nor tool calls)",
@@ -685,7 +685,14 @@ func toolResultMediaUserPart(output fantasy.ToolResultOutputContentMedia) (opena
 	}
 }
 
-func hasVisibleUserContent(content []openai.ChatCompletionContentPartUnionParam) bool {
+// HasVisibleUserContent reports whether a user message carries anything the
+// model can actually see. A message that converts to no visible parts must be
+// dropped rather than sent: the API rejects a content-less user message, and
+// the error points at the request rather than at the content that vanished.
+//
+// Exported because every chat-completions provider in this module needs the
+// same check against the same SDK type.
+func HasVisibleUserContent(content []openai.ChatCompletionContentPartUnionParam) bool {
 	for _, part := range content {
 		if part.OfText != nil || part.OfImageURL != nil || part.OfInputAudio != nil || part.OfFile != nil {
 			return true
@@ -694,7 +701,20 @@ func hasVisibleUserContent(content []openai.ChatCompletionContentPartUnionParam)
 	return false
 }
 
-func hasVisibleAssistantContent(msg *openai.ChatCompletionAssistantMessageParam) bool {
+// HasVisibleAssistantContent reports whether an assistant message carries text
+// or tool calls. Reasoning alone is not enough: the reasoning travels in
+// provider-specific extra fields, and a message holding only those is empty as
+// far as the API is concerned.
+//
+// Dropping a reasoning-only turn is safe as well as necessary. Strict
+// OpenAI-compatible upstreams reject such a message outright ("content or
+// tool_calls must be set"), and because the message stays in history the
+// rejection repeats on every later request (charmbracelet/crush#3794). The
+// DeepSeek and Kimi replay contract only needs reasoning carried on turns that
+// also have content or tool calls, which pass the checks here; a bare
+// reasoning turn is a truncated or canceled turn with no completion to resume
+// from.
+func HasVisibleAssistantContent(msg *openai.ChatCompletionAssistantMessageParam) bool {
 	// Check if there's text content
 	if !param.IsOmitted(msg.Content.OfString) || len(msg.Content.OfArrayOfContentParts) > 0 {
 		return true

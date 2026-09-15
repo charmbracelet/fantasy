@@ -1,0 +1,26 @@
+{
+  "messages": [
+    {
+      "tool_calls": [
+        {
+          "id": "c1",
+          "function": {
+            "arguments": "{}",
+            "name": "view"
+          },
+          "type": "function"
+        }
+      ],
+      "role": "assistant"
+    },
+    {
+      "content": "cached result",
+      "tool_call_id": "c1",
+      "role": "tool",
+      "cache_control": {
+        "type": "ephemeral"
+      }
+    }
+  ],
+  "warnings": []
+}

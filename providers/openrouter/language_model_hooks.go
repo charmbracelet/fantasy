@@ -513,7 +513,16 @@ func languageModelStreamUsage(chunk openaisdk.ChatCompletionChunk, _ map[string]
 func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.ChatCompletionMessageParamUnion, []fantasy.CallWarning) {
 	var messages []openaisdk.ChatCompletionMessageParamUnion
 	var warnings []fantasy.CallWarning
+	// Synthetic user messages carrying tool-result media are held back until
+	// the run of tool messages ends, because every tool message answering an
+	// assistant's tool_calls has to follow that assistant message without a
+	// message of another role in between. See openai.ToolResultMediaMessages.
+	var deferredMedia []openaisdk.ChatCompletionMessageParamUnion
 	for _, msg := range prompt {
+		if msg.Role != fantasy.MessageRoleTool && len(deferredMedia) > 0 {
+			messages = append(messages, deferredMedia...)
+			deferredMedia = nil
+		}
 		switch msg.Role {
 		case fantasy.MessageRoleSystem:
 			var systemPromptParts []string
@@ -737,6 +746,13 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 						})
 					}
 				}
+			}
+			if !openai.HasVisibleUserContent(content) {
+				warnings = append(warnings, fantasy.CallWarning{
+					Type:    fantasy.CallWarningTypeOther,
+					Message: "dropping empty user message (contains neither user-facing content nor tool results)",
+				})
+				continue
 			}
 			messages = append(messages, openaisdk.UserMessage(content))
 		case fantasy.MessageRoleAssistant:
@@ -1028,13 +1044,7 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 						continue
 					}
 					tr := openaisdk.ToolMessage(output.Text, toolResultPart.ToolCallID)
-					if cacheControl != nil {
-						tr.SetExtraFields(map[string]any{
-							"cache_control": map[string]string{
-								"type": cacheControl.Type,
-							},
-						})
-					}
+					tagToolCacheControl(tr, cacheControl)
 					messages = append(messages, tr)
 				case fantasy.ToolResultContentTypeError:
 					// TODO: check if better handling is needed
@@ -1047,17 +1057,51 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 						continue
 					}
 					tr := openaisdk.ToolMessage(output.Error.Error(), toolResultPart.ToolCallID)
-					if cacheControl != nil {
-						tr.SetExtraFields(map[string]any{
-							"cache_control": map[string]string{
-								"type": cacheControl.Type,
-							},
-						})
-					}
+					tagToolCacheControl(tr, cacheControl)
 					messages = append(messages, tr)
+				case fantasy.ToolResultContentTypeMedia:
+					output, ok := fantasy.AsToolResultOutputType[fantasy.ToolResultOutputContentMedia](toolResultPart.Output)
+					if !ok {
+						warnings = append(warnings, fantasy.CallWarning{
+							Type:    fantasy.CallWarningTypeOther,
+							Message: "tool result output does not have the right type",
+						})
+						continue
+					}
+					// Chat completions tool messages cannot carry image or audio
+					// content, so the media travels in a separate user message.
+					tr, mediaMessages, mediaWarnings := openai.ToolResultMediaMessages(output, toolResultPart.ToolCallID)
+					tagToolCacheControl(tr, cacheControl)
+					messages = append(messages, tr)
+					deferredMedia = append(deferredMedia, mediaMessages...)
+					warnings = append(warnings, mediaWarnings...)
+				default:
+					// Falling through silently would leave the assistant's
+					// tool_call unanswered, which the API rejects.
+					warnings = append(warnings, fantasy.CallWarning{
+						Type:    fantasy.CallWarningTypeOther,
+						Message: fmt.Sprintf("tool result output type %q not supported", toolResultPart.Output.GetType()),
+					})
 				}
 			}
 		}
 	}
+	messages = append(messages, deferredMedia...)
 	return messages, warnings
+}
+
+// tagToolCacheControl marks a tool message for prompt caching.
+//
+// The extra field has to be set on the tool param, not on the message union
+// that wraps it: the union is not what gets serialised, so setting it there
+// silently drops the cache_control and the request goes out uncached.
+func tagToolCacheControl(msg openaisdk.ChatCompletionMessageParamUnion, cacheControl *anthropic.CacheControl) {
+	if cacheControl == nil {
+		return
+	}
+	msg.OfTool.SetExtraFields(map[string]any{
+		"cache_control": map[string]string{
+			"type": cacheControl.Type,
+		},
+	})
 }

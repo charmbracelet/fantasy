@@ -156,8 +156,9 @@ func TestStreamingAgentCallbacks(t *testing.T) {
 			callbacks["OnTextDelta"] = true
 			return nil
 		},
-		OnTextEnd: func(id string) error {
+		OnTextEnd: func(id, text string) error {
 			callbacks["OnTextEnd"] = true
+			require.Equal(t, "Hello", text)
 			return nil
 		},
 		OnReasoningStart: func(id string, _ ReasoningContent) error {
@@ -237,6 +238,51 @@ func TestStreamingAgentCallbacks(t *testing.T) {
 	require.False(t, callbacks["OnError"], "OnError should not be called in successful case")
 	require.False(t, callbacks["OnToolCall"], "OnToolCall should not be called without actual tool calls")
 	require.False(t, callbacks["OnToolResult"], "OnToolResult should not be called without actual tool results")
+}
+
+func TestStreamingAgentOnTextEndReceivesAccumulatedText(t *testing.T) {
+	t.Parallel()
+
+	mockModel := &mockLanguageModel{
+		streamFunc: func(ctx context.Context, call Call) (StreamResponse, error) {
+			return func(yield func(StreamPart) bool) {
+				parts := []StreamPart{
+					{Type: StreamPartTypeTextStart, ID: "text-1"},
+					{Type: StreamPartTypeTextDelta, ID: "text-1", Delta: "Hello"},
+					{Type: StreamPartTypeTextStart, ID: "text-2"},
+					{Type: StreamPartTypeTextDelta, ID: "text-2", Delta: "Go"},
+					{Type: StreamPartTypeTextDelta, ID: "text-1", Delta: ", world!"},
+					{Type: StreamPartTypeTextDelta, ID: "text-2", Delta: "pher"},
+					{Type: StreamPartTypeTextEnd, ID: "text-2"},
+					{Type: StreamPartTypeTextEnd, ID: "text-1"},
+					{Type: StreamPartTypeFinish, FinishReason: FinishReasonStop},
+				}
+
+				for _, part := range parts {
+					if !yield(part) {
+						return
+					}
+				}
+			}, nil
+		},
+	}
+
+	completedText := make(map[string]string)
+	agent := NewAgent(mockModel)
+	result, err := agent.Stream(context.Background(), AgentStreamCall{
+		Prompt: "Test accumulated text",
+		OnTextEnd: func(id, text string) error {
+			completedText[id] = text
+			return nil
+		},
+	})
+
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	require.Equal(t, map[string]string{
+		"text-1": "Hello, world!",
+		"text-2": "Gopher",
+	}, completedText)
 }
 
 // TestStreamingAgentWithTools tests streaming agent with tool calls (mirrors TS test patterns)

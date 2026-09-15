@@ -13,6 +13,7 @@ import (
 
 	"charm.land/fantasy"
 	"github.com/openai/openai-go/v3/packages/param"
+	"github.com/openai/openai-go/v3/responses"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -4182,6 +4183,328 @@ func TestUserAgent(t *testing.T) {
 		require.Len(t, server.calls, 1)
 		assert.Equal(t, "provider-ua", server.calls[0].headers["User-Agent"])
 	})
+}
+
+func cacheWriteResponsesUsage() fantasy.Usage {
+	return fantasy.Usage{
+		InputTokens:         10,
+		OutputTokens:        20,
+		TotalTokens:         120,
+		ReasoningTokens:     7,
+		CacheCreationTokens: 30,
+		CacheReadTokens:     60,
+	}
+}
+
+func cacheWriteResponsesUsageJSON() map[string]any {
+	return map[string]any{
+		"input_tokens": 100,
+		"input_tokens_details": map[string]any{
+			"cached_tokens":      60,
+			"cache_write_tokens": 30,
+		},
+		"output_tokens": 20,
+		"output_tokens_details": map[string]any{
+			"reasoning_tokens": 7,
+		},
+		"total_tokens": 120,
+	}
+}
+
+func mockResponsesTextResponse(text string) map[string]any {
+	output := []any{}
+	if text != "" {
+		output = append(output, map[string]any{
+			"type":   "message",
+			"id":     "msg_cache_write",
+			"role":   "assistant",
+			"status": "completed",
+			"content": []any{
+				map[string]any{
+					"type":        "output_text",
+					"text":        text,
+					"annotations": []any{},
+				},
+			},
+		})
+	}
+
+	return map[string]any{
+		"id":     "resp_cache_write",
+		"object": "response",
+		"model":  "gpt-5.6",
+		"output": output,
+		"status": "completed",
+		"usage":  cacheWriteResponsesUsageJSON(),
+	}
+}
+
+func cacheWriteResponsesObjectSchema() fantasy.Schema {
+	return fantasy.Schema{
+		Type: "object",
+		Properties: map[string]*fantasy.Schema{
+			"answer": {Type: "string"},
+		},
+		Required: []string{"answer"},
+	}
+}
+
+func TestResponsesUsage_CacheWriteTokens(t *testing.T) {
+	t.Parallel()
+
+	cacheWriteTokens := func(value int64) *int64 {
+		return &value
+	}
+	tests := []struct {
+		name             string
+		inputTokens      int64
+		cachedTokens     int64
+		cacheWriteTokens *int64
+		want             fantasy.Usage
+	}{
+		{
+			name:             "write only",
+			inputTokens:      100,
+			cacheWriteTokens: cacheWriteTokens(90),
+			want: fantasy.Usage{
+				InputTokens:         10,
+				OutputTokens:        20,
+				TotalTokens:         120,
+				ReasoningTokens:     7,
+				CacheCreationTokens: 90,
+			},
+		},
+		{
+			name:             "mixed read and write",
+			inputTokens:      100,
+			cachedTokens:     60,
+			cacheWriteTokens: cacheWriteTokens(30),
+			want:             cacheWriteResponsesUsage(),
+		},
+		{
+			name:         "write absent",
+			inputTokens:  100,
+			cachedTokens: 40,
+			want: fantasy.Usage{
+				InputTokens:     60,
+				OutputTokens:    20,
+				TotalTokens:     120,
+				ReasoningTokens: 7,
+				CacheReadTokens: 40,
+			},
+		},
+		{
+			name:             "write zero",
+			inputTokens:      100,
+			cachedTokens:     40,
+			cacheWriteTokens: cacheWriteTokens(0),
+			want: fantasy.Usage{
+				InputTokens:     60,
+				OutputTokens:    20,
+				TotalTokens:     120,
+				ReasoningTokens: 7,
+				CacheReadTokens: 40,
+			},
+		},
+		{
+			name:             "clamps normalized input at zero",
+			inputTokens:      10,
+			cachedTokens:     8,
+			cacheWriteTokens: cacheWriteTokens(5),
+			want: fantasy.Usage{
+				OutputTokens:        20,
+				TotalTokens:         30,
+				ReasoningTokens:     7,
+				CacheCreationTokens: 5,
+				CacheReadTokens:     8,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			inputDetails := map[string]any{
+				"cached_tokens": tt.cachedTokens,
+			}
+			if tt.cacheWriteTokens != nil {
+				inputDetails["cache_write_tokens"] = *tt.cacheWriteTokens
+			}
+			data, err := json.Marshal(map[string]any{
+				"usage": map[string]any{
+					"input_tokens":         tt.inputTokens,
+					"input_tokens_details": inputDetails,
+					"output_tokens":        20,
+					"output_tokens_details": map[string]any{
+						"reasoning_tokens": 7,
+					},
+					"total_tokens": tt.inputTokens + 20,
+				},
+			})
+			require.NoError(t, err)
+
+			var response responses.Response
+			require.NoError(t, json.Unmarshal(data, &response))
+			require.Equal(t, tt.want, responsesUsage(response))
+		})
+	}
+}
+
+func TestResponsesGenerate_CacheWriteTokens(t *testing.T) {
+	t.Parallel()
+
+	server := newMockServer()
+	defer server.close()
+	server.response = mockResponsesTextResponse("hello")
+
+	model := newResponsesProvider(t, server.server.URL)
+	response, err := model.Generate(t.Context(), fantasy.Call{Prompt: testPrompt})
+	require.NoError(t, err)
+	require.Equal(t, cacheWriteResponsesUsage(), response.Usage)
+}
+
+func TestResponsesStream_CacheWriteTokens(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name  string
+		event string
+		data  string
+	}{
+		{
+			name:  "response completed",
+			event: "response.completed",
+			data:  `{"type":"response.completed","response":{"id":"resp_cache_write","status":"completed","output":[],"usage":{"input_tokens":100,"input_tokens_details":{"cached_tokens":60,"cache_write_tokens":30},"output_tokens":20,"output_tokens_details":{"reasoning_tokens":7},"total_tokens":120}}}`,
+		},
+		{
+			name:  "response incomplete",
+			event: "response.incomplete",
+			data:  `{"type":"response.incomplete","response":{"id":"resp_cache_write","status":"incomplete","output":[],"incomplete_details":{"reason":"max_output_tokens"},"usage":{"input_tokens":100,"input_tokens_details":{"cached_tokens":60,"cache_write_tokens":30},"output_tokens":20,"output_tokens_details":{"reasoning_tokens":7},"total_tokens":120}}}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			server := newStreamingMockServer()
+			defer server.close()
+			server.chunks = []string{responsesSSEEvent(tt.event, tt.data)}
+
+			model := newResponsesProvider(t, server.server.URL)
+			stream, err := model.Stream(t.Context(), fantasy.Call{Prompt: testPrompt})
+			require.NoError(t, err)
+
+			parts, err := collectStreamParts(stream)
+			require.NoError(t, err)
+			var finishParts []fantasy.StreamPart
+			for _, part := range parts {
+				if part.Type == fantasy.StreamPartTypeFinish {
+					finishParts = append(finishParts, part)
+				}
+			}
+			require.Len(t, finishParts, 1)
+			require.Equal(t, cacheWriteResponsesUsage(), finishParts[0].Usage)
+		})
+	}
+}
+
+func TestResponsesGenerateObject_CacheWriteTokens(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name    string
+		text    string
+		wantErr bool
+	}{
+		{
+			name: "valid structured output",
+			text: `{"answer":"hello"}`,
+		},
+		{
+			name:    "no output text",
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			server := newMockServer()
+			defer server.close()
+			server.response = mockResponsesTextResponse(tt.text)
+
+			model := newResponsesProvider(t, server.server.URL)
+			response, err := model.GenerateObject(t.Context(), fantasy.ObjectCall{
+				Prompt: testPrompt,
+				Schema: cacheWriteResponsesObjectSchema(),
+			})
+			if tt.wantErr {
+				require.Nil(t, response)
+				var noObjectErr *fantasy.NoObjectGeneratedError
+				require.ErrorAs(t, err, &noObjectErr)
+				require.Equal(t, cacheWriteResponsesUsage(), noObjectErr.Usage)
+				return
+			}
+
+			require.NoError(t, err)
+			require.Equal(t, map[string]any{"answer": "hello"}, response.Object)
+			require.Equal(t, cacheWriteResponsesUsage(), response.Usage)
+		})
+	}
+}
+
+func TestResponsesStreamObject_CacheWriteTokens(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name  string
+		event string
+		data  string
+	}{
+		{
+			name:  "response completed",
+			event: "response.completed",
+			data:  `{"type":"response.completed","response":{"id":"resp_cache_write","status":"completed","output":[],"usage":{"input_tokens":100,"input_tokens_details":{"cached_tokens":60,"cache_write_tokens":30},"output_tokens":20,"output_tokens_details":{"reasoning_tokens":7},"total_tokens":120}}}`,
+		},
+		{
+			name:  "response incomplete",
+			event: "response.incomplete",
+			data:  `{"type":"response.incomplete","response":{"id":"resp_cache_write","status":"incomplete","output":[],"incomplete_details":{"reason":"max_output_tokens"},"usage":{"input_tokens":100,"input_tokens_details":{"cached_tokens":60,"cache_write_tokens":30},"output_tokens":20,"output_tokens_details":{"reasoning_tokens":7},"total_tokens":120}}}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			server := newStreamingMockServer()
+			defer server.close()
+			server.chunks = []string{
+				responsesSSEEvent("response.output_text.delta", `{"type":"response.output_text.delta","output_index":0,"content_index":0,"item_id":"msg_cache_write","delta":"{\"answer\":\"hello\"}"}`),
+				responsesSSEEvent(tt.event, tt.data),
+			}
+
+			model := newResponsesProvider(t, server.server.URL)
+			stream, err := model.StreamObject(t.Context(), fantasy.ObjectCall{
+				Prompt: testPrompt,
+				Schema: cacheWriteResponsesObjectSchema(),
+			})
+			require.NoError(t, err)
+
+			parts := collectObjectStreamParts(stream)
+			var finishParts []fantasy.ObjectStreamPart
+			for _, part := range parts {
+				if part.Type == fantasy.ObjectStreamPartTypeFinish {
+					finishParts = append(finishParts, part)
+				}
+			}
+			require.Len(t, finishParts, 1)
+			require.Equal(t, cacheWriteResponsesUsage(), finishParts[0].Usage)
+		})
+	}
 }
 
 // --- OpenAI Responses API Web Search Tests ---

@@ -1,0 +1,66 @@
+[
+  {
+    "type": "tool_input_start",
+    "id": "call_test_1",
+    "name": "grep"
+  },
+  {
+    "type": "tool_input_delta",
+    "id": "call_test_1",
+    "delta": "{\"pat"
+  },
+  {
+    "type": "tool_input_start",
+    "id": "call_test_2",
+    "name": "glob"
+  },
+  {
+    "type": "tool_input_delta",
+    "id": "call_test_2",
+    "delta": "{\"pa"
+  },
+  {
+    "type": "tool_input_delta",
+    "id": "call_test_1",
+    "delta": "tern\":\"foo\"}"
+  },
+  {
+    "type": "tool_input_delta",
+    "id": "call_test_2",
+    "delta": "th\":\"x\"}"
+  },
+  {
+    "type": "tool_input_end",
+    "id": "call_test_1"
+  },
+  {
+    "type": "tool_call",
+    "id": "call_test_1",
+    "name": "grep",
+    "input": "{\"pattern\":\"foo\"}"
+  },
+  {
+    "type": "tool_input_end",
+    "id": "call_test_2"
+  },
+  {
+    "type": "tool_call",
+    "id": "call_test_2",
+    "name": "glob",
+    "input": "{\"path\":\"x\"}"
+  },
+  {
+    "type": "finish",
+    "reason": "tool-calls",
+    "metadata": {
+      "openai": {
+        "type": "openai.metadata",
+        "data": {
+          "logprobs": null,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      }
+    }
+  }
+]

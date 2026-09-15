@@ -1,0 +1,72 @@
+[
+  {
+    "type": "reasoning_start",
+    "id": "0"
+  },
+  {
+    "type": "reasoning_delta",
+    "id": "0",
+    "delta": "The user wants the date."
+  },
+  {
+    "type": "reasoning_delta",
+    "id": "0",
+    "delta": " I'll call get_date."
+  },
+  {
+    "type": "text_start",
+    "id": "0"
+  },
+  {
+    "type": "text_delta",
+    "id": "0",
+    "delta": "Let me check."
+  },
+  {
+    "type": "reasoning_end",
+    "id": "0"
+  },
+  {
+    "type": "text_end",
+    "id": "0"
+  },
+  {
+    "type": "tool_input_start",
+    "id": "call_test_1",
+    "name": "get_date"
+  },
+  {
+    "type": "tool_input_delta",
+    "id": "call_test_1",
+    "delta": "{}"
+  },
+  {
+    "type": "tool_input_end",
+    "id": "call_test_1"
+  },
+  {
+    "type": "tool_call",
+    "id": "call_test_1",
+    "name": "get_date",
+    "input": "{}"
+  },
+  {
+    "type": "finish",
+    "reason": "tool-calls",
+    "usage": {
+      "input_tokens": 120,
+      "output_tokens": 40,
+      "total_tokens": 160
+    },
+    "metadata": {
+      "openai": {
+        "type": "openai.metadata",
+        "data": {
+          "logprobs": null,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      }
+    }
+  }
+]

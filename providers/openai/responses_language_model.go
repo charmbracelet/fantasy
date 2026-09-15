@@ -15,7 +15,6 @@ import (
 	"charm.land/fantasy"
 	"charm.land/fantasy/object"
 	"charm.land/fantasy/schema"
-	"github.com/google/uuid"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/packages/param"
 	"github.com/openai/openai-go/v3/responses"
@@ -846,7 +845,7 @@ func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call)
 						case "url_citation":
 							content = append(content, fantasy.SourceContent{
 								SourceType: fantasy.SourceTypeURL,
-								ID:         uuid.NewString(),
+								ID:         fantasy.NewID(),
 								URL:        annotation.URL,
 								Title:      annotation.Title,
 							})
@@ -861,7 +860,7 @@ func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call)
 							}
 							content = append(content, fantasy.SourceContent{
 								SourceType: fantasy.SourceTypeDocument,
-								ID:         uuid.NewString(),
+								ID:         fantasy.NewID(),
 								MediaType:  "text/plain",
 								Title:      title,
 								Filename:   filename,
@@ -1187,7 +1186,7 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 				case "url_citation":
 					if !yield(fantasy.StreamPart{
 						Type:       fantasy.StreamPartTypeSource,
-						ID:         uuid.NewString(),
+						ID:         fantasy.NewID(),
 						SourceType: fantasy.SourceTypeURL,
 						URL:        annotation.URL,
 						Title:      annotation.Title,
@@ -1201,7 +1200,7 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 					}
 					if !yield(fantasy.StreamPart{
 						Type:       fantasy.StreamPartTypeSource,
-						ID:         uuid.NewString(),
+						ID:         fantasy.NewID(),
 						SourceType: fantasy.SourceTypeDocument,
 						Title:      title,
 					}) {

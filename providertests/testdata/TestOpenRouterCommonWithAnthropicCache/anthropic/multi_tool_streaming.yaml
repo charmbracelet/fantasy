@@ -77,7 +77,7 @@ interactions:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 1422
+    content_length: 1459
     host: ""
     body: '{"messages":[{"content":"You are a helpful assistant. Always use both add and multiply at the same time.","role":"system","cache_control":{"type":"ephemeral"}},{"content":"Add and multiply the number 2 and 3","role":"user"},{"tool_calls":[{"id":"toolu_bdrk_01FS6PPeAPQTDNqXK3a3eRHr","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"add"},"type":"function"},{"id":"toolu_bdrk_01YRxwgSi9gzNNtQ9Bz5AX6u","function":{"arguments":"{\"a\": 2, \"b\": 3}","name":"multiply"},"type":"function","cache_control":{"type":"ephemeral"}}],"role":"assistant"},{"content":"5","tool_call_id":"toolu_bdrk_01FS6PPeAPQTDNqXK3a3eRHr","role":"tool"},{"content":"6","tool_call_id":"toolu_bdrk_01YRxwgSi9gzNNtQ9Bz5AX6u","role":"tool","cache_control":{"type":"ephemeral"}}],"model":"anthropic/claude-haiku-4.5","max_tokens":4000,"stream_options":{"include_usage":true},"tool_choice":"auto","tools":[{"function":{"name":"add","strict":false,"description":"Add two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"name":"multiply","strict":false,"description":"Multiply two numbers","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}],"usage":{"include":true},"stream":true}'
     headers:

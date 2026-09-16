@@ -513,16 +513,9 @@ func languageModelStreamUsage(chunk openaisdk.ChatCompletionChunk, _ map[string]
 func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.ChatCompletionMessageParamUnion, []fantasy.CallWarning) {
 	var messages []openaisdk.ChatCompletionMessageParamUnion
 	var warnings []fantasy.CallWarning
-	// Synthetic user messages carrying tool-result media are held back until
-	// the run of tool messages ends, because every tool message answering an
-	// assistant's tool_calls has to follow that assistant message without a
-	// message of another role in between. See openai.ToolResultMediaMessages.
-	var deferredMedia []openaisdk.ChatCompletionMessageParamUnion
+	var media openai.ToolRunBuffer
 	for _, msg := range prompt {
-		if msg.Role != fantasy.MessageRoleTool && len(deferredMedia) > 0 {
-			messages = append(messages, deferredMedia...)
-			deferredMedia = nil
-		}
+		messages = media.Role(msg.Role, messages)
 		switch msg.Role {
 		case fantasy.MessageRoleSystem:
 			var systemPromptParts []string
@@ -1006,6 +999,13 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 					assistantMsg.ToolCalls = append(assistantMsg.ToolCalls, tc)
 				}
 			}
+			if !openai.HasVisibleAssistantContent(&assistantMsg) {
+				warnings = append(warnings, fantasy.CallWarning{
+					Type:    fantasy.CallWarningTypeOther,
+					Message: "dropping empty assistant message (contains neither user-facing content nor tool calls)",
+				})
+				continue
+			}
 			messages = append(messages, openaisdk.ChatCompletionMessageParamUnion{
 				OfAssistant: &assistantMsg,
 			})
@@ -1044,7 +1044,7 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 						continue
 					}
 					tr := openaisdk.ToolMessage(output.Text, toolResultPart.ToolCallID)
-					tagToolCacheControl(tr, cacheControl)
+					openai.TagToolCacheControl(tr.OfTool, cacheControl.CacheType())
 					messages = append(messages, tr)
 				case fantasy.ToolResultContentTypeError:
 					// TODO: check if better handling is needed
@@ -1057,7 +1057,7 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 						continue
 					}
 					tr := openaisdk.ToolMessage(output.Error.Error(), toolResultPart.ToolCallID)
-					tagToolCacheControl(tr, cacheControl)
+					openai.TagToolCacheControl(tr.OfTool, cacheControl.CacheType())
 					messages = append(messages, tr)
 				case fantasy.ToolResultContentTypeMedia:
 					output, ok := fantasy.AsToolResultOutputType[fantasy.ToolResultOutputContentMedia](toolResultPart.Output)
@@ -1071,9 +1071,9 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 					// Chat completions tool messages cannot carry image or audio
 					// content, so the media travels in a separate user message.
 					tr, mediaMessages, mediaWarnings := openai.ToolResultMediaMessages(output, toolResultPart.ToolCallID)
-					tagToolCacheControl(tr, cacheControl)
+					openai.TagToolCacheControl(tr.OfTool, cacheControl.CacheType())
 					messages = append(messages, tr)
-					deferredMedia = append(deferredMedia, mediaMessages...)
+					media.Defer(mediaMessages...)
 					warnings = append(warnings, mediaWarnings...)
 				default:
 					// Falling through silently would leave the assistant's
@@ -1086,22 +1086,5 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 			}
 		}
 	}
-	messages = append(messages, deferredMedia...)
-	return messages, warnings
-}
-
-// tagToolCacheControl marks a tool message for prompt caching.
-//
-// The extra field has to be set on the tool param, not on the message union
-// that wraps it: the union is not what gets serialised, so setting it there
-// silently drops the cache_control and the request goes out uncached.
-func tagToolCacheControl(msg openaisdk.ChatCompletionMessageParamUnion, cacheControl *anthropic.CacheControl) {
-	if cacheControl == nil {
-		return
-	}
-	msg.OfTool.SetExtraFields(map[string]any{
-		"cache_control": map[string]string{
-			"type": cacheControl.Type,
-		},
-	})
+	return media.Close(messages), warnings
 }

@@ -189,18 +189,10 @@ func StreamExtraFunc(chunk openaisdk.ChatCompletionChunk, yield func(fantasy.Str
 func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletionMessageParamUnion, []fantasy.CallWarning) {
 	var messages []openaisdk.ChatCompletionMessageParamUnion
 	var warnings []fantasy.CallWarning
-	// Defer synthetic user messages holding tool-result media (see
-	// openai.ToolResultMediaMessages) until the contiguous run of tool
-	// messages ends: strict chat-completions validators require every
-	// tool message answering an assistant's tool_calls to immediately
-	// follow that assistant message.
-	var deferredMedia []openaisdk.ChatCompletionMessageParamUnion
+	var media openai.ToolRunBuffer
 
 	for _, msg := range prompt {
-		if msg.Role != fantasy.MessageRoleTool && len(deferredMedia) > 0 {
-			messages = append(messages, deferredMedia...)
-			deferredMedia = nil
-		}
+		messages = media.Role(msg.Role, messages)
 		switch msg.Role {
 		case fantasy.MessageRoleSystem:
 			var blocks []openaisdk.ChatCompletionContentPartTextParam
@@ -562,7 +554,7 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 					// synthetic user message holding the media.
 					toolMessage, mediaMessages, mediaWarnings := openai.ToolResultMediaMessages(output, toolResultPart.ToolCallID)
 					messages = append(messages, toolMessage)
-					deferredMedia = append(deferredMedia, mediaMessages...)
+					media.Defer(mediaMessages...)
 					warnings = append(warnings, mediaWarnings...)
 				default:
 					warnings = append(warnings, fantasy.CallWarning{
@@ -573,6 +565,5 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 			}
 		}
 	}
-	messages = append(messages, deferredMedia...)
-	return messages, warnings
+	return media.Close(messages), warnings
 }

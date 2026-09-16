@@ -14,6 +14,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"charm.land/fantasy"
 )
 
 // Fixture is a recorded upstream response together with the request that
@@ -21,9 +23,7 @@ import (
 type Fixture struct {
 	// Dir is the directory the fixture was loaded from.
 	Dir string
-	// Request is the content of request.json: the upstream request the
-	// provider sends for this fixture, for documentation and future
-	// request-side assertions.
+	// Request contains a JSON-encoded fantasy.Call used to drive replay.
 	Request json.RawMessage
 	// Events holds the raw SSE events of response.sse, split on
 	// blank-line boundaries. Each event is kept verbatim, including its
@@ -36,6 +36,30 @@ type Fixture struct {
 	// server is the replay server bound to this fixture by Serve, so
 	// RunAgentStep can record the requests the model under test sends.
 	server *Server
+}
+
+// Call decodes the fixture input, rejecting upstream HTTP fields so a fixture
+// cannot silently exercise a different call than its author intended.
+func (f *Fixture) Call() (fantasy.Call, error) {
+	var call fantasy.Call
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(f.Request, &fields); err != nil {
+		return call, fmt.Errorf("replaytest: request.json: %w", err)
+	}
+	if _, ok := fields["prompt"]; !ok {
+		return call, fmt.Errorf("replaytest: request.json must contain a fantasy.Call prompt, not an upstream HTTP request")
+	}
+	for field := range fields {
+		switch field {
+		case "prompt", "max_output_tokens", "temperature", "top_p", "top_k", "presence_penalty", "frequency_penalty", "tools", "tool_choice", "provider_options":
+		default:
+			return call, fmt.Errorf("replaytest: request.json: unsupported fantasy.Call field %q", field)
+		}
+	}
+	if err := json.Unmarshal(f.Request, &call); err != nil {
+		return call, fmt.Errorf("replaytest: request.json: %w", err)
+	}
+	return call, nil
 }
 
 // Load reads a fixture directory. It requires request.json and exactly one

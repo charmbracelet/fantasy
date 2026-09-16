@@ -51,16 +51,15 @@ func TestFixtureShapes(t *testing.T) {
 			require.NoError(t, err)
 			server := replaytest.Serve(t, fixture)
 
-			model := shapeLanguageModel(t, meta.Provider, server.URL())
-			stream, err := model.Stream(t.Context(), fantasy.Call{
-				Prompt: fantasy.Prompt{
-					{Role: fantasy.MessageRoleUser, Content: []fantasy.MessagePart{fantasy.TextPart{Text: "hi"}}},
-				},
-			})
+			call, err := fixture.Call()
 			require.NoError(t, err)
-
-			records := replaytest.Collect(stream)
-			replaytest.AssertGolden(t, filepath.Join(dir, "parts.golden.json"), records)
+			replaytest.WithCounterIDs(func() {
+				model := shapeLanguageModel(t, meta.Provider, server.URL())
+				stream, err := model.Stream(t.Context(), call)
+				require.NoError(t, err)
+				records := replaytest.Collect(stream)
+				replaytest.AssertGolden(t, filepath.Join(dir, "parts.golden.json"), records)
+			})
 		})
 	}
 }

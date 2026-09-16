@@ -45,19 +45,22 @@ func RunAgentStep(t testing.TB, model fantasy.LanguageModel, f *Fixture, tools .
 		server = Serve(t, f)
 	}
 	before := len(server.Requests())
-	setCounterIDs(t)
 
 	var (
-		dispatched []string
+		dispatched = make(map[string]string)
 		mu         sync.Mutex
 	)
 	wrapped := make([]fantasy.AgentTool, 0, len(tools))
 	for _, tool := range tools {
-		wrapped = append(wrapped, &recordingTool{AgentTool: tool, dispatched: &dispatched, mu: &mu})
+		wrapped = append(wrapped, &recordingTool{AgentTool: tool, dispatched: dispatched, mu: &mu})
 	}
 
 	agent := fantasy.NewAgent(model, fantasy.WithMaxRetries(0), fantasy.WithTools(wrapped...))
-	result, err := agent.Stream(t.Context(), fantasy.AgentStreamCall{Prompt: "hi"})
+	var result *fantasy.AgentResult
+	var err error
+	WithCounterIDs(func() {
+		result, err = agent.Stream(t.Context(), fantasy.AgentStreamCall{Prompt: "hi"})
+	})
 
 	record := StepRecord{Content: []PartRecord{}}
 	if err != nil {
@@ -68,7 +71,9 @@ func RunAgentStep(t testing.TB, model fantasy.LanguageModel, f *Fixture, tools .
 	}
 
 	mu.Lock()
-	record.ToolsDispatched = append(record.ToolsDispatched, dispatched...)
+	if result != nil && len(result.Steps) > 0 {
+		record.ToolsDispatched = orderedDispatches(result.Steps[0].Content, dispatched)
+	}
 	mu.Unlock()
 
 	requests := server.Requests()
@@ -81,22 +86,31 @@ func RunAgentStep(t testing.TB, model fantasy.LanguageModel, f *Fixture, tools .
 // recordingTool wraps an AgentTool and records every dispatch by tool name.
 type recordingTool struct {
 	fantasy.AgentTool
-	dispatched *[]string
+	dispatched map[string]string
 	mu         *sync.Mutex
 }
 
 func (r *recordingTool) Run(ctx context.Context, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
 	r.mu.Lock()
-	*r.dispatched = append(*r.dispatched, call.Name)
+	r.dispatched[call.ID] = call.Name
 	r.mu.Unlock()
 	return r.AgentTool.Run(ctx, call)
 }
 
-// setCounterIDs replaces fantasy.NewID with a deterministic counter
-// ("id-1", "id-2", ...) for the duration of the test and restores the
-// previous generator afterwards.
-func setCounterIDs(t testing.TB) {
-	t.Helper()
+func orderedDispatches(content fantasy.ResponseContent, dispatched map[string]string) []string {
+	var names []string
+	for _, call := range content.ToolCalls() {
+		if name, ok := dispatched[call.ToolCallID]; ok {
+			names = append(names, name)
+		}
+	}
+	return names
+}
+
+// WithCounterIDs makes generated IDs reproducible within run and restores the
+// previous generator on return or panic. The scope must not overlap parallel
+// tests or unrelated provider operations because fantasy.NewID is global.
+func WithCounterIDs(run func()) {
 	previous := fantasy.NewID
 	var (
 		mu      sync.Mutex
@@ -108,7 +122,8 @@ func setCounterIDs(t testing.TB) {
 		counter++
 		return "id-" + strconv.Itoa(counter)
 	}
-	t.Cleanup(func() {
+	defer func() {
 		fantasy.NewID = previous
-	})
+	}()
+	run()
 }

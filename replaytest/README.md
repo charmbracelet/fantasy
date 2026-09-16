@@ -18,7 +18,7 @@ Each fixture directory contains:
 | file              | required | purpose                                                      |
 | ----------------- | -------- | ------------------------------------------------------------ |
 | `meta.json`       | yes      | `{"provider": "openaicompat"}` or `{"provider": "anthropic"}` |
-| `request.json`    | yes      | the upstream request the provider sends, for documentation   |
+| `request.json`    | yes      | a JSON-encoded `fantasy.Call` used to drive stream replay   |
 | `response.sse`    | one of   | the raw streaming response body                              |
 | `response.json`   | one of   | the raw non-streaming response body                          |
 | `parts.golden.json` | yes    | golden for the provider's StreamPart sequence                |
@@ -81,32 +81,57 @@ adding is fine to create with `-update`; review it before committing.
 ```go
 fixture, err := replaytest.Load(dir)
 server := replaytest.Serve(t, fixture)                    // or Serve(t, fixture, opts...)
-requests := server.Requests()                             // every request body received
-records := replaytest.Collect(stream)                     // StreamParts -> PartRecords
-replaytest.AssertGolden(t, path, records)                 // compare or -update
+call, err := fixture.Call()
+replaytest.WithCounterIDs(func() {
+    stream, err := model.Stream(t.Context(), call)
+    if err != nil {
+        t.Fatal(err)
+    }
+    records := replaytest.Collect(stream)
+    replaytest.AssertGolden(t, path, records)
+})
+requests := server.Requests()
 record := replaytest.RunAgentStep(t, model, fixture, tools...) // one agent step
 ```
 
 - `Load(dir)` reads `request.json` and exactly one of `response.sse` or
   `response.json`.
+- `Fixture.Call()` decodes `request.json` into `fantasy.Call`. It requires a
+  `prompt` field and rejects unknown top-level fields, malformed JSON, and
+  upstream HTTP request formats. Model selection remains in provider setup
+  (`test-model`), not in the call. For example:
+
+  ```json
+  {"prompt":[{"role":"user","content":[{"type":"text","data":{"text":"hi"}}]}]}
+  ```
+
 - `Serve` answers the first request with the fixture's response. Second and
   later requests get a canned minimal finish response shaped by the request
   (streaming or not, messages endpoint or chat-completions endpoint), unless
   `WithSubsequentSSE(events...)` or `WithSubsequentJSON(body)` supplies one.
   The canned responses are keyed by what the request looks like, never by
   provider name.
-- `RunAgentStep` runs `Agent.Stream` for one step against a fresh server
-  built from the fixture, with the given stub tools (wrapped so dispatches
+- `RunAgentStep` runs `Agent.Stream` against the server previously bound by
+  `Serve`, with the given stub tools (wrapped so dispatches
   are recorded) and retries disabled. It returns the step content as
   `PartRecord`s, the finish reason, which tools were dispatched, and the raw
   body of the next request the agent sent (from `Server.Requests()[1]`), or
   empty when the step made no further request. If the step errors, the
   record's `error` field carries it. The agent prompt is fixed (`hi`) so
-  step goldens are stable.
+  step goldens are stable. Dispatches are matched by call ID and reported in
+  the first step's model-call order, even when tools execute concurrently.
+  Calls that were not executed are excluded; repeated tool names are preserved.
 
 ## Determinism
 
 Providers call `fantasy.NewID` (default `uuid.NewString`) for generated IDs.
-`RunAgentStep` replaces it with a counter (`id-1`, `id-2`, ...) for the
-duration of the call and restores it afterwards. Fixtures themselves are
-authored clean and scrub nothing at runtime.
+`WithCounterIDs(func() { ... })` installs a fresh counter (`id-1`, `id-2`, ...)
+for the callback and restores the previous generator when it exits, including
+panic unwinding. Wrap model construction, streaming, and collection in this
+scope. `RunAgentStep` uses the same scope internally.
+
+The generator is process-global. These scopes must not overlap parallel tests
+or other provider operations using `fantasy.NewID`; do not use `t.Parallel`
+for these tests or their ancestors. The counter is safe for concurrent calls
+inside a single scope, but replacing the global generator is not synchronized
+with unrelated consumers. Fixtures themselves are authored clean.

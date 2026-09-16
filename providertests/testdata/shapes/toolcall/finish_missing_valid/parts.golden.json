@@ -1,0 +1,42 @@
+[
+  {
+    "type": "tool_input_start",
+    "id": "call_test_1",
+    "name": "get_date"
+  },
+  {
+    "type": "tool_input_delta",
+    "id": "call_test_1",
+    "delta": "{}"
+  },
+  {
+    "type": "tool_input_end",
+    "id": "call_test_1"
+  },
+  {
+    "type": "tool_call",
+    "id": "call_test_1",
+    "name": "get_date",
+    "input": "{}"
+  },
+  {
+    "type": "warnings",
+    "warnings": [
+      "stream ended without finish_reason; assuming tool-call turn"
+    ]
+  },
+  {
+    "type": "finish",
+    "reason": "tool-calls",
+    "metadata": {
+      "openai": {
+        "type": "openai.metadata",
+        "data": {
+          "logprobs": null,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      }
+    }
+  }
+]

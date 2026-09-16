@@ -1,0 +1,17 @@
+data: {"id":"test-response","created":0,"model":"test-model","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning_content":null},"finish_reason":null}]}
+
+data: {"id":"test-response","created":0,"model":"test-model","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":null,"reasoning_content":"The user wants the date."},"finish_reason":null}]}
+
+data: {"id":"test-response","created":0,"model":"test-model","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":null,"reasoning_content":" I'll call get_date."},"finish_reason":null}]}
+
+data: {"id":"test-response","created":0,"model":"test-model","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"Let me check.","reasoning_content":null},"finish_reason":null}]}
+
+data: {"id":"test-response","created":0,"model":"test-model","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":null,"reasoning_content":null,"tool_calls":[{"index":0,"id":"call_test_1","type":"function","function":{"name":"get_date","arguments":""}}]},"finish_reason":null}]}
+
+data: {"id":"test-response","created":0,"model":"test-model","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":null,"reasoning_content":null,"tool_calls":[{"index":0,"function":{"arguments":"{}"}}]},"finish_reason":null}]}
+
+data: {"id":"test-response","created":0,"model":"test-model","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"","reasoning_content":null},"finish_reason":"tool_calls"}]}
+
+data: {"id":"test-response","created":0,"model":"test-model","object":"chat.completion.chunk","choices":[],"usage":{"prompt_tokens":120,"completion_tokens":40,"total_tokens":160}}
+
+data: [DONE]

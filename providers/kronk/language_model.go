@@ -10,7 +10,6 @@ import (
 	"charm.land/fantasy/object"
 	"github.com/ardanlabs/kronk/sdk/kronk/model"
 	xjson "github.com/charmbracelet/x/json"
-	"github.com/google/uuid"
 )
 
 type languageModel struct {
@@ -398,7 +397,7 @@ func (l *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 					if !ok {
 						toolID := tc.ID
 						if toolID == "" {
-							toolID = uuid.NewString()
+							toolID = fantasy.NewID()
 						}
 
 						toolCall = streamToolCall{

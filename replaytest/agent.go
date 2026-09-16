@@ -49,17 +49,35 @@ func RunAgentStep(t testing.TB, model fantasy.LanguageModel, f *Fixture, tools .
 	var (
 		dispatched = make(map[string]string)
 		mu         sync.Mutex
+		stepNumber int
+		callOrder  fantasy.ResponseContent
 	)
 	wrapped := make([]fantasy.AgentTool, 0, len(tools))
 	for _, tool := range tools {
-		wrapped = append(wrapped, &recordingTool{AgentTool: tool, dispatched: dispatched, mu: &mu})
+		wrapped = append(wrapped, &recordingTool{AgentTool: tool, dispatched: dispatched, mu: &mu, stepNumber: &stepNumber})
 	}
 
 	agent := fantasy.NewAgent(model, fantasy.WithMaxRetries(0), fantasy.WithTools(wrapped...))
 	var result *fantasy.AgentResult
 	var err error
 	WithCounterIDs(func() {
-		result, err = agent.Stream(t.Context(), fantasy.AgentStreamCall{Prompt: "hi"})
+		result, err = agent.Stream(t.Context(), fantasy.AgentStreamCall{
+			Prompt: "hi",
+			OnStepStart: func(number int) error {
+				mu.Lock()
+				stepNumber = number
+				mu.Unlock()
+				return nil
+			},
+			OnToolCall: func(call fantasy.ToolCallContent) error {
+				mu.Lock()
+				if stepNumber == 0 {
+					callOrder = append(callOrder, call)
+				}
+				mu.Unlock()
+				return nil
+			},
+		})
 	})
 
 	record := StepRecord{Content: []PartRecord{}}
@@ -71,9 +89,7 @@ func RunAgentStep(t testing.TB, model fantasy.LanguageModel, f *Fixture, tools .
 	}
 
 	mu.Lock()
-	if result != nil && len(result.Steps) > 0 {
-		record.ToolsDispatched = orderedDispatches(result.Steps[0].Content, dispatched)
-	}
+	record.ToolsDispatched = orderedDispatches(callOrder, dispatched)
 	mu.Unlock()
 
 	requests := server.Requests()
@@ -88,11 +104,14 @@ type recordingTool struct {
 	fantasy.AgentTool
 	dispatched map[string]string
 	mu         *sync.Mutex
+	stepNumber *int
 }
 
 func (r *recordingTool) Run(ctx context.Context, call fantasy.ToolCall) (fantasy.ToolResponse, error) {
 	r.mu.Lock()
-	r.dispatched[call.ID] = call.Name
+	if r.stepNumber == nil || *r.stepNumber == 0 {
+		r.dispatched[call.ID] = call.Name
+	}
 	r.mu.Unlock()
 	return r.AgentTool.Run(ctx, call)
 }

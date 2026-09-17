@@ -485,6 +485,17 @@ func languageModelStreamExtra(chunk openaisdk.ChatCompletionChunk, yield func(fa
 	return ctx, true
 }
 
+// isVertexUpstream reports whether Vercel's upstream for the request was
+// Vertex AI. Vercel forwards Vertex's usage verbatim, and Vertex reports
+// thoughts disjoint from completion_tokens — unlike OpenAI's subset shape —
+// so reasoning must be folded into output even when it does not exceed it
+// (the numeric guard in FoldDisjointReasoning only proves disjointness when
+// reasoning > output). The provider value arrives as raw JSON, quotes and
+// all.
+func isVertexUpstream(provider string) bool {
+	return strings.Trim(provider, `"`) == "vertex"
+}
+
 func languageModelUsage(response openaisdk.ChatCompletion) (fantasy.Usage, fantasy.ProviderOptionsData) {
 	if len(response.Choices) == 0 {
 		return fantasy.Usage{}, nil
@@ -505,12 +516,21 @@ func languageModelUsage(response openaisdk.ChatCompletion) (fantasy.Usage, fanta
 
 	// Vercel reports prompt_tokens INCLUDING cached tokens. Subtract to avoid double-counting.
 	inputTokens := max(usage.PromptTokens-promptTokenDetails.CachedTokens, 0)
+	reasoning := completionTokenDetails.ReasoningTokens
+	outputTokens := usage.CompletionTokens
+	totalTokens := inputTokens + usage.CompletionTokens + promptTokenDetails.CachedTokens
+	if isVertexUpstream(provider) {
+		outputTokens += reasoning
+		totalTokens += reasoning
+	} else {
+		outputTokens, totalTokens = openaipkg.FoldDisjointReasoning(outputTokens, reasoning, totalTokens)
+	}
 
 	return fantasy.Usage{
 		InputTokens:     inputTokens,
-		OutputTokens:    usage.CompletionTokens,
-		TotalTokens:     inputTokens + usage.CompletionTokens + promptTokenDetails.CachedTokens,
-		ReasoningTokens: completionTokenDetails.ReasoningTokens,
+		OutputTokens:    outputTokens,
+		TotalTokens:     totalTokens,
+		ReasoningTokens: reasoning,
 		CacheReadTokens: promptTokenDetails.CachedTokens,
 	}, providerMetadata
 }
@@ -531,8 +551,10 @@ func languageModelStreamUsage(chunk openaisdk.ChatCompletionChunk, _ map[string]
 		}
 	}
 
+	var provider string
 	if p, ok := chunk.JSON.ExtraFields["provider"]; ok {
-		streamProviderMetadata.Provider = p.Raw()
+		provider = p.Raw()
+		streamProviderMetadata.Provider = provider
 	}
 
 	completionTokenDetails := usage.CompletionTokensDetails
@@ -540,12 +562,21 @@ func languageModelStreamUsage(chunk openaisdk.ChatCompletionChunk, _ map[string]
 
 	// Vercel reports prompt_tokens INCLUDING cached tokens. Subtract to avoid double-counting.
 	inputTokens := max(usage.PromptTokens-promptTokenDetails.CachedTokens, 0)
+	reasoning := completionTokenDetails.ReasoningTokens
+	outputTokens := usage.CompletionTokens
+	totalTokens := inputTokens + usage.CompletionTokens + promptTokenDetails.CachedTokens
+	if isVertexUpstream(provider) {
+		outputTokens += reasoning
+		totalTokens += reasoning
+	} else {
+		outputTokens, totalTokens = openaipkg.FoldDisjointReasoning(outputTokens, reasoning, totalTokens)
+	}
 
 	aiUsage := fantasy.Usage{
 		InputTokens:     inputTokens,
-		OutputTokens:    usage.CompletionTokens,
-		TotalTokens:     inputTokens + usage.CompletionTokens + promptTokenDetails.CachedTokens,
-		ReasoningTokens: completionTokenDetails.ReasoningTokens,
+		OutputTokens:    outputTokens,
+		TotalTokens:     totalTokens,
+		ReasoningTokens: reasoning,
 		CacheReadTokens: promptTokenDetails.CachedTokens,
 	}
 

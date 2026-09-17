@@ -409,10 +409,15 @@ func responsesProviderMetadata(responseID string) fantasy.ProviderMetadata {
 func responsesUsage(resp responses.Response) fantasy.Usage {
 	// OpenAI reports input_tokens INCLUDING cached tokens. Subtract to avoid double-counting.
 	inputTokens := max(resp.Usage.InputTokens-resp.Usage.InputTokensDetails.CachedTokens, 0)
+	outputTokens, totalTokens := FoldDisjointReasoning(
+		resp.Usage.OutputTokens,
+		resp.Usage.OutputTokensDetails.ReasoningTokens,
+		resp.Usage.InputTokens+resp.Usage.OutputTokens,
+	)
 	usage := fantasy.Usage{
 		InputTokens:  inputTokens,
-		OutputTokens: resp.Usage.OutputTokens,
-		TotalTokens:  resp.Usage.InputTokens + resp.Usage.OutputTokens,
+		OutputTokens: outputTokens,
+		TotalTokens:  totalTokens,
 	}
 	if resp.Usage.OutputTokensDetails.ReasoningTokens != 0 {
 		usage.ReasoningTokens = resp.Usage.OutputTokensDetails.ReasoningTokens
@@ -1504,11 +1509,7 @@ func (o responsesLanguageModel) generateObjectWithJSONMode(ctx context.Context, 
 	}
 
 	if jsonText == "" {
-		usage := fantasy.Usage{
-			InputTokens:  response.Usage.InputTokens,
-			OutputTokens: response.Usage.OutputTokens,
-			TotalTokens:  response.Usage.InputTokens + response.Usage.OutputTokens,
-		}
+		usage := responsesUsage(*response)
 		finishReason := mapResponsesFinishReason(response.IncompleteDetails.Reason, false)
 		return nil, &fantasy.NoObjectGeneratedError{
 			RawText:      "",

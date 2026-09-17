@@ -457,11 +457,16 @@ func languageModelUsage(response openaisdk.ChatCompletion) (fantasy.Usage, fanta
 
 	// OpenRouter reports prompt_tokens INCLUDING cached tokens. Subtract to avoid double-counting.
 	inputTokens := max(usage.PromptTokens-promptTokenDetails.CachedTokens, 0)
+	outputTokens, totalTokens := openai.FoldDisjointReasoning(
+		usage.CompletionTokens,
+		completionTokenDetails.ReasoningTokens,
+		inputTokens+usage.CompletionTokens+promptTokenDetails.CachedTokens,
+	)
 
 	return fantasy.Usage{
 		InputTokens:     inputTokens,
-		OutputTokens:    usage.CompletionTokens,
-		TotalTokens:     inputTokens + usage.CompletionTokens + promptTokenDetails.CachedTokens,
+		OutputTokens:    outputTokens,
+		TotalTokens:     totalTokens,
 		ReasoningTokens: completionTokenDetails.ReasoningTokens,
 		CacheReadTokens: promptTokenDetails.CachedTokens,
 	}, providerMetadata
@@ -496,11 +501,16 @@ func languageModelStreamUsage(chunk openaisdk.ChatCompletionChunk, _ map[string]
 
 	// OpenRouter reports prompt_tokens INCLUDING cached tokens. Subtract to avoid double-counting.
 	inputTokens := max(usage.PromptTokens-promptTokenDetails.CachedTokens, 0)
+	outputTokens, totalTokens := openai.FoldDisjointReasoning(
+		usage.CompletionTokens,
+		completionTokenDetails.ReasoningTokens,
+		inputTokens+usage.CompletionTokens+promptTokenDetails.CachedTokens,
+	)
 
 	aiUsage := fantasy.Usage{
 		InputTokens:     inputTokens,
-		OutputTokens:    usage.CompletionTokens,
-		TotalTokens:     inputTokens + usage.CompletionTokens + promptTokenDetails.CachedTokens,
+		OutputTokens:    outputTokens,
+		TotalTokens:     totalTokens,
 		ReasoningTokens: completionTokenDetails.ReasoningTokens,
 		CacheReadTokens: promptTokenDetails.CachedTokens,
 	}

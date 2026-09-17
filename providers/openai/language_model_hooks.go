@@ -207,6 +207,19 @@ func DefaultMapFinishReasonFunc(finishReason string) fantasy.FinishReason {
 	}
 }
 
+// FoldDisjointReasoning keeps output tokens all-inclusive. OpenAI reports
+// reasoning as a subset of completion_tokens, but some OpenAI-shaped gateways
+// report it disjointly (Vercel AI Gateway streaming Gemini, for one).
+// Reasoning exceeding output can only happen in the disjoint shape — a subset
+// can never exceed its parent — so folding it in is always safe, and total
+// follows output.
+func FoldDisjointReasoning(output, reasoning, total int64) (int64, int64) {
+	if reasoning > output {
+		return output + reasoning, total + reasoning
+	}
+	return output, total
+}
+
 // DefaultUsageFunc is the default implementation for calculating usage.
 func DefaultUsageFunc(response openai.ChatCompletion) (fantasy.Usage, fantasy.ProviderOptionsData) {
 	completionTokenDetails := response.Usage.CompletionTokensDetails
@@ -231,11 +244,16 @@ func DefaultUsageFunc(response openai.ChatCompletion) (fantasy.Usage, fantasy.Pr
 	}
 	// OpenAI reports prompt_tokens INCLUDING cached tokens. Subtract to avoid double-counting.
 	inputTokens := max(response.Usage.PromptTokens-promptTokenDetails.CachedTokens, 0)
+	outputTokens, totalTokens := FoldDisjointReasoning(
+		response.Usage.CompletionTokens,
+		completionTokenDetails.ReasoningTokens,
+		response.Usage.TotalTokens,
+	)
 	providerMetadata.ExtraFields = ExtractExtraFields(response.Usage.JSON.ExtraFields)
 	return fantasy.Usage{
 		InputTokens:     inputTokens,
-		OutputTokens:    response.Usage.CompletionTokens,
-		TotalTokens:     response.Usage.TotalTokens,
+		OutputTokens:    outputTokens,
+		TotalTokens:     totalTokens,
 		ReasoningTokens: completionTokenDetails.ReasoningTokens,
 		CacheReadTokens: promptTokenDetails.CachedTokens,
 	}, providerMetadata
@@ -260,10 +278,15 @@ func DefaultStreamUsageFunc(chunk openai.ChatCompletionChunk, _ map[string]any, 
 	promptTokenDetails := chunk.Usage.PromptTokensDetails
 	// OpenAI reports prompt_tokens INCLUDING cached tokens. Subtract to avoid double-counting.
 	inputTokens := max(chunk.Usage.PromptTokens-promptTokenDetails.CachedTokens, 0)
+	outputTokens, totalTokens := FoldDisjointReasoning(
+		chunk.Usage.CompletionTokens,
+		completionTokenDetails.ReasoningTokens,
+		chunk.Usage.TotalTokens,
+	)
 	usage := fantasy.Usage{
 		InputTokens:     inputTokens,
-		OutputTokens:    chunk.Usage.CompletionTokens,
-		TotalTokens:     chunk.Usage.TotalTokens,
+		OutputTokens:    outputTokens,
+		TotalTokens:     totalTokens,
 		ReasoningTokens: completionTokenDetails.ReasoningTokens,
 		CacheReadTokens: promptTokenDetails.CachedTokens,
 	}

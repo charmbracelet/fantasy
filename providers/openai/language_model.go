@@ -626,43 +626,39 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 			// invalid arguments before seeing the terminal reason.
 			mappedFinishReason := o.mapFinishReasonFunc(finishReason)
 
-			// "Tool calls were seen" is not proof of a complete turn. Infer a
-			// tool-call turn only when the upstream said tool_calls/function_call
-			// explicitly (kept verbatim by the mapper) or sent no finish reason
-			// at all and every accumulated call's arguments parse as complete
-			// JSON. Terminal reasons that can cut output mid-call — length,
-			// content_filter, provider errors — must never be rewritten into a
-			// tool-call turn: dispatching their partial calls executes truncated
-			// input (CHARM-2020).
-			var missingFinishWithBadArgs bool
+			// Some compatible providers return stop even when emitting tools.
+			// Normalize stop and missing finish reasons only after checking all
+			// arguments. Abnormal terminal reasons must retain their truncation
+			// guards rather than dispatching partial calls (CHARM-2020).
+			inferToolTurn := finishReason == "" || mappedFinishReason == fantasy.FinishReasonStop
+
+			var incompleteToolArgs bool
 			var missingFinish bool
-			if finishReason == "" && len(toolCalls) > 0 {
-				missingFinish = true
+			if inferToolTurn && len(toolCalls) > 0 {
+				missingFinish = finishReason == ""
 				for _, tc := range toolCalls {
 					// A call with no arguments was cut before any argument
 					// arrived; filling in "{}" would invent arguments the model
 					// never sent.
 					if tc.arguments == "" || !json.Valid([]byte(tc.arguments)) {
-						missingFinishWithBadArgs = true
+						incompleteToolArgs = true
 						break
 					}
 				}
 			}
 
-			if finishReason == "" && len(acc.Choices) > 0 && !missingFinishWithBadArgs {
-				if len(acc.Choices[0].Message.ToolCalls) > 0 {
-					mappedFinishReason = fantasy.FinishReasonToolCalls
-				}
+			if inferToolTurn && len(toolCalls) > 0 && !incompleteToolArgs {
+				mappedFinishReason = fantasy.FinishReasonToolCalls
 			}
 			suppressedWithToolCalls := (mappedFinishReason == fantasy.FinishReasonLength ||
 				mappedFinishReason == fantasy.FinishReasonError ||
 				mappedFinishReason == fantasy.FinishReasonContentFilter ||
-				missingFinishWithBadArgs) && len(toolCalls) > 0
+				incompleteToolArgs) && len(toolCalls) > 0
 
 			// A cut stream with unusable partial calls errors out before the
 			// finalizer runs: emitting ToolInputEnd after backfilling "{}" would
 			// present fabricated completed input to consumers (CHARM-2020).
-			if missingFinishWithBadArgs {
+			if incompleteToolArgs {
 				err := ctx.Err()
 				if err == nil {
 					err = fantasy.NewIncompleteStreamError()
@@ -734,7 +730,7 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 				})
 				return
 			}
-			if missingFinish && !missingFinishWithBadArgs {
+			if missingFinish && !incompleteToolArgs {
 				yield(fantasy.StreamPart{
 					Type: fantasy.StreamPartTypeWarnings,
 					Warnings: []fantasy.CallWarning{{
@@ -743,7 +739,7 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 					}},
 				})
 			}
-			if suppressedWithToolCalls && !missingFinishWithBadArgs {
+			if suppressedWithToolCalls && !incompleteToolArgs {
 				yield(fantasy.StreamPart{
 					Type: fantasy.StreamPartTypeWarnings,
 					Warnings: []fantasy.CallWarning{{

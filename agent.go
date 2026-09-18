@@ -235,8 +235,8 @@ type (
 	// OnTextDeltaFunc is called for text deltas.
 	OnTextDeltaFunc func(id, text string) error
 
-	// OnTextEndFunc is called when text ends.
-	OnTextEndFunc func(id string) error
+	// OnTextEndFunc is called with the accumulated text when text ends.
+	OnTextEndFunc func(id, text string) error
 
 	// OnReasoningStartFunc is called when reasoning starts.
 	OnReasoningStartFunc func(id string, reasoning ReasoningContent) error
@@ -1493,7 +1493,8 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 			}
 
 		case StreamPartTypeTextEnd:
-			if text, exists := activeTextContent[part.ID]; exists {
+			text, exists := activeTextContent[part.ID]
+			if exists {
 				stepContent = append(stepContent, TextContent{
 					Text:             text,
 					ProviderMetadata: part.ProviderMetadata,
@@ -1501,7 +1502,7 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 				delete(activeTextContent, part.ID)
 			}
 			if opts.OnTextEnd != nil {
-				err := opts.OnTextEnd(part.ID)
+				err := opts.OnTextEnd(part.ID, text)
 				if err != nil {
 					return stepExecutionResult{}, err
 				}

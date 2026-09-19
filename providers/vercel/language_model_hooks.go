@@ -588,8 +588,10 @@ func languageModelStreamUsage(chunk openaisdk.ChatCompletionChunk, _ map[string]
 func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.ChatCompletionMessageParamUnion, []fantasy.CallWarning) {
 	var messages []openaisdk.ChatCompletionMessageParamUnion
 	var warnings []fantasy.CallWarning
+	var media openaipkg.ToolRunBuffer
 
 	for _, msg := range prompt {
+		messages = media.Role(msg.Role, messages)
 		switch msg.Role {
 		case fantasy.MessageRoleSystem:
 			var systemPromptParts []string
@@ -795,7 +797,7 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 					}
 				}
 			}
-			if !hasVisibleUserContent(content) {
+			if !openaipkg.HasVisibleUserContent(content) {
 				warnings = append(warnings, fantasy.CallWarning{
 					Type:    fantasy.CallWarningTypeOther,
 					Message: "dropping empty user message (contains neither user-facing content nor tool results)",
@@ -1012,6 +1014,13 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 					assistantMsg.ToolCalls = append(assistantMsg.ToolCalls, tc)
 				}
 			}
+			if !openaipkg.HasVisibleAssistantContent(&assistantMsg) {
+				warnings = append(warnings, fantasy.CallWarning{
+					Type:    fantasy.CallWarningTypeOther,
+					Message: "dropping empty assistant message (contains neither user-facing content nor tool calls)",
+				})
+				continue
+			}
 			messages = append(messages, openaisdk.ChatCompletionMessageParamUnion{
 				OfAssistant: &assistantMsg,
 			})
@@ -1049,13 +1058,7 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 						continue
 					}
 					tr := openaisdk.ToolMessage(output.Text, toolResultPart.ToolCallID)
-					if cacheControl != nil {
-						tr.SetExtraFields(map[string]any{
-							"cache_control": map[string]string{
-								"type": cacheControl.Type,
-							},
-						})
-					}
+					openaipkg.TagToolCacheControl(tr.OfTool, cacheControl.CacheType())
 					messages = append(messages, tr)
 				case fantasy.ToolResultContentTypeError:
 					output, ok := fantasy.AsToolResultOutputType[fantasy.ToolResultOutputContentError](toolResultPart.Output)
@@ -1067,28 +1070,36 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 						continue
 					}
 					tr := openaisdk.ToolMessage(output.Error.Error(), toolResultPart.ToolCallID)
-					if cacheControl != nil {
-						tr.SetExtraFields(map[string]any{
-							"cache_control": map[string]string{
-								"type": cacheControl.Type,
-							},
-						})
-					}
+					openaipkg.TagToolCacheControl(tr.OfTool, cacheControl.CacheType())
 					messages = append(messages, tr)
+				case fantasy.ToolResultContentTypeMedia:
+					output, ok := fantasy.AsToolResultOutputType[fantasy.ToolResultOutputContentMedia](toolResultPart.Output)
+					if !ok {
+						warnings = append(warnings, fantasy.CallWarning{
+							Type:    fantasy.CallWarningTypeOther,
+							Message: "tool result output does not have the right type",
+						})
+						continue
+					}
+					// Chat completions tool messages cannot carry image or audio
+					// content, so the media travels in a separate user message.
+					tr, mediaMessages, mediaWarnings := openaipkg.ToolResultMediaMessages(output, toolResultPart.ToolCallID)
+					openaipkg.TagToolCacheControl(tr.OfTool, cacheControl.CacheType())
+					messages = append(messages, tr)
+					media.Defer(mediaMessages...)
+					warnings = append(warnings, mediaWarnings...)
+				default:
+					// Falling through silently would leave the assistant's
+					// tool_call unanswered, which the API rejects.
+					warnings = append(warnings, fantasy.CallWarning{
+						Type:    fantasy.CallWarningTypeOther,
+						Message: fmt.Sprintf("tool result output type %q not supported", toolResultPart.Output.GetType()),
+					})
 				}
 			}
 		}
 	}
-	return messages, warnings
-}
-
-func hasVisibleUserContent(content []openaisdk.ChatCompletionContentPartUnionParam) bool {
-	for _, part := range content {
-		if part.OfText != nil || part.OfImageURL != nil || part.OfInputAudio != nil || part.OfFile != nil {
-			return true
-		}
-	}
-	return false
+	return media.Close(messages), warnings
 }
 
 func structToMapJSON(s any) (map[string]any, error) {

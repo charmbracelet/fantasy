@@ -328,17 +328,9 @@ func DefaultStreamProviderMetadataFunc(choice openai.ChatCompletionChoice, metad
 func DefaultToPrompt(prompt fantasy.Prompt, _, _ string) ([]openai.ChatCompletionMessageParamUnion, []fantasy.CallWarning) {
 	var messages []openai.ChatCompletionMessageParamUnion
 	var warnings []fantasy.CallWarning
-	// Defer synthetic user messages holding tool-result media (see
-	// ToolResultMediaMessages) until the contiguous run of tool messages
-	// ends: strict chat-completions validators require every tool message
-	// answering an assistant's tool_calls to immediately follow that
-	// assistant message.
-	var deferredMedia []openai.ChatCompletionMessageParamUnion
+	var media ToolRunBuffer
 	for _, msg := range prompt {
-		if msg.Role != fantasy.MessageRoleTool && len(deferredMedia) > 0 {
-			messages = append(messages, deferredMedia...)
-			deferredMedia = nil
-		}
+		messages = media.Role(msg.Role, messages)
 		switch msg.Role {
 		case fantasy.MessageRoleSystem:
 			var systemPromptParts []string
@@ -502,7 +494,7 @@ func DefaultToPrompt(prompt fantasy.Prompt, _, _ string) ([]openai.ChatCompletio
 					}
 				}
 			}
-			if !hasVisibleUserContent(content) {
+			if !HasVisibleUserContent(content) {
 				warnings = append(warnings, fantasy.CallWarning{
 					Type:    fantasy.CallWarningTypeOther,
 					Message: "dropping empty user message (contains neither user-facing content nor tool results)",
@@ -563,7 +555,7 @@ func DefaultToPrompt(prompt fantasy.Prompt, _, _ string) ([]openai.ChatCompletio
 						})
 				}
 			}
-			if !hasVisibleAssistantContent(&assistantMsg) {
+			if !HasVisibleAssistantContent(&assistantMsg) {
 				warnings = append(warnings, fantasy.CallWarning{
 					Type:    fantasy.CallWarningTypeOther,
 					Message: "dropping empty assistant message (contains neither user-facing content nor tool calls)",
@@ -627,7 +619,7 @@ func DefaultToPrompt(prompt fantasy.Prompt, _, _ string) ([]openai.ChatCompletio
 					// or audio content directly; see ToolResultMediaMessages.
 					toolMessage, mediaMessages, mediaWarnings := ToolResultMediaMessages(output, toolResultPart.ToolCallID)
 					messages = append(messages, toolMessage)
-					deferredMedia = append(deferredMedia, mediaMessages...)
+					media.Defer(mediaMessages...)
 					warnings = append(warnings, mediaWarnings...)
 				default:
 					warnings = append(warnings, fantasy.CallWarning{
@@ -638,8 +630,7 @@ func DefaultToPrompt(prompt fantasy.Prompt, _, _ string) ([]openai.ChatCompletio
 			}
 		}
 	}
-	messages = append(messages, deferredMedia...)
-	return messages, warnings
+	return media.Close(messages), warnings
 }
 
 // ToolResultMediaMessages maps a tool-result media output to the chat
@@ -708,7 +699,14 @@ func toolResultMediaUserPart(output fantasy.ToolResultOutputContentMedia) (opena
 	}
 }
 
-func hasVisibleUserContent(content []openai.ChatCompletionContentPartUnionParam) bool {
+// HasVisibleUserContent reports whether a user message carries anything the
+// model can actually see. A message that converts to no visible parts must be
+// dropped rather than sent: the API rejects a content-less user message, and
+// the error points at the request rather than at the content that vanished.
+//
+// Exported because every chat-completions provider in this module needs the
+// same check against the same SDK type.
+func HasVisibleUserContent(content []openai.ChatCompletionContentPartUnionParam) bool {
 	for _, part := range content {
 		if part.OfText != nil || part.OfImageURL != nil || part.OfInputAudio != nil || part.OfFile != nil {
 			return true
@@ -717,7 +715,20 @@ func hasVisibleUserContent(content []openai.ChatCompletionContentPartUnionParam)
 	return false
 }
 
-func hasVisibleAssistantContent(msg *openai.ChatCompletionAssistantMessageParam) bool {
+// HasVisibleAssistantContent reports whether an assistant message carries text
+// or tool calls. Reasoning alone is not enough: the reasoning travels in
+// provider-specific extra fields, and a message holding only those is empty as
+// far as the API is concerned.
+//
+// Dropping a reasoning-only turn is safe as well as necessary. Strict
+// OpenAI-compatible upstreams reject such a message outright ("content or
+// tool_calls must be set"), and because the message stays in history the
+// rejection repeats on every later request (charmbracelet/crush#3794). The
+// DeepSeek and Kimi replay contract only needs reasoning carried on turns that
+// also have content or tool calls, which pass the checks here; a bare
+// reasoning turn is a truncated or canceled turn with no completion to resume
+// from.
+func HasVisibleAssistantContent(msg *openai.ChatCompletionAssistantMessageParam) bool {
 	// Check if there's text content
 	if !param.IsOmitted(msg.Content.OfString) || len(msg.Content.OfArrayOfContentParts) > 0 {
 		return true
@@ -727,4 +738,61 @@ func hasVisibleAssistantContent(msg *openai.ChatCompletionAssistantMessageParam)
 		return true
 	}
 	return false
+}
+
+// TagToolCacheControl marks a tool message for Anthropic-style prompt caching.
+//
+// It takes the tool param rather than the message union that wraps it because
+// the union is not the value that gets marshalled: setting the extra field
+// there compiles, reads correctly, and silently drops the hint, so every
+// request goes out uncached with nothing to show for it. Taking the inner
+// value makes that mistake unspellable.
+//
+// Exported because openrouter and vercel both attach the same hint to the same
+// SDK type.
+func TagToolCacheControl(msg *openai.ChatCompletionToolMessageParam, cacheType string) {
+	if msg == nil || cacheType == "" {
+		return
+	}
+	msg.SetExtraFields(map[string]any{
+		"cache_control": map[string]string{"type": cacheType},
+	})
+}
+
+// ToolRunBuffer holds synthetic user messages carrying tool-result media back
+// until the current run of tool messages ends.
+//
+// Chat-completions validators require every tool message answering an
+// assistant's tool_calls to follow that assistant message with only other tool
+// messages in between, so a media result cannot emit its user message where it
+// is produced: doing so splits the run and every tool_call_id after the split
+// is reported unanswered. See ToolResultMediaMessages.
+//
+// The rule lives here rather than in each converter because all four
+// chat-completions providers in this module hit it identically, and a rule
+// written four times is a rule that drifts.
+type ToolRunBuffer struct {
+	deferred []openai.ChatCompletionMessageParamUnion
+}
+
+// Role reports that a prompt message of the given role is about to be
+// converted, flushing any deferred media when that role ends a tool run.
+// It returns messages with the flush applied.
+func (b *ToolRunBuffer) Role(role fantasy.MessageRole, messages []openai.ChatCompletionMessageParamUnion) []openai.ChatCompletionMessageParamUnion {
+	if role == fantasy.MessageRoleTool || len(b.deferred) == 0 {
+		return messages
+	}
+	messages = append(messages, b.deferred...)
+	b.deferred = nil
+	return messages
+}
+
+// Defer holds media messages until the current tool run ends.
+func (b *ToolRunBuffer) Defer(messages ...openai.ChatCompletionMessageParamUnion) {
+	b.deferred = append(b.deferred, messages...)
+}
+
+// Close flushes anything still deferred when the prompt ends on a tool run.
+func (b *ToolRunBuffer) Close(messages []openai.ChatCompletionMessageParamUnion) []openai.ChatCompletionMessageParamUnion {
+	return append(messages, b.deferred...)
 }

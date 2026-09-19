@@ -206,6 +206,17 @@ type CacheControl struct {
 	Type string `json:"type"`
 }
 
+// CacheType returns the configured cache type, or the empty string when no
+// cache control is set. GetCacheControl returns nil whenever caching is off,
+// so this lets callers tag a message without repeating that nil check at
+// every call site.
+func (c *CacheControl) CacheType() string {
+	if c == nil {
+		return ""
+	}
+	return c.Type
+}
+
 // NewProviderOptions creates new provider options for the Anthropic provider.
 func NewProviderOptions(opts *ProviderOptions) fantasy.ProviderOptions {
 	return fantasy.ProviderOptions{

@@ -1143,7 +1143,12 @@ func (p *parser) parseString() (any, error) {
 	} else {
 		p.index++
 	}
-	if !p.streamStable && (missingQuotes || (len(stringAcc) > 0 && stringAcc[len(stringAcc)-1] == '\n')) {
+	// Only a line break that is literally present in the source is dropped here. An
+	// escaped \n decodes to the same rune but is string content, so trimming it would
+	// silently change an already valid document.
+	prevChar, hasPrevChar := p.getCharAt(-2)
+	rawTrailingNewline := ok && char == rdelim && hasPrevChar && prevChar == '\n'
+	if !p.streamStable && (missingQuotes || rawTrailingNewline) {
 		stringAcc = trimRightWhitespace(stringAcc)
 	}
 	if missingQuotes && p.context.empty {

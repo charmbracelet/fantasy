@@ -1372,6 +1372,48 @@ func TestEscaping(t *testing.T) {
 			input: "{\"key_1\n\": \"value\"}",
 			want:  "{\"key_1\": \"value\"}",
 		},
+		// Regression tests for #373: a newline that came from an escape sequence is
+		// string content, so repairing an already valid document must not trim it.
+		{
+			name:  "escaped_newline_at_end_of_value",
+			input: "{\"key\": \"line\\n\"}",
+			want:  "{\"key\": \"line\\n\"}",
+		},
+		{
+			name:  "escaped_newline_at_end_of_key",
+			input: "{\"key\\n\": \"value\"}",
+			want:  "{\"key\\n\": \"value\"}",
+		},
+		{
+			name:  "escaped_crlf_at_end_of_value",
+			input: "{\"key\": \"line\\r\\n\"}",
+			want:  "{\"key\": \"line\\r\\n\"}",
+		},
+		{
+			name:  "escaped_newlines_at_end_of_value",
+			input: "{\"key\": \"line\\n\\n\"}",
+			want:  "{\"key\": \"line\\n\\n\"}",
+		},
+		{
+			name:  "unicode_escaped_newline_at_end_of_value",
+			input: "{\"key\": \"line\\u000a\"}",
+			want:  "{\"key\": \"line\\n\"}",
+		},
+		{
+			name:  "trailing_space_before_escaped_newline",
+			input: "{\"key\": \"line \\n\"}",
+			want:  "{\"key\": \"line \\n\"}",
+		},
+		{
+			name:  "escaped_newline_before_trailing_space",
+			input: "{\"key\": \"line\\n \"}",
+			want:  "{\"key\": \"line\\n \"}",
+		},
+		{
+			name:  "raw_newline_at_end_of_value",
+			input: "{\"key\": \"line\n\"}",
+			want:  "{\"key\": \"line\"}",
+		},
 		{
 			name:  "tab_in_key",
 			input: "{\"key\t_\": \"value\"}",

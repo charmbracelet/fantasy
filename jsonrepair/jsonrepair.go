@@ -462,10 +462,10 @@ func (p *parser) parseNumber() (any, error) {
 		numberStr = numberStr[:len(numberStr)-1]
 		p.index--
 	}
-	if strings.Contains(numberStr, "/") || strings.Contains(numberStr, "-") || strings.Contains(numberStr, ",") {
-		if numberStr == "-" {
-			return "", nil
-		}
+	if numberStr == "" || numberStr == "-" {
+		return "", nil
+	}
+	if hasNumericSeparator(numberStr) {
 		if strings.ContainsAny(numberStr, "eE") {
 			floatVal, err := strconv.ParseFloat(numberStr, 64)
 			if err == nil {
@@ -484,9 +484,6 @@ func (p *parser) parseNumber() (any, error) {
 		}
 		return numberStr, nil
 	}
-	if numberStr == "" {
-		return "", nil
-	}
 	return numberValue{raw: numberStr}, nil
 }
 
@@ -499,6 +496,23 @@ func isExponentSign(char rune, numberStr string) bool {
 	}
 	last := numberStr[len(numberStr)-1]
 	return last == 'e' || last == 'E'
+}
+
+// hasNumericSeparator reports whether the characters collected as a number are
+// interleaved with something that cannot appear in a JSON number, such as the
+// "-" of "10-20" or the "/" of "1/3". A "-" at the front is a sign and a "-"
+// right after an exponent marker belongs to the exponent, so neither counts:
+// both leave a literal that must keep its number type.
+func hasNumericSeparator(numberStr string) bool {
+	if strings.ContainsAny(numberStr, "/,") {
+		return true
+	}
+	for i := 1; i < len(numberStr); i++ {
+		if numberStr[i] == '-' && numberStr[i-1] != 'e' && numberStr[i-1] != 'E' {
+			return true
+		}
+	}
+	return false
 }
 
 func (p *parser) parseObject() (any, error) {

@@ -231,6 +231,13 @@ func (p *parser) parseJSON() (any, error) {
 				return p.parseNumber()
 			}
 		}
+		// Only the JSON quote character, not every isStringDelimiter rune: text
+		// that begins with an apostrophe or a curly quote has to stay junk.
+		if p.context.empty && char == '"' {
+			if onlyWhitespaceBefore(p) {
+				return p.parseString()
+			}
+		}
 		if char == '#' || char == '/' {
 			return p.parseComment()
 		}
@@ -1460,11 +1467,10 @@ func RepairJSON(input string, opts ...Option) (string, error) {
 		return "", err
 	}
 	if str, ok := value.(string); ok {
-		trimmed := strings.TrimSpace(str)
-		if str == "" || trimmed == "" {
+		if strings.TrimSpace(str) == "" {
 			return "", nil
 		}
-		return "", nil
+		return serialize(value, ensureASCIIValue(cfg)), nil
 	}
 	if value == "" {
 		return "", nil

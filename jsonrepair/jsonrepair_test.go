@@ -1225,6 +1225,187 @@ func TestParseStringBasics(t *testing.T) {
 	}
 }
 
+// A document may be a single JSON string, so repairing one has to hand it back
+// rather than returning nothing.
+func TestTopLevelString(t *testing.T) {
+	cases := []struct {
+		name  string
+		input string
+		want  string
+	}{
+		{
+			name:  "quoted_word",
+			input: `"str"`,
+			want:  `"str"`,
+		},
+		{
+			name:  "quoted_number",
+			input: `"42"`,
+			want:  `"42"`,
+		},
+		{
+			name:  "quoted_boolean_word",
+			input: `"true"`,
+			want:  `"true"`,
+		},
+		{
+			name:  "quoted_phrase",
+			input: `"a b"`,
+			want:  `"a b"`,
+		},
+		{
+			name:  "quoted_non_ascii",
+			input: `"★"`,
+			want:  `"\u2605"`,
+		},
+		// Guards: the blank rule and the junk around a quote stay as they are.
+		{
+			name:  "blank_quoted",
+			input: `" "`,
+			want:  "",
+		},
+		{
+			name:  "empty_quoted",
+			input: `""`,
+			want:  "",
+		},
+		{
+			name:  "lone_quote",
+			input: `"`,
+			want:  "",
+		},
+		{
+			name:  "bare_word",
+			input: `string`,
+			want:  "",
+		},
+		{
+			name:  "word_before_object",
+			input: `stringbeforeobject {}`,
+			want:  `{}`,
+		},
+		{
+			name:  "single_quoted",
+			input: "'key'",
+			want:  "",
+		},
+		{
+			name:  "quote_after_text",
+			input: `he said "hi" now`,
+			want:  "",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := RepairJSON(tc.input)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if got != tc.want {
+				t.Fatalf("got %q want %q", got, tc.want)
+			}
+		})
+	}
+}
+
+// The option paths have to agree with the default one.
+func TestTopLevelStringOptions(t *testing.T) {
+	cases := []struct {
+		name  string
+		input string
+		opts  []Option
+		want  string
+	}{
+		{
+			name:  "strict",
+			input: `"str"`,
+			opts:  []Option{WithStrict()},
+			want:  `"str"`,
+		},
+		{
+			name:  "stream_stable",
+			input: `"str"`,
+			opts:  []Option{WithStreamStable()},
+			want:  `"str"`,
+		},
+		{
+			name:  "skip_json_loads",
+			input: `"str"`,
+			opts:  []Option{WithSkipJSONLoads()},
+			want:  `"str"`,
+		},
+		{
+			name:  "ensure_ascii_off",
+			input: `"★"`,
+			opts:  []Option{WithEnsureASCII(false)},
+			want:  `"★"`,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := RepairJSON(tc.input, tc.opts...)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if got != tc.want {
+				t.Fatalf("got %q want %q", got, tc.want)
+			}
+		})
+	}
+}
+
+// Repairing the repaired string must not change it again.
+func TestTopLevelStringIdempotent(t *testing.T) {
+	once, err := RepairJSON(`"str"`)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	twice, err := RepairJSON(once)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if once != `"str"` || twice != once {
+		t.Fatalf("first pass %q, second pass %q", once, twice)
+	}
+}
+
+func TestLoadsTopLevelString(t *testing.T) {
+	cases := []struct {
+		name  string
+		input string
+		want  string
+	}{
+		{
+			name:  "quoted_word",
+			input: `"str"`,
+			want:  "str",
+		},
+		{
+			name:  "quoted_number",
+			input: `"42"`,
+			want:  "42",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := Loads(tc.input)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			str, ok := got.(string)
+			if !ok {
+				t.Fatalf("got %#v (%T) want the string %q", got, got, tc.want)
+			}
+			if str != tc.want {
+				t.Fatalf("got %q want %q", str, tc.want)
+			}
+		})
+	}
+}
+
 func TestMissingAndMixedQuotes(t *testing.T) {
 	cases := []struct {
 		name  string

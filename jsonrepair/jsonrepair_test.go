@@ -1613,3 +1613,137 @@ func TestParseBooleanOrNull(t *testing.T) {
 		})
 	}
 }
+
+// TestRepairJSONUnicodeSurrogatePairs covers the two \uXXXX escapes a non-BMP
+// character is encoded as when the JSON text stays ASCII.
+func TestRepairJSONUnicodeSurrogatePairs(t *testing.T) {
+	cases := []struct {
+		name  string
+		input string
+		opts  []Option
+		want  string
+	}{
+		{
+			name:  "valid_pair_is_preserved",
+			input: `{"key": "\ud83d\ude00"}`,
+			want:  `{"key": "\ud83d\ude00"}`,
+		},
+		{
+			name:  "pair_in_uppercase_hex",
+			input: `{"key": "\uD83D\uDE00"}`,
+			want:  `{"key": "\ud83d\ude00"}`,
+		},
+		{
+			name:  "pair_written_literally",
+			input: `{"key": "\ud83d\ude00"}`,
+			opts:  []Option{WithEnsureASCII(false)},
+			want:  `{"key": "😀"}`,
+		},
+		{
+			name:  "pair_in_object_key",
+			input: `{"\ud83d\ude00k": 1}`,
+			want:  `{"\ud83d\ude00k": 1}`,
+		},
+		{
+			name:  "pair_in_array_item",
+			input: `["\ud83d\ude00", "x"]`,
+			want:  `["\ud83d\ude00", "x"]`,
+		},
+		{
+			name:  "pair_then_bmp_escape",
+			input: `{"key": "\ud83d\ude00\u263a"}`,
+			want:  `{"key": "\ud83d\ude00\u263a"}`,
+		},
+		{
+			name:  "truncated_object_with_pair",
+			input: `{"text": "hi \ud83d\ude00"`,
+			want:  `{"text": "hi \ud83d\ude00"}`,
+		},
+		{
+			name:  "lone_high_surrogate_stays_replaced",
+			input: `{"key": "\ud83d"}`,
+			want:  `{"key": "\ufffd"}`,
+		},
+		{
+			name:  "orphan_low_surrogate_stays_replaced",
+			input: `{"key": "\ude00"}`,
+			want:  `{"key": "\ufffd"}`,
+		},
+		{
+			name:  "two_high_surrogates_stay_replaced",
+			input: `{"key": "\ud83d\ud83d"}`,
+			want:  `{"key": "\ufffd\ufffd"}`,
+		},
+		{
+			name:  "high_surrogate_then_bmp_escape",
+			input: `{"key": "\ud83d\u263a"}`,
+			want:  `{"key": "\ufffd\u263a"}`,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := RepairJSON(tc.input, tc.opts...)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if got != tc.want {
+				t.Fatalf("got %q want %q", got, tc.want)
+			}
+		})
+	}
+}
+
+// TestRepairJSONUnicodeMatchesStdlib pins the invariant: repairing valid JSON
+// must not change the value it decodes to.
+func TestRepairJSONUnicodeMatchesStdlib(t *testing.T) {
+	nonASCII := []string{
+		`"\ud83d\ude00"`,
+		`"\ud83d\ude00\ud83c\udf89"`,
+		`"emoji: \ud83d\ude00"`,
+		`"\ud840\udc00"`,
+		`"\u263a"`,
+		`"\ufffd"`,
+		`"\ud83d"`,
+	}
+	for _, raw := range nonASCII {
+		input := `{"key": ` + raw + `}`
+		var want any
+		if err := json.Unmarshal([]byte(input), &want); err != nil {
+			t.Fatalf("input %q is not valid json: %v", input, err)
+		}
+		repaired, err := RepairJSON(input)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		var got any
+		if err := json.Unmarshal([]byte(repaired), &got); err != nil {
+			t.Fatalf("repaired %q is not valid json: %v", repaired, err)
+		}
+		if !reflect.DeepEqual(want, got) {
+			t.Fatalf("input %q repaired %q: got %#v want %#v", input, repaired, got, want)
+		}
+	}
+}
+
+// TestRepairJSONIdempotentOnOwnOutput feeds the repairer its own result back in,
+// as happens when a streamed tool call is repaired again on the next chunk.
+func TestRepairJSONIdempotentOnOwnOutput(t *testing.T) {
+	for _, input := range []string{
+		`{"key": "😀 café 中"}`,
+		`{"key": "\ud83d\ude00"}`,
+		`{"items": ["\ud83c\udf89", "\ud840\udc00"]}`,
+	} {
+		first, err := RepairJSON(input)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		second, err := RepairJSON(first)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if first != second {
+			t.Fatalf("input %q: first %q second %q", input, first, second)
+		}
+	}
+}

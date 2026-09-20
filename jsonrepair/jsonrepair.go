@@ -940,8 +940,14 @@ func (p *parser) parseString() (any, error) {
 				if len(nextChars) == numChars && isHexString(string(nextChars)) {
 					p.log("Found a unicode escape sequence, normalizing it")
 					parsed, _ := strconv.ParseInt(string(nextChars), 16, 32)
-					stringAcc = append(stringAcc[:len(stringAcc)-1], rune(parsed))
+					code := rune(parsed)
 					p.index += 1 + numChars
+					if char == 'u' {
+						if paired, isPair := p.readSurrogatePair(code); isPair {
+							code = paired
+						}
+					}
+					stringAcc = append(stringAcc[:len(stringAcc)-1], code)
 					char, ok = p.getCharAt(0)
 					continue
 				}
@@ -1173,6 +1179,31 @@ func (p *parser) parseString() (any, error) {
 		}
 	}
 	return string(stringAcc), nil
+}
+
+// readSurrogatePair consumes the \uXXXX escape that follows a surrogate, so a
+// non-BMP character decodes to one code point instead of two invalid ones.
+func (p *parser) readSurrogatePair(high rune) (rune, bool) {
+	if !utf16.IsSurrogate(high) {
+		return 0, false
+	}
+	if p.sliceString(p.index, p.index+2) != "\\u" {
+		return 0, false
+	}
+	digits := p.sliceString(p.index+2, p.index+6)
+	if !isHexString(digits) {
+		return 0, false
+	}
+	parsed, err := strconv.ParseInt(digits, 16, 32)
+	if err != nil {
+		return 0, false
+	}
+	combined := utf16.DecodeRune(high, rune(parsed))
+	if combined == unicode.ReplacementChar {
+		return 0, false
+	}
+	p.index += 6
+	return combined, true
 }
 
 func (p *parser) parseBooleanOrNull() any {

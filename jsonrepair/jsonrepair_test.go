@@ -859,6 +859,19 @@ func TestParseNumberEdgeCases(t *testing.T) {
 			input: "{\"key\": 1e+10}",
 			want:  "{\"key\": 10000000000.0}",
 		},
+		// src/index.test.ts:46 and :51 of josdejong/jsonrepair assert these two
+		// pass through unchanged. formatFloat rewrites the text either way, so
+		// what is pinned here is the value: on b4bf5f9 "2300e+3" decodes to 2300.
+		{
+			name:  "upstream_corpus_zero_exponent",
+			input: "0e+2",
+			want:  "0.0",
+		},
+		{
+			name:  "upstream_corpus_large_exponent",
+			input: "2300e+3",
+			want:  "2300000.0",
+		},
 		{
 			name:  "truncated_positive_exponent",
 			input: "{\"key\": 1E+}",

@@ -436,7 +436,7 @@ func (p *parser) parseNumber() (any, error) {
 	numberStr := ""
 	char, ok := p.getCharAt(0)
 	isArray := p.context.current != nil && *p.context.current == contextArray
-	for ok && strings.ContainsRune(numberChars, char) && (!isArray || char != ',' || strings.Contains(numberStr, "/")) {
+	for ok && (strings.ContainsRune(numberChars, char) || isExponentSign(char, numberStr)) && (!isArray || char != ',' || strings.Contains(numberStr, "/")) {
 		if char != '_' {
 			numberStr += string(char)
 		}
@@ -447,12 +447,13 @@ func (p *parser) parseNumber() (any, error) {
 		p.index -= len([]rune(numberStr))
 		return p.parseString()
 	}
-	if len(numberStr) > 0 {
+	for len(numberStr) > 0 {
 		last := numberStr[len(numberStr)-1]
-		if last == '-' || last == 'e' || last == 'E' || last == '/' || last == ',' {
-			numberStr = numberStr[:len(numberStr)-1]
-			p.index--
+		if last != '-' && last != 'e' && last != 'E' && last != '/' && last != ',' && last != '+' {
+			break
 		}
+		numberStr = numberStr[:len(numberStr)-1]
+		p.index--
 	}
 	if strings.Contains(numberStr, "/") || strings.Contains(numberStr, "-") || strings.Contains(numberStr, ",") {
 		if numberStr == "-" {
@@ -480,6 +481,17 @@ func (p *parser) parseNumber() (any, error) {
 		return "", nil
 	}
 	return numberValue{raw: numberStr}, nil
+}
+
+// isExponentSign reports whether char is the "+" of an exponent such as "1e+2".
+// "+" is deliberately left out of numberChars: anywhere else it is not part of
+// a JSON number and has to end the literal.
+func isExponentSign(char rune, numberStr string) bool {
+	if char != '+' || numberStr == "" {
+		return false
+	}
+	last := numberStr[len(numberStr)-1]
+	return last == 'e' || last == 'E'
 }
 
 func (p *parser) parseObject() (any, error) {

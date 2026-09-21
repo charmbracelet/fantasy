@@ -742,6 +742,11 @@ func TestParseNumber(t *testing.T) {
 				"value": json.Number("1234.56"),
 			},
 		},
+		{
+			name:  "positive_exponent",
+			input: "2E+3",
+			want:  json.Number("2000.0"),
+		},
 	}
 
 	for _, tc := range cases {
@@ -827,6 +832,55 @@ func TestParseNumberEdgeCases(t *testing.T) {
 			name:  "exponent",
 			input: "{\"key\": 1e10 }",
 			want:  "{\"key\": 10000000000.0}",
+		},
+		// A "+" belongs to the exponent, so the literal stays one number.
+		{
+			name:  "positive_exponent",
+			input: "{\"key\": 1E+2}",
+			want:  "{\"key\": 100.0}",
+		},
+		{
+			name:  "lowercase_positive_exponent",
+			input: "{\"key\": 1e+2}",
+			want:  "{\"key\": 100.0}",
+		},
+		{
+			name:  "negative_with_positive_exponent",
+			input: "{\"key\": -1E+2}",
+			want:  "{\"key\": -100.0}",
+		},
+		{
+			name:  "positive_exponent_in_array",
+			input: "{\"a\": [1E+2, 2e+3]}",
+			want:  "{\"a\": [100.0, 2000.0]}",
+		},
+		{
+			name:  "large_positive_exponent",
+			input: "{\"key\": 1e+10}",
+			want:  "{\"key\": 10000000000.0}",
+		},
+		// src/index.test.ts:46 and :51 of josdejong/jsonrepair assert these two
+		// pass through unchanged. formatFloat rewrites the text either way, so
+		// what is pinned here is the value: on b4bf5f9 "2300e+3" decodes to 2300.
+		{
+			name:  "upstream_corpus_zero_exponent",
+			input: "0e+2",
+			want:  "0.0",
+		},
+		{
+			name:  "upstream_corpus_large_exponent",
+			input: "2300e+3",
+			want:  "2300000.0",
+		},
+		{
+			name:  "truncated_positive_exponent",
+			input: "{\"key\": 1E+}",
+			want:  "{\"key\": 1}",
+		},
+		{
+			name:  "plus_outside_exponent",
+			input: "{\"key\": 1+2}",
+			want:  "{\"key\": 1}",
 		},
 		{
 			name:  "bad_exponent",

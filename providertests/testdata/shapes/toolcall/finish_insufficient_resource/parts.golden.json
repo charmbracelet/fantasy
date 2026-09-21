@@ -1,0 +1,36 @@
+[
+  {
+    "type": "tool_input_start",
+    "id": "call_test_1",
+    "name": "get_date"
+  },
+  {
+    "type": "tool_input_delta",
+    "id": "call_test_1",
+    "delta": "{}"
+  },
+  {
+    "type": "tool_input_end",
+    "id": "call_test_1"
+  },
+  {
+    "type": "warnings",
+    "warnings": [
+      "tool calls were returned but the turn ended abnormally (token limit, content filter, or provider error); arguments may be truncated"
+    ]
+  },
+  {
+    "type": "finish",
+    "reason": "error",
+    "metadata": {
+      "openai": {
+        "type": "openai.metadata",
+        "data": {
+          "logprobs": null,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      }
+    }
+  }
+]

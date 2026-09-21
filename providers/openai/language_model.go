@@ -16,7 +16,6 @@ import (
 	"charm.land/fantasy"
 	"charm.land/fantasy/object"
 	"charm.land/fantasy/schema"
-	"github.com/google/uuid"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/option"
 	"github.com/openai/openai-go/v3/packages/param"
@@ -432,7 +431,7 @@ func (o languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantas
 		if annotation.Type == "url_citation" {
 			content = append(content, fantasy.SourceContent{
 				SourceType: fantasy.SourceTypeURL,
-				ID:         uuid.NewString(),
+				ID:         fantasy.NewID(),
 				URL:        annotation.URLCitation.URL,
 				Title:      annotation.URLCitation.Title,
 			})
@@ -596,7 +595,7 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 						if annotation.Type == "url_citation" {
 							if !yield(fantasy.StreamPart{
 								Type:       fantasy.StreamPartTypeSource,
-								ID:         uuid.NewString(),
+								ID:         fantasy.NewID(),
 								SourceType: fantasy.SourceTypeURL,
 								URL:        annotation.URLCitation.URL,
 								Title:      annotation.URLCitation.Title,

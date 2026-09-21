@@ -747,6 +747,23 @@ func TestParseNumber(t *testing.T) {
 			input: "2E+3",
 			want:  json.Number("2000.0"),
 		},
+		{
+			name:  "negative_integer",
+			input: "-10",
+			want:  json.Number("-10"),
+		},
+		{
+			name:  "negative_float",
+			input: "-0.5",
+			want:  json.Number("-0.5"),
+		},
+		{
+			name:  "negative_in_object",
+			input: "{\"offset\": -10}",
+			want: map[string]any{
+				"offset": json.Number("-10"),
+			},
+		},
 	}
 
 	for _, tc := range cases {
@@ -755,8 +772,10 @@ func TestParseNumber(t *testing.T) {
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
+			// The types matter here: "%#v" prints a string and a json.Number
+			// identically, so a value-level message hides the real regression.
 			if !reflect.DeepEqual(got, tc.want) {
-				t.Fatalf("got %#v want %#v", got, tc.want)
+				t.Fatalf("got %#v (%T) want %#v (%T)", got, got, tc.want, tc.want)
 			}
 		})
 	}
@@ -807,6 +826,43 @@ func TestParseNumberEdgeCases(t *testing.T) {
 			name:  "fraction_trailing",
 			input: "{\"key\": 1/3, \"foo\": \"bar\"}",
 			want:  "{\"key\": \"1/3\", \"foo\": \"bar\"}",
+		},
+		// Regression tests for #375: a leading "-" is a sign, so a negative
+		// number is a valid JSON number and must not be quoted into a string.
+		{
+			name:  "negative_integer",
+			input: "{\"key\": -1}",
+			want:  "{\"key\": -1}",
+		},
+		{
+			name:  "negative_float",
+			input: "{\"key\": -3.5}",
+			want:  "{\"key\": -3.5}",
+		},
+		{
+			name:  "negative_zero",
+			input: "{\"key\": -0}",
+			want:  "{\"key\": -0}",
+		},
+		{
+			name:  "negative_in_array",
+			input: "{\"offsets\": [-1, -2]}",
+			want:  "{\"offsets\": [-1, -2]}",
+		},
+		{
+			name:  "negative_exponent",
+			input: "{\"key\": -1e-3}",
+			want:  "{\"key\": -0.001}",
+		},
+		{
+			name:  "negative_in_truncated_object",
+			input: "{\"offset\": -1",
+			want:  "{\"offset\": -1}",
+		},
+		{
+			name:  "negative_in_array_of_objects",
+			input: "[{\"a\": -1}, {\"b\": -2.5}]",
+			want:  "[{\"a\": -1}, {\"b\": -2.5}]",
 		},
 		{
 			name:  "dash_number",

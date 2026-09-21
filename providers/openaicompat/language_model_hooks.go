@@ -168,10 +168,10 @@ func StreamExtraFunc(chunk openaisdk.ChatCompletionChunk, yield func(fantasy.Str
 		if reasoningStarted && boundary {
 			ctx[startedKey] = false
 			ctx[endedKey] = true
-			// The openai main loop emits a chunk's text/tool-call parts before
-			// this hook runs, so on a batched boundary chunk the part order is
-			// ToolInputStart, ReasoningDelta(tail), ReasoningEnd. Parts are
-			// keyed by id, so consumers can still attribute them correctly.
+			// The openai main loop runs this hook before emitting a chunk's
+			// text/tool-call parts, so on a batched boundary chunk the part order
+			// is ReasoningDelta(tail), ReasoningEnd, then the content/tool parts:
+			// the reasoning in that delta semantically precedes the content.
 			if !yield(fantasy.StreamPart{
 				Type: fantasy.StreamPartTypeReasoningEnd,
 				ID:   fmt.Sprintf("%d", inx),

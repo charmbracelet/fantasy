@@ -10,6 +10,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.45.1
 	github.com/aws/aws-sdk-go-v2/config v1.33.1
 	github.com/aws/smithy-go v1.28.1
+	github.com/charmbracelet/openai-go v0.0.0-20260921175203-216db9e71b83
 	github.com/charmbracelet/x/exp/slice v0.0.0-20250904123553-b4e2667e5ad5
 	github.com/charmbracelet/x/exp/strings v0.1.0
 	github.com/charmbracelet/x/json v0.2.0
@@ -17,7 +18,6 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/kaptinlin/jsonschema v0.9.9
-	github.com/openai/openai-go/v3 v3.54.0
 	github.com/stretchr/testify v1.12.1
 	golang.org/x/net v0.58.0
 	golang.org/x/oauth2 v0.36.0
@@ -58,6 +58,7 @@ require (
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cncf/xds/go v0.0.0-20260202195803-dba9d589def2 // indirect
+	github.com/coder/websocket v1.8.15 // indirect
 	github.com/ebitengine/purego v0.11.0-alpha.9 // indirect
 	github.com/envoyproxy/go-control-plane/envoy v1.39.0 // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.3.3 // indirect

@@ -11,8 +11,8 @@ import (
 	"strings"
 
 	"charm.land/fantasy"
-	"github.com/openai/openai-go/v3"
-	"github.com/openai/openai-go/v3/packages/ssestream"
+	"github.com/charmbracelet/openai-go"
+	"github.com/charmbracelet/openai-go/packages/ssestream"
 )
 
 var (

@@ -11,8 +11,8 @@ import (
 	"charm.land/fantasy/providers/anthropic"
 	"charm.land/fantasy/providers/google"
 	openaipkg "charm.land/fantasy/providers/openai"
-	openaisdk "github.com/openai/openai-go/v3"
-	"github.com/openai/openai-go/v3/packages/param"
+	openaisdk "github.com/charmbracelet/openai-go"
+	"github.com/charmbracelet/openai-go/packages/param"
 )
 
 const reasoningStartedCtx = "reasoning_started"

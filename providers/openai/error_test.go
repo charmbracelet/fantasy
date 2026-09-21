@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"charm.land/fantasy"
-	"github.com/openai/openai-go/v3/packages/ssestream"
+	"github.com/charmbracelet/openai-go/packages/ssestream"
 )
 
 func TestToProviderErr_WrapsUnexpectedEOF(t *testing.T) {

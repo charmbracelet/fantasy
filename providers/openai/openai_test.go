@@ -4003,6 +4003,13 @@ func TestParseContextTooLargeError(t *testing.T) {
 			wantMax: 245760,
 		},
 		{
+			name:     "matches baseten format",
+			message:  "Input length 265059 exceeds the maximum allowed input length of 262112 tokens.",
+			wantErr:  true,
+			wantUsed: 265059,
+			wantMax:  262112,
+		},
+		{
 			name:     "matches vercel format",
 			message:  "Input too long: 518063 input tokens, limit is 262144 for this model",
 			wantErr:  true,

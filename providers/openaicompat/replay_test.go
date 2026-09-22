@@ -293,6 +293,68 @@ func TestReplay_DeepSeekBatchedBoundaryChunk(t *testing.T) {
 	})
 	require.Equal(t, "Need the date. Calling.", reasoningText(parts))
 	require.Equal(t, 1, countType(parts, fantasy.StreamPartTypeToolCall), "types: %v", partTypes(parts))
+	// The reasoning tail rides the same delta as the tool call, so it must
+	// be yielded before the tool parts: block-based consumers (e.g.
+	// Anthropic-shaped /messages endpoints) close their reasoning block when
+	// a tool part opens, and reasoning emitted after it lands in a block
+	// that was already closed.
+	lastReasoning, firstTool := -1, -1
+	for i, p := range parts {
+		if p.Type == fantasy.StreamPartTypeReasoningDelta || p.Type == fantasy.StreamPartTypeReasoningEnd {
+			lastReasoning = i
+		}
+		if firstTool == -1 && (p.Type == fantasy.StreamPartTypeToolInputStart || p.Type == fantasy.StreamPartTypeToolCall) {
+			firstTool = i
+		}
+	}
+	require.Greater(t, lastReasoning, -1)
+	require.Greater(t, firstTool, -1)
+	require.Less(t, lastReasoning, firstTool,
+		"reasoning must precede tool parts on a batched boundary chunk: %v", partTypes(parts))
+}
+
+// A batching host may also put the reasoning tail and the first content token
+// in the same delta. The reasoning must be yielded before the text parts for
+// the same reason as above: a consumer that closes its reasoning block when
+// text opens cannot place reasoning emitted afterwards.
+const deepseekBatchedContentBoundarySSE = `{"id":"x","created":1,"model":"deepseek-v4-flash","choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning_content":null},"finish_reason":null}]}
+{"id":"x","created":1,"model":"deepseek-v4-flash","choices":[{"index":0,"delta":{"content":null,"reasoning_content":"Long thinking about the answer."},"finish_reason":null}]}
+{"id":"x","created":1,"model":"deepseek-v4-flash","choices":[{"index":0,"delta":{"content":"Hello","reasoning_content":" Done."},"finish_reason":null}]}
+{"id":"x","created":1,"model":"deepseek-v4-flash","choices":[{"index":0,"delta":{"content":" world.","reasoning_content":null},"finish_reason":null}]}
+{"id":"x","created":1,"model":"deepseek-v4-flash","choices":[{"index":0,"delta":{"content":"","reasoning_content":null},"finish_reason":"stop"}]}`
+
+func TestReplay_BatchedContentBoundaryChunkOrder(t *testing.T) {
+	srv, _ := serveSSE(t, deepseekBatchedContentBoundarySSE)
+	provider, err := New(WithBaseURL(srv.URL), WithAPIKey("x"))
+	require.NoError(t, err)
+	lm, err := provider.LanguageModel(context.Background(), "deepseek-v4-flash")
+	require.NoError(t, err)
+
+	parts := streamParts(t, lm, fantasy.Prompt{
+		{Role: fantasy.MessageRoleUser, Content: []fantasy.MessagePart{fantasy.TextPart{Text: "hi"}}},
+	})
+	require.Equal(t, "Long thinking about the answer. Done.", reasoningText(parts))
+	var text strings.Builder
+	for _, p := range parts {
+		if p.Type == fantasy.StreamPartTypeTextDelta {
+			text.WriteString(p.Delta)
+		}
+	}
+	require.Equal(t, "Hello world.", text.String())
+
+	lastReasoning, firstText := -1, -1
+	for i, p := range parts {
+		if p.Type == fantasy.StreamPartTypeReasoningDelta || p.Type == fantasy.StreamPartTypeReasoningEnd {
+			lastReasoning = i
+		}
+		if firstText == -1 && (p.Type == fantasy.StreamPartTypeTextStart || p.Type == fantasy.StreamPartTypeTextDelta) {
+			firstText = i
+		}
+	}
+	require.Greater(t, lastReasoning, -1)
+	require.Greater(t, firstText, -1)
+	require.Less(t, lastReasoning, firstText,
+		"reasoning must precede text parts on a batched boundary chunk: %v", partTypes(parts))
 }
 
 // A.5: Kimi/Avian shape. Reasoning chunks carry reasoning_content, content

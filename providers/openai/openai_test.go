@@ -4010,6 +4010,13 @@ func TestParseContextTooLargeError(t *testing.T) {
 			wantMax:  262112,
 		},
 		{
+			name:     "matches fireworks format",
+			message:  "The prompt is too long: 1261484, model maximum context length: 1048573",
+			wantErr:  true,
+			wantUsed: 1261484,
+			wantMax:  1048573,
+		},
+		{
 			name:     "matches vercel format",
 			message:  "Input too long: 518063 input tokens, limit is 262144 for this model",
 			wantErr:  true,

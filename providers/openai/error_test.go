@@ -4,11 +4,35 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"testing"
 
 	"charm.land/fantasy"
 	"github.com/charmbracelet/openai-go/packages/ssestream"
 )
+
+func TestToHeaderMapLowercasesResponseHeaders(t *testing.T) {
+	t.Parallel()
+
+	input := http.Header{
+		"Retry-After":    []string{"2"},
+		"X-Should-Retry": []string{"true"},
+	}
+	got := toHeaderMap(input)
+
+	if len(got) != 2 {
+		t.Errorf("toHeaderMap returned %d headers, want 2: %#v", len(got), got)
+	}
+	if got["retry-after"] != "2" {
+		t.Errorf("toHeaderMap()[retry-after] = %q, want %q", got["retry-after"], "2")
+	}
+	if got["x-should-retry"] != "true" {
+		t.Errorf("toHeaderMap()[x-should-retry] = %q, want %q", got["x-should-retry"], "true")
+	}
+	if _, ok := input["retry-after"]; ok {
+		t.Error("toHeaderMap mutated the input header map")
+	}
+}
 
 func TestToProviderErr_WrapsUnexpectedEOF(t *testing.T) {
 	t.Parallel()

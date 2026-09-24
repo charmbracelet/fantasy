@@ -160,6 +160,10 @@ const (
 	StreamPartTypeToolResult StreamPartType = "tool_result"
 	// StreamPartTypeSource represents source stream part type.
 	StreamPartTypeSource StreamPartType = "source"
+	// StreamPartTypeProviderMetadata carries provider metadata that is
+	// already known before the stream completes (e.g. values from HTTP
+	// response headers). It is emitted once, before the first content part.
+	StreamPartTypeProviderMetadata StreamPartType = "provider_metadata"
 	// StreamPartTypeFinish represents finish stream part type.
 	StreamPartTypeFinish StreamPartType = "finish"
 	// StreamPartTypeError represents error stream part type.

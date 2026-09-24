@@ -36,9 +36,9 @@ interactions:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 832
+    content_length: 869
     host: ""
-    body: '{"messages":[{"content":"You are a helpful assistant","role":"system","cache_control":{"type":"ephemeral"}},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"toolu_bdrk_0156sNzvRkpm2xuxFNs2N49s","function":{"arguments":"{\"location\": \"Florence, Italy\"}","name":"weather"},"type":"function","cache_control":{"type":"ephemeral"}}],"role":"assistant"},{"content":"40 C","tool_call_id":"toolu_bdrk_0156sNzvRkpm2xuxFNs2N49s","role":"tool"}],"model":"anthropic/claude-haiku-4.5","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
+    body: '{"messages":[{"content":"You are a helpful assistant","role":"system","cache_control":{"type":"ephemeral"}},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"tool_calls":[{"id":"toolu_bdrk_0156sNzvRkpm2xuxFNs2N49s","function":{"arguments":"{\"location\": \"Florence, Italy\"}","name":"weather"},"type":"function","cache_control":{"type":"ephemeral"}}],"role":"assistant"},{"content":"40 C","tool_call_id":"toolu_bdrk_0156sNzvRkpm2xuxFNs2N49s","role":"tool","cache_control":{"type":"ephemeral"}}],"model":"anthropic/claude-haiku-4.5","max_tokens":4000,"tool_choice":"auto","tools":[{"function":{"name":"weather","strict":false,"description":"Get weather information for a location","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}],"usage":{"include":true}}'
     headers:
       Accept:
       - application/json

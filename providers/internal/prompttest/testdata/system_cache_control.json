@@ -1,0 +1,31 @@
+{
+  "openai,openaicompat": {
+    "messages": [
+      {
+        "content": "cached system prompt",
+        "role": "system"
+      },
+      {
+        "content": "hello",
+        "role": "user"
+      }
+    ],
+    "warnings": []
+  },
+  "openrouter,vercel": {
+    "messages": [
+      {
+        "content": "cached system prompt",
+        "role": "system",
+        "cache_control": {
+          "type": "ephemeral"
+        }
+      },
+      {
+        "content": "hello",
+        "role": "user"
+      }
+    ],
+    "warnings": []
+  }
+}

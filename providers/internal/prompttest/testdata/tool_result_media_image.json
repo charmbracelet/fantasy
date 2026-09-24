@@ -1,0 +1,36 @@
+{
+  "openai,openaicompat,openrouter,vercel": {
+    "messages": [
+      {
+        "tool_calls": [
+          {
+            "id": "c1",
+            "function": {
+              "arguments": "{}",
+              "name": "view"
+            },
+            "type": "function"
+          }
+        ],
+        "role": "assistant"
+      },
+      {
+        "content": "The tool returned image/png content; see the following user message.",
+        "tool_call_id": "c1",
+        "role": "tool"
+      },
+      {
+        "content": [
+          {
+            "image_url": {
+              "url": "data:image/png;base64,iVBORw=="
+            },
+            "type": "image_url"
+          }
+        ],
+        "role": "user"
+      }
+    ],
+    "warnings": []
+  }
+}

@@ -4,11 +4,30 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"testing"
 
 	"charm.land/fantasy"
 	"github.com/charmbracelet/openai-go/packages/ssestream"
 )
+
+func TestToHeaderMap_LowercasesKeys(t *testing.T) {
+	t.Parallel()
+
+	in := http.Header{
+		"Retry-After":    []string{"30"},
+		"Retry-After-Ms": []string{"1500"},
+	}
+
+	out := toHeaderMap(in)
+
+	if got := out["retry-after"]; got != "30" {
+		t.Errorf(`out["retry-after"] = %q, want "30" (retry.go looks up headers by lowercase key)`, got)
+	}
+	if got := out["retry-after-ms"]; got != "1500" {
+		t.Errorf(`out["retry-after-ms"] = %q, want "1500"`, got)
+	}
+}
 
 func TestToProviderErr_WrapsUnexpectedEOF(t *testing.T) {
 	t.Parallel()

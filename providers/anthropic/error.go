@@ -131,8 +131,7 @@ func toHeaderMap(in http.Header) (out map[string]string) {
 	out = make(map[string]string, len(in))
 	for k, v := range in {
 		if l := len(v); l > 0 {
-			out[k] = v[l-1]
-			in[strings.ToLower(k)] = v
+			out[strings.ToLower(k)] = v[l-1]
 		}
 	}
 	return out

@@ -302,6 +302,11 @@ func ParseResponsesOptions(data map[string]any) (*ResponsesProviderOptions, erro
 // that predates it.
 var responsesGenerationPattern = regexp.MustCompile(`gpt-(?:[4-9]|[1-9]\d)`)
 
+// reasoningGenerationPattern matches the reasoning model generations:
+// gpt-5 and the ones after it (gpt-6, ...). It stays on a single digit
+// so Azure's gpt-35-turbo is not caught.
+var reasoningGenerationPattern = regexp.MustCompile(`gpt-[5-9]`)
+
 // IsResponsesModel checks if a model ID is a Responses API model for OpenAI.
 func IsResponsesModel(modelID string) bool {
 	return slices.Contains(responsesModelIDs, modelID) ||

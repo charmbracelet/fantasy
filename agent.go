@@ -1683,11 +1683,7 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 					toolResults = append(toolResults, result)
 					if isCriticalError && toolExecutionErr == nil {
 						if errorResult, ok := result.Result.(ToolResultOutputContentError); ok && errorResult.Error != nil {
-							toolExecutionErr = &ToolExecutionError{
-								ToolName:   result.ToolName,
-								ToolCallID: result.ToolCallID,
-								Err:        errorResult.Error,
-							}
+							toolExecutionErr = errorResult.Error
 						}
 					}
 					toolStateMu.Unlock()
@@ -1699,11 +1695,7 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 				toolResults = append(toolResults, result)
 				if isCriticalError && toolExecutionErr == nil {
 					if errorResult, ok := result.Result.(ToolResultOutputContentError); ok && errorResult.Error != nil {
-						toolExecutionErr = &ToolExecutionError{
-							ToolName:   result.ToolName,
-							ToolCallID: result.ToolCallID,
-							Err:        errorResult.Error,
-						}
+						toolExecutionErr = errorResult.Error
 					}
 				}
 				toolStateMu.Unlock()

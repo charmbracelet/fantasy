@@ -2561,10 +2561,10 @@ func TestAgent_Generate_ExecutableProviderTool_ImageBase64(t *testing.T) {
 	require.Equal(t, "image/png", mediaResult.MediaType)
 }
 
-// TestAgent_Generate_ExecutableProviderTool_CriticalError verifies
-// that a Go error returned from an ExecutableProviderTool's run
-// function is treated as a critical error, stopping the agent loop.
-func TestAgent_Generate_ExecutableProviderTool_CriticalError(t *testing.T) {
+// TestAgent_Generate_ExecutableProviderTool_Error verifies that a Go error
+// returned from an ExecutableProviderTool's run function reaches the model
+// as an error result, like any other tool failure.
+func TestAgent_Generate_ExecutableProviderTool_Error(t *testing.T) {
 	t.Parallel()
 
 	execTool := NewExecutableProviderTool(
@@ -2582,6 +2582,13 @@ func TestAgent_Generate_ExecutableProviderTool_CriticalError(t *testing.T) {
 	model := &mockLanguageModel{
 		generateFunc: func(ctx context.Context, call Call) (*Response, error) {
 			callCount++
+			if callCount > 1 {
+				return &Response{
+					Content:      []Content{TextContent{Text: "the screen is unavailable"}},
+					Usage:        Usage{TotalTokens: 10},
+					FinishReason: FinishReasonStop,
+				}, nil
+			}
 			return &Response{
 				Content: []Content{
 					ToolCallContent{
@@ -2603,10 +2610,15 @@ func TestAgent_Generate_ExecutableProviderTool_CriticalError(t *testing.T) {
 
 	require.NoError(t, err)
 	require.NotNil(t, result)
-	// The model should only be called once — the critical error stops
-	// the loop before a second model call.
-	require.Equal(t, 1, callCount)
-	require.Len(t, result.Steps, 1)
+	// The tool failure is reported to the model, which gets to answer.
+	require.Equal(t, 2, callCount)
+	require.Len(t, result.Steps, 2)
+
+	results := result.Steps[0].Content.ToolResults()
+	require.Len(t, results, 1)
+	errResult, ok := results[0].Result.(ToolResultOutputContentError)
+	require.True(t, ok, "the tool failure must be recorded as an error result")
+	require.EqualError(t, errResult.Error, "vnc connection lost")
 }
 
 func TestAgent_Generate_StopTurn(t *testing.T) {

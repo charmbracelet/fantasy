@@ -3,9 +3,12 @@ package fantasy
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"net"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -1055,4 +1058,134 @@ func TestStreamingAgent_ProviderExecutedToolCallGatedOnFinish(t *testing.T) {
 			require.Len(t, result.Steps, 1)
 		})
 	}
+}
+
+// TestStreamingAgent_ToolErrorReachesTheModel pins that a Go error returned
+// from a tool's Run function becomes an error result the model can act on:
+// the run continues, the tool runs once, and OnRetry never fires. The tool
+// error here satisfies net.Error, which the retry loop treats as a transient
+// network failure when it comes from the provider request.
+func TestStreamingAgent_ToolErrorReachesTheModel(t *testing.T) {
+	t.Parallel()
+
+	type input struct{}
+	toolErr := &net.OpError{Op: "dial", Net: "tcp", Err: errors.New("connection refused")}
+
+	for _, tc := range []struct {
+		name string
+		tool func(runs *atomic.Int32) AgentTool
+	}{
+		{
+			name: "sequential tool",
+			tool: func(runs *atomic.Int32) AgentTool {
+				return NewAgentTool("boom", "always fails",
+					func(ctx context.Context, in input, call ToolCall) (ToolResponse, error) {
+						runs.Add(1)
+						return ToolResponse{}, toolErr
+					})
+			},
+		},
+		{
+			name: "parallel tool",
+			tool: func(runs *atomic.Int32) AgentTool {
+				return NewParallelAgentTool("boom", "always fails",
+					func(ctx context.Context, in input, call ToolCall) (ToolResponse, error) {
+						runs.Add(1)
+						return ToolResponse{}, toolErr
+					})
+			},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			var toolRuns, streamCalls atomic.Int32
+			mockModel := &mockLanguageModel{
+				streamFunc: func(ctx context.Context, call Call) (StreamResponse, error) {
+					n := streamCalls.Add(1)
+					return func(yield func(StreamPart) bool) {
+						if n == 1 {
+							if !yield(StreamPart{Type: StreamPartTypeToolCall, ID: "call-1", ToolCallName: "boom", ToolCallInput: `{}`}) {
+								return
+							}
+							yield(StreamPart{Type: StreamPartTypeFinish, FinishReason: FinishReasonToolCalls, Usage: Usage{TotalTokens: 10}})
+							return
+						}
+						if !yield(StreamPart{Type: StreamPartTypeTextStart, ID: "t1"}) {
+							return
+						}
+						if !yield(StreamPart{Type: StreamPartTypeTextDelta, ID: "t1", Delta: "could not reach it"}) {
+							return
+						}
+						if !yield(StreamPart{Type: StreamPartTypeTextEnd, ID: "t1"}) {
+							return
+						}
+						yield(StreamPart{Type: StreamPartTypeFinish, FinishReason: FinishReasonStop, Usage: Usage{TotalTokens: 10}})
+					}, nil
+				},
+			}
+
+			agent := NewAgent(mockModel, WithTools(tc.tool(&toolRuns)))
+			retries := 0
+			res, err := agent.Stream(context.Background(), AgentStreamCall{
+				Prompt: "run boom",
+				OnRetry: func(err *ProviderError, delay time.Duration) {
+					retries++
+				},
+			})
+			require.NoError(t, err, "a tool failure must not end the run")
+			require.Equal(t, FinishReasonStop, res.Response.FinishReason)
+
+			var results []ToolResultContent
+			for _, step := range res.Steps {
+				results = append(results, step.Content.ToolResults()...)
+			}
+			require.Len(t, results, 1)
+			errResult, ok := results[0].Result.(ToolResultOutputContentError)
+			require.True(t, ok, "the tool failure must be recorded as an error result")
+			require.ErrorIs(t, errResult.Error, toolErr, "the tool's own error must stay reachable")
+
+			require.Equal(t, int32(2), streamCalls.Load(), "the model must see the error and get to respond")
+			require.Equal(t, int32(1), toolRuns.Load(), "the tool must not be re-executed")
+			require.Equal(t, 0, retries, "OnRetry must not fire for a tool error")
+		})
+	}
+}
+
+// TestStreamingAgent_CancelDuringToolEndsRun pins that cancellation still
+// ends the run now that a tool's error no longer does. The tool reports a
+// plain failure rather than the context error, so the only thing that can
+// stop the loop is the loop's own view of the context.
+func TestStreamingAgent_CancelDuringToolEndsRun(t *testing.T) {
+	t.Parallel()
+
+	type input struct{}
+	ctx, cancel := context.WithCancel(context.Background())
+
+	var toolRuns, streamCalls atomic.Int32
+	tool := NewAgentTool("boom", "cancels the run",
+		func(ctx context.Context, in input, call ToolCall) (ToolResponse, error) {
+			toolRuns.Add(1)
+			cancel()
+			return ToolResponse{}, errors.New("could not finish")
+		})
+
+	mockModel := &mockLanguageModel{
+		streamFunc: func(ctx context.Context, call Call) (StreamResponse, error) {
+			streamCalls.Add(1)
+			return func(yield func(StreamPart) bool) {
+				if !yield(StreamPart{Type: StreamPartTypeToolCall, ID: "call-1", ToolCallName: "boom", ToolCallInput: `{}`}) {
+					return
+				}
+				yield(StreamPart{Type: StreamPartTypeFinish, FinishReason: FinishReasonToolCalls, Usage: Usage{TotalTokens: 10}})
+			}, nil
+		},
+	}
+
+	agent := NewAgent(mockModel, WithTools(tool))
+	_, err := agent.Stream(ctx, AgentStreamCall{Prompt: "run boom"})
+
+	require.ErrorIs(t, err, context.Canceled)
+	require.Equal(t, int32(1), streamCalls.Load(), "the model must not be asked again after a cancel")
+	require.Equal(t, int32(1), toolRuns.Load())
 }

@@ -1007,6 +1007,21 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 	activeReasoning := make(map[string]*reasoningState)
 
 	return func(yield func(fantasy.StreamPart) bool) {
+		// Surface metadata that is known before the stream completes
+		// (e.g. response headers captured by the header func). Trailers
+		// are not available yet; they land on the finish part instead.
+		if o.headerFunc != nil {
+			initialMetadata := fantasy.ProviderMetadata{}
+			o.applyHeaders(capture.header(), &initialMetadata)
+			if len(initialMetadata) > 0 {
+				if !yield(fantasy.StreamPart{
+					Type:             fantasy.StreamPartTypeProviderMetadata,
+					ProviderMetadata: initialMetadata,
+				}) {
+					return
+				}
+			}
+		}
 		if len(warnings) > 0 {
 			if !yield(fantasy.StreamPart{
 				Type:     fantasy.StreamPartTypeWarnings,

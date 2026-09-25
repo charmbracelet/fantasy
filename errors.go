@@ -281,27 +281,6 @@ func (e RetryError) Unwrap() error {
 	return nil
 }
 
-// ToolExecutionError is returned by the agent when a tool's Run function
-// returns a Go error. The failure ends the step, and it is never retried:
-// the error is local to the tool, so re-running the step would only repeat
-// the model request and re-execute every tool in it. Callers can use
-// errors.As to find it and errors.Unwrap (or errors.Is/As) to reach the
-// tool's own error.
-type ToolExecutionError struct {
-	ToolName   string
-	ToolCallID string
-	Err        error
-}
-
-func (e *ToolExecutionError) Error() string {
-	return fmt.Sprintf("tool %q failed: %v", e.ToolName, e.Err)
-}
-
-// Unwrap returns the error the tool returned.
-func (e *ToolExecutionError) Unwrap() error {
-	return e.Err
-}
-
 // ErrorTitleForStatusCode returns a human-readable title for a given HTTP status code.
 func ErrorTitleForStatusCode(statusCode int) string {
 	return strings.ToLower(http.StatusText(statusCode))

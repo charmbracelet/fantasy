@@ -176,21 +176,11 @@ func isAuthError(err *ProviderError) bool {
 }
 
 // isRetryableError reports whether the error should be retried.
-// A ToolExecutionError is never retried. Otherwise it checks for
-// retryable ProviderError, network-level connection errors
+// It checks for retryable ProviderError, network-level connection errors
 // (DNS failures, TCP timeouts, connection refused), and HTTP/2 stream-
 // level transport errors. The latter two categories may not be wrapped
 // in ProviderError when they occur outside the provider's error handler.
 func isRetryableError(err error) bool {
-	// A tool's Go error is local to the tool: re-running the step would
-	// repeat the model request and re-execute every tool in it without
-	// changing the outcome. Checked before ProviderError so a tool that
-	// surfaces a retryable provider error (a sub-agent hitting a 429, for
-	// example) does not retry the outer step either.
-	var toolErr *ToolExecutionError
-	if errors.As(err, &toolErr) {
-		return false
-	}
 	var providerErr *ProviderError
 	if errors.As(err, &providerErr) {
 		return providerErr.IsRetryable()

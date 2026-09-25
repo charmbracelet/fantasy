@@ -3,12 +3,9 @@ package fantasy
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"net"
 	"strings"
 	"sync"
-	"sync/atomic"
 	"testing"
 	"time"
 
@@ -1056,82 +1053,6 @@ func TestStreamingAgent_ProviderExecutedToolCallGatedOnFinish(t *testing.T) {
 			require.Equal(t, tc.wantNotified, onToolCallFired,
 				"OnToolCall fired=%v for provider-executed call with finish %s", onToolCallFired, tc.reason)
 			require.Len(t, result.Steps, 1)
-		})
-	}
-}
-
-// TestStreamingAgent_ToolErrorIsNotRetried pins that a Go error returned
-// from a tool's Run function ends the step without re-running it: the model
-// is asked once, the tool runs once, OnRetry never fires, and the caller
-// gets a ToolExecutionError that still unwraps to the tool's own error. The
-// tool error here satisfies net.Error, which the retry loop treats as a
-// transient network failure when it comes from the provider request.
-func TestStreamingAgent_ToolErrorIsNotRetried(t *testing.T) {
-	t.Parallel()
-
-	type input struct{}
-	toolErr := &net.OpError{Op: "dial", Net: "tcp", Err: errors.New("connection refused")}
-
-	for _, tc := range []struct {
-		name string
-		tool func(runs *atomic.Int32) AgentTool
-	}{
-		{
-			name: "sequential tool",
-			tool: func(runs *atomic.Int32) AgentTool {
-				return NewAgentTool("boom", "always fails",
-					func(ctx context.Context, in input, call ToolCall) (ToolResponse, error) {
-						runs.Add(1)
-						return ToolResponse{}, toolErr
-					})
-			},
-		},
-		{
-			name: "parallel tool",
-			tool: func(runs *atomic.Int32) AgentTool {
-				return NewParallelAgentTool("boom", "always fails",
-					func(ctx context.Context, in input, call ToolCall) (ToolResponse, error) {
-						runs.Add(1)
-						return ToolResponse{}, toolErr
-					})
-			},
-		},
-	} {
-		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
-
-			var toolRuns, streamCalls atomic.Int32
-			mockModel := &mockLanguageModel{
-				streamFunc: func(ctx context.Context, call Call) (StreamResponse, error) {
-					streamCalls.Add(1)
-					return func(yield func(StreamPart) bool) {
-						if !yield(StreamPart{Type: StreamPartTypeToolCall, ID: "call-1", ToolCallName: "boom", ToolCallInput: `{}`}) {
-							return
-						}
-						yield(StreamPart{Type: StreamPartTypeFinish, FinishReason: FinishReasonToolCalls, Usage: Usage{TotalTokens: 10}})
-					}, nil
-				},
-			}
-
-			agent := NewAgent(mockModel, WithTools(tc.tool(&toolRuns)))
-			retries := 0
-			_, err := agent.Stream(context.Background(), AgentStreamCall{
-				Prompt: "run boom",
-				OnRetry: func(err *ProviderError, delay time.Duration) {
-					retries++
-				},
-			})
-			require.Error(t, err)
-
-			var execErr *ToolExecutionError
-			require.ErrorAs(t, err, &execErr)
-			require.Equal(t, "boom", execErr.ToolName)
-			require.Equal(t, "call-1", execErr.ToolCallID)
-			require.ErrorIs(t, err, toolErr, "the tool's own error must stay reachable")
-
-			require.Equal(t, int32(1), streamCalls.Load(), "the step must not be re-run against the model")
-			require.Equal(t, int32(1), toolRuns.Load(), "the tool must not be re-executed")
-			require.Equal(t, 0, retries, "OnRetry must not fire for a tool error")
 		})
 	}
 }

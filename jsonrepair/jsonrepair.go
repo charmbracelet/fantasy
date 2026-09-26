@@ -476,6 +476,12 @@ func (p *parser) parseNumber() (any, error) {
 		}
 		return numberStr, nil
 	}
+	if hasInvalidJSONIntegerPart(numberStr) {
+		// RFC 8259: int = zero / ( digit1-9 *DIGIT ). A literal with a leading zero
+		// is not a JSON number, so keeping it as one would hand back a document that
+		// still does not parse. Keep the literal as a string instead.
+		return numberStr, nil
+	}
 	if strings.ContainsAny(numberStr, ".eE") {
 		floatVal, err := strconv.ParseFloat(numberStr, 64)
 		if err == nil {
@@ -485,6 +491,18 @@ func (p *parser) parseNumber() (any, error) {
 		return numberStr, nil
 	}
 	return numberValue{raw: numberStr}, nil
+}
+
+// hasInvalidJSONIntegerPart reports whether the literal's integer part starts with a
+// zero that is followed by more digits, optionally behind a sign: "01", "007",
+// "01.5", "-01e2". A bare "0" is a valid JSON number, and so are "0.5" and "0e2",
+// where the digits after the fraction or the exponent say nothing about the int part.
+func hasInvalidJSONIntegerPart(numberStr string) bool {
+	digits := strings.TrimPrefix(numberStr, "-")
+	if i := strings.IndexAny(digits, ".eE"); i >= 0 {
+		digits = digits[:i]
+	}
+	return len(digits) > 1 && digits[0] == '0'
 }
 
 // isExponentSign reports whether char is the "+" of an exponent such as "1e+2".

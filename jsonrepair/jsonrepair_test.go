@@ -1715,6 +1715,39 @@ func TestEscaping(t *testing.T) {
 			input: "{\"key\": '\u0076\u0061\u006c\u0075\u0065'}",
 			want:  "{\"key\": \"value\"}",
 		},
+		// A literal with a leading zero is not a JSON number, so it is kept as a
+		// string: returning it as a number would produce a document that still
+		// does not parse.
+		{
+			name:  "number_with_leading_zero",
+			input: "{\"key\": 01}",
+			want:  "{\"key\": \"01\"}",
+		},
+		{
+			name:  "number_with_leading_zeros",
+			input: "{\"key\": 007}",
+			want:  "{\"key\": \"007\"}",
+		},
+		{
+			name:  "negative_number_with_leading_zero",
+			input: "{\"key\": -01}",
+			want:  "{\"key\": \"-01\"}",
+		},
+		{
+			name:  "float_with_leading_zero",
+			input: "{\"key\": 01.5}",
+			want:  "{\"key\": \"01.5\"}",
+		},
+		{
+			name:  "exponent_with_leading_zero",
+			input: "{\"key\": 01e2}",
+			want:  "{\"key\": \"01e2\"}",
+		},
+		{
+			name:  "zero_and_zero_decimal_stay_numbers",
+			input: "{\"key\": 0, \"key2\": 0.5}",
+			want:  "{\"key\": 0, \"key2\": 0.5}",
+		},
 		{
 			name:  "unicode_escape_skip_loads",
 			input: "{\"key\": \"\\u0076\\u0061\\u006C\\u0075\\u0065\"}",

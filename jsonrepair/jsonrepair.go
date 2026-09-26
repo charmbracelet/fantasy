@@ -1182,12 +1182,12 @@ func (p *parser) parseString() (any, error) {
 	} else {
 		p.index++
 	}
-	// Only a line break that is literally present in the source is dropped here. An
-	// escaped \n decodes to the same rune but is string content, so trimming it would
-	// silently change an already valid document.
-	prevChar, hasPrevChar := p.getCharAt(-2)
-	rawTrailingNewline := ok && char == rdelim && hasPrevChar && prevChar == '\n'
-	if !p.streamStable && (missingQuotes || rawTrailingNewline) {
+	// A raw line break inside the string is string content, like a tab or a
+	// carriage return, and is escaped on output. It is only dropped when the
+	// closing quote is missing, which the branch above already handles: reaching
+	// this point with a closing quote means the string was terminated, and trimming
+	// there deleted a character the caller wrote.
+	if !p.streamStable && missingQuotes {
 		stringAcc = trimRightWhitespace(stringAcc)
 	}
 	if missingQuotes && p.context.empty {

@@ -1661,7 +1661,7 @@ func TestEscaping(t *testing.T) {
 		{
 			name:  "newline_in_key",
 			input: "{\"key_1\n\": \"value\"}",
-			want:  "{\"key_1\": \"value\"}",
+			want:  "{\"key_1\\n\": \"value\"}",
 		},
 		// Regression tests for #373: a newline that came from an escape sequence is
 		// string content, so repairing an already valid document must not trim it.
@@ -1703,7 +1703,29 @@ func TestEscaping(t *testing.T) {
 		{
 			name:  "raw_newline_at_end_of_value",
 			input: "{\"key\": \"line\n\"}",
-			want:  "{\"key\": \"line\"}",
+			want:  "{\"key\": \"line\\n\"}",
+		},
+		// A raw line break is string content exactly like a raw tab or carriage
+		// return, which the cases above keep, so it must survive the repair too.
+		{
+			name:  "raw_newline_at_end_of_key",
+			input: "{\"key\n\": \"value\"}",
+			want:  "{\"key\\n\": \"value\"}",
+		},
+		{
+			name:  "raw_newlines_at_end_of_value",
+			input: "{\"key\": \"line\n\n\"}",
+			want:  "{\"key\": \"line\\n\\n\"}",
+		},
+		{
+			name:  "raw_newline_at_end_of_nested_value",
+			input: "{\"key\": [\"line\n\"]}",
+			want:  "{\"key\": [\"line\\n\"]}",
+		},
+		{
+			name:  "raw_newline_before_trailing_space",
+			input: "{\"key\": \"line\n \"}",
+			want:  "{\"key\": \"line\\n \"}",
 		},
 		{
 			name:  "tab_in_key",

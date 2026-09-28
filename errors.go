@@ -131,15 +131,42 @@ func NewIncompleteStreamError() *ProviderError {
 }
 
 // http2TransportErrorFragments are message fragments that identify a
-// transient HTTP/2 transport failure. Go's standard library bundles its
-// own copy of the http2 package whose error types are unexported, so they
-// cannot be matched with errors.As. We fall back to matching these stable
-// fragments, which both the stdlib and x/net/http2 use. The list is kept
-// tight to avoid misclassifying application-level errors as transport
-// failures.
+// transient HTTP/2 transport failure. Go's standard library carries its own
+// copy of the http2 package, since Go 1.27 at net/http/internal/http2, and
+// an internal package's types cannot be named by an importer however they
+// are declared, so errors.As against x/net/http2 never matches one. We fall
+// back to matching these stable fragments, which both copies use. The list
+// is kept tight to avoid misclassifying application-level errors as
+// transport failures.
+//
+// Every fragment here names the framing of a stream- or connection-level
+// protocol error, "…: stream ID N; CODE" and the like, which is the shape
+// cleanHTTP2ErrorMessage knows how to trim. Messages reporting that the
+// connection itself died belong in http2ConnectionLostMessages instead.
 var http2TransportErrorFragments = []string{
 	"stream error:",     // RST_STREAM: INTERNAL_ERROR, REFUSED_STREAM, CANCEL, etc.
 	"connection error:", // connection-level protocol error
+}
+
+// http2ConnectionLostMessages identify an HTTP/2 connection that died under
+// a request, rather than a protocol error reported over a live one. Both
+// are worth retrying, since a fresh connection is exactly the remedy, but
+// these arrive as plain errors carrying no type to match and no shared
+// framing to parse, so they are listed in full.
+//
+// The first is what a failed health-check ping produces. A transport
+// configured with HTTP2Config.SendPingTimeout pings a connection that has
+// gone quiet and closes it when the ping goes unanswered, which is how a
+// connection killed while the machine slept gets noticed at all: nothing
+// else in the stack tells a dead peer from a slow one. Leaving it
+// unclassified turns that recovery into an immediate hard failure, because
+// the error is not a net.Error either.
+//
+// The second is a server's GOAWAY. x/net's GoAwayError is matched by type
+// above; the standard library's cannot be, so it needs a string.
+var http2ConnectionLostMessages = []string{
+	"http2: client connection lost",
+	"http2: server sent GOAWAY and closed the connection",
 }
 
 // IsTransportError reports whether err or any error in its chain is a
@@ -148,8 +175,9 @@ var http2TransportErrorFragments = []string{
 // errors, and GOAWAY frames, which originate from the transport rather
 // than the application.
 //
-// x/net/http2 error types are matched by type; Go's stdlib-bundled http2
-// uses unexported types, so those are matched by their message fragments.
+// x/net/http2 error types are matched by type. The standard library's copy
+// lives in an internal package, so its equivalents are matched by message
+// instead.
 func IsTransportError(err error) bool {
 	if err == nil {
 		return false
@@ -169,6 +197,11 @@ func IsTransportError(err error) bool {
 	msg := err.Error()
 	for _, fragment := range http2TransportErrorFragments {
 		if strings.Contains(msg, fragment) {
+			return true
+		}
+	}
+	for _, lost := range http2ConnectionLostMessages {
+		if strings.Contains(msg, lost) {
 			return true
 		}
 	}
@@ -231,8 +264,19 @@ func WrapTransportError(err error) error {
 //	"stream error: stream ID 27; INTERNAL_ERROR; received from peer" → "INTERNAL_ERROR (received from peer)"
 //	"stream error: stream ID 5; REFUSED_STREAM"                      → "REFUSED_STREAM"
 //	"http2: connection error: INTERNAL_ERROR"                        → "INTERNAL_ERROR"
+//	"http2: client connection lost"                                  → "client connection lost"
+//	"http2: server sent GOAWAY ...; LastStreamID=5, ErrCode=NO_ERROR" → "server sent GOAWAY and closed the connection"
 func extractHTTP2ErrorMessage(err error) string {
 	msg := err.Error()
+	// Checked first, and returned rather than cleaned. These messages are
+	// already a whole sentence, and GOAWAY carries trailing "; LastStreamID=…"
+	// detail that cleanHTTP2ErrorMessage would mistake for the "; CODE" of a
+	// stream error and return on its own.
+	for _, lost := range http2ConnectionLostMessages {
+		if strings.Contains(msg, lost) {
+			return strings.TrimPrefix(lost, "http2: ")
+		}
+	}
 	for _, fragment := range http2TransportErrorFragments {
 		if i := strings.Index(msg, fragment); i != -1 {
 			return cleanHTTP2ErrorMessage(msg[i:])

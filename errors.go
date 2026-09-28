@@ -131,15 +131,42 @@ func NewIncompleteStreamError() *ProviderError {
 }
 
 // http2TransportErrorFragments are message fragments that identify a
-// transient HTTP/2 transport failure. Go's standard library bundles its
-// own copy of the http2 package whose error types are unexported, so they
-// cannot be matched with errors.As. We fall back to matching these stable
-// fragments, which both the stdlib and x/net/http2 use. The list is kept
-// tight to avoid misclassifying application-level errors as transport
-// failures.
+// transient HTTP/2 transport failure. Go's standard library carries its own
+// copy of the http2 package, since Go 1.27 at net/http/internal/http2, whose
+// types an importer cannot name, so errors.As against x/net/http2 never
+// matches one and only the message is left to go on. The list is kept tight
+// to avoid misclassifying application-level errors as transport failures.
+//
+// These name protocol errors shaped "...: stream ID N; CODE", which is what
+// cleanHTTP2ErrorMessage trims. A dead connection goes in
+// http2ConnectionLostMessages instead.
 var http2TransportErrorFragments = []string{
 	"stream error:",     // RST_STREAM: INTERNAL_ERROR, REFUSED_STREAM, CANCEL, etc.
 	"connection error:", // connection-level protocol error
+}
+
+// http2ConnectionLostMessages report an HTTP/2 connection that died under a
+// request, rather than a protocol error carried over a live one. Retrying is
+// the remedy, since a retry dials afresh, but they arrive as plain errors
+// that are not net.Error and carry no type to match, so without this they
+// read as permanent.
+//
+// Matched in full: they share no framing to parse, and the trailing frame
+// detail on GOAWAY would misread as the "; CODE" of a stream error.
+var http2ConnectionLostMessages = []string{
+	"http2: client connection lost",                       // health-check ping went unanswered
+	"http2: server sent GOAWAY and closed the connection", // stdlib's GoAwayError
+}
+
+// matchConnectionLost returns the entry of http2ConnectionLostMessages that
+// msg contains, so a caller can both detect one and name it.
+func matchConnectionLost(msg string) (string, bool) {
+	for _, lost := range http2ConnectionLostMessages {
+		if strings.Contains(msg, lost) {
+			return lost, true
+		}
+	}
+	return "", false
 }
 
 // IsTransportError reports whether err or any error in its chain is a
@@ -148,8 +175,9 @@ var http2TransportErrorFragments = []string{
 // errors, and GOAWAY frames, which originate from the transport rather
 // than the application.
 //
-// x/net/http2 error types are matched by type; Go's stdlib-bundled http2
-// uses unexported types, so those are matched by their message fragments.
+// x/net/http2 error types are matched by type. The standard library's copy
+// lives in an internal package, so its equivalents are matched by message
+// instead.
 func IsTransportError(err error) bool {
 	if err == nil {
 		return false
@@ -172,7 +200,8 @@ func IsTransportError(err error) bool {
 			return true
 		}
 	}
-	return false
+	_, lost := matchConnectionLost(msg)
+	return lost
 }
 
 // NewTransportError wraps a transient transport error into a retryable
@@ -231,8 +260,15 @@ func WrapTransportError(err error) error {
 //	"stream error: stream ID 27; INTERNAL_ERROR; received from peer" → "INTERNAL_ERROR (received from peer)"
 //	"stream error: stream ID 5; REFUSED_STREAM"                      → "REFUSED_STREAM"
 //	"http2: connection error: INTERNAL_ERROR"                        → "INTERNAL_ERROR"
+//	"http2: client connection lost"                                  → "client connection lost"
+//	"http2: server sent GOAWAY ...; LastStreamID=5, ErrCode=NO_ERROR" → "server sent GOAWAY and closed the connection"
 func extractHTTP2ErrorMessage(err error) string {
 	msg := err.Error()
+	// Returned whole: these are already a sentence, and cleaning GOAWAY
+	// would strip it down to its trailing frame detail.
+	if lost, ok := matchConnectionLost(msg); ok {
+		return strings.TrimPrefix(lost, "http2: ")
+	}
 	for _, fragment := range http2TransportErrorFragments {
 		if i := strings.Index(msg, fragment); i != -1 {
 			return cleanHTTP2ErrorMessage(msg[i:])

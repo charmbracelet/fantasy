@@ -8,61 +8,43 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"sync"
-	"sync/atomic"
 	"testing"
 	"time"
 )
 
-// TestLostPingIsClassifiedLive pins http2ConnectionLostMessages to what the
-// standard library actually produces.
-//
-// The entry it guards is a message, not a type, so nothing but this test
-// notices if a future Go release rewords it. The failure that would follow
-// is silent and bad: a connection killed while the machine slept stops
-// being retryable and surfaces as a hard error instead, which is the exact
-// bug the entry was added to fix.
-//
-// The setup reproduces a slept laptop rather than a closed socket. A proxy
-// stops forwarding in both directions without sending FIN or RST, so the
-// peer is gone but the kernel has no reason to say so, and only the
-// transport's health-check ping can tell the difference.
+// TestLostPingIsClassifiedLive pins http2ConnectionLostMessages to the
+// message Go actually produces. The entry is matched as a string, so a
+// reword in a future release would silently stop dead connections being
+// retryable, and only this test would notice.
 func TestLostPingIsClassifiedLive(t *testing.T) {
 	t.Parallel()
 
-	// Streams a first chunk so the response is live, then blocks. The
-	// freeze lands mid-stream, where a real one would.
+	// Streams a chunk so the response is live, then holds the stream open
+	// so the freeze lands mid-stream, where a real one would.
 	srv := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "text/event-stream")
-		w.WriteHeader(http.StatusOK)
-		if f, ok := w.(http.Flusher); ok {
-			f.Flush()
-		}
 		_, _ = w.Write([]byte("data: hello\n\n"))
-		if f, ok := w.(http.Flusher); ok {
-			f.Flush()
-		}
+		w.(http.Flusher).Flush()
 		<-r.Context().Done()
 	}))
 	srv.EnableHTTP2 = true
 	srv.StartTLS()
 	defer srv.Close()
 
-	proxy := newFreezableProxy(t, srv.Listener.Addr().String())
-	defer proxy.Close()
+	conn := &freezableConn{closed: make(chan struct{}), frozen: make(chan struct{})}
+	defer conn.Close()
 
-	srvTLS := srv.Client().Transport.(*http.Transport).TLSClientConfig.Clone()
 	tr := &http.Transport{
-		// Required: a Transport carrying a TLSClientConfig does not
-		// negotiate h2 on its own, and the ping config is h2-only, so
-		// without this the test would quietly prove nothing over HTTP/1.1.
+		// A Transport carrying a TLSClientConfig does not negotiate h2 on
+		// its own, and the ping is h2-only, so without this the test would
+		// pass over HTTP/1.1 having proved nothing.
 		ForceAttemptHTTP2: true,
-		TLSClientConfig:   srvTLS,
+		TLSClientConfig:   srv.Client().Transport.(*http.Transport).TLSClientConfig.Clone(),
 		HTTP2: &http.HTTP2Config{
 			SendPingTimeout: 200 * time.Millisecond,
 			PingTimeout:     200 * time.Millisecond,
 		},
-		DialContext: func(ctx context.Context, network, _ string) (net.Conn, error) {
-			return (&net.Dialer{}).DialContext(ctx, network, proxy.Addr())
+		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+			return conn.dial(ctx, network, addr)
 		},
 	}
 	defer tr.CloseIdleConnections()
@@ -81,124 +63,82 @@ func TestLostPingIsClassifiedLive(t *testing.T) {
 		t.Fatalf("reading first chunk: %v", err)
 	}
 
-	proxy.Freeze()
+	conn.freeze()
 
-	type readResult struct{ err error }
-	done := make(chan readResult, 1)
+	read := make(chan error, 1)
 	go func() {
 		for {
 			if _, err := resp.Body.Read(buf); err != nil {
-				done <- readResult{err}
+				read <- err
 				return
 			}
 		}
 	}()
 
 	select {
-	case got := <-done:
-		if got.err == nil || errors.Is(got.err, io.EOF) {
-			t.Fatalf("expected a transport failure, got %v", got.err)
+	case err := <-read:
+		if err == nil || errors.Is(err, io.EOF) {
+			t.Fatalf("expected a transport failure, got %v", err)
 		}
-		if !IsTransportError(got.err) {
-			t.Fatalf("IsTransportError(%q) = false.\n"+
-				"The standard library's lost-connection message no longer matches "+
-				"http2ConnectionLostMessages, so a dead connection is not retryable. "+
-				"Update the list to match.", got.err)
-		}
-		if !isRetryableError(got.err) {
-			t.Errorf("a lost connection is not retryable: %v", got.err)
+		if !IsTransportError(err) {
+			t.Fatalf("IsTransportError(%q) = false, so a dead connection is no "+
+				"longer retryable. Go reworded it; update http2ConnectionLostMessages.", err)
 		}
 	case <-time.After(10 * time.Second):
 		t.Fatal("the read never returned: no health check noticed the dead peer")
 	}
 }
 
-// freezableProxy forwards TCP to a backend until Freeze, after which it
-// drops every byte in both directions while holding both sockets open.
-type freezableProxy struct {
-	ln     net.Listener
-	frozen atomic.Bool
-
-	mu    sync.Mutex
-	conns []net.Conn
-	done  bool
+// freezableConn is a client connection that goes deaf and mute on freeze
+// while staying open, which is what a socket killed by a sleeping laptop
+// looks like: the peer is gone, but no FIN or RST ever says so, and only
+// the transport's health-check ping can tell that from a slow reply.
+type freezableConn struct {
+	net.Conn
+	frozen chan struct{}
+	closed chan struct{}
+	once   sync.Once
 }
 
-func newFreezableProxy(t *testing.T, backend string) *freezableProxy {
-	t.Helper()
-	ln, err := net.Listen("tcp", "127.0.0.1:0")
-	if err != nil {
-		t.Fatalf("proxy listen: %v", err)
-	}
-	p := &freezableProxy{ln: ln}
-	go func() {
-		for {
-			client, err := ln.Accept()
-			if err != nil {
-				return
-			}
-			upstream, err := net.Dial("tcp", backend)
-			if err != nil {
-				_ = client.Close()
-				return
-			}
-			if !p.track(client, upstream) {
-				return
-			}
-			go p.pipe(client, upstream)
-			go p.pipe(upstream, client)
-		}
-	}()
-	return p
+func (c *freezableConn) dial(ctx context.Context, network, addr string) (net.Conn, error) {
+	conn, err := (&net.Dialer{}).DialContext(ctx, network, addr)
+	c.Conn = conn
+	return c, err
 }
 
-// track registers a pair for teardown, or closes it and reports false when
-// the proxy is already shutting down.
-func (p *freezableProxy) track(conns ...net.Conn) bool {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	if p.done {
-		for _, c := range conns {
-			_ = c.Close()
-		}
+func (c *freezableConn) freeze() { close(c.frozen) }
+
+func (c *freezableConn) isFrozen() bool {
+	select {
+	case <-c.frozen:
+		return true
+	default:
 		return false
 	}
-	p.conns = append(p.conns, conns...)
-	return true
 }
 
-func (p *freezableProxy) pipe(dst, src net.Conn) {
-	buf := make([]byte, 32*1024)
-	for {
-		n, err := src.Read(buf)
-		// Discarded rather than forwarded once frozen, so neither end
-		// learns the connection is gone.
-		if n > 0 && !p.frozen.Load() {
-			if _, werr := dst.Write(buf[:n]); werr != nil {
-				return
-			}
-		}
-		if err != nil {
-			return
-		}
+// Read parks until teardown once frozen, so no frame arrives to reset the
+// transport's read-idle timer and the health check fires.
+func (c *freezableConn) Read(p []byte) (int, error) {
+	if c.isFrozen() {
+		<-c.closed
+		return 0, io.EOF
 	}
+	return c.Conn.Read(p)
 }
 
-func (p *freezableProxy) Addr() string { return p.ln.Addr().String() }
-
-func (p *freezableProxy) Freeze() { p.frozen.Store(true) }
-
-// Close tears down every connection as well as the listener. Freezing hides
-// the client's disappearance from the server, so without this the server's
-// handler waits on a request context that will never be cancelled and
-// httptest.Server.Close blocks on it.
-func (p *freezableProxy) Close() {
-	_ = p.ln.Close()
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	p.done = true
-	for _, c := range p.conns {
-		_ = c.Close()
+// Write reports success without sending once frozen, so the health-check
+// ping never reaches the server and goes unanswered.
+func (c *freezableConn) Write(p []byte) (int, error) {
+	if c.isFrozen() {
+		return len(p), nil
 	}
-	p.conns = nil
+	return c.Conn.Write(p)
+}
+
+// Close releases any parked Read and lets the server see EOF, which is
+// what ends its handler and unblocks httptest.Server.Close.
+func (c *freezableConn) Close() error {
+	c.once.Do(func() { close(c.closed) })
+	return c.Conn.Close()
 }

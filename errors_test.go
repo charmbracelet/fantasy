@@ -160,14 +160,19 @@ func TestExtractHTTP2ErrorMessage(t *testing.T) {
 	}
 }
 
-// TestConnectionLostIsRetryable covers the whole path the retry middleware
-// actually walks. A lost connection reaches it as a bare error: it is not a
-// net.Error and carries no type to match, so without the message check it
-// reads as a permanent failure and the request is never retried.
+// TestConnectionLostIsRetryable covers the path the retry middleware walks.
+// A lost connection reaches it as a bare error that is not a net.Error and
+// carries no type to match, so without the message check it reads as
+// permanent and the request is never retried.
 func TestConnectionLostIsRetryable(t *testing.T) {
 	t.Parallel()
 
-	for _, msg := range http2ConnectionLostMessages {
+	// Spelled out rather than ranged over http2ConnectionLostMessages, so
+	// emptying that list fails here instead of passing vacuously.
+	for _, msg := range []string{
+		"http2: client connection lost",
+		"http2: server sent GOAWAY and closed the connection",
+	} {
 		t.Run(msg, func(t *testing.T) {
 			t.Parallel()
 			err := newTestError(msg)

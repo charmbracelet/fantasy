@@ -992,9 +992,9 @@ func (p *parser) parseString() (any, error) {
 		}
 		if len(stringAcc) > 0 && stringAcc[len(stringAcc)-1] == '\\' {
 			p.log("Found a stray escape sequence, normalizing it")
-			if char == rdelim || char == 't' || char == 'n' || char == 'r' || char == 'b' || char == '\\' {
+			if char == rdelim || char == 't' || char == 'n' || char == 'r' || char == 'b' || char == 'f' || char == '/' || char == '\\' {
 				stringAcc = stringAcc[:len(stringAcc)-1]
-				escapeSeqs := map[rune]rune{'t': '\t', 'n': '\n', 'r': '\r', 'b': '\b'}
+				escapeSeqs := map[rune]rune{'t': '\t', 'n': '\n', 'r': '\r', 'b': '\b', 'f': '\f'}
 				if replacement, ok := escapeSeqs[char]; ok {
 					stringAcc = append(stringAcc, replacement)
 				} else {

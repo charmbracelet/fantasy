@@ -484,13 +484,40 @@ func (p *parser) parseNumber() (any, error) {
 	}
 	if strings.ContainsAny(numberStr, ".eE") {
 		floatVal, err := strconv.ParseFloat(numberStr, 64)
-		if err == nil {
-			formatted := formatFloat(floatVal)
-			return numberValue{raw: formatted}, nil
+		if err != nil {
+			// RFC 8259 puts no bound on the exponent, so a literal larger than float64 is
+			// still a valid JSON number. Keep it a number: returning the text here hands
+			// the caller a string where the document said number.
+			if errors.Is(err, strconv.ErrRange) {
+				return numberValue{raw: numberStr}, nil
+			}
+			return numberStr, nil
 		}
-		return numberStr, nil
+		if floatVal == 0 && !isZeroLiteral(numberStr) {
+			// Underflow reports zero with no error, so formatting it would replace the
+			// value with 0.0. The literal is valid JSON, so keep the caller's text.
+			return numberValue{raw: numberStr}, nil
+		}
+		formatted := formatFloat(floatVal)
+		return numberValue{raw: formatted}, nil
 	}
 	return numberValue{raw: numberStr}, nil
+}
+
+// isZeroLiteral reports whether the mantissa of a number literal has no nonzero digit,
+// which is what separates a literal that really is zero from one that float64 rounded
+// down to it. The exponent does not decide this: 0e+2 is a zero.
+func isZeroLiteral(numberStr string) bool {
+	mantissa := numberStr
+	if idx := strings.IndexAny(mantissa, "eE"); idx >= 0 {
+		mantissa = mantissa[:idx]
+	}
+	for _, r := range mantissa {
+		if r >= '1' && r <= '9' {
+			return false
+		}
+	}
+	return true
 }
 
 // hasInvalidJSONIntegerPart reports whether the literal's integer part starts with a

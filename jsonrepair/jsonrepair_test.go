@@ -928,6 +928,29 @@ func TestParseNumberEdgeCases(t *testing.T) {
 			input: "2300e+3",
 			want:  "2300000.0",
 		},
+		// A number bigger than float64 is still a valid JSON number, so it stays one.
+		{
+			name:  "exponent_overflows_float64",
+			input: "{\"key\": 1e999}",
+			want:  "{\"key\": 1e999}",
+		},
+		{
+			name:  "positive_exponent_overflows_float64",
+			input: "{\"key\": 1.0e+400}",
+			want:  "{\"key\": 1.0e+400}",
+		},
+		// float64 underflows to zero without reporting an error, which would
+		// rewrite the value.
+		{
+			name:  "exponent_underflows_float64",
+			input: "{\"key\": 1e-999}",
+			want:  "{\"key\": 1e-999}",
+		},
+		{
+			name:  "negative_exponent_underflows_float64",
+			input: "{\"key\": -1e-400}",
+			want:  "{\"key\": -1e-400}",
+		},
 		{
 			name:  "truncated_positive_exponent",
 			input: "{\"key\": 1E+}",

@@ -44,6 +44,21 @@ const (
 	ThinkingLevelMinimal ThinkingLevel = "MINIMAL"
 )
 
+// ServiceTier selects the pricing/performance tier for a request.
+type ServiceTier = string
+
+// Predefined service tiers for the Google provider. An empty value defaults to
+// the standard tier.
+const (
+	// ServiceTierFlex selects Flex processing: lower cost in exchange for
+	// variable latency and best-effort, sheddable availability.
+	ServiceTierFlex ServiceTier = "flex"
+	// ServiceTierStandard selects the default standard tier.
+	ServiceTierStandard ServiceTier = "standard"
+	// ServiceTierPriority selects the priority tier.
+	ServiceTierPriority ServiceTier = "priority"
+)
+
 // ThinkingConfig represents thinking configuration for the Google provider.
 type ThinkingConfig struct {
 	ThinkingBudget  *int64  `json:"thinking_budget,omitempty"`
@@ -107,6 +122,11 @@ type ProviderOptions struct {
 
 	// Optional. A list of unique safety settings for blocking unsafe content.
 	SafetySettings []SafetySetting `json:"safety_settings"`
+
+	// Optional. The service tier to use for the request, e.g. ServiceTierFlex.
+	// An empty value defaults to the standard tier.
+	ServiceTier string `json:"service_tier,omitempty"`
+
 	// 'HARM_BLOCK_THRESHOLD_UNSPECIFIED',
 	// 'BLOCK_LOW_AND_ABOVE',
 	// 'BLOCK_MEDIUM_AND_ABOVE',

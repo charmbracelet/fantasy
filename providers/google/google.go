@@ -1142,7 +1142,19 @@ func (g *languageModel) streamObjectWithJSONMode(ctx context.Context, call fanta
 
 		// Final validation and emit
 		if streamErr == nil && lastParsedObject != nil {
-			finishReason := cmp.Or(lastFinishReason, fantasy.FinishReasonStop)
+			if lastFinishReason == "" {
+				// Truncated stream: no candidate emitted a finishReason
+				// before close. Reporting it as "stop" would hand the caller
+				// a cut-short object that looks complete; surface a retryable
+				// error instead, as Stream does.
+				yield(fantasy.ObjectStreamPart{
+					Type:  fantasy.ObjectStreamPartTypeError,
+					Error: fantasy.NewIncompleteStreamError(),
+				})
+				return
+			}
+
+			finishReason := lastFinishReason
 
 			var finalUsage fantasy.Usage
 			if usage != nil {

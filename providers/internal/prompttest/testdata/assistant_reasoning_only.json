@@ -1,0 +1,26 @@
+{
+  "openai,openaicompat": {
+    "messages": [
+      {
+        "content": "think",
+        "role": "user"
+      }
+    ],
+    "warnings": [
+      "other: dropping empty assistant message (contains neither user-facing content nor tool calls)"
+    ]
+  },
+  "openrouter,vercel": {
+    "messages": [
+      {
+        "content": "think",
+        "role": "user"
+      },
+      {
+        "content": "\u003cthoughts\u003eonly reasoning, no text\u003c/thoughts\u003e",
+        "role": "assistant"
+      }
+    ],
+    "warnings": []
+  }
+}

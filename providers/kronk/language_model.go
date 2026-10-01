@@ -205,17 +205,21 @@ func (l *languageModel) Generate(ctx context.Context, call fantasy.Call) (*fanta
 
 	usage := fantasy.Usage{}
 	if response.Usage != nil {
+		cachedTokens := int64(response.Usage.PromptTokensDetails.CachedTokens)
 		outputTokens, totalTokens := openai.FoldDisjointReasoning(
 			int64(response.Usage.CompletionTokens),
 			int64(response.Usage.CompletionTokensDetails.ReasoningTokens),
 			int64(response.Usage.PromptTokens+response.Usage.CompletionTokens),
 		)
 		usage = fantasy.Usage{
-			InputTokens:     int64(response.Usage.PromptTokens),
+			// Kronk reports prompt_tokens INCLUDING cached tokens, and CacheReadTokens
+			// below reports those again: subtract so the two do not double-count, the
+			// same arithmetic the openai, openrouter and vercel adapters use.
+			InputTokens:     max(int64(response.Usage.PromptTokens)-cachedTokens, 0),
 			OutputTokens:    outputTokens,
 			TotalTokens:     totalTokens,
 			ReasoningTokens: int64(response.Usage.CompletionTokensDetails.ReasoningTokens),
-			CacheReadTokens: int64(response.Usage.PromptTokensDetails.CachedTokens),
+			CacheReadTokens: cachedTokens,
 		}
 	}
 
@@ -275,17 +279,19 @@ func (l *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 			metadata.update(resp)
 
 			if resp.Usage != nil {
+				cachedTokens := int64(resp.Usage.PromptTokensDetails.CachedTokens)
 				outputTokens, totalTokens := openai.FoldDisjointReasoning(
 					int64(resp.Usage.CompletionTokens),
 					int64(resp.Usage.CompletionTokensDetails.ReasoningTokens),
 					int64(resp.Usage.PromptTokens+resp.Usage.CompletionTokens),
 				)
 				usage = fantasy.Usage{
-					InputTokens:     int64(resp.Usage.PromptTokens),
+					// Same subtraction as the buffered path above.
+					InputTokens:     max(int64(resp.Usage.PromptTokens)-cachedTokens, 0),
 					OutputTokens:    outputTokens,
 					TotalTokens:     totalTokens,
 					ReasoningTokens: int64(resp.Usage.CompletionTokensDetails.ReasoningTokens),
-					CacheReadTokens: int64(resp.Usage.PromptTokensDetails.CachedTokens),
+					CacheReadTokens: cachedTokens,
 				}
 			}
 

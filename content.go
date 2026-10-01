@@ -122,6 +122,22 @@ const (
 	FinishReasonUnknown FinishReason = "unknown" // the model has not transmitted a finish reason
 )
 
+// IsAbnormalFinishReason reports whether a finish reason means the turn was cut
+// short rather than completed.
+//
+// Length, content filter, provider error and unknown can all accompany tool-call
+// arguments that were truncated mid-serialization. Adapters must not rewrite such
+// a reason into a tool-call turn, because the agent then validates, repairs and
+// dispatches a partial call — executing truncated input (CHARM-2020).
+func IsAbnormalFinishReason(reason FinishReason) bool {
+	switch reason {
+	case FinishReasonLength, FinishReasonContentFilter, FinishReasonError, FinishReasonUnknown:
+		return true
+	default:
+		return false
+	}
+}
+
 // Prompt represents a list of messages for the language model.
 type Prompt []Message
 

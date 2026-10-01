@@ -882,8 +882,18 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 		}
 
 		finishReason := lastFinishReason
+		// Terminal reasons that can cut output mid-call must not be rewritten into a
+		// tool-call turn: dispatching their partial calls executes truncated input
+		// (CHARM-2020).
 		if len(toolCalls) > 0 {
-			finishReason = fantasy.FinishReasonToolCalls
+			if fantasy.IsAbnormalFinishReason(finishReason) {
+				yield(fantasy.StreamPart{
+					Type:     fantasy.StreamPartTypeWarnings,
+					Warnings: []fantasy.CallWarning{truncatedToolCallWarning()},
+				})
+			} else {
+				finishReason = fantasy.FinishReasonToolCalls
+			}
 		} else if finishReason == "" {
 			// Truncated stream: no candidate emitted a finishReason before
 			// close. Surface as a retryable error.
@@ -1429,10 +1439,16 @@ func (g languageModel) mapResponse(response *genai.GenerateContentResponse, warn
 		}
 	}
 
+	finishReason = mapFinishReason(candidate.FinishReason)
+	// Terminal reasons that can cut output mid-call must not be rewritten into a
+	// tool-call turn: dispatching their partial calls executes truncated input
+	// (CHARM-2020).
 	if hasToolCalls {
-		finishReason = fantasy.FinishReasonToolCalls
-	} else {
-		finishReason = mapFinishReason(candidate.FinishReason)
+		if fantasy.IsAbnormalFinishReason(finishReason) {
+			warnings = append(warnings, truncatedToolCallWarning())
+		} else {
+			finishReason = fantasy.FinishReasonToolCalls
+		}
 	}
 
 	return &fantasy.Response{
@@ -1451,6 +1467,16 @@ func GetReasoningMetadata(providerOptions fantasy.ProviderOptions) *ReasoningMet
 		}
 	}
 	return nil
+}
+
+// truncatedToolCallWarning is the shared warning for a tool call whose arguments
+// were cut short by a terminal finish reason. The wording matches the OpenAI
+// adapter so every provider reports it identically.
+func truncatedToolCallWarning() fantasy.CallWarning {
+	return fantasy.CallWarning{
+		Type:    fantasy.CallWarningTypeOther,
+		Message: "tool calls were returned but the turn ended abnormally (token limit, content filter, or provider error); arguments may be truncated",
+	}
 }
 
 func mapFinishReason(reason genai.FinishReason) fantasy.FinishReason {

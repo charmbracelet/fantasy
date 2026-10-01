@@ -259,12 +259,6 @@ func (o languageModel) Provider() string {
 func (o languageModel) prepareParams(call fantasy.Call) (*openai.ChatCompletionNewParams, []fantasy.CallWarning, error) {
 	params := &openai.ChatCompletionNewParams{}
 	messages, warnings := o.toPromptFunc(call.Prompt, o.provider, o.modelID)
-	if call.TopK != nil {
-		warnings = append(warnings, fantasy.CallWarning{
-			Type:    fantasy.CallWarningTypeUnsupportedSetting,
-			Setting: "top_k",
-		})
-	}
 
 	if call.MaxOutputTokens != nil {
 		params.MaxTokens = param.NewOpt(*call.MaxOutputTokens)
@@ -346,6 +340,18 @@ func (o languageModel) prepareParams(call fantasy.Call) (*openai.ChatCompletionN
 
 	if len(optionsWarnings) > 0 {
 		warnings = append(warnings, optionsWarnings...)
+	}
+
+	// The chat completions request has no top_k field. A provider hook sends it
+	// as an extra body field when its host accepts one, so check after the hook
+	// and warn only when nothing sent it.
+	if call.TopK != nil {
+		if _, ok := params.ExtraFields()["top_k"]; !ok {
+			warnings = append(warnings, fantasy.CallWarning{
+				Type:    fantasy.CallWarningTypeUnsupportedSetting,
+				Setting: "top_k",
+			})
+		}
 	}
 
 	params.Messages = messages

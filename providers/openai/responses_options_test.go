@@ -58,3 +58,27 @@ func TestIsResponsesReasoningModel(t *testing.T) {
 		assert.Equal(t, tt.want, IsResponsesReasoningModel(tt.modelID), tt.modelID)
 	}
 }
+
+func TestReasoningModelDetection(t *testing.T) {
+	tests := []struct {
+		modelID string
+		want    bool
+	}{
+		{"gpt-5", true},
+		{"o3-mini", true},
+		{"gpt-6-astra", true},
+		{"GPT-6-ASTRA", true},
+		{"us.openai.gpt-6-sol", true}, // Amazon Bedrock inference profile
+		{"openai.gpt-6-luna", true},   // Amazon Bedrock Mantle
+
+		{"gpt-4o", false},
+		{"gpt-4.1-mini", false},
+		{"gpt-35-turbo", false}, // Azure's name for gpt-3.5-turbo
+		{"some-custom-model", false},
+	}
+
+	for _, tt := range tests {
+		assert.Equal(t, tt.want, isReasoningModel(tt.modelID), "chat completions: "+tt.modelID)
+		assert.Equal(t, tt.want, getResponsesModelConfig(tt.modelID).isReasoningModel, "responses: "+tt.modelID)
+	}
+}

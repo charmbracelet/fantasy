@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"charm.land/fantasy"
+	"google.golang.org/genai"
 )
 
 func TestToProviderErr_WrapsUnexpectedEOF(t *testing.T) {
@@ -59,5 +60,46 @@ func TestToProviderErr_PassesThroughPlainEOF(t *testing.T) {
 	var providerErr *fantasy.ProviderError
 	if errors.As(got, &providerErr) {
 		t.Errorf("toProviderErr wrapped io.EOF as ProviderError; should pass through")
+	}
+}
+
+func TestToProviderErr_SurfacesRetryInfoDelay(t *testing.T) {
+	t.Parallel()
+
+	apiErr := genai.APIError{
+		Code:    429,
+		Message: "Resource has been exhausted",
+		Status:  "RESOURCE_EXHAUSTED",
+		Details: []map[string]any{
+			{
+				"@type":      "type.googleapis.com/google.rpc.RetryInfo",
+				"retryDelay": "38s",
+			},
+		},
+	}
+
+	providerErr, ok := toProviderErr(apiErr).(*fantasy.ProviderError)
+	if !ok {
+		t.Fatalf("toProviderErr did not return *fantasy.ProviderError")
+	}
+	if providerErr.ResponseHeaders == nil {
+		t.Fatalf("ResponseHeaders is nil, want a synthesized retry-after header")
+	}
+	if got := providerErr.ResponseHeaders["retry-after"]; got != "38" {
+		t.Errorf("ResponseHeaders[retry-after] = %q, want %q", got, "38")
+	}
+}
+
+func TestToProviderErr_NoRetryInfoLeavesHeadersNil(t *testing.T) {
+	t.Parallel()
+
+	apiErr := genai.APIError{Code: 500, Message: "internal error"}
+
+	providerErr, ok := toProviderErr(apiErr).(*fantasy.ProviderError)
+	if !ok {
+		t.Fatalf("toProviderErr did not return *fantasy.ProviderError")
+	}
+	if providerErr.ResponseHeaders != nil {
+		t.Errorf("ResponseHeaders = %v, want nil", providerErr.ResponseHeaders)
 	}
 }

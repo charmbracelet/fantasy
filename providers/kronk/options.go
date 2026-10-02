@@ -183,11 +183,6 @@ func WithOpOffload(v bool) Option {
 	return withModelOption(model.WithOpOffload(v))
 }
 
-// WithOpOffloadMinBatch configures the minimum batch size for operation offloading.
-func WithOpOffloadMinBatch(v int) Option {
-	return withModelOption(model.WithOpOffloadMinBatch(v))
-}
-
 // WithPrefillBatchSize configures the maximum number of prompt tokens processed per decode iteration.
 func WithPrefillBatchSize(v int) Option {
 	return withModelOption(model.WithPrefillBatchSize(v))

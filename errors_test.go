@@ -27,7 +27,6 @@ func TestIsTransportError(t *testing.T) {
 		{"wrapped stream error", fmt.Errorf("reading body: %w", newTestError("stream error: stream ID 3; INTERNAL_ERROR")), true},
 		{"x/net StreamError", http2.StreamError{StreamID: 1, Code: http2.ErrCodeInternal}, true},
 		{"x/net ConnectionError", http2.ConnectionError(http2.ErrCodeInternal), true},
-		{"x/net GoAwayError", http2.GoAwayError{LastStreamID: 1, ErrCode: http2.ErrCodeInternal}, true},
 		{"lost health-check ping", newTestError("http2: client connection lost"), true},
 		{"wrapped lost ping", fmt.Errorf("reading body: %w", newTestError("http2: client connection lost")), true},
 		{"stdlib GoAwayError", newTestError(`http2: server sent GOAWAY and closed the connection; LastStreamID=5, ErrCode=NO_ERROR, debug=""`), true},

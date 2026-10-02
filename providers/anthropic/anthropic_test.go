@@ -24,6 +24,23 @@ var noopComputerRun = func(_ context.Context, _ fantasy.ToolCall) (fantasy.ToolR
 	return fantasy.ToolResponse{}, nil
 }
 
+func TestDecodeToolCallInputPreservesLargeInteger(t *testing.T) {
+	const input = `{"value":9007199254740993}`
+	toolCall := fantasy.ToolCallPart{ToolCallID: "call_1", ToolName: "echo", Input: input}
+
+	inputMap, warning := decodeToolCallInputMap(toolCall)
+	require.Nil(t, warning)
+	raw, err := json.Marshal(inputMap)
+	require.NoError(t, err)
+	require.JSONEq(t, input, string(raw))
+
+	inputAny, warning := decodeToolCallInputAny(toolCall)
+	require.Nil(t, warning)
+	raw, err = json.Marshal(inputAny)
+	require.NoError(t, err)
+	require.JSONEq(t, input, string(raw))
+}
+
 func TestToPrompt_DropsEmptyMessages(t *testing.T) {
 	t.Parallel()
 

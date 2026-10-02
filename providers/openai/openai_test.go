@@ -4704,19 +4704,17 @@ func TestResponsesToPrompt_ReasoningWithStore(t *testing.T) {
 		}
 	})
 
-	t.Run("store false skips reasoning", func(t *testing.T) {
+	t.Run("store false replays encrypted reasoning", func(t *testing.T) {
 		t.Parallel()
 
 		input, warnings := toResponsesPrompt(prompt, "system", false)
 		require.Empty(t, warnings)
 
-		// With store=false: user, assistant text, follow-up user.
-		require.Len(t, input, 3)
-
-		for _, item := range input {
-			require.Nil(t, item.OfReasoning,
-				"reasoning items must not appear when store=false")
-		}
+		require.Len(t, input, 4)
+		require.NotNil(t, input[1].OfReasoning)
+		require.Equal(t, reasoningItemID, input[1].OfReasoning.ID)
+		require.Equal(t, encryptedContent, input[1].OfReasoning.EncryptedContent.Value)
+		require.Empty(t, input[1].OfReasoning.Summary)
 	})
 }
 

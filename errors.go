@@ -175,9 +175,9 @@ func matchConnectionLost(msg string) (string, bool) {
 // errors, and GOAWAY frames, which originate from the transport rather
 // than the application.
 //
-// x/net/http2 error types are matched by type. The standard library's copy
-// lives in an internal package, so its equivalents are matched by message
-// instead.
+// x/net/http2 stream and connection errors are matched by type. GOAWAY errors
+// and the standard library's internal HTTP/2 error types are matched by
+// message instead.
 func IsTransportError(err error) bool {
 	if err == nil {
 		return false
@@ -185,11 +185,9 @@ func IsTransportError(err error) bool {
 	var (
 		streamErr http2.StreamError
 		connErr   http2.ConnectionError
-		goAwayErr http2.GoAwayError
 	)
 	if errors.As(err, &streamErr) ||
-		errors.As(err, &connErr) ||
-		errors.As(err, &goAwayErr) {
+		errors.As(err, &connErr) {
 		return true
 	}
 	// Wrapped errors embed the inner message, so scanning the top-level

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"reflect"
 	"slices"
+	"strconv"
 	"strings"
 
 	"charm.land/fantasy/jsonrepair"
@@ -160,7 +161,7 @@ func generateSchemaRecursive(t reflect.Type, visited map[reflect.Type]bool) Sche
 				enumValues := strings.Split(enumTag, ",")
 				fieldSchema.Enum = make([]any, len(enumValues))
 				for i, v := range enumValues {
-					fieldSchema.Enum[i] = strings.TrimSpace(v)
+					fieldSchema.Enum[i] = parseEnumValue(strings.TrimSpace(v), fieldSchema.Type)
 				}
 			}
 
@@ -177,6 +178,28 @@ func generateSchemaRecursive(t reflect.Type, visited map[reflect.Type]bool) Sche
 	default:
 		return Schema{Type: "object"}
 	}
+}
+
+func parseEnumValue(value, schemaType string) any {
+	switch schemaType {
+	case "integer":
+		if n, err := strconv.ParseInt(value, 10, 64); err == nil {
+			return n
+		}
+		if n, err := strconv.ParseUint(value, 10, 64); err == nil {
+			return n
+		}
+	case "number":
+		var n json.Number
+		if err := json.Unmarshal([]byte(value), &n); err == nil && n != "" {
+			return n
+		}
+	case "boolean":
+		if value == "true" || value == "false" {
+			return value == "true"
+		}
+	}
+	return value
 }
 
 // ToMap converts a Schema to a map representation suitable for JSON Schema.

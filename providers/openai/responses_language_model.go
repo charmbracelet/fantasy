@@ -597,8 +597,10 @@ func toResponsesPrompt(prompt fantasy.Prompt, systemMessageMode string, store bo
 				case fantasy.ContentTypeReasoning:
 					// Stateless requests must replay encrypted content inline.
 					// An item reference alone cannot resolve an unstored item.
+					// Only finalized metadata is replayed: unfinalized content can
+					// be a partial placeholder from the added stream event.
 					metadata := GetReasoningMetadata(c.Options())
-					if store || metadata == nil || metadata.ItemID == "" || metadata.EncryptedContent == nil || *metadata.EncryptedContent == "" || seenReasoning[metadata.ItemID] {
+					if store || metadata == nil || !metadata.Finalized || metadata.ItemID == "" || metadata.EncryptedContent == nil || *metadata.EncryptedContent == "" || seenReasoning[metadata.ItemID] {
 						continue
 					}
 					seenReasoning[metadata.ItemID] = true
@@ -921,7 +923,8 @@ func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call)
 			})
 		case "reasoning":
 			metadata := &ResponsesReasoningMetadata{
-				ItemID: outputItem.ID,
+				ItemID:    outputItem.ID,
+				Finalized: true,
 			}
 			if outputItem.EncryptedContent != "" {
 				metadata.EncryptedContent = &outputItem.EncryptedContent
@@ -1160,8 +1163,9 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 						// The completed item owns the replay data. The added item
 						// can have missing or partial encrypted content.
 						metadata := &ResponsesReasoningMetadata{
-							ItemID:  done.Item.ID,
-							Summary: make([]string, 0, len(done.Item.Summary)),
+							ItemID:    done.Item.ID,
+							Summary:   make([]string, 0, len(done.Item.Summary)),
+							Finalized: true,
 						}
 						if done.Item.EncryptedContent != "" {
 							metadata.EncryptedContent = &done.Item.EncryptedContent

@@ -70,6 +70,10 @@ func init() {
 // The ResponseID can be used as PreviousResponseID in follow-up requests to chain responses.
 type ResponsesProviderMetadata struct {
 	ResponseID string `json:"response_id"`
+	// ResponseStatus is the status in the terminal response.
+	ResponseStatus string `json:"response_status,omitempty"`
+	// RawFinishReason is incomplete_details.reason, without conversion.
+	RawFinishReason string `json:"raw_finish_reason,omitempty"`
 	// ExtraFields holds non-standard response fields, including any
 	// captured via [LanguageModelHeaderFunc].
 	ExtraFields map[string]json.RawMessage `json:"extra_fields,omitempty"`

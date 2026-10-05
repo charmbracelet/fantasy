@@ -17,6 +17,7 @@ import (
 	"charm.land/fantasy/object"
 	"charm.land/fantasy/schema"
 	"github.com/charmbracelet/openai-go"
+	"github.com/charmbracelet/openai-go/option"
 	"github.com/charmbracelet/openai-go/packages/param"
 	"github.com/charmbracelet/openai-go/responses"
 	"github.com/charmbracelet/openai-go/shared"
@@ -404,16 +405,15 @@ func validatePreviousResponseIDPrompt(prompt fantasy.Prompt) error {
 	return nil
 }
 
-func responsesProviderMetadata(responseID string) fantasy.ProviderMetadata {
-	if responseID == "" {
+func responsesProviderMetadata(response responses.Response) fantasy.ProviderMetadata {
+	if response.ID == "" && response.Status == "" && response.IncompleteDetails.Reason == "" {
 		return fantasy.ProviderMetadata{}
 	}
-
-	return fantasy.ProviderMetadata{
-		Name: &ResponsesProviderMetadata{
-			ResponseID: responseID,
-		},
-	}
+	return fantasy.ProviderMetadata{Name: &ResponsesProviderMetadata{
+		ResponseID:      response.ID,
+		ResponseStatus:  string(response.Status),
+		RawFinishReason: response.IncompleteDetails.Reason,
+	}}
 }
 
 func responsesUsage(resp responses.Response) fantasy.Usage {
@@ -865,9 +865,9 @@ func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call)
 		return nil, err
 	}
 
-	response, err := o.client.Responses.New(ctx, *params, capture.requestOptions(o.headerFunc, append(callUARequestOptions(call), callHeadersRequestOptions(call)...))...)
+	response, err := o.client.Responses.New(ctx, *params, capture.requestOptions(o.headerFunc, append(append(callUARequestOptions(call), callHeadersRequestOptions(call)...), option.WithResponseInto(&capture.response)))...)
 	if err != nil {
-		return nil, toProviderErr(err)
+		return nil, toResponsesProviderErr(err, capture.response)
 	}
 
 	if response == nil {
@@ -875,10 +875,7 @@ func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call)
 	}
 
 	if response.Error.Message != "" {
-		return nil, &fantasy.Error{
-			Title:   "provider error",
-			Message: fmt.Sprintf("%s (code: %s)", response.Error.Message, response.Error.Code),
-		}
+		return nil, responsesStreamFailureError("provider error", response.Error.RawJSON(), capture.response)
 	}
 
 	var content []fantasy.Content
@@ -998,7 +995,7 @@ func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call)
 		})
 	}
 
-	metadata := responsesProviderMetadata(response.ID)
+	metadata := responsesProviderMetadata(*response)
 	o.applyHeaders(capture.header(), &metadata)
 
 	return &fantasy.Response{
@@ -1037,7 +1034,7 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 		return nil, err
 	}
 
-	stream := o.client.Responses.NewStreaming(ctx, *params, capture.requestOptions(o.headerFunc, append(callUARequestOptions(call), callHeadersRequestOptions(call)...))...)
+	stream := o.client.Responses.NewStreaming(ctx, *params, capture.requestOptions(o.headerFunc, append(append(callUARequestOptions(call), callHeadersRequestOptions(call)...), option.WithResponseInto(&capture.response)))...)
 
 	finishReason := fantasy.FinishReasonUnknown
 	var usage fantasy.Usage
@@ -1047,6 +1044,7 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 	// identical; the overwrites ensure we have the final value even if an event
 	// is missed.
 	responseID := ""
+	var terminalResponse responses.Response
 	sawTerminalEvent := false
 	ongoingToolCalls := make(map[int64]*ongoingToolCall)
 	hasFunctionCall := false
@@ -1322,6 +1320,7 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 				sawTerminalEvent = true
 				completed := event.AsResponseCompleted()
 				responseID = completed.Response.ID
+				terminalResponse = completed.Response
 				finishReason = mapResponsesFinishReason(completed.Response.IncompleteDetails.Reason, hasFunctionCall)
 				usage = responsesUsage(completed.Response)
 
@@ -1329,6 +1328,7 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 				sawTerminalEvent = true
 				incomplete := event.AsResponseIncomplete()
 				responseID = incomplete.Response.ID
+				terminalResponse = incomplete.Response
 				finishReason = mapResponsesFinishReason(incomplete.Response.IncompleteDetails.Reason, hasFunctionCall)
 				usage = responsesUsage(incomplete.Response)
 
@@ -1336,7 +1336,7 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 				failed := event.AsResponseFailed()
 				if !yield(fantasy.StreamPart{
 					Type:  fantasy.StreamPartTypeError,
-					Error: responsesFailedStreamError(failed.Response.Error.Message, string(failed.Response.Error.Code)),
+					Error: responsesStreamFailureError("response failed", failed.Response.Error.RawJSON(), capture.response),
 				}) {
 					return
 				}
@@ -1346,7 +1346,7 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 				errorEvent := event.AsError()
 				if !yield(fantasy.StreamPart{
 					Type:  fantasy.StreamPartTypeError,
-					Error: responsesErrorStreamError(errorEvent.Message, errorEvent.Code),
+					Error: responsesStreamFailureError("response error", errorEvent.RawJSON(), capture.response),
 				}) {
 					return
 				}
@@ -1358,7 +1358,7 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 		if err != nil && !errors.Is(err, io.EOF) {
 			yield(fantasy.StreamPart{
 				Type:  fantasy.StreamPartTypeError,
-				Error: toProviderErr(err),
+				Error: toResponsesProviderErr(err, capture.response),
 			})
 			return
 		}
@@ -1385,7 +1385,8 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 			})
 		}
 
-		metadata := responsesProviderMetadata(responseID)
+		terminalResponse.ID = responseID
+		metadata := responsesProviderMetadata(terminalResponse)
 		o.applyHeaders(capture.header(), &metadata)
 		yield(fantasy.StreamPart{
 			Type:             fantasy.StreamPartTypeFinish,
@@ -1394,24 +1395,6 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 			ProviderMetadata: metadata,
 		})
 	}, nil
-}
-
-// responsesFailedStreamError intentionally returns a provider-declared failure
-// instead of a retryable transport error. Only synthetic stream truncation
-// errors are wrapped with io.ErrUnexpectedEOF.
-func responsesFailedStreamError(message, code string) error {
-	return responsesStreamFailureError("response failed", message, code)
-}
-
-func responsesErrorStreamError(message, code string) error {
-	return responsesStreamFailureError("response error", message, code)
-}
-
-func responsesStreamFailureError(title, message, code string) error {
-	if code != "" {
-		message = fmt.Sprintf("%s (code: %s)", message, code)
-	}
-	return &fantasy.Error{Title: title, Message: message}
 }
 
 // toWebSearchToolParam converts a ProviderDefinedTool with ID
@@ -1550,16 +1533,13 @@ func (o responsesLanguageModel) generateObjectWithJSONMode(ctx context.Context, 
 
 	// Make request
 	capture := responseCapture{}
-	response, err := o.client.Responses.New(ctx, *params, capture.requestOptions(o.headerFunc, append(objectCallUARequestOptions(call), objectCallHeadersRequestOptions(call)...))...)
+	response, err := o.client.Responses.New(ctx, *params, capture.requestOptions(o.headerFunc, append(append(objectCallUARequestOptions(call), objectCallHeadersRequestOptions(call)...), option.WithResponseInto(&capture.response)))...)
 	if err != nil {
-		return nil, toProviderErr(err)
+		return nil, toResponsesProviderErr(err, capture.response)
 	}
 
 	if response.Error.Message != "" {
-		return nil, &fantasy.Error{
-			Title:   "provider error",
-			Message: fmt.Sprintf("%s (code: %s)", response.Error.Message, response.Error.Code),
-		}
+		return nil, responsesStreamFailureError("provider error", response.Error.RawJSON(), capture.response)
 	}
 
 	// Extract JSON text from response
@@ -1606,7 +1586,7 @@ func (o responsesLanguageModel) generateObjectWithJSONMode(ctx context.Context, 
 		return nil, err
 	}
 
-	metadata := responsesProviderMetadata(response.ID)
+	metadata := responsesProviderMetadata(*response)
 	o.applyHeaders(capture.header(), &metadata)
 
 	return &fantasy.ObjectResponse{
@@ -1653,7 +1633,7 @@ func (o responsesLanguageModel) streamObjectWithJSONMode(ctx context.Context, ca
 	}
 
 	capture := responseCapture{}
-	stream := o.client.Responses.NewStreaming(ctx, *params, capture.requestOptions(o.headerFunc, append(objectCallUARequestOptions(call), objectCallHeadersRequestOptions(call)...))...)
+	stream := o.client.Responses.NewStreaming(ctx, *params, capture.requestOptions(o.headerFunc, append(append(objectCallUARequestOptions(call), objectCallHeadersRequestOptions(call)...), option.WithResponseInto(&capture.response)))...)
 
 	return func(yield func(fantasy.ObjectStreamPart) bool) {
 		if len(warnings) > 0 {
@@ -1675,6 +1655,7 @@ func (o responsesLanguageModel) streamObjectWithJSONMode(ctx context.Context, ca
 		// identical; the overwrites ensure we have the final value even if an event
 		// is missed.
 		var responseID string
+		var terminalResponse responses.Response
 		var sawTerminalEvent bool
 		hasFunctionCall := false
 
@@ -1733,6 +1714,7 @@ func (o responsesLanguageModel) streamObjectWithJSONMode(ctx context.Context, ca
 				sawTerminalEvent = true
 				completed := event.AsResponseCompleted()
 				responseID = completed.Response.ID
+				terminalResponse = completed.Response
 				finishReason = mapResponsesFinishReason(completed.Response.IncompleteDetails.Reason, hasFunctionCall)
 				usage = responsesUsage(completed.Response)
 
@@ -1740,6 +1722,7 @@ func (o responsesLanguageModel) streamObjectWithJSONMode(ctx context.Context, ca
 				sawTerminalEvent = true
 				incomplete := event.AsResponseIncomplete()
 				responseID = incomplete.Response.ID
+				terminalResponse = incomplete.Response
 				finishReason = mapResponsesFinishReason(incomplete.Response.IncompleteDetails.Reason, hasFunctionCall)
 				usage = responsesUsage(incomplete.Response)
 
@@ -1747,7 +1730,7 @@ func (o responsesLanguageModel) streamObjectWithJSONMode(ctx context.Context, ca
 				failed := event.AsResponseFailed()
 				if !yield(fantasy.ObjectStreamPart{
 					Type:  fantasy.ObjectStreamPartTypeError,
-					Error: responsesFailedStreamError(failed.Response.Error.Message, string(failed.Response.Error.Code)),
+					Error: responsesStreamFailureError("response failed", failed.Response.Error.RawJSON(), capture.response),
 				}) {
 					return
 				}
@@ -1757,7 +1740,7 @@ func (o responsesLanguageModel) streamObjectWithJSONMode(ctx context.Context, ca
 				errorEvent := event.AsError()
 				if !yield(fantasy.ObjectStreamPart{
 					Type:  fantasy.ObjectStreamPartTypeError,
-					Error: responsesErrorStreamError(errorEvent.Message, errorEvent.Code),
+					Error: responsesStreamFailureError("response error", errorEvent.RawJSON(), capture.response),
 				}) {
 					return
 				}
@@ -1769,7 +1752,7 @@ func (o responsesLanguageModel) streamObjectWithJSONMode(ctx context.Context, ca
 		if err != nil && !errors.Is(err, io.EOF) {
 			yield(fantasy.ObjectStreamPart{
 				Type:  fantasy.ObjectStreamPartTypeError,
-				Error: toProviderErr(err),
+				Error: toResponsesProviderErr(err, capture.response),
 			})
 			return
 		}
@@ -1788,7 +1771,8 @@ func (o responsesLanguageModel) streamObjectWithJSONMode(ctx context.Context, ca
 
 		// Final validation and emit
 		if lastParsedObject != nil {
-			metadata := responsesProviderMetadata(responseID)
+			terminalResponse.ID = responseID
+			metadata := responsesProviderMetadata(terminalResponse)
 			o.applyHeaders(capture.header(), &metadata)
 			yield(fantasy.ObjectStreamPart{
 				Type:             fantasy.ObjectStreamPartTypeFinish,

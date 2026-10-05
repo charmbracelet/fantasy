@@ -552,6 +552,7 @@ func toResponsesPrompt(prompt fantasy.Prompt, systemMessageMode string, store bo
 		case fantasy.MessageRoleAssistant:
 			startIdx := len(input)
 			seenReasoning := make(map[string]bool)
+			messageItems := make(map[string]int)
 			for _, c := range msg.Content {
 				switch c.GetType() {
 				case fantasy.ContentTypeText:
@@ -563,7 +564,26 @@ func toResponsesPrompt(prompt fantasy.Prompt, systemMessageMode string, store bo
 						})
 						continue
 					}
-					input = append(input, responses.ResponseInputItemParamOfMessage(textPart.Text, responses.EasyInputMessageRoleAssistant))
+					metadata, _ := textPart.ProviderOptions[Name].(*ResponsesTextMetadata)
+					if !store && metadata != nil && metadata.ItemID != "" {
+						outputText := responses.ResponseOutputMessageContentUnionParam{OfOutputText: &responses.ResponseOutputTextParam{Text: textPart.Text, Annotations: []responses.ResponseOutputTextAnnotationUnionParam{}}}
+						if index, ok := messageItems[metadata.ItemID]; ok {
+							message := input[index].OfOutputMessage
+							message.Content = append(message.Content, outputText)
+							continue
+						}
+						messageItems[metadata.ItemID] = len(input)
+						input = append(input, responses.ResponseInputItemUnionParam{
+							OfOutputMessage: &responses.ResponseOutputMessageParam{
+								ID:      metadata.ItemID,
+								Phase:   responses.ResponseOutputMessagePhase(metadata.Phase),
+								Status:  responses.ResponseOutputMessageStatusCompleted,
+								Content: []responses.ResponseOutputMessageContentUnionParam{outputText},
+							},
+						})
+					} else {
+						input = append(input, responses.ResponseInputItemParamOfMessage(textPart.Text, responses.EasyInputMessageRoleAssistant))
+					}
 
 				case fantasy.ContentTypeToolCall:
 					toolCallPart, ok := fantasy.AsContentType[fantasy.ToolCallPart](c)
@@ -737,7 +757,7 @@ func hasVisibleResponsesUserContent(content responses.ResponseInputMessageConten
 func hasVisibleResponsesAssistantContent(items []responses.ResponseInputItemUnionParam, startIdx int) bool {
 	// Check if we added any assistant content parts from this message
 	for i := startIdx; i < len(items); i++ {
-		if items[i].OfMessage != nil || items[i].OfFunctionCall != nil || items[i].OfItemReference != nil || items[i].OfReasoning != nil {
+		if items[i].OfOutputMessage != nil || items[i].OfMessage != nil || items[i].OfFunctionCall != nil || items[i].OfItemReference != nil || items[i].OfReasoning != nil {
 			return true
 		}
 	}
@@ -857,7 +877,8 @@ func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call)
 			for _, contentPart := range outputItem.Content {
 				if contentPart.Type == "output_text" {
 					content = append(content, fantasy.TextContent{
-						Text: contentPart.Text,
+						Text:             contentPart.Text,
+						ProviderMetadata: fantasy.ProviderMetadata{Name: &ResponsesTextMetadata{ItemID: outputItem.ID, Phase: string(outputItem.Phase)}},
 					})
 
 					for _, annotation := range contentPart.Annotations {
@@ -1064,8 +1085,9 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 
 				case "message":
 					if !yield(fantasy.StreamPart{
-						Type: fantasy.StreamPartTypeTextStart,
-						ID:   added.Item.ID,
+						Type:             fantasy.StreamPartTypeTextStart,
+						ID:               added.Item.ID,
+						ProviderMetadata: fantasy.ProviderMetadata{Name: &ResponsesTextMetadata{ItemID: added.Item.ID, Phase: string(added.Item.Phase)}},
 					}) {
 						return
 					}
@@ -1151,8 +1173,9 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 					}
 				case "message":
 					if !yield(fantasy.StreamPart{
-						Type: fantasy.StreamPartTypeTextEnd,
-						ID:   done.Item.ID,
+						Type:             fantasy.StreamPartTypeTextEnd,
+						ID:               done.Item.ID,
+						ProviderMetadata: fantasy.ProviderMetadata{Name: &ResponsesTextMetadata{ItemID: done.Item.ID, Phase: string(done.Item.Phase)}},
 					}) {
 						return
 					}

@@ -74,6 +74,8 @@ type ResponsesProviderMetadata struct {
 	ResponseStatus string `json:"response_status,omitempty"`
 	// RawFinishReason is incomplete_details.reason, without conversion.
 	RawFinishReason string `json:"raw_finish_reason,omitempty"`
+	// ServiceTier is the tier reported by the provider.
+	ServiceTier ServiceTier `json:"service_tier,omitempty"`
 	// ExtraFields holds non-standard response fields, including any
 	// captured via [LanguageModelHeaderFunc].
 	ExtraFields map[string]json.RawMessage `json:"extra_fields,omitempty"`

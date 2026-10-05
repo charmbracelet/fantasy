@@ -406,13 +406,14 @@ func validatePreviousResponseIDPrompt(prompt fantasy.Prompt) error {
 }
 
 func responsesProviderMetadata(response responses.Response) fantasy.ProviderMetadata {
-	if response.ID == "" && response.Status == "" && response.IncompleteDetails.Reason == "" {
+	if response.ID == "" && response.Status == "" && response.IncompleteDetails.Reason == "" && response.ServiceTier == "" {
 		return fantasy.ProviderMetadata{}
 	}
 	return fantasy.ProviderMetadata{Name: &ResponsesProviderMetadata{
 		ResponseID:      response.ID,
 		ResponseStatus:  string(response.Status),
 		RawFinishReason: response.IncompleteDetails.Reason,
+		ServiceTier:     ServiceTier(response.ServiceTier),
 	}}
 }
 

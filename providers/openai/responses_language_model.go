@@ -198,17 +198,23 @@ func (o responsesLanguageModel) prepareParams(call fantasy.Call) (*responses.Res
 		params.Store = param.NewOpt(false)
 	}
 
+	storeEnabled := params.Store.Value
+	if openaiOptions != nil {
+		if store, ok := openaiOptions.ExtraBody["store"].(bool); ok {
+			storeEnabled = store
+		}
+	}
+
 	if openaiOptions != nil && openaiOptions.PreviousResponseID != nil && *openaiOptions.PreviousResponseID != "" {
 		if err := validatePreviousResponseIDPrompt(call.Prompt); err != nil {
 			return nil, warnings, err
 		}
-		if openaiOptions.Store == nil || !*openaiOptions.Store {
+		if !storeEnabled {
 			return nil, warnings, errors.New(previousResponseIDStoreError)
 		}
 		params.PreviousResponseID = param.NewOpt(*openaiOptions.PreviousResponseID)
 	}
 
-	storeEnabled := openaiOptions != nil && openaiOptions.Store != nil && *openaiOptions.Store
 	input, inputWarnings := toResponsesPrompt(call.Prompt, modelConfig.systemMessageMode, storeEnabled)
 	warnings = append(warnings, inputWarnings...)
 
@@ -380,6 +386,9 @@ func (o responsesLanguageModel) prepareParams(call fantasy.Call) (*responses.Res
 		params.ToolChoice = toolChoice
 	}
 
+	if openaiOptions != nil && len(openaiOptions.ExtraBody) > 0 {
+		params.SetExtraFields(openaiOptions.ExtraBody)
+	}
 	return params, warnings, nil
 }
 

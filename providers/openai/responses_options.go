@@ -230,6 +230,8 @@ const (
 
 // ResponsesProviderOptions represents additional options for OpenAI Responses API.
 type ResponsesProviderOptions struct {
+	// ExtraBody adds request fields and overrides standard fields.
+	ExtraBody         map[string]any `json:"extra_body,omitempty"`
 	Include           []IncludeType  `json:"include"`
 	Instructions      *string        `json:"instructions"`
 	Logprobs          any            `json:"logprobs"`

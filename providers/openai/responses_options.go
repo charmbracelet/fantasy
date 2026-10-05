@@ -14,6 +14,7 @@ import (
 const (
 	TypeResponsesProviderMetadata  = Name + ".responses.metadata"
 	TypeResponsesProviderOptions   = Name + ".responses.options"
+	TypeResponsesToolCallMetadata  = Name + ".responses.tool_call_metadata"
 	TypeResponsesTextMetadata      = Name + ".responses.text_metadata"
 	TypeResponsesReasoningMetadata = Name + ".responses.reasoning_metadata"
 	TypeWebSearchCallMetadata      = Name + ".responses.web_search_call_metadata"
@@ -30,6 +31,13 @@ func init() {
 	})
 	fantasy.RegisterProviderType(TypeResponsesProviderOptions, func(data []byte) (fantasy.ProviderOptionsData, error) {
 		var v ResponsesProviderOptions
+		if err := json.Unmarshal(data, &v); err != nil {
+			return nil, err
+		}
+		return &v, nil
+	})
+	fantasy.RegisterProviderType(TypeResponsesToolCallMetadata, func(data []byte) (fantasy.ProviderOptionsData, error) {
+		var v ResponsesToolCallMetadata
 		if err := json.Unmarshal(data, &v); err != nil {
 			return nil, err
 		}
@@ -99,6 +107,31 @@ func (m *ResponsesProviderMetadata) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*m = ResponsesProviderMetadata(p)
+	return nil
+}
+
+// ResponsesToolCallMetadata contains the function-call item ID for replay.
+type ResponsesToolCallMetadata struct {
+	ItemID string `json:"item_id"`
+}
+
+// Options implements the ProviderOptions interface.
+func (*ResponsesToolCallMetadata) Options() {}
+
+// MarshalJSON adds the provider type to the stored metadata.
+func (m ResponsesToolCallMetadata) MarshalJSON() ([]byte, error) {
+	type plain ResponsesToolCallMetadata
+	return fantasy.MarshalProviderType(TypeResponsesToolCallMetadata, plain(m))
+}
+
+// UnmarshalJSON reads stored provider metadata.
+func (m *ResponsesToolCallMetadata) UnmarshalJSON(data []byte) error {
+	type plain ResponsesToolCallMetadata
+	var p plain
+	if err := fantasy.UnmarshalProviderType(data, &p); err != nil {
+		return err
+	}
+	*m = ResponsesToolCallMetadata(p)
 	return nil
 }
 

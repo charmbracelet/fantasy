@@ -10,6 +10,7 @@ import (
 	"maps"
 	"net/http"
 	"reflect"
+	"slices"
 	"strings"
 
 	"charm.land/fantasy"
@@ -609,7 +610,11 @@ func toResponsesPrompt(prompt fantasy.Prompt, systemMessageMode string, store bo
 						continue
 					}
 
-					input = append(input, responses.ResponseInputItemParamOfFunctionCall(toolCallPart.Input, toolCallPart.ToolCallID, toolCallPart.ToolName))
+					item := responses.ResponseInputItemParamOfFunctionCall(toolCallPart.Input, toolCallPart.ToolCallID, toolCallPart.ToolName)
+					if metadata, ok := toolCallPart.ProviderOptions[Name].(*ResponsesToolCallMetadata); !store && ok && metadata != nil && strings.HasPrefix(metadata.ItemID, "fc_") {
+						item.OfFunctionCall.ID = param.NewOpt(metadata.ItemID)
+					}
+					input = append(input, item)
 				case fantasy.ContentTypeSource:
 					// Source citations from web search are not a
 					// recognised Responses API input type; skip.
@@ -869,7 +874,6 @@ func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call)
 
 	var content []fantasy.Content
 	hasFunctionCall := false
-	var pendingFunctionCalls []fantasy.ToolCallContent
 
 	for _, outputItem := range response.Output {
 		switch outputItem.Type {
@@ -913,11 +917,12 @@ func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call)
 
 		case "function_call":
 			hasFunctionCall = true
-			pendingFunctionCalls = append(pendingFunctionCalls, fantasy.ToolCallContent{
+			content = append(content, fantasy.ToolCallContent{
 				ProviderExecuted: false,
 				ToolCallID:       outputItem.CallID,
 				ToolName:         outputItem.Name,
 				Input:            outputItem.Arguments.OfString,
+				ProviderMetadata: fantasy.ProviderMetadata{Name: &ResponsesToolCallMetadata{ItemID: outputItem.ID}},
 			})
 
 		case "web_search_call":
@@ -978,10 +983,10 @@ func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call)
 			Type:    fantasy.CallWarningTypeOther,
 			Message: "tool calls were returned but the model hit the token limit; arguments may be truncated",
 		})
-	} else {
-		for _, tc := range pendingFunctionCalls {
-			content = append(content, tc)
-		}
+		content = slices.DeleteFunc(content, func(c fantasy.Content) bool {
+			tc, ok := c.(fantasy.ToolCallContent)
+			return ok && !tc.ProviderExecuted
+		})
 	}
 
 	metadata := responsesProviderMetadata(response.ID)
@@ -1063,11 +1068,13 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 					ongoingToolCalls[added.OutputIndex] = &ongoingToolCall{
 						toolName:   added.Item.Name,
 						toolCallID: added.Item.CallID,
+						itemID:     added.Item.ID,
 					}
 					if !yield(fantasy.StreamPart{
-						Type:         fantasy.StreamPartTypeToolInputStart,
-						ID:           added.Item.CallID,
-						ToolCallName: added.Item.Name,
+						Type:             fantasy.StreamPartTypeToolInputStart,
+						ID:               added.Item.CallID,
+						ToolCallName:     added.Item.Name,
+						ProviderMetadata: fantasy.ProviderMetadata{Name: &ResponsesToolCallMetadata{ItemID: added.Item.ID}},
 					}) {
 						return
 					}
@@ -1125,16 +1132,18 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 						hasFunctionCall = true
 
 						if !yield(fantasy.StreamPart{
-							Type: fantasy.StreamPartTypeToolInputEnd,
-							ID:   done.Item.CallID,
+							Type:             fantasy.StreamPartTypeToolInputEnd,
+							ID:               done.Item.CallID,
+							ProviderMetadata: fantasy.ProviderMetadata{Name: &ResponsesToolCallMetadata{ItemID: done.Item.ID}},
 						}) {
 							return
 						}
 						if !yield(fantasy.StreamPart{
-							Type:          fantasy.StreamPartTypeToolCall,
-							ID:            done.Item.CallID,
-							ToolCallName:  done.Item.Name,
-							ToolCallInput: done.Item.Arguments.OfString,
+							Type:             fantasy.StreamPartTypeToolCall,
+							ID:               done.Item.CallID,
+							ToolCallName:     done.Item.Name,
+							ToolCallInput:    done.Item.Arguments.OfString,
+							ProviderMetadata: fantasy.ProviderMetadata{Name: &ResponsesToolCallMetadata{ItemID: done.Item.ID}},
 						}) {
 							return
 						}
@@ -1214,9 +1223,10 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 				tc := ongoingToolCalls[delta.OutputIndex]
 				if tc != nil {
 					if !yield(fantasy.StreamPart{
-						Type:  fantasy.StreamPartTypeToolInputDelta,
-						ID:    tc.toolCallID,
-						Delta: delta.Delta,
+						Type:             fantasy.StreamPartTypeToolInputDelta,
+						ID:               tc.toolCallID,
+						Delta:            delta.Delta,
+						ProviderMetadata: fantasy.ProviderMetadata{Name: &ResponsesToolCallMetadata{ItemID: tc.itemID}},
 					}) {
 						return
 					}
@@ -1463,6 +1473,7 @@ func GetReasoningMetadata(providerOptions fantasy.ProviderOptions) *ResponsesRea
 }
 
 type ongoingToolCall struct {
+	itemID     string
 	toolName   string
 	toolCallID string
 }

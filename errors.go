@@ -155,7 +155,7 @@ var http2TransportErrorFragments = []string{
 // detail on GOAWAY would misread as the "; CODE" of a stream error.
 var http2ConnectionLostMessages = []string{
 	"http2: client connection lost",                       // health-check ping went unanswered
-	"http2: server sent GOAWAY and closed the connection", // stdlib's GoAwayError
+	"http2: server sent GOAWAY and closed the connection", // GoAwayError, from either http2 copy
 }
 
 // matchConnectionLost returns the entry of http2ConnectionLostMessages that
@@ -175,9 +175,11 @@ func matchConnectionLost(msg string) (string, bool) {
 // errors, and GOAWAY frames, which originate from the transport rather
 // than the application.
 //
-// x/net/http2 error types are matched by type. The standard library's copy
-// lives in an internal package, so its equivalents are matched by message
-// instead.
+// Stream and connection errors are matched by type against x/net/http2.
+// GOAWAY is matched by message instead: x/net deprecated GoAwayError
+// without offering a replacement, and the standard library's copy of the
+// package is internal, so neither one's type can be named here for long.
+// Both spell the failure the same way, so one fragment covers them.
 func IsTransportError(err error) bool {
 	if err == nil {
 		return false
@@ -185,11 +187,8 @@ func IsTransportError(err error) bool {
 	var (
 		streamErr http2.StreamError
 		connErr   http2.ConnectionError
-		goAwayErr http2.GoAwayError
 	)
-	if errors.As(err, &streamErr) ||
-		errors.As(err, &connErr) ||
-		errors.As(err, &goAwayErr) {
+	if errors.As(err, &streamErr) || errors.As(err, &connErr) {
 		return true
 	}
 	// Wrapped errors embed the inner message, so scanning the top-level

@@ -57,6 +57,18 @@ type ProviderError struct {
 	// events ride inside an already-successful 200 response, so the status
 	// code alone cannot signal that a retry may succeed.
 	TransientError bool
+
+	// ErrorType is the provider's own name for the failure, e.g.
+	// "overloaded_error", "rate_limit_exceeded", "RESOURCE_EXHAUSTED".
+	// Providers already parse it to classify transient failures, so carrying
+	// it spares callers from reading it back out of Message, which is
+	// formatted for people rather than for parsing.
+	//
+	// Empty when the response named no type, and always empty for a failure
+	// a provider recognises by message alone rather than from a classified
+	// payload. Treat it as a hint worth acting on when present rather than a
+	// field every error carries.
+	ErrorType string
 }
 
 func (m *ProviderError) Error() string {

@@ -36,6 +36,7 @@ func toProviderErr(err error) error {
 			RequestBody:     apiErr.DumpRequest(true),
 			ResponseHeaders: toHeaderMap(apiErr.Response.Header),
 			ResponseBody:    apiErr.DumpResponse(true),
+			ErrorType:       cmp.Or(apiErr.Type, apiErr.Code),
 		}
 
 		parseContextTooLargeError(message, providerErr)
@@ -76,6 +77,7 @@ func toProviderErrFromStreamError(streamErr *ssestream.StreamError) *fantasy.Pro
 		Message:        cmp.Or(envelope.Error.Message, streamErr.Message),
 		Cause:          streamErr,
 		ResponseBody:   streamErr.Event.Data,
+		ErrorType:      errType,
 		TransientError: fantasy.TransientStreamErrorTypes[errType],
 	}
 }

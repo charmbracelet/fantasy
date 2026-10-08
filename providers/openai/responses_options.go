@@ -99,6 +99,10 @@ type ResponsesReasoningMetadata struct {
 	ItemID           string   `json:"item_id"`
 	EncryptedContent *string  `json:"encrypted_content"`
 	Summary          []string `json:"summary"`
+	// Finalized marks metadata copied from the completed reasoning output
+	// item. Only finalized encrypted content is replayed inline. Streaming
+	// placeholders and metadata persisted before this field existed are not.
+	Finalized bool `json:"finalized,omitempty"`
 }
 
 // Options implements the ProviderOptions interface.

@@ -24,6 +24,33 @@ var noopComputerRun = func(_ context.Context, _ fantasy.ToolCall) (fantasy.ToolR
 	return fantasy.ToolResponse{}, nil
 }
 
+func TestDecodeToolCallInputPreservesNumbers(t *testing.T) {
+	t.Parallel()
+	const input = `{"a":2,"b":-3.5,"value":9007199254740993,"nested":{"n":1e3}}`
+	toolCall := fantasy.ToolCallPart{ToolCallID: "call_1", ToolName: "echo", Input: input}
+
+	// Marshal through the SDK params: the SDK encoder, not encoding/json,
+	// decides how each value is written to the request body.
+	inputMap, warning := decodeToolCallInputMap(toolCall)
+	require.Nil(t, warning)
+	raw, err := json.Marshal(anthropic.ToolUseBlockParam{ID: "call_1", Name: "echo", Input: inputMap})
+	require.NoError(t, err)
+	var block struct {
+		Input json.RawMessage `json:"input"`
+	}
+	require.NoError(t, json.Unmarshal(raw, &block))
+	require.JSONEq(t, input, string(block.Input))
+	require.Contains(t, string(block.Input), "9007199254740993")
+
+	inputAny, warning := decodeToolCallInputAny(toolCall)
+	require.Nil(t, warning)
+	raw, err = json.Marshal(anthropic.ServerToolUseBlockParam{ID: "call_1", Name: "web_search", Input: inputAny})
+	require.NoError(t, err)
+	require.NoError(t, json.Unmarshal(raw, &block))
+	require.JSONEq(t, input, string(block.Input))
+	require.Contains(t, string(block.Input), "9007199254740993")
+}
+
 func TestToPrompt_DropsEmptyMessages(t *testing.T) {
 	t.Parallel()
 

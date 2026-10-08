@@ -551,6 +551,7 @@ func toResponsesPrompt(prompt fantasy.Prompt, systemMessageMode string, store bo
 
 		case fantasy.MessageRoleAssistant:
 			startIdx := len(input)
+			seenReasoning := make(map[string]bool)
 			for _, c := range msg.Content {
 				switch c.GetType() {
 				case fantasy.ContentTypeText:
@@ -594,13 +595,26 @@ func toResponsesPrompt(prompt fantasy.Prompt, systemMessageMode string, store bo
 					// recognised Responses API input type; skip.
 					continue
 				case fantasy.ContentTypeReasoning:
-					// Reasoning items are always skipped during replay.
-					// When store is enabled, the API already has them
-					// persisted server-side. When store is disabled, the
-					// item IDs are ephemeral and referencing them causes
-					// "Item not found" errors. In both cases, replaying
-					// reasoning inline is not supported by the API.
-					continue
+					// Stateless requests must replay encrypted content inline.
+					// An item reference alone cannot resolve an unstored item.
+					// Only finalized metadata is replayed: unfinalized content can
+					// be a partial placeholder from the added stream event.
+					metadata := GetReasoningMetadata(c.Options())
+					if store || metadata == nil || !metadata.Finalized || metadata.ItemID == "" || metadata.EncryptedContent == nil || *metadata.EncryptedContent == "" || seenReasoning[metadata.ItemID] {
+						continue
+					}
+					seenReasoning[metadata.ItemID] = true
+					summary := make([]responses.ResponseReasoningItemSummaryParam, 0, len(metadata.Summary))
+					for _, text := range metadata.Summary {
+						summary = append(summary, responses.ResponseReasoningItemSummaryParam{Text: text})
+					}
+					input = append(input, responses.ResponseInputItemUnionParam{
+						OfReasoning: &responses.ResponseReasoningItemParam{
+							ID:               metadata.ItemID,
+							Summary:          summary,
+							EncryptedContent: param.NewOpt(*metadata.EncryptedContent),
+						},
+					})
 				}
 			}
 
@@ -723,7 +737,7 @@ func hasVisibleResponsesUserContent(content responses.ResponseInputMessageConten
 func hasVisibleResponsesAssistantContent(items []responses.ResponseInputItemUnionParam, startIdx int) bool {
 	// Check if we added any assistant content parts from this message
 	for i := startIdx; i < len(items); i++ {
-		if items[i].OfMessage != nil || items[i].OfFunctionCall != nil || items[i].OfItemReference != nil {
+		if items[i].OfMessage != nil || items[i].OfFunctionCall != nil || items[i].OfItemReference != nil || items[i].OfReasoning != nil {
 			return true
 		}
 	}
@@ -909,7 +923,8 @@ func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call)
 			})
 		case "reasoning":
 			metadata := &ResponsesReasoningMetadata{
-				ItemID: outputItem.ID,
+				ItemID:    outputItem.ID,
+				Finalized: true,
 			}
 			if outputItem.EncryptedContent != "" {
 				metadata.EncryptedContent = &outputItem.EncryptedContent
@@ -919,13 +934,9 @@ func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call)
 				continue
 			}
 
-			// When there are no summary parts, add an empty reasoning part
-			summaries := outputItem.Summary
-			if len(summaries) == 0 {
-				summaries = []responses.ResponseReasoningItemSummary{{Type: "summary_text", Text: ""}}
-			}
-
-			for _, s := range summaries {
+			// Preserve the original summary for replay, including an empty list.
+			metadata.Summary = make([]string, 0, len(outputItem.Summary))
+			for _, s := range outputItem.Summary {
 				metadata.Summary = append(metadata.Summary, s.Text)
 			}
 
@@ -1149,11 +1160,24 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 				case "reasoning":
 					state := activeReasoning[done.Item.ID]
 					if state != nil {
+						// The completed item owns the replay data. The added item
+						// can have missing or partial encrypted content.
+						metadata := &ResponsesReasoningMetadata{
+							ItemID:    done.Item.ID,
+							Summary:   make([]string, 0, len(done.Item.Summary)),
+							Finalized: true,
+						}
+						if done.Item.EncryptedContent != "" {
+							metadata.EncryptedContent = &done.Item.EncryptedContent
+						}
+						for _, summary := range done.Item.Summary {
+							metadata.Summary = append(metadata.Summary, summary.Text)
+						}
 						if !yield(fantasy.StreamPart{
 							Type: fantasy.StreamPartTypeReasoningEnd,
 							ID:   done.Item.ID,
 							ProviderMetadata: fantasy.ProviderMetadata{
-								Name: state.metadata,
+								Name: metadata,
 							},
 						}) {
 							return

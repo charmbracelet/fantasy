@@ -14,6 +14,8 @@ import (
 const (
 	TypeResponsesProviderMetadata  = Name + ".responses.metadata"
 	TypeResponsesProviderOptions   = Name + ".responses.options"
+	TypeResponsesToolCallMetadata  = Name + ".responses.tool_call_metadata"
+	TypeResponsesTextMetadata      = Name + ".responses.text_metadata"
 	TypeResponsesReasoningMetadata = Name + ".responses.reasoning_metadata"
 	TypeWebSearchCallMetadata      = Name + ".responses.web_search_call_metadata"
 )
@@ -29,6 +31,20 @@ func init() {
 	})
 	fantasy.RegisterProviderType(TypeResponsesProviderOptions, func(data []byte) (fantasy.ProviderOptionsData, error) {
 		var v ResponsesProviderOptions
+		if err := json.Unmarshal(data, &v); err != nil {
+			return nil, err
+		}
+		return &v, nil
+	})
+	fantasy.RegisterProviderType(TypeResponsesToolCallMetadata, func(data []byte) (fantasy.ProviderOptionsData, error) {
+		var v ResponsesToolCallMetadata
+		if err := json.Unmarshal(data, &v); err != nil {
+			return nil, err
+		}
+		return &v, nil
+	})
+	fantasy.RegisterProviderType(TypeResponsesTextMetadata, func(data []byte) (fantasy.ProviderOptionsData, error) {
+		var v ResponsesTextMetadata
 		if err := json.Unmarshal(data, &v); err != nil {
 			return nil, err
 		}
@@ -54,6 +70,12 @@ func init() {
 // The ResponseID can be used as PreviousResponseID in follow-up requests to chain responses.
 type ResponsesProviderMetadata struct {
 	ResponseID string `json:"response_id"`
+	// ResponseStatus is the status in the terminal response.
+	ResponseStatus string `json:"response_status,omitempty"`
+	// RawFinishReason is incomplete_details.reason, without conversion.
+	RawFinishReason string `json:"raw_finish_reason,omitempty"`
+	// ServiceTier is the tier reported by the provider.
+	ServiceTier ServiceTier `json:"service_tier,omitempty"`
 	// ExtraFields holds non-standard response fields, including any
 	// captured via [LanguageModelHeaderFunc].
 	ExtraFields map[string]json.RawMessage `json:"extra_fields,omitempty"`
@@ -94,11 +116,66 @@ func (m *ResponsesProviderMetadata) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// ResponsesToolCallMetadata contains the function-call item ID for replay.
+type ResponsesToolCallMetadata struct {
+	ItemID string `json:"item_id"`
+}
+
+// Options implements the ProviderOptions interface.
+func (*ResponsesToolCallMetadata) Options() {}
+
+// MarshalJSON adds the provider type to the stored metadata.
+func (m ResponsesToolCallMetadata) MarshalJSON() ([]byte, error) {
+	type plain ResponsesToolCallMetadata
+	return fantasy.MarshalProviderType(TypeResponsesToolCallMetadata, plain(m))
+}
+
+// UnmarshalJSON reads stored provider metadata.
+func (m *ResponsesToolCallMetadata) UnmarshalJSON(data []byte) error {
+	type plain ResponsesToolCallMetadata
+	var p plain
+	if err := fantasy.UnmarshalProviderType(data, &p); err != nil {
+		return err
+	}
+	*m = ResponsesToolCallMetadata(p)
+	return nil
+}
+
+// ResponsesTextMetadata contains the message fields needed for text replay.
+type ResponsesTextMetadata struct {
+	ItemID string `json:"item_id"`
+	Phase  string `json:"phase,omitempty"`
+}
+
+// Options implements the ProviderOptions interface.
+func (*ResponsesTextMetadata) Options() {}
+
+// MarshalJSON adds the provider type to the stored metadata.
+func (m ResponsesTextMetadata) MarshalJSON() ([]byte, error) {
+	type plain ResponsesTextMetadata
+	return fantasy.MarshalProviderType(TypeResponsesTextMetadata, plain(m))
+}
+
+// UnmarshalJSON reads stored provider metadata.
+func (m *ResponsesTextMetadata) UnmarshalJSON(data []byte) error {
+	type plain ResponsesTextMetadata
+	var p plain
+	if err := fantasy.UnmarshalProviderType(data, &p); err != nil {
+		return err
+	}
+	*m = ResponsesTextMetadata(p)
+	return nil
+}
+
 // ResponsesReasoningMetadata represents reasoning metadata for OpenAI Responses API.
 type ResponsesReasoningMetadata struct {
 	ItemID           string   `json:"item_id"`
 	EncryptedContent *string  `json:"encrypted_content"`
 	Summary          []string `json:"summary"`
+	// Finalized marks metadata copied from the completed reasoning output
+	// item. Only finalized encrypted content is replayed inline. Streaming
+	// placeholders and metadata persisted before this field existed are not.
+	Finalized bool `json:"finalized,omitempty"`
 }
 
 // Options implements the ProviderOptions interface.
@@ -159,6 +236,8 @@ const (
 
 // ResponsesProviderOptions represents additional options for OpenAI Responses API.
 type ResponsesProviderOptions struct {
+	// ExtraBody adds request fields and overrides standard fields.
+	ExtraBody         map[string]any `json:"extra_body,omitempty"`
 	Include           []IncludeType  `json:"include"`
 	Instructions      *string        `json:"instructions"`
 	Logprobs          any            `json:"logprobs"`

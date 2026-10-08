@@ -1225,8 +1225,10 @@ func decodeToolCallInputMap(toolCall fantasy.ToolCallPart) (map[string]any, *fan
 	if strings.TrimSpace(toolCall.Input) == "" {
 		return map[string]any{}, nil
 	}
-	var inputMap map[string]any
-	if err := json.Unmarshal([]byte(toolCall.Input), &inputMap); err != nil {
+	// Keep each value as raw JSON. Generic decoding turns large integers
+	// into float64, and the SDK encodes json.Number as a string.
+	var rawMap map[string]json.RawMessage
+	if err := json.Unmarshal([]byte(toolCall.Input), &rawMap); err != nil {
 		return map[string]any{}, &fantasy.CallWarning{
 			Type: fantasy.CallWarningTypeOther,
 			Message: fmt.Sprintf(
@@ -1235,8 +1237,9 @@ func decodeToolCallInputMap(toolCall fantasy.ToolCallPart) (map[string]any, *fan
 			),
 		}
 	}
-	if inputMap == nil {
-		return map[string]any{}, nil
+	inputMap := make(map[string]any, len(rawMap))
+	for key, value := range rawMap {
+		inputMap[key] = value
 	}
 	return inputMap, nil
 }
@@ -1248,7 +1251,7 @@ func decodeToolCallInputAny(toolCall fantasy.ToolCallPart) (any, *fantasy.CallWa
 	if strings.TrimSpace(toolCall.Input) == "" {
 		return nil, nil
 	}
-	var inputAny any
+	var inputAny json.RawMessage
 	if err := json.Unmarshal([]byte(toolCall.Input), &inputAny); err != nil {
 		return nil, &fantasy.CallWarning{
 			Type: fantasy.CallWarningTypeOther,
@@ -1257,6 +1260,9 @@ func decodeToolCallInputAny(toolCall fantasy.ToolCallPart) (any, *fantasy.CallWa
 				toolCall.ToolCallID, err,
 			),
 		}
+	}
+	if string(inputAny) == "null" {
+		return nil, nil
 	}
 	return inputAny, nil
 }

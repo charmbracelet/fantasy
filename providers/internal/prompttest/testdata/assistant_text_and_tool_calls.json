@@ -1,0 +1,43 @@
+{
+  "openai,openaicompat,openrouter,vercel": {
+    "messages": [
+      {
+        "content": "look at these",
+        "role": "user"
+      },
+      {
+        "content": "on it",
+        "tool_calls": [
+          {
+            "id": "c1",
+            "function": {
+              "arguments": "{\"path\":\"a\"}",
+              "name": "view"
+            },
+            "type": "function"
+          },
+          {
+            "id": "c2",
+            "function": {
+              "arguments": "{\"path\":\"b\"}",
+              "name": "view"
+            },
+            "type": "function"
+          }
+        ],
+        "role": "assistant"
+      },
+      {
+        "content": "a body",
+        "tool_call_id": "c1",
+        "role": "tool"
+      },
+      {
+        "content": "b body",
+        "tool_call_id": "c2",
+        "role": "tool"
+      }
+    ],
+    "warnings": []
+  }
+}

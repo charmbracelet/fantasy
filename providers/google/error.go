@@ -28,6 +28,7 @@ func toProviderErr(err error) error {
 		StatusCode:      apiErr.Code,
 		ResponseBody:    []byte(apiErr.Message),
 		ResponseHeaders: retryHeadersFromDetails(apiErr.Details),
+		ErrorType:       apiErr.Status,
 	}
 
 	parseContextTooLargeError(apiErr.Message, providerErr)

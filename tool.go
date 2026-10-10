@@ -29,6 +29,11 @@ type ToolCall struct {
 }
 
 // ToolResponse represents the response from a tool execution, matching the existing pattern.
+//
+// A failure, whether a returned error or IsError, reaches the model as an
+// error result and does not end the run. Returning an error discards the
+// response, so a tool with a message for the model returns
+// NewTextErrorResponse with a nil error.
 type ToolResponse struct {
 	Type    string `json:"type"`
 	Content string `json:"content"`
@@ -37,8 +42,10 @@ type ToolResponse struct {
 	// MediaType specifies the MIME type of the media (e.g., "image/png", "audio/wav").
 	MediaType string `json:"media_type,omitempty"`
 	Metadata  string `json:"metadata,omitempty"`
-	IsError   bool   `json:"is_error"`
-	StopTurn  bool   `json:"stop_turn,omitempty"`
+	// IsError marks the response as a failure and is non fatal
+	IsError bool `json:"is_error"`
+	// StopTurn ends the agent loop after this toolcall and is fatal
+	StopTurn bool `json:"stop_turn,omitempty"`
 }
 
 // NewTextResponse creates a text response.
@@ -49,7 +56,8 @@ func NewTextResponse(content string) ToolResponse {
 	}
 }
 
-// NewTextErrorResponse creates an error response.
+// NewTextErrorResponse creates an error response. The model sees the content
+// and gets to try again.
 func NewTextErrorResponse(content string) ToolResponse {
 	return ToolResponse{
 		Type:    "text",

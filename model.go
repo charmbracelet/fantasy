@@ -164,6 +164,10 @@ const (
 	StreamPartTypeFinish StreamPartType = "finish"
 	// StreamPartTypeError represents error stream part type.
 	StreamPartTypeError StreamPartType = "error"
+	// StreamPartTypeKeepalive represents a provider event that carries no
+	// content and only shows the stream is still alive. Consumers reading
+	// content can ignore it; an idle-timeout watchdog should not.
+	StreamPartTypeKeepalive StreamPartType = "keepalive"
 )
 
 // StreamPart represents a part of a streaming response.

@@ -1,14 +1,16 @@
 package openai
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"charm.land/fantasy"
-	"github.com/openai/openai-go/v3/packages/ssestream"
+	"github.com/charmbracelet/openai-go/packages/ssestream"
 )
 
 func TestToHeaderMap_LowercasesKeys(t *testing.T) {
@@ -185,4 +187,86 @@ func TestToProviderErr_StreamErrorMalformedBodyFallsBackToRawMessage(t *testing.
 	if providerErr.IsRetryable() {
 		t.Error("unparseable stream error body must not be assumed retryable")
 	}
+}
+
+// ErrorType carries the provider's own name for the failure on both paths an
+// OpenAI error can take, so a caller does not have to tell them apart.
+func TestToProviderErr_CarriesTheErrorType(t *testing.T) {
+	t.Parallel()
+
+	t.Run("stream error event", func(t *testing.T) {
+		t.Parallel()
+
+		streamErr := &ssestream.StreamError{
+			Event: ssestream.Event{
+				Type: "error",
+				Data: []byte(`{"error":{"message":"Overloaded","type":"server_error"}}`),
+			},
+		}
+
+		var providerErr *fantasy.ProviderError
+		if !errors.As(toProviderErr(streamErr), &providerErr) {
+			t.Fatalf("toProviderErr did not wrap %v as *fantasy.ProviderError", streamErr)
+		}
+		if providerErr.ErrorType != "server_error" {
+			t.Errorf("ErrorType = %q, want %q", providerErr.ErrorType, "server_error")
+		}
+	})
+
+	// code stands in when the payload names no type: OpenAI puts the useful
+	// word in whichever it feels like, e.g. type "tokens" alongside code
+	// "rate_limit_exceeded".
+	t.Run("code stands in for a missing type", func(t *testing.T) {
+		t.Parallel()
+
+		streamErr := &ssestream.StreamError{
+			Event: ssestream.Event{
+				Type: "error",
+				Data: []byte(`{"error":{"message":"Rate limited","code":"rate_limit_exceeded"}}`),
+			},
+		}
+
+		var providerErr *fantasy.ProviderError
+		if !errors.As(toProviderErr(streamErr), &providerErr) {
+			t.Fatalf("toProviderErr did not wrap %v as *fantasy.ProviderError", streamErr)
+		}
+		if providerErr.ErrorType != "rate_limit_exceeded" {
+			t.Errorf("ErrorType = %q, want %q", providerErr.ErrorType, "rate_limit_exceeded")
+		}
+	})
+
+	// The other path an OpenAI error takes: a rejected request rather than a
+	// failing stream. A real round trip is what builds the SDK error here,
+	// since it reads the type off fields only the transport fills in.
+	t.Run("rejected request", func(t *testing.T) {
+		t.Parallel()
+
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusTooManyRequests)
+			_, _ = w.Write([]byte(`{"error":{"message":"Rate limit reached","type":"tokens","code":"rate_limit_exceeded"}}`))
+		}))
+		defer server.Close()
+
+		provider, err := New(WithAPIKey("test-api-key"), WithBaseURL(server.URL))
+		if err != nil {
+			t.Fatalf("New: %v", err)
+		}
+		model, err := provider.LanguageModel(context.Background(), "gpt-4")
+		if err != nil {
+			t.Fatalf("LanguageModel: %v", err)
+		}
+		_, err = model.Generate(context.Background(), fantasy.Call{Prompt: testPrompt})
+		if err == nil {
+			t.Fatal("the request was meant to be rejected")
+		}
+
+		var providerErr *fantasy.ProviderError
+		if !errors.As(err, &providerErr) {
+			t.Fatalf("error is %T, want *fantasy.ProviderError", err)
+		}
+		if providerErr.ErrorType != "tokens" {
+			t.Errorf("ErrorType = %q, want %q", providerErr.ErrorType, "tokens")
+		}
+	})
 }

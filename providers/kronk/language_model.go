@@ -8,6 +8,7 @@ import (
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/object"
+	"charm.land/fantasy/providers/openai"
 	"github.com/ardanlabs/kronk/sdk/kronk/model"
 	xjson "github.com/charmbracelet/x/json"
 	"github.com/google/uuid"
@@ -204,10 +205,15 @@ func (l *languageModel) Generate(ctx context.Context, call fantasy.Call) (*fanta
 
 	usage := fantasy.Usage{}
 	if response.Usage != nil {
+		outputTokens, totalTokens := openai.FoldDisjointReasoning(
+			int64(response.Usage.CompletionTokens),
+			int64(response.Usage.CompletionTokensDetails.ReasoningTokens),
+			int64(response.Usage.PromptTokens+response.Usage.CompletionTokens),
+		)
 		usage = fantasy.Usage{
 			InputTokens:     int64(response.Usage.PromptTokens),
-			OutputTokens:    int64(response.Usage.CompletionTokens),
-			TotalTokens:     int64(response.Usage.PromptTokens + response.Usage.CompletionTokens),
+			OutputTokens:    outputTokens,
+			TotalTokens:     totalTokens,
 			ReasoningTokens: int64(response.Usage.CompletionTokensDetails.ReasoningTokens),
 			CacheReadTokens: int64(response.Usage.PromptTokensDetails.CachedTokens),
 		}
@@ -269,10 +275,15 @@ func (l *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 			metadata.update(resp)
 
 			if resp.Usage != nil {
+				outputTokens, totalTokens := openai.FoldDisjointReasoning(
+					int64(resp.Usage.CompletionTokens),
+					int64(resp.Usage.CompletionTokensDetails.ReasoningTokens),
+					int64(resp.Usage.PromptTokens+resp.Usage.CompletionTokens),
+				)
 				usage = fantasy.Usage{
 					InputTokens:     int64(resp.Usage.PromptTokens),
-					OutputTokens:    int64(resp.Usage.CompletionTokens),
-					TotalTokens:     int64(resp.Usage.PromptTokens + resp.Usage.CompletionTokens),
+					OutputTokens:    outputTokens,
+					TotalTokens:     totalTokens,
 					ReasoningTokens: int64(resp.Usage.CompletionTokensDetails.ReasoningTokens),
 					CacheReadTokens: int64(resp.Usage.PromptTokensDetails.CachedTokens),
 				}

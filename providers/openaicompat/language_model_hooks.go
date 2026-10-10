@@ -8,9 +8,9 @@ import (
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/providers/openai"
-	openaisdk "github.com/openai/openai-go/v3"
-	"github.com/openai/openai-go/v3/packages/param"
-	"github.com/openai/openai-go/v3/shared"
+	openaisdk "github.com/charmbracelet/openai-go"
+	"github.com/charmbracelet/openai-go/packages/param"
+	"github.com/charmbracelet/openai-go/shared"
 )
 
 const (
@@ -168,10 +168,10 @@ func StreamExtraFunc(chunk openaisdk.ChatCompletionChunk, yield func(fantasy.Str
 		if reasoningStarted && boundary {
 			ctx[startedKey] = false
 			ctx[endedKey] = true
-			// The openai main loop emits a chunk's text/tool-call parts before
-			// this hook runs, so on a batched boundary chunk the part order is
-			// ToolInputStart, ReasoningDelta(tail), ReasoningEnd. Parts are
-			// keyed by id, so consumers can still attribute them correctly.
+			// The openai main loop runs this hook before emitting a chunk's
+			// text/tool-call parts, so on a batched boundary chunk the part order
+			// is ReasoningDelta(tail), ReasoningEnd, then the content/tool parts:
+			// the reasoning in that delta semantically precedes the content.
 			if !yield(fantasy.StreamPart{
 				Type: fantasy.StreamPartTypeReasoningEnd,
 				ID:   fmt.Sprintf("%d", inx),
@@ -189,8 +189,18 @@ func StreamExtraFunc(chunk openaisdk.ChatCompletionChunk, yield func(fantasy.Str
 func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletionMessageParamUnion, []fantasy.CallWarning) {
 	var messages []openaisdk.ChatCompletionMessageParamUnion
 	var warnings []fantasy.CallWarning
+	// Defer synthetic user messages holding tool-result media (see
+	// openai.ToolResultMediaMessages) until the contiguous run of tool
+	// messages ends: strict chat-completions validators require every
+	// tool message answering an assistant's tool_calls to immediately
+	// follow that assistant message.
+	var deferredMedia []openaisdk.ChatCompletionMessageParamUnion
 
 	for _, msg := range prompt {
+		if msg.Role != fantasy.MessageRoleTool && len(deferredMedia) > 0 {
+			messages = append(messages, deferredMedia...)
+			deferredMedia = nil
+		}
 		switch msg.Role {
 		case fantasy.MessageRoleSystem:
 			var blocks []openaisdk.ChatCompletionContentPartTextParam
@@ -548,10 +558,11 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 					// OpenAI-compatible chat completions tool messages cannot
 					// carry image or audio content directly; the SDK's content
 					// union only accepts text. Reuse the openai provider's
-					// helper, which emits a text tool message plus a synthetic
-					// user message holding the media.
-					mediaMessages, mediaWarnings := openai.ToolResultMediaMessages(output, toolResultPart.ToolCallID)
-					messages = append(messages, mediaMessages...)
+					// helper, which splits the text tool message from the
+					// synthetic user message holding the media.
+					toolMessage, mediaMessages, mediaWarnings := openai.ToolResultMediaMessages(output, toolResultPart.ToolCallID)
+					messages = append(messages, toolMessage)
+					deferredMedia = append(deferredMedia, mediaMessages...)
 					warnings = append(warnings, mediaWarnings...)
 				default:
 					warnings = append(warnings, fantasy.CallWarning{
@@ -562,6 +573,7 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 			}
 		}
 	}
+	messages = append(messages, deferredMedia...)
 	return messages, warnings
 }
 
@@ -587,11 +599,13 @@ func hasVisibleCompatAssistantContent(msg *openaisdk.ChatCompletionAssistantMess
 	if len(msg.ToolCalls) > 0 {
 		return true
 	}
-	// A reasoning-only turn is visible: reasoning_content must round-trip
-	// for DeepSeek-family replay, and dropping the turn breaks the
-	// conversation's message ordering.
-	if _, ok := msg.ExtraFields()["reasoning_content"]; ok {
-		return true
-	}
+	// A reasoning-only turn is not visible: it carries neither content nor
+	// tool calls, and strict OpenAI-compatible upstreams reject such
+	// messages outright ("content or tool_calls must be set"), failing every
+	// subsequent request once one lands in history (charmbracelet/crush#3794).
+	// The DeepSeek/Kimi replay contract only requires reasoning_content on
+	// turns that also carry content or tool calls, which pass the checks
+	// above; a bare reasoning turn is a truncated or canceled turn with no
+	// completion to resume from, so dropping it is safe.
 	return false
 }

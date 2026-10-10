@@ -16,11 +16,11 @@ import (
 	"charm.land/fantasy"
 	"charm.land/fantasy/object"
 	"charm.land/fantasy/schema"
+	"github.com/charmbracelet/openai-go"
+	"github.com/charmbracelet/openai-go/option"
+	"github.com/charmbracelet/openai-go/packages/param"
+	"github.com/charmbracelet/openai-go/shared"
 	"github.com/google/uuid"
-	"github.com/openai/openai-go/v3"
-	"github.com/openai/openai-go/v3/option"
-	"github.com/openai/openai-go/v3/packages/param"
-	"github.com/openai/openai-go/v3/shared"
 )
 
 type languageModel struct {
@@ -489,6 +489,20 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 			if len(chunk.Choices) == 0 {
 				continue
 			}
+			// The extra hook receives the whole chunk and iterates choices
+			// itself; calling it per choice would duplicate its events once
+			// per additional choice. It must run before the content/tool
+			// loop: when a batching host puts the reasoning tail and the
+			// first content/tool-call token in the same delta, the reasoning
+			// belongs before that content — yielding it after inverts the
+			// part order and breaks block-based consumers.
+			if o.streamExtraFunc != nil {
+				updatedContext, shouldContinue := o.streamExtraFunc(chunk, yield, extraContext)
+				if !shouldContinue {
+					return
+				}
+				extraContext = updatedContext
+			}
 			for _, choice := range chunk.Choices {
 				if choice.FinishReason != "" {
 					finishReason = choice.FinishReason
@@ -578,17 +592,6 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 						}
 					}
 				}
-			}
-
-			// The extra hook receives the whole chunk and iterates choices
-			// itself; calling it per choice would duplicate its events once
-			// per additional choice.
-			if o.streamExtraFunc != nil {
-				updatedContext, shouldContinue := o.streamExtraFunc(chunk, yield, extraContext)
-				if !shouldContinue {
-					return
-				}
-				extraContext = updatedContext
 			}
 			for _, choice := range chunk.Choices {
 				if annotations := parseAnnotationsFromDelta(choice.Delta); len(annotations) > 0 {

@@ -12,7 +12,7 @@ import (
 	"testing"
 
 	"charm.land/fantasy"
-	"github.com/openai/openai-go/v3/packages/param"
+	"github.com/charmbracelet/openai-go/packages/param"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -4001,6 +4001,20 @@ func TestParseContextTooLargeError(t *testing.T) {
 			message: "<400> InternalError.Algo.InvalidParameter: Range of input length should be [1, 245760]",
 			wantErr: true,
 			wantMax: 245760,
+		},
+		{
+			name:     "matches baseten format",
+			message:  "Input length 265059 exceeds the maximum allowed input length of 262112 tokens.",
+			wantErr:  true,
+			wantUsed: 265059,
+			wantMax:  262112,
+		},
+		{
+			name:     "matches fireworks format",
+			message:  "The prompt is too long: 1261484, model maximum context length: 1048573",
+			wantErr:  true,
+			wantUsed: 1261484,
+			wantMax:  1048573,
 		},
 		{
 			name:     "matches vercel format",

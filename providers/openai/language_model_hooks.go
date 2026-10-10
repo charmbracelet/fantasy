@@ -7,9 +7,9 @@ import (
 	"strings"
 
 	"charm.land/fantasy"
-	"github.com/openai/openai-go/v3"
-	"github.com/openai/openai-go/v3/packages/param"
-	"github.com/openai/openai-go/v3/shared"
+	"github.com/charmbracelet/openai-go"
+	"github.com/charmbracelet/openai-go/packages/param"
+	"github.com/charmbracelet/openai-go/shared"
 )
 
 // LanguageModelPrepareCallFunc is a function that prepares the call for the language model.
@@ -207,6 +207,19 @@ func DefaultMapFinishReasonFunc(finishReason string) fantasy.FinishReason {
 	}
 }
 
+// FoldDisjointReasoning keeps output tokens all-inclusive. OpenAI reports
+// reasoning as a subset of completion_tokens, but some OpenAI-shaped gateways
+// report it disjointly (Vercel AI Gateway streaming Gemini, for one).
+// Reasoning exceeding output can only happen in the disjoint shape — a subset
+// can never exceed its parent — so folding it in is always safe, and total
+// follows output.
+func FoldDisjointReasoning(output, reasoning, total int64) (int64, int64) {
+	if reasoning > output {
+		return output + reasoning, total + reasoning
+	}
+	return output, total
+}
+
 // DefaultUsageFunc is the default implementation for calculating usage.
 func DefaultUsageFunc(response openai.ChatCompletion) (fantasy.Usage, fantasy.ProviderOptionsData) {
 	completionTokenDetails := response.Usage.CompletionTokensDetails
@@ -231,11 +244,16 @@ func DefaultUsageFunc(response openai.ChatCompletion) (fantasy.Usage, fantasy.Pr
 	}
 	// OpenAI reports prompt_tokens INCLUDING cached tokens. Subtract to avoid double-counting.
 	inputTokens := max(response.Usage.PromptTokens-promptTokenDetails.CachedTokens, 0)
+	outputTokens, totalTokens := FoldDisjointReasoning(
+		response.Usage.CompletionTokens,
+		completionTokenDetails.ReasoningTokens,
+		response.Usage.TotalTokens,
+	)
 	providerMetadata.ExtraFields = ExtractExtraFields(response.Usage.JSON.ExtraFields)
 	return fantasy.Usage{
 		InputTokens:     inputTokens,
-		OutputTokens:    response.Usage.CompletionTokens,
-		TotalTokens:     response.Usage.TotalTokens,
+		OutputTokens:    outputTokens,
+		TotalTokens:     totalTokens,
 		ReasoningTokens: completionTokenDetails.ReasoningTokens,
 		CacheReadTokens: promptTokenDetails.CachedTokens,
 	}, providerMetadata
@@ -260,10 +278,15 @@ func DefaultStreamUsageFunc(chunk openai.ChatCompletionChunk, _ map[string]any, 
 	promptTokenDetails := chunk.Usage.PromptTokensDetails
 	// OpenAI reports prompt_tokens INCLUDING cached tokens. Subtract to avoid double-counting.
 	inputTokens := max(chunk.Usage.PromptTokens-promptTokenDetails.CachedTokens, 0)
+	outputTokens, totalTokens := FoldDisjointReasoning(
+		chunk.Usage.CompletionTokens,
+		completionTokenDetails.ReasoningTokens,
+		chunk.Usage.TotalTokens,
+	)
 	usage := fantasy.Usage{
 		InputTokens:     inputTokens,
-		OutputTokens:    chunk.Usage.CompletionTokens,
-		TotalTokens:     chunk.Usage.TotalTokens,
+		OutputTokens:    outputTokens,
+		TotalTokens:     totalTokens,
 		ReasoningTokens: completionTokenDetails.ReasoningTokens,
 		CacheReadTokens: promptTokenDetails.CachedTokens,
 	}
@@ -305,7 +328,17 @@ func DefaultStreamProviderMetadataFunc(choice openai.ChatCompletionChoice, metad
 func DefaultToPrompt(prompt fantasy.Prompt, _, _ string) ([]openai.ChatCompletionMessageParamUnion, []fantasy.CallWarning) {
 	var messages []openai.ChatCompletionMessageParamUnion
 	var warnings []fantasy.CallWarning
+	// Defer synthetic user messages holding tool-result media (see
+	// ToolResultMediaMessages) until the contiguous run of tool messages
+	// ends: strict chat-completions validators require every tool message
+	// answering an assistant's tool_calls to immediately follow that
+	// assistant message.
+	var deferredMedia []openai.ChatCompletionMessageParamUnion
 	for _, msg := range prompt {
+		if msg.Role != fantasy.MessageRoleTool && len(deferredMedia) > 0 {
+			messages = append(messages, deferredMedia...)
+			deferredMedia = nil
+		}
 		switch msg.Role {
 		case fantasy.MessageRoleSystem:
 			var systemPromptParts []string
@@ -592,8 +625,9 @@ func DefaultToPrompt(prompt fantasy.Prompt, _, _ string) ([]openai.ChatCompletio
 					}
 					// OpenAI Chat Completions tool messages cannot carry image
 					// or audio content directly; see ToolResultMediaMessages.
-					mediaMessages, mediaWarnings := ToolResultMediaMessages(output, toolResultPart.ToolCallID)
-					messages = append(messages, mediaMessages...)
+					toolMessage, mediaMessages, mediaWarnings := ToolResultMediaMessages(output, toolResultPart.ToolCallID)
+					messages = append(messages, toolMessage)
+					deferredMedia = append(deferredMedia, mediaMessages...)
 					warnings = append(warnings, mediaWarnings...)
 				default:
 					warnings = append(warnings, fantasy.CallWarning{
@@ -604,34 +638,43 @@ func DefaultToPrompt(prompt fantasy.Prompt, _, _ string) ([]openai.ChatCompletio
 			}
 		}
 	}
+	messages = append(messages, deferredMedia...)
 	return messages, warnings
 }
 
 // ToolResultMediaMessages maps a tool-result media output to the chat
 // completions messages that convey it. OpenAI tool messages can only carry
-// text, so this emits a text tool message (using any accompanying text, or a
+// text, so this returns a text tool message (using any accompanying text, or a
 // placeholder describing the media) to keep the tool_call/tool_result pairing
-// valid, followed by a synthetic user message holding the actual image or
-// audio content part so vision- and audio-capable models can see it.
+// valid, plus synthetic user messages holding the actual image or audio
+// content part so vision- and audio-capable models can see it.
+//
+// The two are returned separately because they belong in different places: the
+// tool message must stay inside the contiguous run of tool messages answering
+// an assistant's tool_calls, while the media messages must land after that run
+// ends. Strict validators reject a tool message that does not immediately
+// follow either its assistant message or another tool message.
 //
 // Unsupported media types produce only the text tool message plus a warning.
 // This is shared with OpenAI-compatible providers, which face the same
 // constraint.
-func ToolResultMediaMessages(output fantasy.ToolResultOutputContentMedia, toolCallID string) ([]openai.ChatCompletionMessageParamUnion, []fantasy.CallWarning) {
+func ToolResultMediaMessages(output fantasy.ToolResultOutputContentMedia, toolCallID string) (openai.ChatCompletionMessageParamUnion, []openai.ChatCompletionMessageParamUnion, []fantasy.CallWarning) {
 	placeholder := output.Text
 	if placeholder == "" {
 		placeholder = fmt.Sprintf("The tool returned %s content; see the following user message.", output.MediaType)
 	}
-	messages := []openai.ChatCompletionMessageParamUnion{openai.ToolMessage(placeholder, toolCallID)}
+	toolMessage := openai.ToolMessage(placeholder, toolCallID)
 
 	mediaPart, warning, emit := toolResultMediaUserPart(output)
 	if warning != nil {
-		return messages, []fantasy.CallWarning{*warning}
+		return toolMessage, nil, []fantasy.CallWarning{*warning}
 	}
-	if emit {
-		messages = append(messages, openai.UserMessage([]openai.ChatCompletionContentPartUnionParam{mediaPart}))
+	if !emit {
+		return toolMessage, nil, nil
 	}
-	return messages, nil
+	return toolMessage, []openai.ChatCompletionMessageParamUnion{
+		openai.UserMessage([]openai.ChatCompletionContentPartUnionParam{mediaPart}),
+	}, nil
 }
 
 // toolResultMediaUserPart maps a tool-result media output to an OpenAI chat

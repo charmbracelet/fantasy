@@ -11,14 +11,16 @@ import (
 	"strings"
 
 	"charm.land/fantasy"
-	"github.com/openai/openai-go/v3"
-	"github.com/openai/openai-go/v3/packages/ssestream"
+	"github.com/charmbracelet/openai-go"
+	"github.com/charmbracelet/openai-go/packages/ssestream"
 )
 
 var (
-	openaiContextPattern  = regexp.MustCompile(`maximum context length (?:is|of) (\d+) tokens.*?(?:resulted in|requested) ~?(\d+) tokens`)
-	alibabaContextPattern = regexp.MustCompile(`Range of input length should be \[\d+,\s*(\d+)\]`)
-	vercelContextPattern  = regexp.MustCompile(`Input too long:\s*(\d+)\s*input tokens,\s*limit is\s*(\d+)`)
+	openaiContextPattern    = regexp.MustCompile(`maximum context length (?:is|of) (\d+) tokens.*?(?:resulted in|requested) ~?(\d+) tokens`)
+	alibabaContextPattern   = regexp.MustCompile(`Range of input length should be \[\d+,\s*(\d+)\]`)
+	basetenContextPattern   = regexp.MustCompile(`Input length (\d+) exceeds the maximum allowed input length of (\d+) tokens`)
+	fireworksContextPattern = regexp.MustCompile(`The prompt is too long:\s*(\d+),\s*model maximum context length:\s*(\d+)`)
+	vercelContextPattern    = regexp.MustCompile(`Input too long:\s*(\d+)\s*input tokens,\s*limit is\s*(\d+)`)
 )
 
 func toProviderErr(err error) error {
@@ -34,6 +36,7 @@ func toProviderErr(err error) error {
 			RequestBody:     apiErr.DumpRequest(true),
 			ResponseHeaders: toHeaderMap(apiErr.Response.Header),
 			ResponseBody:    apiErr.DumpResponse(true),
+			ErrorType:       cmp.Or(apiErr.Type, apiErr.Code),
 		}
 
 		parseContextTooLargeError(message, providerErr)
@@ -74,6 +77,7 @@ func toProviderErrFromStreamError(streamErr *ssestream.StreamError) *fantasy.Pro
 		Message:        cmp.Or(envelope.Error.Message, streamErr.Message),
 		Cause:          streamErr,
 		ResponseBody:   streamErr.Event.Data,
+		ErrorType:      errType,
 		TransientError: fantasy.TransientStreamErrorTypes[errType],
 	}
 }
@@ -88,6 +92,18 @@ func parseContextTooLargeError(message string, providerErr *fantasy.ProviderErro
 	if matches := alibabaContextPattern.FindStringSubmatch(message); matches != nil {
 		providerErr.ContextTooLargeErr = true
 		providerErr.ContextMaxTokens, _ = strconv.Atoi(matches[1])
+		return
+	}
+	if matches := basetenContextPattern.FindStringSubmatch(message); matches != nil {
+		providerErr.ContextTooLargeErr = true
+		providerErr.ContextUsedTokens, _ = strconv.Atoi(matches[1])
+		providerErr.ContextMaxTokens, _ = strconv.Atoi(matches[2])
+		return
+	}
+	if matches := fireworksContextPattern.FindStringSubmatch(message); matches != nil {
+		providerErr.ContextTooLargeErr = true
+		providerErr.ContextUsedTokens, _ = strconv.Atoi(matches[1])
+		providerErr.ContextMaxTokens, _ = strconv.Atoi(matches[2])
 		return
 	}
 	if matches := vercelContextPattern.FindStringSubmatch(message); matches != nil {

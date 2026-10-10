@@ -847,7 +847,7 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 
 			// we need to make sure that there is actual tokendata
 			if resp.UsageMetadata != nil && resp.UsageMetadata.TotalTokenCount != 0 {
-				currentUsage := mapUsage(resp.UsageMetadata)
+				currentUsage := g.mapUsage(resp.UsageMetadata)
 				// if first usage chunk
 				if usage == nil {
 					usage = &currentUsage
@@ -1125,7 +1125,7 @@ func (g *languageModel) streamObjectWithJSONMode(ctx context.Context, call fanta
 
 			// we need to make sure that there is actual tokendata
 			if resp.UsageMetadata != nil && resp.UsageMetadata.TotalTokenCount != 0 {
-				currentUsage := mapUsage(resp.UsageMetadata)
+				currentUsage := g.mapUsage(resp.UsageMetadata)
 				if usage == nil {
 					usage = &currentUsage
 				} else {
@@ -1437,7 +1437,7 @@ func (g languageModel) mapResponse(response *genai.GenerateContentResponse, warn
 
 	return &fantasy.Response{
 		Content:      content,
-		Usage:        mapUsage(response.UsageMetadata),
+		Usage:        g.mapUsage(response.UsageMetadata),
 		FinishReason: finishReason,
 		Warnings:     warnings,
 	}, nil
@@ -1476,12 +1476,42 @@ func mapFinishReason(reason genai.FinishReason) fantasy.FinishReason {
 	}
 }
 
-func mapUsage(usage *genai.GenerateContentResponseUsageMetadata) fantasy.Usage {
+// mapUsage maps Google's usage metadata to fantasy usage.
+//
+// Output tokens always include thoughts: downstream pricing never itemizes
+// reasoning, so a surface that reports thoughts disjointly must be folded in
+// here. Whether candidatesTokenCount already contains thoughtsTokenCount
+// depends on the surface — AI Studio folds them in, Vertex reports them
+// apart, and preview models have flipped between the two — so the totals
+// decide per response:
+//
+//	prompt + candidates == total            → candidates already include thoughts
+//	prompt + candidates + thoughts == total → thoughts are disjoint; add them
+//
+// toolUsePromptTokenCount counts as prompt in both sums. When neither
+// equality holds (partial metadata), fall back to the backend's documented
+// behavior: Vertex disjoint, AI Studio inclusive.
+func (g languageModel) mapUsage(usage *genai.GenerateContentResponseUsageMetadata) fantasy.Usage {
+	output := int64(usage.CandidatesTokenCount)
+	reasoning := int64(usage.ThoughtsTokenCount)
+	if reasoning > 0 {
+		prompt := int64(usage.PromptTokenCount) + int64(usage.ToolUsePromptTokenCount)
+		total := int64(usage.TotalTokenCount)
+		switch {
+		case prompt+output == total:
+			// Candidates already include thoughts (AI Studio).
+		case prompt+output+reasoning == total:
+			// Thoughts are reported disjointly (Vertex).
+			output += reasoning
+		case g.providerOptions.backend == genai.BackendVertexAI:
+			output += reasoning
+		}
+	}
 	return fantasy.Usage{
 		InputTokens:         int64(usage.PromptTokenCount),
-		OutputTokens:        int64(usage.CandidatesTokenCount),
+		OutputTokens:        output,
 		TotalTokens:         int64(usage.TotalTokenCount),
-		ReasoningTokens:     int64(usage.ThoughtsTokenCount),
+		ReasoningTokens:     reasoning,
 		CacheCreationTokens: 0,
 		CacheReadTokens:     int64(usage.CachedContentTokenCount),
 	}

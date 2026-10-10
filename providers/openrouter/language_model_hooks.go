@@ -11,9 +11,9 @@ import (
 	"charm.land/fantasy/providers/anthropic"
 	"charm.land/fantasy/providers/google"
 	"charm.land/fantasy/providers/openai"
+	openaisdk "github.com/charmbracelet/openai-go"
+	"github.com/charmbracelet/openai-go/packages/param"
 	xstrings "github.com/charmbracelet/x/exp/strings"
-	openaisdk "github.com/openai/openai-go/v3"
-	"github.com/openai/openai-go/v3/packages/param"
 )
 
 const reasoningStartedCtx = "reasoning_started"
@@ -457,11 +457,16 @@ func languageModelUsage(response openaisdk.ChatCompletion) (fantasy.Usage, fanta
 
 	// OpenRouter reports prompt_tokens INCLUDING cached tokens. Subtract to avoid double-counting.
 	inputTokens := max(usage.PromptTokens-promptTokenDetails.CachedTokens, 0)
+	outputTokens, totalTokens := openai.FoldDisjointReasoning(
+		usage.CompletionTokens,
+		completionTokenDetails.ReasoningTokens,
+		inputTokens+usage.CompletionTokens+promptTokenDetails.CachedTokens,
+	)
 
 	return fantasy.Usage{
 		InputTokens:     inputTokens,
-		OutputTokens:    usage.CompletionTokens,
-		TotalTokens:     inputTokens + usage.CompletionTokens + promptTokenDetails.CachedTokens,
+		OutputTokens:    outputTokens,
+		TotalTokens:     totalTokens,
 		ReasoningTokens: completionTokenDetails.ReasoningTokens,
 		CacheReadTokens: promptTokenDetails.CachedTokens,
 	}, providerMetadata
@@ -496,11 +501,16 @@ func languageModelStreamUsage(chunk openaisdk.ChatCompletionChunk, _ map[string]
 
 	// OpenRouter reports prompt_tokens INCLUDING cached tokens. Subtract to avoid double-counting.
 	inputTokens := max(usage.PromptTokens-promptTokenDetails.CachedTokens, 0)
+	outputTokens, totalTokens := openai.FoldDisjointReasoning(
+		usage.CompletionTokens,
+		completionTokenDetails.ReasoningTokens,
+		inputTokens+usage.CompletionTokens+promptTokenDetails.CachedTokens,
+	)
 
 	aiUsage := fantasy.Usage{
 		InputTokens:     inputTokens,
-		OutputTokens:    usage.CompletionTokens,
-		TotalTokens:     inputTokens + usage.CompletionTokens + promptTokenDetails.CachedTokens,
+		OutputTokens:    outputTokens,
+		TotalTokens:     totalTokens,
 		ReasoningTokens: completionTokenDetails.ReasoningTokens,
 		CacheReadTokens: promptTokenDetails.CachedTokens,
 	}

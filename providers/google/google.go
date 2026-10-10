@@ -1482,7 +1482,12 @@ func mapFinishReason(reason genai.FinishReason) fantasy.FinishReason {
 // toolUsePromptTokenCount counts as prompt in both sums. When neither
 // equality holds (partial metadata), fall back to the backend's documented
 // behavior: Vertex disjoint, AI Studio inclusive.
+//
+// Input tokens leave out cached ones. promptTokenCount includes the cached
+// part of the prompt, which is reported again as CacheReadTokens, so keeping
+// it in both would bill a cache hit as fresh input too.
 func (g languageModel) mapUsage(usage *genai.GenerateContentResponseUsageMetadata) fantasy.Usage {
+	cached := int64(usage.CachedContentTokenCount)
 	output := int64(usage.CandidatesTokenCount)
 	reasoning := int64(usage.ThoughtsTokenCount)
 	if reasoning > 0 {
@@ -1499,11 +1504,11 @@ func (g languageModel) mapUsage(usage *genai.GenerateContentResponseUsageMetadat
 		}
 	}
 	return fantasy.Usage{
-		InputTokens:         int64(usage.PromptTokenCount),
+		InputTokens:         max(int64(usage.PromptTokenCount)-cached, 0),
 		OutputTokens:        output,
 		TotalTokens:         int64(usage.TotalTokenCount),
 		ReasoningTokens:     reasoning,
 		CacheCreationTokens: 0,
-		CacheReadTokens:     int64(usage.CachedContentTokenCount),
+		CacheReadTokens:     cached,
 	}
 }

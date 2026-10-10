@@ -125,6 +125,9 @@ func toProviderErrMessage(apiErr *openai.Error) string {
 	return string(data)
 }
 
+// toHeaderMap flattens headers to their last value under lowercase keys, the
+// form retry.go looks them up in. http.Header canonicalizes keys to
+// "Retry-After", so copying them as they are would hide the hint.
 func toHeaderMap(in http.Header) (out map[string]string) {
 	out = make(map[string]string, len(in))
 	for k, v := range in {

@@ -12,24 +12,6 @@ import (
 	"github.com/anthropics/anthropic-sdk-go"
 )
 
-func TestToHeaderMap_LowercasesKeys(t *testing.T) {
-	t.Parallel()
-
-	in := http.Header{
-		"Retry-After":    []string{"30"},
-		"Retry-After-Ms": []string{"1500"},
-	}
-
-	out := toHeaderMap(in)
-
-	if got := out["retry-after"]; got != "30" {
-		t.Errorf(`out["retry-after"] = %q, want "30" (retry.go looks up headers by lowercase key)`, got)
-	}
-	if got := out["retry-after-ms"]; got != "1500" {
-		t.Errorf(`out["retry-after-ms"] = %q, want "1500"`, got)
-	}
-}
-
 func TestToProviderErr_WrapsUnexpectedEOF(t *testing.T) {
 	t.Parallel()
 
@@ -387,4 +369,22 @@ func streamProviderError(t *testing.T, url string) *fantasy.ProviderError {
 		t.Fatalf("stream error is %T, want *fantasy.ProviderError", streamErr)
 	}
 	return providerErr
+}
+
+// retry.go looks up retry hints by lowercase key, so toHeaderMap must not
+// keep http.Header's canonical casing.
+func TestToHeaderMap_LowercasesKeys(t *testing.T) {
+	t.Parallel()
+
+	out := toHeaderMap(http.Header{
+		"Retry-After":    []string{"30"},
+		"Retry-After-Ms": []string{"1500"},
+	})
+
+	if got := out["retry-after"]; got != "30" {
+		t.Errorf(`out["retry-after"] = %q, want %q`, got, "30")
+	}
+	if got := out["retry-after-ms"]; got != "1500" {
+		t.Errorf(`out["retry-after-ms"] = %q, want %q`, got, "1500")
+	}
 }

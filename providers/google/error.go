@@ -5,7 +5,6 @@ import (
 	"errors"
 	"regexp"
 	"strconv"
-	"strings"
 	"time"
 
 	"charm.land/fantasy"
@@ -26,8 +25,8 @@ func toProviderErr(err error) error {
 		Title:           cmp.Or(fantasy.ErrorTitleForStatusCode(apiErr.Code), "provider request failed"),
 		Cause:           err,
 		StatusCode:      apiErr.Code,
-		ResponseBody:    []byte(apiErr.Message),
 		ResponseHeaders: retryHeadersFromDetails(apiErr.Details),
+		ResponseBody:    []byte(apiErr.Message),
 		ErrorType:       apiErr.Status,
 	}
 
@@ -36,25 +35,22 @@ func toProviderErr(err error) error {
 	return providerErr
 }
 
-// retryHeadersFromDetails looks for a google.rpc.RetryInfo entry in a
-// genai.APIError's Details — the structured hint Gemini actually uses to
-// report how long to wait on RESOURCE_EXHAUSTED (HTTP 429) — and, if found,
-// synthesizes a lowercase "retry-after" header from its retryDelay so
-// retry.go's getRetryDelayInMs picks it up the same way it does for the
-// other providers' real Retry-After headers.
+// retryInfoType is the type URL of the google.rpc.RetryInfo error detail.
+const retryInfoType = "type.googleapis.com/google.rpc.RetryInfo"
+
+// retryHeadersFromDetails turns a RetryInfo detail into a retry-after header.
+// Gemini answers a 429 without a Retry-After header and puts the wait it wants
+// in the error's details instead, so the retry loop, which only reads headers,
+// would otherwise fall back to its own backoff and retry too soon.
 func retryHeadersFromDetails(details []map[string]any) map[string]string {
 	for _, detail := range details {
-		typ, _ := detail["@type"].(string)
-		if !strings.Contains(typ, "RetryInfo") {
+		if detail["@type"] != retryInfoType {
 			continue
 		}
 		raw, _ := detail["retryDelay"].(string)
-		if raw == "" {
-			continue
-		}
-		if d, err := time.ParseDuration(raw); err == nil && d > 0 {
+		if delay, err := time.ParseDuration(raw); err == nil && delay > 0 {
 			return map[string]string{
-				"retry-after": strconv.FormatFloat(d.Seconds(), 'f', -1, 64),
+				"retry-after": strconv.FormatFloat(delay.Seconds(), 'f', -1, 64),
 			}
 		}
 	}

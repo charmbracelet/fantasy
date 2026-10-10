@@ -847,15 +847,10 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 
 			// we need to make sure that there is actual tokendata
 			if resp.UsageMetadata != nil && resp.UsageMetadata.TotalTokenCount != 0 {
+				// Every chunk reports running totals for the response so far,
+				// not what that chunk added, so the latest one is the usage.
 				currentUsage := g.mapUsage(resp.UsageMetadata)
-				// if first usage chunk
-				if usage == nil {
-					usage = &currentUsage
-				} else {
-					usage.OutputTokens += currentUsage.OutputTokens
-					usage.ReasoningTokens += currentUsage.ReasoningTokens
-					usage.CacheReadTokens += currentUsage.CacheReadTokens
-				}
+				usage = &currentUsage
 			}
 
 			if len(resp.Candidates) > 0 && resp.Candidates[0].FinishReason != "" {
@@ -1125,14 +1120,10 @@ func (g *languageModel) streamObjectWithJSONMode(ctx context.Context, call fanta
 
 			// we need to make sure that there is actual tokendata
 			if resp.UsageMetadata != nil && resp.UsageMetadata.TotalTokenCount != 0 {
+				// Every chunk reports running totals for the response so far,
+				// not what that chunk added, so the latest one is the usage.
 				currentUsage := g.mapUsage(resp.UsageMetadata)
-				if usage == nil {
-					usage = &currentUsage
-				} else {
-					usage.OutputTokens += currentUsage.OutputTokens
-					usage.ReasoningTokens += currentUsage.ReasoningTokens
-					usage.CacheReadTokens += currentUsage.CacheReadTokens
-				}
+				usage = &currentUsage
 			}
 
 			if len(resp.Candidates) > 0 && resp.Candidates[0].FinishReason != "" {
@@ -1491,7 +1482,12 @@ func mapFinishReason(reason genai.FinishReason) fantasy.FinishReason {
 // toolUsePromptTokenCount counts as prompt in both sums. When neither
 // equality holds (partial metadata), fall back to the backend's documented
 // behavior: Vertex disjoint, AI Studio inclusive.
+//
+// Input tokens leave out cached ones. promptTokenCount includes the cached
+// part of the prompt, which is reported again as CacheReadTokens, so keeping
+// it in both would bill a cache hit as fresh input too.
 func (g languageModel) mapUsage(usage *genai.GenerateContentResponseUsageMetadata) fantasy.Usage {
+	cached := int64(usage.CachedContentTokenCount)
 	output := int64(usage.CandidatesTokenCount)
 	reasoning := int64(usage.ThoughtsTokenCount)
 	if reasoning > 0 {
@@ -1508,11 +1504,11 @@ func (g languageModel) mapUsage(usage *genai.GenerateContentResponseUsageMetadat
 		}
 	}
 	return fantasy.Usage{
-		InputTokens:         int64(usage.PromptTokenCount),
+		InputTokens:         max(int64(usage.PromptTokenCount)-cached, 0),
 		OutputTokens:        output,
 		TotalTokens:         int64(usage.TotalTokenCount),
 		ReasoningTokens:     reasoning,
 		CacheCreationTokens: 0,
-		CacheReadTokens:     int64(usage.CachedContentTokenCount),
+		CacheReadTokens:     cached,
 	}
 }

@@ -87,4 +87,23 @@ func TestMapUsage(t *testing.T) {
 			t.Fatalf("ai studio fallback: expected output 50, got %d", u.OutputTokens)
 		}
 	})
+
+	t.Run("cached tokens are not counted as input too", func(t *testing.T) {
+		lm := languageModel{providerOptions: options{backend: genai.BackendGeminiAPI}}
+		u := lm.mapUsage(&genai.GenerateContentResponseUsageMetadata{
+			PromptTokenCount:        100, // 60 cached + 40 fresh
+			CachedContentTokenCount: 60,
+			CandidatesTokenCount:    50,
+			TotalTokenCount:         150,
+		})
+		if u.InputTokens != 40 {
+			t.Fatalf("expected input 100-60=40, got %d", u.InputTokens)
+		}
+		if u.CacheReadTokens != 60 {
+			t.Fatalf("expected cache read 60, got %d", u.CacheReadTokens)
+		}
+		if u.TotalTokens != 150 {
+			t.Fatalf("expected total unchanged at 150, got %d", u.TotalTokens)
+		}
+	})
 }

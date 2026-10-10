@@ -82,3 +82,45 @@ func TestToProviderErr_CarriesTheErrorType(t *testing.T) {
 		t.Errorf("ErrorType = %q, want %q", providerErr.ErrorType, "RESOURCE_EXHAUSTED")
 	}
 }
+
+// Gemini's retry hint arrives as a RetryInfo detail rather than a header, and
+// must come out as the lowercase retry-after header retry.go looks up.
+func TestToProviderErr_SurfacesRetryInfoDelay(t *testing.T) {
+	t.Parallel()
+
+	apiErr := genai.APIError{
+		Code:    429,
+		Status:  "RESOURCE_EXHAUSTED",
+		Message: "Resource has been exhausted",
+		Details: []map[string]any{
+			{
+				"@type":      "type.googleapis.com/google.rpc.RetryInfo",
+				"retryDelay": "38s",
+			},
+		},
+	}
+
+	var providerErr *fantasy.ProviderError
+	if !errors.As(toProviderErr(apiErr), &providerErr) {
+		t.Fatalf("toProviderErr did not wrap %v as *fantasy.ProviderError", apiErr)
+	}
+	if got := providerErr.ResponseHeaders["retry-after"]; got != "38" {
+		t.Errorf(`ResponseHeaders["retry-after"] = %q, want %q`, got, "38")
+	}
+}
+
+// Without a RetryInfo detail there is no hint to pass on, and an invented
+// header would override retry.go's own backoff.
+func TestToProviderErr_NoRetryInfoLeavesHeadersNil(t *testing.T) {
+	t.Parallel()
+
+	apiErr := genai.APIError{Code: 500, Message: "internal error"}
+
+	var providerErr *fantasy.ProviderError
+	if !errors.As(toProviderErr(apiErr), &providerErr) {
+		t.Fatalf("toProviderErr did not wrap %v as *fantasy.ProviderError", apiErr)
+	}
+	if providerErr.ResponseHeaders != nil {
+		t.Errorf("ResponseHeaders = %v, want nil", providerErr.ResponseHeaders)
+	}
+}

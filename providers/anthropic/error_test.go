@@ -370,3 +370,21 @@ func streamProviderError(t *testing.T, url string) *fantasy.ProviderError {
 	}
 	return providerErr
 }
+
+// retry.go looks up retry hints by lowercase key, so toHeaderMap must not
+// keep http.Header's canonical casing.
+func TestToHeaderMap_LowercasesKeys(t *testing.T) {
+	t.Parallel()
+
+	out := toHeaderMap(http.Header{
+		"Retry-After":    []string{"30"},
+		"Retry-After-Ms": []string{"1500"},
+	})
+
+	if got := out["retry-after"]; got != "30" {
+		t.Errorf(`out["retry-after"] = %q, want %q`, got, "30")
+	}
+	if got := out["retry-after-ms"]; got != "1500" {
+		t.Errorf(`out["retry-after-ms"] = %q, want %q`, got, "1500")
+	}
+}

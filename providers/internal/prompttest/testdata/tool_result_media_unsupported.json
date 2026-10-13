@@ -1,0 +1,27 @@
+{
+  "openai,openaicompat,openrouter,vercel": {
+    "messages": [
+      {
+        "tool_calls": [
+          {
+            "id": "c1",
+            "function": {
+              "arguments": "{}",
+              "name": "record"
+            },
+            "type": "function"
+          }
+        ],
+        "role": "assistant"
+      },
+      {
+        "content": "The tool returned video/mp4 content, which cannot be displayed.",
+        "tool_call_id": "c1",
+        "role": "tool"
+      }
+    ],
+    "warnings": [
+      "other: tool result media type video/mp4 not supported, sending text placeholder only"
+    ]
+  }
+}

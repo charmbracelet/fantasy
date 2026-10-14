@@ -9,9 +9,9 @@ import (
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/providers/openai"
-	openaisdk "github.com/openai/openai-go/v3"
-	"github.com/openai/openai-go/v3/packages/param"
-	"github.com/openai/openai-go/v3/shared"
+	openaisdk "github.com/charmbracelet/openai-go"
+	"github.com/charmbracelet/openai-go/packages/param"
+	"github.com/charmbracelet/openai-go/shared"
 )
 
 const (
@@ -181,10 +181,10 @@ func StreamExtraFunc(chunk openaisdk.ChatCompletionChunk, yield func(fantasy.Str
 		if reasoningStarted && boundary {
 			ctx[startedKey] = false
 			ctx[endedKey] = true
-			// The openai main loop emits a chunk's text/tool-call parts before
-			// this hook runs, so on a batched boundary chunk the part order is
-			// ToolInputStart, ReasoningDelta(tail), ReasoningEnd. Parts are
-			// keyed by id, so consumers can still attribute them correctly.
+			// The openai main loop runs this hook before emitting a chunk's
+			// text/tool-call parts, so on a batched boundary chunk the part order
+			// is ReasoningDelta(tail), ReasoningEnd, then the content/tool parts:
+			// the reasoning in that delta semantically precedes the content.
 			if !yield(fantasy.StreamPart{
 				Type: fantasy.StreamPartTypeReasoningEnd,
 				ID:   fmt.Sprintf("%d", inx),
@@ -202,8 +202,10 @@ func StreamExtraFunc(chunk openaisdk.ChatCompletionChunk, yield func(fantasy.Str
 func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletionMessageParamUnion, []fantasy.CallWarning) {
 	var messages []openaisdk.ChatCompletionMessageParamUnion
 	var warnings []fantasy.CallWarning
+	var media openai.ToolRunBuffer
 
 	for _, msg := range prompt {
+		messages = media.Role(msg.Role, messages)
 		switch msg.Role {
 		case fantasy.MessageRoleSystem:
 			var blocks []openaisdk.ChatCompletionContentPartTextParam
@@ -381,7 +383,7 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 					}
 				}
 			}
-			if !hasVisibleCompatUserContent(content) {
+			if !openai.HasVisibleUserContent(content) {
 				warnings = append(warnings, fantasy.CallWarning{
 					Type:    fantasy.CallWarningTypeOther,
 					Message: "dropping empty user message (contains neither user-facing content nor tool results)",
@@ -499,7 +501,7 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 					"reasoning_content": strings.Join(reasoningTexts, "\n"),
 				})
 			}
-			if !hasVisibleCompatAssistantContent(&assistantMsg) {
+			if !openai.HasVisibleAssistantContent(&assistantMsg) {
 				warnings = append(warnings, fantasy.CallWarning{
 					Type:    fantasy.CallWarningTypeOther,
 					Message: "dropping empty assistant message (contains neither user-facing content nor tool calls)",
@@ -510,101 +512,11 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 				OfAssistant: &assistantMsg,
 			})
 		case fantasy.MessageRoleTool:
-			for _, c := range msg.Content {
-				if c.GetType() != fantasy.ContentTypeToolResult {
-					warnings = append(warnings, fantasy.CallWarning{
-						Type:    fantasy.CallWarningTypeOther,
-						Message: "tool message can only have tool result content",
-					})
-					continue
-				}
-
-				toolResultPart, ok := fantasy.AsContentType[fantasy.ToolResultPart](c)
-				if !ok {
-					warnings = append(warnings, fantasy.CallWarning{
-						Type:    fantasy.CallWarningTypeOther,
-						Message: "tool message result part does not have the right type",
-					})
-					continue
-				}
-
-				switch toolResultPart.Output.GetType() {
-				case fantasy.ToolResultContentTypeText:
-					output, ok := fantasy.AsToolResultOutputType[fantasy.ToolResultOutputContentText](toolResultPart.Output)
-					if !ok {
-						warnings = append(warnings, fantasy.CallWarning{
-							Type:    fantasy.CallWarningTypeOther,
-							Message: "tool result output does not have the right type",
-						})
-						continue
-					}
-					messages = append(messages, openaisdk.ToolMessage(output.Text, toolResultPart.ToolCallID))
-				case fantasy.ToolResultContentTypeError:
-					output, ok := fantasy.AsToolResultOutputType[fantasy.ToolResultOutputContentError](toolResultPart.Output)
-					if !ok {
-						warnings = append(warnings, fantasy.CallWarning{
-							Type:    fantasy.CallWarningTypeOther,
-							Message: "tool result output does not have the right type",
-						})
-						continue
-					}
-					messages = append(messages, openaisdk.ToolMessage(output.Error.Error(), toolResultPart.ToolCallID))
-				case fantasy.ToolResultContentTypeMedia:
-					output, ok := fantasy.AsToolResultOutputType[fantasy.ToolResultOutputContentMedia](toolResultPart.Output)
-					if !ok {
-						warnings = append(warnings, fantasy.CallWarning{
-							Type:    fantasy.CallWarningTypeOther,
-							Message: "tool result output does not have the right type",
-						})
-						continue
-					}
-					// OpenAI-compatible chat completions tool messages cannot
-					// carry image or audio content directly; the SDK's content
-					// union only accepts text. Reuse the openai provider's
-					// helper, which emits a text tool message plus a synthetic
-					// user message holding the media.
-					mediaMessages, mediaWarnings := openai.ToolResultMediaMessages(output, toolResultPart.ToolCallID)
-					messages = append(messages, mediaMessages...)
-					warnings = append(warnings, mediaWarnings...)
-				default:
-					warnings = append(warnings, fantasy.CallWarning{
-						Type:    fantasy.CallWarningTypeOther,
-						Message: fmt.Sprintf("tool result output type %q not supported", toolResultPart.Output.GetType()),
-					})
-				}
-			}
+			toolMessages, deferred, toolWarnings := openai.ToolMessages(msg, nil)
+			messages = append(messages, toolMessages...)
+			media.Defer(deferred...)
+			warnings = append(warnings, toolWarnings...)
 		}
 	}
-	return messages, warnings
-}
-
-// toolResultMediaUserPart maps a tool-result media output to an OpenAI chat
-// completions user content part. It returns the content part, an optional
-// warning, and whether the caller should emit the returned part.
-
-func hasVisibleCompatUserContent(content []openaisdk.ChatCompletionContentPartUnionParam) bool {
-	for _, part := range content {
-		if part.OfText != nil || part.OfImageURL != nil || part.OfInputAudio != nil || part.OfFile != nil {
-			return true
-		}
-	}
-	return false
-}
-
-func hasVisibleCompatAssistantContent(msg *openaisdk.ChatCompletionAssistantMessageParam) bool {
-	// Check if there's text content
-	if !param.IsOmitted(msg.Content.OfString) || len(msg.Content.OfArrayOfContentParts) > 0 {
-		return true
-	}
-	// Check if there are tool calls
-	if len(msg.ToolCalls) > 0 {
-		return true
-	}
-	// A reasoning-only turn is visible: reasoning_content must round-trip
-	// for DeepSeek-family replay, and dropping the turn breaks the
-	// conversation's message ordering.
-	if _, ok := msg.ExtraFields()["reasoning_content"]; ok {
-		return true
-	}
-	return false
+	return media.Close(messages), warnings
 }

@@ -25,7 +25,7 @@ func toProviderErr(err error) error {
 	var apiErr *anthropic.Error
 	if errors.As(err, &apiErr) {
 		providerErr := &fantasy.ProviderError{
-			Title:           cmp.Or(fantasy.ErrorTitleForStatusCode(apiErr.StatusCode), "provider request failed"),
+			Title:           apiErrorTitle(apiErr),
 			Message:         apiErr.Error(),
 			Cause:           apiErr,
 			URL:             apiErr.Request.URL.String(),
@@ -33,6 +33,7 @@ func toProviderErr(err error) error {
 			RequestBody:     apiErr.DumpRequest(true),
 			ResponseHeaders: toHeaderMap(apiErr.Response.Header),
 			ResponseBody:    apiErr.DumpResponse(true),
+			ErrorType:       string(apiErr.Type()),
 			TransientError:  fantasy.TransientStreamErrorTypes[string(apiErr.Type())],
 		}
 
@@ -56,6 +57,26 @@ func toProviderErr(err error) error {
 		return wrapped
 	}
 	return fantasy.WrapTransportError(err)
+}
+
+// apiErrorTitle names what the error describes rather than the exchange that
+// carried it, preferring the status, then the payload's type, then a generic
+// title. A mid-stream SSE event rides inside a response that already went out
+// as a 2xx, so titling from that status puts "ok" above a failure, and only
+// the payload can name that one.
+func apiErrorTitle(apiErr *anthropic.Error) string {
+	errType := string(apiErr.Type())
+	if apiErr.StatusCode >= http.StatusOK && apiErr.StatusCode < http.StatusMultipleChoices {
+		return streamErrorTitle(errType)
+	}
+	// Anthropic answers an overload with 529, which the HTTP registry does
+	// not name, so a status-derived title comes out empty and the payload's
+	// type is the only thing left that says what happened.
+	statusTitle := fantasy.ErrorTitleForStatusCode(apiErr.StatusCode)
+	if statusTitle == "" && errType != "" {
+		return streamErrorTitle(errType)
+	}
+	return cmp.Or(statusTitle, "provider request failed")
 }
 
 // streamErrorPrefix is the message prefix the Anthropic SDK uses for a
@@ -99,6 +120,7 @@ func wrapStreamError(err error) *fantasy.ProviderError {
 		Message:        cmp.Or(message, payload),
 		Cause:          err,
 		ResponseBody:   []byte(payload),
+		ErrorType:      errType,
 		TransientError: fantasy.TransientStreamErrorTypes[errType],
 	}
 }

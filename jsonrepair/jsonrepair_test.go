@@ -742,6 +742,28 @@ func TestParseNumber(t *testing.T) {
 				"value": json.Number("1234.56"),
 			},
 		},
+		{
+			name:  "positive_exponent",
+			input: "2E+3",
+			want:  json.Number("2000.0"),
+		},
+		{
+			name:  "negative_integer",
+			input: "-10",
+			want:  json.Number("-10"),
+		},
+		{
+			name:  "negative_float",
+			input: "-0.5",
+			want:  json.Number("-0.5"),
+		},
+		{
+			name:  "negative_in_object",
+			input: "{\"offset\": -10}",
+			want: map[string]any{
+				"offset": json.Number("-10"),
+			},
+		},
 	}
 
 	for _, tc := range cases {
@@ -750,8 +772,10 @@ func TestParseNumber(t *testing.T) {
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
+			// The types matter here: "%#v" prints a string and a json.Number
+			// identically, so a value-level message hides the real regression.
 			if !reflect.DeepEqual(got, tc.want) {
-				t.Fatalf("got %#v want %#v", got, tc.want)
+				t.Fatalf("got %#v (%T) want %#v (%T)", got, got, tc.want, tc.want)
 			}
 		})
 	}
@@ -803,6 +827,43 @@ func TestParseNumberEdgeCases(t *testing.T) {
 			input: "{\"key\": 1/3, \"foo\": \"bar\"}",
 			want:  "{\"key\": \"1/3\", \"foo\": \"bar\"}",
 		},
+		// Regression tests for #375: a leading "-" is a sign, so a negative
+		// number is a valid JSON number and must not be quoted into a string.
+		{
+			name:  "negative_integer",
+			input: "{\"key\": -1}",
+			want:  "{\"key\": -1}",
+		},
+		{
+			name:  "negative_float",
+			input: "{\"key\": -3.5}",
+			want:  "{\"key\": -3.5}",
+		},
+		{
+			name:  "negative_zero",
+			input: "{\"key\": -0}",
+			want:  "{\"key\": -0}",
+		},
+		{
+			name:  "negative_in_array",
+			input: "{\"offsets\": [-1, -2]}",
+			want:  "{\"offsets\": [-1, -2]}",
+		},
+		{
+			name:  "negative_exponent",
+			input: "{\"key\": -1e-3}",
+			want:  "{\"key\": -0.001}",
+		},
+		{
+			name:  "negative_in_truncated_object",
+			input: "{\"offset\": -1",
+			want:  "{\"offset\": -1}",
+		},
+		{
+			name:  "negative_in_array_of_objects",
+			input: "[{\"a\": -1}, {\"b\": -2.5}]",
+			want:  "[{\"a\": -1}, {\"b\": -2.5}]",
+		},
 		{
 			name:  "dash_number",
 			input: "{\"key\": 10-20}",
@@ -827,6 +888,78 @@ func TestParseNumberEdgeCases(t *testing.T) {
 			name:  "exponent",
 			input: "{\"key\": 1e10 }",
 			want:  "{\"key\": 10000000000.0}",
+		},
+		// A "+" belongs to the exponent, so the literal stays one number.
+		{
+			name:  "positive_exponent",
+			input: "{\"key\": 1E+2}",
+			want:  "{\"key\": 100.0}",
+		},
+		{
+			name:  "lowercase_positive_exponent",
+			input: "{\"key\": 1e+2}",
+			want:  "{\"key\": 100.0}",
+		},
+		{
+			name:  "negative_with_positive_exponent",
+			input: "{\"key\": -1E+2}",
+			want:  "{\"key\": -100.0}",
+		},
+		{
+			name:  "positive_exponent_in_array",
+			input: "{\"a\": [1E+2, 2e+3]}",
+			want:  "{\"a\": [100.0, 2000.0]}",
+		},
+		{
+			name:  "large_positive_exponent",
+			input: "{\"key\": 1e+10}",
+			want:  "{\"key\": 10000000000.0}",
+		},
+		// src/index.test.ts:46 and :51 of josdejong/jsonrepair assert these two
+		// pass through unchanged. formatFloat rewrites the text either way, so
+		// what is pinned here is the value: on b4bf5f9 "2300e+3" decodes to 2300.
+		{
+			name:  "upstream_corpus_zero_exponent",
+			input: "0e+2",
+			want:  "0.0",
+		},
+		{
+			name:  "upstream_corpus_large_exponent",
+			input: "2300e+3",
+			want:  "2300000.0",
+		},
+		// A number bigger than float64 is still a valid JSON number, so it stays one.
+		{
+			name:  "exponent_overflows_float64",
+			input: "{\"key\": 1e999}",
+			want:  "{\"key\": 1e999}",
+		},
+		{
+			name:  "positive_exponent_overflows_float64",
+			input: "{\"key\": 1.0e+400}",
+			want:  "{\"key\": 1.0e+400}",
+		},
+		// float64 underflows to zero without reporting an error, which would
+		// rewrite the value.
+		{
+			name:  "exponent_underflows_float64",
+			input: "{\"key\": 1e-999}",
+			want:  "{\"key\": 1e-999}",
+		},
+		{
+			name:  "negative_exponent_underflows_float64",
+			input: "{\"key\": -1e-400}",
+			want:  "{\"key\": -1e-400}",
+		},
+		{
+			name:  "truncated_positive_exponent",
+			input: "{\"key\": 1E+}",
+			want:  "{\"key\": 1}",
+		},
+		{
+			name:  "plus_outside_exponent",
+			input: "{\"key\": 1+2}",
+			want:  "{\"key\": 1}",
 		},
 		{
 			name:  "bad_exponent",
@@ -1225,6 +1358,187 @@ func TestParseStringBasics(t *testing.T) {
 	}
 }
 
+// A document may be a single JSON string, so repairing one has to hand it back
+// rather than returning nothing.
+func TestTopLevelString(t *testing.T) {
+	cases := []struct {
+		name  string
+		input string
+		want  string
+	}{
+		{
+			name:  "quoted_word",
+			input: `"str"`,
+			want:  `"str"`,
+		},
+		{
+			name:  "quoted_number",
+			input: `"42"`,
+			want:  `"42"`,
+		},
+		{
+			name:  "quoted_boolean_word",
+			input: `"true"`,
+			want:  `"true"`,
+		},
+		{
+			name:  "quoted_phrase",
+			input: `"a b"`,
+			want:  `"a b"`,
+		},
+		{
+			name:  "quoted_non_ascii",
+			input: `"★"`,
+			want:  `"\u2605"`,
+		},
+		// Guards: the blank rule and the junk around a quote stay as they are.
+		{
+			name:  "blank_quoted",
+			input: `" "`,
+			want:  "",
+		},
+		{
+			name:  "empty_quoted",
+			input: `""`,
+			want:  "",
+		},
+		{
+			name:  "lone_quote",
+			input: `"`,
+			want:  "",
+		},
+		{
+			name:  "bare_word",
+			input: `string`,
+			want:  "",
+		},
+		{
+			name:  "word_before_object",
+			input: `stringbeforeobject {}`,
+			want:  `{}`,
+		},
+		{
+			name:  "single_quoted",
+			input: "'key'",
+			want:  "",
+		},
+		{
+			name:  "quote_after_text",
+			input: `he said "hi" now`,
+			want:  "",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := RepairJSON(tc.input)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if got != tc.want {
+				t.Fatalf("got %q want %q", got, tc.want)
+			}
+		})
+	}
+}
+
+// The option paths have to agree with the default one.
+func TestTopLevelStringOptions(t *testing.T) {
+	cases := []struct {
+		name  string
+		input string
+		opts  []Option
+		want  string
+	}{
+		{
+			name:  "strict",
+			input: `"str"`,
+			opts:  []Option{WithStrict()},
+			want:  `"str"`,
+		},
+		{
+			name:  "stream_stable",
+			input: `"str"`,
+			opts:  []Option{WithStreamStable()},
+			want:  `"str"`,
+		},
+		{
+			name:  "skip_json_loads",
+			input: `"str"`,
+			opts:  []Option{WithSkipJSONLoads()},
+			want:  `"str"`,
+		},
+		{
+			name:  "ensure_ascii_off",
+			input: `"★"`,
+			opts:  []Option{WithEnsureASCII(false)},
+			want:  `"★"`,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := RepairJSON(tc.input, tc.opts...)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if got != tc.want {
+				t.Fatalf("got %q want %q", got, tc.want)
+			}
+		})
+	}
+}
+
+// Repairing the repaired string must not change it again.
+func TestTopLevelStringIdempotent(t *testing.T) {
+	once, err := RepairJSON(`"str"`)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	twice, err := RepairJSON(once)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if once != `"str"` || twice != once {
+		t.Fatalf("first pass %q, second pass %q", once, twice)
+	}
+}
+
+func TestLoadsTopLevelString(t *testing.T) {
+	cases := []struct {
+		name  string
+		input string
+		want  string
+	}{
+		{
+			name:  "quoted_word",
+			input: `"str"`,
+			want:  "str",
+		},
+		{
+			name:  "quoted_number",
+			input: `"42"`,
+			want:  "42",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := Loads(tc.input)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			str, ok := got.(string)
+			if !ok {
+				t.Fatalf("got %#v (%T) want the string %q", got, got, tc.want)
+			}
+			if str != tc.want {
+				t.Fatalf("got %q want %q", str, tc.want)
+			}
+		})
+	}
+}
+
 func TestMissingAndMixedQuotes(t *testing.T) {
 	cases := []struct {
 		name  string
@@ -1370,7 +1684,71 @@ func TestEscaping(t *testing.T) {
 		{
 			name:  "newline_in_key",
 			input: "{\"key_1\n\": \"value\"}",
-			want:  "{\"key_1\": \"value\"}",
+			want:  "{\"key_1\\n\": \"value\"}",
+		},
+		// Regression tests for #373: a newline that came from an escape sequence is
+		// string content, so repairing an already valid document must not trim it.
+		{
+			name:  "escaped_newline_at_end_of_value",
+			input: "{\"key\": \"line\\n\"}",
+			want:  "{\"key\": \"line\\n\"}",
+		},
+		{
+			name:  "escaped_newline_at_end_of_key",
+			input: "{\"key\\n\": \"value\"}",
+			want:  "{\"key\\n\": \"value\"}",
+		},
+		{
+			name:  "escaped_crlf_at_end_of_value",
+			input: "{\"key\": \"line\\r\\n\"}",
+			want:  "{\"key\": \"line\\r\\n\"}",
+		},
+		{
+			name:  "escaped_newlines_at_end_of_value",
+			input: "{\"key\": \"line\\n\\n\"}",
+			want:  "{\"key\": \"line\\n\\n\"}",
+		},
+		{
+			name:  "unicode_escaped_newline_at_end_of_value",
+			input: "{\"key\": \"line\\u000a\"}",
+			want:  "{\"key\": \"line\\n\"}",
+		},
+		{
+			name:  "trailing_space_before_escaped_newline",
+			input: "{\"key\": \"line \\n\"}",
+			want:  "{\"key\": \"line \\n\"}",
+		},
+		{
+			name:  "escaped_newline_before_trailing_space",
+			input: "{\"key\": \"line\\n \"}",
+			want:  "{\"key\": \"line\\n \"}",
+		},
+		{
+			name:  "raw_newline_at_end_of_value",
+			input: "{\"key\": \"line\n\"}",
+			want:  "{\"key\": \"line\\n\"}",
+		},
+		// A raw line break is string content exactly like a raw tab or carriage
+		// return, which the cases above keep, so it must survive the repair too.
+		{
+			name:  "raw_newline_at_end_of_key",
+			input: "{\"key\n\": \"value\"}",
+			want:  "{\"key\\n\": \"value\"}",
+		},
+		{
+			name:  "raw_newlines_at_end_of_value",
+			input: "{\"key\": \"line\n\n\"}",
+			want:  "{\"key\": \"line\\n\\n\"}",
+		},
+		{
+			name:  "raw_newline_at_end_of_nested_value",
+			input: "{\"key\": [\"line\n\"]}",
+			want:  "{\"key\": [\"line\\n\"]}",
+		},
+		{
+			name:  "raw_newline_before_trailing_space",
+			input: "{\"key\": \"line\n \"}",
+			want:  "{\"key\": \"line\\n \"}",
 		},
 		{
 			name:  "tab_in_key",
@@ -1381,6 +1759,39 @@ func TestEscaping(t *testing.T) {
 			name:  "unicode_escape",
 			input: "{\"key\": '\u0076\u0061\u006c\u0075\u0065'}",
 			want:  "{\"key\": \"value\"}",
+		},
+		// A literal with a leading zero is not a JSON number, so it is kept as a
+		// string: returning it as a number would produce a document that still
+		// does not parse.
+		{
+			name:  "number_with_leading_zero",
+			input: "{\"key\": 01}",
+			want:  "{\"key\": \"01\"}",
+		},
+		{
+			name:  "number_with_leading_zeros",
+			input: "{\"key\": 007}",
+			want:  "{\"key\": \"007\"}",
+		},
+		{
+			name:  "negative_number_with_leading_zero",
+			input: "{\"key\": -01}",
+			want:  "{\"key\": \"-01\"}",
+		},
+		{
+			name:  "float_with_leading_zero",
+			input: "{\"key\": 01.5}",
+			want:  "{\"key\": \"01.5\"}",
+		},
+		{
+			name:  "exponent_with_leading_zero",
+			input: "{\"key\": 01e2}",
+			want:  "{\"key\": \"01e2\"}",
+		},
+		{
+			name:  "zero_and_zero_decimal_stay_numbers",
+			input: "{\"key\": 0, \"key2\": 0.5}",
+			want:  "{\"key\": 0, \"key2\": 0.5}",
 		},
 		{
 			name:  "unicode_escape_skip_loads",
@@ -1611,5 +2022,139 @@ func TestParseBooleanOrNull(t *testing.T) {
 				t.Fatalf("got %q want %q", got, tc.want)
 			}
 		})
+	}
+}
+
+// TestRepairJSONUnicodeSurrogatePairs covers the two \uXXXX escapes a non-BMP
+// character is encoded as when the JSON text stays ASCII.
+func TestRepairJSONUnicodeSurrogatePairs(t *testing.T) {
+	cases := []struct {
+		name  string
+		input string
+		opts  []Option
+		want  string
+	}{
+		{
+			name:  "valid_pair_is_preserved",
+			input: `{"key": "\ud83d\ude00"}`,
+			want:  `{"key": "\ud83d\ude00"}`,
+		},
+		{
+			name:  "pair_in_uppercase_hex",
+			input: `{"key": "\uD83D\uDE00"}`,
+			want:  `{"key": "\ud83d\ude00"}`,
+		},
+		{
+			name:  "pair_written_literally",
+			input: `{"key": "\ud83d\ude00"}`,
+			opts:  []Option{WithEnsureASCII(false)},
+			want:  `{"key": "😀"}`,
+		},
+		{
+			name:  "pair_in_object_key",
+			input: `{"\ud83d\ude00k": 1}`,
+			want:  `{"\ud83d\ude00k": 1}`,
+		},
+		{
+			name:  "pair_in_array_item",
+			input: `["\ud83d\ude00", "x"]`,
+			want:  `["\ud83d\ude00", "x"]`,
+		},
+		{
+			name:  "pair_then_bmp_escape",
+			input: `{"key": "\ud83d\ude00\u263a"}`,
+			want:  `{"key": "\ud83d\ude00\u263a"}`,
+		},
+		{
+			name:  "truncated_object_with_pair",
+			input: `{"text": "hi \ud83d\ude00"`,
+			want:  `{"text": "hi \ud83d\ude00"}`,
+		},
+		{
+			name:  "lone_high_surrogate_stays_replaced",
+			input: `{"key": "\ud83d"}`,
+			want:  `{"key": "\ufffd"}`,
+		},
+		{
+			name:  "orphan_low_surrogate_stays_replaced",
+			input: `{"key": "\ude00"}`,
+			want:  `{"key": "\ufffd"}`,
+		},
+		{
+			name:  "two_high_surrogates_stay_replaced",
+			input: `{"key": "\ud83d\ud83d"}`,
+			want:  `{"key": "\ufffd\ufffd"}`,
+		},
+		{
+			name:  "high_surrogate_then_bmp_escape",
+			input: `{"key": "\ud83d\u263a"}`,
+			want:  `{"key": "\ufffd\u263a"}`,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := RepairJSON(tc.input, tc.opts...)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if got != tc.want {
+				t.Fatalf("got %q want %q", got, tc.want)
+			}
+		})
+	}
+}
+
+// TestRepairJSONUnicodeMatchesStdlib pins the invariant: repairing valid JSON
+// must not change the value it decodes to.
+func TestRepairJSONUnicodeMatchesStdlib(t *testing.T) {
+	nonASCII := []string{
+		`"\ud83d\ude00"`,
+		`"\ud83d\ude00\ud83c\udf89"`,
+		`"emoji: \ud83d\ude00"`,
+		`"\ud840\udc00"`,
+		`"\u263a"`,
+		`"\ufffd"`,
+		`"\ud83d"`,
+	}
+	for _, raw := range nonASCII {
+		input := `{"key": ` + raw + `}`
+		var want any
+		if err := json.Unmarshal([]byte(input), &want); err != nil {
+			t.Fatalf("input %q is not valid json: %v", input, err)
+		}
+		repaired, err := RepairJSON(input)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		var got any
+		if err := json.Unmarshal([]byte(repaired), &got); err != nil {
+			t.Fatalf("repaired %q is not valid json: %v", repaired, err)
+		}
+		if !reflect.DeepEqual(want, got) {
+			t.Fatalf("input %q repaired %q: got %#v want %#v", input, repaired, got, want)
+		}
+	}
+}
+
+// TestRepairJSONIdempotentOnOwnOutput feeds the repairer its own result back in,
+// as happens when a streamed tool call is repaired again on the next chunk.
+func TestRepairJSONIdempotentOnOwnOutput(t *testing.T) {
+	for _, input := range []string{
+		`{"key": "😀 café 中"}`,
+		`{"key": "\ud83d\ude00"}`,
+		`{"items": ["\ud83c\udf89", "\ud840\udc00"]}`,
+	} {
+		first, err := RepairJSON(input)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		second, err := RepairJSON(first)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if first != second {
+			t.Fatalf("input %q: first %q second %q", input, first, second)
+		}
 	}
 }

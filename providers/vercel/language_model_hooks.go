@@ -11,8 +11,8 @@ import (
 	"charm.land/fantasy/providers/anthropic"
 	"charm.land/fantasy/providers/google"
 	openaipkg "charm.land/fantasy/providers/openai"
-	openaisdk "github.com/openai/openai-go/v3"
-	"github.com/openai/openai-go/v3/packages/param"
+	openaisdk "github.com/charmbracelet/openai-go"
+	"github.com/charmbracelet/openai-go/packages/param"
 )
 
 const reasoningStartedCtx = "reasoning_started"
@@ -485,6 +485,17 @@ func languageModelStreamExtra(chunk openaisdk.ChatCompletionChunk, yield func(fa
 	return ctx, true
 }
 
+// isVertexUpstream reports whether Vercel's upstream for the request was
+// Vertex AI. Vercel forwards Vertex's usage verbatim, and Vertex reports
+// thoughts disjoint from completion_tokens — unlike OpenAI's subset shape —
+// so reasoning must be folded into output even when it does not exceed it
+// (the numeric guard in FoldDisjointReasoning only proves disjointness when
+// reasoning > output). The provider value arrives as raw JSON, quotes and
+// all.
+func isVertexUpstream(provider string) bool {
+	return strings.Trim(provider, `"`) == "vertex"
+}
+
 func languageModelUsage(response openaisdk.ChatCompletion) (fantasy.Usage, fantasy.ProviderOptionsData) {
 	if len(response.Choices) == 0 {
 		return fantasy.Usage{}, nil
@@ -505,12 +516,21 @@ func languageModelUsage(response openaisdk.ChatCompletion) (fantasy.Usage, fanta
 
 	// Vercel reports prompt_tokens INCLUDING cached tokens. Subtract to avoid double-counting.
 	inputTokens := max(usage.PromptTokens-promptTokenDetails.CachedTokens, 0)
+	reasoning := completionTokenDetails.ReasoningTokens
+	outputTokens := usage.CompletionTokens
+	totalTokens := inputTokens + usage.CompletionTokens + promptTokenDetails.CachedTokens
+	if isVertexUpstream(provider) {
+		outputTokens += reasoning
+		totalTokens += reasoning
+	} else {
+		outputTokens, totalTokens = openaipkg.FoldDisjointReasoning(outputTokens, reasoning, totalTokens)
+	}
 
 	return fantasy.Usage{
 		InputTokens:     inputTokens,
-		OutputTokens:    usage.CompletionTokens,
-		TotalTokens:     inputTokens + usage.CompletionTokens + promptTokenDetails.CachedTokens,
-		ReasoningTokens: completionTokenDetails.ReasoningTokens,
+		OutputTokens:    outputTokens,
+		TotalTokens:     totalTokens,
+		ReasoningTokens: reasoning,
 		CacheReadTokens: promptTokenDetails.CachedTokens,
 	}, providerMetadata
 }
@@ -531,8 +551,10 @@ func languageModelStreamUsage(chunk openaisdk.ChatCompletionChunk, _ map[string]
 		}
 	}
 
+	var provider string
 	if p, ok := chunk.JSON.ExtraFields["provider"]; ok {
-		streamProviderMetadata.Provider = p.Raw()
+		provider = p.Raw()
+		streamProviderMetadata.Provider = provider
 	}
 
 	completionTokenDetails := usage.CompletionTokensDetails
@@ -540,12 +562,21 @@ func languageModelStreamUsage(chunk openaisdk.ChatCompletionChunk, _ map[string]
 
 	// Vercel reports prompt_tokens INCLUDING cached tokens. Subtract to avoid double-counting.
 	inputTokens := max(usage.PromptTokens-promptTokenDetails.CachedTokens, 0)
+	reasoning := completionTokenDetails.ReasoningTokens
+	outputTokens := usage.CompletionTokens
+	totalTokens := inputTokens + usage.CompletionTokens + promptTokenDetails.CachedTokens
+	if isVertexUpstream(provider) {
+		outputTokens += reasoning
+		totalTokens += reasoning
+	} else {
+		outputTokens, totalTokens = openaipkg.FoldDisjointReasoning(outputTokens, reasoning, totalTokens)
+	}
 
 	aiUsage := fantasy.Usage{
 		InputTokens:     inputTokens,
-		OutputTokens:    usage.CompletionTokens,
-		TotalTokens:     inputTokens + usage.CompletionTokens + promptTokenDetails.CachedTokens,
-		ReasoningTokens: completionTokenDetails.ReasoningTokens,
+		OutputTokens:    outputTokens,
+		TotalTokens:     totalTokens,
+		ReasoningTokens: reasoning,
 		CacheReadTokens: promptTokenDetails.CachedTokens,
 	}
 
@@ -557,8 +588,10 @@ func languageModelStreamUsage(chunk openaisdk.ChatCompletionChunk, _ map[string]
 func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.ChatCompletionMessageParamUnion, []fantasy.CallWarning) {
 	var messages []openaisdk.ChatCompletionMessageParamUnion
 	var warnings []fantasy.CallWarning
+	var media openaipkg.ToolRunBuffer
 
 	for _, msg := range prompt {
+		messages = media.Role(msg.Role, messages)
 		switch msg.Role {
 		case fantasy.MessageRoleSystem:
 			var systemPromptParts []string
@@ -764,7 +797,7 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 					}
 				}
 			}
-			if !hasVisibleUserContent(content) {
+			if !openaipkg.HasVisibleUserContent(content) {
 				warnings = append(warnings, fantasy.CallWarning{
 					Type:    fantasy.CallWarningTypeOther,
 					Message: "dropping empty user message (contains neither user-facing content nor tool results)",
@@ -981,83 +1014,25 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 					assistantMsg.ToolCalls = append(assistantMsg.ToolCalls, tc)
 				}
 			}
+			if !openaipkg.HasVisibleAssistantContent(&assistantMsg) {
+				warnings = append(warnings, fantasy.CallWarning{
+					Type:    fantasy.CallWarningTypeOther,
+					Message: "dropping empty assistant message (contains neither user-facing content nor tool calls)",
+				})
+				continue
+			}
 			messages = append(messages, openaisdk.ChatCompletionMessageParamUnion{
 				OfAssistant: &assistantMsg,
 			})
 
 		case fantasy.MessageRoleTool:
-			for i, c := range msg.Content {
-				isLastPart := i == len(msg.Content)-1
-				cacheControl := anthropic.GetCacheControl(c.Options())
-				if cacheControl == nil && isLastPart {
-					cacheControl = anthropic.GetCacheControl(msg.ProviderOptions)
-				}
-				if c.GetType() != fantasy.ContentTypeToolResult {
-					warnings = append(warnings, fantasy.CallWarning{
-						Type:    fantasy.CallWarningTypeOther,
-						Message: "tool message can only have tool result content",
-					})
-					continue
-				}
-				toolResultPart, ok := fantasy.AsContentType[fantasy.ToolResultPart](c)
-				if !ok {
-					warnings = append(warnings, fantasy.CallWarning{
-						Type:    fantasy.CallWarningTypeOther,
-						Message: "tool message result part does not have the right type",
-					})
-					continue
-				}
-				switch toolResultPart.Output.GetType() {
-				case fantasy.ToolResultContentTypeText:
-					output, ok := fantasy.AsToolResultOutputType[fantasy.ToolResultOutputContentText](toolResultPart.Output)
-					if !ok {
-						warnings = append(warnings, fantasy.CallWarning{
-							Type:    fantasy.CallWarningTypeOther,
-							Message: "tool result output does not have the right type",
-						})
-						continue
-					}
-					tr := openaisdk.ToolMessage(output.Text, toolResultPart.ToolCallID)
-					if cacheControl != nil {
-						tr.SetExtraFields(map[string]any{
-							"cache_control": map[string]string{
-								"type": cacheControl.Type,
-							},
-						})
-					}
-					messages = append(messages, tr)
-				case fantasy.ToolResultContentTypeError:
-					output, ok := fantasy.AsToolResultOutputType[fantasy.ToolResultOutputContentError](toolResultPart.Output)
-					if !ok {
-						warnings = append(warnings, fantasy.CallWarning{
-							Type:    fantasy.CallWarningTypeOther,
-							Message: "tool result output does not have the right type",
-						})
-						continue
-					}
-					tr := openaisdk.ToolMessage(output.Error.Error(), toolResultPart.ToolCallID)
-					if cacheControl != nil {
-						tr.SetExtraFields(map[string]any{
-							"cache_control": map[string]string{
-								"type": cacheControl.Type,
-							},
-						})
-					}
-					messages = append(messages, tr)
-				}
-			}
+			toolMessages, deferred, toolWarnings := openaipkg.ToolMessages(msg, anthropic.ToolResultCacheType)
+			messages = append(messages, toolMessages...)
+			media.Defer(deferred...)
+			warnings = append(warnings, toolWarnings...)
 		}
 	}
-	return messages, warnings
-}
-
-func hasVisibleUserContent(content []openaisdk.ChatCompletionContentPartUnionParam) bool {
-	for _, part := range content {
-		if part.OfText != nil || part.OfImageURL != nil || part.OfInputAudio != nil || part.OfFile != nil {
-			return true
-		}
-	}
-	return false
+	return media.Close(messages), warnings
 }
 
 func structToMapJSON(s any) (map[string]any, error) {

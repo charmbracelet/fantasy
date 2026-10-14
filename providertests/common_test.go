@@ -327,6 +327,7 @@ func testThinking(t *testing.T, pairs []builderPair, thinkChecks func(*testing.T
 				got := result.Response.Content.Text()
 				require.True(t, strings.Contains(got, want1) && strings.Contains(got, want2), "unexpected response: got %q, want %q %q", got, want1, want2)
 
+				assertReasoningSubsetOfOutput(t, result.TotalUsage)
 				thinkChecks(t, result)
 			})
 
@@ -365,9 +366,21 @@ func testThinking(t *testing.T, pairs []builderPair, thinkChecks func(*testing.T
 				got := result.Response.Content.Text()
 				require.True(t, strings.Contains(got, want1) && strings.Contains(got, want2), "unexpected response: got %q, want %q %q", got, want1, want2)
 
+				assertReasoningSubsetOfOutput(t, result.TotalUsage)
 				thinkChecks(t, result)
 			})
 		})
+	}
+}
+
+// assertReasoningSubsetOfOutput pins the RFC 0020 invariant: reasoning tokens
+// are a subset of output tokens, never disjoint addends. A provider whose
+// usage mapping violates this double-counts reasoning downstream.
+func assertReasoningSubsetOfOutput(t *testing.T, usage fantasy.Usage) {
+	t.Helper()
+	if usage.ReasoningTokens > 0 {
+		require.GreaterOrEqual(t, usage.OutputTokens, usage.ReasoningTokens,
+			"reasoning tokens must be a subset of output tokens")
 	}
 }
 

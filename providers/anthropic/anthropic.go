@@ -11,6 +11,7 @@ import (
 	"io"
 	"maps"
 	"math"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -54,6 +55,8 @@ func defaultsToAdaptiveThinking(model string) bool {
 	return strings.Contains(model, "claude-mythos-preview")
 }
 
+// requiresAdaptiveThinking reports whether the model rejects a manual
+// budget_tokens configuration and must be sent adaptive thinking instead.
 func requiresAdaptiveThinking(model string) bool {
 	return defaultsToAdaptiveThinking(model) || defaultsToOmittedOpusThinkingDisplay(model)
 }
@@ -62,9 +65,33 @@ func setThinkingDisplay(param interface{ SetExtraFields(map[string]any) }, displ
 	param.SetExtraFields(map[string]any{"display": string(display)})
 }
 
+// omittedThinkingDisplayFamilies are the model families that default to
+// display "omitted". Matched by substring so dated snapshots and
+// platform-qualified ids resolve the same as the bare alias. Keep in step
+// with the display list in the thinking docs:
+// https://platform.claude.com/docs/en/build-with-claude/thinking#controlling-thinking-display
+var omittedThinkingDisplayFamilies = []string{
+	"claude-opus-5",
+	"claude-sonnet-5",
+	"claude-fable-5",
+	"claude-mythos-5",
+}
+
+// defaultsToOmittedThinkingDisplay reports whether the model returns empty
+// thinking text unless a display is requested. Broader than
+// [requiresAdaptiveThinking] on purpose: a display is accepted alongside
+// either thinking type, so it is safe to list a model here.
 func defaultsToOmittedThinkingDisplay(model string) bool {
 	model = strings.ToLower(strings.TrimSpace(model))
-	return defaultsToAdaptiveThinking(model) || defaultsToOmittedOpusThinkingDisplay(model)
+	if defaultsToAdaptiveThinking(model) || defaultsToOmittedOpusThinkingDisplay(model) {
+		return true
+	}
+	for _, family := range omittedThinkingDisplayFamilies {
+		if strings.Contains(model, family) {
+			return true
+		}
+	}
+	return false
 }
 
 func defaultsToOmittedOpusThinkingDisplay(model string) bool {
@@ -1451,12 +1478,24 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 
 		sawMessageStop := false
 
+		// openToolBlocks holds tool_use blocks announced by content_block_start
+		// but not yet ended. The accumulator cannot serve this: it drops blocks
+		// it could not index, and max_tokens truncation sends no stop event.
+		openToolBlocks := map[int64]*openToolBlock{}
+
 		for stream.Next() {
 			chunk := stream.Current()
 			_ = acc.Accumulate(chunk)
 			switch chunk.Type {
 			case "content_block_start":
 				contentBlockType := chunk.ContentBlock.Type
+				if contentBlockType == "tool_use" || contentBlockType == "server_tool_use" {
+					openToolBlocks[chunk.Index] = &openToolBlock{
+						id:               chunk.ContentBlock.ID,
+						name:             chunk.ContentBlock.Name,
+						providerExecuted: contentBlockType == "server_tool_use",
+					}
+				}
 				switch contentBlockType {
 				case "text":
 					if !yield(fantasy.StreamPart{
@@ -1501,6 +1540,15 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 					}
 				}
 			case "content_block_stop":
+				// Tool blocks end from openToolBlocks so that an accumulator
+				// that dropped the block cannot swallow the call.
+				if open, ok := openToolBlocks[chunk.Index]; ok {
+					delete(openToolBlocks, chunk.Index)
+					if !open.close(acc, chunk.Index, yield) {
+						return
+					}
+					continue
+				}
 				if len(acc.Content)-1 < int(chunk.Index) {
 					continue
 				}
@@ -1530,37 +1578,7 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 						return
 					}
 				case "tool_use":
-					if !yield(fantasy.StreamPart{
-						Type: fantasy.StreamPartTypeToolInputEnd,
-						ID:   contentBlock.ID,
-					}) {
-						return
-					}
-					if !yield(fantasy.StreamPart{
-						Type:          fantasy.StreamPartTypeToolCall,
-						ID:            contentBlock.ID,
-						ToolCallName:  contentBlock.Name,
-						ToolCallInput: string(contentBlock.Input),
-					}) {
-						return
-					}
-				case "server_tool_use":
-					if !yield(fantasy.StreamPart{
-						Type:             fantasy.StreamPartTypeToolInputEnd,
-						ID:               contentBlock.ID,
-						ProviderExecuted: true,
-					}) {
-						return
-					}
-					if !yield(fantasy.StreamPart{
-						Type:             fantasy.StreamPartTypeToolCall,
-						ID:               contentBlock.ID,
-						ToolCallName:     contentBlock.Name,
-						ToolCallInput:    string(contentBlock.Input),
-						ProviderExecuted: true,
-					}) {
-						return
-					}
+					// Handled above, from openToolBlocks.
 				case "web_search_tool_result":
 					// Read search results directly from the ContentBlockUnion
 					// struct fields instead of using AsAny(). The Anthropic SDK's
@@ -1643,13 +1661,17 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 						return
 					}
 				case "input_json_delta":
-					if len(acc.Content)-1 < int(chunk.Index) {
+					// Resolved from openToolBlocks, not the accumulator: the
+					// accumulator drops blocks it could not index, and a
+					// dropped delta silently shortens the tool call.
+					open, ok := openToolBlocks[chunk.Index]
+					if !ok {
 						continue
 					}
-					contentBlock := acc.Content[int(chunk.Index)]
+					open.input.WriteString(chunk.Delta.PartialJSON)
 					if !yield(fantasy.StreamPart{
 						Type:          fantasy.StreamPartTypeToolInputDelta,
-						ID:            contentBlock.ID,
+						ID:            open.id,
 						ToolCallInput: chunk.Delta.PartialJSON,
 					}) {
 						return
@@ -1657,6 +1679,13 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 				}
 			case "message_stop":
 				sawMessageStop = true
+			default:
+				// Catch-all on purpose: Anthropic may add event types and
+				// documents that unknown ones should be handled gracefully.
+				// https://platform.claude.com/docs/en/build-with-claude/streaming
+				if !yield(fantasy.StreamPart{Type: fantasy.StreamPartTypeKeepalive}) {
+					return
+				}
 			}
 		}
 
@@ -1684,6 +1713,16 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 			return
 		}
 
+		// A turn stopped at max_tokens sends no content_block_stop for the
+		// block it was writing. Emit what is still open, truncated arguments
+		// and all, so the call is reported invalid rather than dropped.
+		for _, index := range slices.Sorted(maps.Keys(openToolBlocks)) {
+			open := openToolBlocks[index]
+			if !open.close(acc, index, yield) {
+				return
+			}
+		}
+
 		yield(fantasy.StreamPart{
 			Type:         fantasy.StreamPartTypeFinish,
 			ID:           acc.ID,
@@ -1698,6 +1737,58 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 			ProviderMetadata: fantasy.ProviderMetadata{},
 		})
 	}, nil
+}
+
+// openToolBlock is a tool_use block announced on the stream but not yet
+// ended. It carries the arguments seen so far so the call can still be
+// reported if no content_block_stop arrives.
+type openToolBlock struct {
+	id               string
+	name             string
+	providerExecuted bool
+	input            strings.Builder
+}
+
+// close emits the end-of-input and tool call parts for the block. It reports
+// whether the consumer wants more parts.
+func (o *openToolBlock) close(acc anthropic.Message, index int64, yield func(fantasy.StreamPart) bool) bool {
+	if !yield(fantasy.StreamPart{
+		Type:             fantasy.StreamPartTypeToolInputEnd,
+		ID:               o.id,
+		ProviderExecuted: o.providerExecuted,
+	}) {
+		return false
+	}
+	return yield(fantasy.StreamPart{
+		Type:             fantasy.StreamPartTypeToolCall,
+		ID:               o.id,
+		ToolCallName:     o.name,
+		ToolCallInput:    o.arguments(acc, index),
+		ProviderExecuted: o.providerExecuted,
+	})
+}
+
+// arguments returns the call's arguments as JSON text. Deltas win; a block
+// with no deltas falls back to the accumulator, then to an empty object so a
+// no-argument call is still valid JSON.
+func (o *openToolBlock) arguments(acc anthropic.Message, index int64) string {
+	if o.input.Len() > 0 {
+		return o.input.String()
+	}
+	// Only trust the accumulator when the block sitting at this index
+	// carries this call's ID. Index drift between the stream and the
+	// accumulator is the very thing this tracking exists to survive, so
+	// reading by position alone would be trusting the one thing already
+	// known to be unreliable, and another call's arguments are worse than
+	// none. A negative index cannot address a block at all.
+	if index >= 0 && int(index) < len(acc.Content) {
+		if block := acc.Content[index]; block.ID == o.id {
+			if input := string(block.Input); input != "" {
+				return input
+			}
+		}
+	}
+	return "{}"
 }
 
 // GenerateObject implements fantasy.LanguageModel.

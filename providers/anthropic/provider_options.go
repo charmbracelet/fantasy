@@ -206,6 +206,28 @@ type CacheControl struct {
 	Type string `json:"type"`
 }
 
+// CacheType returns the configured cache type, or the empty string when no
+// cache control is set, so callers can tag a message without a nil check.
+func (c *CacheControl) CacheType() string {
+	if c == nil {
+		return ""
+	}
+	return c.Type
+}
+
+// ToolResultCacheType returns the prompt-cache hint for content part i of a
+// tool message, falling back to the message's own options on the last part.
+func ToolResultCacheType(msg fantasy.Message, i int) string {
+	if i < 0 || i >= len(msg.Content) {
+		return ""
+	}
+	cacheControl := GetCacheControl(msg.Content[i].Options())
+	if cacheControl == nil && i == len(msg.Content)-1 {
+		cacheControl = GetCacheControl(msg.ProviderOptions)
+	}
+	return cacheControl.CacheType()
+}
+
 // NewProviderOptions creates new provider options for the Anthropic provider.
 func NewProviderOptions(opts *ProviderOptions) fantasy.ProviderOptions {
 	return fantasy.ProviderOptions{

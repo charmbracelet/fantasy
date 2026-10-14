@@ -25,6 +25,7 @@ func toProviderErr(err error) error {
 		Cause:        err,
 		StatusCode:   apiErr.Code,
 		ResponseBody: []byte(apiErr.Message),
+		ErrorType:    apiErr.Status,
 	}
 
 	parseContextTooLargeError(apiErr.Message, providerErr)

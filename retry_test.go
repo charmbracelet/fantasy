@@ -412,3 +412,65 @@ func TestIsAuthError(t *testing.T) {
 		t.Error("expected an AuthError-flagged error to be an auth error")
 	}
 }
+
+func TestGetRetryDelayInMs(t *testing.T) {
+	t.Parallel()
+	const backoff = 5 * time.Second
+	for _, tt := range []struct {
+		name    string
+		headers map[string]string
+		want    time.Duration
+	}{
+		{"fractional seconds", map[string]string{"retry-after": "1.5"}, 1500 * time.Millisecond},
+		{"subsecond delay", map[string]string{"retry-after": "0.5"}, 500 * time.Millisecond},
+		{"fractional milliseconds", map[string]string{"retry-after-ms": "1.5"}, 1500 * time.Microsecond},
+		{"submillisecond delay", map[string]string{"retry-after-ms": "0.5"}, 500 * time.Microsecond},
+		{"milliseconds take precedence", map[string]string{"retry-after-ms": "0.5", "retry-after": "2"}, 500 * time.Microsecond},
+		{"integer seconds", map[string]string{"retry-after": "2"}, 2 * time.Second},
+		{"integer milliseconds", map[string]string{"retry-after-ms": "250"}, 250 * time.Millisecond},
+		{"invalid milliseconds fall back to seconds", map[string]string{"retry-after-ms": "invalid", "retry-after": "1.5"}, 1500 * time.Millisecond},
+		{"missing headers", nil, backoff},
+		{"invalid delay", map[string]string{"retry-after": "invalid"}, backoff},
+		{"zero delay", map[string]string{"retry-after": "0"}, backoff},
+		{"negative delay", map[string]string{"retry-after": "-1"}, backoff},
+		{"excessive delay", map[string]string{"retry-after": "60"}, backoff},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			err := &ProviderError{StatusCode: 429, ResponseHeaders: tt.headers}
+			if got := getRetryDelayInMs(err, backoff); got != tt.want {
+				t.Errorf("getRetryDelayInMs() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestRetryWithExponentialBackoff_FractionalRetryHeader(t *testing.T) {
+	t.Parallel()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	var delay time.Duration
+	attempts := 0
+	retry := RetryWithExponentialBackoffRespectingRetryHeaders[int](RetryOptions{
+		MaxRetries:     1,
+		InitialDelayIn: 5 * time.Second,
+		BackoffFactor:  2,
+		OnRetry: func(_ *ProviderError, d time.Duration) {
+			delay = d
+			cancel() // Observe the selected delay without sleeping or making another request.
+		},
+	})
+	_, err := retry(ctx, func() (int, error) {
+		attempts++
+		return 0, &ProviderError{StatusCode: 429, ResponseHeaders: map[string]string{"retry-after": "1.5"}}
+	})
+	if delay != 1500*time.Millisecond {
+		t.Errorf("retry delay = %v, want 1.5s", delay)
+	}
+	if !errors.Is(err, context.Canceled) {
+		t.Errorf("error = %v, want context.Canceled", err)
+	}
+	if attempts != 1 {
+		t.Errorf("attempts = %d, want 1", attempts)
+	}
+}

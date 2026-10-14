@@ -584,7 +584,12 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 
 		var toolResults []ToolResultContent
 		if !suppressed {
-			toolResults, err = a.executeTools(ctx, stepTools, stepExecProviderTools, stepToolCalls, nil)
+			toolResults = a.executeTools(ctx, stepTools, stepExecProviderTools, stepToolCalls, nil)
+		}
+
+		// Stop a canceled run rather than looping back to the model.
+		if err := ctx.Err(); err != nil {
+			return nil, err
 		}
 
 		// If any tool result requested a stop, deliver all results but don't
@@ -630,7 +635,7 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 		steps = append(steps, stepResult)
 		shouldStop := isStopConditionMet(opts.StopWhen, steps)
 
-		if shouldStop || err != nil || stopTurnRequested || len(stepToolCalls) == 0 || result.FinishReason != FinishReasonToolCalls {
+		if shouldStop || stopTurnRequested || len(stepToolCalls) == 0 || result.FinishReason != FinishReasonToolCalls {
 			break
 		}
 	}
@@ -766,9 +771,9 @@ func toResponseMessages(content []Content) []Message {
 	return messages
 }
 
-func (a *agent) executeTools(ctx context.Context, allTools []AgentTool, execProviderTools []ExecutableProviderTool, toolCalls []ToolCallContent, toolResultCallback func(result ToolResultContent) error) ([]ToolResultContent, error) {
+func (a *agent) executeTools(ctx context.Context, allTools []AgentTool, execProviderTools []ExecutableProviderTool, toolCalls []ToolCallContent, toolResultCallback func(result ToolResultContent) error) []ToolResultContent {
 	if len(toolCalls) == 0 {
-		return nil, nil
+		return nil
 	}
 
 	// Create a map for quick tool lookup
@@ -786,35 +791,27 @@ func (a *agent) executeTools(ctx context.Context, allTools []AgentTool, execProv
 	results := make([]ToolResultContent, 0, len(toolCalls))
 
 	for _, toolCall := range toolCalls {
-		result, isCriticalError := a.executeSingleTool(ctx, toolMap, execProviderToolMap, toolCall, toolResultCallback)
-		results = append(results, result)
-		if isCriticalError {
-			if errorResult, ok := result.Result.(ToolResultOutputContentError); ok && errorResult.Error != nil {
-				return nil, errorResult.Error
-			}
-		}
+		results = append(results, a.executeSingleTool(ctx, toolMap, execProviderToolMap, toolCall, toolResultCallback))
 	}
 
-	return results, nil
+	return results
 }
 
-// executeSingleTool executes a single tool and returns its result and a critical error flag.
-func (a *agent) executeSingleTool(ctx context.Context, toolMap map[string]AgentTool, execProviderToolMap map[string]ExecutableProviderTool, toolCall ToolCallContent, toolResultCallback func(result ToolResultContent) error) (ToolResultContent, bool) {
-	result := ToolResultContent{
+// executeSingleTool runs one tool call. A tool that fails, by any means,
+// produces an error result the model can act on.
+func (a *agent) executeSingleTool(ctx context.Context, toolMap map[string]AgentTool, execProviderToolMap map[string]ExecutableProviderTool, toolCall ToolCallContent, toolResultCallback func(result ToolResultContent) error) (result ToolResultContent) {
+	result = ToolResultContent{
 		ToolCallID:       toolCall.ToolCallID,
 		ToolName:         toolCall.ToolName,
 		ProviderExecuted: false,
 	}
+	if toolResultCallback != nil {
+		defer func() { _ = toolResultCallback(result) }()
+	}
 
-	// Skip invalid tool calls - create error result (not critical)
 	if toolCall.Invalid {
-		result.Result = ToolResultOutputContentError{
-			Error: toolCall.ValidationError,
-		}
-		if toolResultCallback != nil {
-			_ = toolResultCallback(result)
-		}
-		return result, false
+		result.Result = ToolResultOutputContentError{Error: toolCall.ValidationError}
+		return result
 	}
 
 	// Find the run function — either from a regular AgentTool or an
@@ -826,57 +823,32 @@ func (a *agent) executeSingleTool(ctx context.Context, toolMap map[string]AgentT
 		runTool = ept.Run
 	}
 	if runTool == nil {
-		result.Result = ToolResultOutputContentError{
-			Error: errors.New("tool not found: " + toolCall.ToolName),
-		}
-		if toolResultCallback != nil {
-			_ = toolResultCallback(result)
-		}
-		return result, false
+		result.Result = ToolResultOutputContentError{Error: errors.New("tool not found: " + toolCall.ToolName)}
+		return result
 	}
 
-	// Execute the tool, converting a panic into a failed tool result so a
-	// single misbehaving tool cannot take down the whole process. The panic
-	// value and stack are included so they survive in the transcript even
-	// when stderr is lost.
 	toolResult, err := runToolSafely(ctx, runTool, ToolCall{
 		ID:    toolCall.ToolCallID,
 		Name:  toolCall.ToolName,
 		Input: toolCall.Input,
 	})
-	if err != nil {
-		result.Result = ToolResultOutputContentError{
-			Error: err,
-		}
-		result.ClientMetadata = toolResult.Metadata
-		result.StopTurn = toolResult.StopTurn
-		if toolResultCallback != nil {
-			_ = toolResultCallback(result)
-		}
-		return result, true
-	}
-
 	result.ClientMetadata = toolResult.Metadata
 	result.StopTurn = toolResult.StopTurn
-	if toolResult.IsError {
-		result.Result = ToolResultOutputContentError{
-			Error: errors.New(toolResult.Content),
-		}
-	} else if toolResult.Type == "image" || toolResult.Type == "media" {
+	switch {
+	case err != nil:
+		result.Result = ToolResultOutputContentError{Error: err}
+	case toolResult.IsError:
+		result.Result = ToolResultOutputContentError{Error: errors.New(toolResult.Content)}
+	case toolResult.Type == "image", toolResult.Type == "media":
 		result.Result = ToolResultOutputContentMedia{
 			Data:      base64.StdEncoding.EncodeToString(toolResult.Data),
 			MediaType: toolResult.MediaType,
 			Text:      toolResult.Content,
 		}
-	} else {
-		result.Result = ToolResultOutputContentText{
-			Text: toolResult.Content,
-		}
+	default:
+		result.Result = ToolResultOutputContentText{Text: toolResult.Content}
 	}
-	if toolResultCallback != nil {
-		_ = toolResultCallback(result)
-	}
-	return result, false
+	return result
 }
 
 // runToolSafely invokes a tool's run function and converts any panic into a
@@ -1659,51 +1631,6 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 		}
 	}
 
-	// All tool calls are now collected. Create the execution channel sized to
-	// avoid blocking during dispatch, start the coordinator, then flush the batch.
-	toolChan := make(chan toolExecutionRequest, len(pendingDispatches))
-	var toolExecutionWg sync.WaitGroup
-	var toolStateMu sync.Mutex
-	toolResults := make([]ToolResultContent, 0, len(pendingDispatches))
-	var toolExecutionErr error
-
-	// Semaphores for controlling parallelism.
-	parallelSem := make(chan struct{}, 5)
-	var sequentialMu sync.Mutex
-
-	// Single coordinator goroutine that dispatches tools.
-	toolExecutionWg.Go(func() {
-		for req := range toolChan {
-			if req.parallel {
-				parallelSem <- struct{}{}
-				toolExecutionWg.Go(func() {
-					defer func() { <-parallelSem }()
-					result, isCriticalError := a.executeSingleTool(ctx, toolMap, execProviderToolMap, req.toolCall, opts.OnToolResult)
-					toolStateMu.Lock()
-					toolResults = append(toolResults, result)
-					if isCriticalError && toolExecutionErr == nil {
-						if errorResult, ok := result.Result.(ToolResultOutputContentError); ok && errorResult.Error != nil {
-							toolExecutionErr = errorResult.Error
-						}
-					}
-					toolStateMu.Unlock()
-				})
-			} else {
-				sequentialMu.Lock()
-				result, isCriticalError := a.executeSingleTool(ctx, toolMap, execProviderToolMap, req.toolCall, opts.OnToolResult)
-				toolStateMu.Lock()
-				toolResults = append(toolResults, result)
-				if isCriticalError && toolExecutionErr == nil {
-					if errorResult, ok := result.Result.(ToolResultOutputContentError); ok && errorResult.Error != nil {
-						toolExecutionErr = errorResult.Error
-					}
-				}
-				toolStateMu.Unlock()
-				sequentialMu.Unlock()
-			}
-		}
-	})
-
 	// Process buffered tool calls now that the finish reason is known.
 	// Abnormal finishes — length, content filter, provider error, unknown —
 	// can accompany arguments that were cut short: record the raw call in
@@ -1770,26 +1697,38 @@ func (a *agent) processStepStream(ctx context.Context, stream StreamResponse, op
 		pendingDispatches = append(pendingDispatches, toolExecutionRequest{toolCall: validatedToolCall, parallel: isParallel})
 	}
 
-	// Dispatch all buffered tool calls now that every OnToolCall callback has
-	// been called, then close and wait. Dispatch only on an explicit
-	// tool-calls turn: any other finish reason (length, content filter,
-	// provider error, unknown) can accompany arguments that were cut short,
-	// and executing those is how truncated input reaches tools
-	// (CHARM-2020). The tool-call content stays in stepContent either way,
-	// so the step result records what the model tried to call.
+	// Run the buffered calls now that every OnToolCall callback has fired.
+	// Dispatch only on an explicit tool-calls turn: any other finish reason
+	// can accompany arguments that were cut short, and running those is how
+	// truncated input reaches tools (CHARM-2020).
+	toolResults := make([]ToolResultContent, 0, len(pendingDispatches))
 	if stepFinishReason == FinishReasonToolCalls {
-		for _, req := range pendingDispatches {
-			toolChan <- req
+		var wg sync.WaitGroup
+		var mu sync.Mutex
+		parallelSem := make(chan struct{}, 5)
+		run := func(req toolExecutionRequest) {
+			result := a.executeSingleTool(ctx, toolMap, execProviderToolMap, req.toolCall, opts.OnToolResult)
+			mu.Lock()
+			toolResults = append(toolResults, result)
+			mu.Unlock()
 		}
+		for _, req := range pendingDispatches {
+			if !req.parallel {
+				run(req)
+				continue
+			}
+			parallelSem <- struct{}{}
+			wg.Go(func() {
+				defer func() { <-parallelSem }()
+				run(req)
+			})
+		}
+		wg.Wait()
 	}
 
-	// Close the tool execution channel and wait for all executions to complete.
-	close(toolChan)
-	toolExecutionWg.Wait()
-
-	// Check for tool execution errors
-	if toolExecutionErr != nil {
-		return stepExecutionResult{}, toolExecutionErr
+	// Stop a canceled run rather than looping back to the model.
+	if err := ctx.Err(); err != nil {
+		return stepExecutionResult{}, err
 	}
 
 	// Add tool results to content in the order the model called the tools,

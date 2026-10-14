@@ -15,11 +15,11 @@ import (
 	"charm.land/fantasy"
 	"charm.land/fantasy/object"
 	"charm.land/fantasy/schema"
+	"github.com/charmbracelet/openai-go"
+	"github.com/charmbracelet/openai-go/packages/param"
+	"github.com/charmbracelet/openai-go/responses"
+	"github.com/charmbracelet/openai-go/shared"
 	"github.com/google/uuid"
-	"github.com/openai/openai-go/v3"
-	"github.com/openai/openai-go/v3/packages/param"
-	"github.com/openai/openai-go/v3/responses"
-	"github.com/openai/openai-go/v3/shared"
 )
 
 const topLogprobsMax = 20
@@ -409,10 +409,15 @@ func responsesProviderMetadata(responseID string) fantasy.ProviderMetadata {
 func responsesUsage(resp responses.Response) fantasy.Usage {
 	// OpenAI reports input_tokens INCLUDING cached tokens. Subtract to avoid double-counting.
 	inputTokens := max(resp.Usage.InputTokens-resp.Usage.InputTokensDetails.CachedTokens, 0)
+	outputTokens, totalTokens := FoldDisjointReasoning(
+		resp.Usage.OutputTokens,
+		resp.Usage.OutputTokensDetails.ReasoningTokens,
+		resp.Usage.InputTokens+resp.Usage.OutputTokens,
+	)
 	usage := fantasy.Usage{
 		InputTokens:  inputTokens,
-		OutputTokens: resp.Usage.OutputTokens,
-		TotalTokens:  resp.Usage.InputTokens + resp.Usage.OutputTokens,
+		OutputTokens: outputTokens,
+		TotalTokens:  totalTokens,
 	}
 	if resp.Usage.OutputTokensDetails.ReasoningTokens != 0 {
 		usage.ReasoningTokens = resp.Usage.OutputTokensDetails.ReasoningTokens
@@ -935,11 +940,11 @@ func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call)
 
 	usage := responsesUsage(*response)
 	finishReason := mapResponsesFinishReason(response.IncompleteDetails.Reason, hasFunctionCall)
-	truncatedWithToolCalls := hasFunctionCall && finishReason == fantasy.FinishReasonLength
+	truncatedWithToolCalls := hasFunctionCall && abnormalFinishReason(finishReason)
 	if truncatedWithToolCalls {
 		warnings = append(warnings, fantasy.CallWarning{
 			Type:    fantasy.CallWarningTypeOther,
-			Message: "tool calls were returned but the model hit the token limit; arguments may be truncated",
+			Message: "tool calls were returned but the turn ended abnormally (token limit or content filter); arguments may be truncated",
 		})
 	} else {
 		for _, tc := range pendingFunctionCalls {
@@ -960,10 +965,12 @@ func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call)
 }
 
 func mapResponsesFinishReason(reason string, hasFunctionCall bool) fantasy.FinishReason {
-	if hasFunctionCall && reason != "max_tokens" && reason != "max_output_tokens" {
-		return fantasy.FinishReasonToolCalls
-	}
-
+	// A terminal reason the upstream actually sent always wins. Rewriting one
+	// into a tool-call turn hides a turn that was cut short, and the agent
+	// then validates, repairs and dispatches truncated arguments
+	// (CHARM-2020). The chat-completions adapter keeps length, content_filter
+	// and error for the same reason; only a reason the switch does not
+	// recognise falls back to the tool-call inference.
 	switch reason {
 	case "":
 		if hasFunctionCall {
@@ -975,7 +982,22 @@ func mapResponsesFinishReason(reason string, hasFunctionCall bool) fantasy.Finis
 	case "content_filter":
 		return fantasy.FinishReasonContentFilter
 	default:
+		if hasFunctionCall {
+			return fantasy.FinishReasonToolCalls
+		}
 		return fantasy.FinishReasonOther
+	}
+}
+
+// abnormalFinishReason reports whether a Responses turn ended abnormally. Such
+// a turn can carry function-call arguments that were cut short mid-serialization,
+// so the calls must not be dispatched (CHARM-2020).
+func abnormalFinishReason(reason fantasy.FinishReason) bool {
+	switch reason {
+	case fantasy.FinishReasonLength, fantasy.FinishReasonContentFilter:
+		return true
+	default:
+		return false
 	}
 }
 
@@ -1304,12 +1326,12 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 			return
 		}
 
-		if hasFunctionCall && finishReason == fantasy.FinishReasonLength {
+		if hasFunctionCall && abnormalFinishReason(finishReason) {
 			yield(fantasy.StreamPart{
 				Type: fantasy.StreamPartTypeWarnings,
 				Warnings: []fantasy.CallWarning{{
 					Type:    fantasy.CallWarningTypeOther,
-					Message: "tool calls were returned but the model hit the token limit; arguments may be truncated",
+					Message: "tool calls were returned but the turn ended abnormally (token limit or content filter); arguments may be truncated",
 				}},
 			})
 		}
@@ -1504,11 +1526,7 @@ func (o responsesLanguageModel) generateObjectWithJSONMode(ctx context.Context, 
 	}
 
 	if jsonText == "" {
-		usage := fantasy.Usage{
-			InputTokens:  response.Usage.InputTokens,
-			OutputTokens: response.Usage.OutputTokens,
-			TotalTokens:  response.Usage.InputTokens + response.Usage.OutputTokens,
-		}
+		usage := responsesUsage(*response)
 		finishReason := mapResponsesFinishReason(response.IncompleteDetails.Reason, false)
 		return nil, &fantasy.NoObjectGeneratedError{
 			RawText:      "",

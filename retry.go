@@ -28,14 +28,14 @@ func getRetryDelayInMs(err error, exponentialBackoffDelay time.Duration) time.Du
 	// retry-ms is more precise than retry-after and used by e.g. OpenAI
 	if retryAfterMs, exists := headers["retry-after-ms"]; exists {
 		if timeoutMs, err := strconv.ParseFloat(retryAfterMs, 64); err == nil {
-			ms = time.Duration(timeoutMs) * time.Millisecond
+			ms = time.Duration(timeoutMs * float64(time.Millisecond))
 		}
 	}
 
 	// About the Retry-After header: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After
 	if retryAfter, exists := headers["retry-after"]; exists && ms == 0 {
 		if timeoutSeconds, err := strconv.ParseFloat(retryAfter, 64); err == nil {
-			ms = time.Duration(timeoutSeconds) * time.Second
+			ms = time.Duration(timeoutSeconds * float64(time.Second))
 		} else {
 			// Try parsing as HTTP date
 			if t, err := time.Parse(time.RFC1123, retryAfter); err == nil {

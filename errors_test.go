@@ -1,6 +1,7 @@
 package fantasy
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -27,6 +28,10 @@ func TestIsTransportError(t *testing.T) {
 		{"x/net StreamError", http2.StreamError{StreamID: 1, Code: http2.ErrCodeInternal}, true},
 		{"x/net ConnectionError", http2.ConnectionError(http2.ErrCodeInternal), true},
 		{"x/net GoAwayError", http2.GoAwayError{LastStreamID: 1, ErrCode: http2.ErrCodeInternal}, true},
+		{"lost health-check ping", newTestError("http2: client connection lost"), true},
+		{"wrapped lost ping", fmt.Errorf("reading body: %w", newTestError("http2: client connection lost")), true},
+		{"stdlib GoAwayError", newTestError(`http2: server sent GOAWAY and closed the connection; LastStreamID=5, ErrCode=NO_ERROR, debug=""`), true},
+		{"deliberate close is not transient", newTestError("http2: client connection force closed via ClientConn.Close"), false},
 	}
 
 	for _, tt := range tests {
@@ -111,3 +116,72 @@ type testError struct{ msg string }
 func (e *testError) Error() string { return e.msg }
 
 func newTestError(msg string) error { return &testError{msg: msg} }
+
+func TestExtractHTTP2ErrorMessage(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name string
+		err  error
+		want string
+	}{
+		{
+			"lost ping drops the http2 prefix",
+			newTestError("http2: client connection lost"),
+			"client connection lost",
+		},
+		{
+			// The trailing "; LastStreamID=…" reads like the "; CODE" of a
+			// stream error, so cleaning this one would return the frame
+			// bookkeeping and discard the part that says what happened.
+			"GOAWAY keeps the sentence, not the frame detail",
+			newTestError(`http2: server sent GOAWAY and closed the connection; LastStreamID=5, ErrCode=NO_ERROR, debug=""`),
+			"server sent GOAWAY and closed the connection",
+		},
+		{
+			"stream errors still clean",
+			newTestError("stream error: stream ID 27; INTERNAL_ERROR; received from peer"),
+			"INTERNAL_ERROR (received from peer)",
+		},
+		{
+			"unrecognised errors pass through",
+			newTestError("something went wrong"),
+			"something went wrong",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			if got := extractHTTP2ErrorMessage(tt.err); got != tt.want {
+				t.Errorf("extractHTTP2ErrorMessage(%v) = %q, want %q", tt.err, got, tt.want)
+			}
+		})
+	}
+}
+
+// TestConnectionLostIsRetryable covers the path the retry middleware walks.
+// A lost connection reaches it as a bare error that is not a net.Error and
+// carries no type to match, so without the message check it reads as
+// permanent and the request is never retried.
+func TestConnectionLostIsRetryable(t *testing.T) {
+	t.Parallel()
+
+	// Spelled out rather than ranged over http2ConnectionLostMessages, so
+	// emptying that list fails here instead of passing vacuously.
+	for _, msg := range []string{
+		"http2: client connection lost",
+		"http2: server sent GOAWAY and closed the connection",
+	} {
+		t.Run(msg, func(t *testing.T) {
+			t.Parallel()
+			err := newTestError(msg)
+			if !isRetryableError(err) {
+				t.Error("expected a lost connection to be retryable")
+			}
+			if wrapped := WrapTransportError(err); !errors.Is(wrapped, err) {
+				t.Errorf("WrapTransportError dropped the cause: %v", wrapped)
+			}
+		})
+	}
+}

@@ -11,9 +11,9 @@ import (
 	"charm.land/fantasy/providers/anthropic"
 	"charm.land/fantasy/providers/google"
 	"charm.land/fantasy/providers/openai"
+	openaisdk "github.com/charmbracelet/openai-go"
+	"github.com/charmbracelet/openai-go/packages/param"
 	xstrings "github.com/charmbracelet/x/exp/strings"
-	openaisdk "github.com/openai/openai-go/v3"
-	"github.com/openai/openai-go/v3/packages/param"
 )
 
 const reasoningStartedCtx = "reasoning_started"
@@ -457,11 +457,16 @@ func languageModelUsage(response openaisdk.ChatCompletion) (fantasy.Usage, fanta
 
 	// OpenRouter reports prompt_tokens INCLUDING cached tokens. Subtract to avoid double-counting.
 	inputTokens := max(usage.PromptTokens-promptTokenDetails.CachedTokens, 0)
+	outputTokens, totalTokens := openai.FoldDisjointReasoning(
+		usage.CompletionTokens,
+		completionTokenDetails.ReasoningTokens,
+		inputTokens+usage.CompletionTokens+promptTokenDetails.CachedTokens,
+	)
 
 	return fantasy.Usage{
 		InputTokens:     inputTokens,
-		OutputTokens:    usage.CompletionTokens,
-		TotalTokens:     inputTokens + usage.CompletionTokens + promptTokenDetails.CachedTokens,
+		OutputTokens:    outputTokens,
+		TotalTokens:     totalTokens,
 		ReasoningTokens: completionTokenDetails.ReasoningTokens,
 		CacheReadTokens: promptTokenDetails.CachedTokens,
 	}, providerMetadata
@@ -496,11 +501,16 @@ func languageModelStreamUsage(chunk openaisdk.ChatCompletionChunk, _ map[string]
 
 	// OpenRouter reports prompt_tokens INCLUDING cached tokens. Subtract to avoid double-counting.
 	inputTokens := max(usage.PromptTokens-promptTokenDetails.CachedTokens, 0)
+	outputTokens, totalTokens := openai.FoldDisjointReasoning(
+		usage.CompletionTokens,
+		completionTokenDetails.ReasoningTokens,
+		inputTokens+usage.CompletionTokens+promptTokenDetails.CachedTokens,
+	)
 
 	aiUsage := fantasy.Usage{
 		InputTokens:     inputTokens,
-		OutputTokens:    usage.CompletionTokens,
-		TotalTokens:     inputTokens + usage.CompletionTokens + promptTokenDetails.CachedTokens,
+		OutputTokens:    outputTokens,
+		TotalTokens:     totalTokens,
 		ReasoningTokens: completionTokenDetails.ReasoningTokens,
 		CacheReadTokens: promptTokenDetails.CachedTokens,
 	}
@@ -513,7 +523,9 @@ func languageModelStreamUsage(chunk openaisdk.ChatCompletionChunk, _ map[string]
 func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.ChatCompletionMessageParamUnion, []fantasy.CallWarning) {
 	var messages []openaisdk.ChatCompletionMessageParamUnion
 	var warnings []fantasy.CallWarning
+	var media openai.ToolRunBuffer
 	for _, msg := range prompt {
+		messages = media.Role(msg.Role, messages)
 		switch msg.Role {
 		case fantasy.MessageRoleSystem:
 			var systemPromptParts []string
@@ -737,6 +749,13 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 						})
 					}
 				}
+			}
+			if !openai.HasVisibleUserContent(content) {
+				warnings = append(warnings, fantasy.CallWarning{
+					Type:    fantasy.CallWarningTypeOther,
+					Message: "dropping empty user message (contains neither user-facing content nor tool results)",
+				})
+				continue
 			}
 			messages = append(messages, openaisdk.UserMessage(content))
 		case fantasy.MessageRoleAssistant:
@@ -990,74 +1009,22 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 					assistantMsg.ToolCalls = append(assistantMsg.ToolCalls, tc)
 				}
 			}
+			if !openai.HasVisibleAssistantContent(&assistantMsg) {
+				warnings = append(warnings, fantasy.CallWarning{
+					Type:    fantasy.CallWarningTypeOther,
+					Message: "dropping empty assistant message (contains neither user-facing content nor tool calls)",
+				})
+				continue
+			}
 			messages = append(messages, openaisdk.ChatCompletionMessageParamUnion{
 				OfAssistant: &assistantMsg,
 			})
 		case fantasy.MessageRoleTool:
-			for i, c := range msg.Content {
-				isLastPart := i == len(msg.Content)-1
-				cacheControl := anthropic.GetCacheControl(c.Options())
-				if cacheControl == nil && isLastPart {
-					cacheControl = anthropic.GetCacheControl(msg.ProviderOptions)
-				}
-				if c.GetType() != fantasy.ContentTypeToolResult {
-					warnings = append(warnings, fantasy.CallWarning{
-						Type:    fantasy.CallWarningTypeOther,
-						Message: "tool message can only have tool result content",
-					})
-					continue
-				}
-
-				toolResultPart, ok := fantasy.AsContentType[fantasy.ToolResultPart](c)
-				if !ok {
-					warnings = append(warnings, fantasy.CallWarning{
-						Type:    fantasy.CallWarningTypeOther,
-						Message: "tool message result part does not have the right type",
-					})
-					continue
-				}
-
-				switch toolResultPart.Output.GetType() {
-				case fantasy.ToolResultContentTypeText:
-					output, ok := fantasy.AsToolResultOutputType[fantasy.ToolResultOutputContentText](toolResultPart.Output)
-					if !ok {
-						warnings = append(warnings, fantasy.CallWarning{
-							Type:    fantasy.CallWarningTypeOther,
-							Message: "tool result output does not have the right type",
-						})
-						continue
-					}
-					tr := openaisdk.ToolMessage(output.Text, toolResultPart.ToolCallID)
-					if cacheControl != nil {
-						tr.SetExtraFields(map[string]any{
-							"cache_control": map[string]string{
-								"type": cacheControl.Type,
-							},
-						})
-					}
-					messages = append(messages, tr)
-				case fantasy.ToolResultContentTypeError:
-					// TODO: check if better handling is needed
-					output, ok := fantasy.AsToolResultOutputType[fantasy.ToolResultOutputContentError](toolResultPart.Output)
-					if !ok {
-						warnings = append(warnings, fantasy.CallWarning{
-							Type:    fantasy.CallWarningTypeOther,
-							Message: "tool result output does not have the right type",
-						})
-						continue
-					}
-					tr := openaisdk.ToolMessage(output.Error.Error(), toolResultPart.ToolCallID)
-					if cacheControl != nil {
-						tr.SetExtraFields(map[string]any{
-							"cache_control": map[string]string{
-								"type": cacheControl.Type,
-							},
-						})
-					}
-					messages = append(messages, tr)
-				}
-			}
+			toolMessages, deferred, toolWarnings := openai.ToolMessages(msg, anthropic.ToolResultCacheType)
+			messages = append(messages, toolMessages...)
+			media.Defer(deferred...)
+			warnings = append(warnings, toolWarnings...)
 		}
 	}
-	return messages, warnings
+	return media.Close(messages), warnings
 }

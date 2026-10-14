@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"charm.land/fantasy"
-	"github.com/openai/openai-go/v3"
+	"github.com/charmbracelet/openai-go"
 	"github.com/stretchr/testify/require"
 )
 

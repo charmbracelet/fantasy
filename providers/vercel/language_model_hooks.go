@@ -635,6 +635,7 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 			messages = append(messages, systemMsg)
 
 		case fantasy.MessageRoleUser:
+			//nolint:dupl // mirrored with the assistant branch below: the differing lines are the role's SDK call.
 			if len(msg.Content) == 1 && msg.Content[0].GetType() == fantasy.ContentTypeText {
 				textPart, ok := fantasy.AsContentType[fantasy.TextPart](msg.Content[0])
 				if !ok {
@@ -807,6 +808,7 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 			messages = append(messages, openaisdk.UserMessage(content))
 
 		case fantasy.MessageRoleAssistant:
+			//nolint:dupl // mirrored with the user branch above: the differing lines are the role's SDK call.
 			if len(msg.Content) == 1 && msg.Content[0].GetType() == fantasy.ContentTypeText {
 				textPart, ok := fantasy.AsContentType[fantasy.TextPart](msg.Content[0])
 				if !ok {

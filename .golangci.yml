@@ -4,6 +4,7 @@ run:
 linters:
   enable:
     - bodyclose
+    - dupl
     # - exhaustive
     # - goconst
     - godot
@@ -25,11 +26,17 @@ linters:
     - unparam
     - whitespace
     # - wrapcheck
+  settings:
+    dupl:
+      threshold: 75
   exclusions:
     rules:
       - text: '(slog|log)\.\w+'
         linters:
           - noctx
+      - path: providers/internal/prompttest/
+        linters:
+          - dupl
     generated: lax
     presets:
       - common-false-positives

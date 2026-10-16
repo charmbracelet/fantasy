@@ -30,6 +30,54 @@ type toolJSON struct {
 	Data json.RawMessage `json:"data"`
 }
 
+// unmarshalTextPayload decodes the {text, provider data} payload shared by the
+// text and reasoning codecs. The provider data is looked up under providerKey and
+// converted with decode, which is skipped when the payload carries none.
+func unmarshalTextPayload[P any](
+	data []byte,
+	providerKey string,
+	decode func(map[string]json.RawMessage) (P, error),
+) (string, P, error) {
+	var zero P
+
+	var aux struct {
+		Text             string                     `json:"text"`
+		ProviderMetadata map[string]json.RawMessage `json:"provider_metadata"`
+		ProviderOptions  map[string]json.RawMessage `json:"provider_options"`
+	}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return "", zero, err
+	}
+
+	providerData := aux.ProviderMetadata
+	if providerKey == "provider_options" {
+		providerData = aux.ProviderOptions
+	}
+	if len(providerData) == 0 {
+		return aux.Text, zero, nil
+	}
+
+	provider, err := decode(providerData)
+	if err != nil {
+		return "", zero, err
+	}
+
+	return aux.Text, provider, nil
+}
+
+// marshalMessagePart encodes a message part payload into the {type, data} envelope.
+func marshalMessagePart(partType ContentType, payload any) ([]byte, error) {
+	dataBytes, err := json.Marshal(payload)
+	if err != nil {
+		return nil, err
+	}
+
+	return json.Marshal(messagePartJSON{
+		Type: string(partType),
+		Data: json.RawMessage(dataBytes),
+	})
+}
+
 // MarshalJSON implements json.Marshaler for TextContent.
 func (t TextContent) MarshalJSON() ([]byte, error) {
 	dataBytes, err := json.Marshal(struct {
@@ -56,24 +104,11 @@ func (t *TextContent) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	var aux struct {
-		Text             string                     `json:"text"`
-		ProviderMetadata map[string]json.RawMessage `json:"provider_metadata,omitempty"`
-	}
-
-	if err := json.Unmarshal(cj.Data, &aux); err != nil {
+	text, metadata, err := unmarshalTextPayload(cj.Data, "provider_metadata", UnmarshalProviderMetadata)
+	if err != nil {
 		return err
 	}
-
-	t.Text = aux.Text
-
-	if len(aux.ProviderMetadata) > 0 {
-		metadata, err := UnmarshalProviderMetadata(aux.ProviderMetadata)
-		if err != nil {
-			return err
-		}
-		t.ProviderMetadata = metadata
-	}
+	t.Text, t.ProviderMetadata = text, metadata
 
 	return nil
 }
@@ -104,24 +139,11 @@ func (r *ReasoningContent) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	var aux struct {
-		Text             string                     `json:"text"`
-		ProviderMetadata map[string]json.RawMessage `json:"provider_metadata,omitempty"`
-	}
-
-	if err := json.Unmarshal(cj.Data, &aux); err != nil {
+	text, metadata, err := unmarshalTextPayload(cj.Data, "provider_metadata", UnmarshalProviderMetadata)
+	if err != nil {
 		return err
 	}
-
-	r.Text = aux.Text
-
-	if len(aux.ProviderMetadata) > 0 {
-		metadata, err := UnmarshalProviderMetadata(aux.ProviderMetadata)
-		if err != nil {
-			return err
-		}
-		r.ProviderMetadata = metadata
-	}
+	r.Text, r.ProviderMetadata = text, metadata
 
 	return nil
 }
@@ -522,24 +544,11 @@ func (t *TextPart) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	var aux struct {
-		Text            string                     `json:"text"`
-		ProviderOptions map[string]json.RawMessage `json:"provider_options,omitempty"`
-	}
-
-	if err := json.Unmarshal(mpj.Data, &aux); err != nil {
+	text, options, err := unmarshalTextPayload(mpj.Data, "provider_options", UnmarshalProviderOptions)
+	if err != nil {
 		return err
 	}
-
-	t.Text = aux.Text
-
-	if len(aux.ProviderOptions) > 0 {
-		options, err := UnmarshalProviderOptions(aux.ProviderOptions)
-		if err != nil {
-			return err
-		}
-		t.ProviderOptions = options
-	}
+	t.Text, t.ProviderOptions = text, options
 
 	return nil
 }
@@ -570,24 +579,11 @@ func (r *ReasoningPart) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	var aux struct {
-		Text            string                     `json:"text"`
-		ProviderOptions map[string]json.RawMessage `json:"provider_options,omitempty"`
-	}
-
-	if err := json.Unmarshal(mpj.Data, &aux); err != nil {
+	text, options, err := unmarshalTextPayload(mpj.Data, "provider_options", UnmarshalProviderOptions)
+	if err != nil {
 		return err
 	}
-
-	r.Text = aux.Text
-
-	if len(aux.ProviderOptions) > 0 {
-		options, err := UnmarshalProviderOptions(aux.ProviderOptions)
-		if err != nil {
-			return err
-		}
-		r.ProviderOptions = options
-	}
+	r.Text, r.ProviderOptions = text, options
 
 	return nil
 }
@@ -650,7 +646,7 @@ func (f *FilePart) UnmarshalJSON(data []byte) error {
 
 // MarshalJSON implements json.Marshaler for ToolCallPart.
 func (t ToolCallPart) MarshalJSON() ([]byte, error) {
-	dataBytes, err := json.Marshal(struct {
+	return marshalMessagePart(ContentTypeToolCall, struct {
 		ToolCallID       string          `json:"tool_call_id"`
 		ToolName         string          `json:"tool_name"`
 		Input            string          `json:"input"`
@@ -662,14 +658,6 @@ func (t ToolCallPart) MarshalJSON() ([]byte, error) {
 		Input:            t.Input,
 		ProviderExecuted: t.ProviderExecuted,
 		ProviderOptions:  t.ProviderOptions,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return json.Marshal(messagePartJSON{
-		Type: string(ContentTypeToolCall),
-		Data: json.RawMessage(dataBytes),
 	})
 }
 
@@ -710,7 +698,7 @@ func (t *ToolCallPart) UnmarshalJSON(data []byte) error {
 
 // MarshalJSON implements json.Marshaler for ToolResultPart.
 func (t ToolResultPart) MarshalJSON() ([]byte, error) {
-	dataBytes, err := json.Marshal(struct {
+	return marshalMessagePart(ContentTypeToolResult, struct {
 		ToolCallID       string                  `json:"tool_call_id"`
 		Output           ToolResultOutputContent `json:"output"`
 		ProviderExecuted bool                    `json:"provider_executed"`
@@ -722,14 +710,6 @@ func (t ToolResultPart) MarshalJSON() ([]byte, error) {
 		ProviderExecuted: t.ProviderExecuted,
 		ProviderOptions:  t.ProviderOptions,
 		ClientMetadata:   t.ClientMetadata,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return json.Marshal(messagePartJSON{
-		Type: string(ContentTypeToolResult),
-		Data: json.RawMessage(dataBytes),
 	})
 }
 

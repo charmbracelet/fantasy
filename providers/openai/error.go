@@ -24,8 +24,7 @@ var (
 )
 
 func toProviderErr(err error) error {
-	var apiErr *openai.Error
-	if errors.As(err, &apiErr) {
+	if apiErr, ok := errors.AsType[*openai.Error](err); ok {
 		message := toProviderErrMessage(apiErr)
 		providerErr := &fantasy.ProviderError{
 			Title:           cmp.Or(fantasy.ErrorTitleForStatusCode(apiErr.StatusCode), "provider request failed"),
@@ -46,8 +45,7 @@ func toProviderErr(err error) error {
 
 	// Mid-stream SSE error events surface as *ssestream.StreamError, not
 	// *openai.Error, so they need their own classification path.
-	var streamErr *ssestream.StreamError
-	if errors.As(err, &streamErr) {
+	if streamErr, ok := errors.AsType[*ssestream.StreamError](err); ok {
 		return toProviderErrFromStreamError(streamErr)
 	}
 

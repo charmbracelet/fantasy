@@ -196,11 +196,10 @@ func IsTransportError(err error) bool {
 	if err == nil {
 		return false
 	}
-	var (
-		streamErr http2.StreamError
-		connErr   http2.ConnectionError
-	)
-	if errors.As(err, &streamErr) || errors.As(err, &connErr) {
+	if _, ok := errors.AsType[http2.StreamError](err); ok {
+		return true
+	}
+	if _, ok := errors.AsType[http2.ConnectionError](err); ok {
 		return true
 	}
 	// Wrapped errors embed the inner message, so scanning the top-level
@@ -356,6 +355,6 @@ func (e *NoObjectGeneratedError) Error() string {
 
 // IsNoObjectGeneratedError checks if an error is of type NoObjectGeneratedError.
 func IsNoObjectGeneratedError(err error) bool {
-	var target *NoObjectGeneratedError
-	return errors.As(err, &target)
+	_, ok := errors.AsType[*NoObjectGeneratedError](err)
+	return ok
 }

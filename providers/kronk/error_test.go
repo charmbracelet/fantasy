@@ -43,8 +43,8 @@ func TestToProviderErr(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := toProviderErr(tt.err)
-			var providerErr *fantasy.ProviderError
-			if gotProviderErr := errors.As(got, &providerErr); gotProviderErr != tt.wantProviderErr {
+			providerErr, gotProviderErr := errors.AsType[*fantasy.ProviderError](got)
+			if gotProviderErr != tt.wantProviderErr {
 				t.Fatalf("ProviderError: got %t, want %t", gotProviderErr, tt.wantProviderErr)
 			}
 			if !tt.wantProviderErr {
@@ -73,8 +73,8 @@ func TestToOperationErr(t *testing.T) {
 	baseErr := errors.New("load failed")
 	err := toOperationErr("kronk model loading failed", baseErr)
 
-	var providerErr *fantasy.ProviderError
-	if !errors.As(err, &providerErr) {
+	providerErr, ok := errors.AsType[*fantasy.ProviderError](err)
+	if !ok {
 		t.Fatalf("error: got %T, want *fantasy.ProviderError", err)
 	}
 	if got, want := providerErr.Title, "kronk model loading failed"; got != want {

@@ -996,13 +996,13 @@ func TestStream_RequiresMessageStopBeforeFinish(t *testing.T) {
 				require.Contains(t, errorParts[0].Error.Error(), tt.wantErrContain)
 			}
 
-			var providerErr *fantasy.ProviderError
 			if tt.wantRetryable {
+				var providerErr *fantasy.ProviderError
 				require.ErrorAs(t, errorParts[0].Error, &providerErr)
 				require.True(t, providerErr.IsRetryable())
 			} else {
 				require.NotErrorIs(t, errorParts[0].Error, io.ErrUnexpectedEOF)
-				if errors.As(errorParts[0].Error, &providerErr) {
+				if providerErr, ok := errors.AsType[*fantasy.ProviderError](errorParts[0].Error); ok {
 					require.False(t, providerErr.IsRetryable())
 					require.NotErrorIs(t, providerErr.Cause, io.ErrUnexpectedEOF)
 				}

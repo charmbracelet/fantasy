@@ -154,6 +154,12 @@ func TestGenerateResponse(t *testing.T) {
 	if got, want := response.Usage.TotalTokens, int64(16); got != want {
 		t.Errorf("Usage.TotalTokens: got %d, want %d", got, want)
 	}
+	// prompt_tokens (12) includes the 3 cached tokens, which CacheReadTokens
+	// reports again, so InputTokens must be the 9 that were actually sent
+	// uncached. The openai, openrouter and vercel adapters all subtract here.
+	if got, want := response.Usage.InputTokens, int64(9); got != want {
+		t.Errorf("Usage.InputTokens: got %d, want %d", got, want)
+	}
 	if got, want := response.Usage.CacheReadTokens, int64(3); got != want {
 		t.Errorf("Usage.CacheReadTokens: got %d, want %d", got, want)
 	}
@@ -196,6 +202,7 @@ func TestStreamResponse(t *testing.T) {
 			{Choices: []model.Choice{{Delta: &model.ResponseMessage{}, FinishReasonPtr: &toolFinish}}},
 			{Choices: []model.Choice{}, Usage: &model.Usage{
 				PromptTokens:        12,
+				PromptTokensDetails: model.PromptTokensDetails{CachedTokens: 3},
 				CompletionTokens:    4,
 				TotalTokens:         16,
 				TokensPerSecond:     20,
@@ -239,6 +246,14 @@ func TestStreamResponse(t *testing.T) {
 	}
 	if got, want := parts[7].Usage.TotalTokens, int64(16); got != want {
 		t.Errorf("Usage.TotalTokens: got %d, want %d", got, want)
+	}
+	// Same subtraction as the buffered path, so a cached stream does not
+	// report the cached tokens in both InputTokens and CacheReadTokens.
+	if got, want := parts[7].Usage.InputTokens, int64(9); got != want {
+		t.Errorf("Usage.InputTokens: got %d, want %d", got, want)
+	}
+	if got, want := parts[7].Usage.CacheReadTokens, int64(3); got != want {
+		t.Errorf("Usage.CacheReadTokens: got %d, want %d", got, want)
 	}
 	if got, want := parts[7].FinishReason, fantasy.FinishReasonToolCalls; got != want {
 		t.Errorf("FinishReason: got %q, want %q", got, want)

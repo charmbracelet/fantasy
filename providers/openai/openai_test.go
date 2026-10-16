@@ -4947,8 +4947,7 @@ func requireNotRetryableUnexpectedEOF(t *testing.T, err error) {
 	t.Helper()
 
 	require.NotErrorIs(t, err, io.ErrUnexpectedEOF)
-	var providerErr *fantasy.ProviderError
-	if errors.As(err, &providerErr) {
+	if providerErr, ok := errors.AsType[*fantasy.ProviderError](err); ok {
 		require.False(t, providerErr.IsRetryable())
 		require.NotErrorIs(t, providerErr.Cause, io.ErrUnexpectedEOF)
 	}

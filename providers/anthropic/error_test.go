@@ -31,8 +31,8 @@ func TestToProviderErr_WrapsUnexpectedEOF(t *testing.T) {
 
 			got := toProviderErr(tc.err)
 
-			var providerErr *fantasy.ProviderError
-			if !errors.As(got, &providerErr) {
+			providerErr, ok := errors.AsType[*fantasy.ProviderError](got)
+			if !ok {
 				t.Fatalf("toProviderErr did not wrap %v as *fantasy.ProviderError (got %T)", tc.err, got)
 			}
 			if !errors.Is(providerErr.Cause, io.ErrUnexpectedEOF) {
@@ -63,8 +63,7 @@ func TestToProviderErr_PassesThroughPlainEOF(t *testing.T) {
 	// calls toProviderErr with io.EOF. But if it ever did, we should not
 	// wrap it: io.EOF is not "retryable" in the ProviderError sense.
 	got := toProviderErr(io.EOF)
-	var providerErr *fantasy.ProviderError
-	if errors.As(got, &providerErr) {
+	if _, ok := errors.AsType[*fantasy.ProviderError](got); ok {
 		t.Errorf("toProviderErr wrapped io.EOF as ProviderError; should pass through")
 	}
 }
@@ -84,8 +83,8 @@ func TestToProviderErr_FlagsExpiredBedrockCredentials(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			var providerErr *fantasy.ProviderError
-			if !errors.As(toProviderErr(tc.err), &providerErr) {
+			providerErr, ok := errors.AsType[*fantasy.ProviderError](toProviderErr(tc.err))
+			if !ok {
 				t.Fatalf("toProviderErr did not wrap %v as *fantasy.ProviderError", tc.err)
 			}
 			if !providerErr.AuthError {
@@ -102,8 +101,8 @@ func TestToProviderErr_RetriesMidStreamOverload(t *testing.T) {
 
 	err := errors.New(`received error while streaming: {"type":"error","error":{"details":null,"type":"overloaded_error","message":"Overloaded"}}`)
 
-	var providerErr *fantasy.ProviderError
-	if !errors.As(toProviderErr(err), &providerErr) {
+	providerErr, ok := errors.AsType[*fantasy.ProviderError](toProviderErr(err))
+	if !ok {
 		t.Fatalf("toProviderErr did not wrap %v as *fantasy.ProviderError", err)
 	}
 	if !providerErr.IsRetryable() {
@@ -135,8 +134,8 @@ func TestToProviderErr_StreamErrorTransientTypes(t *testing.T) {
 
 			err := errors.New(`received error while streaming: {"type":"error","error":{"type":"` + errType + `","message":"transient"}}`)
 
-			var providerErr *fantasy.ProviderError
-			if !errors.As(toProviderErr(err), &providerErr) {
+			providerErr, ok := errors.AsType[*fantasy.ProviderError](toProviderErr(err))
+			if !ok {
 				t.Fatalf("toProviderErr did not wrap %v as *fantasy.ProviderError", err)
 			}
 			if !providerErr.IsRetryable() {
@@ -151,8 +150,8 @@ func TestToProviderErr_PermanentStreamErrorNotRetried(t *testing.T) {
 
 	err := errors.New(`received error while streaming: {"type":"error","error":{"type":"invalid_request_error","message":"bad tool schema"}}`)
 
-	var providerErr *fantasy.ProviderError
-	if !errors.As(toProviderErr(err), &providerErr) {
+	providerErr, ok := errors.AsType[*fantasy.ProviderError](toProviderErr(err))
+	if !ok {
 		t.Fatalf("toProviderErr did not wrap %v as *fantasy.ProviderError", err)
 	}
 	if providerErr.IsRetryable() {
@@ -169,8 +168,8 @@ func TestToProviderErr_StreamErrorWrappedByOuterError(t *testing.T) {
 	inner := errors.New(`received error while streaming: {"type":"error","error":{"type":"overloaded_error","message":"Overloaded"}}`)
 	err := fmt.Errorf("anthropic: %w", inner)
 
-	var providerErr *fantasy.ProviderError
-	if !errors.As(toProviderErr(err), &providerErr) {
+	providerErr, ok := errors.AsType[*fantasy.ProviderError](toProviderErr(err))
+	if !ok {
 		t.Fatalf("toProviderErr did not wrap %v as *fantasy.ProviderError", err)
 	}
 	if !providerErr.IsRetryable() {
@@ -221,8 +220,8 @@ func TestToProviderErr_TitlesMidStreamOverloadFromThePayload(t *testing.T) {
 		t.Fatal("the stream reported no error, so the overload never surfaced")
 	}
 
-	var providerErr *fantasy.ProviderError
-	if !errors.As(streamErr, &providerErr) {
+	providerErr, ok := errors.AsType[*fantasy.ProviderError](streamErr)
+	if !ok {
 		t.Fatalf("stream error is %T, want *fantasy.ProviderError", streamErr)
 	}
 
@@ -327,8 +326,8 @@ func TestToProviderErr_CarriesTheErrorType(t *testing.T) {
 
 		err := errors.New(streamErrorPrefix + ` {"type":"error","error":{"type":"api_error","message":"Internal"}}`)
 
-		var providerErr *fantasy.ProviderError
-		if !errors.As(toProviderErr(err), &providerErr) {
+		providerErr, ok := errors.AsType[*fantasy.ProviderError](toProviderErr(err))
+		if !ok {
 			t.Fatalf("toProviderErr did not wrap %v as *fantasy.ProviderError", err)
 		}
 		if providerErr.ErrorType != "api_error" {
@@ -364,8 +363,8 @@ func streamProviderError(t *testing.T, url string) *fantasy.ProviderError {
 	if streamErr == nil {
 		t.Fatal("the stream reported no error")
 	}
-	var providerErr *fantasy.ProviderError
-	if !errors.As(streamErr, &providerErr) {
+	providerErr, ok := errors.AsType[*fantasy.ProviderError](streamErr)
+	if !ok {
 		t.Fatalf("stream error is %T, want *fantasy.ProviderError", streamErr)
 	}
 	return providerErr

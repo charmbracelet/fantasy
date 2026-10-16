@@ -165,8 +165,7 @@ func TestRetryWithExponentialBackoff_ConnectionErrors(t *testing.T) {
 			return 0, &net.OpError{Op: "dial", Net: "tcp", Err: errors.New("connection refused")}
 		})
 
-		var retryErr *RetryError
-		if !errors.As(err, &retryErr) {
+		if _, ok := errors.AsType[*RetryError](err); !ok {
 			t.Fatalf("expected RetryError, got %T: %v", err, err)
 		}
 	})
@@ -298,8 +297,8 @@ func TestRetryWithAuthRefresh(t *testing.T) {
 			return 0, authErr()
 		})
 
-		var providerErr *ProviderError
-		if !errors.As(err, &providerErr) || providerErr.StatusCode != 401 {
+		providerErr, ok := errors.AsType[*ProviderError](err)
+		if !ok || providerErr.StatusCode != 401 {
 			t.Fatalf("expected original 401 ProviderError, got %T: %v", err, err)
 		}
 		if attempts != 1 {

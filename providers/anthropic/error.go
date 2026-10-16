@@ -22,8 +22,7 @@ var anthropicContextPattern = regexp.MustCompile(`prompt is too long:\s*(\d+)\s*
 const awsCredentialErrorFragment = "failed to refresh cached credentials" //nolint:gosec // false positive: error message fragment, not a credential
 
 func toProviderErr(err error) error {
-	var apiErr *anthropic.Error
-	if errors.As(err, &apiErr) {
+	if apiErr, ok := errors.AsType[*anthropic.Error](err); ok {
 		providerErr := &fantasy.ProviderError{
 			Title:           apiErrorTitle(apiErr),
 			Message:         apiErr.Error(),

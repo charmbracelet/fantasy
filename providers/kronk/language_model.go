@@ -188,7 +188,30 @@ func (l *languageModel) Generate(ctx context.Context, call fantasy.Call) (*fanta
 		})
 	}
 
-	if choice.Message != nil {
+	mappedFinishReason := l.mapFinishReasonFunc(choice.FinishReason())
+	// Terminal reasons that can cut output mid-call — length, content
+	// filter, provider errors — must not be rewritten into a tool-call
+	// turn: dispatching their partial calls executes truncated input (the
+	// same contract the openai adapter enforces, CHARM-2020). The kronk
+	// server itself drops length-terminated tool calls and ends such runs
+	// with finish_reason=length.
+	suppressedToolCalls := choice.Message != nil && len(choice.Message.ToolCalls) > 0 &&
+		(mappedFinishReason == fantasy.FinishReasonLength ||
+			mappedFinishReason == fantasy.FinishReasonContentFilter ||
+			mappedFinishReason == fantasy.FinishReasonError)
+	if choice.Message != nil && len(choice.Message.ToolCalls) > 0 && !suppressedToolCalls {
+		mappedFinishReason = fantasy.FinishReasonToolCalls
+	}
+	if suppressedToolCalls {
+		warnings = append(warnings, fantasy.CallWarning{
+			Type:    fantasy.CallWarningTypeOther,
+			Message: "tool calls were returned but the turn ended abnormally (token limit, content filter, or provider error); arguments may be truncated",
+		})
+	}
+
+	// Suppress truncated tool-call content so agents don't dispatch calls
+	// with incomplete arguments.
+	if choice.Message != nil && !suppressedToolCalls {
 		for _, tc := range choice.Message.ToolCalls {
 			// Marshal the underlying map directly, not the ToolCallArguments type
 			// which has a custom MarshalJSON that double-encodes to a JSON string.
@@ -217,11 +240,6 @@ func (l *languageModel) Generate(ctx context.Context, call fantasy.Call) (*fanta
 			ReasoningTokens: int64(response.Usage.CompletionTokensDetails.ReasoningTokens),
 			CacheReadTokens: int64(response.Usage.PromptTokensDetails.CachedTokens),
 		}
-	}
-
-	mappedFinishReason := l.mapFinishReasonFunc(choice.FinishReason())
-	if choice.Message != nil && len(choice.Message.ToolCalls) > 0 {
-		mappedFinishReason = fantasy.FinishReasonToolCalls
 	}
 
 	metadata := newProviderMetadata(l.kronk.ModelInfo())
@@ -498,7 +516,15 @@ func (l *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 		}
 
 		mappedFinishReason := l.mapFinishReasonFunc(finishReason)
-		if len(toolCalls) > 0 {
+		// Started tool-call deltas are not proof of a complete turn: when a
+		// run hits the token limit mid call, the kronk server drops the
+		// partial calls and terminates with finish_reason=length. Terminal
+		// reasons must not be rewritten into a tool-call turn (the same
+		// contract the openai adapter enforces, CHARM-2020).
+		if len(toolCalls) > 0 &&
+			mappedFinishReason != fantasy.FinishReasonLength &&
+			mappedFinishReason != fantasy.FinishReasonContentFilter &&
+			mappedFinishReason != fantasy.FinishReasonError {
 			mappedFinishReason = fantasy.FinishReasonToolCalls
 		}
 

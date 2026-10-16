@@ -981,9 +981,15 @@ func (o languageModel) generateObjectWithJSONMode(ctx context.Context, call fant
 	finishReason := o.mapFinishReasonFunc(choice.FinishReason)
 
 	if err != nil {
-		if nogErr, ok := err.(*fantasy.NoObjectGeneratedError); ok {
-			nogErr.Usage = usage
-			nogErr.FinishReason = finishReason
+		var parseErr *schema.ParseError
+		if errors.As(err, &parseErr) {
+			return nil, &fantasy.NoObjectGeneratedError{
+				RawText:         parseErr.RawText,
+				ParseError:      parseErr.ParseError,
+				ValidationError: parseErr.ValidationError,
+				Usage:           usage,
+				FinishReason:    finishReason,
+			}
 		}
 		return nil, err
 	}

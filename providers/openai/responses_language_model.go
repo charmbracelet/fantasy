@@ -122,7 +122,7 @@ func getResponsesModelConfig(modelID string) responsesModelConfig {
 		strings.HasPrefix(modelID, "o3") || strings.Contains(modelID, "-o3") ||
 		strings.HasPrefix(modelID, "o4") || strings.Contains(modelID, "-o4") ||
 		strings.HasPrefix(modelID, "oss") || strings.Contains(modelID, "-oss") ||
-		strings.Contains(strings.ToLower(modelID), "gpt-5") ||
+		reasoningGenerationPattern.MatchString(strings.ToLower(modelID)) ||
 		strings.Contains(modelID, "codex-") || strings.Contains(modelID, "computer-use") {
 		if strings.Contains(modelID, "o1-mini") || strings.Contains(modelID, "o1-preview") {
 			return responsesModelConfig{

@@ -17,6 +17,133 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// generateWithUsage runs one Generate against a canned usage response — 15
+// prompt, 20 completion, 35 total tokens — with the given details block and
+// returns the result.
+func generateWithUsage(t *testing.T, model, detailsKey, detailField string, detailValue int) *fantasy.Response {
+	t.Helper()
+
+	languageModel, _ := newGenerateTestModel(t, model, map[string]any{
+		"usage": map[string]any{
+			"prompt_tokens":     15,
+			"completion_tokens": 20,
+			"total_tokens":      35,
+			detailsKey: map[string]any{
+				detailField: detailValue,
+			},
+		},
+	})
+
+	result, err := languageModel.Generate(context.Background(), fantasy.Call{Prompt: testPrompt})
+	require.NoError(t, err)
+	return result
+}
+
+// newGenerateTestModel starts a mock server that answers every request with
+// the given JSON response and returns a model pointed at it.
+func newGenerateTestModel(t *testing.T, model string, response map[string]any) (fantasy.LanguageModel, *mockServer) {
+	t.Helper()
+
+	server := newMockServer()
+	t.Cleanup(server.close)
+	server.prepareJSONResponse(response)
+
+	provider, err := New(
+		WithAPIKey("test-api-key"),
+		WithBaseURL(server.server.URL),
+	)
+	require.NoError(t, err)
+	languageModel, _ := provider.LanguageModel(t.Context(), model)
+	return languageModel, server
+}
+
+// generateAgainstMockServer runs one Generate call with the given provider
+// options against a fresh mock server and returns the recorded request body.
+func generateAgainstMockServer(t *testing.T, model string, opts *ProviderOptions) map[string]any {
+	t.Helper()
+
+	languageModel, server := newGenerateTestModel(t, model, map[string]any{"content": ""})
+
+	_, err := languageModel.Generate(context.Background(), fantasy.Call{
+		Prompt:          testPrompt,
+		ProviderOptions: NewProviderOptions(opts),
+	})
+	require.NoError(t, err)
+	require.Len(t, server.calls, 1)
+
+	call := server.calls[0]
+	require.Equal(t, model, call.body["model"])
+
+	messages := call.body["messages"].([]any)
+	require.Len(t, messages, 1)
+
+	message := messages[0].(map[string]any)
+	require.Equal(t, "user", message["role"])
+	require.Equal(t, "Hello", message["content"])
+
+	return call.body
+}
+
+// streamAgainstMockServer runs one Stream call with the given provider
+// options against a fresh streaming mock server and returns the recorded
+// request body.
+func streamAgainstMockServer(t *testing.T, model string, opts *ProviderOptions) map[string]any {
+	t.Helper()
+
+	server := newStreamingMockServer()
+	t.Cleanup(server.close)
+	server.prepareStreamResponse(map[string]any{"content": []string{}})
+
+	provider, err := New(
+		WithAPIKey("test-api-key"),
+		WithBaseURL(server.server.URL),
+	)
+	require.NoError(t, err)
+	languageModel, _ := provider.LanguageModel(t.Context(), model)
+
+	_, err = languageModel.Stream(context.Background(), fantasy.Call{
+		Prompt:          testPrompt,
+		ProviderOptions: NewProviderOptions(opts),
+	})
+	require.NoError(t, err)
+	require.Len(t, server.calls, 1)
+
+	call := server.calls[0]
+	require.Equal(t, model, call.body["model"])
+	require.Equal(t, true, call.body["stream"])
+
+	streamOptions := call.body["stream_options"].(map[string]any)
+	require.Equal(t, true, streamOptions["include_usage"])
+
+	messages := call.body["messages"].([]any)
+	require.Len(t, messages, 1)
+
+	message := messages[0].(map[string]any)
+	require.Equal(t, "user", message["role"])
+	require.Equal(t, "Hello", message["content"])
+
+	return call.body
+}
+
+// testFunctionTool is the standard single-string-argument tool shared by the
+// tool tests.
+func testFunctionTool() fantasy.FunctionTool {
+	return fantasy.FunctionTool{
+		Name: "test-tool",
+		InputSchema: map[string]any{
+			"type": "object",
+			"properties": map[string]any{
+				"value": map[string]any{
+					"type": "string",
+				},
+			},
+			"required":             []string{"value"},
+			"additionalProperties": false,
+			"$schema":              "http://json-schema.org/draft-07/schema#",
+		},
+	}
+}
+
 func TestToOpenAiPrompt_SystemMessages(t *testing.T) {
 	t.Parallel()
 
@@ -966,23 +1093,9 @@ func TestDoGenerate(t *testing.T) {
 	t.Run("should extract finish reason", func(t *testing.T) {
 		t.Parallel()
 
-		server := newMockServer()
-		defer server.close()
+		languageModel, _ := newGenerateTestModel(t, "gpt-3.5-turbo", map[string]any{"finish_reason": "stop"})
 
-		server.prepareJSONResponse(map[string]any{
-			"finish_reason": "stop",
-		})
-
-		provider, err := New(
-			WithAPIKey("test-api-key"),
-			WithBaseURL(server.server.URL),
-		)
-		require.NoError(t, err)
-		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
-
-		result, err := model.Generate(context.Background(), fantasy.Call{
-			Prompt: testPrompt,
-		})
+		result, err := languageModel.Generate(context.Background(), fantasy.Call{Prompt: testPrompt})
 
 		require.NoError(t, err)
 		require.Equal(t, fantasy.FinishReasonStop, result.FinishReason)
@@ -991,23 +1104,9 @@ func TestDoGenerate(t *testing.T) {
 	t.Run("should support unknown finish reason", func(t *testing.T) {
 		t.Parallel()
 
-		server := newMockServer()
-		defer server.close()
+		languageModel, _ := newGenerateTestModel(t, "gpt-3.5-turbo", map[string]any{"finish_reason": "eos"})
 
-		server.prepareJSONResponse(map[string]any{
-			"finish_reason": "eos",
-		})
-
-		provider, err := New(
-			WithAPIKey("test-api-key"),
-			WithBaseURL(server.server.URL),
-		)
-		require.NoError(t, err)
-		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
-
-		result, err := model.Generate(context.Background(), fantasy.Call{
-			Prompt: testPrompt,
-		})
+		result, err := languageModel.Generate(context.Background(), fantasy.Call{Prompt: testPrompt})
 
 		require.NoError(t, err)
 		require.Equal(t, fantasy.FinishReasonUnknown, result.FinishReason)
@@ -1133,40 +1232,9 @@ func TestDoGenerate(t *testing.T) {
 	t.Run("should pass textVerbosity setting", func(t *testing.T) {
 		t.Parallel()
 
-		server := newMockServer()
-		defer server.close()
+		body := generateAgainstMockServer(t, "gpt-4o", &ProviderOptions{TextVerbosity: new("low")})
 
-		server.prepareJSONResponse(map[string]any{
-			"content": "",
-		})
-
-		provider, err := New(
-			WithAPIKey("test-api-key"),
-			WithBaseURL(server.server.URL),
-		)
-		require.NoError(t, err)
-		model, _ := provider.LanguageModel(t.Context(), "gpt-4o")
-
-		_, err = model.Generate(context.Background(), fantasy.Call{
-			Prompt: testPrompt,
-			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				TextVerbosity: new("low"),
-			}),
-		})
-
-		require.NoError(t, err)
-		require.Len(t, server.calls, 1)
-
-		call := server.calls[0]
-		require.Equal(t, "gpt-4o", call.body["model"])
-		require.Equal(t, "low", call.body["verbosity"])
-
-		messages := call.body["messages"].([]any)
-		require.Len(t, messages, 1)
-
-		message := messages[0].(map[string]any)
-		require.Equal(t, "user", message["role"])
-		require.Equal(t, "Hello", message["content"])
+		require.Equal(t, "low", body["verbosity"])
 	})
 
 	t.Run("should pass tools and toolChoice", func(t *testing.T) {
@@ -1187,23 +1255,8 @@ func TestDoGenerate(t *testing.T) {
 		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		_, err = model.Generate(context.Background(), fantasy.Call{
-			Prompt: testPrompt,
-			Tools: []fantasy.Tool{
-				fantasy.FunctionTool{
-					Name: "test-tool",
-					InputSchema: map[string]any{
-						"type": "object",
-						"properties": map[string]any{
-							"value": map[string]any{
-								"type": "string",
-							},
-						},
-						"required":             []string{"value"},
-						"additionalProperties": false,
-						"$schema":              "http://json-schema.org/draft-07/schema#",
-					},
-				},
-			},
+			Prompt:     testPrompt,
+			Tools:      []fantasy.Tool{testFunctionTool()},
 			ToolChoice: &[]fantasy.ToolChoice{fantasy.ToolChoice("test-tool")}[0],
 		})
 
@@ -1260,23 +1313,8 @@ func TestDoGenerate(t *testing.T) {
 		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		result, err := model.Generate(context.Background(), fantasy.Call{
-			Prompt: testPrompt,
-			Tools: []fantasy.Tool{
-				fantasy.FunctionTool{
-					Name: "test-tool",
-					InputSchema: map[string]any{
-						"type": "object",
-						"properties": map[string]any{
-							"value": map[string]any{
-								"type": "string",
-							},
-						},
-						"required":             []string{"value"},
-						"additionalProperties": false,
-						"$schema":              "http://json-schema.org/draft-07/schema#",
-					},
-				},
-			},
+			Prompt:     testPrompt,
+			Tools:      []fantasy.Tool{testFunctionTool()},
 			ToolChoice: &[]fantasy.ToolChoice{fantasy.ToolChoice("test-tool")}[0],
 		})
 
@@ -1495,32 +1533,8 @@ func TestDoGenerate(t *testing.T) {
 	t.Run("should return cached_tokens in prompt_details_tokens", func(t *testing.T) {
 		t.Parallel()
 
-		server := newMockServer()
-		defer server.close()
+		result := generateWithUsage(t, "gpt-4o-mini", "prompt_tokens_details", "cached_tokens", 1152)
 
-		server.prepareJSONResponse(map[string]any{
-			"usage": map[string]any{
-				"prompt_tokens":     15,
-				"completion_tokens": 20,
-				"total_tokens":      35,
-				"prompt_tokens_details": map[string]any{
-					"cached_tokens": 1152,
-				},
-			},
-		})
-
-		provider, err := New(
-			WithAPIKey("test-api-key"),
-			WithBaseURL(server.server.URL),
-		)
-		require.NoError(t, err)
-		model, _ := provider.LanguageModel(t.Context(), "gpt-4o-mini")
-
-		result, err := model.Generate(context.Background(), fantasy.Call{
-			Prompt: testPrompt,
-		})
-
-		require.NoError(t, err)
 		require.Equal(t, int64(1152), result.Usage.CacheReadTokens)
 		// InputTokens = prompt_tokens - cached_tokens = 15 - 1152 = -1137 → clamped to 0
 		require.Equal(t, int64(0), result.Usage.InputTokens)
@@ -1655,32 +1669,8 @@ func TestDoGenerate(t *testing.T) {
 	t.Run("should return reasoning tokens", func(t *testing.T) {
 		t.Parallel()
 
-		server := newMockServer()
-		defer server.close()
+		result := generateWithUsage(t, "o1-preview", "completion_tokens_details", "reasoning_tokens", 10)
 
-		server.prepareJSONResponse(map[string]any{
-			"usage": map[string]any{
-				"prompt_tokens":     15,
-				"completion_tokens": 20,
-				"total_tokens":      35,
-				"completion_tokens_details": map[string]any{
-					"reasoning_tokens": 10,
-				},
-			},
-		})
-
-		provider, err := New(
-			WithAPIKey("test-api-key"),
-			WithBaseURL(server.server.URL),
-		)
-		require.NoError(t, err)
-		model, _ := provider.LanguageModel(t.Context(), "o1-preview")
-
-		result, err := model.Generate(context.Background(), fantasy.Call{
-			Prompt: testPrompt,
-		})
-
-		require.NoError(t, err)
 		require.Equal(t, int64(15), result.Usage.InputTokens)
 		require.Equal(t, int64(20), result.Usage.OutputTokens)
 		require.Equal(t, int64(35), result.Usage.TotalTokens)
@@ -1856,79 +1846,17 @@ func TestDoGenerate(t *testing.T) {
 	t.Run("should send promptCacheKey extension value", func(t *testing.T) {
 		t.Parallel()
 
-		server := newMockServer()
-		defer server.close()
+		body := generateAgainstMockServer(t, "gpt-3.5-turbo", &ProviderOptions{PromptCacheKey: new("test-cache-key-123")})
 
-		server.prepareJSONResponse(map[string]any{
-			"content": "",
-		})
-
-		provider, err := New(
-			WithAPIKey("test-api-key"),
-			WithBaseURL(server.server.URL),
-		)
-		require.NoError(t, err)
-		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
-
-		_, err = model.Generate(context.Background(), fantasy.Call{
-			Prompt: testPrompt,
-			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				PromptCacheKey: new("test-cache-key-123"),
-			}),
-		})
-
-		require.NoError(t, err)
-		require.Len(t, server.calls, 1)
-
-		call := server.calls[0]
-		require.Equal(t, "gpt-3.5-turbo", call.body["model"])
-		require.Equal(t, "test-cache-key-123", call.body["prompt_cache_key"])
-
-		messages := call.body["messages"].([]any)
-		require.Len(t, messages, 1)
-
-		message := messages[0].(map[string]any)
-		require.Equal(t, "user", message["role"])
-		require.Equal(t, "Hello", message["content"])
+		require.Equal(t, "test-cache-key-123", body["prompt_cache_key"])
 	})
 
 	t.Run("should send safety_identifier extension value", func(t *testing.T) {
 		t.Parallel()
 
-		server := newMockServer()
-		defer server.close()
+		body := generateAgainstMockServer(t, "gpt-3.5-turbo", &ProviderOptions{SafetyIdentifier: new("test-safety-identifier-123")})
 
-		server.prepareJSONResponse(map[string]any{
-			"content": "",
-		})
-
-		provider, err := New(
-			WithAPIKey("test-api-key"),
-			WithBaseURL(server.server.URL),
-		)
-		require.NoError(t, err)
-		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
-
-		_, err = model.Generate(context.Background(), fantasy.Call{
-			Prompt: testPrompt,
-			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				SafetyIdentifier: new("test-safety-identifier-123"),
-			}),
-		})
-
-		require.NoError(t, err)
-		require.Len(t, server.calls, 1)
-
-		call := server.calls[0]
-		require.Equal(t, "gpt-3.5-turbo", call.body["model"])
-		require.Equal(t, "test-safety-identifier-123", call.body["safety_identifier"])
-
-		messages := call.body["messages"].([]any)
-		require.Len(t, messages, 1)
-
-		message := messages[0].(map[string]any)
-		require.Equal(t, "user", message["role"])
-		require.Equal(t, "Hello", message["content"])
+		require.Equal(t, "test-safety-identifier-123", body["safety_identifier"])
 	})
 
 	t.Run("should remove temperature setting for search preview models", func(t *testing.T) {
@@ -1967,40 +1895,9 @@ func TestDoGenerate(t *testing.T) {
 	t.Run("should send ServiceTier flex processing setting", func(t *testing.T) {
 		t.Parallel()
 
-		server := newMockServer()
-		defer server.close()
+		body := generateAgainstMockServer(t, "o3-mini", &ProviderOptions{ServiceTier: new("flex")})
 
-		server.prepareJSONResponse(map[string]any{
-			"content": "",
-		})
-
-		provider, err := New(
-			WithAPIKey("test-api-key"),
-			WithBaseURL(server.server.URL),
-		)
-		require.NoError(t, err)
-		model, _ := provider.LanguageModel(t.Context(), "o3-mini")
-
-		_, err = model.Generate(context.Background(), fantasy.Call{
-			Prompt: testPrompt,
-			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				ServiceTier: new("flex"),
-			}),
-		})
-
-		require.NoError(t, err)
-		require.Len(t, server.calls, 1)
-
-		call := server.calls[0]
-		require.Equal(t, "o3-mini", call.body["model"])
-		require.Equal(t, "flex", call.body["service_tier"])
-
-		messages := call.body["messages"].([]any)
-		require.Len(t, messages, 1)
-
-		message := messages[0].(map[string]any)
-		require.Equal(t, "user", message["role"])
-		require.Equal(t, "Hello", message["content"])
+		require.Equal(t, "flex", body["service_tier"])
 	})
 
 	t.Run("should show warning when using flex processing with unsupported model", func(t *testing.T) {
@@ -3233,87 +3130,17 @@ func TestDoStream(t *testing.T) {
 	t.Run("should send serviceTier flex processing setting in streaming", func(t *testing.T) {
 		t.Parallel()
 
-		server := newStreamingMockServer()
-		defer server.close()
+		body := streamAgainstMockServer(t, "o3-mini", &ProviderOptions{ServiceTier: new("flex")})
 
-		server.prepareStreamResponse(map[string]any{
-			"content": []string{},
-		})
-
-		provider, err := New(
-			WithAPIKey("test-api-key"),
-			WithBaseURL(server.server.URL),
-		)
-		require.NoError(t, err)
-		model, _ := provider.LanguageModel(t.Context(), "o3-mini")
-
-		_, err = model.Stream(context.Background(), fantasy.Call{
-			Prompt: testPrompt,
-			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				ServiceTier: new("flex"),
-			}),
-		})
-
-		require.NoError(t, err)
-		require.Len(t, server.calls, 1)
-
-		call := server.calls[0]
-		require.Equal(t, "o3-mini", call.body["model"])
-		require.Equal(t, "flex", call.body["service_tier"])
-		require.Equal(t, true, call.body["stream"])
-
-		streamOptions := call.body["stream_options"].(map[string]any)
-		require.Equal(t, true, streamOptions["include_usage"])
-
-		messages := call.body["messages"].([]any)
-		require.Len(t, messages, 1)
-
-		message := messages[0].(map[string]any)
-		require.Equal(t, "user", message["role"])
-		require.Equal(t, "Hello", message["content"])
+		require.Equal(t, "flex", body["service_tier"])
 	})
 
 	t.Run("should send serviceTier priority processing setting in streaming", func(t *testing.T) {
 		t.Parallel()
 
-		server := newStreamingMockServer()
-		defer server.close()
+		body := streamAgainstMockServer(t, "gpt-4o-mini", &ProviderOptions{ServiceTier: new("priority")})
 
-		server.prepareStreamResponse(map[string]any{
-			"content": []string{},
-		})
-
-		provider, err := New(
-			WithAPIKey("test-api-key"),
-			WithBaseURL(server.server.URL),
-		)
-		require.NoError(t, err)
-		model, _ := provider.LanguageModel(t.Context(), "gpt-4o-mini")
-
-		_, err = model.Stream(context.Background(), fantasy.Call{
-			Prompt: testPrompt,
-			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				ServiceTier: new("priority"),
-			}),
-		})
-
-		require.NoError(t, err)
-		require.Len(t, server.calls, 1)
-
-		call := server.calls[0]
-		require.Equal(t, "gpt-4o-mini", call.body["model"])
-		require.Equal(t, "priority", call.body["service_tier"])
-		require.Equal(t, true, call.body["stream"])
-
-		streamOptions := call.body["stream_options"].(map[string]any)
-		require.Equal(t, true, streamOptions["include_usage"])
-
-		messages := call.body["messages"].([]any)
-		require.Len(t, messages, 1)
-
-		message := messages[0].(map[string]any)
-		require.Equal(t, "user", message["role"])
-		require.Equal(t, "Hello", message["content"])
+		require.Equal(t, "priority", body["service_tier"])
 	})
 
 	t.Run("should stream text delta for reasoning models", func(t *testing.T) {

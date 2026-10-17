@@ -84,28 +84,26 @@ func TestEnumToolExample(t *testing.T) {
 	require.Contains(t, result.Content, "72°F")
 }
 
-func TestNewImageResponse(t *testing.T) {
-	imageData := []byte{0x89, 0x50, 0x4E, 0x47} // PNG header bytes
-	mediaType := "image/png"
+// assertMediaResponse checks the invariants shared by the media response
+// constructors.
+func assertMediaResponse(t *testing.T, resp ToolResponse, wantType string, data []byte, mediaType string) {
+	t.Helper()
 
-	resp := NewImageResponse(imageData, mediaType)
-
-	require.Equal(t, "image", resp.Type)
-	require.Equal(t, imageData, resp.Data)
+	require.Equal(t, wantType, resp.Type)
+	require.Equal(t, data, resp.Data)
 	require.Equal(t, mediaType, resp.MediaType)
 	require.False(t, resp.IsError)
 	require.Empty(t, resp.Content)
 }
 
+func TestNewImageResponse(t *testing.T) {
+	imageData := []byte{0x89, 0x50, 0x4E, 0x47} // PNG header bytes
+
+	assertMediaResponse(t, NewImageResponse(imageData, "image/png"), "image", imageData, "image/png")
+}
+
 func TestNewMediaResponse(t *testing.T) {
 	audioData := []byte{0x52, 0x49, 0x46, 0x46} // RIFF header bytes
-	mediaType := "audio/wav"
 
-	resp := NewMediaResponse(audioData, mediaType)
-
-	require.Equal(t, "media", resp.Type)
-	require.Equal(t, audioData, resp.Data)
-	require.Equal(t, mediaType, resp.MediaType)
-	require.False(t, resp.IsError)
-	require.Empty(t, resp.Content)
+	assertMediaResponse(t, NewMediaResponse(audioData, "audio/wav"), "media", audioData, "audio/wav")
 }

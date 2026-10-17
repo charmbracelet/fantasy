@@ -1,13 +1,12 @@
 package providertests
 
 import (
+	"cmp"
 	"net/http"
 	"os"
 	"testing"
 
-	"charm.land/fantasy"
 	"charm.land/fantasy/providers/openai"
-	"charm.land/x/vcr"
 )
 
 var openaiTestModels = []testModel{
@@ -34,14 +33,10 @@ func TestOpenAIObjectGeneration(t *testing.T) {
 }
 
 func openAIBuilder(model string) builderFunc {
-	return func(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
-		provider, err := openai.New(
-			openai.WithAPIKey(os.Getenv("FANTASY_OPENAI_API_KEY")),
-			openai.WithHTTPClient(&http.Client{Transport: r}),
-		)
-		if err != nil {
-			return nil, err
-		}
-		return provider.LanguageModel(t.Context(), model)
-	}
+	return vcrProviderBuilder(model,
+		openai.New,
+		openai.WithAPIKey,
+		func(client *http.Client) openai.Option { return openai.WithHTTPClient(client) },
+		cmp.Or(os.Getenv("FANTASY_OPENAI_API_KEY"), "(missing)"),
+	)
 }

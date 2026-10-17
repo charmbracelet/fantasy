@@ -20,6 +20,66 @@ type EchoTool struct {
 	providerOptions ProviderOptions
 }
 
+// streamToolCallStep streams one tool call — input start, two deltas, end,
+// the call itself, and the tool-calls finish — and reports whether the
+// consumer kept consuming.
+func streamToolCallStep(yield func(StreamPart) bool, id, toolName string) bool {
+	if !yield(StreamPart{Type: StreamPartTypeToolInputStart, ID: id, ToolCallName: toolName}) {
+		return false
+	}
+	if !yield(StreamPart{Type: StreamPartTypeToolInputDelta, ID: id, Delta: `{"message"`}) {
+		return false
+	}
+	if !yield(StreamPart{Type: StreamPartTypeToolInputDelta, ID: id, Delta: `: "test"}`}) {
+		return false
+	}
+	if !yield(StreamPart{Type: StreamPartTypeToolInputEnd, ID: id}) {
+		return false
+	}
+	if !yield(StreamPart{
+		Type:          StreamPartTypeToolCall,
+		ID:            id,
+		ToolCallName:  toolName,
+		ToolCallInput: `{"message": "test"}`,
+	}) {
+		return false
+	}
+	yield(StreamPart{
+		Type:         StreamPartTypeFinish,
+		Usage:        Usage{InputTokens: 10, OutputTokens: 5, TotalTokens: 15},
+		FinishReason: FinishReasonToolCalls,
+	})
+	return true
+}
+
+// streamingToolCallModel streams one echo tool call with the given input and
+// finish reason.
+func streamingToolCallModel(id, input string, reason FinishReason) *mockLanguageModel {
+	return &mockLanguageModel{
+		streamFunc: func(ctx context.Context, call Call) (StreamResponse, error) {
+			return func(yield func(StreamPart) bool) {
+				if !yield(StreamPart{Type: StreamPartTypeToolInputStart, ID: id, ToolCallName: "echo"}) {
+					return
+				}
+				if !yield(StreamPart{Type: StreamPartTypeToolInputDelta, ID: id, Delta: input}) {
+					return
+				}
+				if !yield(StreamPart{Type: StreamPartTypeToolInputEnd, ID: id}) {
+					return
+				}
+				if !yield(StreamPart{Type: StreamPartTypeToolCall, ID: id, ToolCallName: "echo", ToolCallInput: input}) {
+					return
+				}
+				yield(StreamPart{
+					Type:         StreamPartTypeFinish,
+					Usage:        Usage{InputTokens: 10, OutputTokens: 20, TotalTokens: 30},
+					FinishReason: reason,
+				})
+			}, nil
+		},
+	}
+}
+
 func (e *EchoTool) SetProviderOptions(opts ProviderOptions) {
 	e.providerOptions = opts
 }
@@ -254,31 +314,9 @@ func TestStreamingAgentWithTools(t *testing.T) {
 			return func(yield func(StreamPart) bool) {
 				if stepCount == 1 {
 					// First step: make tool call
-					if !yield(StreamPart{Type: StreamPartTypeToolInputStart, ID: "tool-1", ToolCallName: "echo"}) {
+					if !streamToolCallStep(yield, "tool-1", "echo") {
 						return
 					}
-					if !yield(StreamPart{Type: StreamPartTypeToolInputDelta, ID: "tool-1", Delta: `{"message"`}) {
-						return
-					}
-					if !yield(StreamPart{Type: StreamPartTypeToolInputDelta, ID: "tool-1", Delta: `: "test"}`}) {
-						return
-					}
-					if !yield(StreamPart{Type: StreamPartTypeToolInputEnd, ID: "tool-1"}) {
-						return
-					}
-					if !yield(StreamPart{
-						Type:          StreamPartTypeToolCall,
-						ID:            "tool-1",
-						ToolCallName:  "echo",
-						ToolCallInput: `{"message": "test"}`,
-					}) {
-						return
-					}
-					yield(StreamPart{
-						Type:         StreamPartTypeFinish,
-						Usage:        Usage{InputTokens: 10, OutputTokens: 5, TotalTokens: 15},
-						FinishReason: FinishReasonToolCalls,
-					})
 				} else {
 					// Second step: finish after tool execution
 					if !yield(StreamPart{Type: StreamPartTypeTextStart, ID: "text-1"}) {
@@ -695,31 +733,9 @@ func TestStreamingAgent_StopTurn(t *testing.T) {
 			stepCount++
 			return func(yield func(StreamPart) bool) {
 				if stepCount == 1 {
-					if !yield(StreamPart{Type: StreamPartTypeToolInputStart, ID: "tool-1", ToolCallName: "blocked_tool"}) {
+					if !streamToolCallStep(yield, "tool-1", "blocked_tool") {
 						return
 					}
-					if !yield(StreamPart{Type: StreamPartTypeToolInputDelta, ID: "tool-1", Delta: `{"message"`}) {
-						return
-					}
-					if !yield(StreamPart{Type: StreamPartTypeToolInputDelta, ID: "tool-1", Delta: `: "test"}`}) {
-						return
-					}
-					if !yield(StreamPart{Type: StreamPartTypeToolInputEnd, ID: "tool-1"}) {
-						return
-					}
-					if !yield(StreamPart{
-						Type:          StreamPartTypeToolCall,
-						ID:            "tool-1",
-						ToolCallName:  "blocked_tool",
-						ToolCallInput: `{"message": "test"}`,
-					}) {
-						return
-					}
-					yield(StreamPart{
-						Type:         StreamPartTypeFinish,
-						Usage:        Usage{InputTokens: 10, OutputTokens: 5, TotalTokens: 15},
-						FinishReason: FinishReasonToolCalls,
-					})
 				} else {
 					// Should not be reached because StopTurn prevents a second step
 					t.Fatal("model should not be called a second time after StopTurn")
@@ -770,36 +786,7 @@ func TestStreamingAgent_SkipsToolDispatchWhenTruncated(t *testing.T) {
 	t.Parallel()
 
 	var toolExecuted bool
-	mockModel := &mockLanguageModel{
-		streamFunc: func(ctx context.Context, call Call) (StreamResponse, error) {
-			return func(yield func(StreamPart) bool) {
-				// Emit a tool call with truncated arguments
-				if !yield(StreamPart{Type: StreamPartTypeToolInputStart, ID: "call-trunc", ToolCallName: "echo"}) {
-					return
-				}
-				if !yield(StreamPart{Type: StreamPartTypeToolInputDelta, ID: "call-trunc", Delta: `{"message":"tr`}) {
-					return
-				}
-				if !yield(StreamPart{Type: StreamPartTypeToolInputEnd, ID: "call-trunc"}) {
-					return
-				}
-				if !yield(StreamPart{
-					Type:          StreamPartTypeToolCall,
-					ID:            "call-trunc",
-					ToolCallName:  "echo",
-					ToolCallInput: `{"message":"tr`,
-				}) {
-					return
-				}
-				// Finish with length instead of tool_calls
-				yield(StreamPart{
-					Type:         StreamPartTypeFinish,
-					Usage:        Usage{InputTokens: 10, OutputTokens: 20, TotalTokens: 30},
-					FinishReason: FinishReasonLength,
-				})
-			}, nil
-		},
-	}
+	mockModel := streamingToolCallModel("call-trunc", `{"message":"tr`, FinishReasonLength)
 
 	echoTool := &trackingEchoTool{onExecute: func() { toolExecuted = true }}
 	agent := NewAgent(
@@ -855,29 +842,7 @@ func TestStreamingAgent_SkipsToolDispatchOnAbnormalFinish(t *testing.T) {
 			t.Parallel()
 
 			var toolExecuted bool
-			mockModel := &mockLanguageModel{
-				streamFunc: func(ctx context.Context, call Call) (StreamResponse, error) {
-					return func(yield func(StreamPart) bool) {
-						if !yield(StreamPart{Type: StreamPartTypeToolInputStart, ID: "call-x", ToolCallName: "echo"}) {
-							return
-						}
-						if !yield(StreamPart{Type: StreamPartTypeToolInputDelta, ID: "call-x", Delta: `{"message":"hi"}`}) {
-							return
-						}
-						if !yield(StreamPart{Type: StreamPartTypeToolInputEnd, ID: "call-x"}) {
-							return
-						}
-						if !yield(StreamPart{Type: StreamPartTypeToolCall, ID: "call-x", ToolCallName: "echo", ToolCallInput: `{"message":"hi"}`}) {
-							return
-						}
-						yield(StreamPart{
-							Type:         StreamPartTypeFinish,
-							Usage:        Usage{InputTokens: 10, OutputTokens: 20, TotalTokens: 30},
-							FinishReason: reason,
-						})
-					}, nil
-				},
-			}
+			mockModel := streamingToolCallModel("call-x", `{"message":"hi"}`, reason)
 
 			echoTool := &trackingEchoTool{onExecute: func() { toolExecuted = true }}
 			agent := NewAgent(mockModel, WithTools(echoTool))
@@ -915,12 +880,7 @@ func TestStreamingAgent_ParallelToolResultsInCallOrder(t *testing.T) {
 		streamFunc: func(ctx context.Context, call Call) (StreamResponse, error) {
 			for _, msg := range call.Prompt {
 				if msg.Role == MessageRoleTool {
-					return func(yield func(StreamPart) bool) {
-						yield(StreamPart{Type: StreamPartTypeTextStart, ID: "t"})
-						yield(StreamPart{Type: StreamPartTypeTextDelta, ID: "t", Delta: "done"})
-						yield(StreamPart{Type: StreamPartTypeTextEnd, ID: "t"})
-						yield(StreamPart{Type: StreamPartTypeFinish, FinishReason: FinishReasonStop, Usage: Usage{TotalTokens: 5}})
-					}, nil
+					return doneTextStream, nil
 				}
 			}
 			return func(yield func(StreamPart) bool) {

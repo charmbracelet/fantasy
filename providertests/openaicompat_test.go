@@ -12,23 +12,42 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// openaicompatModel builds a builderFunc for an OpenAI-compatible endpoint.
+// An empty apiKeyEnv skips the API-key option (for endpoints that need none).
+func openaicompatModel(baseURL, apiKeyEnv, model string) builderFunc {
+	return func(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
+		opts := []openaicompat.Option{
+			openaicompat.WithBaseURL(baseURL),
+			openaicompat.WithHTTPClient(&http.Client{Transport: r}),
+		}
+		if apiKeyEnv != "" {
+			opts = append(opts, openaicompat.WithAPIKey(os.Getenv(apiKeyEnv)))
+		}
+		provider, err := openaicompat.New(opts...)
+		if err != nil {
+			return nil, err
+		}
+		return provider.LanguageModel(t.Context(), model)
+	}
+}
+
 func TestOpenAICompatibleCommon(t *testing.T) {
 	testCommon(t, []builderPair{
-		{"xai-grok-4-fast", builderXAIGrok4Fast, nil, nil},
-		{"xai-grok-code-fast", builderXAIGrokCodeFast, nil, nil},
-		{"groq-kimi-k2", builderGroq, nil, nil},
-		{"zai-glm-4-7-flash", builderZAIGLM47Flash, nil, nil},
-		{"huggingface-kimi-k2", builderHuggingFace, nil, nil},
-		{"llama-cpp-gpt-oss", builderLlamaCppGptOss, nil, nil},
-		{"avian-kimi", builderAvianKimi, nil, nil},
+		{"xai-grok-4-fast", openaicompatModel("https://api.x.ai/v1", "FANTASY_XAI_API_KEY", "grok-4-fast"), nil, nil},
+		{"xai-grok-code-fast", openaicompatModel("https://api.x.ai/v1", "FANTASY_XAI_API_KEY", "grok-code-fast-1"), nil, nil},
+		{"groq-kimi-k2", openaicompatModel("https://api.groq.com/openai/v1", "FANTASY_GROQ_API_KEY", "moonshotai/kimi-k2-instruct-0905"), nil, nil},
+		{"zai-glm-4-7-flash", openaicompatModel("https://api.z.ai/api/coding/paas/v4", "FANTASY_ZAI_API_KEY", "glm-4.7-flash"), nil, nil},
+		{"huggingface-kimi-k2", openaicompatModel("https://router.huggingface.co/v1", "FANTASY_HUGGINGFACE_API_KEY", "moonshotai/Kimi-K2-Instruct-0905:groq"), nil, nil},
+		{"llama-cpp-gpt-oss", openaicompatModel("http://localhost:8080/v1", "", "openai/gpt-oss-20b"), nil, nil},
+		{"avian-kimi", openaicompatModel("https://api.avian.io/v1", "FANTASY_AVIAN_API_KEY", "moonshotai/kimi-k2.5"), nil, nil},
 	})
 }
 
 func TestOpenAICompatObjectGeneration(t *testing.T) {
 	testObjectGeneration(t, []builderPair{
-		{"xai-grok-4-fast", builderXAIGrok4Fast, nil, nil},
-		{"xai-grok-code-fast", builderXAIGrokCodeFast, nil, nil},
-		{"zai-glm-4-7-flash", builderZAIGLM47Flash, nil, nil},
+		{"xai-grok-4-fast", openaicompatModel("https://api.x.ai/v1", "FANTASY_XAI_API_KEY", "grok-4-fast"), nil, nil},
+		{"xai-grok-code-fast", openaicompatModel("https://api.x.ai/v1", "FANTASY_XAI_API_KEY", "grok-code-fast-1"), nil, nil},
+		{"zai-glm-4-7-flash", openaicompatModel("https://api.z.ai/api/coding/paas/v4", "FANTASY_ZAI_API_KEY", "glm-4.7-flash"), nil, nil},
 	})
 }
 
@@ -39,10 +58,10 @@ func TestOpenAICompatibleThinking(t *testing.T) {
 		},
 	}
 	testThinking(t, []builderPair{
-		{"xai-grok-3-mini", builderXAIGrok3Mini, opts, nil},
-		{"zai-glm-4-7-flash", builderZAIGLM47Flash, opts, nil},
-		{"llama-cpp-gpt-oss", builderLlamaCppGptOss, opts, nil},
-		{"avian-kimi", builderAvianKimi, nil, nil},
+		{"xai-grok-3-mini", openaicompatModel("https://api.x.ai/v1", "FANTASY_XAI_API_KEY", "grok-3-mini"), opts, nil},
+		{"zai-glm-4-7-flash", openaicompatModel("https://api.z.ai/api/coding/paas/v4", "FANTASY_ZAI_API_KEY", "glm-4.7-flash"), opts, nil},
+		{"llama-cpp-gpt-oss", openaicompatModel("http://localhost:8080/v1", "", "openai/gpt-oss-20b"), opts, nil},
+		{"avian-kimi", openaicompatModel("https://api.avian.io/v1", "FANTASY_AVIAN_API_KEY", "moonshotai/kimi-k2.5"), nil, nil},
 	}, testOpenAICompatThinking)
 }
 
@@ -58,99 +77,4 @@ func testOpenAICompatThinking(t *testing.T, result *fantasy.AgentResult) {
 		}
 	}
 	require.Greater(t, reasoningContentCount, 0, "expected reasoning content, got none")
-}
-
-func builderXAIGrokCodeFast(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
-	provider, err := openaicompat.New(
-		openaicompat.WithBaseURL("https://api.x.ai/v1"),
-		openaicompat.WithAPIKey(os.Getenv("FANTASY_XAI_API_KEY")),
-		openaicompat.WithHTTPClient(&http.Client{Transport: r}),
-	)
-	if err != nil {
-		return nil, err
-	}
-	return provider.LanguageModel(t.Context(), "grok-code-fast-1")
-}
-
-func builderXAIGrok4Fast(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
-	provider, err := openaicompat.New(
-		openaicompat.WithBaseURL("https://api.x.ai/v1"),
-		openaicompat.WithAPIKey(os.Getenv("FANTASY_XAI_API_KEY")),
-		openaicompat.WithHTTPClient(&http.Client{Transport: r}),
-	)
-	if err != nil {
-		return nil, err
-	}
-	return provider.LanguageModel(t.Context(), "grok-4-fast")
-}
-
-func builderXAIGrok3Mini(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
-	provider, err := openaicompat.New(
-		openaicompat.WithBaseURL("https://api.x.ai/v1"),
-		openaicompat.WithAPIKey(os.Getenv("FANTASY_XAI_API_KEY")),
-		openaicompat.WithHTTPClient(&http.Client{Transport: r}),
-	)
-	if err != nil {
-		return nil, err
-	}
-	return provider.LanguageModel(t.Context(), "grok-3-mini")
-}
-
-func builderZAIGLM47Flash(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
-	provider, err := openaicompat.New(
-		openaicompat.WithBaseURL("https://api.z.ai/api/coding/paas/v4"),
-		openaicompat.WithAPIKey(os.Getenv("FANTASY_ZAI_API_KEY")),
-		openaicompat.WithHTTPClient(&http.Client{Transport: r}),
-	)
-	if err != nil {
-		return nil, err
-	}
-	return provider.LanguageModel(t.Context(), "glm-4.7-flash")
-}
-
-func builderGroq(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
-	provider, err := openaicompat.New(
-		openaicompat.WithBaseURL("https://api.groq.com/openai/v1"),
-		openaicompat.WithAPIKey(os.Getenv("FANTASY_GROQ_API_KEY")),
-		openaicompat.WithHTTPClient(&http.Client{Transport: r}),
-	)
-	if err != nil {
-		return nil, err
-	}
-	return provider.LanguageModel(t.Context(), "moonshotai/kimi-k2-instruct-0905")
-}
-
-func builderHuggingFace(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
-	provider, err := openaicompat.New(
-		openaicompat.WithBaseURL("https://router.huggingface.co/v1"),
-		openaicompat.WithAPIKey(os.Getenv("FANTASY_HUGGINGFACE_API_KEY")),
-		openaicompat.WithHTTPClient(&http.Client{Transport: r}),
-	)
-	if err != nil {
-		return nil, err
-	}
-	return provider.LanguageModel(t.Context(), "moonshotai/Kimi-K2-Instruct-0905:groq")
-}
-
-func builderLlamaCppGptOss(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
-	provider, err := openaicompat.New(
-		openaicompat.WithBaseURL("http://localhost:8080/v1"),
-		openaicompat.WithHTTPClient(&http.Client{Transport: r}),
-	)
-	if err != nil {
-		return nil, err
-	}
-	return provider.LanguageModel(t.Context(), "openai/gpt-oss-20b")
-}
-
-func builderAvianKimi(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
-	provider, err := openaicompat.New(
-		openaicompat.WithBaseURL("https://api.avian.io/v1"),
-		openaicompat.WithAPIKey(os.Getenv("FANTASY_AVIAN_API_KEY")),
-		openaicompat.WithHTTPClient(&http.Client{Transport: r}),
-	)
-	if err != nil {
-		return nil, err
-	}
-	return provider.LanguageModel(t.Context(), "moonshotai/kimi-k2.5")
 }

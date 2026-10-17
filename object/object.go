@@ -320,77 +320,14 @@ func StreamWithTool(
 			switch part.Type {
 			case fantasy.StreamPartTypeTextDelta:
 				accumulated += part.Delta
-
-				obj, state, parseErr := schema.ParsePartialJSON(accumulated)
-
-				if state == schema.ParseStateSuccessful || state == schema.ParseStateRepaired {
-					if err := schema.ValidateAgainstSchema(obj, call.Schema); err == nil {
-						if !reflect.DeepEqual(obj, lastParsedObject) {
-							if !yield(fantasy.ObjectStreamPart{
-								Type:   fantasy.ObjectStreamPartTypeObject,
-								Object: obj,
-							}) {
-								return
-							}
-							lastParsedObject = obj
-						}
-					}
-				}
-
-				if state == schema.ParseStateFailed && call.RepairText != nil {
-					repairedText, repairErr := call.RepairText(ctx, accumulated, parseErr)
-					if repairErr == nil {
-						obj2, state2, _ := schema.ParsePartialJSON(repairedText)
-						if (state2 == schema.ParseStateSuccessful || state2 == schema.ParseStateRepaired) &&
-							schema.ValidateAgainstSchema(obj2, call.Schema) == nil {
-							if !reflect.DeepEqual(obj2, lastParsedObject) {
-								if !yield(fantasy.ObjectStreamPart{
-									Type:   fantasy.ObjectStreamPartTypeObject,
-									Object: obj2,
-								}) {
-									return
-								}
-								lastParsedObject = obj2
-							}
-						}
-					}
+				if !EmitParsedObject(ctx, call, accumulated, &lastParsedObject, yield) {
+					return
 				}
 
 			case fantasy.StreamPartTypeToolInputDelta:
 				accumulated += part.Delta
-
-				obj, state, parseErr := schema.ParsePartialJSON(accumulated)
-				if state == schema.ParseStateSuccessful || state == schema.ParseStateRepaired {
-					if err := schema.ValidateAgainstSchema(obj, call.Schema); err == nil {
-						if !reflect.DeepEqual(obj, lastParsedObject) {
-							if !yield(fantasy.ObjectStreamPart{
-								Type:   fantasy.ObjectStreamPartTypeObject,
-								Object: obj,
-							}) {
-								return
-							}
-							lastParsedObject = obj
-						}
-					}
-				}
-
-				if state == schema.ParseStateFailed && call.RepairText != nil {
-					repairedText, repairErr := call.RepairText(ctx, accumulated, parseErr)
-					if repairErr == nil {
-						obj2, state2, _ := schema.ParsePartialJSON(repairedText)
-						if (state2 == schema.ParseStateSuccessful || state2 == schema.ParseStateRepaired) &&
-							schema.ValidateAgainstSchema(obj2, call.Schema) == nil {
-							if !reflect.DeepEqual(obj2, lastParsedObject) {
-								if !yield(fantasy.ObjectStreamPart{
-									Type:   fantasy.ObjectStreamPartTypeObject,
-									Object: obj2,
-								}) {
-									return
-								}
-								lastParsedObject = obj2
-							}
-						}
-					}
+				if !EmitParsedObject(ctx, call, accumulated, &lastParsedObject, yield) {
+					return
 				}
 
 			case fantasy.StreamPartTypeToolCall:
@@ -438,24 +375,8 @@ func StreamWithTool(
 			}
 		}
 
-		if streamErr == nil && lastParsedObject != nil {
-			yield(fantasy.ObjectStreamPart{
-				Type:             fantasy.ObjectStreamPartTypeFinish,
-				Usage:            usage,
-				FinishReason:     finishReason,
-				Warnings:         warnings,
-				ProviderMetadata: providerMetadata,
-			})
-		} else if streamErr == nil && lastParsedObject == nil {
-			yield(fantasy.ObjectStreamPart{
-				Type: fantasy.ObjectStreamPartTypeError,
-				Error: &fantasy.NoObjectGeneratedError{
-					RawText:      accumulated,
-					ParseError:   fmt.Errorf("no valid object generated in stream"),
-					Usage:        usage,
-					FinishReason: finishReason,
-				},
-			})
+		if part, ok := streamEndPart(streamErr, lastParsedObject, accumulated, usage, finishReason, warnings, providerMetadata); ok {
+			yield(part)
 		}
 	}, nil
 }
@@ -530,40 +451,8 @@ func StreamWithText(
 			switch part.Type {
 			case fantasy.StreamPartTypeTextDelta:
 				accumulated += part.Delta
-
-				obj, state, parseErr := schema.ParsePartialJSON(accumulated)
-
-				if state == schema.ParseStateSuccessful || state == schema.ParseStateRepaired {
-					if err := schema.ValidateAgainstSchema(obj, call.Schema); err == nil {
-						if !reflect.DeepEqual(obj, lastParsedObject) {
-							if !yield(fantasy.ObjectStreamPart{
-								Type:   fantasy.ObjectStreamPartTypeObject,
-								Object: obj,
-							}) {
-								return
-							}
-							lastParsedObject = obj
-						}
-					}
-				}
-
-				if state == schema.ParseStateFailed && call.RepairText != nil {
-					repairedText, repairErr := call.RepairText(ctx, accumulated, parseErr)
-					if repairErr == nil {
-						obj2, state2, _ := schema.ParsePartialJSON(repairedText)
-						if (state2 == schema.ParseStateSuccessful || state2 == schema.ParseStateRepaired) &&
-							schema.ValidateAgainstSchema(obj2, call.Schema) == nil {
-							if !reflect.DeepEqual(obj2, lastParsedObject) {
-								if !yield(fantasy.ObjectStreamPart{
-									Type:   fantasy.ObjectStreamPartTypeObject,
-									Object: obj2,
-								}) {
-									return
-								}
-								lastParsedObject = obj2
-							}
-						}
-					}
+				if !EmitParsedObject(ctx, call, accumulated, &lastParsedObject, yield) {
+					return
 				}
 
 			case fantasy.StreamPartTypeError:
@@ -588,26 +477,97 @@ func StreamWithText(
 			}
 		}
 
-		if streamErr == nil && lastParsedObject != nil {
-			yield(fantasy.ObjectStreamPart{
-				Type:             fantasy.ObjectStreamPartTypeFinish,
-				Usage:            usage,
-				FinishReason:     finishReason,
-				Warnings:         warnings,
-				ProviderMetadata: providerMetadata,
-			})
-		} else if streamErr == nil && lastParsedObject == nil {
-			yield(fantasy.ObjectStreamPart{
-				Type: fantasy.ObjectStreamPartTypeError,
-				Error: &fantasy.NoObjectGeneratedError{
-					RawText:      accumulated,
-					ParseError:   fmt.Errorf("no valid object generated in stream"),
-					Usage:        usage,
-					FinishReason: finishReason,
-				},
-			})
+		if part, ok := streamEndPart(streamErr, lastParsedObject, accumulated, usage, finishReason, warnings, providerMetadata); ok {
+			yield(part)
 		}
 	}, nil
+}
+
+// EmitParsedObject parses the accumulated text as partial JSON, validates it
+// against the call schema, and yields the object whenever it differs from the
+// last one emitted. When parsing fails and the call provides a repair function,
+// it retries once with the repaired text. It reports whether the stream should
+// continue: false means the consumer stopped consuming.
+func EmitParsedObject(
+	ctx context.Context,
+	call fantasy.ObjectCall,
+	accumulated string,
+	lastParsedObject *any,
+	yield func(fantasy.ObjectStreamPart) bool,
+) bool {
+	obj, state, parseErr := schema.ParsePartialJSON(accumulated)
+
+	if state == schema.ParseStateSuccessful || state == schema.ParseStateRepaired {
+		if err := schema.ValidateAgainstSchema(obj, call.Schema); err == nil {
+			if !reflect.DeepEqual(obj, *lastParsedObject) {
+				if !yield(fantasy.ObjectStreamPart{
+					Type:   fantasy.ObjectStreamPartTypeObject,
+					Object: obj,
+				}) {
+					return false
+				}
+				*lastParsedObject = obj
+			}
+		}
+	}
+
+	if state == schema.ParseStateFailed && call.RepairText != nil {
+		repairedText, repairErr := call.RepairText(ctx, accumulated, parseErr)
+		if repairErr == nil {
+			obj2, state2, _ := schema.ParsePartialJSON(repairedText)
+			if (state2 == schema.ParseStateSuccessful || state2 == schema.ParseStateRepaired) &&
+				schema.ValidateAgainstSchema(obj2, call.Schema) == nil {
+				if !reflect.DeepEqual(obj2, *lastParsedObject) {
+					if !yield(fantasy.ObjectStreamPart{
+						Type:   fantasy.ObjectStreamPartTypeObject,
+						Object: obj2,
+					}) {
+						return false
+					}
+					*lastParsedObject = obj2
+				}
+			}
+		}
+	}
+
+	return true
+}
+
+// streamEndPart returns the part that terminates an object stream: a finish part
+// once an object has been emitted, or the no-object error when none was. The
+// boolean is false when the stream has already reported an error.
+func streamEndPart(
+	streamErr error,
+	lastParsedObject any,
+	accumulated string,
+	usage fantasy.Usage,
+	finishReason fantasy.FinishReason,
+	warnings []fantasy.CallWarning,
+	providerMetadata fantasy.ProviderMetadata,
+) (fantasy.ObjectStreamPart, bool) {
+	if streamErr != nil {
+		return fantasy.ObjectStreamPart{}, false
+	}
+
+	if lastParsedObject != nil {
+		return fantasy.ObjectStreamPart{
+			Type:             fantasy.ObjectStreamPartTypeFinish,
+			Usage:            usage,
+			FinishReason:     finishReason,
+			Warnings:         warnings,
+			ProviderMetadata: providerMetadata,
+		}, true
+	}
+
+	return fantasy.ObjectStreamPart{
+		Type: fantasy.ObjectStreamPartTypeError,
+		Error: &fantasy.NoObjectGeneratedError{
+			RawText:      accumulated,
+			ParseError:   fmt.Errorf("no valid object generated in stream"),
+			Usage:        usage,
+			FinishReason: finishReason,
+		},
+	}, true
 }
 
 func unmarshal(obj any, target any) error {

@@ -10,8 +10,8 @@ import (
 	"charm.land/fantasy/providers/openaicompat"
 )
 
-// API access and live model qualification are pending. This example requires an
-// enabled Tsubasa account and uses the text-only Chat Completions endpoint.
+// Live model qualification is pending for this example. It requires an active
+// Tsubasa API key and uses the text-only Chat Completions endpoint.
 func main() {
 	key := os.Getenv("TSUBASA_API_KEY")
 	if key == "" {

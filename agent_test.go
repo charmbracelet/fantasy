@@ -75,6 +75,169 @@ func (m *mockLanguageModel) Stream(ctx context.Context, call Call) (StreamRespon
 	return nil, fmt.Errorf("mock stream not implemented")
 }
 
+// generateCapture records what a capturing model was called with.
+type generateCapture struct {
+	systemPrompt string
+	toolChoice   *ToolChoice
+	toolNames    []string
+}
+
+// capturingGenerateModel records the system prompt, tool choice, and tool
+// names of every call into capture and answers with a plain text response.
+func capturingGenerateModel(capture *generateCapture) *mockLanguageModel {
+	return &mockLanguageModel{
+		generateFunc: func(ctx context.Context, call Call) (*Response, error) {
+			if len(call.Prompt) > 0 && call.Prompt[0].Role == MessageRoleSystem {
+				if len(call.Prompt[0].Content) > 0 {
+					if textPart, ok := AsContentType[TextPart](call.Prompt[0].Content[0]); ok {
+						capture.systemPrompt = textPart.Text
+					}
+				}
+			}
+			capture.toolChoice = call.ToolChoice
+			for _, tool := range call.Tools {
+				capture.toolNames = append(capture.toolNames, tool.GetName())
+			}
+			return &Response{
+				Content:      ResponseContent{TextContent{Text: "Response"}},
+				Usage:        Usage{TotalTokens: 10},
+				FinishReason: FinishReasonStop,
+			}, nil
+		},
+	}
+}
+
+// scriptedGenerateModel answers with the given responses in order, fails the
+// test on any call beyond them, and reports the number of calls made so far.
+func scriptedGenerateModel(t *testing.T, responses ...*Response) (*mockLanguageModel, func() int) {
+	callCount := 0
+	return &mockLanguageModel{
+		generateFunc: func(ctx context.Context, call Call) (*Response, error) {
+			callCount++
+			if callCount > len(responses) {
+				t.Fatalf("Unexpected call count: %d", callCount)
+				return nil, nil
+			}
+			return responses[callCount-1], nil
+		},
+	}, func() int { return callCount }
+}
+
+// toolCallResponse builds a tool-call response finishing with ToolCalls.
+func toolCallResponse(id, name, input string, usage Usage) *Response {
+	return &Response{
+		Content: []Content{
+			ToolCallContent{ToolCallID: id, ToolName: name, Input: input},
+		},
+		Usage:        usage,
+		FinishReason: FinishReasonToolCalls,
+	}
+}
+
+// textResponse builds a plain text response finishing with Stop.
+func textResponse(text string, usage Usage) *Response {
+	return &Response{
+		Content:      []Content{TextContent{Text: text}},
+		Usage:        usage,
+		FinishReason: FinishReasonStop,
+	}
+}
+
+// twoStepToolCallModel requests the tool on the first call (single prompt
+// message) and answers with finalText once the tool result is in.
+func twoStepToolCallModel(toolCallID, toolName, finalText string) *mockLanguageModel {
+	return &mockLanguageModel{
+		generateFunc: func(ctx context.Context, call Call) (*Response, error) {
+			if len(call.Prompt) == 1 {
+				// First call - request the tool
+				return toolCallResponse(toolCallID, toolName, `{}`, Usage{TotalTokens: 10}), nil
+			}
+			// Second call - after tool execution
+			return textResponse(finalText, Usage{TotalTokens: 20}), nil
+		},
+	}
+}
+
+// textAndToolCallModel answers with one text and one test_tool call whose
+// input is the given string.
+func textAndToolCallModel(input string) *mockLanguageModel {
+	return &mockLanguageModel{
+		generateFunc: func(ctx context.Context, call Call) (*Response, error) {
+			return &Response{
+				Content: ResponseContent{
+					TextContent{Text: "Response"},
+					ToolCallContent{ToolCallID: "call1", ToolName: "test_tool", Input: input},
+				},
+				Usage:        Usage{TotalTokens: 10},
+				FinishReason: FinishReasonStop,
+			}, nil
+		},
+	}
+}
+
+// verifyingToolCallModel asserts the shape of the call (tool count, auto
+// choice, single user prompt) and answers with one tool call that finishes
+// with Stop.
+func verifyingToolCallModel(t *testing.T, wantTools int) *mockLanguageModel {
+	return &mockLanguageModel{
+		generateFunc: func(ctx context.Context, call Call) (*Response, error) {
+			// Verify tools are passed correctly
+			require.Len(t, call.Tools, wantTools)
+			require.Equal(t, ToolChoiceAuto, *call.ToolChoice) // Should be auto, not required
+
+			// Verify prompt structure
+			require.Len(t, call.Prompt, 1)
+			require.Equal(t, MessageRoleUser, call.Prompt[0].Role)
+
+			return &Response{
+				Content: []Content{
+					ToolCallContent{
+						ToolCallID: "call-1",
+						ToolName:   "tool1",
+						Input:      `{"value":"value"}`,
+					},
+				},
+				Usage: Usage{
+					InputTokens:  3,
+					OutputTokens: 10,
+					TotalTokens:  13,
+				},
+				FinishReason: FinishReasonStop, // Note: Stop, not ToolCalls
+			}, nil
+		},
+	}
+}
+
+// expectProviderDefinedToolModel asserts the single tool is the given
+// provider defined tool and answers with finalText.
+func expectProviderDefinedToolModel(t *testing.T, wantName, wantID, finalText string) *mockLanguageModel {
+	return &mockLanguageModel{
+		generateFunc: func(ctx context.Context, call Call) (*Response, error) {
+			// Verify the tool is emitted as a ProviderDefinedTool.
+			require.Len(t, call.Tools, 1)
+			pdt, ok := call.Tools[0].(ProviderDefinedTool)
+			require.True(t, ok, "expected ProviderDefinedTool, got %T", call.Tools[0])
+			require.Equal(t, wantName, pdt.Name)
+			require.Equal(t, wantID, pdt.ID)
+
+			return textResponse(finalText, Usage{TotalTokens: 5}), nil
+		},
+	}
+}
+
+// doneTextStream is what a mock model streams once it has seen a tool result:
+// a single "done" text and a stop finish.
+func doneTextStream(yield func(StreamPart) bool) {
+	yield(StreamPart{Type: StreamPartTypeTextStart, ID: "t"})
+	yield(StreamPart{Type: StreamPartTypeTextDelta, ID: "t", Delta: "done"})
+	yield(StreamPart{Type: StreamPartTypeTextEnd, ID: "t"})
+	yield(StreamPart{
+		Type:         StreamPartTypeFinish,
+		FinishReason: FinishReasonStop,
+		Usage:        Usage{TotalTokens: 5},
+	})
+}
+
 func (m *mockLanguageModel) Provider() string {
 	return "mock-provider"
 }
@@ -250,33 +413,7 @@ func TestAgent_Generate_ResultToolCalls(t *testing.T) {
 		},
 	)
 
-	model := &mockLanguageModel{
-		generateFunc: func(ctx context.Context, call Call) (*Response, error) {
-			// Verify tools are passed correctly
-			require.Len(t, call.Tools, 2)
-			require.Equal(t, ToolChoiceAuto, *call.ToolChoice) // Should be auto, not required
-
-			// Verify prompt structure
-			require.Len(t, call.Prompt, 1)
-			require.Equal(t, MessageRoleUser, call.Prompt[0].Role)
-
-			return &Response{
-				Content: []Content{
-					ToolCallContent{
-						ToolCallID: "call-1",
-						ToolName:   "tool1",
-						Input:      `{"value":"value"}`,
-					},
-				},
-				Usage: Usage{
-					InputTokens:  3,
-					OutputTokens: 10,
-					TotalTokens:  13,
-				},
-				FinishReason: FinishReasonStop, // Note: Stop, not ToolCalls
-			}, nil
-		},
-	}
+	model := verifyingToolCallModel(t, 2)
 
 	agent := NewAgent(model, WithTools(tool1, tool2))
 	result, err := agent.Generate(context.Background(), AgentCall{
@@ -324,33 +461,7 @@ func TestAgent_Generate_ResultToolResults(t *testing.T) {
 		},
 	)
 
-	model := &mockLanguageModel{
-		generateFunc: func(ctx context.Context, call Call) (*Response, error) {
-			// Verify tools and tool choice
-			require.Len(t, call.Tools, 1)
-			require.Equal(t, ToolChoiceAuto, *call.ToolChoice)
-
-			// Verify prompt
-			require.Len(t, call.Prompt, 1)
-			require.Equal(t, MessageRoleUser, call.Prompt[0].Role)
-
-			return &Response{
-				Content: []Content{
-					ToolCallContent{
-						ToolCallID: "call-1",
-						ToolName:   "tool1",
-						Input:      `{"value":"value"}`,
-					},
-				},
-				Usage: Usage{
-					InputTokens:  3,
-					OutputTokens: 10,
-					TotalTokens:  13,
-				},
-				FinishReason: FinishReasonStop, // Note: Stop, not ToolCalls
-			}, nil
-		},
-	}
+	model := verifyingToolCallModel(t, 1)
 
 	agent := NewAgent(model, WithTools(tool1))
 	result, err := agent.Generate(context.Background(), AgentCall{
@@ -397,47 +508,10 @@ func TestAgent_Generate_MultipleSteps(t *testing.T) {
 		},
 	)
 
-	callCount := 0
-	model := &mockLanguageModel{
-		generateFunc: func(ctx context.Context, call Call) (*Response, error) {
-			callCount++
-			switch callCount {
-			case 1:
-				// First call - return tool call with FinishReasonToolCalls
-				return &Response{
-					Content: []Content{
-						ToolCallContent{
-							ToolCallID: "call-1",
-							ToolName:   "tool1",
-							Input:      `{"value":"value"}`,
-						},
-					},
-					Usage: Usage{
-						InputTokens:  10,
-						OutputTokens: 5,
-						TotalTokens:  15,
-					},
-					FinishReason: FinishReasonToolCalls, // This triggers multi-step
-				}, nil
-			case 2:
-				// Second call - return final text
-				return &Response{
-					Content: []Content{
-						TextContent{Text: "Hello, world!"},
-					},
-					Usage: Usage{
-						InputTokens:  3,
-						OutputTokens: 10,
-						TotalTokens:  13,
-					},
-					FinishReason: FinishReasonStop,
-				}, nil
-			default:
-				t.Fatalf("Unexpected call count: %d", callCount)
-				return nil, nil
-			}
-		},
-	}
+	model, _ := scriptedGenerateModel(t,
+		toolCallResponse("call-1", "tool1", `{"value":"value"}`, Usage{InputTokens: 10, OutputTokens: 5, TotalTokens: 15}),
+		textResponse("Hello, world!", Usage{InputTokens: 3, OutputTokens: 10, TotalTokens: 13}),
+	)
 
 	agent := NewAgent(model, WithTools(tool1))
 	result, err := agent.Generate(context.Background(), AgentCall{
@@ -1368,35 +1442,9 @@ func TestPrepareStep(t *testing.T) {
 
 	t.Run("All fields modified together", func(t *testing.T) {
 		t.Parallel()
-		var capturedSystemPrompt string
-		var capturedToolChoice *ToolChoice
-		var capturedToolNames []string
+		var capture generateCapture
 
-		model := &mockLanguageModel{
-			generateFunc: func(ctx context.Context, call Call) (*Response, error) {
-				// Capture system prompt
-				if len(call.Prompt) > 0 && call.Prompt[0].Role == MessageRoleSystem {
-					if len(call.Prompt[0].Content) > 0 {
-						if textPart, ok := AsContentType[TextPart](call.Prompt[0].Content[0]); ok {
-							capturedSystemPrompt = textPart.Text
-						}
-					}
-				}
-				// Capture tool choice
-				capturedToolChoice = call.ToolChoice
-				// Capture tool names
-				for _, tool := range call.Tools {
-					capturedToolNames = append(capturedToolNames, tool.GetName())
-				}
-				return &Response{
-					Content: ResponseContent{
-						TextContent{Text: "Response"},
-					},
-					Usage:        Usage{TotalTokens: 10},
-					FinishReason: FinishReasonStop,
-				}, nil
-			},
-		}
+		model := capturingGenerateModel(&capture)
 
 		tool1 := &mockTool{name: "tool1", description: "Tool 1"}
 		tool2 := &mockTool{name: "tool2", description: "Tool 2"}
@@ -1423,44 +1471,18 @@ func TestPrepareStep(t *testing.T) {
 
 		require.NoError(t, err)
 		require.NotNil(t, result)
-		require.Equal(t, "Step-specific system", capturedSystemPrompt)
-		require.NotNil(t, capturedToolChoice)
-		require.Equal(t, SpecificToolChoice("tool1"), *capturedToolChoice)
-		require.Len(t, capturedToolNames, 1)
-		require.Equal(t, "tool1", capturedToolNames[0])
+		require.Equal(t, "Step-specific system", capture.systemPrompt)
+		require.NotNil(t, capture.toolChoice)
+		require.Equal(t, SpecificToolChoice("tool1"), *capture.toolChoice)
+		require.Len(t, capture.toolNames, 1)
+		require.Equal(t, "tool1", capture.toolNames[0])
 	})
 
 	t.Run("Nil fields use parent values", func(t *testing.T) {
 		t.Parallel()
-		var capturedSystemPrompt string
-		var capturedToolChoice *ToolChoice
-		var capturedToolNames []string
+		var capture generateCapture
 
-		model := &mockLanguageModel{
-			generateFunc: func(ctx context.Context, call Call) (*Response, error) {
-				// Capture system prompt
-				if len(call.Prompt) > 0 && call.Prompt[0].Role == MessageRoleSystem {
-					if len(call.Prompt[0].Content) > 0 {
-						if textPart, ok := AsContentType[TextPart](call.Prompt[0].Content[0]); ok {
-							capturedSystemPrompt = textPart.Text
-						}
-					}
-				}
-				// Capture tool choice
-				capturedToolChoice = call.ToolChoice
-				// Capture tool names
-				for _, tool := range call.Tools {
-					capturedToolNames = append(capturedToolNames, tool.GetName())
-				}
-				return &Response{
-					Content: ResponseContent{
-						TextContent{Text: "Response"},
-					},
-					Usage:        Usage{TotalTokens: 10},
-					FinishReason: FinishReasonStop,
-				}, nil
-			},
-		}
+		model := capturingGenerateModel(&capture)
 
 		tool1 := &mockTool{name: "tool1", description: "Tool 1"}
 
@@ -1484,11 +1506,11 @@ func TestPrepareStep(t *testing.T) {
 
 		require.NoError(t, err)
 		require.NotNil(t, result)
-		require.Equal(t, "Parent system", capturedSystemPrompt)
-		require.NotNil(t, capturedToolChoice)
-		require.Equal(t, ToolChoiceAuto, *capturedToolChoice) // Default
-		require.Len(t, capturedToolNames, 1)
-		require.Equal(t, "tool1", capturedToolNames[0])
+		require.Equal(t, "Parent system", capture.systemPrompt)
+		require.NotNil(t, capture.toolChoice)
+		require.Equal(t, ToolChoiceAuto, *capture.toolChoice) // Default
+		require.Len(t, capture.toolNames, 1)
+		require.Equal(t, "tool1", capture.toolNames[0])
 	})
 
 	t.Run("Empty ActiveTools means all tools", func(t *testing.T) {
@@ -1541,22 +1563,7 @@ func TestToolCallRepair(t *testing.T) {
 
 	t.Run("Valid tool call passes validation", func(t *testing.T) {
 		t.Parallel()
-		model := &mockLanguageModel{
-			generateFunc: func(ctx context.Context, call Call) (*Response, error) {
-				return &Response{
-					Content: ResponseContent{
-						TextContent{Text: "Response"},
-						ToolCallContent{
-							ToolCallID: "call1",
-							ToolName:   "test_tool",
-							Input:      `{"value": "test"}`, // Valid JSON with required field
-						},
-					},
-					Usage:        Usage{TotalTokens: 10},
-					FinishReason: FinishReasonStop, // Changed to stop to avoid infinite loop
-				}, nil
-			},
-		}
+		model := textAndToolCallModel(`{"value": "test"}`)
 
 		tool := &mockTool{
 			name:        "test_tool",
@@ -1588,22 +1595,7 @@ func TestToolCallRepair(t *testing.T) {
 
 	t.Run("Invalid tool call without repair function", func(t *testing.T) {
 		t.Parallel()
-		model := &mockLanguageModel{
-			generateFunc: func(ctx context.Context, call Call) (*Response, error) {
-				return &Response{
-					Content: ResponseContent{
-						TextContent{Text: "Response"},
-						ToolCallContent{
-							ToolCallID: "call1",
-							ToolName:   "test_tool",
-							Input:      `{"wrong_field": "test"}`, // Missing required field
-						},
-					},
-					Usage:        Usage{TotalTokens: 10},
-					FinishReason: FinishReasonStop, // Changed to stop to avoid infinite loop
-				}, nil
-			},
-		}
+		model := textAndToolCallModel(`{"wrong_field": "test"}`)
 
 		tool := &mockTool{
 			name:        "test_tool",
@@ -1776,22 +1768,7 @@ func TestToolCallRepair(t *testing.T) {
 
 	t.Run("Invalid JSON in tool call", func(t *testing.T) {
 		t.Parallel()
-		model := &mockLanguageModel{
-			generateFunc: func(ctx context.Context, call Call) (*Response, error) {
-				return &Response{
-					Content: ResponseContent{
-						TextContent{Text: "Response"},
-						ToolCallContent{
-							ToolCallID: "call1",
-							ToolName:   "test_tool",
-							Input:      `{invalid json}`, // Invalid JSON
-						},
-					},
-					Usage:        Usage{TotalTokens: 10},
-					FinishReason: FinishReasonStop, // Changed to stop
-				}, nil
-			},
-		}
+		model := textAndToolCallModel(`{invalid json}`)
 
 		tool := &mockTool{
 			name:        "test_tool",
@@ -1838,30 +1815,7 @@ func TestAgent_MediaToolResponses(t *testing.T) {
 			},
 		}
 
-		model := &mockLanguageModel{
-			generateFunc: func(ctx context.Context, call Call) (*Response, error) {
-				if len(call.Prompt) == 1 {
-					// First call - request image tool
-					return &Response{
-						Content: []Content{
-							ToolCallContent{
-								ToolCallID: "img-1",
-								ToolName:   "generate_image",
-								Input:      `{}`,
-							},
-						},
-						Usage:        Usage{TotalTokens: 10},
-						FinishReason: FinishReasonToolCalls,
-					}, nil
-				}
-				// Second call - after tool execution
-				return &Response{
-					Content:      []Content{TextContent{Text: "Image generated"}},
-					Usage:        Usage{TotalTokens: 20},
-					FinishReason: FinishReasonStop,
-				}, nil
-			},
-		}
+		model := twoStepToolCallModel("img-1", "generate_image", "Image generated")
 
 		agent := NewAgent(model, WithTools(imageTool), WithStopConditions(StepCountIs(3)))
 
@@ -1894,28 +1848,7 @@ func TestAgent_MediaToolResponses(t *testing.T) {
 			},
 		}
 
-		model := &mockLanguageModel{
-			generateFunc: func(ctx context.Context, call Call) (*Response, error) {
-				if len(call.Prompt) == 1 {
-					return &Response{
-						Content: []Content{
-							ToolCallContent{
-								ToolCallID: "audio-1",
-								ToolName:   "generate_audio",
-								Input:      `{}`,
-							},
-						},
-						Usage:        Usage{TotalTokens: 10},
-						FinishReason: FinishReasonToolCalls,
-					}, nil
-				}
-				return &Response{
-					Content:      []Content{TextContent{Text: "Audio generated"}},
-					Usage:        Usage{TotalTokens: 20},
-					FinishReason: FinishReasonStop,
-				}, nil
-			},
-		}
+		model := twoStepToolCallModel("audio-1", "generate_audio", "Audio generated")
 
 		agent := NewAgent(model, WithTools(audioTool), WithStopConditions(StepCountIs(3)))
 
@@ -1948,28 +1881,7 @@ func TestAgent_MediaToolResponses(t *testing.T) {
 			},
 		}
 
-		model := &mockLanguageModel{
-			generateFunc: func(ctx context.Context, call Call) (*Response, error) {
-				if len(call.Prompt) == 1 {
-					return &Response{
-						Content: []Content{
-							ToolCallContent{
-								ToolCallID: "screen-1",
-								ToolName:   "screenshot",
-								Input:      `{}`,
-							},
-						},
-						Usage:        Usage{TotalTokens: 10},
-						FinishReason: FinishReasonToolCalls,
-					}, nil
-				}
-				return &Response{
-					Content:      []Content{TextContent{Text: "Done"}},
-					Usage:        Usage{TotalTokens: 20},
-					FinishReason: FinishReasonStop,
-				}, nil
-			},
-		}
+		model := twoStepToolCallModel("screen-1", "screenshot", "Done")
 
 		agent := NewAgent(model, WithTools(imageTool), WithStopConditions(StepCountIs(3)))
 
@@ -2007,28 +1919,7 @@ func TestAgent_MediaToolResponses(t *testing.T) {
 			},
 		}
 
-		model := &mockLanguageModel{
-			generateFunc: func(ctx context.Context, call Call) (*Response, error) {
-				if len(call.Prompt) == 1 {
-					return &Response{
-						Content: []Content{
-							ToolCallContent{
-								ToolCallID: "img-1",
-								ToolName:   "generate_image",
-								Input:      `{}`,
-							},
-						},
-						Usage:        Usage{TotalTokens: 10},
-						FinishReason: FinishReasonToolCalls,
-					}, nil
-				}
-				return &Response{
-					Content:      []Content{TextContent{Text: "Done"}},
-					Usage:        Usage{TotalTokens: 20},
-					FinishReason: FinishReasonStop,
-				}, nil
-			},
-		}
+		model := twoStepToolCallModel("img-1", "generate_image", "Done")
 
 		agent := NewAgent(model, WithTools(imageTool), WithStopConditions(StepCountIs(3)))
 
@@ -2256,30 +2147,10 @@ func TestAgent_Generate_ExecutableProviderTool_ActiveTools_Rejected(t *testing.T
 		},
 	)
 
-	callCount := 0
-	model := &mockLanguageModel{
-		generateFunc: func(ctx context.Context, call Call) (*Response, error) {
-			callCount++
-			if callCount == 1 {
-				// Model hallucinates a call to the excluded tool.
-				return &Response{
-					Content: []Content{ToolCallContent{
-						ToolCallID: "call-1",
-						ToolName:   "computer",
-						Input:      `{"action":"screenshot"}`,
-					}},
-					Usage:        Usage{TotalTokens: 5},
-					FinishReason: FinishReasonToolCalls,
-				}, nil
-			}
-			// Second call: model stops.
-			return &Response{
-				Content:      []Content{TextContent{Text: "done"}},
-				Usage:        Usage{TotalTokens: 3},
-				FinishReason: FinishReasonStop,
-			}, nil
-		},
-	}
+	model, _ := scriptedGenerateModel(t,
+		toolCallResponse("call-1", "computer", `{"action":"screenshot"}`, Usage{TotalTokens: 5}),
+		textResponse("done", Usage{TotalTokens: 3}),
+	)
 
 	agent := NewAgent(model, WithProviderDefinedTools(execTool))
 	result, err := agent.Generate(context.Background(), AgentCall{
@@ -2330,16 +2201,7 @@ func TestAgent_Stream_ExecutableProviderTool(t *testing.T) {
 			// back the model stops, so the agent loop terminates.
 			for _, msg := range call.Prompt {
 				if msg.Role == MessageRoleTool {
-					return func(yield func(StreamPart) bool) {
-						yield(StreamPart{Type: StreamPartTypeTextStart, ID: "t"})
-						yield(StreamPart{Type: StreamPartTypeTextDelta, ID: "t", Delta: "done"})
-						yield(StreamPart{Type: StreamPartTypeTextEnd, ID: "t"})
-						yield(StreamPart{
-							Type:         StreamPartTypeFinish,
-							FinishReason: FinishReasonStop,
-							Usage:        Usage{TotalTokens: 5},
-						})
-					}, nil
+					return doneTextStream, nil
 				}
 			}
 			return func(yield func(StreamPart) bool) {
@@ -2398,22 +2260,7 @@ func TestAgent_PrepareTools_ExecutableProviderTool(t *testing.T) {
 		},
 	)
 
-	model := &mockLanguageModel{
-		generateFunc: func(ctx context.Context, call Call) (*Response, error) {
-			// Verify the tool is emitted as a ProviderDefinedTool.
-			require.Len(t, call.Tools, 1)
-			pdt, ok := call.Tools[0].(ProviderDefinedTool)
-			require.True(t, ok, "expected ProviderDefinedTool, got %T", call.Tools[0])
-			require.Equal(t, "computer", pdt.Name)
-			require.Equal(t, "test.computer", pdt.ID)
-
-			return &Response{
-				Content:      []Content{TextContent{Text: "done"}},
-				Usage:        Usage{TotalTokens: 5},
-				FinishReason: FinishReasonStop,
-			}, nil
-		},
-	}
+	model := expectProviderDefinedToolModel(t, "computer", "test.computer", "done")
 
 	agent := NewAgent(model, WithProviderDefinedTools(execTool))
 	_, err := agent.Generate(context.Background(), AgentCall{
@@ -2472,21 +2319,7 @@ func TestAgent_WithProviderDefinedTools_BackwardCompat(t *testing.T) {
 		Args: map[string]any{"max_results": 5},
 	}
 
-	model := &mockLanguageModel{
-		generateFunc: func(ctx context.Context, call Call) (*Response, error) {
-			require.Len(t, call.Tools, 1)
-			pdt, ok := call.Tools[0].(ProviderDefinedTool)
-			require.True(t, ok, "expected ProviderDefinedTool, got %T", call.Tools[0])
-			require.Equal(t, "web_search", pdt.Name)
-			require.Equal(t, "anthropic.web_search", pdt.ID)
-
-			return &Response{
-				Content:      []Content{TextContent{Text: "search results"}},
-				Usage:        Usage{TotalTokens: 5},
-				FinishReason: FinishReasonStop,
-			}, nil
-		},
-	}
+	model := expectProviderDefinedToolModel(t, "web_search", "anthropic.web_search", "search results")
 
 	agent := NewAgent(model, WithProviderDefinedTools(webSearch))
 	result, err := agent.Generate(context.Background(), AgentCall{
@@ -2517,30 +2350,10 @@ func TestAgent_Generate_ExecutableProviderTool_ImageBase64(t *testing.T) {
 		},
 	)
 
-	callCount := 0
-	model := &mockLanguageModel{
-		generateFunc: func(ctx context.Context, call Call) (*Response, error) {
-			callCount++
-			if callCount == 1 {
-				return &Response{
-					Content: []Content{
-						ToolCallContent{
-							ToolCallID: "call-1",
-							ToolName:   "computer",
-							Input:      `{"action":"screenshot"}`,
-						},
-					},
-					Usage:        Usage{TotalTokens: 10},
-					FinishReason: FinishReasonToolCalls,
-				}, nil
-			}
-			return &Response{
-				Content:      []Content{TextContent{Text: "done"}},
-				Usage:        Usage{TotalTokens: 5},
-				FinishReason: FinishReasonStop,
-			}, nil
-		},
-	}
+	model, _ := scriptedGenerateModel(t,
+		toolCallResponse("call-1", "computer", `{"action":"screenshot"}`, Usage{TotalTokens: 10}),
+		textResponse("done", Usage{TotalTokens: 5}),
+	)
 
 	agent := NewAgent(model, WithProviderDefinedTools(execTool))
 	result, err := agent.Generate(context.Background(), AgentCall{
@@ -2736,41 +2549,10 @@ func TestAgent_Generate_StopTurn_NotSet(t *testing.T) {
 		},
 	)
 
-	callCount := 0
-	model := &mockLanguageModel{
-		generateFunc: func(ctx context.Context, call Call) (*Response, error) {
-			callCount++
-			switch callCount {
-			case 1:
-				return &Response{
-					Content: []Content{
-						ToolCallContent{
-							ToolCallID: "call-1",
-							ToolName:   "tool1",
-							Input:      `{"value":"test"}`,
-						},
-					},
-					Usage: Usage{
-						InputTokens:  10,
-						OutputTokens: 5,
-						TotalTokens:  15,
-					},
-					FinishReason: FinishReasonToolCalls,
-				}, nil
-			case 2:
-				return &Response{
-					Content: []Content{
-						TextContent{Text: "Done"},
-					},
-					Usage:        Usage{InputTokens: 3, OutputTokens: 5, TotalTokens: 8},
-					FinishReason: FinishReasonStop,
-				}, nil
-			default:
-				t.Fatalf("Unexpected call count: %d", callCount)
-				return nil, nil
-			}
-		},
-	}
+	model, calls := scriptedGenerateModel(t,
+		toolCallResponse("call-1", "tool1", `{"value":"test"}`, Usage{InputTokens: 10, OutputTokens: 5, TotalTokens: 15}),
+		textResponse("Done", Usage{InputTokens: 3, OutputTokens: 5, TotalTokens: 8}),
+	)
 
 	agent := NewAgent(model, WithTools(tool1))
 	result, err := agent.Generate(context.Background(), AgentCall{
@@ -2780,7 +2562,7 @@ func TestAgent_Generate_StopTurn_NotSet(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, result)
 	// Without StopTurn, the model gets a second call.
-	require.Equal(t, 2, callCount)
+	require.Equal(t, 2, calls())
 	require.Len(t, result.Steps, 2)
 
 	// StopTurn should be false on the tool result.

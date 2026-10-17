@@ -569,6 +569,7 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 			messages = append(messages, systemMsg)
 		case fantasy.MessageRoleUser:
 			// simple user message just text content
+			//nolint:dupl // mirrored with the assistant branch below: the differing lines are the role's SDK call.
 			if len(msg.Content) == 1 && msg.Content[0].GetType() == fantasy.ContentTypeText {
 				textPart, ok := fantasy.AsContentType[fantasy.TextPart](msg.Content[0])
 				if !ok {
@@ -760,6 +761,7 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 			messages = append(messages, openaisdk.UserMessage(content))
 		case fantasy.MessageRoleAssistant:
 			// simple assistant message just text content
+			//nolint:dupl // mirrored with the user branch above: the differing lines are the role's SDK call.
 			if len(msg.Content) == 1 && msg.Content[0].GetType() == fantasy.ContentTypeText {
 				textPart, ok := fantasy.AsContentType[fantasy.TextPart](msg.Content[0])
 				if !ok {
@@ -859,7 +861,7 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 							"reasoning_details": reasoningDetailsMap,
 							"reasoning":         reasoningPart.Text,
 						})
-					case strings.HasPrefix(model, "openai/"):
+					case strings.HasPrefix(model, "openai/"), strings.HasPrefix(model, "xai/"):
 						metadata := openai.GetReasoningMetadata(reasoningPart.Options())
 						if metadata == nil {
 							text := fmt.Sprintf("<thoughts>%s</thoughts>", reasoningPart.Text)
@@ -872,43 +874,11 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 							}
 							continue
 						}
-						for inx, summary := range metadata.Summary {
-							if summary == "" {
-								continue
-							}
-							reasoningDetails = append(reasoningDetails, ReasoningDetail{
-								Type:    "reasoning.summary",
-								Format:  "openai-responses-v1",
-								Summary: summary,
-								Index:   inx,
-							})
-						}
-						if metadata.EncryptedContent != nil {
-							reasoningDetails = append(reasoningDetails, ReasoningDetail{
-								Type:   "reasoning.encrypted",
-								Format: "openai-responses-v1",
-								Data:   *metadata.EncryptedContent,
-								ID:     metadata.ItemID,
-							})
-						}
-						data, _ := json.Marshal(reasoningDetails)
-						reasoningDetailsMap := []map[string]any{}
-						_ = json.Unmarshal(data, &reasoningDetailsMap)
-						assistantMsg.SetExtraFields(map[string]any{
-							"reasoning_details": reasoningDetailsMap,
-						})
-					case strings.HasPrefix(model, "xai/"):
-						metadata := openai.GetReasoningMetadata(reasoningPart.Options())
-						if metadata == nil {
-							text := fmt.Sprintf("<thoughts>%s</thoughts>", reasoningPart.Text)
-							if assistantMsg.Content.OfString.Valid() {
-								text = assistantMsg.Content.OfString.Value + "\n" + text
-							}
-							// this reasoning did not come from anthropic just add a text content
-							assistantMsg.Content = openaisdk.ChatCompletionAssistantMessageParamContentUnion{
-								OfString: param.NewOpt(text),
-							}
-							continue
+						// openai/ and xai/ share the Responses API reasoning format;
+						// they differ only in the reported format string.
+						reasoningFormat := "openai-responses-v1"
+						if strings.HasPrefix(model, "xai/") {
+							reasoningFormat = "xai-responses-v1"
 						}
 						for inx, summary := range metadata.Summary {
 							if summary == "" {
@@ -916,7 +886,7 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 							}
 							reasoningDetails = append(reasoningDetails, ReasoningDetail{
 								Type:    "reasoning.summary",
-								Format:  "xai-responses-v1",
+								Format:  reasoningFormat,
 								Summary: summary,
 								Index:   inx,
 							})
@@ -924,7 +894,7 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 						if metadata.EncryptedContent != nil {
 							reasoningDetails = append(reasoningDetails, ReasoningDetail{
 								Type:   "reasoning.encrypted",
-								Format: "xai-responses-v1",
+								Format: reasoningFormat,
 								Data:   *metadata.EncryptedContent,
 								ID:     metadata.ItemID,
 							})

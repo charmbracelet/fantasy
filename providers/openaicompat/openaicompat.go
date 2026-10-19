@@ -91,6 +91,16 @@ func WithHTTPClient(client option.HTTPClient) Option {
 	}
 }
 
+// WithRequestCompression gzip-compresses JSON request bodies, for
+// OpenAI-compatible servers that accept `Content-Encoding: gzip`. Off by
+// default; see [openai.WithRequestCompression] for the fallback that keeps an
+// uncompressed request working either way.
+func WithRequestCompression() Option {
+	return func(o *options) {
+		o.openaiOptions = append(o.openaiOptions, openai.WithRequestCompression())
+	}
+}
+
 // WithSDKOptions sets the SDK options for the OpenAI-compatible provider.
 func WithSDKOptions(opts ...option.RequestOption) Option {
 	return func(o *options) {

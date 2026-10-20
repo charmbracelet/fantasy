@@ -1,6 +1,6 @@
 module charm.land/fantasy
 
-go 1.27.0
+go 1.27.2
 
 require (
 	charm.land/x/vcr v0.1.1
@@ -19,7 +19,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/kaptinlin/jsonschema v0.9.10
 	github.com/stretchr/testify v1.12.1
-	golang.org/x/net v0.59.0
+	golang.org/x/net v0.60.0
 	golang.org/x/oauth2 v0.37.0
 	google.golang.org/genai v1.71.0
 )

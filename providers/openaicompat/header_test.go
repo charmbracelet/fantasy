@@ -341,3 +341,59 @@ func TestResponseTrailers_Stream(t *testing.T) {
 	require.NotNil(t, finish, "expected a finish part")
 	requirePrismTrailerField(t, finish.ProviderMetadata)
 }
+
+// TestResponseHeaders_EarlyMetadataPart asserts that headers captured at
+// stream start are surfaced as a provider_metadata part before any content,
+// while trailers land only on the finish part.
+func TestResponseHeaders_EarlyMetadataPart(t *testing.T) {
+	t.Parallel()
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("X-Prism-Model-Id", "prism-42")
+		w.Header().Set("X-Prism-Model-Name", "GPT-5.2 Codex Max")
+		w.Header().Set("Trailer", "X-Prism-Hypercredit-Savings")
+		w.Header().Set("Content-Type", "text/event-stream")
+		rc := http.NewResponseController(w)
+		_, _ = w.Write([]byte("data: {\"id\":\"z\",\"created\":1,\"model\":\"prism\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Hi\"},\"finish_reason\":null}]}\n\n"))
+		_ = rc.Flush()
+		_, _ = w.Write([]byte("data: {\"id\":\"z\",\"created\":1,\"model\":\"prism\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\n"))
+		_ = rc.Flush()
+		_, _ = w.Write([]byte("data: {\"id\":\"z\",\"created\":1,\"model\":\"prism\",\"choices\":[],\"usage\":{\"prompt_tokens\":1,\"completion_tokens\":1,\"total_tokens\":2}}\n\n"))
+		_ = rc.Flush()
+		_, _ = w.Write([]byte("data: [DONE]\n\n"))
+		_ = rc.Flush()
+		// The trailer arrives after the DONE sentinel, as usage is priced
+		// only once the stream has been served.
+		time.Sleep(100 * time.Millisecond)
+		w.Header().Set("X-Prism-Hypercredit-Savings", "1.5")
+	}))
+	t.Cleanup(srv.Close)
+	provider := prismProvider(t, srv)
+	lm, err := provider.LanguageModel(context.Background(), "prism")
+	require.NoError(t, err)
+
+	stream, err := lm.Stream(context.Background(), fantasy.Call{Prompt: prompt()})
+	require.NoError(t, err)
+	var parts []fantasy.StreamPart
+	for part := range stream {
+		parts = append(parts, part)
+	}
+
+	require.NotEmpty(t, parts)
+	require.Equal(t, fantasy.StreamPartTypeProviderMetadata, parts[0].Type, "first part should carry the early metadata")
+	requirePrismFields(t, parts[0].ProviderMetadata)
+	// Trailers are not visible at stream start.
+	earlyMetadata, ok := parts[0].ProviderMetadata[openai.Name].(*openai.ProviderMetadata)
+	require.True(t, ok)
+	var savings string
+	require.False(t, earlyMetadata.ExtraField("x-prism-hypercredit-savings", &savings))
+
+	var finish *fantasy.StreamPart
+	for i := range parts {
+		if parts[i].Type == fantasy.StreamPartTypeFinish {
+			finish = &parts[i]
+		}
+	}
+	require.NotNil(t, finish)
+	requirePrismFields(t, finish.ProviderMetadata)
+	requirePrismTrailerField(t, finish.ProviderMetadata)
+}

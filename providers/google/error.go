@@ -5,6 +5,7 @@ import (
 	"errors"
 	"regexp"
 	"strconv"
+	"time"
 
 	"charm.land/fantasy"
 	"google.golang.org/genai"
@@ -20,17 +21,40 @@ func toProviderErr(err error) error {
 	}
 
 	providerErr := &fantasy.ProviderError{
-		Message:      apiErr.Message,
-		Title:        cmp.Or(fantasy.ErrorTitleForStatusCode(apiErr.Code), "provider request failed"),
-		Cause:        err,
-		StatusCode:   apiErr.Code,
-		ResponseBody: []byte(apiErr.Message),
-		ErrorType:    apiErr.Status,
+		Message:         apiErr.Message,
+		Title:           cmp.Or(fantasy.ErrorTitleForStatusCode(apiErr.Code), "provider request failed"),
+		Cause:           err,
+		StatusCode:      apiErr.Code,
+		ResponseHeaders: retryHeadersFromDetails(apiErr.Details),
+		ResponseBody:    []byte(apiErr.Message),
+		ErrorType:       apiErr.Status,
 	}
 
 	parseContextTooLargeError(apiErr.Message, providerErr)
 
 	return providerErr
+}
+
+// retryInfoType is the type URL of the google.rpc.RetryInfo error detail.
+const retryInfoType = "type.googleapis.com/google.rpc.RetryInfo"
+
+// retryHeadersFromDetails turns a RetryInfo detail into a retry-after header.
+// Gemini answers a 429 without a Retry-After header and puts the wait it wants
+// in the error's details instead, so the retry loop, which only reads headers,
+// would otherwise fall back to its own backoff and retry too soon.
+func retryHeadersFromDetails(details []map[string]any) map[string]string {
+	for _, detail := range details {
+		if detail["@type"] != retryInfoType {
+			continue
+		}
+		raw, _ := detail["retryDelay"].(string)
+		if delay, err := time.ParseDuration(raw); err == nil && delay > 0 {
+			return map[string]string{
+				"retry-after": strconv.FormatFloat(delay.Seconds(), 'f', -1, 64),
+			}
+		}
+	}
+	return nil
 }
 
 func parseContextTooLargeError(message string, providerErr *fantasy.ProviderError) {

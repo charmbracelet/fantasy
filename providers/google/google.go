@@ -348,6 +348,32 @@ func (g languageModel) prepareParams(call fantasy.Call) (*genai.GenerateContentC
 	return config, content, warnings, nil
 }
 
+// decodeToolCallInputMap unmarshals a ToolCallPart.Input into the arguments of
+// a function call. Gemini rejects a function response that has no matching
+// function call in the previous turn, so this helper never drops the call:
+// empty input becomes {}, and malformed input falls back to {} with a
+// CallWarning. The caller still emits the call with the original ToolCallID,
+// preserving the call and result pair.
+func decodeToolCallInputMap(toolCall fantasy.ToolCallPart) (map[string]any, *fantasy.CallWarning) {
+	if strings.TrimSpace(toolCall.Input) == "" {
+		return map[string]any{}, nil
+	}
+	var result map[string]any
+	if err := json.Unmarshal([]byte(toolCall.Input), &result); err != nil {
+		return map[string]any{}, &fantasy.CallWarning{
+			Type: fantasy.CallWarningTypeOther,
+			Message: fmt.Sprintf(
+				"tool call %q has malformed input JSON; emitting empty arguments to preserve function call and response pairing: %s",
+				toolCall.ToolCallID, err,
+			),
+		}
+	}
+	if result == nil {
+		return map[string]any{}, nil
+	}
+	return result, nil
+}
+
 func toGooglePrompt(prompt fantasy.Prompt, isVertexAI bool) (*genai.Content, []*genai.Content, []fantasy.CallWarning) { //nolint: unparam
 	var systemInstructions *genai.Content
 	var content []*genai.Content
@@ -451,10 +477,9 @@ func toGooglePrompt(prompt fantasy.Prompt, isVertexAI bool) (*genai.Content, []*
 						continue
 					}
 
-					var result map[string]any
-					err := json.Unmarshal([]byte(toolCall.Input), &result)
-					if err != nil {
-						continue
+					result, warning := decodeToolCallInputMap(toolCall)
+					if warning != nil {
+						warnings = append(warnings, *warning)
 					}
 					geminiPart := &genai.Part{
 						FunctionCall: &genai.FunctionCall{

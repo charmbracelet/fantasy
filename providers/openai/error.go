@@ -20,6 +20,7 @@ var (
 	alibabaContextPattern   = regexp.MustCompile(`Range of input length should be \[\d+,\s*(\d+)\]`)
 	basetenContextPattern   = regexp.MustCompile(`Input length (\d+) exceeds the maximum allowed input length of (\d+) tokens`)
 	fireworksContextPattern = regexp.MustCompile(`The prompt is too long:\s*(\d+),\s*model maximum context length:\s*(\d+)`)
+	parasailContextPattern  = regexp.MustCompile(`maximum context length is (\d+) tokens, but the prompt contains (\d+) input tokens`)
 	vercelContextPattern    = regexp.MustCompile(`Input too long:\s*(\d+)\s*input tokens,\s*limit is\s*(\d+)`)
 )
 
@@ -102,6 +103,12 @@ func parseContextTooLargeError(message string, providerErr *fantasy.ProviderErro
 		providerErr.ContextTooLargeErr = true
 		providerErr.ContextUsedTokens, _ = strconv.Atoi(matches[1])
 		providerErr.ContextMaxTokens, _ = strconv.Atoi(matches[2])
+		return
+	}
+	if matches := parasailContextPattern.FindStringSubmatch(message); matches != nil {
+		providerErr.ContextTooLargeErr = true
+		providerErr.ContextMaxTokens, _ = strconv.Atoi(matches[1])
+		providerErr.ContextUsedTokens, _ = strconv.Atoi(matches[2])
 		return
 	}
 	if matches := vercelContextPattern.FindStringSubmatch(message); matches != nil {

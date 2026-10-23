@@ -1,6 +1,6 @@
 module charm.land/fantasy/examples
 
-go 1.27.2
+go 1.27.3
 
 replace charm.land/fantasy => ../
 

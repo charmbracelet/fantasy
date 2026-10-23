@@ -890,6 +890,26 @@ func (p *parser) parseString() (any, error) {
 		}
 	}
 
+	isClosingDelimiter := func() bool {
+		i := p.scrollWhitespaces(1)
+		next, ok := p.getCharAt(i)
+		if !ok {
+			return true
+		}
+		if p.context.current == nil {
+			return false
+		}
+		switch *p.context.current {
+		case contextObjectKey:
+			return next == ':'
+		case contextObjectValue:
+			return next == ',' || next == '}'
+		case contextArray:
+			return next == ',' || next == ']'
+		default:
+			return false
+		}
+	}
 	stringAcc := []rune{}
 	char, ok = p.getCharAt(0)
 	unmatchedDelimiter := false
@@ -1003,6 +1023,12 @@ func (p *parser) parseString() (any, error) {
 				p.index++
 				char, ok = p.getCharAt(0)
 				for ok && len(stringAcc) > 0 && stringAcc[len(stringAcc)-1] == '\\' && (char == rdelim || char == '\\') {
+					if char == rdelim && isClosingDelimiter() {
+						break
+					}
+					if char == '\\' {
+						break
+					}
 					stringAcc = append(stringAcc[:len(stringAcc)-1], char)
 					p.index++
 					char, ok = p.getCharAt(0)

@@ -169,7 +169,7 @@ func WithNThreadsBatch(v int) Option {
 }
 
 // WithNUMA configures the NUMA strategy.
-func WithNUMA(v string) Option {
+func WithNUMA(v model.NUMAStrategy) Option {
 	return withModelOption(model.WithNUMA(v))
 }
 
@@ -181,11 +181,6 @@ func WithOffloadKQV(v bool) Option {
 // WithOpOffload configures host tensor operation offloading.
 func WithOpOffload(v bool) Option {
 	return withModelOption(model.WithOpOffload(v))
-}
-
-// WithOpOffloadMinBatch configures the minimum batch size for operation offloading.
-func WithOpOffloadMinBatch(v int) Option {
-	return withModelOption(model.WithOpOffloadMinBatch(v))
 }
 
 // WithPrefillBatchSize configures the maximum number of prompt tokens processed per decode iteration.

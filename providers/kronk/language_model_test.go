@@ -94,7 +94,7 @@ func TestGenerateResponse(t *testing.T) {
 		modelInfo: model.ModelInfo{
 			ID:            "loaded-model",
 			Desc:          "test model",
-			Type:          model.ModelTypeDense,
+			Type:          "Dense",
 			HasProjection: true,
 			Size:          1024,
 			VRAMTotal:     768,
@@ -184,7 +184,7 @@ func TestGenerateResponse(t *testing.T) {
 func TestStreamResponse(t *testing.T) {
 	toolFinish := model.FinishReasonTool
 	client := fakeChatModel{
-		modelInfo: model.ModelInfo{ID: "loaded-model", Type: model.ModelTypeDense},
+		modelInfo: model.ModelInfo{ID: "loaded-model", Type: "Dense"},
 		streamResponse: []model.ChatResponse{
 			{Model: "response-model", SystemFingerprint: "fp_kronk", Choices: []model.Choice{{Delta: &model.ResponseMessage{Reasoning: "thinking"}}}},
 			{Choices: []model.Choice{{Delta: &model.ResponseMessage{ToolCallDeltas: []model.ResponseToolCallDelta{

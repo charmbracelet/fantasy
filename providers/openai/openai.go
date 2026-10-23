@@ -34,6 +34,7 @@ type options struct {
 	headers              map[string]string
 	userAgent            string
 	client               option.HTTPClient
+	requestCompression   bool
 	sdkOptions           []option.RequestOption
 	objectMode           fantasy.ObjectMode
 	languageModelOptions []LanguageModelOption
@@ -180,8 +181,12 @@ func (o *provider) LanguageModel(_ context.Context, modelID string) (fantasy.Lan
 		openaiClientOptions = append(openaiClientOptions, option.WithHeader(key, value))
 	}
 
-	if o.options.client != nil {
-		openaiClientOptions = append(openaiClientOptions, option.WithHTTPClient(o.options.client))
+	httpClient := o.options.client
+	if o.options.requestCompression {
+		httpClient = withRequestCompression(httpClient)
+	}
+	if httpClient != nil {
+		openaiClientOptions = append(openaiClientOptions, option.WithHTTPClient(httpClient))
 	}
 
 	openaiClientOptions = append(openaiClientOptions, o.options.sdkOptions...)

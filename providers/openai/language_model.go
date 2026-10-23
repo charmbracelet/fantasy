@@ -37,10 +37,20 @@ type languageModel struct {
 	streamProviderMetadataFunc LanguageModelStreamProviderMetadataFunc
 	headerFunc                 LanguageModelHeaderFunc
 	toPromptFunc               LanguageModelToPromptFunc
+	requireFinishReason        bool
 }
 
 // LanguageModelOption is a function that configures a languageModel.
 type LanguageModelOption = func(*languageModel)
+
+// WithLanguageModelRequireFinishReason rejects Chat Completions streams that end
+// without a finish_reason, even when the tool arguments form valid JSON.
+// The default retains inference of tool-call completion for compatible providers.
+func WithLanguageModelRequireFinishReason() LanguageModelOption {
+	return func(l *languageModel) {
+		l.requireFinishReason = true
+	}
+}
 
 // WithLanguageModelPrepareCallFunc sets the prepare call function for the language model.
 func WithLanguageModelPrepareCallFunc(fn LanguageModelPrepareCallFunc) LanguageModelOption {
@@ -628,6 +638,14 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 			// Emitting partial tool calls causes agents to dispatch them with
 			// invalid arguments before seeing the terminal reason.
 			mappedFinishReason := o.mapFinishReasonFunc(finishReason)
+			if o.requireFinishReason && finishReason == "" {
+				err := ctx.Err()
+				if err == nil {
+					err = fantasy.NewIncompleteStreamError()
+				}
+				yield(fantasy.StreamPart{Type: fantasy.StreamPartTypeError, Error: err})
+				return
+			}
 
 			// "Tool calls were seen" is not proof of a complete turn. Infer a
 			// tool-call turn only when the upstream said tool_calls/function_call

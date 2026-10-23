@@ -122,9 +122,9 @@ interactions:
     proto: HTTP/1.1
     proto_major: 1
     proto_minor: 1
-    content_length: 712
+    content_length: 773
     host: ""
-    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":"You are a helpful assistant","role":"system"},{"content":[{"text":"What''s the weather in Florence,Italy?","type":"input_text"}],"role":"user"},{"arguments":"{\"location\":\"Florence, Italy\"}","call_id":"call_XX4zIshrJWNnM1Z3n6XsaSxP","name":"weather","type":"function_call"},{"call_id":"call_XX4zIshrJWNnM1Z3n6XsaSxP","output":"40 C","type":"function_call_output"}],"model":"gpt-4o-mini","tool_choice":"auto","tools":[{"strict":false,"parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location","type":"function"}]}'
+    body: '{"max_output_tokens":4000,"store":false,"input":[{"content":"You are a helpful assistant","role":"system"},{"content":[{"text":"What''s the weather in Florence,Italy?","type":"input_text"}],"role":"user"},{"arguments":"{\"location\":\"Florence, Italy\"}","call_id":"call_XX4zIshrJWNnM1Z3n6XsaSxP","name":"weather","type":"function_call","id":"fc_0d9e9b38807e0d8a016a3c120cb92c81a193e05ae6e58246c3"},{"call_id":"call_XX4zIshrJWNnM1Z3n6XsaSxP","output":"40 C","type":"function_call_output"}],"model":"gpt-4o-mini","tool_choice":"auto","tools":[{"strict":false,"parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"},"name":"weather","description":"Get weather information for a location","type":"function"}]}'
     headers:
       Accept:
       - application/json

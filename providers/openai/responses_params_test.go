@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"charm.land/fantasy"
+	"github.com/charmbracelet/openai-go/responses"
 	"github.com/stretchr/testify/require"
 )
 
@@ -242,7 +243,7 @@ func TestResponsesProviderMetadata_Helper(t *testing.T) {
 	t.Run("non-empty id", func(t *testing.T) {
 		t.Parallel()
 
-		metadata := responsesProviderMetadata("resp_123")
+		metadata := responsesProviderMetadata(responses.Response{ID: "resp_123"})
 		require.Len(t, metadata, 1)
 
 		providerMetadata, ok := metadata[Name].(*ResponsesProviderMetadata)
@@ -253,7 +254,7 @@ func TestResponsesProviderMetadata_Helper(t *testing.T) {
 	t.Run("empty id", func(t *testing.T) {
 		t.Parallel()
 
-		metadata := responsesProviderMetadata("")
+		metadata := responsesProviderMetadata(responses.Response{})
 		require.Empty(t, metadata)
 	})
 }

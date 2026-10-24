@@ -64,6 +64,8 @@ fmt.Println(result.Response.Content.Text())
 
 Yeah! Fantasy is designed to support a wide variety of providers and models under a single API. While many providers such as Microsoft Azure, Amazon Bedrock, and OpenRouter have dedicated packages in Fantasy, many others work just fine with `openaicompat`, the generic OpenAI-compatible layer. That said, if you find a provider that’s not compatible and needs special treatment, please let us know in an issue (or open a PR).
 
+One such special case is `providers/synthetic` for [Synthetic](https://synthetic.new): it wraps the OpenAI-compatible API and makes rate limits self-explanatory. When your subscription quota is exhausted, it queries the [quota endpoint](https://dev.synthetic.new/docs/synthetic/quotas) (which Synthetic does not count against your subscription) and reports the exact renewal moment, so the retry middleware waits for it when it fits its budget instead of hammering a locked door, and a failure tells you when to come back rather than just "too many requests".
+
 ## Work in Progress
 
 We built Fantasy to power [Crush](https://github.com/charmbracelet/crush), a hot coding agent for glamourously invincible development. Given that, Fantasy does not yet support things like:

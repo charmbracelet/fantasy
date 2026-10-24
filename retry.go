@@ -16,9 +16,24 @@ type RetryFn[T any] func() (T, error)
 type RetryFunction[T any] func(ctx context.Context, fn RetryFn[T]) (T, error)
 
 // getRetryDelayInMs calculates the retry delay based on error headers and exponential backoff.
-func getRetryDelayInMs(err error, exponentialBackoffDelay time.Duration) time.Duration {
+// maxHeaderDelay bounds how long a header-declared wait is honored; anything
+// beyond it falls back to exponential backoff.
+func getRetryDelayInMs(err error, exponentialBackoffDelay, maxHeaderDelay time.Duration) time.Duration {
 	providerErr, ok := errors.AsType[*ProviderError](err)
-	if !ok || providerErr.ResponseHeaders == nil {
+	if !ok {
+		return exponentialBackoffDelay
+	}
+
+	// A declared deadline overrides both headers and backoff when it fits
+	// the budget; a deadline beyond it keeps the previous behavior.
+	if !providerErr.RetryAt.IsZero() {
+		if wait := time.Until(providerErr.RetryAt); wait > 0 && wait <= maxHeaderDelay {
+			return wait
+		}
+		return exponentialBackoffDelay
+	}
+
+	if providerErr.ResponseHeaders == nil {
 		return exponentialBackoffDelay
 	}
 
@@ -45,8 +60,8 @@ func getRetryDelayInMs(err error, exponentialBackoffDelay time.Duration) time.Du
 	}
 
 	// Check that the delay is reasonable:
-	// 0 <= ms < 60 seconds or ms < exponentialBackoffDelay
-	if ms > 0 && (ms < 60*time.Second || ms < exponentialBackoffDelay) {
+	// 0 <= ms < maxHeaderDelay or ms < exponentialBackoffDelay
+	if ms > 0 && (ms < maxHeaderDelay || ms < exponentialBackoffDelay) {
 		return ms
 	}
 
@@ -55,7 +70,14 @@ func getRetryDelayInMs(err error, exponentialBackoffDelay time.Duration) time.Du
 
 // RetryWithExponentialBackoffRespectingRetryHeaders creates a retry function that retries
 // a failed operation with exponential backoff, while respecting rate limit headers
-// (retry-after-ms and retry-after) if they are provided and reasonable (0-60 seconds).
+// (retry-after-ms and retry-after) if they are provided and reasonable (within
+// RetryOptions.MaxRetryDelay, 60 seconds by default).
+//
+// A provider-declared retry deadline (ProviderError.RetryAt) is waited out
+// exactly when it fits within MaxRetryDelay. A quota exhaustion whose
+// deadline lies beyond that budget is not retried at all: the original error,
+// naming the renewal moment, is returned immediately instead of burning
+// retries that cannot succeed.
 //
 // When OnAuthRefresh is set and the operation ends in an authentication error,
 // the hook is given one chance to refresh credentials. On success the entire
@@ -86,6 +108,14 @@ type RetryOptions struct {
 	BackoffFactor  float64
 	OnRetry        OnRetryCallback
 
+	// MaxRetryDelay bounds how long a provider-declared wait is honored,
+	// whether from a retry-after header or a quota renewal deadline. Waits
+	// within it are served exactly; beyond it a rate limit falls back to
+	// exponential backoff, and a quota exhaustion is not retried at all. It
+	// does not cap exponential backoff growth. Zero means the 60 second
+	// default.
+	MaxRetryDelay time.Duration
+
 	// OnAuthRefresh is called when an operation fails with an authentication
 	// error the caller may be able to resolve (e.g. an expired SSO session).
 	// If it returns nil, the entire retry pass restarts with a fresh retry
@@ -115,6 +145,7 @@ func DefaultRetryOptions() RetryOptions {
 		MaxRetries:     3,
 		InitialDelayIn: 5000 * time.Millisecond,
 		BackoffFactor:  2.0,
+		MaxRetryDelay:  60 * time.Second,
 	}
 }
 
@@ -143,7 +174,10 @@ func retryWithExponentialBackoff[T any](ctx context.Context, fn RetryFn[T], opti
 
 	var providerErr *ProviderError
 	if isRetryableError(err) && tryNumber <= options.MaxRetries {
-		delay := getRetryDelayInMs(err, options.InitialDelayIn)
+		if quotaExhaustedBeyondBudget(err, options) {
+			return zero, err // the quota renews beyond the retry budget: name the moment, don't burn retries
+		}
+		delay := getRetryDelayInMs(err, options.InitialDelayIn, options.maxRetryDelay())
 		if options.OnRetry != nil {
 			providerErr, _ = errors.AsType[*ProviderError](err)
 			options.OnRetry(providerErr, delay)
@@ -167,6 +201,29 @@ func retryWithExponentialBackoff[T any](ctx context.Context, fn RetryFn[T], opti
 	}
 
 	return zero, &RetryError{newErrors}
+}
+
+// maxRetryDelay resolves the zero value to the default budget.
+func (o RetryOptions) maxRetryDelay() time.Duration {
+	if o.MaxRetryDelay > 0 {
+		return o.MaxRetryDelay
+	}
+	return 60 * time.Second
+}
+
+// quotaExhaustedBeyondBudget reports whether err is a quota exhaustion whose
+// declared renewal moment lies further away than the retry budget. Such a
+// wait cannot succeed within the budget, so the caller should stop instead
+// of burning retries.
+func quotaExhaustedBeyondBudget(err error, options RetryOptions) bool {
+	providerErr, ok := errors.AsType[*ProviderError](err)
+	if !ok || !providerErr.QuotaExhausted {
+		return false
+	}
+	if providerErr.RetryAt.IsZero() {
+		return false // IsRetryable already stopped the deadline-less case
+	}
+	return time.Until(providerErr.RetryAt) > options.maxRetryDelay()
 }
 
 // isAuthError reports whether the error is an authentication failure that a

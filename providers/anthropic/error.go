@@ -23,6 +23,7 @@ const awsCredentialErrorFragment = "failed to refresh cached credentials" //noli
 
 func toProviderErr(err error) error {
 	if apiErr, ok := errors.AsType[*anthropic.Error](err); ok {
+		headers := toHeaderMap(apiErr.Response.Header)
 		providerErr := &fantasy.ProviderError{
 			Title:           apiErrorTitle(apiErr),
 			Message:         apiErr.Error(),
@@ -30,13 +31,17 @@ func toProviderErr(err error) error {
 			URL:             apiErr.Request.URL.String(),
 			StatusCode:      apiErr.StatusCode,
 			RequestBody:     apiErr.DumpRequest(true),
-			ResponseHeaders: toHeaderMap(apiErr.Response.Header),
+			ResponseHeaders: headers,
 			ResponseBody:    apiErr.DumpResponse(true),
 			ErrorType:       string(apiErr.Type()),
 			TransientError:  fantasy.TransientStreamErrorTypes[string(apiErr.Type())],
+			RetryAt:         fantasy.RetryAtFromHeaders(headers),
 		}
 
 		parseContextTooLargeError(apiErr.Error(), providerErr)
+		if fantasy.IsQuotaExhaustedMessage(apiErr.Error()) {
+			providerErr.QuotaExhausted = true
+		}
 
 		return providerErr
 	}

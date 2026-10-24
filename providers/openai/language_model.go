@@ -9,7 +9,6 @@ import (
 	"io"
 	"maps"
 	"net/http"
-	"reflect"
 	"slices"
 	"strings"
 
@@ -1074,40 +1073,8 @@ func (o languageModel) streamObjectWithJSONMode(ctx context.Context, call fantas
 
 			if choice.Delta.Content != "" {
 				accumulated += choice.Delta.Content
-
-				obj, state, parseErr := schema.ParsePartialJSON(accumulated)
-
-				if state == schema.ParseStateSuccessful || state == schema.ParseStateRepaired {
-					if err := schema.ValidateAgainstSchema(obj, call.Schema); err == nil {
-						if !reflect.DeepEqual(obj, lastParsedObject) {
-							if !yield(fantasy.ObjectStreamPart{
-								Type:   fantasy.ObjectStreamPartTypeObject,
-								Object: obj,
-							}) {
-								return
-							}
-							lastParsedObject = obj
-						}
-					}
-				}
-
-				if state == schema.ParseStateFailed && call.RepairText != nil {
-					repairedText, repairErr := call.RepairText(ctx, accumulated, parseErr)
-					if repairErr == nil {
-						obj2, state2, _ := schema.ParsePartialJSON(repairedText)
-						if (state2 == schema.ParseStateSuccessful || state2 == schema.ParseStateRepaired) &&
-							schema.ValidateAgainstSchema(obj2, call.Schema) == nil {
-							if !reflect.DeepEqual(obj2, lastParsedObject) {
-								if !yield(fantasy.ObjectStreamPart{
-									Type:   fantasy.ObjectStreamPartTypeObject,
-									Object: obj2,
-								}) {
-									return
-								}
-								lastParsedObject = obj2
-							}
-						}
-					}
+				if !object.EmitParsedObject(ctx, call, accumulated, &lastParsedObject, yield) {
+					return
 				}
 			}
 		}

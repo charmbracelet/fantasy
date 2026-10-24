@@ -34,7 +34,9 @@ linters:
       - text: '(slog|log)\.\w+'
         linters:
           - noctx
-      - path: providers/internal/prompttest/
+      # cases.go is the shared fixture corpus: repeated case shapes are the
+      # point of table-driven test data. The golden harness stays linted.
+      - path: providers/internal/prompttest/cases.go
         linters:
           - dupl
     generated: lax

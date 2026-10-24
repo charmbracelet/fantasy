@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/charmbracelet/x/exp/slice"
 	"golang.org/x/net/http2"
@@ -69,13 +70,36 @@ type ProviderError struct {
 	// payload. Treat it as a hint worth acting on when present rather than a
 	// field every error carries.
 	ErrorType string
+
+	// RetryAt is the earliest moment the provider said a retry may succeed,
+	// parsed from the retry-after or retry-after-ms response header, or
+	// supplied by a provider that knows its quota renewal schedule. The zero
+	// value means the provider named no deadline.
+	//
+	// The retry middleware waits until this moment when the wait fits its
+	// budget (RetryOptions.MaxRetryDelay) and otherwise falls back to
+	// exponential backoff. Error() surfaces it so a failed operation reports
+	// when it becomes worth retrying, not just that it failed.
+	RetryAt time.Time
+
+	// QuotaExhausted marks a rate limit that a billing or subscription quota
+	// hit, not a per-minute throttle. A quota renews on the provider's
+	// billing schedule — hours or days away — so when RetryAt is unknown,
+	// retrying within any automatic budget cannot succeed and IsRetryable
+	// reports false. With RetryAt set, the retry middleware decides from the
+	// deadline instead.
+	QuotaExhausted bool
 }
 
 func (m *ProviderError) Error() string {
-	if m.Title == "" {
-		return m.Message
+	message := m.Message
+	if wait := time.Until(m.RetryAt); wait > 0 {
+		message = fmt.Sprintf("%s; retry at %s (in %s)", message, m.RetryAt.UTC().Format(time.RFC3339), wait.Round(time.Second))
 	}
-	return fmt.Sprintf("%s: %s", m.Title, m.Message)
+	if m.Title == "" {
+		return message
+	}
+	return fmt.Sprintf("%s: %s", m.Title, message)
 }
 
 // Unwrap returns the underlying cause so errors.Is and errors.As can
@@ -90,7 +114,14 @@ func (m *ProviderError) Unwrap() error {
 // evaluates to true, if the HTTP status code indicates a retryable
 // condition (408, 409, 429, or any 5xx), or if the cause is a transient
 // HTTP/2 transport error.
+//
+// A quota exhaustion without a known renewal deadline is the exception: the
+// quota renews on the provider's billing schedule, which no automatic
+// retry budget can outwait, so it reports false.
 func (m *ProviderError) IsRetryable() bool {
+	if m.QuotaExhausted && m.RetryAt.IsZero() {
+		return false
+	}
 	if m.TransientError {
 		return true
 	}
@@ -330,6 +361,66 @@ func (e RetryError) Unwrap() error {
 // ErrorTitleForStatusCode returns a human-readable title for a given HTTP status code.
 func ErrorTitleForStatusCode(statusCode int) string {
 	return strings.ToLower(http.StatusText(statusCode))
+}
+
+// quotaExhaustedFragment identifies a billing or subscription quota hit in
+// an error body. Synthetic (synthetic.new) answers an exhausted subscription
+// with "You've exceeded your subscription rate limits"; per-minute throttles
+// say "rate limit" without "subscription" and must keep their default retry
+// classification.
+const quotaExhaustedFragment = "exceeded your subscription"
+
+// IsQuotaExhaustedMessage reports whether a provider error message names a
+// billing or subscription quota hit, as opposed to a per-minute throttle.
+// Providers that cannot classify quota exhaustion from their SDK error type
+// match the message against this instead, so ProviderError.QuotaExhausted is
+// set for the retry middleware to act on.
+func IsQuotaExhaustedMessage(message string) bool {
+	return strings.Contains(strings.ToLower(message), quotaExhaustedFragment)
+}
+
+// RetryAtFromHeaders reports the earliest retry moment a provider declared
+// in the standard rate-limit response headers: retry-after-ms (milliseconds,
+// the more precise form) and retry-after (delay-seconds or an HTTP-date). It
+// returns the zero time when the headers carry no usable deadline.
+//
+// Header names are matched case-insensitively, since ProviderError stores
+// headers as the provider's SDK spelled them. Per-limit reset hints such as
+// x-ratelimit-reset-requests describe when a token bucket refills, not when
+// a retry is sanctioned, so they are deliberately not consulted.
+func RetryAtFromHeaders(headers map[string]string) time.Time {
+	if headers == nil {
+		return time.Time{}
+	}
+
+	header := func(name string) (string, bool) {
+		for k, v := range headers {
+			if strings.EqualFold(k, name) {
+				return v, true
+			}
+		}
+		return "", false
+	}
+
+	if retryAfterMs, exists := header("retry-after-ms"); exists {
+		if ms, err := strconv.ParseFloat(retryAfterMs, 64); err == nil && ms > 0 {
+			return time.Now().Add(time.Duration(ms * float64(time.Millisecond)))
+		}
+	}
+
+	// About the Retry-After header: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After
+	if retryAfter, exists := header("retry-after"); exists {
+		if seconds, err := strconv.ParseFloat(retryAfter, 64); err == nil && seconds > 0 {
+			return time.Now().Add(time.Duration(seconds * float64(time.Second)))
+		}
+		// Try parsing as HTTP date; one already in the past names no future
+		// moment, so it is no deadline at all.
+		if t, err := time.Parse(time.RFC1123, retryAfter); err == nil && t.After(time.Now()) {
+			return t
+		}
+	}
+
+	return time.Time{}
 }
 
 // NoObjectGeneratedError is returned when object generation fails

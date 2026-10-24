@@ -7,7 +7,9 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
+	"time"
 
 	"charm.land/fantasy"
 	"github.com/charmbracelet/openai-go/packages/ssestream"
@@ -250,4 +252,81 @@ func TestToProviderErr_CarriesTheErrorType(t *testing.T) {
 			t.Errorf("ErrorType = %q, want %q", providerErr.ErrorType, "tokens")
 		}
 	})
+}
+
+func TestToProviderErr_SyntheticSubscriptionQuota(t *testing.T) {
+	t.Parallel()
+
+	// Synthetic (synthetic.new) answers an exhausted subscription quota with
+	// a bare string error body and no retry headers, so nothing but the
+	// message can classify it.
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusTooManyRequests)
+		_, _ = w.Write([]byte(`{"error":"You've exceeded your subscription rate limits. Upgrade, or try again later. You can view your usage at https://synthetic.new/billing"}`))
+	}))
+	defer server.Close()
+
+	provider, err := New(WithAPIKey("test-api-key"), WithBaseURL(server.URL))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	model, err := provider.LanguageModel(context.Background(), "hf:zai-org/GLM-5.3")
+	if err != nil {
+		t.Fatalf("LanguageModel: %v", err)
+	}
+	_, err = model.Generate(context.Background(), fantasy.Call{Prompt: testPrompt})
+	if err == nil {
+		t.Fatal("the request was meant to be rejected")
+	}
+
+	providerErr, ok := errors.AsType[*fantasy.ProviderError](err)
+	if !ok {
+		t.Fatalf("error is %T, want *fantasy.ProviderError", err)
+	}
+	if !providerErr.QuotaExhausted {
+		t.Error("QuotaExhausted = false, want true for a subscription quota body")
+	}
+	if providerErr.IsRetryable() {
+		t.Error("quota exhaustion without a renewal deadline must not be retried")
+	}
+}
+
+func TestToProviderErr_RetryDeadlineFromHeaders(t *testing.T) {
+	t.Parallel()
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Retry-After", "7")
+		w.WriteHeader(http.StatusTooManyRequests)
+		_, _ = w.Write([]byte(`{"error":{"message":"Rate limit reached","type":"tokens","code":"rate_limit_exceeded"}}`))
+	}))
+	defer server.Close()
+
+	provider, err := New(WithAPIKey("test-api-key"), WithBaseURL(server.URL))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	model, err := provider.LanguageModel(context.Background(), "gpt-4")
+	if err != nil {
+		t.Fatalf("LanguageModel: %v", err)
+	}
+	_, err = model.Generate(context.Background(), fantasy.Call{Prompt: testPrompt})
+	if err == nil {
+		t.Fatal("the request was meant to be rejected")
+	}
+
+	providerErr, ok := errors.AsType[*fantasy.ProviderError](err)
+	if !ok {
+		t.Fatalf("error is %T, want *fantasy.ProviderError", err)
+	}
+	if providerErr.RetryAt.IsZero() {
+		t.Fatal("RetryAt is zero, want a deadline parsed from the Retry-After header")
+	}
+	if wait := time.Until(providerErr.RetryAt); wait <= 0 || wait > 7*time.Second {
+		t.Errorf("time.Until(RetryAt) = %v, want within (0s, 7s]", wait)
+	}
+	if !strings.Contains(providerErr.Error(), "retry at ") {
+		t.Errorf("Error() = %q, want it to name the retry deadline", providerErr.Error())
+	}
 }

@@ -3,7 +3,10 @@ package fantasy
 import (
 	"errors"
 	"fmt"
+	"net/http"
+	"strings"
 	"testing"
+	"time"
 
 	"golang.org/x/net/http2"
 )
@@ -184,4 +187,134 @@ func TestConnectionLostIsRetryable(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestRetryAtFromHeaders(t *testing.T) {
+	t.Parallel()
+
+	t.Run("delay seconds", func(t *testing.T) {
+		t.Parallel()
+
+		retryAt := RetryAtFromHeaders(map[string]string{"retry-after": "30"})
+		if wait := time.Until(retryAt); wait <= 0 || wait > 30*time.Second {
+			t.Errorf("time.Until(RetryAt) = %v, want within (0s, 30s]", wait)
+		}
+	})
+
+	t.Run("milliseconds take precedence", func(t *testing.T) {
+		t.Parallel()
+
+		retryAt := RetryAtFromHeaders(map[string]string{"retry-after-ms": "500", "retry-after": "30"})
+		if wait := time.Until(retryAt); wait <= 0 || wait > 500*time.Millisecond {
+			t.Errorf("time.Until(RetryAt) = %v, want within (0s, 500ms]", wait)
+		}
+	})
+
+	t.Run("http date", func(t *testing.T) {
+		t.Parallel()
+
+		want := time.Now().UTC().Add(time.Hour).Truncate(time.Second)
+		retryAt := RetryAtFromHeaders(map[string]string{"retry-after": want.Format(time.RFC1123)})
+		if diff := retryAt.Sub(want); diff < -time.Second || diff > time.Second {
+			t.Errorf("RetryAt = %v, want %v", retryAt, want)
+		}
+	})
+
+	t.Run("case-insensitive header names", func(t *testing.T) {
+		t.Parallel()
+
+		if RetryAtFromHeaders(map[string]string{"Retry-After": "30"}).IsZero() {
+			t.Error("RetryAt is zero for a canonical-cased Retry-After header")
+		}
+	})
+
+	t.Run("missing, invalid, and non-positive values", func(t *testing.T) {
+		t.Parallel()
+
+		for name, headers := range map[string]map[string]string{
+			"nil":        nil,
+			"none":       {},
+			"invalid":    {"retry-after": "invalid"},
+			"zero":       {"retry-after": "0"},
+			"negative":   {"retry-after": "-5"},
+			"invalid-ms": {"retry-after-ms": "soon"},
+			"past date":  {"retry-after": time.Now().Add(-time.Hour).UTC().Format(time.RFC1123)},
+		} {
+			t.Run(name, func(t *testing.T) {
+				t.Parallel()
+
+				if retryAt := RetryAtFromHeaders(headers); !retryAt.IsZero() {
+					t.Errorf("RetryAtFromHeaders(%v) = %v, want the zero time", headers, retryAt)
+				}
+			})
+		}
+	})
+}
+
+func TestIsQuotaExhaustedMessage(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		name    string
+		message string
+		want    bool
+	}{
+		{"synthetic subscription body", `{"error":"You've exceeded your subscription rate limits. Upgrade, or try again later."}`, true},
+		{"case-insensitive", "you have EXCEEDED YOUR SUBSCRIPTION quota", true},
+		{"plain rate limit", "Rate limit reached for requests", false},
+		{"unrelated", "model overloaded", false},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			if got := IsQuotaExhaustedMessage(tc.message); got != tc.want {
+				t.Errorf("IsQuotaExhaustedMessage(%q) = %v, want %v", tc.message, got, tc.want)
+			}
+		})
+	}
+}
+
+func TestProviderErrorRetryDeadline(t *testing.T) {
+	t.Parallel()
+
+	t.Run("Error names a future deadline", func(t *testing.T) {
+		t.Parallel()
+
+		err := &ProviderError{
+			Title:   "too many requests",
+			Message: "quota gone",
+			RetryAt: time.Now().Add(90 * time.Minute),
+		}
+		if msg := err.Error(); !strings.Contains(msg, "retry at ") || !strings.Contains(msg, "(in 1h30m") {
+			t.Errorf("Error() = %q, want it to name the deadline and the wait", msg)
+		}
+	})
+
+	t.Run("Error omits a passed deadline", func(t *testing.T) {
+		t.Parallel()
+
+		err := &ProviderError{Title: "too many requests", Message: "quota gone", RetryAt: time.Now().Add(-time.Minute)}
+		if msg := err.Error(); strings.Contains(msg, "retry at") {
+			t.Errorf("Error() = %q, want no deadline suffix once it has passed", msg)
+		}
+	})
+
+	t.Run("quota exhaustion without a deadline is not retryable", func(t *testing.T) {
+		t.Parallel()
+
+		err := &ProviderError{StatusCode: http.StatusTooManyRequests, QuotaExhausted: true}
+		if err.IsRetryable() {
+			t.Error("quota exhaustion with no renewal deadline must not be retried")
+		}
+	})
+
+	t.Run("quota exhaustion with a deadline stays retryable", func(t *testing.T) {
+		t.Parallel()
+
+		err := &ProviderError{StatusCode: http.StatusTooManyRequests, QuotaExhausted: true, RetryAt: time.Now().Add(time.Minute)}
+		if !err.IsRetryable() {
+			t.Error("quota exhaustion with a renewal deadline is retryable at that moment")
+		}
+	})
 }

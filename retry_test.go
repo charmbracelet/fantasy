@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"net"
+	"net/http"
+	"strings"
 	"testing"
 	"time"
 )
@@ -437,7 +439,7 @@ func TestGetRetryDelayInMs(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			err := &ProviderError{StatusCode: 429, ResponseHeaders: tt.headers}
-			if got := getRetryDelayInMs(err, backoff); got != tt.want {
+			if got := getRetryDelayInMs(err, backoff, 60*time.Second); got != tt.want {
 				t.Errorf("getRetryDelayInMs() = %v, want %v", got, tt.want)
 			}
 		})
@@ -472,4 +474,145 @@ func TestRetryWithExponentialBackoff_FractionalRetryHeader(t *testing.T) {
 	if attempts != 1 {
 		t.Errorf("attempts = %d, want 1", attempts)
 	}
+}
+
+func TestRetryDeadline(t *testing.T) {
+	t.Parallel()
+
+	quotaBody := `{"error":"You've exceeded your subscription rate limits. Upgrade, or try again later."}`
+
+	t.Run("quota exhaustion without a deadline is not retried", func(t *testing.T) {
+		t.Parallel()
+
+		attempts := 0
+		retry := RetryWithExponentialBackoffRespectingRetryHeaders[int](RetryOptions{
+			MaxRetries:     3,
+			InitialDelayIn: time.Millisecond,
+			BackoffFactor:  2,
+		})
+
+		_, err := retry(context.Background(), func() (int, error) {
+			attempts++
+			return 0, &ProviderError{
+				StatusCode:     http.StatusTooManyRequests,
+				Title:          "too many requests",
+				Message:        quotaBody,
+				QuotaExhausted: true,
+			}
+		})
+
+		if attempts != 1 {
+			t.Errorf("attempts = %d, want 1: no retry can succeed without a renewal deadline", attempts)
+		}
+		if _, ok := errors.AsType[*ProviderError](err); !ok {
+			t.Fatalf("error = %v, want the original *ProviderError unwrapped", err)
+		}
+	})
+
+	t.Run("quota exhaustion renewing beyond the budget fails fast", func(t *testing.T) {
+		t.Parallel()
+
+		attempts := 0
+		retry := RetryWithExponentialBackoffRespectingRetryHeaders[int](RetryOptions{
+			MaxRetries:     3,
+			InitialDelayIn: time.Millisecond,
+			BackoffFactor:  2,
+			MaxRetryDelay:  time.Second,
+		})
+
+		quotaErr := &ProviderError{
+			StatusCode:     http.StatusTooManyRequests,
+			Title:          "too many requests",
+			Message:        quotaBody,
+			QuotaExhausted: true,
+			RetryAt:        time.Now().Add(time.Hour),
+		}
+
+		_, err := retry(context.Background(), func() (int, error) {
+			attempts++
+			return 0, quotaErr
+		})
+
+		if attempts != 1 {
+			t.Errorf("attempts = %d, want 1: renewal lies beyond the retry budget", attempts)
+		}
+		if err != error(quotaErr) {
+			t.Fatalf("error = %v, want the original quota error naming the renewal moment", err)
+		}
+		if !strings.Contains(err.Error(), "retry at ") {
+			t.Errorf("error %q does not name the retry deadline", err.Error())
+		}
+	})
+
+	t.Run("retry deadline within the budget is waited out", func(t *testing.T) {
+		t.Parallel()
+
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+
+		var delay time.Duration
+		attempts := 0
+		retry := RetryWithExponentialBackoffRespectingRetryHeaders[int](RetryOptions{
+			MaxRetries:     1,
+			InitialDelayIn: 5 * time.Second,
+			BackoffFactor:  2,
+			MaxRetryDelay:  time.Minute,
+			OnRetry: func(_ *ProviderError, d time.Duration) {
+				delay = d
+				cancel() // Observe the selected delay without sleeping or making another request.
+			},
+		})
+
+		_, err := retry(ctx, func() (int, error) {
+			attempts++
+			return 0, &ProviderError{
+				StatusCode:     http.StatusTooManyRequests,
+				RetryAt:        time.Now().Add(30 * time.Second),
+				QuotaExhausted: true,
+			}
+		})
+
+		if attempts != 1 {
+			t.Fatalf("attempts = %d, want 1", attempts)
+		}
+		if delay <= 25*time.Second || delay > 30*time.Second {
+			t.Errorf("retry delay = %v, want roughly the 30s until the deadline", delay)
+		}
+		if !errors.Is(err, context.Canceled) {
+			t.Errorf("error = %v, want context.Canceled", err)
+		}
+	})
+
+	t.Run("header deadline beyond the budget falls back to backoff", func(t *testing.T) {
+		t.Parallel()
+
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+
+		var delay time.Duration
+		retry := RetryWithExponentialBackoffRespectingRetryHeaders[int](RetryOptions{
+			MaxRetries:     1,
+			InitialDelayIn: 5 * time.Second,
+			BackoffFactor:  2,
+			OnRetry: func(_ *ProviderError, d time.Duration) {
+				delay = d
+				cancel()
+			},
+		})
+
+		_, err := retry(ctx, func() (int, error) {
+			return 0, &ProviderError{
+				StatusCode:      http.StatusTooManyRequests,
+				ResponseHeaders: map[string]string{"retry-after": "3600"},
+				RetryAt:         time.Now().Add(time.Hour),
+			}
+		})
+
+		if delay != 5*time.Second {
+			t.Errorf("retry delay = %v, want the 5s backoff: a non-quota hint beyond the budget keeps previous behavior", delay)
+		}
+		if !errors.Is(err, context.Canceled) {
+			t.Errorf("error = %v, want context.Canceled", err)
+		}
+	})
 }

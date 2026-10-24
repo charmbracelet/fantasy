@@ -28,6 +28,7 @@ var (
 func toProviderErr(err error) error {
 	if apiErr, ok := errors.AsType[*openai.Error](err); ok {
 		message := toProviderErrMessage(apiErr)
+		headers := toHeaderMap(apiErr.Response.Header)
 		providerErr := &fantasy.ProviderError{
 			Title:           cmp.Or(fantasy.ErrorTitleForStatusCode(apiErr.StatusCode), "provider request failed"),
 			Message:         message,
@@ -35,12 +36,16 @@ func toProviderErr(err error) error {
 			URL:             apiErr.Request.URL.String(),
 			StatusCode:      apiErr.StatusCode,
 			RequestBody:     apiErr.DumpRequest(true),
-			ResponseHeaders: toHeaderMap(apiErr.Response.Header),
+			ResponseHeaders: headers,
 			ResponseBody:    apiErr.DumpResponse(true),
 			ErrorType:       cmp.Or(apiErr.Type, apiErr.Code),
+			RetryAt:         fantasy.RetryAtFromHeaders(headers),
 		}
 
 		parseContextTooLargeError(message, providerErr)
+		if fantasy.IsQuotaExhaustedMessage(message) {
+			providerErr.QuotaExhausted = true
+		}
 
 		return providerErr
 	}

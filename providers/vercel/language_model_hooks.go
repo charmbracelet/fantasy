@@ -585,6 +585,51 @@ func languageModelStreamUsage(chunk openaisdk.ChatCompletionChunk, _ map[string]
 	}
 }
 
+// singleTextMessage converts a message whose entire content is one text part
+// into the flat SDK message for its role, applying the message-level
+// anthropic cache hint. handled is false when the message does not qualify,
+// and the caller should build the array form instead. warning is non-nil
+// when the single part claimed to be text but did not convert; the caller
+// should record it and drop the message. vercel and openrouter deliberately
+// keep their own copies of this helper; the prompttest golden matrix makes
+// any drift between them visible.
+func singleTextMessage(msg fantasy.Message) (message openaisdk.ChatCompletionMessageParamUnion, warning *fantasy.CallWarning, handled bool) {
+	if len(msg.Content) != 1 || msg.Content[0].GetType() != fantasy.ContentTypeText {
+		return openaisdk.ChatCompletionMessageParamUnion{}, nil, false
+	}
+	textPart, ok := fantasy.AsContentType[fantasy.TextPart](msg.Content[0])
+	if !ok {
+		return openaisdk.ChatCompletionMessageParamUnion{}, &fantasy.CallWarning{
+			Type:    fantasy.CallWarningTypeOther,
+			Message: string(msg.Role) + " message text part does not have the right type",
+		}, true
+	}
+
+	switch msg.Role {
+	case fantasy.MessageRoleUser:
+		message = openaisdk.UserMessage(textPart.Text)
+		if cache := anthropic.GetCacheControl(msg.ProviderOptions); cache != nil {
+			message.OfUser.SetExtraFields(map[string]any{
+				"cache_control": map[string]string{
+					"type": cache.Type,
+				},
+			})
+		}
+	case fantasy.MessageRoleAssistant:
+		message = openaisdk.AssistantMessage(textPart.Text)
+		if cache := anthropic.GetCacheControl(msg.ProviderOptions); cache != nil {
+			message.OfAssistant.SetExtraFields(map[string]any{
+				"cache_control": map[string]string{
+					"type": cache.Type,
+				},
+			})
+		}
+	default:
+		return openaisdk.ChatCompletionMessageParamUnion{}, nil, false
+	}
+	return message, nil, true
+}
+
 func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.ChatCompletionMessageParamUnion, []fantasy.CallWarning) {
 	var messages []openaisdk.ChatCompletionMessageParamUnion
 	var warnings []fantasy.CallWarning
@@ -635,26 +680,13 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 			messages = append(messages, systemMsg)
 
 		case fantasy.MessageRoleUser:
-			//nolint:dupl // mirrored with the assistant branch below: the differing lines are the role's SDK call.
-			if len(msg.Content) == 1 && msg.Content[0].GetType() == fantasy.ContentTypeText {
-				textPart, ok := fantasy.AsContentType[fantasy.TextPart](msg.Content[0])
-				if !ok {
-					warnings = append(warnings, fantasy.CallWarning{
-						Type:    fantasy.CallWarningTypeOther,
-						Message: "user message text part does not have the right type",
-					})
-					continue
-				}
-				userMsg := openaisdk.UserMessage(textPart.Text)
-				anthropicCache := anthropic.GetCacheControl(msg.ProviderOptions)
-				if anthropicCache != nil {
-					userMsg.OfUser.SetExtraFields(map[string]any{
-						"cache_control": map[string]string{
-							"type": anthropicCache.Type,
-						},
-					})
-				}
-				messages = append(messages, userMsg)
+			simple, warning, handled := singleTextMessage(msg)
+			if warning != nil {
+				warnings = append(warnings, *warning)
+				continue
+			}
+			if handled {
+				messages = append(messages, simple)
 				continue
 			}
 
@@ -808,26 +840,13 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 			messages = append(messages, openaisdk.UserMessage(content))
 
 		case fantasy.MessageRoleAssistant:
-			//nolint:dupl // mirrored with the user branch above: the differing lines are the role's SDK call.
-			if len(msg.Content) == 1 && msg.Content[0].GetType() == fantasy.ContentTypeText {
-				textPart, ok := fantasy.AsContentType[fantasy.TextPart](msg.Content[0])
-				if !ok {
-					warnings = append(warnings, fantasy.CallWarning{
-						Type:    fantasy.CallWarningTypeOther,
-						Message: "assistant message text part does not have the right type",
-					})
-					continue
-				}
-				assistantMsg := openaisdk.AssistantMessage(textPart.Text)
-				anthropicCache := anthropic.GetCacheControl(msg.ProviderOptions)
-				if anthropicCache != nil {
-					assistantMsg.OfAssistant.SetExtraFields(map[string]any{
-						"cache_control": map[string]string{
-							"type": anthropicCache.Type,
-						},
-					})
-				}
-				messages = append(messages, assistantMsg)
+			simple, warning, handled := singleTextMessage(msg)
+			if warning != nil {
+				warnings = append(warnings, *warning)
+				continue
+			}
+			if handled {
+				messages = append(messages, simple)
 				continue
 			}
 

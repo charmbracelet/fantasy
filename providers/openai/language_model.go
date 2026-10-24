@@ -474,6 +474,23 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 	var usage fantasy.Usage
 	var finishReason string
 	return func(yield func(fantasy.StreamPart) bool) {
+		// Surface metadata that is known before the stream completes
+		// (e.g. response headers captured by the header func). Trailers
+		// are not available yet; they land on the finish part instead.
+		if o.headerFunc != nil {
+			if header := capture.header(); header != nil {
+				sink := &ProviderMetadata{}
+				o.headerFunc(header, sink)
+				if len(sink.ExtraFields) > 0 {
+					if !yield(fantasy.StreamPart{
+						Type:             fantasy.StreamPartTypeProviderMetadata,
+						ProviderMetadata: fantasy.ProviderMetadata{Name: sink},
+					}) {
+						return
+					}
+				}
+			}
+		}
 		if len(warnings) > 0 {
 			if !yield(fantasy.StreamPart{
 				Type:     fantasy.StreamPartTypeWarnings,

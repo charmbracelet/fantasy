@@ -18,49 +18,17 @@ func TestResponsesGenerate_ContentFilterToolCallsKeepFilterReason(t *testing.T) 
 	t.Parallel()
 
 	server := newMockServer()
-	defer server.close()
-	server.response = map[string]any{
-		"id":     "resp_filter",
-		"object": "response",
-		"model":  "gpt-4.1",
-		"output": []any{
-			map[string]any{
-				"type":      "function_call",
-				"id":        "fc_filter",
-				"call_id":   "call_filter",
-				"name":      "test-tool",
-				"arguments": `{"value":"trunc`,
-				"status":    "completed",
-			},
-		},
-		"status":             "incomplete",
-		"incomplete_details": map[string]any{"reason": "content_filter"},
-		"usage": map[string]any{
-			"input_tokens":  10,
-			"output_tokens": 20,
-			"total_tokens":  30,
-		},
-	}
+	t.Cleanup(server.close)
+	server.response = truncatedToolCallResponsesResponse("filter", "content_filter")
 
 	model := newResponsesProvider(t, server.server.URL)
 
 	resp, err := model.Generate(context.Background(), fantasy.Call{
 		Prompt: testPrompt,
-		Tools: []fantasy.Tool{fantasy.FunctionTool{
-			Name: "test-tool",
-			InputSchema: map[string]any{
-				"type":       "object",
-				"properties": map[string]any{"value": map[string]any{"type": "string"}},
-			},
-		}},
+		Tools:  []fantasy.Tool{testFunctionTool()},
 	})
 	require.NoError(t, err)
-	require.Equal(t, fantasy.FinishReasonContentFilter, resp.FinishReason)
-	require.NotEmpty(t, resp.Warnings)
-	require.Contains(t, resp.Warnings[0].Message, "arguments may be truncated")
-	for _, c := range resp.Content {
-		require.NotEqual(t, fantasy.ContentTypeToolCall, c.GetType(), "truncated tool call should be suppressed")
-	}
+	requireSuppressedToolCall(t, resp, fantasy.FinishReasonContentFilter, "arguments may be truncated")
 }
 
 func TestResponsesStream_ContentFilterToolCallsKeepFilterReason(t *testing.T) {
@@ -82,13 +50,7 @@ func TestResponsesStream_ContentFilterToolCallsKeepFilterReason(t *testing.T) {
 
 	stream, err := model.Stream(context.Background(), fantasy.Call{
 		Prompt: testPrompt,
-		Tools: []fantasy.Tool{fantasy.FunctionTool{
-			Name: "test-tool",
-			InputSchema: map[string]any{
-				"type":       "object",
-				"properties": map[string]any{"value": map[string]any{"type": "string"}},
-			},
-		}},
+		Tools:  []fantasy.Tool{testFunctionTool()},
 	})
 	require.NoError(t, err)
 
@@ -98,17 +60,5 @@ func TestResponsesStream_ContentFilterToolCallsKeepFilterReason(t *testing.T) {
 		return true
 	})
 
-	var finish *fantasy.StreamPart
-	var hasWarning bool
-	for i, part := range parts {
-		if part.Type == fantasy.StreamPartTypeFinish {
-			finish = &parts[i]
-		}
-		if part.Type == fantasy.StreamPartTypeWarnings {
-			hasWarning = true
-		}
-	}
-	require.NotNil(t, finish)
-	require.Equal(t, fantasy.FinishReasonContentFilter, finish.FinishReason)
-	require.True(t, hasWarning, "expected truncation warning")
+	requireStreamFinishAndWarning(t, parts, fantasy.FinishReasonContentFilter)
 }

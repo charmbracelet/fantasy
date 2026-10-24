@@ -66,24 +66,18 @@ func TestAnthropicCommonWithCacheControl(t *testing.T) {
 }
 
 func TestAnthropicThinking(t *testing.T) {
-	opts := fantasy.ProviderOptions{
-		anthropic.Name: &anthropic.ProviderOptions{
-			Thinking: &anthropic.ThinkingProviderOption{
-				BudgetTokens: 4000,
-			},
-		},
-	}
-	var pairs []builderPair
-	for _, m := range anthropicTestModels {
-		if !m.reasoning {
-			continue
-		}
-		pairs = append(pairs, builderPair{m.name, anthropicBuilder(m.model), opts, nil})
-	}
-	testThinking(t, pairs, testAnthropicThinking)
+	_, pairs := anthropicThinkingPairs(nil)
+	testThinking(t, pairs, requireThinkingWithSignatures)
 }
 
 func TestAnthropicThinkingWithCacheControl(t *testing.T) {
+	_, pairs := anthropicThinkingPairs(addAnthropicCaching)
+	testThinking(t, pairs, requireThinkingWithSignatures)
+}
+
+// anthropicThinkingPairs builds the thinking-enabled model pairs, optionally
+// with cache-control prepare steps.
+func anthropicThinkingPairs(prepareStep fantasy.PrepareStepFunction) (fantasy.ProviderOptions, []builderPair) {
 	opts := fantasy.ProviderOptions{
 		anthropic.Name: &anthropic.ProviderOptions{
 			Thinking: &anthropic.ThinkingProviderOption{
@@ -96,9 +90,9 @@ func TestAnthropicThinkingWithCacheControl(t *testing.T) {
 		if !m.reasoning {
 			continue
 		}
-		pairs = append(pairs, builderPair{m.name, anthropicBuilder(m.model), opts, addAnthropicCaching})
+		pairs = append(pairs, builderPair{m.name, anthropicBuilder(m.model), opts, prepareStep})
 	}
-	testThinking(t, pairs, testAnthropicThinking)
+	return opts, pairs
 }
 
 func TestAnthropicObjectGeneration(t *testing.T) {
@@ -109,53 +103,13 @@ func TestAnthropicObjectGeneration(t *testing.T) {
 	testObjectGeneration(t, pairs)
 }
 
-func testAnthropicThinking(t *testing.T, result *fantasy.AgentResult) {
-	reasoningContentCount := 0
-	signaturesCount := 0
-	// Test if we got the signature
-	for _, step := range result.Steps {
-		for _, msg := range step.Messages {
-			for _, content := range msg.Content {
-				if content.GetType() == fantasy.ContentTypeReasoning {
-					reasoningContentCount += 1
-					reasoningContent, ok := fantasy.AsContentType[fantasy.ReasoningPart](content)
-					if !ok {
-						continue
-					}
-					if len(reasoningContent.ProviderOptions) == 0 {
-						continue
-					}
-
-					anthropicReasoningMetadata, ok := reasoningContent.ProviderOptions[anthropic.Name]
-					if !ok {
-						continue
-					}
-					if reasoningContent.Text != "" {
-						if typed, ok := anthropicReasoningMetadata.(*anthropic.ReasoningOptionMetadata); ok {
-							require.NotEmpty(t, typed.Signature)
-							signaturesCount += 1
-						}
-					}
-				}
-			}
-		}
-	}
-	require.Greater(t, reasoningContentCount, 0)
-	require.Greater(t, signaturesCount, 0)
-	require.Equal(t, reasoningContentCount, signaturesCount)
-}
-
 func anthropicBuilder(model string) builderFunc {
-	return func(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
-		provider, err := anthropic.New(
-			anthropic.WithAPIKey(cmp.Or(os.Getenv("FANTASY_ANTHROPIC_API_KEY"), "(missing)")),
-			anthropic.WithHTTPClient(&http.Client{Transport: r}),
-		)
-		if err != nil {
-			return nil, err
-		}
-		return provider.LanguageModel(t.Context(), model)
-	}
+	return vcrProviderBuilder(model,
+		anthropic.New,
+		anthropic.WithAPIKey,
+		func(client *http.Client) anthropic.Option { return anthropic.WithHTTPClient(client) },
+		cmp.Or(os.Getenv("FANTASY_ANTHROPIC_API_KEY"), "(missing)"),
+	)
 }
 
 // TestAnthropicWebSearch tests web search tool support via the agent

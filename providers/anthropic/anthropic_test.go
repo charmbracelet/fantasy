@@ -24,6 +24,36 @@ var noopComputerRun = func(_ context.Context, _ fantasy.ToolCall) (fantasy.ToolR
 	return fantasy.ToolResponse{}, nil
 }
 
+// assertDocumentFileTitle checks that a user file part of the given media type
+// converts to an Anthropic document block whose title is derived from the
+// filename (or falls back to "Document" when it is missing).
+func assertDocumentFileTitle(t *testing.T, mediaType, filename, data, wantTitle string) {
+	t.Helper()
+
+	prompt := fantasy.Prompt{
+		{
+			Role: fantasy.MessageRoleUser,
+			Content: []fantasy.MessagePart{
+				fantasy.FilePart{
+					Filename:  filename,
+					Data:      []byte(data),
+					MediaType: mediaType,
+				},
+			},
+		},
+	}
+
+	systemBlocks, messages, warnings := toPrompt(prompt, true)
+
+	require.Empty(t, systemBlocks)
+	require.Len(t, messages, 1)
+	require.Len(t, messages[0].Content, 1)
+	require.NotNil(t, messages[0].Content[0].OfDocument)
+	require.Equal(t, wantTitle, messages[0].Content[0].OfDocument.Title.Value)
+	require.True(t, messages[0].Content[0].OfDocument.Title.Valid())
+	require.Empty(t, warnings)
+}
+
 func TestToPrompt_DropsEmptyMessages(t *testing.T) {
 	t.Parallel()
 
@@ -317,107 +347,25 @@ func TestToPrompt_DropsEmptyMessages(t *testing.T) {
 	t.Run("should keep user messages with PDF content", func(t *testing.T) {
 		t.Parallel()
 
-		prompt := fantasy.Prompt{
-			{
-				Role: fantasy.MessageRoleUser,
-				Content: []fantasy.MessagePart{
-					fantasy.FilePart{
-						Filename:  "quarterly_report.v1.pdf",
-						Data:      []byte("fake pdf data"),
-						MediaType: "application/pdf",
-					},
-				},
-			},
-		}
-
-		systemBlocks, messages, warnings := toPrompt(prompt, true)
-
-		require.Empty(t, systemBlocks)
-		require.Len(t, messages, 1)
-		require.Len(t, messages[0].Content, 1)
-		require.NotNil(t, messages[0].Content[0].OfDocument)
-		require.Equal(t, "quarterly report v1 pdf", messages[0].Content[0].OfDocument.Title.Value)
-		require.True(t, messages[0].Content[0].OfDocument.Title.Valid())
-		require.Empty(t, warnings)
+		assertDocumentFileTitle(t, "application/pdf", "quarterly_report.v1.pdf", "fake pdf data", "quarterly report v1 pdf")
 	})
 
 	t.Run("should fall back to Document title when PDF filename is missing", func(t *testing.T) {
 		t.Parallel()
 
-		prompt := fantasy.Prompt{
-			{
-				Role: fantasy.MessageRoleUser,
-				Content: []fantasy.MessagePart{
-					fantasy.FilePart{
-						Data:      []byte("fake pdf data"),
-						MediaType: "application/pdf",
-					},
-				},
-			},
-		}
-
-		systemBlocks, messages, warnings := toPrompt(prompt, true)
-
-		require.Empty(t, systemBlocks)
-		require.Len(t, messages, 1)
-		require.Len(t, messages[0].Content, 1)
-		require.NotNil(t, messages[0].Content[0].OfDocument)
-		require.Equal(t, "Document", messages[0].Content[0].OfDocument.Title.Value)
-		require.True(t, messages[0].Content[0].OfDocument.Title.Valid())
-		require.Empty(t, warnings)
+		assertDocumentFileTitle(t, "application/pdf", "", "fake pdf data", "Document")
 	})
 
 	t.Run("should keep user messages with text document content", func(t *testing.T) {
 		t.Parallel()
 
-		prompt := fantasy.Prompt{
-			{
-				Role: fantasy.MessageRoleUser,
-				Content: []fantasy.MessagePart{
-					fantasy.FilePart{
-						Filename:  "notes_v1.md",
-						Data:      []byte("# Hello World\nSome markdown content"),
-						MediaType: "text/markdown",
-					},
-				},
-			},
-		}
-
-		systemBlocks, messages, warnings := toPrompt(prompt, true)
-
-		require.Empty(t, systemBlocks)
-		require.Len(t, messages, 1)
-		require.Len(t, messages[0].Content, 1)
-		require.NotNil(t, messages[0].Content[0].OfDocument)
-		require.Equal(t, "notes v1 md", messages[0].Content[0].OfDocument.Title.Value)
-		require.True(t, messages[0].Content[0].OfDocument.Title.Valid())
-		require.Empty(t, warnings)
+		assertDocumentFileTitle(t, "text/markdown", "notes_v1.md", "# Hello World\nSome markdown content", "notes v1 md")
 	})
 
 	t.Run("should fall back to Document title when text filename is missing", func(t *testing.T) {
 		t.Parallel()
 
-		prompt := fantasy.Prompt{
-			{
-				Role: fantasy.MessageRoleUser,
-				Content: []fantasy.MessagePart{
-					fantasy.FilePart{
-						Data:      []byte("# Hello World\nSome markdown content"),
-						MediaType: "text/markdown",
-					},
-				},
-			},
-		}
-
-		systemBlocks, messages, warnings := toPrompt(prompt, true)
-
-		require.Empty(t, systemBlocks)
-		require.Len(t, messages, 1)
-		require.Len(t, messages[0].Content, 1)
-		require.NotNil(t, messages[0].Content[0].OfDocument)
-		require.Equal(t, "Document", messages[0].Content[0].OfDocument.Title.Value)
-		require.True(t, messages[0].Content[0].OfDocument.Title.Valid())
-		require.Empty(t, warnings)
+		assertDocumentFileTitle(t, "text/markdown", "", "# Hello World\nSome markdown content", "Document")
 	})
 
 	t.Run("should warn on unsupported file media type while keeping visible content", func(t *testing.T) {
@@ -2498,75 +2446,103 @@ func TestToTools_RawJSON(t *testing.T) {
 	require.Equal(t, "computer", cuToolJSON["name"])
 }
 
+func assertComputerUseBetaHeader(t *testing.T, toolVersion ComputerUseToolVersion, wantBetaHeader string) {
+	t.Helper()
+
+	var capturedHeaders http.Header
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		capturedHeaders = r.Header.Clone()
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(mockAnthropicGenerateResponse())
+	}))
+	t.Cleanup(server.Close)
+
+	provider, err := New(
+		WithAPIKey("test-api-key"),
+		WithBaseURL(server.URL),
+	)
+	require.NoError(t, err)
+
+	model, err := provider.LanguageModel(context.Background(), "claude-sonnet-4-20250514")
+	require.NoError(t, err)
+
+	cuTool := jsonRoundTripTool(t, NewComputerUseTool(ComputerUseToolOptions{
+		DisplayWidthPx:  1920,
+		DisplayHeightPx: 1080,
+		ToolVersion:     toolVersion,
+	}, noopComputerRun))
+
+	_, err = model.Generate(context.Background(), fantasy.Call{
+		Prompt: testPrompt(),
+		Tools:  []fantasy.Tool{cuTool},
+	})
+	require.NoError(t, err)
+	require.Contains(t, capturedHeaders.Get("Anthropic-Beta"), wantBetaHeader)
+}
+
+func assertComputerUseBetaHeaderStream(t *testing.T, toolVersion ComputerUseToolVersion, wantBetaHeader string) {
+	t.Helper()
+
+	var capturedHeaders http.Header
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		capturedHeaders = r.Header.Clone()
+		w.Header().Set("Content-Type", "text/event-stream")
+		w.Header().Set("Cache-Control", "no-cache")
+		w.WriteHeader(http.StatusOK)
+		chunks := []string{
+			"event: message_start\n",
+			"data: {\"type\":\"message_start\",\"message\":{}}\n\n",
+			"event: message_stop\n",
+			"data: {\"type\":\"message_stop\"}\n\n",
+		}
+		for _, chunk := range chunks {
+			_, _ = fmt.Fprint(w, chunk)
+			if flusher, ok := w.(http.Flusher); ok {
+				flusher.Flush()
+			}
+		}
+	}))
+	t.Cleanup(server.Close)
+
+	provider, err := New(
+		WithAPIKey("test-api-key"),
+		WithBaseURL(server.URL),
+	)
+	require.NoError(t, err)
+
+	model, err := provider.LanguageModel(context.Background(), "claude-sonnet-4-20250514")
+	require.NoError(t, err)
+
+	cuTool := jsonRoundTripTool(t, NewComputerUseTool(ComputerUseToolOptions{
+		DisplayWidthPx:  1920,
+		DisplayHeightPx: 1080,
+		ToolVersion:     toolVersion,
+	}, noopComputerRun))
+
+	stream, err := model.Stream(context.Background(), fantasy.Call{
+		Prompt: testPrompt(),
+		Tools:  []fantasy.Tool{cuTool},
+	})
+	require.NoError(t, err)
+
+	stream(func(fantasy.StreamPart) bool { return true })
+
+	require.Contains(t, capturedHeaders.Get("Anthropic-Beta"), wantBetaHeader)
+}
+
 func TestGenerate_BetaAPI(t *testing.T) {
 	t.Parallel()
 
 	t.Run("sends beta header for computer use", func(t *testing.T) {
 		t.Parallel()
 
-		var capturedHeaders http.Header
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			capturedHeaders = r.Header.Clone()
-			w.Header().Set("Content-Type", "application/json")
-			_ = json.NewEncoder(w).Encode(mockAnthropicGenerateResponse())
-		}))
-		defer server.Close()
-
-		provider, err := New(
-			WithAPIKey("test-api-key"),
-			WithBaseURL(server.URL),
-		)
-		require.NoError(t, err)
-
-		model, err := provider.LanguageModel(context.Background(), "claude-sonnet-4-20250514")
-		require.NoError(t, err)
-
-		cuTool := jsonRoundTripTool(t, NewComputerUseTool(ComputerUseToolOptions{
-			DisplayWidthPx:  1920,
-			DisplayHeightPx: 1080,
-			ToolVersion:     ComputerUse20250124,
-		}, noopComputerRun))
-
-		_, err = model.Generate(context.Background(), fantasy.Call{
-			Prompt: testPrompt(),
-			Tools:  []fantasy.Tool{cuTool},
-		})
-		require.NoError(t, err)
-		require.Contains(t, capturedHeaders.Get("Anthropic-Beta"), "computer-use-2025-01-24")
+		assertComputerUseBetaHeader(t, ComputerUse20250124, "computer-use-2025-01-24")
 	})
 
 	t.Run("sends beta header for computer use 20251124", func(t *testing.T) {
 		t.Parallel()
 
-		var capturedHeaders http.Header
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			capturedHeaders = r.Header.Clone()
-			w.Header().Set("Content-Type", "application/json")
-			_ = json.NewEncoder(w).Encode(mockAnthropicGenerateResponse())
-		}))
-		defer server.Close()
-
-		provider, err := New(
-			WithAPIKey("test-api-key"),
-			WithBaseURL(server.URL),
-		)
-		require.NoError(t, err)
-
-		model, err := provider.LanguageModel(context.Background(), "claude-sonnet-4-20250514")
-		require.NoError(t, err)
-
-		cuTool := jsonRoundTripTool(t, NewComputerUseTool(ComputerUseToolOptions{
-			DisplayWidthPx:  1920,
-			DisplayHeightPx: 1080,
-			ToolVersion:     ComputerUse20251124,
-		}, noopComputerRun))
-
-		_, err = model.Generate(context.Background(), fantasy.Call{
-			Prompt: testPrompt(),
-			Tools:  []fantasy.Tool{cuTool},
-		})
-		require.NoError(t, err)
-		require.Contains(t, capturedHeaders.Get("Anthropic-Beta"), "computer-use-2025-11-24")
+		assertComputerUseBetaHeader(t, ComputerUse20251124, "computer-use-2025-11-24")
 	})
 
 	t.Run("returns tool use from beta response", func(t *testing.T) {
@@ -2767,101 +2743,13 @@ func TestStream_BetaAPI(t *testing.T) {
 	t.Run("streams via beta API for computer use", func(t *testing.T) {
 		t.Parallel()
 
-		var capturedHeaders http.Header
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			capturedHeaders = r.Header.Clone()
-			w.Header().Set("Content-Type", "text/event-stream")
-			w.Header().Set("Cache-Control", "no-cache")
-			w.WriteHeader(http.StatusOK)
-			chunks := []string{
-				"event: message_start\n",
-				"data: {\"type\":\"message_start\",\"message\":{}}\n\n",
-				"event: message_stop\n",
-				"data: {\"type\":\"message_stop\"}\n\n",
-			}
-			for _, chunk := range chunks {
-				_, _ = fmt.Fprint(w, chunk)
-				if flusher, ok := w.(http.Flusher); ok {
-					flusher.Flush()
-				}
-			}
-		}))
-		defer server.Close()
-
-		provider, err := New(
-			WithAPIKey("test-api-key"),
-			WithBaseURL(server.URL),
-		)
-		require.NoError(t, err)
-
-		model, err := provider.LanguageModel(context.Background(), "claude-sonnet-4-20250514")
-		require.NoError(t, err)
-
-		cuTool := jsonRoundTripTool(t, NewComputerUseTool(ComputerUseToolOptions{
-			DisplayWidthPx:  1920,
-			DisplayHeightPx: 1080,
-			ToolVersion:     ComputerUse20250124,
-		}, noopComputerRun))
-
-		stream, err := model.Stream(context.Background(), fantasy.Call{
-			Prompt: testPrompt(),
-			Tools:  []fantasy.Tool{cuTool},
-		})
-		require.NoError(t, err)
-
-		stream(func(fantasy.StreamPart) bool { return true })
-
-		require.Contains(t, capturedHeaders.Get("Anthropic-Beta"), "computer-use-2025-01-24")
+		assertComputerUseBetaHeaderStream(t, ComputerUse20250124, "computer-use-2025-01-24")
 	})
 
 	t.Run("streams via beta API for computer use 20251124", func(t *testing.T) {
 		t.Parallel()
 
-		var capturedHeaders http.Header
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			capturedHeaders = r.Header.Clone()
-			w.Header().Set("Content-Type", "text/event-stream")
-			w.Header().Set("Cache-Control", "no-cache")
-			w.WriteHeader(http.StatusOK)
-			chunks := []string{
-				"event: message_start\n",
-				"data: {\"type\":\"message_start\",\"message\":{}}\n\n",
-				"event: message_stop\n",
-				"data: {\"type\":\"message_stop\"}\n\n",
-			}
-			for _, chunk := range chunks {
-				_, _ = fmt.Fprint(w, chunk)
-				if flusher, ok := w.(http.Flusher); ok {
-					flusher.Flush()
-				}
-			}
-		}))
-		defer server.Close()
-
-		provider, err := New(
-			WithAPIKey("test-api-key"),
-			WithBaseURL(server.URL),
-		)
-		require.NoError(t, err)
-
-		model, err := provider.LanguageModel(context.Background(), "claude-sonnet-4-20250514")
-		require.NoError(t, err)
-
-		cuTool := jsonRoundTripTool(t, NewComputerUseTool(ComputerUseToolOptions{
-			DisplayWidthPx:  1920,
-			DisplayHeightPx: 1080,
-			ToolVersion:     ComputerUse20251124,
-		}, noopComputerRun))
-
-		stream, err := model.Stream(context.Background(), fantasy.Call{
-			Prompt: testPrompt(),
-			Tools:  []fantasy.Tool{cuTool},
-		})
-		require.NoError(t, err)
-
-		stream(func(fantasy.StreamPart) bool { return true })
-
-		require.Contains(t, capturedHeaders.Get("Anthropic-Beta"), "computer-use-2025-11-24")
+		assertComputerUseBetaHeaderStream(t, ComputerUse20251124, "computer-use-2025-11-24")
 	})
 }
 

@@ -6,9 +6,7 @@ import (
 	"testing"
 
 	"charm.land/fantasy"
-	"charm.land/fantasy/providers/anthropic"
 	"charm.land/fantasy/providers/openrouter"
-	"charm.land/x/vcr"
 	"github.com/stretchr/testify/require"
 )
 
@@ -56,45 +54,7 @@ func TestOpenRouterThinking(t *testing.T) {
 	// test anthropic signature
 	testThinking(t, []builderPair{
 		{"anthropic", openrouterBuilder("anthropic/claude-haiku-4.5"), opts, nil},
-	}, testOpenrouterThinkingWithSignature)
-}
-
-func testOpenrouterThinkingWithSignature(t *testing.T, result *fantasy.AgentResult) {
-	reasoningContentCount := 0
-	signaturesCount := 0
-	// Test if we got the signature
-	for _, step := range result.Steps {
-		for _, msg := range step.Messages {
-			for _, content := range msg.Content {
-				if content.GetType() == fantasy.ContentTypeReasoning {
-					reasoningContentCount += 1
-					reasoningContent, ok := fantasy.AsContentType[fantasy.ReasoningPart](content)
-					if !ok {
-						continue
-					}
-					if len(reasoningContent.ProviderOptions) == 0 {
-						continue
-					}
-
-					anthropicReasoningMetadata, ok := reasoningContent.ProviderOptions[anthropic.Name]
-					if !ok {
-						continue
-					}
-					if reasoningContent.Text != "" {
-						if typed, ok := anthropicReasoningMetadata.(*anthropic.ReasoningOptionMetadata); ok {
-							require.NotEmpty(t, typed.Signature)
-							signaturesCount += 1
-						}
-					}
-				}
-			}
-		}
-	}
-	require.Greater(t, reasoningContentCount, 0)
-	require.Greater(t, signaturesCount, 0)
-	require.Equal(t, reasoningContentCount, signaturesCount)
-	// we also add the anthropic metadata so test that
-	testAnthropicThinking(t, result)
+	}, requireThinkingWithSignatures)
 }
 
 func testOpenrouterThinking(t *testing.T, result *fantasy.AgentResult) {
@@ -112,14 +72,10 @@ func testOpenrouterThinking(t *testing.T, result *fantasy.AgentResult) {
 }
 
 func openrouterBuilder(model string) builderFunc {
-	return func(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
-		provider, err := openrouter.New(
-			openrouter.WithAPIKey(os.Getenv("FANTASY_OPENROUTER_API_KEY")),
-			openrouter.WithHTTPClient(&http.Client{Transport: r}),
-		)
-		if err != nil {
-			return nil, err
-		}
-		return provider.LanguageModel(t.Context(), model)
-	}
+	return vcrProviderBuilder(model,
+		openrouter.New,
+		openrouter.WithAPIKey,
+		func(client *http.Client) openrouter.Option { return openrouter.WithHTTPClient(client) },
+		os.Getenv("FANTASY_OPENROUTER_API_KEY"),
+	)
 }

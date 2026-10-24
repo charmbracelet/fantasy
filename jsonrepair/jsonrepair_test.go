@@ -7,13 +7,73 @@ import (
 	"testing"
 )
 
+type repairCase struct {
+	name  string
+	input string
+	opts  []Option
+	want  string
+}
+
+type repairErrCase struct {
+	name    string
+	input   string
+	opts    []Option
+	wantErr string
+}
+
+func runRepairCases(t *testing.T, cases []repairCase) {
+	t.Helper()
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := RepairJSON(tc.input, tc.opts...)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if got != tc.want {
+				t.Fatalf("got %q want %q", got, tc.want)
+			}
+		})
+	}
+}
+
+func runRepairErrCases(t *testing.T, cases []repairErrCase) {
+	t.Helper()
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			_, err := RepairJSON(tc.input, tc.opts...)
+			if err == nil {
+				t.Fatalf("expected error")
+			}
+			if !strings.Contains(err.Error(), tc.wantErr) {
+				t.Fatalf("got %q want %q", err.Error(), tc.wantErr)
+			}
+		})
+	}
+}
+
+type loadsCase struct {
+	name  string
+	input string
+	want  any
+}
+
+func runLoadsCases(t *testing.T, cases []loadsCase) {
+	t.Helper()
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := Loads(tc.input)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if !reflect.DeepEqual(got, tc.want) {
+				t.Fatalf("got %#v want %#v", got, tc.want)
+			}
+		})
+	}
+}
+
 func TestRepairJSON(t *testing.T) {
-	cases := []struct {
-		name  string
-		input string
-		opts  []Option
-		want  string
-	}{
+	cases := []repairCase{
 		{
 			name:  "valid_object",
 			input: "{\"name\": \"John\", \"age\": 30, \"city\": \"New York\"}",
@@ -66,25 +126,11 @@ func TestRepairJSON(t *testing.T) {
 		},
 	}
 
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			got, err := RepairJSON(tc.input, tc.opts...)
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
-			if got != tc.want {
-				t.Fatalf("got %q want %q", got, tc.want)
-			}
-		})
-	}
+	runRepairCases(t, cases)
 }
 
 func TestRepairJSONMultipleTopLevel(t *testing.T) {
-	cases := []struct {
-		name  string
-		input string
-		want  string
-	}{
+	cases := []repairCase{
 		{
 			name:  "array_then_object",
 			input: "[]{}",
@@ -112,17 +158,7 @@ func TestRepairJSONMultipleTopLevel(t *testing.T) {
 		},
 	}
 
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			got, err := RepairJSON(tc.input)
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
-			if got != tc.want {
-				t.Fatalf("got %q want %q", got, tc.want)
-			}
-		})
-	}
+	runRepairCases(t, cases)
 }
 
 func TestRepairJSONEnsureASCII(t *testing.T) {
@@ -137,12 +173,7 @@ func TestRepairJSONEnsureASCII(t *testing.T) {
 }
 
 func TestRepairJSONStreamStable(t *testing.T) {
-	cases := []struct {
-		name  string
-		input string
-		opts  []Option
-		want  string
-	}{
+	cases := []repairCase{
 		{
 			name:  "default_trailing_backslash",
 			input: "{\"key\": \"val\\",
@@ -184,25 +215,11 @@ func TestRepairJSONStreamStable(t *testing.T) {
 		},
 	}
 
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			got, err := RepairJSON(tc.input, tc.opts...)
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
-			if got != tc.want {
-				t.Fatalf("got %q want %q", got, tc.want)
-			}
-		})
-	}
+	runRepairCases(t, cases)
 }
 
 func TestLoads(t *testing.T) {
-	cases := []struct {
-		name  string
-		input string
-		want  any
-	}{
+	cases := []loadsCase{
 		{
 			name:  "empty_array",
 			input: "[]",
@@ -260,26 +277,11 @@ func TestLoads(t *testing.T) {
 		},
 	}
 
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			got, err := Loads(tc.input)
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
-			if !reflect.DeepEqual(got, tc.want) {
-				t.Fatalf("got %#v want %#v", got, tc.want)
-			}
-		})
-	}
+	runLoadsCases(t, cases)
 }
 
 func TestRepairJSONSkipJSONLoads(t *testing.T) {
-	cases := []struct {
-		name  string
-		input string
-		opts  []Option
-		want  string
-	}{
+	cases := []repairCase{
 		{
 			name:  "valid_json",
 			input: "{\"key\": true, \"key2\": false, \"key3\": null}",
@@ -294,17 +296,7 @@ func TestRepairJSONSkipJSONLoads(t *testing.T) {
 		},
 	}
 
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			got, err := RepairJSON(tc.input, tc.opts...)
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
-			if got != tc.want {
-				t.Fatalf("got %q want %q", got, tc.want)
-			}
-		})
-	}
+	runRepairCases(t, cases)
 
 	got, err := Loads("{\"key\": true, \"key2\": false, \"key3\": }", WithSkipJSONLoads())
 	if err != nil {
@@ -369,12 +361,7 @@ func TestRepairJSONWithLog(t *testing.T) {
 }
 
 func TestRepairJSONStrict(t *testing.T) {
-	cases := []struct {
-		name    string
-		input   string
-		opts    []Option
-		wantErr string
-	}{
+	cases := []repairErrCase{
 		{
 			name:    "multiple_top_level",
 			input:   "{\"key\":\"value\"}[\"value\"]",
@@ -425,25 +412,11 @@ func TestRepairJSONStrict(t *testing.T) {
 		},
 	}
 
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			_, err := RepairJSON(tc.input, tc.opts...)
-			if err == nil {
-				t.Fatalf("expected error")
-			}
-			if !strings.Contains(err.Error(), tc.wantErr) {
-				t.Fatalf("got %q want %q", err.Error(), tc.wantErr)
-			}
-		})
-	}
+	runRepairErrCases(t, cases)
 }
 
 func TestParseArrayObjects(t *testing.T) {
-	cases := []struct {
-		name  string
-		input string
-		want  any
-	}{
+	cases := []loadsCase{
 		{
 			name:  "empty_array",
 			input: "[]",
@@ -466,25 +439,11 @@ func TestParseArrayObjects(t *testing.T) {
 		},
 	}
 
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			got, err := Loads(tc.input)
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
-			if !reflect.DeepEqual(got, tc.want) {
-				t.Fatalf("got %#v want %#v", got, tc.want)
-			}
-		})
-	}
+	runLoadsCases(t, cases)
 }
 
 func TestParseArrayEdgeCases(t *testing.T) {
-	cases := []struct {
-		name  string
-		input string
-		want  string
-	}{
+	cases := []repairCase{
 		{
 			name:  "nested_newlines",
 			input: "[[1\n\n]",
@@ -607,25 +566,11 @@ func TestParseArrayEdgeCases(t *testing.T) {
 		},
 	}
 
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			got, err := RepairJSON(tc.input)
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
-			if got != tc.want {
-				t.Fatalf("got %q want %q", got, tc.want)
-			}
-		})
-	}
+	runRepairCases(t, cases)
 }
 
 func TestParseArrayMissingQuotes(t *testing.T) {
-	cases := []struct {
-		name  string
-		input string
-		want  string
-	}{
+	cases := []repairCase{
 		{
 			name:  "value_missing_quote",
 			input: "[\"value1\" value2\", \"value3\"]",
@@ -643,25 +588,11 @@ func TestParseArrayMissingQuotes(t *testing.T) {
 		},
 	}
 
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			got, err := RepairJSON(tc.input)
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
-			if got != tc.want {
-				t.Fatalf("got %q want %q", got, tc.want)
-			}
-		})
-	}
+	runRepairCases(t, cases)
 }
 
 func TestParseComment(t *testing.T) {
-	cases := []struct {
-		name  string
-		input string
-		want  string
-	}{
+	cases := []repairCase{
 		{
 			name:  "just_slash",
 			input: "/",
@@ -699,25 +630,11 @@ func TestParseComment(t *testing.T) {
 		},
 	}
 
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			got, err := RepairJSON(tc.input)
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
-			if got != tc.want {
-				t.Fatalf("got %q want %q", got, tc.want)
-			}
-		})
-	}
+	runRepairCases(t, cases)
 }
 
 func TestParseNumber(t *testing.T) {
-	cases := []struct {
-		name  string
-		input string
-		want  any
-	}{
+	cases := []loadsCase{
 		{
 			name:  "integer",
 			input: "1",
@@ -782,11 +699,7 @@ func TestParseNumber(t *testing.T) {
 }
 
 func TestParseNumberEdgeCases(t *testing.T) {
-	cases := []struct {
-		name  string
-		input string
-		want  string
-	}{
+	cases := []repairCase{
 		{
 			name:  "leading_dash",
 			input: " - { \"test_key\": [\"test_value\", \"test_value2\"] }",
@@ -983,25 +896,11 @@ func TestParseNumberEdgeCases(t *testing.T) {
 		},
 	}
 
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			got, err := RepairJSON(tc.input)
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
-			if got != tc.want {
-				t.Fatalf("got %q want %q", got, tc.want)
-			}
-		})
-	}
+	runRepairCases(t, cases)
 }
 
 func TestParseObjectObjects(t *testing.T) {
-	cases := []struct {
-		name  string
-		input string
-		want  any
-	}{
+	cases := []loadsCase{
 		{
 			name:  "empty_object",
 			input: "{}",
@@ -1032,25 +931,11 @@ func TestParseObjectObjects(t *testing.T) {
 		},
 	}
 
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			got, err := Loads(tc.input)
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
-			if !reflect.DeepEqual(got, tc.want) {
-				t.Fatalf("got %#v want %#v", got, tc.want)
-			}
-		})
-	}
+	runLoadsCases(t, cases)
 }
 
 func TestParseObjectEdgeCases(t *testing.T) {
-	cases := []struct {
-		name  string
-		input string
-		want  string
-	}{
+	cases := []repairCase{
 		{
 			name:  "empty_trim",
 			input: "   {  }   ",
@@ -1238,25 +1123,11 @@ func TestParseObjectEdgeCases(t *testing.T) {
 		},
 	}
 
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			got, err := RepairJSON(tc.input)
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
-			if got != tc.want {
-				t.Fatalf("got %q want %q", got, tc.want)
-			}
-		})
-	}
+	runRepairCases(t, cases)
 }
 
 func TestParseObjectMergeAtEnd(t *testing.T) {
-	cases := []struct {
-		name  string
-		input string
-		want  string
-	}{
+	cases := []repairCase{
 		{
 			name:  "merge_key",
 			input: "{\"key\": \"value\"}, \"key2\": \"value2\"}",
@@ -1299,25 +1170,11 @@ func TestParseObjectMergeAtEnd(t *testing.T) {
 		},
 	}
 
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			got, err := RepairJSON(tc.input)
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
-			if got != tc.want {
-				t.Fatalf("got %q want %q", got, tc.want)
-			}
-		})
-	}
+	runRepairCases(t, cases)
 }
 
 func TestParseStringBasics(t *testing.T) {
-	cases := []struct {
-		name  string
-		input string
-		want  string
-	}{
+	cases := []repairCase{
 		{
 			name:  "just_quote",
 			input: "\"",
@@ -1345,27 +1202,13 @@ func TestParseStringBasics(t *testing.T) {
 		},
 	}
 
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			got, err := RepairJSON(tc.input)
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
-			if got != tc.want {
-				t.Fatalf("got %q want %q", got, tc.want)
-			}
-		})
-	}
+	runRepairCases(t, cases)
 }
 
 // A document may be a single JSON string, so repairing one has to hand it back
 // rather than returning nothing.
 func TestTopLevelString(t *testing.T) {
-	cases := []struct {
-		name  string
-		input string
-		want  string
-	}{
+	cases := []repairCase{
 		{
 			name:  "quoted_word",
 			input: `"str"`,
@@ -1429,27 +1272,12 @@ func TestTopLevelString(t *testing.T) {
 		},
 	}
 
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			got, err := RepairJSON(tc.input)
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
-			if got != tc.want {
-				t.Fatalf("got %q want %q", got, tc.want)
-			}
-		})
-	}
+	runRepairCases(t, cases)
 }
 
 // The option paths have to agree with the default one.
 func TestTopLevelStringOptions(t *testing.T) {
-	cases := []struct {
-		name  string
-		input string
-		opts  []Option
-		want  string
-	}{
+	cases := []repairCase{
 		{
 			name:  "strict",
 			input: `"str"`,
@@ -1476,17 +1304,7 @@ func TestTopLevelStringOptions(t *testing.T) {
 		},
 	}
 
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			got, err := RepairJSON(tc.input, tc.opts...)
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
-			if got != tc.want {
-				t.Fatalf("got %q want %q", got, tc.want)
-			}
-		})
-	}
+	runRepairCases(t, cases)
 }
 
 // Repairing the repaired string must not change it again.
@@ -1505,11 +1323,7 @@ func TestTopLevelStringIdempotent(t *testing.T) {
 }
 
 func TestLoadsTopLevelString(t *testing.T) {
-	cases := []struct {
-		name  string
-		input string
-		want  string
-	}{
+	cases := []repairCase{
 		{
 			name:  "quoted_word",
 			input: `"str"`,
@@ -1540,11 +1354,7 @@ func TestLoadsTopLevelString(t *testing.T) {
 }
 
 func TestMissingAndMixedQuotes(t *testing.T) {
-	cases := []struct {
-		name  string
-		input string
-		want  string
-	}{
+	cases := []repairCase{
 		{
 			name:  "mixed_quotes",
 			input: "{'key': 'string', 'key2': false, \"key3\": null, \"key4\": unquoted}",
@@ -1647,25 +1457,11 @@ func TestMissingAndMixedQuotes(t *testing.T) {
 		},
 	}
 
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			got, err := RepairJSON(tc.input)
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
-			if got != tc.want {
-				t.Fatalf("got %q want %q", got, tc.want)
-			}
-		})
-	}
+	runRepairCases(t, cases)
 }
 
 func TestEscaping(t *testing.T) {
-	cases := []struct {
-		name  string
-		input string
-		want  string
-	}{
+	cases := []repairCase{
 		{
 			name:  "just_quotes",
 			input: "'\"'",
@@ -1828,11 +1624,7 @@ func TestEscaping(t *testing.T) {
 }
 
 func TestMarkdown(t *testing.T) {
-	cases := []struct {
-		name  string
-		input string
-		want  string
-	}{
+	cases := []repairCase{
 		{
 			name:  "markdown_link",
 			input: "{ \"content\": \"[LINK](\"https://google.com\")\" }",
@@ -1850,25 +1642,11 @@ func TestMarkdown(t *testing.T) {
 		},
 	}
 
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			got, err := RepairJSON(tc.input)
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
-			if got != tc.want {
-				t.Fatalf("got %q want %q", got, tc.want)
-			}
-		})
-	}
+	runRepairCases(t, cases)
 }
 
 func TestLeadingTrailingCharacters(t *testing.T) {
-	cases := []struct {
-		name  string
-		input string
-		want  string
-	}{
+	cases := []repairCase{
 		{
 			name:  "wrapped_markdown",
 			input: "````{ \"key\": \"value\" }```",
@@ -1891,25 +1669,11 @@ func TestLeadingTrailingCharacters(t *testing.T) {
 		},
 	}
 
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			got, err := RepairJSON(tc.input)
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
-			if got != tc.want {
-				t.Fatalf("got %q want %q", got, tc.want)
-			}
-		})
-	}
+	runRepairCases(t, cases)
 }
 
 func TestStringJSONLLMBlock(t *testing.T) {
-	cases := []struct {
-		name  string
-		input string
-		want  string
-	}{
+	cases := []repairCase{
 		{
 			name:  "backticks",
 			input: "{\"key\": \"``\"",
@@ -1932,25 +1696,11 @@ func TestStringJSONLLMBlock(t *testing.T) {
 		},
 	}
 
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			got, err := RepairJSON(tc.input)
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
-			if got != tc.want {
-				t.Fatalf("got %q want %q", got, tc.want)
-			}
-		})
-	}
+	runRepairCases(t, cases)
 }
 
 func TestParseBooleanOrNull(t *testing.T) {
-	loadCases := []struct {
-		name  string
-		input string
-		want  any
-	}{
+	loadCases := []loadsCase{
 		{
 			name:  "upper_true",
 			input: "True",
@@ -1983,23 +1733,9 @@ func TestParseBooleanOrNull(t *testing.T) {
 		},
 	}
 
-	for _, tc := range loadCases {
-		t.Run(tc.name, func(t *testing.T) {
-			got, err := Loads(tc.input)
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
-			if !reflect.DeepEqual(got, tc.want) {
-				t.Fatalf("got %#v want %#v", got, tc.want)
-			}
-		})
-	}
+	runLoadsCases(t, loadCases)
 
-	stringCases := []struct {
-		name  string
-		input string
-		want  string
-	}{
+	stringCases := []repairCase{
 		{
 			name:  "bools_in_object",
 			input: "  {\"key\": true, \"key2\": false, \"key3\": null}",
@@ -2012,28 +1748,13 @@ func TestParseBooleanOrNull(t *testing.T) {
 		},
 	}
 
-	for _, tc := range stringCases {
-		t.Run(tc.name, func(t *testing.T) {
-			got, err := RepairJSON(tc.input)
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
-			if got != tc.want {
-				t.Fatalf("got %q want %q", got, tc.want)
-			}
-		})
-	}
+	runRepairCases(t, stringCases)
 }
 
 // TestRepairJSONUnicodeSurrogatePairs covers the two \uXXXX escapes a non-BMP
 // character is encoded as when the JSON text stays ASCII.
 func TestRepairJSONUnicodeSurrogatePairs(t *testing.T) {
-	cases := []struct {
-		name  string
-		input string
-		opts  []Option
-		want  string
-	}{
+	cases := []repairCase{
 		{
 			name:  "valid_pair_is_preserved",
 			input: `{"key": "\ud83d\ude00"}`,
@@ -2092,17 +1813,7 @@ func TestRepairJSONUnicodeSurrogatePairs(t *testing.T) {
 		},
 	}
 
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			got, err := RepairJSON(tc.input, tc.opts...)
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
-			if got != tc.want {
-				t.Fatalf("got %q want %q", got, tc.want)
-			}
-		})
-	}
+	runRepairCases(t, cases)
 }
 
 // TestRepairJSONUnicodeMatchesStdlib pins the invariant: repairing valid JSON

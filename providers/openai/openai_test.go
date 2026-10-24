@@ -17,20 +17,214 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// generateWithUsage runs one Generate against a canned usage response — 15
+// prompt, 20 completion, 35 total tokens — with the given details block and
+// returns the result.
+func generateWithUsage(t *testing.T, model, detailsKey, detailField string, detailValue int) *fantasy.Response {
+	t.Helper()
+
+	languageModel, _ := newGenerateTestModel(t, model, map[string]any{
+		"usage": map[string]any{
+			"prompt_tokens":     15,
+			"completion_tokens": 20,
+			"total_tokens":      35,
+			detailsKey: map[string]any{
+				detailField: detailValue,
+			},
+		},
+	})
+
+	result, err := languageModel.Generate(context.Background(), fantasy.Call{Prompt: testPrompt})
+	require.NoError(t, err)
+	return result
+}
+
+// newGenerateTestModel starts a mock server that answers every request with
+// the given JSON response and returns a model pointed at it.
+func newGenerateTestModel(t *testing.T, model string, response map[string]any) (fantasy.LanguageModel, *mockServer) {
+	t.Helper()
+
+	server := newMockServer()
+	t.Cleanup(server.close)
+	server.prepareJSONResponse(response)
+
+	provider, err := New(
+		WithAPIKey("test-api-key"),
+		WithBaseURL(server.server.URL),
+	)
+	require.NoError(t, err)
+	languageModel, _ := provider.LanguageModel(t.Context(), model)
+	return languageModel, server
+}
+
+func textPrompt(role fantasy.MessageRole, text string) fantasy.Prompt {
+	return fantasy.Prompt{{
+		Role:    role,
+		Content: []fantasy.MessagePart{fantasy.TextPart{Text: text}},
+	}}
+}
+
+func assertAudioFilePartFormat(t *testing.T, mediaType, wantFormat string) {
+	t.Helper()
+
+	audioData := []byte{0, 1, 2, 3}
+	prompt := fantasy.Prompt{
+		{
+			Role: fantasy.MessageRoleUser,
+			Content: []fantasy.MessagePart{
+				fantasy.FilePart{
+					MediaType: mediaType,
+					Data:      audioData,
+				},
+			},
+		},
+	}
+
+	messages, warnings := DefaultToPrompt(prompt, "openai", "gpt-5")
+
+	require.Empty(t, warnings)
+	require.Len(t, messages, 1)
+
+	userMsg := messages[0].OfUser
+	require.NotNil(t, userMsg)
+
+	content := userMsg.Content.OfArrayOfContentParts
+	require.Len(t, content, 1)
+
+	audioPart := content[0].OfInputAudio
+	require.NotNil(t, audioPart)
+	require.Equal(t, base64.StdEncoding.EncodeToString(audioData), audioPart.InputAudio.Data)
+	require.Equal(t, wantFormat, audioPart.InputAudio.Format)
+}
+
+// generateWithUnsupportedServiceTier runs one Generate with a ServiceTier the
+// model does not support and returns the result plus the recorded call.
+func generateWithUnsupportedServiceTier(t *testing.T, model, tier string) (*fantasy.Response, *mockCall) {
+	t.Helper()
+
+	server := newMockServer()
+	t.Cleanup(server.close)
+	server.prepareJSONResponse(map[string]any{})
+
+	provider, err := New(
+		WithAPIKey("test-api-key"),
+		WithBaseURL(server.server.URL),
+	)
+	require.NoError(t, err)
+	languageModel, _ := provider.LanguageModel(t.Context(), model)
+
+	result, err := languageModel.Generate(context.Background(), fantasy.Call{
+		Prompt: testPrompt,
+		ProviderOptions: NewProviderOptions(&ProviderOptions{
+			ServiceTier: new(tier),
+		}),
+	})
+	require.NoError(t, err)
+	require.Len(t, server.calls, 1)
+	return result, &server.calls[0]
+}
+
+func requireUsage(t *testing.T, usage fantasy.Usage, input, output, total int64) {
+	t.Helper()
+	require.Equal(t, input, usage.InputTokens)
+	require.Equal(t, output, usage.OutputTokens)
+	require.Equal(t, total, usage.TotalTokens)
+}
+
+// generateAgainstMockServer runs one Generate call with the given provider
+// options against a fresh mock server and returns the recorded request body.
+func generateAgainstMockServer(t *testing.T, model string, opts *ProviderOptions) map[string]any {
+	t.Helper()
+
+	languageModel, server := newGenerateTestModel(t, model, map[string]any{"content": ""})
+
+	_, err := languageModel.Generate(context.Background(), fantasy.Call{
+		Prompt:          testPrompt,
+		ProviderOptions: NewProviderOptions(opts),
+	})
+	require.NoError(t, err)
+	require.Len(t, server.calls, 1)
+
+	call := server.calls[0]
+	require.Equal(t, model, call.body["model"])
+
+	messages := call.body["messages"].([]any)
+	require.Len(t, messages, 1)
+
+	message := messages[0].(map[string]any)
+	require.Equal(t, "user", message["role"])
+	require.Equal(t, "Hello", message["content"])
+
+	return call.body
+}
+
+// streamAgainstMockServer runs one Stream call with the given provider
+// options against a fresh streaming mock server and returns the recorded
+// request body.
+func streamAgainstMockServer(t *testing.T, model string, opts *ProviderOptions) map[string]any {
+	t.Helper()
+
+	server := newStreamingMockServer()
+	t.Cleanup(server.close)
+	server.prepareStreamResponse(map[string]any{"content": []string{}})
+
+	provider, err := New(
+		WithAPIKey("test-api-key"),
+		WithBaseURL(server.server.URL),
+	)
+	require.NoError(t, err)
+	languageModel, _ := provider.LanguageModel(t.Context(), model)
+
+	_, err = languageModel.Stream(context.Background(), fantasy.Call{
+		Prompt:          testPrompt,
+		ProviderOptions: NewProviderOptions(opts),
+	})
+	require.NoError(t, err)
+	require.Len(t, server.calls, 1)
+
+	call := server.calls[0]
+	require.Equal(t, model, call.body["model"])
+	require.Equal(t, true, call.body["stream"])
+
+	streamOptions := call.body["stream_options"].(map[string]any)
+	require.Equal(t, true, streamOptions["include_usage"])
+
+	messages := call.body["messages"].([]any)
+	require.Len(t, messages, 1)
+
+	message := messages[0].(map[string]any)
+	require.Equal(t, "user", message["role"])
+	require.Equal(t, "Hello", message["content"])
+
+	return call.body
+}
+
+// testFunctionTool is the standard single-string-argument tool shared by the
+// tool tests.
+func testFunctionTool() fantasy.FunctionTool {
+	return fantasy.FunctionTool{
+		Name: "test-tool",
+		InputSchema: map[string]any{
+			"type": "object",
+			"properties": map[string]any{
+				"value": map[string]any{
+					"type": "string",
+				},
+			},
+			"required":             []string{"value"},
+			"additionalProperties": false,
+			"$schema":              "http://json-schema.org/draft-07/schema#",
+		},
+	}
+}
+
 func TestToOpenAiPrompt_SystemMessages(t *testing.T) {
 	t.Parallel()
 
 	t.Run("should forward system messages", func(t *testing.T) {
 		t.Parallel()
 
-		prompt := fantasy.Prompt{
-			{
-				Role: fantasy.MessageRoleSystem,
-				Content: []fantasy.MessagePart{
-					fantasy.TextPart{Text: "You are a helpful assistant."},
-				},
-			},
-		}
+		prompt := textPrompt(fantasy.MessageRoleSystem, "You are a helpful assistant.")
 
 		messages, warnings := DefaultToPrompt(prompt, "openai", "gpt-5")
 
@@ -89,14 +283,7 @@ func TestToOpenAiPrompt_UserMessages(t *testing.T) {
 	t.Run("should convert messages with only a text part to a string content", func(t *testing.T) {
 		t.Parallel()
 
-		prompt := fantasy.Prompt{
-			{
-				Role: fantasy.MessageRoleUser,
-				Content: []fantasy.MessagePart{
-					fantasy.TextPart{Text: "Hello"},
-				},
-			},
-		}
+		prompt := textPrompt(fantasy.MessageRoleUser, "Hello")
 
 		messages, warnings := DefaultToPrompt(prompt, "openai", "gpt-5")
 
@@ -213,90 +400,19 @@ func TestToOpenAiPrompt_FileParts(t *testing.T) {
 	t.Run("should add audio content for audio/wav file parts", func(t *testing.T) {
 		t.Parallel()
 
-		audioData := []byte{0, 1, 2, 3}
-		prompt := fantasy.Prompt{
-			{
-				Role: fantasy.MessageRoleUser,
-				Content: []fantasy.MessagePart{
-					fantasy.FilePart{
-						MediaType: "audio/wav",
-						Data:      audioData,
-					},
-				},
-			},
-		}
-
-		messages, warnings := DefaultToPrompt(prompt, "openai", "gpt-5")
-
-		require.Empty(t, warnings)
-		require.Len(t, messages, 1)
-
-		userMsg := messages[0].OfUser
-		require.NotNil(t, userMsg)
-
-		content := userMsg.Content.OfArrayOfContentParts
-		require.Len(t, content, 1)
-
-		audioPart := content[0].OfInputAudio
-		require.NotNil(t, audioPart)
-		require.Equal(t, base64.StdEncoding.EncodeToString(audioData), audioPart.InputAudio.Data)
-		require.Equal(t, "wav", audioPart.InputAudio.Format)
+		assertAudioFilePartFormat(t, "audio/wav", "wav")
 	})
 
 	t.Run("should add audio content for audio/mpeg file parts", func(t *testing.T) {
 		t.Parallel()
 
-		audioData := []byte{0, 1, 2, 3}
-		prompt := fantasy.Prompt{
-			{
-				Role: fantasy.MessageRoleUser,
-				Content: []fantasy.MessagePart{
-					fantasy.FilePart{
-						MediaType: "audio/mpeg",
-						Data:      audioData,
-					},
-				},
-			},
-		}
-
-		messages, warnings := DefaultToPrompt(prompt, "openai", "gpt-5")
-
-		require.Empty(t, warnings)
-		require.Len(t, messages, 1)
-
-		userMsg := messages[0].OfUser
-		content := userMsg.Content.OfArrayOfContentParts
-		audioPart := content[0].OfInputAudio
-		require.NotNil(t, audioPart)
-		require.Equal(t, "mp3", audioPart.InputAudio.Format)
+		assertAudioFilePartFormat(t, "audio/mpeg", "mp3")
 	})
 
 	t.Run("should add audio content for audio/mp3 file parts", func(t *testing.T) {
 		t.Parallel()
 
-		audioData := []byte{0, 1, 2, 3}
-		prompt := fantasy.Prompt{
-			{
-				Role: fantasy.MessageRoleUser,
-				Content: []fantasy.MessagePart{
-					fantasy.FilePart{
-						MediaType: "audio/mp3",
-						Data:      audioData,
-					},
-				},
-			},
-		}
-
-		messages, warnings := DefaultToPrompt(prompt, "openai", "gpt-5")
-
-		require.Empty(t, warnings)
-		require.Len(t, messages, 1)
-
-		userMsg := messages[0].OfUser
-		content := userMsg.Content.OfArrayOfContentParts
-		audioPart := content[0].OfInputAudio
-		require.NotNil(t, audioPart)
-		require.Equal(t, "mp3", audioPart.InputAudio.Format)
+		assertAudioFilePartFormat(t, "audio/mp3", "mp3")
 	})
 
 	t.Run("should convert messages with PDF file parts", func(t *testing.T) {
@@ -530,14 +646,7 @@ func TestToOpenAiPrompt_AssistantMessages(t *testing.T) {
 	t.Run("should handle simple text assistant messages", func(t *testing.T) {
 		t.Parallel()
 
-		prompt := fantasy.Prompt{
-			{
-				Role: fantasy.MessageRoleAssistant,
-				Content: []fantasy.MessagePart{
-					fantasy.TextPart{Text: "Hello, how can I help you?"},
-				},
-			},
-		}
+		prompt := textPrompt(fantasy.MessageRoleAssistant, "Hello, how can I help you?")
 
 		messages, warnings := DefaultToPrompt(prompt, "openai", "gpt-5")
 
@@ -857,9 +966,7 @@ func TestDoGenerate(t *testing.T) {
 		})
 
 		require.NoError(t, err)
-		require.Equal(t, int64(20), result.Usage.InputTokens)
-		require.Equal(t, int64(5), result.Usage.OutputTokens)
-		require.Equal(t, int64(25), result.Usage.TotalTokens)
+		requireUsage(t, result.Usage, 20, 5, 25)
 	})
 
 	t.Run("should send request body", func(t *testing.T) {
@@ -923,9 +1030,7 @@ func TestDoGenerate(t *testing.T) {
 		})
 
 		require.NoError(t, err)
-		require.Equal(t, int64(20), result.Usage.InputTokens)
-		require.Equal(t, int64(0), result.Usage.OutputTokens)
-		require.Equal(t, int64(20), result.Usage.TotalTokens)
+		requireUsage(t, result.Usage, 20, 0, 20)
 	})
 
 	t.Run("should extract logprobs", func(t *testing.T) {
@@ -966,23 +1071,9 @@ func TestDoGenerate(t *testing.T) {
 	t.Run("should extract finish reason", func(t *testing.T) {
 		t.Parallel()
 
-		server := newMockServer()
-		defer server.close()
+		languageModel, _ := newGenerateTestModel(t, "gpt-3.5-turbo", map[string]any{"finish_reason": "stop"})
 
-		server.prepareJSONResponse(map[string]any{
-			"finish_reason": "stop",
-		})
-
-		provider, err := New(
-			WithAPIKey("test-api-key"),
-			WithBaseURL(server.server.URL),
-		)
-		require.NoError(t, err)
-		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
-
-		result, err := model.Generate(context.Background(), fantasy.Call{
-			Prompt: testPrompt,
-		})
+		result, err := languageModel.Generate(context.Background(), fantasy.Call{Prompt: testPrompt})
 
 		require.NoError(t, err)
 		require.Equal(t, fantasy.FinishReasonStop, result.FinishReason)
@@ -991,23 +1082,9 @@ func TestDoGenerate(t *testing.T) {
 	t.Run("should support unknown finish reason", func(t *testing.T) {
 		t.Parallel()
 
-		server := newMockServer()
-		defer server.close()
+		languageModel, _ := newGenerateTestModel(t, "gpt-3.5-turbo", map[string]any{"finish_reason": "eos"})
 
-		server.prepareJSONResponse(map[string]any{
-			"finish_reason": "eos",
-		})
-
-		provider, err := New(
-			WithAPIKey("test-api-key"),
-			WithBaseURL(server.server.URL),
-		)
-		require.NoError(t, err)
-		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
-
-		result, err := model.Generate(context.Background(), fantasy.Call{
-			Prompt: testPrompt,
-		})
+		result, err := languageModel.Generate(context.Background(), fantasy.Call{Prompt: testPrompt})
 
 		require.NoError(t, err)
 		require.Equal(t, fantasy.FinishReasonUnknown, result.FinishReason)
@@ -1133,40 +1210,9 @@ func TestDoGenerate(t *testing.T) {
 	t.Run("should pass textVerbosity setting", func(t *testing.T) {
 		t.Parallel()
 
-		server := newMockServer()
-		defer server.close()
+		body := generateAgainstMockServer(t, "gpt-4o", &ProviderOptions{TextVerbosity: new("low")})
 
-		server.prepareJSONResponse(map[string]any{
-			"content": "",
-		})
-
-		provider, err := New(
-			WithAPIKey("test-api-key"),
-			WithBaseURL(server.server.URL),
-		)
-		require.NoError(t, err)
-		model, _ := provider.LanguageModel(t.Context(), "gpt-4o")
-
-		_, err = model.Generate(context.Background(), fantasy.Call{
-			Prompt: testPrompt,
-			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				TextVerbosity: new("low"),
-			}),
-		})
-
-		require.NoError(t, err)
-		require.Len(t, server.calls, 1)
-
-		call := server.calls[0]
-		require.Equal(t, "gpt-4o", call.body["model"])
-		require.Equal(t, "low", call.body["verbosity"])
-
-		messages := call.body["messages"].([]any)
-		require.Len(t, messages, 1)
-
-		message := messages[0].(map[string]any)
-		require.Equal(t, "user", message["role"])
-		require.Equal(t, "Hello", message["content"])
+		require.Equal(t, "low", body["verbosity"])
 	})
 
 	t.Run("should pass tools and toolChoice", func(t *testing.T) {
@@ -1187,23 +1233,8 @@ func TestDoGenerate(t *testing.T) {
 		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		_, err = model.Generate(context.Background(), fantasy.Call{
-			Prompt: testPrompt,
-			Tools: []fantasy.Tool{
-				fantasy.FunctionTool{
-					Name: "test-tool",
-					InputSchema: map[string]any{
-						"type": "object",
-						"properties": map[string]any{
-							"value": map[string]any{
-								"type": "string",
-							},
-						},
-						"required":             []string{"value"},
-						"additionalProperties": false,
-						"$schema":              "http://json-schema.org/draft-07/schema#",
-					},
-				},
-			},
+			Prompt:     testPrompt,
+			Tools:      []fantasy.Tool{testFunctionTool()},
 			ToolChoice: &[]fantasy.ToolChoice{fantasy.ToolChoice("test-tool")}[0],
 		})
 
@@ -1260,23 +1291,8 @@ func TestDoGenerate(t *testing.T) {
 		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
 
 		result, err := model.Generate(context.Background(), fantasy.Call{
-			Prompt: testPrompt,
-			Tools: []fantasy.Tool{
-				fantasy.FunctionTool{
-					Name: "test-tool",
-					InputSchema: map[string]any{
-						"type": "object",
-						"properties": map[string]any{
-							"value": map[string]any{
-								"type": "string",
-							},
-						},
-						"required":             []string{"value"},
-						"additionalProperties": false,
-						"$schema":              "http://json-schema.org/draft-07/schema#",
-					},
-				},
-			},
+			Prompt:     testPrompt,
+			Tools:      []fantasy.Tool{testFunctionTool()},
 			ToolChoice: &[]fantasy.ToolChoice{fantasy.ToolChoice("test-tool")}[0],
 		})
 
@@ -1495,37 +1511,11 @@ func TestDoGenerate(t *testing.T) {
 	t.Run("should return cached_tokens in prompt_details_tokens", func(t *testing.T) {
 		t.Parallel()
 
-		server := newMockServer()
-		defer server.close()
+		result := generateWithUsage(t, "gpt-4o-mini", "prompt_tokens_details", "cached_tokens", 1152)
 
-		server.prepareJSONResponse(map[string]any{
-			"usage": map[string]any{
-				"prompt_tokens":     15,
-				"completion_tokens": 20,
-				"total_tokens":      35,
-				"prompt_tokens_details": map[string]any{
-					"cached_tokens": 1152,
-				},
-			},
-		})
-
-		provider, err := New(
-			WithAPIKey("test-api-key"),
-			WithBaseURL(server.server.URL),
-		)
-		require.NoError(t, err)
-		model, _ := provider.LanguageModel(t.Context(), "gpt-4o-mini")
-
-		result, err := model.Generate(context.Background(), fantasy.Call{
-			Prompt: testPrompt,
-		})
-
-		require.NoError(t, err)
 		require.Equal(t, int64(1152), result.Usage.CacheReadTokens)
 		// InputTokens = prompt_tokens - cached_tokens = 15 - 1152 = -1137 → clamped to 0
-		require.Equal(t, int64(0), result.Usage.InputTokens)
-		require.Equal(t, int64(20), result.Usage.OutputTokens)
-		require.Equal(t, int64(35), result.Usage.TotalTokens)
+		requireUsage(t, result.Usage, 0, 20, 35)
 	})
 
 	t.Run("should return accepted_prediction_tokens and rejected_prediction_tokens", func(t *testing.T) {
@@ -1655,35 +1645,9 @@ func TestDoGenerate(t *testing.T) {
 	t.Run("should return reasoning tokens", func(t *testing.T) {
 		t.Parallel()
 
-		server := newMockServer()
-		defer server.close()
+		result := generateWithUsage(t, "o1-preview", "completion_tokens_details", "reasoning_tokens", 10)
 
-		server.prepareJSONResponse(map[string]any{
-			"usage": map[string]any{
-				"prompt_tokens":     15,
-				"completion_tokens": 20,
-				"total_tokens":      35,
-				"completion_tokens_details": map[string]any{
-					"reasoning_tokens": 10,
-				},
-			},
-		})
-
-		provider, err := New(
-			WithAPIKey("test-api-key"),
-			WithBaseURL(server.server.URL),
-		)
-		require.NoError(t, err)
-		model, _ := provider.LanguageModel(t.Context(), "o1-preview")
-
-		result, err := model.Generate(context.Background(), fantasy.Call{
-			Prompt: testPrompt,
-		})
-
-		require.NoError(t, err)
-		require.Equal(t, int64(15), result.Usage.InputTokens)
-		require.Equal(t, int64(20), result.Usage.OutputTokens)
-		require.Equal(t, int64(35), result.Usage.TotalTokens)
+		requireUsage(t, result.Usage, 15, 20, 35)
 		require.Equal(t, int64(10), result.Usage.ReasoningTokens)
 	})
 
@@ -1856,79 +1820,17 @@ func TestDoGenerate(t *testing.T) {
 	t.Run("should send promptCacheKey extension value", func(t *testing.T) {
 		t.Parallel()
 
-		server := newMockServer()
-		defer server.close()
+		body := generateAgainstMockServer(t, "gpt-3.5-turbo", &ProviderOptions{PromptCacheKey: new("test-cache-key-123")})
 
-		server.prepareJSONResponse(map[string]any{
-			"content": "",
-		})
-
-		provider, err := New(
-			WithAPIKey("test-api-key"),
-			WithBaseURL(server.server.URL),
-		)
-		require.NoError(t, err)
-		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
-
-		_, err = model.Generate(context.Background(), fantasy.Call{
-			Prompt: testPrompt,
-			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				PromptCacheKey: new("test-cache-key-123"),
-			}),
-		})
-
-		require.NoError(t, err)
-		require.Len(t, server.calls, 1)
-
-		call := server.calls[0]
-		require.Equal(t, "gpt-3.5-turbo", call.body["model"])
-		require.Equal(t, "test-cache-key-123", call.body["prompt_cache_key"])
-
-		messages := call.body["messages"].([]any)
-		require.Len(t, messages, 1)
-
-		message := messages[0].(map[string]any)
-		require.Equal(t, "user", message["role"])
-		require.Equal(t, "Hello", message["content"])
+		require.Equal(t, "test-cache-key-123", body["prompt_cache_key"])
 	})
 
 	t.Run("should send safety_identifier extension value", func(t *testing.T) {
 		t.Parallel()
 
-		server := newMockServer()
-		defer server.close()
+		body := generateAgainstMockServer(t, "gpt-3.5-turbo", &ProviderOptions{SafetyIdentifier: new("test-safety-identifier-123")})
 
-		server.prepareJSONResponse(map[string]any{
-			"content": "",
-		})
-
-		provider, err := New(
-			WithAPIKey("test-api-key"),
-			WithBaseURL(server.server.URL),
-		)
-		require.NoError(t, err)
-		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
-
-		_, err = model.Generate(context.Background(), fantasy.Call{
-			Prompt: testPrompt,
-			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				SafetyIdentifier: new("test-safety-identifier-123"),
-			}),
-		})
-
-		require.NoError(t, err)
-		require.Len(t, server.calls, 1)
-
-		call := server.calls[0]
-		require.Equal(t, "gpt-3.5-turbo", call.body["model"])
-		require.Equal(t, "test-safety-identifier-123", call.body["safety_identifier"])
-
-		messages := call.body["messages"].([]any)
-		require.Len(t, messages, 1)
-
-		message := messages[0].(map[string]any)
-		require.Equal(t, "user", message["role"])
-		require.Equal(t, "Hello", message["content"])
+		require.Equal(t, "test-safety-identifier-123", body["safety_identifier"])
 	})
 
 	t.Run("should remove temperature setting for search preview models", func(t *testing.T) {
@@ -1967,68 +1869,16 @@ func TestDoGenerate(t *testing.T) {
 	t.Run("should send ServiceTier flex processing setting", func(t *testing.T) {
 		t.Parallel()
 
-		server := newMockServer()
-		defer server.close()
+		body := generateAgainstMockServer(t, "o3-mini", &ProviderOptions{ServiceTier: new("flex")})
 
-		server.prepareJSONResponse(map[string]any{
-			"content": "",
-		})
-
-		provider, err := New(
-			WithAPIKey("test-api-key"),
-			WithBaseURL(server.server.URL),
-		)
-		require.NoError(t, err)
-		model, _ := provider.LanguageModel(t.Context(), "o3-mini")
-
-		_, err = model.Generate(context.Background(), fantasy.Call{
-			Prompt: testPrompt,
-			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				ServiceTier: new("flex"),
-			}),
-		})
-
-		require.NoError(t, err)
-		require.Len(t, server.calls, 1)
-
-		call := server.calls[0]
-		require.Equal(t, "o3-mini", call.body["model"])
-		require.Equal(t, "flex", call.body["service_tier"])
-
-		messages := call.body["messages"].([]any)
-		require.Len(t, messages, 1)
-
-		message := messages[0].(map[string]any)
-		require.Equal(t, "user", message["role"])
-		require.Equal(t, "Hello", message["content"])
+		require.Equal(t, "flex", body["service_tier"])
 	})
 
 	t.Run("should show warning when using flex processing with unsupported model", func(t *testing.T) {
 		t.Parallel()
 
-		server := newMockServer()
-		defer server.close()
+		result, call := generateWithUnsupportedServiceTier(t, "gpt-4o-mini", "flex")
 
-		server.prepareJSONResponse(map[string]any{})
-
-		provider, err := New(
-			WithAPIKey("test-api-key"),
-			WithBaseURL(server.server.URL),
-		)
-		require.NoError(t, err)
-		model, _ := provider.LanguageModel(t.Context(), "gpt-4o-mini")
-
-		result, err := model.Generate(context.Background(), fantasy.Call{
-			Prompt: testPrompt,
-			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				ServiceTier: new("flex"),
-			}),
-		})
-
-		require.NoError(t, err)
-		require.Len(t, server.calls, 1)
-
-		call := server.calls[0]
 		require.Nil(t, call.body["service_tier"])
 
 		require.Len(t, result.Warnings, 1)
@@ -2077,29 +1927,8 @@ func TestDoGenerate(t *testing.T) {
 	t.Run("should show warning when using priority processing with unsupported model", func(t *testing.T) {
 		t.Parallel()
 
-		server := newMockServer()
-		defer server.close()
+		result, call := generateWithUnsupportedServiceTier(t, "gpt-3.5-turbo", "priority")
 
-		server.prepareJSONResponse(map[string]any{})
-
-		provider, err := New(
-			WithAPIKey("test-api-key"),
-			WithBaseURL(server.server.URL),
-		)
-		require.NoError(t, err)
-		model, _ := provider.LanguageModel(t.Context(), "gpt-3.5-turbo")
-
-		result, err := model.Generate(context.Background(), fantasy.Call{
-			Prompt: testPrompt,
-			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				ServiceTier: new("priority"),
-			}),
-		})
-
-		require.NoError(t, err)
-		require.Len(t, server.calls, 1)
-
-		call := server.calls[0]
 		require.Nil(t, call.body["service_tier"])
 
 		require.Len(t, result.Warnings, 1)
@@ -2624,9 +2453,7 @@ func TestDoStream(t *testing.T) {
 		// Check finish part
 		finishPart := parts[finish]
 		require.Equal(t, fantasy.FinishReasonStop, finishPart.FinishReason)
-		require.Equal(t, int64(17), finishPart.Usage.InputTokens)
-		require.Equal(t, int64(227), finishPart.Usage.OutputTokens)
-		require.Equal(t, int64(244), finishPart.Usage.TotalTokens)
+		requireUsage(t, finishPart.Usage, 17, 227, 244)
 	})
 
 	t.Run("should stream tool deltas", func(t *testing.T) {
@@ -3082,9 +2909,7 @@ func TestDoStream(t *testing.T) {
 		require.NotNil(t, finishPart)
 		require.Equal(t, int64(1152), finishPart.Usage.CacheReadTokens)
 		// InputTokens = prompt_tokens - cached_tokens = 15 - 1152 = -1137 → clamped to 0
-		require.Equal(t, int64(0), finishPart.Usage.InputTokens)
-		require.Equal(t, int64(20), finishPart.Usage.OutputTokens)
-		require.Equal(t, int64(35), finishPart.Usage.TotalTokens)
+		requireUsage(t, finishPart.Usage, 0, 20, 35)
 	})
 
 	t.Run("should return accepted_prediction_tokens and rejected_prediction_tokens", func(t *testing.T) {
@@ -3233,87 +3058,17 @@ func TestDoStream(t *testing.T) {
 	t.Run("should send serviceTier flex processing setting in streaming", func(t *testing.T) {
 		t.Parallel()
 
-		server := newStreamingMockServer()
-		defer server.close()
+		body := streamAgainstMockServer(t, "o3-mini", &ProviderOptions{ServiceTier: new("flex")})
 
-		server.prepareStreamResponse(map[string]any{
-			"content": []string{},
-		})
-
-		provider, err := New(
-			WithAPIKey("test-api-key"),
-			WithBaseURL(server.server.URL),
-		)
-		require.NoError(t, err)
-		model, _ := provider.LanguageModel(t.Context(), "o3-mini")
-
-		_, err = model.Stream(context.Background(), fantasy.Call{
-			Prompt: testPrompt,
-			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				ServiceTier: new("flex"),
-			}),
-		})
-
-		require.NoError(t, err)
-		require.Len(t, server.calls, 1)
-
-		call := server.calls[0]
-		require.Equal(t, "o3-mini", call.body["model"])
-		require.Equal(t, "flex", call.body["service_tier"])
-		require.Equal(t, true, call.body["stream"])
-
-		streamOptions := call.body["stream_options"].(map[string]any)
-		require.Equal(t, true, streamOptions["include_usage"])
-
-		messages := call.body["messages"].([]any)
-		require.Len(t, messages, 1)
-
-		message := messages[0].(map[string]any)
-		require.Equal(t, "user", message["role"])
-		require.Equal(t, "Hello", message["content"])
+		require.Equal(t, "flex", body["service_tier"])
 	})
 
 	t.Run("should send serviceTier priority processing setting in streaming", func(t *testing.T) {
 		t.Parallel()
 
-		server := newStreamingMockServer()
-		defer server.close()
+		body := streamAgainstMockServer(t, "gpt-4o-mini", &ProviderOptions{ServiceTier: new("priority")})
 
-		server.prepareStreamResponse(map[string]any{
-			"content": []string{},
-		})
-
-		provider, err := New(
-			WithAPIKey("test-api-key"),
-			WithBaseURL(server.server.URL),
-		)
-		require.NoError(t, err)
-		model, _ := provider.LanguageModel(t.Context(), "gpt-4o-mini")
-
-		_, err = model.Stream(context.Background(), fantasy.Call{
-			Prompt: testPrompt,
-			ProviderOptions: NewProviderOptions(&ProviderOptions{
-				ServiceTier: new("priority"),
-			}),
-		})
-
-		require.NoError(t, err)
-		require.Len(t, server.calls, 1)
-
-		call := server.calls[0]
-		require.Equal(t, "gpt-4o-mini", call.body["model"])
-		require.Equal(t, "priority", call.body["service_tier"])
-		require.Equal(t, true, call.body["stream"])
-
-		streamOptions := call.body["stream_options"].(map[string]any)
-		require.Equal(t, true, streamOptions["include_usage"])
-
-		messages := call.body["messages"].([]any)
-		require.Len(t, messages, 1)
-
-		message := messages[0].(map[string]any)
-		require.Equal(t, "user", message["role"])
-		require.Equal(t, "Hello", message["content"])
+		require.Equal(t, "priority", body["service_tier"])
 	})
 
 	t.Run("should stream text delta for reasoning models", func(t *testing.T) {
@@ -3400,9 +3155,7 @@ func TestDoStream(t *testing.T) {
 		}
 
 		require.NotNil(t, finishPart)
-		require.Equal(t, int64(15), finishPart.Usage.InputTokens)
-		require.Equal(t, int64(20), finishPart.Usage.OutputTokens)
-		require.Equal(t, int64(35), finishPart.Usage.TotalTokens)
+		requireUsage(t, finishPart.Usage, 15, 20, 35)
 		require.Equal(t, int64(10), finishPart.Usage.ReasoningTokens)
 	})
 
@@ -4949,6 +4702,65 @@ func responsesSSEEvent(event, data string) string {
 	return "event: " + event + "\n" + "data: " + data + "\n\n"
 }
 
+// truncatedToolCallResponsesResponse builds a Responses API payload whose only
+// output item is a partially-serialized function call (unclosed JSON in
+// arguments) and whose incomplete_details carries the given reason. The ids
+// are resp_/fc_/call_ plus the given suffix.
+func truncatedToolCallResponsesResponse(suffix, reason string) map[string]any {
+	return map[string]any{
+		"id":     "resp_" + suffix,
+		"object": "response",
+		"model":  "gpt-4.1",
+		"output": []any{
+			map[string]any{
+				"type":      "function_call",
+				"id":        "fc_" + suffix,
+				"call_id":   "call_" + suffix,
+				"name":      "test-tool",
+				"arguments": `{"value":"trunc`,
+				"status":    "completed",
+			},
+		},
+		"status":             "incomplete",
+		"incomplete_details": map[string]any{"reason": reason},
+		"usage": map[string]any{
+			"input_tokens":  10,
+			"output_tokens": 20,
+			"total_tokens":  30,
+		},
+	}
+}
+
+// requireSuppressedToolCall asserts that a turn cut short mid-tool-call keeps
+// the given finish reason, carries a truncation warning, and does not surface
+// the truncated tool call as content.
+func requireSuppressedToolCall(t *testing.T, resp *fantasy.Response, wantFinish fantasy.FinishReason, wantWarning string) {
+	t.Helper()
+	require.Equal(t, wantFinish, resp.FinishReason)
+	require.NotEmpty(t, resp.Warnings)
+	require.Contains(t, resp.Warnings[0].Message, wantWarning)
+	for _, c := range resp.Content {
+		require.NotEqual(t, fantasy.ContentTypeToolCall, c.GetType(), "truncated tool call should be suppressed")
+	}
+}
+
+func requireStreamFinishAndWarning(t *testing.T, parts []fantasy.StreamPart, wantFinish fantasy.FinishReason) {
+	t.Helper()
+	var finish *fantasy.StreamPart
+	var hasWarning bool
+	for i, part := range parts {
+		if part.Type == fantasy.StreamPartTypeFinish {
+			finish = &parts[i]
+		}
+		if part.Type == fantasy.StreamPartTypeWarnings {
+			hasWarning = true
+		}
+	}
+	require.NotNil(t, finish)
+	require.Equal(t, wantFinish, finish.FinishReason)
+	require.True(t, hasWarning, "expected truncation warning")
+}
+
 func collectObjectStreamParts(stream fantasy.ObjectStreamResponse) []fantasy.ObjectStreamPart {
 	var parts []fantasy.ObjectStreamPart
 	for part := range stream {
@@ -5189,49 +5001,17 @@ func TestResponsesGenerate_TruncatedToolCalls(t *testing.T) {
 	t.Parallel()
 
 	server := newMockServer()
-	defer server.close()
-	server.response = map[string]any{
-		"id":     "resp_trunc",
-		"object": "response",
-		"model":  "gpt-4.1",
-		"output": []any{
-			map[string]any{
-				"type":      "function_call",
-				"id":        "fc_trunc",
-				"call_id":   "call_trunc",
-				"name":      "test-tool",
-				"arguments": `{"value":"trunc`,
-				"status":    "completed",
-			},
-		},
-		"status":             "incomplete",
-		"incomplete_details": map[string]any{"reason": "max_output_tokens"},
-		"usage": map[string]any{
-			"input_tokens":  10,
-			"output_tokens": 20,
-			"total_tokens":  30,
-		},
-	}
+	t.Cleanup(server.close)
+	server.response = truncatedToolCallResponsesResponse("trunc", "max_output_tokens")
 
 	model := newResponsesProvider(t, server.server.URL)
 
 	resp, err := model.Generate(context.Background(), fantasy.Call{
 		Prompt: testPrompt,
-		Tools: []fantasy.Tool{fantasy.FunctionTool{
-			Name: "test-tool",
-			InputSchema: map[string]any{
-				"type":       "object",
-				"properties": map[string]any{"value": map[string]any{"type": "string"}},
-			},
-		}},
+		Tools:  []fantasy.Tool{testFunctionTool()},
 	})
 	require.NoError(t, err)
-	require.Equal(t, fantasy.FinishReasonLength, resp.FinishReason)
-	require.NotEmpty(t, resp.Warnings)
-	require.Contains(t, resp.Warnings[0].Message, "token limit")
-	for _, c := range resp.Content {
-		require.NotEqual(t, fantasy.ContentTypeToolCall, c.GetType(), "truncated tool call should be suppressed")
-	}
+	requireSuppressedToolCall(t, resp, fantasy.FinishReasonLength, "token limit")
 }
 
 func TestResponsesStream_TruncatedToolCalls(t *testing.T) {
@@ -5253,13 +5033,7 @@ func TestResponsesStream_TruncatedToolCalls(t *testing.T) {
 
 	stream, err := model.Stream(context.Background(), fantasy.Call{
 		Prompt: testPrompt,
-		Tools: []fantasy.Tool{fantasy.FunctionTool{
-			Name: "test-tool",
-			InputSchema: map[string]any{
-				"type":       "object",
-				"properties": map[string]any{"val": map[string]any{"type": "string"}},
-			},
-		}},
+		Tools:  []fantasy.Tool{testFunctionTool()},
 	})
 	require.NoError(t, err)
 
@@ -5269,17 +5043,5 @@ func TestResponsesStream_TruncatedToolCalls(t *testing.T) {
 		return true
 	})
 
-	var finish *fantasy.StreamPart
-	var hasWarning bool
-	for i, part := range parts {
-		if part.Type == fantasy.StreamPartTypeFinish {
-			finish = &parts[i]
-		}
-		if part.Type == fantasy.StreamPartTypeWarnings {
-			hasWarning = true
-		}
-	}
-	require.NotNil(t, finish)
-	require.Equal(t, fantasy.FinishReasonLength, finish.FinishReason)
-	require.True(t, hasWarning, "expected truncation warning")
+	requireStreamFinishAndWarning(t, parts, fantasy.FinishReasonLength)
 }

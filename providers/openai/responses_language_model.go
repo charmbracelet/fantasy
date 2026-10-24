@@ -9,7 +9,6 @@ import (
 	"io"
 	"maps"
 	"net/http"
-	"reflect"
 	"strings"
 
 	"charm.land/fantasy"
@@ -1639,44 +1638,8 @@ func (o responsesLanguageModel) streamObjectWithJSONMode(ctx context.Context, ca
 			case "response.output_text.delta":
 				textDelta := event.AsResponseOutputTextDelta()
 				accumulated += textDelta.Delta
-
-				// Try to parse the accumulated text
-				obj, state, parseErr := schema.ParsePartialJSON(accumulated)
-
-				// If we successfully parsed, validate and emit
-				if state == schema.ParseStateSuccessful || state == schema.ParseStateRepaired {
-					if err := schema.ValidateAgainstSchema(obj, call.Schema); err == nil {
-						// Only emit if object is different from last
-						if !reflect.DeepEqual(obj, lastParsedObject) {
-							if !yield(fantasy.ObjectStreamPart{
-								Type:   fantasy.ObjectStreamPartTypeObject,
-								Object: obj,
-							}) {
-								return
-							}
-							lastParsedObject = obj
-						}
-					}
-				}
-
-				// If parsing failed and we have a repair function, try it
-				if state == schema.ParseStateFailed && call.RepairText != nil {
-					repairedText, repairErr := call.RepairText(ctx, accumulated, parseErr)
-					if repairErr == nil {
-						obj2, state2, _ := schema.ParsePartialJSON(repairedText)
-						if (state2 == schema.ParseStateSuccessful || state2 == schema.ParseStateRepaired) &&
-							schema.ValidateAgainstSchema(obj2, call.Schema) == nil {
-							if !reflect.DeepEqual(obj2, lastParsedObject) {
-								if !yield(fantasy.ObjectStreamPart{
-									Type:   fantasy.ObjectStreamPartTypeObject,
-									Object: obj2,
-								}) {
-									return
-								}
-								lastParsedObject = obj2
-							}
-						}
-					}
+				if !object.EmitParsedObject(ctx, call, accumulated, &lastParsedObject, yield) {
+					return
 				}
 
 			case "response.completed":

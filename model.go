@@ -187,6 +187,8 @@ type StreamPart struct {
 	SourceType SourceType `json:"source_type"`
 	URL        string     `json:"url"`
 	Title      string     `json:"title"`
+	// SourceToolCallID is SourceContent.ToolCallID for source parts.
+	SourceToolCallID string `json:"source_tool_call_id,omitempty"`
 
 	ProviderMetadata ProviderMetadata `json:"provider_metadata"`
 }

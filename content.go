@@ -412,12 +412,16 @@ const (
 
 // SourceContent represents a source that has been used as input to generate the response.
 type SourceContent struct {
-	SourceType       SourceType       `json:"source_type"` // "url" or "document"
-	ID               string           `json:"id"`
-	URL              string           `json:"url"` // for URL sources
-	Title            string           `json:"title"`
-	MediaType        string           `json:"media_type"` // for document sources (IANA media type)
-	Filename         string           `json:"filename"`   // for document sources
+	SourceType SourceType `json:"source_type"` // "url" or "document"
+	ID         string     `json:"id"`
+	URL        string     `json:"url"` // for URL sources
+	Title      string     `json:"title"`
+	MediaType  string     `json:"media_type"` // for document sources (IANA media type)
+	Filename   string     `json:"filename"`   // for document sources
+	// ToolCallID is the provider-executed tool call, such as a web search,
+	// that returned this source. It is empty for sources the response text
+	// cites.
+	ToolCallID       string           `json:"tool_call_id,omitempty"`
 	ProviderMetadata ProviderMetadata `json:"provider_metadata"`
 }
 

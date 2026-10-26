@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"net/http"
 	"os"
+	"slices"
 	"testing"
 
 	"charm.land/fantasy"
@@ -58,12 +59,17 @@ func TestOpenAIWebSearch(t *testing.T) {
 		// Walk the steps and verify web search content was produced.
 		var sources []fantasy.SourceContent
 		var providerToolCalls []fantasy.ToolCallContent
+		var providerToolResults []fantasy.ToolResultContent
 		for _, step := range result.Steps {
 			for _, c := range step.Content {
 				switch v := c.(type) {
 				case fantasy.ToolCallContent:
 					if v.ProviderExecuted {
 						providerToolCalls = append(providerToolCalls, v)
+					}
+				case fantasy.ToolResultContent:
+					if v.ProviderExecuted {
+						providerToolResults = append(providerToolResults, v)
 					}
 				case fantasy.SourceContent:
 					sources = append(sources, v)
@@ -73,9 +79,7 @@ func TestOpenAIWebSearch(t *testing.T) {
 
 		require.NotEmpty(t, providerToolCalls, "should have provider-executed tool calls")
 		require.Equal(t, "web_search", providerToolCalls[0].ToolName)
-		// Sources come from url_citation annotations; the model
-		// may or may not include inline citations so we don't
-		// require them, but if present they should have URLs.
+		requireWebSearchActionMetadata(t, providerToolResults, sources)
 		for _, src := range sources {
 			require.NotEmpty(t, src.URL, "source should have a URL")
 		}
@@ -107,6 +111,7 @@ func TestOpenAIWebSearch(t *testing.T) {
 		// Verify provider-executed tool calls and results in steps.
 		var providerToolCalls []fantasy.ToolCallContent
 		var providerToolResults []fantasy.ToolResultContent
+		var sources []fantasy.SourceContent
 		for _, step := range result.Steps {
 			for _, c := range step.Content {
 				switch v := c.(type) {
@@ -118,11 +123,36 @@ func TestOpenAIWebSearch(t *testing.T) {
 					if v.ProviderExecuted {
 						providerToolResults = append(providerToolResults, v)
 					}
+				case fantasy.SourceContent:
+					sources = append(sources, v)
 				}
 			}
 		}
 		require.NotEmpty(t, providerToolCalls, "should have provider-executed tool calls")
 		require.Equal(t, "web_search", providerToolCalls[0].ToolName)
 		require.NotEmpty(t, providerToolResults, "should have provider-executed tool results")
+		requireWebSearchActionMetadata(t, providerToolResults, sources)
 	})
+}
+
+// requireWebSearchActionMetadata checks that web_search results carry the
+// search queries, and that every page a search found is a source tagged
+// with that search's ID. The recorded gpt-4.1 stream reports no found pages
+// on its search item, so found pages are not required.
+func requireWebSearchActionMetadata(t *testing.T, results []fantasy.ToolResultContent, sources []fantasy.SourceContent) {
+	t.Helper()
+
+	require.NotEmpty(t, results, "should have provider-executed tool results")
+	for _, result := range results {
+		meta, ok := result.ProviderMetadata[openai.Name].(*openai.WebSearchCallMetadata)
+		require.True(t, ok, "web_search result metadata should be *openai.WebSearchCallMetadata, got %T", result.ProviderMetadata[openai.Name])
+		require.NotNil(t, meta.Action)
+		require.Equal(t, "search", meta.Action.Type)
+		require.NotEmpty(t, meta.Action.Queries, "search action should report its queries")
+		for _, found := range meta.Action.Sources {
+			require.True(t, slices.ContainsFunc(sources, func(source fantasy.SourceContent) bool {
+				return source.URL == found.URL && source.ToolCallID == meta.ItemID
+			}), "found page %q should be a source tagged with %q", found.URL, meta.ItemID)
+		}
+	}
 }

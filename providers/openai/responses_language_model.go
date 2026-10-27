@@ -895,12 +895,10 @@ func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call)
 			// a ToolCallContent and ToolResultContent as a pair,
 			// matching the vercel/ai pattern for provider tools.
 			//
-			// Found pages become sources tagged with the search's ID.
-			// Citations come untagged from url_citation annotations on
-			// the message text (handled in the "message" case above).
-			// A non-streamed response only has the final output, where
-			// OpenAI also lists pages the answer cited among the
-			// search's sources, so those appear as found pages here.
+			// Note: source citations come from url_citation annotations
+			// on the message text (handled in the "message" case above),
+			// not from the web_search_call action. Unlike the streamed
+			// item, the final output's action.sources also lists them.
 			content = append(content, fantasy.ToolCallContent{
 				ProviderExecuted: true,
 				ToolCallID:       outputItem.ID,
@@ -1136,10 +1134,9 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 					}
 
 				case "web_search_call":
-					// Provider-executed web search completed. Its found
-					// pages are sources tagged with the search's ID;
-					// citations come untagged from url_citation
-					// annotations on the message text.
+					// Provider-executed web search completed.
+					// Source citations come from url_citation annotations
+					// on the streamed message text, not from the action.
 					if !yield(fantasy.StreamPart{
 						Type: fantasy.StreamPartTypeToolInputEnd,
 						ID:   done.Item.ID,
@@ -1455,8 +1452,8 @@ func webSearchCallToMetadata(itemID, status string, action responses.ResponseOut
 	return meta
 }
 
-// webSearchCallSources returns the pages a web_search_call found as URL
-// sources tagged with the call's ID.
+// webSearchCallSources converts the pages a web search call found into
+// sources.
 func webSearchCallSources(itemID string, action responses.ResponseOutputItemUnionAction) []fantasy.SourceContent {
 	sources := make([]fantasy.SourceContent, 0, len(action.Sources))
 	for _, src := range action.Sources {
@@ -1473,10 +1470,8 @@ func webSearchCallSources(itemID string, action responses.ResponseOutputItemUnio
 	return sources
 }
 
-// webSearchCallInput encodes the web_search_call action as its tool call
-// input: the action type with the queries of a search (falling back to the
-// deprecated query), the URL of open_page, or the URL and pattern of
-// find_in_page.
+// webSearchCallInput encodes a web search call's action as its tool call
+// input.
 func webSearchCallInput(action responses.ResponseOutputItemUnionAction) string {
 	queries := action.Queries
 	if len(queries) == 0 && action.Query != "" {

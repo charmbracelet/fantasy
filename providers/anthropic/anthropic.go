@@ -1401,9 +1401,8 @@ func (a languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantas
 			if !ok {
 				continue
 			}
-			// Emit found pages as sources tagged with the search's ID,
-			// and keep them in metadata with encrypted_content for
-			// multi-turn round-tripping.
+			// Extract search results as sources/citations, preserving
+			// encrypted_content for multi-turn round-tripping.
 			toolResult := fantasy.ToolResultContent{
 				ToolCallID:       webSearchResult.ToolUseID,
 				ToolName:         "web_search",

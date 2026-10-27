@@ -10,11 +10,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// webSearchCallActionCases covers the web_search_call action shapes
-// OpenAI returns: searches with queries and found pages, older responses
-// with the deprecated single query, searches that report no query, and the
-// open_page and find_in_page actions of reasoning models. Status defaults
-// to "completed".
+// webSearchCallActionCases are the web_search_call action shapes OpenAI
+// returns.
 type webSearchCallActionCase struct {
 	name      string
 	status    string
@@ -132,8 +129,7 @@ func requireWebSearchCallMetadata(t *testing.T, metadata fantasy.ProviderMetadat
 	require.Equal(t, wantStatus, wsMeta.Status)
 	require.Equal(t, want, wsMeta.Action)
 
-	// Callers persist the metadata as JSON and read it back on later
-	// turns, so the action fields must survive the round trip.
+	// The metadata must survive a JSON round trip.
 	encoded, err := json.Marshal(metadata)
 	require.NoError(t, err)
 	var raw map[string]json.RawMessage
@@ -336,12 +332,9 @@ func TestResponsesStream_WebSearchCallAction(t *testing.T) {
 	}
 }
 
-// TestResponsesStream_WebSearchCallFinishesWithItem covers live gpt-4.1-mini
-// and gpt-5-mini streams: a search's found pages are on its output_item.done,
-// and the final response summary also lists pages the answer cited among
-// them. gpt-4.1 search items carried no pages, and its summary listed only
-// cited pages. The search finishes, with its own pages, before the answer
-// streams.
+// TestResponsesStream_WebSearchCallFinishesWithItem checks that a search
+// reports the pages of its output_item.done, not the cited pages that
+// response.completed adds to its sources.
 func TestResponsesStream_WebSearchCallFinishesWithItem(t *testing.T) {
 	t.Parallel()
 

@@ -131,9 +131,8 @@ const (
 	IncludeFileSearchCallResults IncludeType = "file_search_call.results"
 	// IncludeMessageOutputTextLogprobs includes message output text log probabilities.
 	IncludeMessageOutputTextLogprobs IncludeType = "message.output_text.logprobs"
-	// IncludeWebSearchCallActionSources includes the pages a web search
-	// found in web_search_call action.sources. Requests with a web
-	// search tool add it automatically.
+	// IncludeWebSearchCallActionSources includes web search call sources.
+	// It is added whenever a web search tool is set.
 	IncludeWebSearchCallActionSources IncludeType = "web_search_call.action.sources"
 )
 
@@ -390,17 +389,15 @@ type WebSearchSource struct {
 type WebSearchAction struct {
 	// Type is the kind of action: "search", "open_page", or "find_in_page".
 	Type string `json:"type"`
-	// Queries are the search queries. OpenAI can omit them.
+	// Queries are the search queries (present when Type is "search").
 	Queries []string `json:"queries,omitempty"`
-	// Query is the deprecated single-query field that OpenAI replaced
-	// with Queries.
+	// Query is the search query (deprecated by OpenAI in favor of Queries).
 	Query string `json:"query,omitempty"`
-	// URL is the page an open_page or find_in_page action used.
+	// URL is the page URL (present when Type is "open_page" or "find_in_page").
 	URL string `json:"url,omitempty"`
-	// Pattern is the text a find_in_page action looked for.
+	// Pattern is the text to find (present when Type is "find_in_page").
 	Pattern string `json:"pattern,omitempty"`
-	// Sources are the pages the search found. OpenAI only returns them
-	// when the request includes web_search_call.action.sources.
+	// Sources are the results returned by the search.
 	Sources []WebSearchSource `json:"sources,omitempty"`
 }
 
@@ -411,7 +408,7 @@ type WebSearchAction struct {
 type WebSearchCallMetadata struct {
 	// ItemID is the server-side ID of the web_search_call output item.
 	ItemID string `json:"item_id"`
-	// Status is the item's status, such as "completed" or "failed".
+	// Status is the status of the web_search_call output item.
 	Status string `json:"status,omitempty"`
 	// Action contains the structured action data from the search.
 	Action *WebSearchAction `json:"action,omitempty"`

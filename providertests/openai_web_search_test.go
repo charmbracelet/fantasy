@@ -80,6 +80,9 @@ func TestOpenAIWebSearch(t *testing.T) {
 		require.NotEmpty(t, providerToolCalls, "should have provider-executed tool calls")
 		require.Equal(t, "web_search", providerToolCalls[0].ToolName)
 		requireWebSearchActionMetadata(t, providerToolResults, sources)
+		// Sources come from url_citation annotations and found pages;
+		// the model may or may not include inline citations so we don't
+		// require them, but if present they should have URLs.
 		for _, src := range sources {
 			require.NotEmpty(t, src.URL, "source should have a URL")
 		}
@@ -135,10 +138,9 @@ func TestOpenAIWebSearch(t *testing.T) {
 	})
 }
 
-// requireWebSearchActionMetadata checks that web_search results carry the
-// search queries, and that every page a search found is a source tagged
-// with that search's ID. The recorded gpt-4.1 stream reports no found pages
-// on its search item, so found pages are not required.
+// requireWebSearchActionMetadata checks that web_search results carry their
+// queries and that found pages are tagged with their search. Found pages are
+// optional because gpt-4.1 streams report none.
 func requireWebSearchActionMetadata(t *testing.T, results []fantasy.ToolResultContent, sources []fantasy.SourceContent) {
 	t.Helper()
 

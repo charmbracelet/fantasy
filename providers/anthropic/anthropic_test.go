@@ -1511,8 +1511,7 @@ func TestGenerate_WebSearchResponse(t *testing.T) {
 	require.Equal(t, "web_search", toolCalls[0].ToolName)
 	require.Equal(t, "srvtoolu_01", toolCalls[0].ToolCallID)
 
-	// SourceContent entries for each search result, tagged with the
-	// search that found them.
+	// SourceContent entries for each search result.
 	require.Len(t, sources, 2)
 	require.Equal(t, "https://example.com/ai-news", sources[0].URL)
 	require.Equal(t, "Latest AI News", sources[0].Title)

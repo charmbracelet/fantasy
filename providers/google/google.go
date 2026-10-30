@@ -997,9 +997,15 @@ func (g *languageModel) generateObjectWithJSONMode(ctx context.Context, call fan
 
 	if err != nil {
 		// Add usage info to error
-		if nogErr, ok := err.(*fantasy.NoObjectGeneratedError); ok {
-			nogErr.Usage = mappedResponse.Usage
-			nogErr.FinishReason = mappedResponse.FinishReason
+		var parseErr *schema.ParseError
+		if errors.As(err, &parseErr) {
+			return nil, &fantasy.NoObjectGeneratedError{
+				RawText:         parseErr.RawText,
+				ParseError:      parseErr.ParseError,
+				ValidationError: parseErr.ValidationError,
+				Usage:           mappedResponse.Usage,
+				FinishReason:    mappedResponse.FinishReason,
+			}
 		}
 		return nil, err
 	}

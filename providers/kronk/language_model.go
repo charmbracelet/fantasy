@@ -203,21 +203,7 @@ func (l *languageModel) Generate(ctx context.Context, call fantasy.Call) (*fanta
 		}
 	}
 
-	usage := fantasy.Usage{}
-	if response.Usage != nil {
-		outputTokens, totalTokens := openai.FoldDisjointReasoning(
-			int64(response.Usage.CompletionTokens),
-			int64(response.Usage.CompletionTokensDetails.ReasoningTokens),
-			int64(response.Usage.PromptTokens+response.Usage.CompletionTokens),
-		)
-		usage = fantasy.Usage{
-			InputTokens:     int64(response.Usage.PromptTokens),
-			OutputTokens:    outputTokens,
-			TotalTokens:     totalTokens,
-			ReasoningTokens: int64(response.Usage.CompletionTokensDetails.ReasoningTokens),
-			CacheReadTokens: int64(response.Usage.PromptTokensDetails.CachedTokens),
-		}
-	}
+	usage := mapUsage(response)
 
 	mappedFinishReason := l.mapFinishReasonFunc(choice.FinishReason())
 	if choice.Message != nil && len(choice.Message.ToolCalls) > 0 {
@@ -236,6 +222,27 @@ func (l *languageModel) Generate(ctx context.Context, call fantasy.Call) (*fanta
 	}
 
 	return &resp, nil
+}
+
+// mapUsage converts the usage kronk reports into fantasy usage.
+func mapUsage(response model.ChatResponse) fantasy.Usage {
+	if response.Usage == nil {
+		return fantasy.Usage{}
+	}
+
+	outputTokens, totalTokens := openai.FoldDisjointReasoning(
+		int64(response.Usage.CompletionTokens),
+		int64(response.Usage.CompletionTokensDetails.ReasoningTokens),
+		int64(response.Usage.PromptTokens+response.Usage.CompletionTokens),
+	)
+
+	return fantasy.Usage{
+		InputTokens:     int64(response.Usage.PromptTokens),
+		OutputTokens:    outputTokens,
+		TotalTokens:     totalTokens,
+		ReasoningTokens: int64(response.Usage.CompletionTokensDetails.ReasoningTokens),
+		CacheReadTokens: int64(response.Usage.PromptTokensDetails.CachedTokens),
+	}
 }
 
 // Stream implements fantasy.LanguageModel.
@@ -275,18 +282,7 @@ func (l *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 			metadata.update(resp)
 
 			if resp.Usage != nil {
-				outputTokens, totalTokens := openai.FoldDisjointReasoning(
-					int64(resp.Usage.CompletionTokens),
-					int64(resp.Usage.CompletionTokensDetails.ReasoningTokens),
-					int64(resp.Usage.PromptTokens+resp.Usage.CompletionTokens),
-				)
-				usage = fantasy.Usage{
-					InputTokens:     int64(resp.Usage.PromptTokens),
-					OutputTokens:    outputTokens,
-					TotalTokens:     totalTokens,
-					ReasoningTokens: int64(resp.Usage.CompletionTokensDetails.ReasoningTokens),
-					CacheReadTokens: int64(resp.Usage.PromptTokensDetails.CachedTokens),
-				}
+				usage = mapUsage(resp)
 			}
 
 			if len(resp.Choices) == 0 {

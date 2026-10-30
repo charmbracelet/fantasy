@@ -2,66 +2,33 @@ package providertests
 
 import (
 	"cmp"
-	"net/http"
 	"os"
 	"testing"
 
 	"charm.land/fantasy"
-	"charm.land/fantasy/providers/anthropic"
 	"charm.land/fantasy/providers/google"
-	"charm.land/fantasy/providers/openai"
 	"charm.land/x/vcr"
 	"github.com/stretchr/testify/require"
 )
 
-func anthropicImageBuilder(model string) builderFunc {
-	return func(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
-		provider, err := anthropic.New(
-			anthropic.WithAPIKey(cmp.Or(os.Getenv("FANTASY_ANTHROPIC_API_KEY"), "(missing)")),
-			anthropic.WithHTTPClient(&http.Client{Transport: r}),
-		)
-		if err != nil {
-			return nil, err
-		}
-		return provider.LanguageModel(t.Context(), model)
-	}
-}
-
-func openAIImageBuilder(model string) builderFunc {
-	return func(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
-		provider, err := openai.New(
-			openai.WithAPIKey(cmp.Or(os.Getenv("FANTASY_OPENAI_API_KEY"), "(missing)")),
-			openai.WithHTTPClient(&http.Client{Transport: r}),
-		)
-		if err != nil {
-			return nil, err
-		}
-		return provider.LanguageModel(t.Context(), model)
-	}
-}
-
 func geminiImageBuilder(model string) builderFunc {
-	return func(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
-		provider, err := google.New(
-			google.WithGeminiAPIKey(cmp.Or(os.Getenv("FANTASY_GEMINI_API_KEY"), "(missing)")),
-			google.WithHTTPClient(&http.Client{Transport: r}),
-		)
-		if err != nil {
-			return nil, err
-		}
-		return provider.LanguageModel(t.Context(), model)
-	}
+	return vcrProviderBuilder(model,
+		google.New,
+		google.WithGeminiAPIKey,
+		google.WithHTTPClient,
+		cmp.Or(os.Getenv("FANTASY_GEMINI_API_KEY"), "(missing)"),
+	)
 }
 
-func TestImageUploadAgent(t *testing.T) {
+func imageUploadPairs(t *testing.T) ([]builderPair, fantasy.FilePart) {
 	pairs := []builderPair{
 		{
 			name:    "anthropic-claude-sonnet-4",
-			builder: anthropicImageBuilder("claude-sonnet-4-20250514"),
+			builder: anthropicBuilder("claude-sonnet-4-20250514"),
 		},
 		{
 			name:    "openai-gpt-5",
-			builder: openAIImageBuilder("gpt-5"),
+			builder: openAIBuilder("gpt-5"),
 		},
 		{
 			name:    "gemini-2.5-pro",
@@ -72,7 +39,11 @@ func TestImageUploadAgent(t *testing.T) {
 	img, err := os.ReadFile("testdata/wish.png")
 	require.NoError(t, err)
 
-	file := fantasy.FilePart{Filename: "wish.png", Data: img, MediaType: "image/png"}
+	return pairs, fantasy.FilePart{Filename: "wish.png", Data: img, MediaType: "image/png"}
+}
+
+func TestImageUploadAgent(t *testing.T) {
+	pairs, file := imageUploadPairs(t)
 
 	for _, pair := range pairs {
 		t.Run(pair.name, func(t *testing.T) {
@@ -100,25 +71,7 @@ func TestImageUploadAgent(t *testing.T) {
 }
 
 func TestImageUploadAgentStreaming(t *testing.T) {
-	pairs := []builderPair{
-		{
-			name:    "anthropic-claude-sonnet-4",
-			builder: anthropicImageBuilder("claude-sonnet-4-20250514"),
-		},
-		{
-			name:    "openai-gpt-5",
-			builder: openAIImageBuilder("gpt-5"),
-		},
-		{
-			name:    "gemini-2.5-pro",
-			builder: geminiImageBuilder("gemini-2.5-pro"),
-		},
-	}
-
-	img, err := os.ReadFile("testdata/wish.png")
-	require.NoError(t, err)
-
-	file := fantasy.FilePart{Filename: "wish.png", Data: img, MediaType: "image/png"}
+	pairs, file := imageUploadPairs(t)
 
 	for _, pair := range pairs {
 		t.Run(pair.name+"-stream", func(t *testing.T) {

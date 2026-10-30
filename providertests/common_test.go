@@ -2,12 +2,15 @@ package providertests
 
 import (
 	"context"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
 	"testing"
 
 	"charm.land/fantasy"
+	"charm.land/fantasy/providers/anthropic"
+	"charm.land/fantasy/providers/openai"
 	"charm.land/x/vcr"
 	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/require"
@@ -34,6 +37,101 @@ type builderPair struct {
 	builder         builderFunc
 	providerOptions fantasy.ProviderOptions
 	prepareStep     fantasy.PrepareStepFunction
+}
+
+// vcrProviderBuilder builds a builderFunc for any provider whose New takes
+// variadic options and returns a fantasy.Provider.
+func vcrProviderBuilder[O any](
+	model string,
+	newProvider func(...O) (fantasy.Provider, error),
+	withAPIKey func(string) O,
+	withHTTPClient func(*http.Client) O,
+	apiKey string,
+) builderFunc {
+	return func(t *testing.T, r *vcr.Recorder) (fantasy.LanguageModel, error) {
+		opts := []O{withAPIKey(apiKey), withHTTPClient(&http.Client{Transport: r})}
+		provider, err := newProvider(opts...)
+		if err != nil {
+			return nil, err
+		}
+		return provider.LanguageModel(t.Context(), model)
+	}
+}
+
+// requireThinkingWithSignatures asserts that every reasoning part with text
+// carries Anthropic signature metadata.
+func requireThinkingWithSignatures(t *testing.T, result *fantasy.AgentResult) {
+	t.Helper()
+	reasoningContentCount := 0
+	signaturesCount := 0
+	// Test if we got the signature
+	for _, step := range result.Steps {
+		for _, msg := range step.Messages {
+			for _, content := range msg.Content {
+				if content.GetType() == fantasy.ContentTypeReasoning {
+					reasoningContentCount += 1
+					reasoningContent, ok := fantasy.AsContentType[fantasy.ReasoningPart](content)
+					if !ok {
+						continue
+					}
+					if len(reasoningContent.ProviderOptions) == 0 {
+						continue
+					}
+
+					anthropicReasoningMetadata, ok := reasoningContent.ProviderOptions[anthropic.Name]
+					if !ok {
+						continue
+					}
+					if reasoningContent.Text != "" {
+						if typed, ok := anthropicReasoningMetadata.(*anthropic.ReasoningOptionMetadata); ok {
+							require.NotEmpty(t, typed.Signature)
+							signaturesCount += 1
+						}
+					}
+				}
+			}
+		}
+	}
+	require.Greater(t, reasoningContentCount, 0)
+	require.Greater(t, signaturesCount, 0)
+	require.Equal(t, reasoningContentCount, signaturesCount)
+}
+
+// requireOpenAIResponsesThinkingWithEncryptedContent asserts that every
+// reasoning part carries OpenAI encrypted-content metadata.
+func requireOpenAIResponsesThinkingWithEncryptedContent(t *testing.T, result *fantasy.AgentResult) {
+	t.Helper()
+	reasoningContentCount := 0
+	encryptedData := 0
+	// Test if we got the signature
+	for _, step := range result.Steps {
+		for _, msg := range step.Messages {
+			for _, content := range msg.Content {
+				if content.GetType() == fantasy.ContentTypeReasoning {
+					reasoningContentCount += 1
+					reasoningContent, ok := fantasy.AsContentType[fantasy.ReasoningPart](content)
+					if !ok {
+						continue
+					}
+					if len(reasoningContent.ProviderOptions) == 0 {
+						continue
+					}
+
+					openaiReasoningMetadata, ok := reasoningContent.ProviderOptions[openai.Name]
+					if !ok {
+						continue
+					}
+					if typed, ok := openaiReasoningMetadata.(*openai.ResponsesReasoningMetadata); ok {
+						require.NotEmpty(t, typed.EncryptedContent)
+						encryptedData += 1
+					}
+				}
+			}
+		}
+	}
+	require.Greater(t, reasoningContentCount, 0)
+	require.Greater(t, encryptedData, 0)
+	require.Equal(t, reasoningContentCount, encryptedData)
 }
 
 func testCommon(t *testing.T, pairs []builderPair) {

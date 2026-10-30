@@ -7,6 +7,35 @@ import (
 	"testing"
 )
 
+// assertRoundTripsAsSingleText checks that msg marshals and unmarshals back
+// into a single text part with the given role and text.
+func assertRoundTripsAsSingleText(t *testing.T, msg Message, wantRole MessageRole, wantText string) {
+	t.Helper()
+
+	data, err := json.Marshal(msg)
+	if err != nil {
+		t.Fatalf("failed to marshal: %v", err)
+	}
+
+	var decoded Message
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		t.Fatalf("failed to unmarshal: %v", err)
+	}
+
+	if decoded.Role != wantRole {
+		t.Errorf("role mismatch: got %v, want %v", decoded.Role, wantRole)
+	}
+
+	if len(decoded.Content) != 1 {
+		t.Fatalf("expected 1 content part, got %d", len(decoded.Content))
+	}
+
+	textPart := decoded.Content[0].(TextPart)
+	if textPart.Text != wantText {
+		t.Errorf("text mismatch: got %q, want %q", textPart.Text, wantText)
+	}
+}
+
 func TestMessageJSONSerialization(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -288,30 +317,7 @@ func compareToolResultOutput(t *testing.T, index int, original, decoded ToolResu
 
 func TestHelperFunctions(t *testing.T) {
 	t.Run("NewUserMessage - text only", func(t *testing.T) {
-		msg := NewUserMessage("Hello")
-
-		data, err := json.Marshal(msg)
-		if err != nil {
-			t.Fatalf("failed to marshal: %v", err)
-		}
-
-		var decoded Message
-		if err := json.Unmarshal(data, &decoded); err != nil {
-			t.Fatalf("failed to unmarshal: %v", err)
-		}
-
-		if decoded.Role != MessageRoleUser {
-			t.Errorf("role mismatch: got %v, want %v", decoded.Role, MessageRoleUser)
-		}
-
-		if len(decoded.Content) != 1 {
-			t.Fatalf("expected 1 content part, got %d", len(decoded.Content))
-		}
-
-		textPart := decoded.Content[0].(TextPart)
-		if textPart.Text != "Hello" {
-			t.Errorf("text mismatch: got %q, want %q", textPart.Text, "Hello")
-		}
+		assertRoundTripsAsSingleText(t, NewUserMessage("Hello"), MessageRoleUser, "Hello")
 	})
 
 	t.Run("NewUserMessage - with files", func(t *testing.T) {
@@ -363,30 +369,7 @@ func TestHelperFunctions(t *testing.T) {
 	})
 
 	t.Run("NewSystemMessage - single prompt", func(t *testing.T) {
-		msg := NewSystemMessage("You are a helpful assistant.")
-
-		data, err := json.Marshal(msg)
-		if err != nil {
-			t.Fatalf("failed to marshal: %v", err)
-		}
-
-		var decoded Message
-		if err := json.Unmarshal(data, &decoded); err != nil {
-			t.Fatalf("failed to unmarshal: %v", err)
-		}
-
-		if decoded.Role != MessageRoleSystem {
-			t.Errorf("role mismatch: got %v, want %v", decoded.Role, MessageRoleSystem)
-		}
-
-		if len(decoded.Content) != 1 {
-			t.Fatalf("expected 1 content part, got %d", len(decoded.Content))
-		}
-
-		textPart := decoded.Content[0].(TextPart)
-		if textPart.Text != "You are a helpful assistant." {
-			t.Errorf("text mismatch: got %q, want %q", textPart.Text, "You are a helpful assistant.")
-		}
+		assertRoundTripsAsSingleText(t, NewSystemMessage("You are a helpful assistant."), MessageRoleSystem, "You are a helpful assistant.")
 	})
 
 	t.Run("NewSystemMessage - multiple prompts", func(t *testing.T) {

@@ -163,26 +163,6 @@ func DefaultPrepareCallFunc(model fantasy.LanguageModel, params *openai.ChatComp
 			})
 		}
 	}
-
-	// Handle service tier validation
-	if providerOptions.ServiceTier != nil {
-		serviceTier := *providerOptions.ServiceTier
-		if serviceTier == "flex" && !supportsFlexProcessing(model.Model()) {
-			params.ServiceTier = ""
-			warnings = append(warnings, fantasy.CallWarning{
-				Type:    fantasy.CallWarningTypeUnsupportedSetting,
-				Setting: "ServiceTier",
-				Details: "flex processing is only available for o3, o4-mini, and gpt-5 models",
-			})
-		} else if serviceTier == "priority" && !supportsPriorityProcessing(model.Model()) {
-			params.ServiceTier = ""
-			warnings = append(warnings, fantasy.CallWarning{
-				Type:    fantasy.CallWarningTypeUnsupportedSetting,
-				Setting: "ServiceTier",
-				Details: "priority processing is only available for supported models (gpt-4, gpt-5, gpt-5-mini, o3, o4-mini) and requires Enterprise access. gpt-5-nano is not supported",
-			})
-		}
-	}
 	return warnings, nil
 }
 

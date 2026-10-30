@@ -140,6 +140,28 @@ type streamToolCall struct {
 	hasFinished bool
 }
 
+// resolveUnindexedToolCall picks the slot for a streamed tool call delta that
+// has no index. A delta starts a new call when it brings an id that differs
+// from the latest call's, or a name without an id; anything else (a repeated
+// id, or a bare argument fragment) continues the latest call.
+func resolveUnindexedToolCall(toolCalls map[int64]streamToolCall, delta openai.ChatCompletionChunkChoiceDeltaToolCall) int64 {
+	if len(toolCalls) == 0 {
+		return 0
+	}
+	latest := int64(0)
+	for idx := range toolCalls {
+		latest = max(latest, idx)
+	}
+	startsNewCall := delta.Function.Name != ""
+	if delta.ID != "" {
+		startsNewCall = delta.ID != toolCalls[latest].id
+	}
+	if startsNewCall {
+		return latest + 1
+	}
+	return latest
+}
+
 // responseCapture holds the raw HTTP response of a call so response headers
 // can be surfaced through provider metadata. Capturing is only enabled when
 // a header func is configured on the language model.
@@ -537,6 +559,12 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 					}
 
 					for _, toolCallDelta := range choice.Delta.ToolCalls {
+						// Some providers (Gemini's OpenAI-compatible endpoint) send
+						// every call whole and without an index, which would decode
+						// as 0 for all of them and merge the calls into one.
+						if !toolCallDelta.JSON.Index.Valid() {
+							toolCallDelta.Index = resolveUnindexedToolCall(toolCalls, toolCallDelta)
+						}
 						if existingToolCall, ok := toolCalls[toolCallDelta.Index]; ok {
 							if toolCallDelta.Function.Arguments != "" {
 								existingToolCall.arguments += toolCallDelta.Function.Arguments

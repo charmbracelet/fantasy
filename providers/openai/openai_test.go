@@ -2003,7 +2003,7 @@ func TestDoGenerate(t *testing.T) {
 		require.Equal(t, "Hello", message["content"])
 	})
 
-	t.Run("should show warning when using flex processing with unsupported model", func(t *testing.T) {
+	t.Run("should pass flex processing through for any model", func(t *testing.T) {
 		t.Parallel()
 
 		server := newMockServer()
@@ -2029,12 +2029,8 @@ func TestDoGenerate(t *testing.T) {
 		require.Len(t, server.calls, 1)
 
 		call := server.calls[0]
-		require.Nil(t, call.body["service_tier"])
-
-		require.Len(t, result.Warnings, 1)
-		require.Equal(t, fantasy.CallWarningTypeUnsupportedSetting, result.Warnings[0].Type)
-		require.Equal(t, "ServiceTier", result.Warnings[0].Setting)
-		require.Contains(t, result.Warnings[0].Details, "flex processing is only available")
+		require.Equal(t, "flex", call.body["service_tier"])
+		require.Empty(t, result.Warnings)
 	})
 
 	t.Run("should send serviceTier priority processing setting", func(t *testing.T) {
@@ -2074,7 +2070,7 @@ func TestDoGenerate(t *testing.T) {
 		require.Equal(t, "Hello", message["content"])
 	})
 
-	t.Run("should show warning when using priority processing with unsupported model", func(t *testing.T) {
+	t.Run("should pass priority processing through for any model", func(t *testing.T) {
 		t.Parallel()
 
 		server := newMockServer()
@@ -2100,12 +2096,8 @@ func TestDoGenerate(t *testing.T) {
 		require.Len(t, server.calls, 1)
 
 		call := server.calls[0]
-		require.Nil(t, call.body["service_tier"])
-
-		require.Len(t, result.Warnings, 1)
-		require.Equal(t, fantasy.CallWarningTypeUnsupportedSetting, result.Warnings[0].Type)
-		require.Equal(t, "ServiceTier", result.Warnings[0].Setting)
-		require.Contains(t, result.Warnings[0].Details, "priority processing is only available")
+		require.Equal(t, "priority", call.body["service_tier"])
+		require.Empty(t, result.Warnings)
 	})
 
 	t.Run("should return error instead of panic on empty response body", func(t *testing.T) {

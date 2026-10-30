@@ -303,7 +303,7 @@ func languageModelStreamExtra(chunk openaisdk.ChatCompletionChunk, yield func(fa
 			return ctx, false
 		}
 		delta := detail.Summary
-		if xstrings.ContainsAnyOf(detail.Format, "google-gemini", "anthropic-claude") {
+		if delta == "" || xstrings.ContainsAnyOf(detail.Format, "google-gemini", "anthropic-claude") {
 			delta = detail.Text
 		}
 		if delta == "" {

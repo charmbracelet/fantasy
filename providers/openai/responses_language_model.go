@@ -930,7 +930,7 @@ func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call)
 			}
 
 			content = append(content, fantasy.ReasoningContent{
-				Text: strings.Join(metadata.Summary, "\n"),
+				Text: strings.Join(metadata.Summary, "\n\n"),
 				ProviderMetadata: fantasy.ProviderMetadata{
 					Name: metadata,
 				},
@@ -1237,10 +1237,14 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 				if state != nil {
 					state.metadata.Summary = append(state.metadata.Summary, "")
 					activeReasoning[added.ItemID] = state
+					// Summary parts open with a bold title that Markdown keeps
+					// inline after a single newline. The blank line also goes
+					// before the first part, so consumers that join consecutive
+					// reasoning items still get a paragraph break between them.
 					if !yield(fantasy.StreamPart{
 						Type:  fantasy.StreamPartTypeReasoningDelta,
 						ID:    added.ItemID,
-						Delta: "\n",
+						Delta: "\n\n",
 						ProviderMetadata: fantasy.ProviderMetadata{
 							Name: state.metadata,
 						},

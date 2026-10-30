@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"charm.land/fantasy"
+	"github.com/ardanlabs/kronk/sdk/kronk/applog"
+	"github.com/ardanlabs/kronk/sdk/kronk/kvstorage"
 	"github.com/ardanlabs/kronk/sdk/kronk/model"
 )
 
@@ -128,7 +130,7 @@ func WithLoadMode(v model.LoadMode) Option {
 }
 
 // WithLog configures the logger used by model operations.
-func WithLog(v model.Logger) Option {
+func WithLog(v applog.Logger) Option {
 	return withModelOption(model.WithLog(v))
 }
 
@@ -269,7 +271,7 @@ func WithQueueDepth(v int) Option {
 }
 
 // WithSessionStoreFactory configures the model session store factory.
-func WithSessionStoreFactory(v model.SessionStoreFactory) Option {
+func WithSessionStoreFactory(v kvstorage.Factory) Option {
 	return withModelOption(model.WithSessionStoreFactory(v))
 }
 

@@ -773,30 +773,8 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 	}, nil
 }
 
-func isReasoningModel(modelID string) bool {
-	return strings.HasPrefix(modelID, "o1") || strings.Contains(modelID, "-o1") ||
-		strings.HasPrefix(modelID, "o3") || strings.Contains(modelID, "-o3") ||
-		strings.HasPrefix(modelID, "o4") || strings.Contains(modelID, "-o4") ||
-		strings.HasPrefix(modelID, "oss") || strings.Contains(modelID, "-oss") ||
-		strings.Contains(strings.ToLower(modelID), "gpt-5")
-}
-
 func isSearchPreviewModel(modelID string) bool {
 	return strings.Contains(modelID, "search-preview")
-}
-
-func supportsFlexProcessing(modelID string) bool {
-	return strings.HasPrefix(modelID, "o3") || strings.Contains(modelID, "-o3") ||
-		strings.Contains(modelID, "o4-mini") ||
-		strings.Contains(strings.ToLower(modelID), "gpt-5")
-}
-
-func supportsPriorityProcessing(modelID string) bool {
-	return strings.Contains(strings.ToLower(modelID), "gpt-4") ||
-		strings.Contains(strings.ToLower(modelID), "gpt-5") ||
-		strings.HasPrefix(modelID, "o3") ||
-		strings.Contains(modelID, "-o3") ||
-		strings.Contains(modelID, "o4-mini")
 }
 
 func toOpenAiTools(tools []fantasy.Tool, toolChoice *fantasy.ToolChoice) (openAiTools []openai.ChatCompletionToolUnionParam, openAiToolChoice *openai.ChatCompletionToolChoiceOptionUnionParam, warnings []fantasy.CallWarning) {

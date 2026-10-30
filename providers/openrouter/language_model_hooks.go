@@ -520,6 +520,51 @@ func languageModelStreamUsage(chunk openaisdk.ChatCompletionChunk, _ map[string]
 	}
 }
 
+// singleTextMessage converts a message whose entire content is one text part
+// into the flat SDK message for its role, applying the message-level
+// anthropic cache hint. handled is false when the message does not qualify,
+// and the caller should build the array form instead. warning is non-nil
+// when the single part claimed to be text but did not convert; the caller
+// should record it and drop the message. vercel and openrouter deliberately
+// keep their own copies of this helper; the prompttest golden matrix makes
+// any drift between them visible.
+func singleTextMessage(msg fantasy.Message) (message openaisdk.ChatCompletionMessageParamUnion, warning *fantasy.CallWarning, handled bool) {
+	if len(msg.Content) != 1 || msg.Content[0].GetType() != fantasy.ContentTypeText {
+		return openaisdk.ChatCompletionMessageParamUnion{}, nil, false
+	}
+	textPart, ok := fantasy.AsContentType[fantasy.TextPart](msg.Content[0])
+	if !ok {
+		return openaisdk.ChatCompletionMessageParamUnion{}, &fantasy.CallWarning{
+			Type:    fantasy.CallWarningTypeOther,
+			Message: string(msg.Role) + " message text part does not have the right type",
+		}, true
+	}
+
+	switch msg.Role {
+	case fantasy.MessageRoleUser:
+		message = openaisdk.UserMessage(textPart.Text)
+		if cache := anthropic.GetCacheControl(msg.ProviderOptions); cache != nil {
+			message.OfUser.SetExtraFields(map[string]any{
+				"cache_control": map[string]string{
+					"type": cache.Type,
+				},
+			})
+		}
+	case fantasy.MessageRoleAssistant:
+		message = openaisdk.AssistantMessage(textPart.Text)
+		if cache := anthropic.GetCacheControl(msg.ProviderOptions); cache != nil {
+			message.OfAssistant.SetExtraFields(map[string]any{
+				"cache_control": map[string]string{
+					"type": cache.Type,
+				},
+			})
+		}
+	default:
+		return openaisdk.ChatCompletionMessageParamUnion{}, nil, false
+	}
+	return message, nil, true
+}
+
 func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.ChatCompletionMessageParamUnion, []fantasy.CallWarning) {
 	var messages []openaisdk.ChatCompletionMessageParamUnion
 	var warnings []fantasy.CallWarning
@@ -569,26 +614,13 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 			messages = append(messages, systemMsg)
 		case fantasy.MessageRoleUser:
 			// simple user message just text content
-			if len(msg.Content) == 1 && msg.Content[0].GetType() == fantasy.ContentTypeText {
-				textPart, ok := fantasy.AsContentType[fantasy.TextPart](msg.Content[0])
-				if !ok {
-					warnings = append(warnings, fantasy.CallWarning{
-						Type:    fantasy.CallWarningTypeOther,
-						Message: "user message text part does not have the right type",
-					})
-					continue
-				}
-				userMsg := openaisdk.UserMessage(textPart.Text)
-
-				anthropicCache := anthropic.GetCacheControl(msg.ProviderOptions)
-				if anthropicCache != nil {
-					userMsg.OfUser.SetExtraFields(map[string]any{
-						"cache_control": map[string]string{
-							"type": anthropicCache.Type,
-						},
-					})
-				}
-				messages = append(messages, userMsg)
+			simple, warning, handled := singleTextMessage(msg)
+			if warning != nil {
+				warnings = append(warnings, *warning)
+				continue
+			}
+			if handled {
+				messages = append(messages, simple)
 				continue
 			}
 			// text content and attachments
@@ -760,26 +792,13 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 			messages = append(messages, openaisdk.UserMessage(content))
 		case fantasy.MessageRoleAssistant:
 			// simple assistant message just text content
-			if len(msg.Content) == 1 && msg.Content[0].GetType() == fantasy.ContentTypeText {
-				textPart, ok := fantasy.AsContentType[fantasy.TextPart](msg.Content[0])
-				if !ok {
-					warnings = append(warnings, fantasy.CallWarning{
-						Type:    fantasy.CallWarningTypeOther,
-						Message: "assistant message text part does not have the right type",
-					})
-					continue
-				}
-
-				assistantMsg := openaisdk.AssistantMessage(textPart.Text)
-				anthropicCache := anthropic.GetCacheControl(msg.ProviderOptions)
-				if anthropicCache != nil {
-					assistantMsg.OfAssistant.SetExtraFields(map[string]any{
-						"cache_control": map[string]string{
-							"type": anthropicCache.Type,
-						},
-					})
-				}
-				messages = append(messages, assistantMsg)
+			simple, warning, handled := singleTextMessage(msg)
+			if warning != nil {
+				warnings = append(warnings, *warning)
+				continue
+			}
+			if handled {
+				messages = append(messages, simple)
 				continue
 			}
 			assistantMsg := openaisdk.ChatCompletionAssistantMessageParam{
@@ -859,7 +878,7 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 							"reasoning_details": reasoningDetailsMap,
 							"reasoning":         reasoningPart.Text,
 						})
-					case strings.HasPrefix(model, "openai/"):
+					case strings.HasPrefix(model, "openai/"), strings.HasPrefix(model, "xai/"):
 						metadata := openai.GetReasoningMetadata(reasoningPart.Options())
 						if metadata == nil {
 							text := fmt.Sprintf("<thoughts>%s</thoughts>", reasoningPart.Text)
@@ -872,43 +891,11 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 							}
 							continue
 						}
-						for inx, summary := range metadata.Summary {
-							if summary == "" {
-								continue
-							}
-							reasoningDetails = append(reasoningDetails, ReasoningDetail{
-								Type:    "reasoning.summary",
-								Format:  "openai-responses-v1",
-								Summary: summary,
-								Index:   inx,
-							})
-						}
-						if metadata.EncryptedContent != nil {
-							reasoningDetails = append(reasoningDetails, ReasoningDetail{
-								Type:   "reasoning.encrypted",
-								Format: "openai-responses-v1",
-								Data:   *metadata.EncryptedContent,
-								ID:     metadata.ItemID,
-							})
-						}
-						data, _ := json.Marshal(reasoningDetails)
-						reasoningDetailsMap := []map[string]any{}
-						_ = json.Unmarshal(data, &reasoningDetailsMap)
-						assistantMsg.SetExtraFields(map[string]any{
-							"reasoning_details": reasoningDetailsMap,
-						})
-					case strings.HasPrefix(model, "xai/"):
-						metadata := openai.GetReasoningMetadata(reasoningPart.Options())
-						if metadata == nil {
-							text := fmt.Sprintf("<thoughts>%s</thoughts>", reasoningPart.Text)
-							if assistantMsg.Content.OfString.Valid() {
-								text = assistantMsg.Content.OfString.Value + "\n" + text
-							}
-							// this reasoning did not come from anthropic just add a text content
-							assistantMsg.Content = openaisdk.ChatCompletionAssistantMessageParamContentUnion{
-								OfString: param.NewOpt(text),
-							}
-							continue
+						// openai/ and xai/ share the Responses API reasoning format;
+						// they differ only in the reported format string.
+						reasoningFormat := "openai-responses-v1"
+						if strings.HasPrefix(model, "xai/") {
+							reasoningFormat = "xai-responses-v1"
 						}
 						for inx, summary := range metadata.Summary {
 							if summary == "" {
@@ -916,7 +903,7 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 							}
 							reasoningDetails = append(reasoningDetails, ReasoningDetail{
 								Type:    "reasoning.summary",
-								Format:  "xai-responses-v1",
+								Format:  reasoningFormat,
 								Summary: summary,
 								Index:   inx,
 							})
@@ -924,7 +911,7 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 						if metadata.EncryptedContent != nil {
 							reasoningDetails = append(reasoningDetails, ReasoningDetail{
 								Type:   "reasoning.encrypted",
-								Format: "xai-responses-v1",
+								Format: reasoningFormat,
 								Data:   *metadata.EncryptedContent,
 								ID:     metadata.ItemID,
 							})

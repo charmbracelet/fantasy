@@ -4,6 +4,7 @@ run:
 linters:
   enable:
     - bodyclose
+    - dupl
     # - exhaustive
     # - goconst
     - godot
@@ -25,11 +26,19 @@ linters:
     - unparam
     - whitespace
     # - wrapcheck
+  settings:
+    dupl:
+      threshold: 75
   exclusions:
     rules:
       - text: '(slog|log)\.\w+'
         linters:
           - noctx
+      # cases.go is the shared fixture corpus: repeated case shapes are the
+      # point of table-driven test data. The golden harness stays linted.
+      - path: providers/internal/prompttest/cases.go
+        linters:
+          - dupl
     generated: lax
     presets:
       - common-false-positives

@@ -187,6 +187,7 @@ func (s SourceContent) MarshalJSON() ([]byte, error) {
 		Title            string           `json:"title,omitempty"`
 		MediaType        string           `json:"media_type,omitempty"`
 		Filename         string           `json:"filename,omitempty"`
+		ToolCallID       string           `json:"tool_call_id,omitempty"`
 		ProviderMetadata ProviderMetadata `json:"provider_metadata,omitempty"`
 	}{
 		SourceType:       s.SourceType,
@@ -195,6 +196,7 @@ func (s SourceContent) MarshalJSON() ([]byte, error) {
 		Title:            s.Title,
 		MediaType:        s.MediaType,
 		Filename:         s.Filename,
+		ToolCallID:       s.ToolCallID,
 		ProviderMetadata: s.ProviderMetadata,
 	})
 	if err != nil {
@@ -221,6 +223,7 @@ func (s *SourceContent) UnmarshalJSON(data []byte) error {
 		Title            string                     `json:"title,omitempty"`
 		MediaType        string                     `json:"media_type,omitempty"`
 		Filename         string                     `json:"filename,omitempty"`
+		ToolCallID       string                     `json:"tool_call_id,omitempty"`
 		ProviderMetadata map[string]json.RawMessage `json:"provider_metadata,omitempty"`
 	}
 
@@ -234,6 +237,7 @@ func (s *SourceContent) UnmarshalJSON(data []byte) error {
 	s.Title = aux.Title
 	s.MediaType = aux.MediaType
 	s.Filename = aux.Filename
+	s.ToolCallID = aux.ToolCallID
 
 	if len(aux.ProviderMetadata) > 0 {
 		metadata, err := UnmarshalProviderMetadata(aux.ProviderMetadata)

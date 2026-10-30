@@ -10,6 +10,7 @@ import (
 	"maps"
 	"net/http"
 	"reflect"
+	"slices"
 	"strings"
 
 	"charm.land/fantasy"
@@ -305,14 +306,6 @@ func (o responsesLanguageModel) prepareParams(call fantasy.Call) (*responses.Res
 		params.Truncation = responses.ResponseNewParamsTruncationAuto
 	}
 
-	if len(include) > 0 {
-		includeParams := make([]responses.ResponseIncludable, len(include))
-		for i, inc := range include {
-			includeParams[i] = responses.ResponseIncludable(string(inc))
-		}
-		params.Include = includeParams
-	}
-
 	if modelConfig.isReasoningModel {
 		if call.Temperature != nil {
 			params.Temperature = param.Opt[float64]{}
@@ -377,6 +370,18 @@ func (o responsesLanguageModel) prepareParams(call fantasy.Call) (*responses.Res
 	if len(tools) > 0 {
 		params.Tools = tools
 		params.ToolChoice = toolChoice
+	}
+
+	if hasResponsesWebSearchTool(tools) && !slices.Contains(include, IncludeWebSearchCallActionSources) {
+		include = append(include, IncludeWebSearchCallActionSources)
+	}
+
+	if len(include) > 0 {
+		includeParams := make([]responses.ResponseIncludable, len(include))
+		for i, inc := range include {
+			includeParams[i] = responses.ResponseIncludable(string(inc))
+		}
+		params.Include = includeParams
 	}
 
 	return params, warnings, nil
@@ -892,19 +897,23 @@ func (o responsesLanguageModel) Generate(ctx context.Context, call fantasy.Call)
 			//
 			// Note: source citations come from url_citation annotations
 			// on the message text (handled in the "message" case above),
-			// not from the web_search_call action.
-			wsMeta := webSearchCallToMetadata(outputItem.ID, outputItem.Action)
+			// not from the web_search_call action. Unlike the streamed
+			// item, the final output's action.sources also lists them.
 			content = append(content, fantasy.ToolCallContent{
 				ProviderExecuted: true,
 				ToolCallID:       outputItem.ID,
 				ToolName:         "web_search",
+				Input:            webSearchCallInput(outputItem.Action),
 			})
+			for _, source := range webSearchCallSources(outputItem.ID, outputItem.Action) {
+				content = append(content, source)
+			}
 			content = append(content, fantasy.ToolResultContent{
 				ProviderExecuted: true,
 				ToolCallID:       outputItem.ID,
 				ToolName:         "web_search",
 				ProviderMetadata: fantasy.ProviderMetadata{
-					Name: wsMeta,
+					Name: webSearchCallToMetadata(outputItem.ID, outputItem.Status, outputItem.Action),
 				},
 			})
 		case "reasoning":
@@ -1138,9 +1147,21 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 						Type:             fantasy.StreamPartTypeToolCall,
 						ID:               done.Item.ID,
 						ToolCallName:     "web_search",
+						ToolCallInput:    webSearchCallInput(done.Item.Action),
 						ProviderExecuted: true,
 					}) {
 						return
+					}
+					for _, source := range webSearchCallSources(done.Item.ID, done.Item.Action) {
+						if !yield(fantasy.StreamPart{
+							Type:             fantasy.StreamPartTypeSource,
+							ID:               source.ID,
+							SourceType:       source.SourceType,
+							URL:              source.URL,
+							SourceToolCallID: source.ToolCallID,
+						}) {
+							return
+						}
 					}
 					// Emit a ToolResult so the agent framework
 					// includes it in round-trip messages.
@@ -1150,7 +1171,7 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 						ToolCallName:     "web_search",
 						ProviderExecuted: true,
 						ProviderMetadata: fantasy.ProviderMetadata{
-							Name: webSearchCallToMetadata(done.Item.ID, done.Item.Action),
+							Name: webSearchCallToMetadata(done.Item.ID, done.Item.Status, done.Item.Action),
 						},
 					}) {
 						return
@@ -1402,14 +1423,23 @@ func toWebSearchToolParam(pt fantasy.ProviderDefinedTool) responses.ToolUnionPar
 	}
 }
 
+func hasResponsesWebSearchTool(tools []responses.ToolUnionParam) bool {
+	return slices.ContainsFunc(tools, func(tool responses.ToolUnionParam) bool {
+		return tool.OfWebSearch != nil || tool.OfWebSearchPreview != nil
+	})
+}
+
 // webSearchCallToMetadata converts an OpenAI web search call output
 // into our structured metadata for round-tripping.
-func webSearchCallToMetadata(itemID string, action responses.ResponseOutputItemUnionAction) *WebSearchCallMetadata {
-	meta := &WebSearchCallMetadata{ItemID: itemID}
+func webSearchCallToMetadata(itemID, status string, action responses.ResponseOutputItemUnionAction) *WebSearchCallMetadata {
+	meta := &WebSearchCallMetadata{ItemID: itemID, Status: status}
 	if action.Type != "" {
 		a := &WebSearchAction{
-			Type:  action.Type,
-			Query: action.Query,
+			Type:    action.Type,
+			Queries: action.Queries,
+			Query:   action.Query,
+			URL:     action.URL,
+			Pattern: action.Pattern,
 		}
 		for _, src := range action.Sources {
 			a.Sources = append(a.Sources, WebSearchSource{
@@ -1420,6 +1450,43 @@ func webSearchCallToMetadata(itemID string, action responses.ResponseOutputItemU
 		meta.Action = a
 	}
 	return meta
+}
+
+// webSearchCallSources converts the pages a web search call found into
+// sources.
+func webSearchCallSources(itemID string, action responses.ResponseOutputItemUnionAction) []fantasy.SourceContent {
+	sources := make([]fantasy.SourceContent, 0, len(action.Sources))
+	for _, src := range action.Sources {
+		if src.URL == "" {
+			continue
+		}
+		sources = append(sources, fantasy.SourceContent{
+			SourceType: fantasy.SourceTypeURL,
+			ID:         src.URL,
+			URL:        src.URL,
+			ToolCallID: itemID,
+		})
+	}
+	return sources
+}
+
+// webSearchCallInput encodes a web search call's action as its tool call
+// input.
+func webSearchCallInput(action responses.ResponseOutputItemUnionAction) string {
+	queries := action.Queries
+	if len(queries) == 0 && action.Query != "" {
+		queries = []string{action.Query}
+	}
+	encoded, err := json.Marshal(struct {
+		Type    string   `json:"type,omitempty"`
+		Queries []string `json:"queries,omitempty"`
+		URL     string   `json:"url,omitempty"`
+		Pattern string   `json:"pattern,omitempty"`
+	}{Type: action.Type, Queries: queries, URL: action.URL, Pattern: action.Pattern})
+	if err != nil {
+		return "{}"
+	}
+	return string(encoded)
 }
 
 // GetReasoningMetadata extracts reasoning metadata from provider options for responses models.

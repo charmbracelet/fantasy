@@ -1516,8 +1516,10 @@ func TestGenerate_WebSearchResponse(t *testing.T) {
 	require.Equal(t, "https://example.com/ai-news", sources[0].URL)
 	require.Equal(t, "Latest AI News", sources[0].Title)
 	require.Equal(t, fantasy.SourceTypeURL, sources[0].SourceType)
+	require.Equal(t, "srvtoolu_01", sources[0].ToolCallID)
 	require.Equal(t, "https://example.com/ml-update", sources[1].URL)
 	require.Equal(t, "ML Update", sources[1].Title)
+	require.Equal(t, "srvtoolu_01", sources[1].ToolCallID)
 
 	// ToolResultContent with provider metadata preserving encrypted_content.
 	require.Len(t, toolResults, 1)
@@ -2068,6 +2070,7 @@ func TestStream_WebSearchResponse(t *testing.T) {
 	require.Equal(t, "https://example.com/ai-news", sourceParts[0].URL)
 	require.Equal(t, "Latest AI News", sourceParts[0].Title)
 	require.Equal(t, fantasy.SourceTypeURL, sourceParts[0].SourceType)
+	require.Equal(t, "srvtoolu_01", sourceParts[0].SourceToolCallID)
 
 	// Text block emits a text delta.
 	require.NotEmpty(t, textDeltas, "should have text deltas")

@@ -184,9 +184,10 @@ type StreamPart struct {
 	Warnings         []CallWarning  `json:"warnings"`
 
 	// Source-related fields
-	SourceType SourceType `json:"source_type"`
-	URL        string     `json:"url"`
-	Title      string     `json:"title"`
+	SourceType       SourceType `json:"source_type"`
+	URL              string     `json:"url"`
+	Title            string     `json:"title"`
+	SourceToolCallID string     `json:"source_tool_call_id,omitempty"`
 
 	ProviderMetadata ProviderMetadata `json:"provider_metadata"`
 }

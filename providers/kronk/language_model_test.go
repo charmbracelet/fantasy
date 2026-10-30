@@ -154,9 +154,6 @@ func TestGenerateResponse(t *testing.T) {
 	if got, want := response.Usage.TotalTokens, int64(16); got != want {
 		t.Errorf("Usage.TotalTokens: got %d, want %d", got, want)
 	}
-	// prompt_tokens (12) includes the 3 cached tokens, which CacheReadTokens
-	// reports again, so InputTokens must be the 9 that were actually sent
-	// uncached. The openai, openrouter and vercel adapters all subtract here.
 	if got, want := response.Usage.InputTokens, int64(9); got != want {
 		t.Errorf("Usage.InputTokens: got %d, want %d", got, want)
 	}
@@ -247,8 +244,6 @@ func TestStreamResponse(t *testing.T) {
 	if got, want := parts[7].Usage.TotalTokens, int64(16); got != want {
 		t.Errorf("Usage.TotalTokens: got %d, want %d", got, want)
 	}
-	// Same subtraction as the buffered path, so a cached stream does not
-	// report the cached tokens in both InputTokens and CacheReadTokens.
 	if got, want := parts[7].Usage.InputTokens, int64(9); got != want {
 		t.Errorf("Usage.InputTokens: got %d, want %d", got, want)
 	}

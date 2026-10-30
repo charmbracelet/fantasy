@@ -205,22 +205,7 @@ func (l *languageModel) Generate(ctx context.Context, call fantasy.Call) (*fanta
 
 	usage := fantasy.Usage{}
 	if response.Usage != nil {
-		cachedTokens := int64(response.Usage.PromptTokensDetails.CachedTokens)
-		outputTokens, totalTokens := openai.FoldDisjointReasoning(
-			int64(response.Usage.CompletionTokens),
-			int64(response.Usage.CompletionTokensDetails.ReasoningTokens),
-			int64(response.Usage.PromptTokens+response.Usage.CompletionTokens),
-		)
-		usage = fantasy.Usage{
-			// Kronk reports prompt_tokens INCLUDING cached tokens, and CacheReadTokens
-			// below reports those again: subtract so the two do not double-count, the
-			// same arithmetic the openai, openrouter and vercel adapters use.
-			InputTokens:     max(int64(response.Usage.PromptTokens)-cachedTokens, 0),
-			OutputTokens:    outputTokens,
-			TotalTokens:     totalTokens,
-			ReasoningTokens: int64(response.Usage.CompletionTokensDetails.ReasoningTokens),
-			CacheReadTokens: cachedTokens,
-		}
+		usage = toUsage(response.Usage)
 	}
 
 	mappedFinishReason := l.mapFinishReasonFunc(choice.FinishReason())
@@ -279,20 +264,7 @@ func (l *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 			metadata.update(resp)
 
 			if resp.Usage != nil {
-				cachedTokens := int64(resp.Usage.PromptTokensDetails.CachedTokens)
-				outputTokens, totalTokens := openai.FoldDisjointReasoning(
-					int64(resp.Usage.CompletionTokens),
-					int64(resp.Usage.CompletionTokensDetails.ReasoningTokens),
-					int64(resp.Usage.PromptTokens+resp.Usage.CompletionTokens),
-				)
-				usage = fantasy.Usage{
-					// Same subtraction as the buffered path above.
-					InputTokens:     max(int64(resp.Usage.PromptTokens)-cachedTokens, 0),
-					OutputTokens:    outputTokens,
-					TotalTokens:     totalTokens,
-					ReasoningTokens: int64(resp.Usage.CompletionTokensDetails.ReasoningTokens),
-					CacheReadTokens: cachedTokens,
-				}
+				usage = toUsage(resp.Usage)
 			}
 
 			if len(resp.Choices) == 0 {
@@ -542,6 +514,24 @@ func (l *languageModel) StreamObject(ctx context.Context, call fantasy.ObjectCal
 
 	default:
 		return object.StreamWithTool(ctx, l, call)
+	}
+}
+
+func toUsage(u *model.Usage) fantasy.Usage {
+	cached := int64(u.PromptTokensDetails.CachedTokens)
+	reasoning := int64(u.CompletionTokensDetails.ReasoningTokens)
+	output, total := openai.FoldDisjointReasoning(
+		int64(u.CompletionTokens),
+		reasoning,
+		int64(u.PromptTokens+u.CompletionTokens),
+	)
+	return fantasy.Usage{
+		// prompt_tokens includes cached tokens; subtract to avoid double counting.
+		InputTokens:     max(int64(u.PromptTokens)-cached, 0),
+		OutputTokens:    output,
+		TotalTokens:     total,
+		ReasoningTokens: reasoning,
+		CacheReadTokens: cached,
 	}
 }
 

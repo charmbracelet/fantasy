@@ -4,8 +4,8 @@ go 1.27.3
 
 require (
 	charm.land/x/vcr v0.1.1
-	cloud.google.com/go/auth v0.24.1
-	github.com/anthropics/anthropic-sdk-go v1.75.0
+	cloud.google.com/go/auth v0.24.2
+	github.com/anthropics/anthropic-sdk-go v1.84.0
 	github.com/ardanlabs/kronk v1.33.1
 	github.com/aws/aws-sdk-go-v2 v1.47.5
 	github.com/aws/aws-sdk-go-v2/config v1.33.12
@@ -21,7 +21,7 @@ require (
 	github.com/stretchr/testify v1.12.1
 	golang.org/x/net v0.62.0
 	golang.org/x/oauth2 v0.37.0
-	google.golang.org/genai v1.71.0
+	google.golang.org/genai v1.76.0
 )
 
 require (

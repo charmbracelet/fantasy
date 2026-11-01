@@ -82,14 +82,39 @@ func (o responsesLanguageModel) Provider() string {
 }
 
 type responsesModelConfig struct {
-	isReasoningModel           bool
+	isReasoningModel bool
+	// acceptsReasoningOptions reports whether an explicit reasoning effort or
+	// summary from the caller is sent. It is true for every reasoning model
+	// and for every id outside the known non-reasoning families, so a new
+	// model id (or a provider such as xAI that shares the Responses wire)
+	// does not silently lose a requested effort.
+	acceptsReasoningOptions    bool
 	systemMessageMode          string
 	requiredAutoTruncation     bool
 	supportsFlexProcessing     bool
 	supportsPriorityProcessing bool
 }
 
+// isKnownNonReasoningResponsesModel reports whether the id belongs to a
+// family that has no reasoning controls. gpt-5-chat is handled separately
+// in getResponsesModelConfig.
+func isKnownNonReasoningResponsesModel(modelID string) bool {
+	id := strings.ToLower(modelID)
+	return strings.Contains(id, "gpt-3") ||
+		strings.Contains(id, "gpt-4") ||
+		strings.Contains(id, "chatgpt") ||
+		strings.Contains(id, "davinci") ||
+		strings.Contains(id, "babbage")
+}
+
 func getResponsesModelConfig(modelID string) responsesModelConfig {
+	config := resolveResponsesModelConfig(modelID)
+	config.acceptsReasoningOptions = config.isReasoningModel ||
+		(!strings.Contains(strings.ToLower(modelID), "gpt-5-chat") && !isKnownNonReasoningResponsesModel(modelID))
+	return config
+}
+
+func resolveResponsesModelConfig(modelID string) responsesModelConfig {
 	supportsFlexProcessing := strings.HasPrefix(modelID, "o3") ||
 		strings.Contains(modelID, "-o3") || strings.Contains(modelID, "o4-mini") ||
 		(strings.Contains(modelID, "gpt-5") && !strings.Contains(modelID, "gpt-5-chat"))
@@ -125,6 +150,7 @@ func getResponsesModelConfig(modelID string) responsesModelConfig {
 		strings.HasPrefix(modelID, "o4") || strings.Contains(modelID, "-o4") ||
 		strings.HasPrefix(modelID, "oss") || strings.Contains(modelID, "-oss") ||
 		strings.Contains(strings.ToLower(modelID), "gpt-5") ||
+		strings.Contains(strings.ToLower(modelID), "gpt-6") ||
 		strings.Contains(modelID, "codex-") || strings.Contains(modelID, "computer-use") {
 		if strings.Contains(modelID, "o1-mini") || strings.Contains(modelID, "o1-preview") {
 			return responsesModelConfig{
@@ -297,7 +323,7 @@ func (o responsesLanguageModel) prepareParams(call fantasy.Call) (*responses.Res
 			include = append(include, openaiOptions.Include...)
 		}
 
-		if modelConfig.isReasoningModel && (openaiOptions.ReasoningEffort != nil || openaiOptions.ReasoningSummary != nil) {
+		if modelConfig.acceptsReasoningOptions && (openaiOptions.ReasoningEffort != nil || openaiOptions.ReasoningSummary != nil) {
 			reasoning := shared.ReasoningParam{}
 			if openaiOptions.ReasoningEffort != nil {
 				reasoning.Effort = shared.ReasoningEffort(*openaiOptions.ReasoningEffort)
@@ -339,7 +365,7 @@ func (o responsesLanguageModel) prepareParams(call fantasy.Call) (*responses.Res
 				Details: "topP is not supported for reasoning models",
 			})
 		}
-	} else {
+	} else if !modelConfig.acceptsReasoningOptions {
 		if openaiOptions != nil {
 			if openaiOptions.ReasoningEffort != nil {
 				warnings = append(warnings, fantasy.CallWarning{

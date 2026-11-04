@@ -72,3 +72,32 @@ func TestStreamWithToolAccumulatesWarnings(t *testing.T) {
 	require.Equal(t, "first", finish.Warnings[0].Message)
 	require.Equal(t, "second", finish.Warnings[1].Message)
 }
+
+func TestStreamWithTextAccumulatesWarnings(t *testing.T) {
+	t.Parallel()
+
+	model := &warningsStreamModel{parts: []fantasy.StreamPart{
+		{Type: fantasy.StreamPartTypeTextDelta, Delta: `{"name":"lasagna"}`},
+		{Type: fantasy.StreamPartTypeWarnings, Warnings: []fantasy.CallWarning{{Type: fantasy.CallWarningTypeOther, Message: "first"}}},
+		{Type: fantasy.StreamPartTypeWarnings, Warnings: []fantasy.CallWarning{{Type: fantasy.CallWarningTypeOther, Message: "second"}}},
+		{Type: fantasy.StreamPartTypeFinish, FinishReason: fantasy.FinishReasonStop},
+	}}
+
+	stream, err := StreamWithText(t.Context(), model, fantasy.ObjectCall{
+		Prompt: fantasy.Prompt{fantasy.NewUserMessage("generate")},
+		Schema: schema.Generate(reflect.TypeOf(testRecipe{})),
+	})
+	require.NoError(t, err)
+
+	var finish *fantasy.ObjectStreamPart
+	for part := range stream {
+		if part.Type == fantasy.ObjectStreamPartTypeFinish {
+			p := part
+			finish = &p
+		}
+	}
+	require.NotNil(t, finish)
+	require.Len(t, finish.Warnings, 2)
+	require.Equal(t, "first", finish.Warnings[0].Message)
+	require.Equal(t, "second", finish.Warnings[1].Message)
+}

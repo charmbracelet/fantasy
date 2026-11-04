@@ -750,9 +750,21 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 				yield(fantasy.StreamPart{
 					Type: fantasy.StreamPartTypeWarnings,
 					Warnings: []fantasy.CallWarning{{
-						Type:    fantasy.CallWarningTypeOther,
-						Message: "tool calls were returned but the turn ended abnormally (token limit, content filter, or provider error); arguments may be truncated",
+						Type:            fantasy.CallWarningTypeOther,
+						Message:         "tool calls were returned but the turn ended abnormally (token limit, content filter, or provider error); arguments may be truncated",
+						RawFinishReason: finishReason,
 					}},
+				})
+			} else if warning := AbnormalFinishWarning(finishReason, mappedFinishReason); warning != nil {
+				// An abnormal or unrecognized finish on a turn that produced
+				// only text (no tool calls) is otherwise indistinguishable from
+				// a complete answer: the stream ends with a normal Finish part
+				// and no error. Warn so consumers can tell a truncated answer
+				// apart from a complete one without checking the finish reason
+				// themselves.
+				yield(fantasy.StreamPart{
+					Type:     fantasy.StreamPartTypeWarnings,
+					Warnings: []fantasy.CallWarning{*warning},
 				})
 			}
 			o.applyHeadersStream(capture.header(), &providerMetadata)

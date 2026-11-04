@@ -3,6 +3,7 @@ package fantasy
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net"
 	"testing"
 	"time"
@@ -10,6 +11,17 @@ import (
 
 func TestIsRetryableError(t *testing.T) {
 	t.Parallel()
+
+	t.Run("RetryableError decides ahead of a wrapped ProviderError", func(t *testing.T) {
+		t.Parallel()
+		cause := &ProviderError{StatusCode: 400, Message: "bad request"}
+		if !isRetryableError(fmt.Errorf("wrapped: %w", selfRetryableError{retry: true, cause: cause})) {
+			t.Error("expected a RetryableError reporting true to be retryable")
+		}
+		if isRetryableError(selfRetryableError{retry: false, cause: &net.OpError{Op: "dial"}}) {
+			t.Error("expected a RetryableError reporting false not to be retryable")
+		}
+	})
 
 	t.Run("retryable ProviderError", func(t *testing.T) {
 		t.Parallel()
@@ -473,3 +485,12 @@ func TestRetryWithExponentialBackoff_FractionalRetryHeader(t *testing.T) {
 		t.Errorf("attempts = %d, want 1", attempts)
 	}
 }
+
+type selfRetryableError struct {
+	retry bool
+	cause error
+}
+
+func (e selfRetryableError) Error() string     { return "self-classified" }
+func (e selfRetryableError) Unwrap() error     { return e.cause }
+func (e selfRetryableError) IsRetryable() bool { return e.retry }

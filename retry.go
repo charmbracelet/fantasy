@@ -175,14 +175,22 @@ func isAuthError(err *ProviderError) bool {
 	return err.StatusCode == http.StatusUnauthorized || err.AuthError
 }
 
+// RetryableError is an error that decides for itself whether its request is
+// worth retrying. An error that wraps a context error is never retried.
+type RetryableError interface {
+	error
+	IsRetryable() bool
+}
+
 // isRetryableError reports whether the error should be retried.
-// It checks for retryable ProviderError, network-level connection errors
-// (DNS failures, TCP timeouts, connection refused), and HTTP/2 stream-
-// level transport errors. The latter two categories may not be wrapped
-// in ProviderError when they occur outside the provider's error handler.
+// A [RetryableError] in the chain, such as a ProviderError, decides first.
+// Otherwise it checks for network-level connection errors (DNS failures,
+// TCP timeouts, connection refused), and HTTP/2 stream-level transport
+// errors. The latter two categories may not be wrapped in ProviderError
+// when they occur outside the provider's error handler.
 func isRetryableError(err error) bool {
-	if providerErr, ok := errors.AsType[*ProviderError](err); ok {
-		return providerErr.IsRetryable()
+	if retryableErr, ok := errors.AsType[RetryableError](err); ok {
+		return retryableErr.IsRetryable()
 	}
 	if isAbortError(err) {
 		return false

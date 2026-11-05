@@ -2158,3 +2158,101 @@ func TestRepairJSONIdempotentOnOwnOutput(t *testing.T) {
 		}
 	}
 }
+
+// TestRepairJSONEscapedBackslashesMatchesStdlib pins the invariant that
+// repairing valid JSON preserves decoded backslashes in values and keys.
+func TestRepairJSONEscapedBackslashesMatchesStdlib(t *testing.T) {
+	slash := "\\"
+	cases := []struct {
+		name  string
+		value any
+		opts  []Option
+	}{
+		{
+			name:  "path_ending_in_backslash",
+			value: `C:\Users\Public\bin\`,
+		},
+		{
+			name:  "multiple_pairs",
+			value: strings.Repeat(slash, 4),
+		},
+		{
+			name:  "even_run_before_embedded_quote",
+			value: "literal" + strings.Repeat(slash, 2) + "\"quote",
+		},
+		{
+			name:  "odd_run_before_embedded_quote",
+			value: "literal" + slash + "\"quote",
+		},
+		{
+			name:  "interior_pairs",
+			value: "C:" + strings.Repeat(slash, 2) + "tmp" + strings.Repeat(slash, 2) + "file",
+		},
+		{
+			name:  "slash_followed_by_newline",
+			value: "literal" + slash + "\n",
+		},
+		{
+			name:  "slash_followed_by_slash",
+			value: "literal" + slash + slash,
+		},
+		{
+			name:  "slash_followed_by_unicode",
+			value: "literal" + slash + "\u2028",
+		},
+		{
+			name:  "slash_quote_adjacent_to_comma",
+			value: "literal" + slash + "\",",
+		},
+		{
+			name: "key_and_nested_array_paths",
+			value: map[string]any{
+				"key" + slash: "value" + slash,
+				"paths": []string{
+					"one" + slash,
+					"two" + strings.Repeat(slash, 2),
+					"inner" + slash + "path" + slash,
+				},
+			},
+		},
+		{
+			name:  "stream_stable",
+			value: `C:\Users\Public\bin\`,
+			opts:  []Option{WithStreamStable()},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			encoded, err := json.Marshal(tc.value)
+			if err != nil {
+				t.Fatalf("could not encode test value: %v", err)
+			}
+			input := `{"path":` + string(encoded) + "}"
+			var want any
+			if err := json.Unmarshal([]byte(input), &want); err != nil {
+				t.Fatalf("test input %q is not valid JSON: %v", input, err)
+			}
+
+			repaired, err := RepairJSON(input, tc.opts...)
+			if err != nil {
+				t.Fatalf("unexpected RepairJSON error: %v", err)
+			}
+			var repairedValue any
+			if err := json.Unmarshal([]byte(repaired), &repairedValue); err != nil {
+				t.Fatalf("repaired %q is not valid JSON: %v", repaired, err)
+			}
+			if !reflect.DeepEqual(repairedValue, want) {
+				t.Fatalf("repaired %q: got %#v want %#v", repaired, repairedValue, want)
+			}
+
+			loaded, err := Loads(input, tc.opts...)
+			if err != nil {
+				t.Fatalf("unexpected Loads error: %v", err)
+			}
+			if !reflect.DeepEqual(loaded, want) {
+				t.Fatalf("loaded: got %#v want %#v", loaded, want)
+			}
+		})
+	}
+}

@@ -131,6 +131,9 @@ const (
 	IncludeFileSearchCallResults IncludeType = "file_search_call.results"
 	// IncludeMessageOutputTextLogprobs includes message output text log probabilities.
 	IncludeMessageOutputTextLogprobs IncludeType = "message.output_text.logprobs"
+	// IncludeWebSearchCallActionSources includes web search call sources.
+	// It is added whenever a web search tool is set.
+	IncludeWebSearchCallActionSources IncludeType = "web_search_call.action.sources"
 )
 
 // ServiceTier represents the service tier for OpenAI Responses API.
@@ -384,10 +387,16 @@ type WebSearchSource struct {
 
 // WebSearchAction represents the action taken during a web search call.
 type WebSearchAction struct {
-	// Type is the kind of action: "search", "open_page", or "find".
+	// Type is the kind of action: "search", "open_page", or "find_in_page".
 	Type string `json:"type"`
-	// Query is the search query (present when Type is "search").
+	// Queries are the search queries (present when Type is "search").
+	Queries []string `json:"queries,omitempty"`
+	// Query is the search query (deprecated by OpenAI in favor of Queries).
 	Query string `json:"query,omitempty"`
+	// URL is the page URL (present when Type is "open_page" or "find_in_page").
+	URL string `json:"url,omitempty"`
+	// Pattern is the text to find (present when Type is "find_in_page").
+	Pattern string `json:"pattern,omitempty"`
 	// Sources are the results returned by the search.
 	Sources []WebSearchSource `json:"sources,omitempty"`
 }
@@ -399,6 +408,8 @@ type WebSearchAction struct {
 type WebSearchCallMetadata struct {
 	// ItemID is the server-side ID of the web_search_call output item.
 	ItemID string `json:"item_id"`
+	// Status is the status of the web_search_call output item.
+	Status string `json:"status,omitempty"`
 	// Action contains the structured action data from the search.
 	Action *WebSearchAction `json:"action,omitempty"`
 }

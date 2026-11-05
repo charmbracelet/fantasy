@@ -610,6 +610,25 @@ func (m *mockProviderData) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func TestSourceContentJSONRoundTrip(t *testing.T) {
+	for _, source := range []SourceContent{
+		{SourceType: SourceTypeURL, ID: "found", URL: "https://example.com", ToolCallID: "ws_1"},
+		{SourceType: SourceTypeURL, ID: "cited", URL: "https://example.com", Title: "Example"},
+	} {
+		data, err := json.Marshal(source)
+		if err != nil {
+			t.Fatalf("failed to marshal source: %v", err)
+		}
+		decoded, err := UnmarshalContent(data)
+		if err != nil {
+			t.Fatalf("failed to unmarshal source: %v", err)
+		}
+		if !reflect.DeepEqual(decoded, source) {
+			t.Errorf("round trip mismatch: got %#v, want %#v", decoded, source)
+		}
+	}
+}
+
 func TestPromptSerialization(t *testing.T) {
 	t.Run("serialize prompt (message slice)", func(t *testing.T) {
 		prompt := Prompt{

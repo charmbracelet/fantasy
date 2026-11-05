@@ -416,8 +416,9 @@ type SourceContent struct {
 	ID               string           `json:"id"`
 	URL              string           `json:"url"` // for URL sources
 	Title            string           `json:"title"`
-	MediaType        string           `json:"media_type"` // for document sources (IANA media type)
-	Filename         string           `json:"filename"`   // for document sources
+	MediaType        string           `json:"media_type"`             // for document sources (IANA media type)
+	Filename         string           `json:"filename"`               // for document sources
+	ToolCallID       string           `json:"tool_call_id,omitempty"` // for sources a provider-executed tool call returned
 	ProviderMetadata ProviderMetadata `json:"provider_metadata"`
 }
 

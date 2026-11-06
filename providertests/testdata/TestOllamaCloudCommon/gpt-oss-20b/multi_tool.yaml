@@ -1,0 +1,81 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 786
+    host: ollama.com
+    body: '{"max_tokens":4000,"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"}],"model":"gpt-oss:20b-cloud","stream":false,"tools":[{"function":{"description":"Add two numbers","name":"add","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"description":"Multiply two numbers","name":"multiply","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Content-Type:
+      - application/json
+    url: https://ollama.com/api/chat
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: 504
+    body: |
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:42.546912654Z","message":{"role":"assistant","content":"","thinking":"We need to use both functions add and multiply on the same time. So: call add with a=2,b=3 and multiply same. Provide output. Probably separate workflows. Let's call functions.","tool_calls":[{"id":"call_8cjdchwg","function":{"index":0,"name":"add","arguments":{"a":2,"b":3}}}]},"done":true,"done_reason":"stop","total_duration":769817619,"prompt_eval_count":201,"eval_count":67}
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 1.013755584s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1159
+    host: ollama.com
+    body: '{"max_tokens":4000,"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"content":"We need to use both functions add and multiply on the same time. So: call add with a=2,b=3 and multiply same. Provide output. Probably separate workflows. Let''s call functions.","role":"assistant","tool_calls":[{"function":{"arguments":{"a":2,"b":3},"name":"add"},"id":"0","type":"function"}]},{"content":"5","role":"tool","tool_call_id":"0","tool_name":"add"}],"model":"gpt-oss:20b-cloud","stream":false,"tools":[{"function":{"description":"Add two numbers","name":"add","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"description":"Multiply two numbers","name":"multiply","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Content-Type:
+      - application/json
+    url: https://ollama.com/api/chat
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: 319
+    body: |
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:43.231627537Z","message":{"role":"assistant","content":"","tool_calls":[{"id":"call_gun0sx9x","function":{"index":0,"name":"multiply","arguments":{"a":2,"b":3}}}]},"done":true,"done_reason":"stop","total_duration":440545189,"prompt_eval_count":279,"eval_count":21}
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 686.6565ms
+- id: 2
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 1366
+    host: ollama.com
+    body: '{"max_tokens":4000,"messages":[{"content":"You are a helpful assistant. CRITICAL: Always use both add and multiply at the same time ALWAYS.","role":"system"},{"content":"Add and multiply the number 2 and 3","role":"user"},{"content":"We need to use both functions add and multiply on the same time. So: call add with a=2,b=3 and multiply same. Provide output. Probably separate workflows. Let''s call functions.","role":"assistant","tool_calls":[{"function":{"arguments":{"a":2,"b":3},"name":"add"},"id":"0","type":"function"}]},{"content":"5","role":"tool","tool_call_id":"0","tool_name":"add"},{"content":"","role":"assistant","tool_calls":[{"function":{"arguments":{"a":2,"b":3},"name":"multiply"},"id":"0","type":"function"}]},{"content":"6","role":"tool","tool_call_id":"0","tool_name":"multiply"}],"model":"gpt-oss:20b-cloud","stream":false,"tools":[{"function":{"description":"Add two numbers","name":"add","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"},{"function":{"description":"Multiply two numbers","name":"multiply","parameters":{"properties":{"a":{"description":"first number","type":"integer"},"b":{"description":"second number","type":"integer"}},"required":["a","b"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Content-Type:
+      - application/json
+    url: https://ollama.com/api/chat
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: 302
+    body: |
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:44.054264241Z","message":{"role":"assistant","content":"**Addition result:** \\(2 + 3 = 5\\)\n\n**Multiplication result:** \\(2 \\times 3 = 6\\)"},"done":true,"done_reason":"stop","total_duration":574749576,"prompt_eval_count":311,"eval_count":34}
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 820.5425ms

@@ -254,6 +254,12 @@ type CallWarning struct {
 	Tool    Tool            `json:"tool"`
 	Details string          `json:"details"`
 	Message string          `json:"message"`
+
+	// RawFinishReason carries the provider's finish-reason string verbatim when
+	// the warning is about an abnormal or unrecognized turn ending. Providers
+	// keep it here so clients can log a reason the mapping does not know
+	// instead of only seeing FinishReasonUnknown.
+	RawFinishReason string `json:"raw_finish_reason,omitempty"`
 }
 
 // LanguageModel represents a language model that can generate responses and stream responses.

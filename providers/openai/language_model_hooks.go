@@ -163,26 +163,6 @@ func DefaultPrepareCallFunc(model fantasy.LanguageModel, params *openai.ChatComp
 			})
 		}
 	}
-
-	// Handle service tier validation
-	if providerOptions.ServiceTier != nil {
-		serviceTier := *providerOptions.ServiceTier
-		if serviceTier == "flex" && !supportsFlexProcessing(model.Model()) {
-			params.ServiceTier = ""
-			warnings = append(warnings, fantasy.CallWarning{
-				Type:    fantasy.CallWarningTypeUnsupportedSetting,
-				Setting: "ServiceTier",
-				Details: "flex processing is only available for o3, o4-mini, and gpt-5 models",
-			})
-		} else if serviceTier == "priority" && !supportsPriorityProcessing(model.Model()) {
-			params.ServiceTier = ""
-			warnings = append(warnings, fantasy.CallWarning{
-				Type:    fantasy.CallWarningTypeUnsupportedSetting,
-				Setting: "ServiceTier",
-				Details: "priority processing is only available for supported models (gpt-4, gpt-5, gpt-5-mini, o3, o4-mini) and requires Enterprise access. gpt-5-nano is not supported",
-			})
-		}
-	}
 	return warnings, nil
 }
 
@@ -204,6 +184,37 @@ func DefaultMapFinishReasonFunc(finishReason string) fantasy.FinishReason {
 		return fantasy.FinishReasonError
 	default:
 		return fantasy.FinishReasonUnknown
+	}
+}
+
+// AbnormalFinishWarning returns a warning for a finish reason that means the
+// turn cannot be trusted as complete: a terminal reason that can cut output
+// mid-answer (token limit, content filter, provider error) or a finish-reason
+// string the mapping does not know. It returns nil for recognized, healthy
+// finishes and when no finish reason was sent at all. The provider's raw
+// finish-reason string is carried verbatim so clients can log it even when it
+// maps to FinishReasonUnknown.
+func AbnormalFinishWarning(rawFinishReason string, mappedFinishReason fantasy.FinishReason) *fantasy.CallWarning {
+	if rawFinishReason == "" {
+		return nil
+	}
+	var message string
+	switch mappedFinishReason {
+	case fantasy.FinishReasonLength:
+		message = fmt.Sprintf("the turn ended abnormally (finish_reason %q): the model hit the token limit; the response may be truncated", rawFinishReason)
+	case fantasy.FinishReasonContentFilter:
+		message = fmt.Sprintf("the turn ended abnormally (finish_reason %q): a content filter stopped the model; the response may be incomplete", rawFinishReason)
+	case fantasy.FinishReasonError:
+		message = fmt.Sprintf("the turn ended abnormally (finish_reason %q): the provider reported an error; the response may be truncated", rawFinishReason)
+	case fantasy.FinishReasonUnknown:
+		message = fmt.Sprintf("the turn ended with an unrecognized finish reason %q; the response may be truncated", rawFinishReason)
+	default:
+		return nil
+	}
+	return &fantasy.CallWarning{
+		Type:            fantasy.CallWarningTypeOther,
+		Message:         message,
+		RawFinishReason: rawFinishReason,
 	}
 }
 

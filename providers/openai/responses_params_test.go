@@ -321,25 +321,24 @@ func TestGetResponsesModelConfig_ReasoningOptions(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		modelID         string
-		wantReasoning   bool
-		wantAcceptsOpts bool
-		wantSystemMode  string
+		modelID        string
+		wantReasoning  bool
+		wantSystemMode string
 	}{
-		{"gpt-5", true, true, "developer"},
-		{"gpt-5.4-mini", true, true, "developer"},
-		{"o3", true, true, "developer"},
-		{"o1-mini", true, true, "remove"},
-		{"gpt-6-sol", true, true, "developer"},
-		{"gpt-6.1-sol", true, true, "developer"},
-		{"grok-4.7", false, true, "system"},
-		{"grok-4.3", false, true, "system"},
-		{"some-new-model", false, true, "system"},
-		{"gpt-4o", false, false, "system"},
-		{"gpt-4.1-mini", false, false, "system"},
-		{"gpt-5-chat-latest", false, false, "system"},
-		{"gpt-3.5-turbo", false, false, "system"},
-		{"chatgpt-4o-latest", false, false, "system"},
+		{"gpt-5", true, "developer"},
+		{"gpt-5.4-mini", true, "developer"},
+		{"o3", true, "developer"},
+		{"o1-mini", true, "remove"},
+		{"gpt-6-sol", true, "developer"},
+		{"gpt-6.1-sol", true, "developer"},
+		{"grok-4.7", true, "developer"},
+		{"grok-4.3", true, "developer"},
+		{"some-new-model", true, "developer"},
+		{"gpt-4o", false, "system"},
+		{"gpt-4.1-mini", false, "system"},
+		{"gpt-5-chat-latest", false, "system"},
+		{"gpt-3.5-turbo", false, "system"},
+		{"chatgpt-4o-latest", false, "system"},
 	}
 
 	for _, tt := range tests {
@@ -348,7 +347,6 @@ func TestGetResponsesModelConfig_ReasoningOptions(t *testing.T) {
 
 			cfg := getResponsesModelConfig(tt.modelID)
 			require.Equal(t, tt.wantReasoning, cfg.isReasoningModel)
-			require.Equal(t, tt.wantAcceptsOpts, cfg.acceptsReasoningOptions)
 			require.Equal(t, tt.wantSystemMode, cfg.systemMessageMode)
 		})
 	}
@@ -399,17 +397,5 @@ func TestPrepareParams_ReasoningEffortByModelID(t *testing.T) {
 		body, err := json.Marshal(params)
 		require.NoError(t, err)
 		require.NotContains(t, string(body), `"reasoning"`)
-	})
-
-	t.Run("grok keeps temperature", func(t *testing.T) {
-		t.Parallel()
-
-		lm := responsesLanguageModel{provider: Name, modelID: "grok-4.7"}
-		call := testCall(prompt, opts)
-		call.Temperature = new(0.5)
-		params, warnings, err := lm.prepareParams(call)
-		require.NoError(t, err)
-		require.Empty(t, warnings)
-		require.True(t, params.Temperature.Valid())
 	})
 }

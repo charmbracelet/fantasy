@@ -80,102 +80,18 @@ func (o responsesLanguageModel) Provider() string {
 }
 
 type responsesModelConfig struct {
-	isReasoningModel bool
-	// acceptsReasoningOptions reports whether an explicit reasoning effort or
-	// summary from the caller is sent. It is true for every reasoning model
-	// and for every id outside the known non-reasoning families, so a new
-	// model id (or a provider such as xAI that shares the Responses wire)
-	// does not silently lose a requested effort.
-	acceptsReasoningOptions    bool
-	systemMessageMode          string
-	requiredAutoTruncation     bool
-	supportsFlexProcessing     bool
-	supportsPriorityProcessing bool
-}
-
-// isKnownNonReasoningResponsesModel reports whether the id belongs to a
-// family that has no reasoning controls. gpt-5-chat is handled separately
-// in getResponsesModelConfig.
-func isKnownNonReasoningResponsesModel(modelID string) bool {
-	id := strings.ToLower(modelID)
-	return strings.Contains(id, "gpt-3") ||
-		strings.Contains(id, "gpt-4") ||
-		strings.Contains(id, "chatgpt") ||
-		strings.Contains(id, "davinci") ||
-		strings.Contains(id, "babbage")
+	isReasoningModel  bool
+	systemMessageMode string
 }
 
 func getResponsesModelConfig(modelID string) responsesModelConfig {
-	config := resolveResponsesModelConfig(modelID)
-	config.acceptsReasoningOptions = config.isReasoningModel ||
-		(!strings.Contains(strings.ToLower(modelID), "gpt-5-chat") && !isKnownNonReasoningResponsesModel(modelID))
-	return config
-}
-
-func resolveResponsesModelConfig(modelID string) responsesModelConfig {
-	supportsFlexProcessing := strings.HasPrefix(modelID, "o3") ||
-		strings.Contains(modelID, "-o3") || strings.Contains(modelID, "o4-mini") ||
-		(strings.Contains(modelID, "gpt-5") && !strings.Contains(modelID, "gpt-5-chat"))
-
-	supportsPriorityProcessing := strings.Contains(strings.ToLower(modelID), "gpt-4") ||
-		strings.Contains(strings.ToLower(modelID), "gpt-5-mini") ||
-		(strings.Contains(strings.ToLower(modelID), "gpt-5") &&
-			!strings.Contains(strings.ToLower(modelID), "gpt-5-nano") &&
-			!strings.Contains(strings.ToLower(modelID), "gpt-5-chat")) ||
-		strings.HasPrefix(modelID, "o3") ||
-		strings.Contains(modelID, "-o3") ||
-		strings.Contains(modelID, "o4-mini")
-
-	defaults := responsesModelConfig{
-		requiredAutoTruncation:     false,
-		systemMessageMode:          "system",
-		supportsFlexProcessing:     supportsFlexProcessing,
-		supportsPriorityProcessing: supportsPriorityProcessing,
+	if !isResponsesReasoningModel(modelID) {
+		return responsesModelConfig{systemMessageMode: "system"}
 	}
-
-	if strings.Contains(strings.ToLower(modelID), "gpt-5-chat") {
-		return responsesModelConfig{
-			isReasoningModel:           false,
-			systemMessageMode:          defaults.systemMessageMode,
-			requiredAutoTruncation:     defaults.requiredAutoTruncation,
-			supportsFlexProcessing:     defaults.supportsFlexProcessing,
-			supportsPriorityProcessing: defaults.supportsPriorityProcessing,
-		}
+	if strings.Contains(modelID, "o1-mini") || strings.Contains(modelID, "o1-preview") {
+		return responsesModelConfig{isReasoningModel: true, systemMessageMode: "remove"}
 	}
-
-	if strings.HasPrefix(modelID, "o1") || strings.Contains(modelID, "-o1") ||
-		strings.HasPrefix(modelID, "o3") || strings.Contains(modelID, "-o3") ||
-		strings.HasPrefix(modelID, "o4") || strings.Contains(modelID, "-o4") ||
-		strings.HasPrefix(modelID, "oss") || strings.Contains(modelID, "-oss") ||
-		strings.Contains(strings.ToLower(modelID), "gpt-5") ||
-		strings.Contains(strings.ToLower(modelID), "gpt-6") ||
-		strings.Contains(modelID, "codex-") || strings.Contains(modelID, "computer-use") {
-		if strings.Contains(modelID, "o1-mini") || strings.Contains(modelID, "o1-preview") {
-			return responsesModelConfig{
-				isReasoningModel:           true,
-				systemMessageMode:          "remove",
-				requiredAutoTruncation:     defaults.requiredAutoTruncation,
-				supportsFlexProcessing:     defaults.supportsFlexProcessing,
-				supportsPriorityProcessing: defaults.supportsPriorityProcessing,
-			}
-		}
-
-		return responsesModelConfig{
-			isReasoningModel:           true,
-			systemMessageMode:          "developer",
-			requiredAutoTruncation:     defaults.requiredAutoTruncation,
-			supportsFlexProcessing:     defaults.supportsFlexProcessing,
-			supportsPriorityProcessing: defaults.supportsPriorityProcessing,
-		}
-	}
-
-	return responsesModelConfig{
-		isReasoningModel:           false,
-		systemMessageMode:          defaults.systemMessageMode,
-		requiredAutoTruncation:     defaults.requiredAutoTruncation,
-		supportsFlexProcessing:     defaults.supportsFlexProcessing,
-		supportsPriorityProcessing: defaults.supportsPriorityProcessing,
-	}
+	return responsesModelConfig{isReasoningModel: true, systemMessageMode: "developer"}
 }
 
 const (
@@ -315,7 +231,7 @@ func (o responsesLanguageModel) prepareParams(call fantasy.Call) (*responses.Res
 			include = append(include, openaiOptions.Include...)
 		}
 
-		if modelConfig.acceptsReasoningOptions && (openaiOptions.ReasoningEffort != nil || openaiOptions.ReasoningSummary != nil) {
+		if modelConfig.isReasoningModel && (openaiOptions.ReasoningEffort != nil || openaiOptions.ReasoningSummary != nil) {
 			reasoning := shared.ReasoningParam{}
 			if openaiOptions.ReasoningEffort != nil {
 				reasoning.Effort = shared.ReasoningEffort(*openaiOptions.ReasoningEffort)
@@ -325,10 +241,6 @@ func (o responsesLanguageModel) prepareParams(call fantasy.Call) (*responses.Res
 			}
 			params.Reasoning = reasoning
 		}
-	}
-
-	if modelConfig.requiredAutoTruncation {
-		params.Truncation = responses.ResponseNewParamsTruncationAuto
 	}
 
 	if len(include) > 0 {
@@ -357,7 +269,7 @@ func (o responsesLanguageModel) prepareParams(call fantasy.Call) (*responses.Res
 				Details: "topP is not supported for reasoning models",
 			})
 		}
-	} else if !modelConfig.acceptsReasoningOptions {
+	} else {
 		if openaiOptions != nil {
 			if openaiOptions.ReasoningEffort != nil {
 				warnings = append(warnings, fantasy.CallWarning{
@@ -374,26 +286,6 @@ func (o responsesLanguageModel) prepareParams(call fantasy.Call) (*responses.Res
 					Details: "reasoningSummary is not supported for non-reasoning models",
 				})
 			}
-		}
-	}
-
-	if openaiOptions != nil && openaiOptions.ServiceTier != nil {
-		if *openaiOptions.ServiceTier == ServiceTierFlex && !modelConfig.supportsFlexProcessing {
-			warnings = append(warnings, fantasy.CallWarning{
-				Type:    fantasy.CallWarningTypeUnsupportedSetting,
-				Setting: "serviceTier",
-				Details: "flex processing is only available for o3, o4-mini, and gpt-5 models",
-			})
-			params.ServiceTier = ""
-		}
-
-		if *openaiOptions.ServiceTier == ServiceTierPriority && !modelConfig.supportsPriorityProcessing {
-			warnings = append(warnings, fantasy.CallWarning{
-				Type:    fantasy.CallWarningTypeUnsupportedSetting,
-				Setting: "serviceTier",
-				Details: "priority processing is only available for supported models (gpt-4, gpt-5, gpt-5-mini, o3, o4-mini) and requires Enterprise access. gpt-5-nano is not supported",
-			})
-			params.ServiceTier = ""
 		}
 	}
 

@@ -94,7 +94,7 @@ func TestGenerateResponse(t *testing.T) {
 		modelInfo: model.ModelInfo{
 			ID:            "loaded-model",
 			Desc:          "test model",
-			Type:          model.ModelTypeDense,
+			Type:          "Dense",
 			HasProjection: true,
 			Size:          1024,
 			VRAMTotal:     768,
@@ -154,6 +154,9 @@ func TestGenerateResponse(t *testing.T) {
 	if got, want := response.Usage.TotalTokens, int64(16); got != want {
 		t.Errorf("Usage.TotalTokens: got %d, want %d", got, want)
 	}
+	if got, want := response.Usage.InputTokens, int64(9); got != want {
+		t.Errorf("Usage.InputTokens: got %d, want %d", got, want)
+	}
 	if got, want := response.Usage.CacheReadTokens, int64(3); got != want {
 		t.Errorf("Usage.CacheReadTokens: got %d, want %d", got, want)
 	}
@@ -184,7 +187,7 @@ func TestGenerateResponse(t *testing.T) {
 func TestStreamResponse(t *testing.T) {
 	toolFinish := model.FinishReasonTool
 	client := fakeChatModel{
-		modelInfo: model.ModelInfo{ID: "loaded-model", Type: model.ModelTypeDense},
+		modelInfo: model.ModelInfo{ID: "loaded-model", Type: "Dense"},
 		streamResponse: []model.ChatResponse{
 			{Model: "response-model", SystemFingerprint: "fp_kronk", Choices: []model.Choice{{Delta: &model.ResponseMessage{Reasoning: "thinking"}}}},
 			{Choices: []model.Choice{{Delta: &model.ResponseMessage{ToolCallDeltas: []model.ResponseToolCallDelta{
@@ -196,6 +199,7 @@ func TestStreamResponse(t *testing.T) {
 			{Choices: []model.Choice{{Delta: &model.ResponseMessage{}, FinishReasonPtr: &toolFinish}}},
 			{Choices: []model.Choice{}, Usage: &model.Usage{
 				PromptTokens:        12,
+				PromptTokensDetails: model.PromptTokensDetails{CachedTokens: 3},
 				CompletionTokens:    4,
 				TotalTokens:         16,
 				TokensPerSecond:     20,
@@ -239,6 +243,12 @@ func TestStreamResponse(t *testing.T) {
 	}
 	if got, want := parts[7].Usage.TotalTokens, int64(16); got != want {
 		t.Errorf("Usage.TotalTokens: got %d, want %d", got, want)
+	}
+	if got, want := parts[7].Usage.InputTokens, int64(9); got != want {
+		t.Errorf("Usage.InputTokens: got %d, want %d", got, want)
+	}
+	if got, want := parts[7].Usage.CacheReadTokens, int64(3); got != want {
+		t.Errorf("Usage.CacheReadTokens: got %d, want %d", got, want)
 	}
 	if got, want := parts[7].FinishReason, fantasy.FinishReasonToolCalls; got != want {
 		t.Errorf("FinishReason: got %q, want %q", got, want)

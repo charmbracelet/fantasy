@@ -218,8 +218,10 @@ const (
 	ServiceTierAuto ServiceTier = "auto"
 	// ServiceTierFlex represents the flex service tier.
 	ServiceTierFlex ServiceTier = "flex"
-	// ServiceTierPriority represents the priority service tier.
+	// ServiceTierPriority represents the priority service tier, now an alias of fast.
 	ServiceTierPriority ServiceTier = "priority"
+	// ServiceTierFast represents the fast service tier.
+	ServiceTierFast ServiceTier = "fast"
 )
 
 // TextVerbosity represents the text verbosity level for OpenAI Responses API.
@@ -389,8 +391,7 @@ func IsResponsesModel(modelID string) bool {
 
 // IsResponsesReasoningModel checks if a model ID is a Responses API reasoning model for OpenAI.
 func IsResponsesReasoningModel(modelID string) bool {
-	return slices.Contains(responsesReasoningModelIDs, modelID) ||
-		responsesGenerationPattern.MatchString(strings.ToLower(modelID))
+	return IsResponsesModel(modelID) && isResponsesReasoningModel(modelID)
 }
 
 // SearchContextSize controls how much context window space the

@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"charm.land/fantasy"
+	"google.golang.org/genai"
 )
 
 func TestToProviderErr_WrapsUnexpectedEOF(t *testing.T) {
@@ -28,8 +29,8 @@ func TestToProviderErr_WrapsUnexpectedEOF(t *testing.T) {
 
 			got := toProviderErr(tc.err)
 
-			var providerErr *fantasy.ProviderError
-			if !errors.As(got, &providerErr) {
+			providerErr, ok := errors.AsType[*fantasy.ProviderError](got)
+			if !ok {
 				t.Fatalf("toProviderErr did not wrap %v as *fantasy.ProviderError (got %T)", tc.err, got)
 			}
 			if !errors.Is(providerErr.Cause, io.ErrUnexpectedEOF) {
@@ -56,8 +57,27 @@ func TestToProviderErr_PassesThroughPlainEOF(t *testing.T) {
 	t.Parallel()
 
 	got := toProviderErr(io.EOF)
-	var providerErr *fantasy.ProviderError
-	if errors.As(got, &providerErr) {
+	if _, ok := errors.AsType[*fantasy.ProviderError](got); ok {
 		t.Errorf("toProviderErr wrapped io.EOF as ProviderError; should pass through")
+	}
+}
+
+// ErrorType carries Google's own name for the failure, so a caller can tell a
+// quota refusal from a bad request without matching on prose.
+func TestToProviderErr_CarriesTheErrorType(t *testing.T) {
+	t.Parallel()
+
+	apiErr := genai.APIError{
+		Code:    429,
+		Status:  "RESOURCE_EXHAUSTED",
+		Message: "Resource has been exhausted",
+	}
+
+	providerErr, ok := errors.AsType[*fantasy.ProviderError](toProviderErr(apiErr))
+	if !ok {
+		t.Fatalf("toProviderErr did not wrap %v as *fantasy.ProviderError", apiErr)
+	}
+	if providerErr.ErrorType != "RESOURCE_EXHAUSTED" {
+		t.Errorf("ErrorType = %q, want %q", providerErr.ErrorType, "RESOURCE_EXHAUSTED")
 	}
 }

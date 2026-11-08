@@ -1,0 +1,37 @@
+{
+  "openai,openaicompat,openrouter,vercel": {
+    "messages": [
+      {
+        "tool_calls": [
+          {
+            "id": "c1",
+            "function": {
+              "arguments": "{}",
+              "name": "say"
+            },
+            "type": "function"
+          }
+        ],
+        "role": "assistant"
+      },
+      {
+        "content": "The tool returned audio/mpeg content; see the following user message.",
+        "tool_call_id": "c1",
+        "role": "tool"
+      },
+      {
+        "content": [
+          {
+            "input_audio": {
+              "data": "AQID",
+              "format": "mp3"
+            },
+            "type": "input_audio"
+          }
+        ],
+        "role": "user"
+      }
+    ],
+    "warnings": []
+  }
+}

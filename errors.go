@@ -57,6 +57,18 @@ type ProviderError struct {
 	// events ride inside an already-successful 200 response, so the status
 	// code alone cannot signal that a retry may succeed.
 	TransientError bool
+
+	// ErrorType is the provider's own name for the failure, e.g.
+	// "overloaded_error", "rate_limit_exceeded", "RESOURCE_EXHAUSTED".
+	// Providers already parse it to classify transient failures, so carrying
+	// it spares callers from reading it back out of Message, which is
+	// formatted for people rather than for parsing.
+	//
+	// Empty when the response named no type, and always empty for a failure
+	// a provider recognises by message alone rather than from a classified
+	// payload. Treat it as a hint worth acting on when present rather than a
+	// field every error carries.
+	ErrorType string
 }
 
 func (m *ProviderError) Error() string {
@@ -155,7 +167,7 @@ var http2TransportErrorFragments = []string{
 // detail on GOAWAY would misread as the "; CODE" of a stream error.
 var http2ConnectionLostMessages = []string{
 	"http2: client connection lost",                       // health-check ping went unanswered
-	"http2: server sent GOAWAY and closed the connection", // stdlib's GoAwayError
+	"http2: server sent GOAWAY and closed the connection", // GoAwayError, from either http2 copy
 }
 
 // matchConnectionLost returns the entry of http2ConnectionLostMessages that
@@ -175,21 +187,19 @@ func matchConnectionLost(msg string) (string, bool) {
 // errors, and GOAWAY frames, which originate from the transport rather
 // than the application.
 //
-// x/net/http2 error types are matched by type. The standard library's copy
-// lives in an internal package, so its equivalents are matched by message
-// instead.
+// Stream and connection errors are matched by type against x/net/http2.
+// GOAWAY is matched by message instead: x/net deprecated GoAwayError
+// without offering a replacement, and the standard library's copy of the
+// package is internal, so neither one's type can be named here for long.
+// Both spell the failure the same way, so one fragment covers them.
 func IsTransportError(err error) bool {
 	if err == nil {
 		return false
 	}
-	var (
-		streamErr http2.StreamError
-		connErr   http2.ConnectionError
-		goAwayErr http2.GoAwayError
-	)
-	if errors.As(err, &streamErr) ||
-		errors.As(err, &connErr) ||
-		errors.As(err, &goAwayErr) {
+	if _, ok := errors.AsType[http2.StreamError](err); ok {
+		return true
+	}
+	if _, ok := errors.AsType[http2.ConnectionError](err); ok {
 		return true
 	}
 	// Wrapped errors embed the inner message, so scanning the top-level
@@ -345,6 +355,6 @@ func (e *NoObjectGeneratedError) Error() string {
 
 // IsNoObjectGeneratedError checks if an error is of type NoObjectGeneratedError.
 func IsNoObjectGeneratedError(err error) bool {
-	var target *NoObjectGeneratedError
-	return errors.As(err, &target)
+	_, ok := errors.AsType[*NoObjectGeneratedError](err)
+	return ok
 }

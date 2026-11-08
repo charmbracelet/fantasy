@@ -588,8 +588,10 @@ func languageModelStreamUsage(chunk openaisdk.ChatCompletionChunk, _ map[string]
 func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.ChatCompletionMessageParamUnion, []fantasy.CallWarning) {
 	var messages []openaisdk.ChatCompletionMessageParamUnion
 	var warnings []fantasy.CallWarning
+	var media openaipkg.ToolRunBuffer
 
 	for _, msg := range prompt {
+		messages = media.Role(msg.Role, messages)
 		switch msg.Role {
 		case fantasy.MessageRoleSystem:
 			var systemPromptParts []string
@@ -795,7 +797,7 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 					}
 				}
 			}
-			if !hasVisibleUserContent(content) {
+			if !openaipkg.HasVisibleUserContent(content) {
 				warnings = append(warnings, fantasy.CallWarning{
 					Type:    fantasy.CallWarningTypeOther,
 					Message: "dropping empty user message (contains neither user-facing content nor tool results)",
@@ -1012,83 +1014,25 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 					assistantMsg.ToolCalls = append(assistantMsg.ToolCalls, tc)
 				}
 			}
+			if !openaipkg.HasVisibleAssistantContent(&assistantMsg) {
+				warnings = append(warnings, fantasy.CallWarning{
+					Type:    fantasy.CallWarningTypeOther,
+					Message: "dropping empty assistant message (contains neither user-facing content nor tool calls)",
+				})
+				continue
+			}
 			messages = append(messages, openaisdk.ChatCompletionMessageParamUnion{
 				OfAssistant: &assistantMsg,
 			})
 
 		case fantasy.MessageRoleTool:
-			for i, c := range msg.Content {
-				isLastPart := i == len(msg.Content)-1
-				cacheControl := anthropic.GetCacheControl(c.Options())
-				if cacheControl == nil && isLastPart {
-					cacheControl = anthropic.GetCacheControl(msg.ProviderOptions)
-				}
-				if c.GetType() != fantasy.ContentTypeToolResult {
-					warnings = append(warnings, fantasy.CallWarning{
-						Type:    fantasy.CallWarningTypeOther,
-						Message: "tool message can only have tool result content",
-					})
-					continue
-				}
-				toolResultPart, ok := fantasy.AsContentType[fantasy.ToolResultPart](c)
-				if !ok {
-					warnings = append(warnings, fantasy.CallWarning{
-						Type:    fantasy.CallWarningTypeOther,
-						Message: "tool message result part does not have the right type",
-					})
-					continue
-				}
-				switch toolResultPart.Output.GetType() {
-				case fantasy.ToolResultContentTypeText:
-					output, ok := fantasy.AsToolResultOutputType[fantasy.ToolResultOutputContentText](toolResultPart.Output)
-					if !ok {
-						warnings = append(warnings, fantasy.CallWarning{
-							Type:    fantasy.CallWarningTypeOther,
-							Message: "tool result output does not have the right type",
-						})
-						continue
-					}
-					tr := openaisdk.ToolMessage(output.Text, toolResultPart.ToolCallID)
-					if cacheControl != nil {
-						tr.SetExtraFields(map[string]any{
-							"cache_control": map[string]string{
-								"type": cacheControl.Type,
-							},
-						})
-					}
-					messages = append(messages, tr)
-				case fantasy.ToolResultContentTypeError:
-					output, ok := fantasy.AsToolResultOutputType[fantasy.ToolResultOutputContentError](toolResultPart.Output)
-					if !ok {
-						warnings = append(warnings, fantasy.CallWarning{
-							Type:    fantasy.CallWarningTypeOther,
-							Message: "tool result output does not have the right type",
-						})
-						continue
-					}
-					tr := openaisdk.ToolMessage(output.Error.Error(), toolResultPart.ToolCallID)
-					if cacheControl != nil {
-						tr.SetExtraFields(map[string]any{
-							"cache_control": map[string]string{
-								"type": cacheControl.Type,
-							},
-						})
-					}
-					messages = append(messages, tr)
-				}
-			}
+			toolMessages, deferred, toolWarnings := openaipkg.ToolMessages(msg, anthropic.ToolResultCacheType)
+			messages = append(messages, toolMessages...)
+			media.Defer(deferred...)
+			warnings = append(warnings, toolWarnings...)
 		}
 	}
-	return messages, warnings
-}
-
-func hasVisibleUserContent(content []openaisdk.ChatCompletionContentPartUnionParam) bool {
-	for _, part := range content {
-		if part.OfText != nil || part.OfImageURL != nil || part.OfInputAudio != nil || part.OfFile != nil {
-			return true
-		}
-	}
-	return false
+	return media.Close(messages), warnings
 }
 
 func structToMapJSON(s any) (map[string]any, error) {

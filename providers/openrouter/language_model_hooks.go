@@ -223,6 +223,25 @@ func languageModelStreamExtra(chunk openaisdk.ChatCompletionChunk, yield func(fa
 		return ctx, false
 	}
 
+	// closeOnFinish closes an open reasoning block when this chunk carries the
+	// finish reason. A finish chunk is the last chunk of the stream, so a block
+	// left open here is never closed downstream and consumers drop it from the
+	// recorded step content. It is safe to call on any return path: it only
+	// acts when a block is still open and the chunk actually ends the turn.
+	closeOnFinish := func(shouldContinue bool) (map[string]any, bool) {
+		if !shouldContinue {
+			return ctx, false
+		}
+		if choice.FinishReason == "" || extractReasoningContext(ctx) == nil {
+			return ctx, true
+		}
+		ctx[reasoningStartedCtx] = nil
+		return ctx, yield(fantasy.StreamPart{
+			Type: fantasy.StreamPartTypeReasoningEnd,
+			ID:   fmt.Sprintf("%d", inx),
+		})
+	}
+
 	// Reasoning Start
 	if currentState == nil {
 		if len(reasoningData.ReasoningDetails) == 0 {
@@ -307,21 +326,25 @@ func languageModelStreamExtra(chunk openaisdk.ChatCompletionChunk, yield func(fa
 			delta = detail.Text
 		}
 		if delta == "" {
-			return ctx, true
+			return closeOnFinish(true)
 		}
-		return ctx, yield(fantasy.StreamPart{
+		return closeOnFinish(yield(fantasy.StreamPart{
 			Type:  fantasy.StreamPartTypeReasoningDelta,
 			ID:    fmt.Sprintf("%d", inx),
 			Delta: delta,
-		})
+		}))
 	}
 	if len(reasoningData.ReasoningDetails) == 0 {
-		// Anthropic sends the signature after tool_calls, so don't end reasoning early
+		// Anthropic sends the signature after tool_calls, so don't end
+		// reasoning early; the finish chunk, though, is strictly last, so the
+		// block must close there even when the signature never arrived.
 		if strings.HasPrefix(currentState.format, "anthropic-claude") {
-			return ctx, true
+			return closeOnFinish(true)
 		}
-		// this means its a model different from openai/anthropic that ended reasoning
-		if choice.Delta.Content != "" || len(choice.Delta.ToolCalls) > 0 {
+		// this means its a model different from openai/anthropic that ended
+		// reasoning; a finish chunk is always a boundary, even when it carries
+		// no content or tool calls.
+		if choice.Delta.Content != "" || len(choice.Delta.ToolCalls) > 0 || choice.FinishReason != "" {
 			ctx[reasoningStartedCtx] = nil
 			return ctx, yield(fantasy.StreamPart{
 				Type: fantasy.StreamPartTypeReasoningEnd,
@@ -356,14 +379,14 @@ func languageModelStreamExtra(chunk openaisdk.ChatCompletionChunk, yield func(fa
 			textDelta = "\n" + detail.Summary
 		}
 		ctx[reasoningStartedCtx] = currentState
-		return ctx, yield(fantasy.StreamPart{
+		return closeOnFinish(yield(fantasy.StreamPart{
 			Type:  fantasy.StreamPartTypeReasoningDelta,
 			ID:    fmt.Sprintf("%d", inx),
 			Delta: textDelta,
 			ProviderMetadata: fantasy.ProviderMetadata{
 				openai.Name: currentState.metadata,
 			},
-		})
+		}))
 	}
 	if strings.HasPrefix(detail.Format, "anthropic-claude") {
 		// the reasoning has ended
@@ -390,11 +413,11 @@ func languageModelStreamExtra(chunk openaisdk.ChatCompletionChunk, yield func(fa
 			})
 		}
 
-		return ctx, yield(fantasy.StreamPart{
+		return closeOnFinish(yield(fantasy.StreamPart{
 			Type:  fantasy.StreamPartTypeReasoningDelta,
 			ID:    fmt.Sprintf("%d", inx),
 			Delta: detail.Text,
-		})
+		}))
 	}
 
 	if strings.HasPrefix(detail.Format, "google-gemini") {
@@ -402,11 +425,11 @@ func languageModelStreamExtra(chunk openaisdk.ChatCompletionChunk, yield func(fa
 		if detail.Type == "reasoning.text" {
 			currentState.googleText += detail.Text
 			ctx[reasoningStartedCtx] = currentState
-			return ctx, yield(fantasy.StreamPart{
+			return closeOnFinish(yield(fantasy.StreamPart{
 				Type:  fantasy.StreamPartTypeReasoningDelta,
 				ID:    fmt.Sprintf("%d", inx),
 				Delta: detail.Text,
-			})
+			}))
 		}
 
 		// reasoning.encrypted type - end reasoning with signature
@@ -425,11 +448,11 @@ func languageModelStreamExtra(chunk openaisdk.ChatCompletionChunk, yield func(fa
 		}
 	}
 
-	return ctx, yield(fantasy.StreamPart{
+	return closeOnFinish(yield(fantasy.StreamPart{
 		Type:  fantasy.StreamPartTypeReasoningDelta,
 		ID:    fmt.Sprintf("%d", inx),
 		Delta: detail.Text,
-	})
+	}))
 }
 
 func languageModelUsage(response openaisdk.ChatCompletion) (fantasy.Usage, fantasy.ProviderOptionsData) {
@@ -523,7 +546,9 @@ func languageModelStreamUsage(chunk openaisdk.ChatCompletionChunk, _ map[string]
 func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.ChatCompletionMessageParamUnion, []fantasy.CallWarning) {
 	var messages []openaisdk.ChatCompletionMessageParamUnion
 	var warnings []fantasy.CallWarning
+	var media openai.ToolRunBuffer
 	for _, msg := range prompt {
+		messages = media.Role(msg.Role, messages)
 		switch msg.Role {
 		case fantasy.MessageRoleSystem:
 			var systemPromptParts []string
@@ -747,6 +772,13 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 						})
 					}
 				}
+			}
+			if !openai.HasVisibleUserContent(content) {
+				warnings = append(warnings, fantasy.CallWarning{
+					Type:    fantasy.CallWarningTypeOther,
+					Message: "dropping empty user message (contains neither user-facing content nor tool results)",
+				})
+				continue
 			}
 			messages = append(messages, openaisdk.UserMessage(content))
 		case fantasy.MessageRoleAssistant:
@@ -1000,74 +1032,22 @@ func languageModelToPrompt(prompt fantasy.Prompt, _, model string) ([]openaisdk.
 					assistantMsg.ToolCalls = append(assistantMsg.ToolCalls, tc)
 				}
 			}
+			if !openai.HasVisibleAssistantContent(&assistantMsg) {
+				warnings = append(warnings, fantasy.CallWarning{
+					Type:    fantasy.CallWarningTypeOther,
+					Message: "dropping empty assistant message (contains neither user-facing content nor tool calls)",
+				})
+				continue
+			}
 			messages = append(messages, openaisdk.ChatCompletionMessageParamUnion{
 				OfAssistant: &assistantMsg,
 			})
 		case fantasy.MessageRoleTool:
-			for i, c := range msg.Content {
-				isLastPart := i == len(msg.Content)-1
-				cacheControl := anthropic.GetCacheControl(c.Options())
-				if cacheControl == nil && isLastPart {
-					cacheControl = anthropic.GetCacheControl(msg.ProviderOptions)
-				}
-				if c.GetType() != fantasy.ContentTypeToolResult {
-					warnings = append(warnings, fantasy.CallWarning{
-						Type:    fantasy.CallWarningTypeOther,
-						Message: "tool message can only have tool result content",
-					})
-					continue
-				}
-
-				toolResultPart, ok := fantasy.AsContentType[fantasy.ToolResultPart](c)
-				if !ok {
-					warnings = append(warnings, fantasy.CallWarning{
-						Type:    fantasy.CallWarningTypeOther,
-						Message: "tool message result part does not have the right type",
-					})
-					continue
-				}
-
-				switch toolResultPart.Output.GetType() {
-				case fantasy.ToolResultContentTypeText:
-					output, ok := fantasy.AsToolResultOutputType[fantasy.ToolResultOutputContentText](toolResultPart.Output)
-					if !ok {
-						warnings = append(warnings, fantasy.CallWarning{
-							Type:    fantasy.CallWarningTypeOther,
-							Message: "tool result output does not have the right type",
-						})
-						continue
-					}
-					tr := openaisdk.ToolMessage(output.Text, toolResultPart.ToolCallID)
-					if cacheControl != nil {
-						tr.SetExtraFields(map[string]any{
-							"cache_control": map[string]string{
-								"type": cacheControl.Type,
-							},
-						})
-					}
-					messages = append(messages, tr)
-				case fantasy.ToolResultContentTypeError:
-					// TODO: check if better handling is needed
-					output, ok := fantasy.AsToolResultOutputType[fantasy.ToolResultOutputContentError](toolResultPart.Output)
-					if !ok {
-						warnings = append(warnings, fantasy.CallWarning{
-							Type:    fantasy.CallWarningTypeOther,
-							Message: "tool result output does not have the right type",
-						})
-						continue
-					}
-					tr := openaisdk.ToolMessage(output.Error.Error(), toolResultPart.ToolCallID)
-					if cacheControl != nil {
-						tr.SetExtraFields(map[string]any{
-							"cache_control": map[string]string{
-								"type": cacheControl.Type,
-							},
-						})
-					}
-					messages = append(messages, tr)
-				}
-			}
+			toolMessages, deferred, toolWarnings := openai.ToolMessages(msg, anthropic.ToolResultCacheType)
+			messages = append(messages, toolMessages...)
+			media.Defer(deferred...)
+			warnings = append(warnings, toolWarnings...)
 		}
 	}
-	return messages, warnings
+	return media.Close(messages), warnings
 }

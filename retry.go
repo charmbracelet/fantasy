@@ -17,8 +17,8 @@ type RetryFunction[T any] func(ctx context.Context, fn RetryFn[T]) (T, error)
 
 // getRetryDelayInMs calculates the retry delay based on error headers and exponential backoff.
 func getRetryDelayInMs(err error, exponentialBackoffDelay time.Duration) time.Duration {
-	var providerErr *ProviderError
-	if !errors.As(err, &providerErr) || providerErr.ResponseHeaders == nil {
+	providerErr, ok := errors.AsType[*ProviderError](err)
+	if !ok || providerErr.ResponseHeaders == nil {
 		return exponentialBackoffDelay
 	}
 
@@ -68,8 +68,8 @@ func RetryWithExponentialBackoffRespectingRetryHeaders[T any](options RetryOptio
 		if err == nil || options.OnAuthRefresh == nil {
 			return result, err
 		}
-		var authErr *ProviderError
-		if !errors.As(err, &authErr) || !isAuthError(authErr) {
+		authErr, ok := errors.AsType[*ProviderError](err)
+		if !ok || !isAuthError(authErr) {
 			return result, err
 		}
 		if refreshErr := options.OnAuthRefresh(ctx, authErr); refreshErr != nil {
@@ -145,7 +145,7 @@ func retryWithExponentialBackoff[T any](ctx context.Context, fn RetryFn[T], opti
 	if isRetryableError(err) && tryNumber <= options.MaxRetries {
 		delay := getRetryDelayInMs(err, options.InitialDelayIn)
 		if options.OnRetry != nil {
-			errors.As(err, &providerErr)
+			providerErr, _ = errors.AsType[*ProviderError](err)
 			options.OnRetry(providerErr, delay)
 		}
 
@@ -175,21 +175,27 @@ func isAuthError(err *ProviderError) bool {
 	return err.StatusCode == http.StatusUnauthorized || err.AuthError
 }
 
+// RetryableError is an error that decides for itself whether its request is
+// worth retrying. An error that wraps a context error is never retried.
+type RetryableError interface {
+	error
+	IsRetryable() bool
+}
+
 // isRetryableError reports whether the error should be retried.
-// It checks for retryable ProviderError, network-level connection errors
-// (DNS failures, TCP timeouts, connection refused), and HTTP/2 stream-
-// level transport errors. The latter two categories may not be wrapped
-// in ProviderError when they occur outside the provider's error handler.
+// A [RetryableError] in the chain, such as a ProviderError, decides first.
+// Otherwise it checks for network-level connection errors (DNS failures,
+// TCP timeouts, connection refused), and HTTP/2 stream-level transport
+// errors. The latter two categories may not be wrapped in ProviderError
+// when they occur outside the provider's error handler.
 func isRetryableError(err error) bool {
-	var providerErr *ProviderError
-	if errors.As(err, &providerErr) {
-		return providerErr.IsRetryable()
+	if retryableErr, ok := errors.AsType[RetryableError](err); ok {
+		return retryableErr.IsRetryable()
 	}
 	if isAbortError(err) {
 		return false
 	}
-	var netErr net.Error
-	if errors.As(err, &netErr) {
+	if _, ok := errors.AsType[net.Error](err); ok {
 		return true
 	}
 	return IsTransportError(err)

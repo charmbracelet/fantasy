@@ -16,16 +16,17 @@ import (
 )
 
 var (
-	openaiContextPattern    = regexp.MustCompile(`maximum context length (?:is|of) (\d+) tokens.*?(?:resulted in|requested) ~?(\d+) tokens`)
-	alibabaContextPattern   = regexp.MustCompile(`Range of input length should be \[\d+,\s*(\d+)\]`)
-	basetenContextPattern   = regexp.MustCompile(`Input length (\d+) exceeds the maximum allowed input length of (\d+) tokens`)
-	fireworksContextPattern = regexp.MustCompile(`The prompt is too long:\s*(\d+),\s*model maximum context length:\s*(\d+)`)
-	vercelContextPattern    = regexp.MustCompile(`Input too long:\s*(\d+)\s*input tokens,\s*limit is\s*(\d+)`)
+	openaiContextPattern      = regexp.MustCompile(`maximum context length (?:is|of) (\d+) tokens.*?(?:resulted in|requested) ~?(\d+) tokens`)
+	alibabaContextPattern     = regexp.MustCompile(`Range of input length should be \[\d+,\s*(\d+)\]`)
+	basetenContextPattern     = regexp.MustCompile(`Input length (\d+) exceeds the maximum allowed input length of (\d+) tokens`)
+	fireworksContextPattern   = regexp.MustCompile(`The prompt is too long:\s*(\d+),\s*model maximum context length:\s*(\d+)`)
+	parasailOneContextPattern = regexp.MustCompile(`maximum context length is (\d+) tokens, but the prompt contains (\d+) input tokens`)
+	parasailTwoContextPattern = regexp.MustCompile(`maximum context length is (\d+) tokens\. However, you requested \d+ output tokens and your prompt contains at least (\d+) input tokens`)
+	vercelContextPattern      = regexp.MustCompile(`Input too long:\s*(\d+)\s*input tokens,\s*limit is\s*(\d+)`)
 )
 
 func toProviderErr(err error) error {
-	var apiErr *openai.Error
-	if errors.As(err, &apiErr) {
+	if apiErr, ok := errors.AsType[*openai.Error](err); ok {
 		message := toProviderErrMessage(apiErr)
 		providerErr := &fantasy.ProviderError{
 			Title:           cmp.Or(fantasy.ErrorTitleForStatusCode(apiErr.StatusCode), "provider request failed"),
@@ -36,6 +37,7 @@ func toProviderErr(err error) error {
 			RequestBody:     apiErr.DumpRequest(true),
 			ResponseHeaders: toHeaderMap(apiErr.Response.Header),
 			ResponseBody:    apiErr.DumpResponse(true),
+			ErrorType:       cmp.Or(apiErr.Type, apiErr.Code),
 		}
 
 		parseContextTooLargeError(message, providerErr)
@@ -45,8 +47,7 @@ func toProviderErr(err error) error {
 
 	// Mid-stream SSE error events surface as *ssestream.StreamError, not
 	// *openai.Error, so they need their own classification path.
-	var streamErr *ssestream.StreamError
-	if errors.As(err, &streamErr) {
+	if streamErr, ok := errors.AsType[*ssestream.StreamError](err); ok {
 		return toProviderErrFromStreamError(streamErr)
 	}
 
@@ -76,6 +77,7 @@ func toProviderErrFromStreamError(streamErr *ssestream.StreamError) *fantasy.Pro
 		Message:        cmp.Or(envelope.Error.Message, streamErr.Message),
 		Cause:          streamErr,
 		ResponseBody:   streamErr.Event.Data,
+		ErrorType:      errType,
 		TransientError: fantasy.TransientStreamErrorTypes[errType],
 	}
 }
@@ -102,6 +104,18 @@ func parseContextTooLargeError(message string, providerErr *fantasy.ProviderErro
 		providerErr.ContextTooLargeErr = true
 		providerErr.ContextUsedTokens, _ = strconv.Atoi(matches[1])
 		providerErr.ContextMaxTokens, _ = strconv.Atoi(matches[2])
+		return
+	}
+	if matches := parasailOneContextPattern.FindStringSubmatch(message); matches != nil {
+		providerErr.ContextTooLargeErr = true
+		providerErr.ContextMaxTokens, _ = strconv.Atoi(matches[1])
+		providerErr.ContextUsedTokens, _ = strconv.Atoi(matches[2])
+		return
+	}
+	if matches := parasailTwoContextPattern.FindStringSubmatch(message); matches != nil {
+		providerErr.ContextTooLargeErr = true
+		providerErr.ContextMaxTokens, _ = strconv.Atoi(matches[1])
+		providerErr.ContextUsedTokens, _ = strconv.Atoi(matches[2])
 		return
 	}
 	if matches := vercelContextPattern.FindStringSubmatch(message); matches != nil {

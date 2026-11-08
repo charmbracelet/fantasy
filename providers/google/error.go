@@ -13,8 +13,8 @@ import (
 var googleContextPattern = regexp.MustCompile(`input token count.*?(\d+).*?exceeds.*?maximum.*?(\d+)`)
 
 func toProviderErr(err error) error {
-	var apiErr genai.APIError
-	if !errors.As(err, &apiErr) {
+	apiErr, ok := errors.AsType[genai.APIError](err)
+	if !ok {
 		// Wrap transient transport failures so `.IsRetryable()` works.
 		return fantasy.WrapTransportError(err)
 	}
@@ -25,6 +25,7 @@ func toProviderErr(err error) error {
 		Cause:        err,
 		StatusCode:   apiErr.Code,
 		ResponseBody: []byte(apiErr.Message),
+		ErrorType:    apiErr.Status,
 	}
 
 	parseContextTooLargeError(apiErr.Message, providerErr)

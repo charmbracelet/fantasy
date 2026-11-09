@@ -4023,6 +4023,13 @@ func TestParseContextTooLargeError(t *testing.T) {
 			wantMax:  1048576,
 		},
 		{
+			name:     "matches parasail format with no output tokens",
+			message:  "This model's maximum context length is 1048576 tokens. However, your prompt contains 1327524 input tokens, which exceeds this limit even without any output tokens. Please reduce the length of the input prompt.",
+			wantErr:  true,
+			wantUsed: 1327524,
+			wantMax:  1048576,
+		},
+		{
 			name:     "matches vercel format",
 			message:  "Input too long: 518063 input tokens, limit is 262144 for this model",
 			wantErr:  true,

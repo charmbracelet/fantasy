@@ -1,8 +1,8 @@
 package openai
 
 // Request compression is a transport concern, so these tests drive a stub
-// server that plays the three roles a real one can take: it understands
-// gzip, it does not, or the answer has nothing to do with the body at all.
+// server that plays the three roles a real one can take: it understands the
+// encoding, it does not, or the answer has nothing to do with the body at all.
 
 import (
 	"bytes"
@@ -17,6 +17,7 @@ import (
 	"testing"
 
 	"charm.land/fantasy"
+	brrr "github.com/molecule-man/go-brrr"
 	"github.com/stretchr/testify/require"
 )
 
@@ -48,7 +49,8 @@ func newCaptureServer(t *testing.T, responses ...int) *captureServer {
 			body:            string(raw),
 			contentLength:   r.ContentLength,
 		}
-		if seen.contentEncoding == "gzip" {
+		switch seen.contentEncoding {
+		case "gzip":
 			zr, gzErr := gzip.NewReader(bytes.NewReader(raw))
 			if gzErr != nil {
 				w.WriteHeader(http.StatusBadRequest)
@@ -59,6 +61,14 @@ func newCaptureServer(t *testing.T, responses ...int) *captureServer {
 			if gzErr != nil {
 				w.WriteHeader(http.StatusBadRequest)
 				_, _ = w.Write([]byte(`{"error":{"message":"bad gzip"}}`))
+				return
+			}
+			seen.body = string(inflated)
+		case "br":
+			inflated, brErr := io.ReadAll(brrr.NewReader(bytes.NewReader(raw)))
+			if brErr != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				_, _ = w.Write([]byte(`{"error":{"message":"bad brotli"}}`))
 				return
 			}
 			seen.body = string(inflated)
@@ -202,6 +212,97 @@ func TestRequestCompression(t *testing.T) {
 		require.Empty(t, received[1].contentEncoding)
 	})
 
+	t.Run("brotli is used when preferred", func(t *testing.T) {
+		t.Parallel()
+		cs := newCaptureServer(t)
+
+		generate(t, providerFor(t, cs, WithRequestCompression(EncodingBrotli, EncodingGzip)), longPrompt())
+
+		received := cs.received()
+		require.Len(t, received, 1, "a server that reads brotli needs no retry")
+		require.Equal(t, "br", received[0].contentEncoding)
+		require.Contains(t, received[0].body, `"model":"test-model"`,
+			"the server must be able to inflate what it was given")
+	})
+
+	t.Run("a server that cannot read brotli gets the next encoding", func(t *testing.T) {
+		t.Parallel()
+		// First arrival answers 400, the way a Hyper with gzip-only support
+		// refuses a brotli body.
+		cs := newCaptureServer(t, http.StatusBadRequest, http.StatusOK)
+
+		generate(t, providerFor(t, cs, WithRequestCompression(EncodingBrotli, EncodingGzip)), longPrompt())
+
+		received := cs.received()
+		require.Len(t, received, 2)
+		require.Equal(t, "br", received[0].contentEncoding)
+		require.Equal(t, "gzip", received[1].contentEncoding)
+		require.Contains(t, received[1].body, `"model":"test-model"`,
+			"the retry must carry the same request, not an empty one")
+	})
+
+	t.Run("a server that reads nothing compressed gets a plain body", func(t *testing.T) {
+		t.Parallel()
+		cs := newCaptureServer(t, http.StatusBadRequest, http.StatusBadRequest, http.StatusOK)
+
+		generate(t, providerFor(t, cs, WithRequestCompression(EncodingBrotli, EncodingGzip)), longPrompt())
+
+		received := cs.received()
+		require.Len(t, received, 3)
+		require.Equal(t, "br", received[0].contentEncoding)
+		require.Equal(t, "gzip", received[1].contentEncoding)
+		require.Empty(t, received[2].contentEncoding)
+	})
+
+	t.Run("the accepted encoding is remembered", func(t *testing.T) {
+		t.Parallel()
+		// The first generate pays the refused br request; the second must go
+		// straight to the encoding that worked.
+		cs := newCaptureServer(t, http.StatusBadRequest, http.StatusOK, http.StatusOK)
+
+		provider := providerFor(t, cs, WithRequestCompression(EncodingBrotli, EncodingGzip))
+		generate(t, provider, longPrompt())
+		generate(t, provider, longPrompt())
+
+		received := cs.received()
+		require.Len(t, received, 3, "the cascade is paid once, not once per request")
+		require.Equal(t, "br", received[0].contentEncoding)
+		require.Equal(t, "gzip", received[1].contentEncoding)
+		require.Equal(t, "gzip", received[2].contentEncoding)
+	})
+
+	t.Run("a fully refused cascade settles on plain", func(t *testing.T) {
+		t.Parallel()
+		cs := newCaptureServer(t, http.StatusBadRequest, http.StatusBadRequest, http.StatusOK, http.StatusOK)
+
+		provider := providerFor(t, cs, WithRequestCompression(EncodingBrotli, EncodingGzip))
+		generate(t, provider, longPrompt())
+		generate(t, provider, longPrompt())
+
+		received := cs.received()
+		require.Len(t, received, 4)
+		require.Empty(t, received[2].contentEncoding)
+		require.Empty(t, received[3].contentEncoding,
+			"a server that only ever accepted plain bodies stops being compressed for")
+	})
+
+	t.Run("a genuine bad request settles nothing", func(t *testing.T) {
+		t.Parallel()
+		// The server answers 400 to the plain body too, so nothing about
+		// encoding support was learned and the next request starts over.
+		cs := newCaptureServer(t, http.StatusBadRequest, http.StatusBadRequest, http.StatusBadRequest)
+
+		provider := providerFor(t, cs, WithRequestCompression(EncodingBrotli, EncodingGzip))
+		lm, err := provider.LanguageModel(t.Context(), "test-model")
+		require.NoError(t, err)
+		_, err = lm.Generate(t.Context(), fantasy.Call{Prompt: longPrompt()})
+		require.Error(t, err)
+
+		received := cs.received()
+		require.Len(t, received, 3)
+		require.Empty(t, received[2].contentEncoding)
+	})
+
 	// A 429 or a 5xx can follow a request that was already served and
 	// charged. Replaying those would bill the customer twice.
 	for _, status := range []int{
@@ -239,7 +340,7 @@ func TestRequestWithBody(t *testing.T) {
 	original.Header.Set("Content-Type", "application/json")
 	original.ContentLength = 9
 
-	compressed := requestWithBody(original, []byte("gzipped"), true)
+	compressed := requestWithBody(original, []byte("gzipped"), "gzip")
 
 	require.Equal(t, "gzip", compressed.Header.Get("Content-Encoding"))
 	require.EqualValues(t, 7, compressed.ContentLength,
@@ -252,7 +353,7 @@ func TestRequestWithBody(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "gzipped", string(replayed))
 
-	plain := requestWithBody(original, []byte("plain"), false)
+	plain := requestWithBody(original, []byte("plain"), "")
 	require.Empty(t, plain.Header.Get("Content-Encoding"))
 
 	require.Equal(t, "", original.Header.Get("Content-Encoding"),
@@ -284,6 +385,35 @@ func TestGzipForWire(t *testing.T) {
 		require.NoError(t, err)
 
 		out, ok := gzipForWire(body)
+		require.False(t, ok)
+		require.Empty(t, out)
+	})
+}
+
+func TestBrotliForWire(t *testing.T) {
+	t.Parallel()
+
+	t.Run("repetitive JSON compresses and round-trips", func(t *testing.T) {
+		t.Parallel()
+		body := []byte(`{"text":"` + strings.Repeat("hello world ", 500) + `"}`)
+		out, ok := brotliForWire(body)
+		require.True(t, ok)
+		require.Less(t, len(out), len(body)/2)
+
+		// The bytes must be a brotli stream any conforming decoder can read,
+		// not merely something our own encoder recognizes.
+		back, err := brrr.Decompress(out)
+		require.NoError(t, err)
+		require.Equal(t, body, back)
+	})
+
+	t.Run("incompressible input is declined", func(t *testing.T) {
+		t.Parallel()
+		body := make([]byte, 1<<14)
+		_, err := rand.Read(body)
+		require.NoError(t, err)
+
+		out, ok := brotliForWire(body)
 		require.False(t, ok)
 		require.Empty(t, out)
 	})
@@ -360,7 +490,7 @@ func TestWithRequestCompressionKeepsClientBehavior(t *testing.T) {
 
 	t.Run("no client supplied", func(t *testing.T) {
 		t.Parallel()
-		wrapped := withRequestCompression(nil)
+		wrapped := withRequestCompression(nil, newRequestCompressor([]RequestEncoding{EncodingGzip}))
 		client, ok := wrapped.(*http.Client)
 		require.True(t, ok, "a native client keeps the SDK's redirect and origin handling")
 
@@ -374,7 +504,7 @@ func TestWithRequestCompressionKeepsClientBehavior(t *testing.T) {
 	t.Run("caller client", func(t *testing.T) {
 		t.Parallel()
 		supplied := &http.Client{Transport: &countingRoundTripper{}, Timeout: 30}
-		wrapped := withRequestCompression(supplied)
+		wrapped := withRequestCompression(supplied, newRequestCompressor([]RequestEncoding{EncodingGzip}))
 		client, ok := wrapped.(*http.Client)
 		require.True(t, ok)
 		require.EqualValues(t, 30, client.Timeout, "the caller's settings survive")
@@ -389,7 +519,7 @@ func TestWithRequestCompressionKeepsClientBehavior(t *testing.T) {
 
 	t.Run("bespoke doer", func(t *testing.T) {
 		t.Parallel()
-		wrapped := withRequestCompression(&countingClient{})
+		wrapped := withRequestCompression(&countingClient{}, newRequestCompressor([]RequestEncoding{EncodingGzip}))
 		_, ok := wrapped.(*compressingClient)
 		require.True(t, ok)
 	})

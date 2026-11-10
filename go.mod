@@ -18,6 +18,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/kaptinlin/jsonschema v0.9.10
+	github.com/molecule-man/go-brrr v1.3.1
 	github.com/stretchr/testify v1.12.1
 	golang.org/x/net v0.62.0
 	golang.org/x/oauth2 v0.37.0

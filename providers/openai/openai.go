@@ -34,7 +34,8 @@ type options struct {
 	headers              map[string]string
 	userAgent            string
 	client               option.HTTPClient
-	requestCompression   bool
+	requestEncodings     []RequestEncoding
+	requestCompressor    *requestCompressor
 	sdkOptions           []option.RequestOption
 	objectMode           fantasy.ObjectMode
 	languageModelOptions []LanguageModelOption
@@ -61,6 +62,11 @@ func New(opts ...Option) (fantasy.Provider, error) {
 	}
 	if providerOptions.project != "" {
 		providerOptions.headers["OpenAi-Project"] = providerOptions.project
+	}
+	if len(providerOptions.requestEncodings) > 0 {
+		// One compressor for the whole provider: every model built from it
+		// shares what the server accepted rather than re-learning it.
+		providerOptions.requestCompressor = newRequestCompressor(providerOptions.requestEncodings)
 	}
 
 	return &provider{options: providerOptions}, nil
@@ -182,8 +188,8 @@ func (o *provider) LanguageModel(_ context.Context, modelID string) (fantasy.Lan
 	}
 
 	httpClient := o.options.client
-	if o.options.requestCompression {
-		httpClient = withRequestCompression(httpClient)
+	if o.options.requestCompressor != nil {
+		httpClient = withRequestCompression(httpClient, o.options.requestCompressor)
 	}
 	if httpClient != nil {
 		openaiClientOptions = append(openaiClientOptions, option.WithHTTPClient(httpClient))

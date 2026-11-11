@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"iter"
 	"strings"
+	"time"
 )
 
 // Usage represents token usage statistics for a model call.
@@ -172,6 +173,7 @@ const (
 
 // StreamPart represents a part of a streaming response.
 type StreamPart struct {
+	ReceivedAt       time.Time      `json:"received_at,omitzero"`
 	Type             StreamPartType `json:"type"`
 	ID               string         `json:"id"`
 	ToolCallName     string         `json:"tool_call_name"`

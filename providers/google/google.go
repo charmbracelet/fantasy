@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"reflect"
 	"strings"
+	"time"
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/object"
@@ -616,6 +617,12 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 	}
 
 	return func(yield func(fantasy.StreamPart) bool) {
+		var receivedAt time.Time
+		emit := yield
+		yield = func(part fantasy.StreamPart) bool {
+			part.ReceivedAt = receivedAt
+			return emit(part)
+		}
 		if len(warnings) > 0 {
 			if !yield(fantasy.StreamPart{
 				Type:     fantasy.StreamPartTypeWarnings,
@@ -636,6 +643,7 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 		var lastFinishReason fantasy.FinishReason
 
 		for resp, err := range chat.SendMessageStream(ctx, depointerSlice(lastMessage.Parts)...) {
+			receivedAt = time.Now()
 			if err != nil {
 				yield(fantasy.StreamPart{
 					Type:  fantasy.StreamPartTypeError,

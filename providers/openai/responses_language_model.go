@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"reflect"
 	"strings"
+	"time"
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/object"
@@ -942,6 +943,12 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 	activeReasoning := make(map[string]*reasoningState)
 
 	return func(yield func(fantasy.StreamPart) bool) {
+		var receivedAt time.Time
+		emit := yield
+		yield = func(part fantasy.StreamPart) bool {
+			part.ReceivedAt = receivedAt
+			return emit(part)
+		}
 		if len(warnings) > 0 {
 			if !yield(fantasy.StreamPart{
 				Type:     fantasy.StreamPartTypeWarnings,
@@ -952,6 +959,7 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 		}
 
 		for stream.Next() {
+			receivedAt = time.Now()
 			event := stream.Current()
 
 			switch event.Type {

@@ -12,6 +12,7 @@ import (
 	"reflect"
 	"slices"
 	"strings"
+	"time"
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/object"
@@ -474,6 +475,12 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 	var usage fantasy.Usage
 	var finishReason string
 	return func(yield func(fantasy.StreamPart) bool) {
+		var receivedAt time.Time
+		emit := yield
+		yield = func(part fantasy.StreamPart) bool {
+			part.ReceivedAt = receivedAt
+			return emit(part)
+		}
 		if len(warnings) > 0 {
 			if !yield(fantasy.StreamPart{
 				Type:     fantasy.StreamPartTypeWarnings,
@@ -483,6 +490,7 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 			}
 		}
 		for stream.Next() {
+			receivedAt = time.Now()
 			chunk := stream.Current()
 			acc.AddChunk(chunk)
 			usage, providerMetadata = o.streamUsageFunc(chunk, extraContext, providerMetadata)

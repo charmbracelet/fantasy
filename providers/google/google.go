@@ -643,7 +643,9 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 		var lastFinishReason fantasy.FinishReason
 
 		for resp, err := range chat.SendMessageStream(ctx, depointerSlice(lastMessage.Parts)...) {
-			receivedAt = time.Now()
+			if receivedAt.IsZero() {
+				receivedAt = time.Now()
+			}
 			if err != nil {
 				yield(fantasy.StreamPart{
 					Type:  fantasy.StreamPartTypeError,

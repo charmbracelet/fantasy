@@ -36,12 +36,8 @@ func TestStreamReceivedAtBeforeConsumerDelay(t *testing.T) {
 			time.Sleep(20 * time.Millisecond)
 			consumerResumed = time.Now()
 		case fantasy.StreamPartTypeTextDelta:
-			if deltas == 0 {
-				require.Equal(t, firstReceived, part.ReceivedAt)
-				require.True(t, part.ReceivedAt.Before(consumerResumed))
-			} else {
-				require.False(t, part.ReceivedAt.Before(consumerResumed))
-			}
+			require.Equal(t, firstReceived, part.ReceivedAt)
+			require.True(t, part.ReceivedAt.Before(consumerResumed))
 			deltas++
 		}
 	}

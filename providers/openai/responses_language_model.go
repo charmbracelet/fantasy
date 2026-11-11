@@ -959,7 +959,9 @@ func (o responsesLanguageModel) Stream(ctx context.Context, call fantasy.Call) (
 		}
 
 		for stream.Next() {
-			receivedAt = time.Now()
+			if receivedAt.IsZero() {
+				receivedAt = time.Now()
+			}
 			event := stream.Current()
 
 			switch event.Type {

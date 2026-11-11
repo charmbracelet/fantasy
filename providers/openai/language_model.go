@@ -490,7 +490,9 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 			}
 		}
 		for stream.Next() {
-			receivedAt = time.Now()
+			if receivedAt.IsZero() {
+				receivedAt = time.Now()
+			}
 			chunk := stream.Current()
 			acc.AddChunk(chunk)
 			usage, providerMetadata = o.streamUsageFunc(chunk, extraContext, providerMetadata)

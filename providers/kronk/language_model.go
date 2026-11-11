@@ -268,7 +268,9 @@ func (l *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 		}
 
 		for resp := range ch {
-			receivedAt = time.Now()
+			if receivedAt.IsZero() {
+				receivedAt = time.Now()
+			}
 			metadata.update(resp)
 
 			if resp.Usage != nil {

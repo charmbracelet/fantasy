@@ -1491,7 +1491,9 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 		openToolBlocks := map[int64]*openToolBlock{}
 
 		for stream.Next() {
-			receivedAt = time.Now()
+			if receivedAt.IsZero() {
+				receivedAt = time.Now()
+			}
 			chunk := stream.Current()
 			_ = acc.Accumulate(chunk)
 			switch chunk.Type {

@@ -7,7 +7,6 @@ import (
 
 	"charm.land/fantasy"
 	"github.com/ardanlabs/kronk/sdk/kronk/applog"
-	"github.com/ardanlabs/kronk/sdk/kronk/kvstorage"
 	"github.com/ardanlabs/kronk/sdk/kronk/model"
 )
 
@@ -268,11 +267,6 @@ func WithYarnOrigCtx(v int) Option {
 // WithQueueDepth configures the model admission queue depth.
 func WithQueueDepth(v int) Option {
 	return withModelOption(model.WithQueueDepth(v))
-}
-
-// WithSessionStoreFactory configures the model session store factory.
-func WithSessionStoreFactory(v kvstorage.Factory) Option {
-	return withModelOption(model.WithSessionStoreFactory(v))
 }
 
 func withModelOption(opt model.Option) Option {

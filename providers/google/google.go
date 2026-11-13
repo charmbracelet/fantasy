@@ -847,15 +847,10 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 
 			// we need to make sure that there is actual tokendata
 			if resp.UsageMetadata != nil && resp.UsageMetadata.TotalTokenCount != 0 {
+				// usageMetadata is cumulative: each chunk repeats the running
+				// totals, so the latest chunk holds the final count.
 				currentUsage := g.mapUsage(resp.UsageMetadata)
-				// if first usage chunk
-				if usage == nil {
-					usage = &currentUsage
-				} else {
-					usage.OutputTokens += currentUsage.OutputTokens
-					usage.ReasoningTokens += currentUsage.ReasoningTokens
-					usage.CacheReadTokens += currentUsage.CacheReadTokens
-				}
+				usage = &currentUsage
 			}
 
 			if len(resp.Candidates) > 0 && resp.Candidates[0].FinishReason != "" {
@@ -1126,13 +1121,7 @@ func (g *languageModel) streamObjectWithJSONMode(ctx context.Context, call fanta
 			// we need to make sure that there is actual tokendata
 			if resp.UsageMetadata != nil && resp.UsageMetadata.TotalTokenCount != 0 {
 				currentUsage := g.mapUsage(resp.UsageMetadata)
-				if usage == nil {
-					usage = &currentUsage
-				} else {
-					usage.OutputTokens += currentUsage.OutputTokens
-					usage.ReasoningTokens += currentUsage.ReasoningTokens
-					usage.CacheReadTokens += currentUsage.CacheReadTokens
-				}
+				usage = &currentUsage
 			}
 
 			if len(resp.Candidates) > 0 && resp.Candidates[0].FinishReason != "" {

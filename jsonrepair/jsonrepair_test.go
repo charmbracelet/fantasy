@@ -64,6 +64,18 @@ func TestRepairJSON(t *testing.T) {
 			input: "{\"key\": \"value\\nvalue\"}",
 			want:  "{\"key\": \"value\\nvalue\"}",
 		},
+		{
+			// A repeated key is valid JSON and must keep the last value, not
+			// split into a second array element as a missing-brace repair would.
+			name:  "duplicate_key_in_array_object",
+			input: "[{\"key\": \"first\", \"key\": \"second\"}]",
+			want:  "[{\"key\": \"second\"}]",
+		},
+		{
+			name:  "duplicate_key_in_nested_array_object",
+			input: "{\"items\": [{\"key\": \"first\", \"key\": \"second\"}]}",
+			want:  "{\"items\": [{\"key\": \"second\"}]}",
+		},
 	}
 
 	for _, tc := range cases {
@@ -365,6 +377,33 @@ func TestRepairJSONWithLog(t *testing.T) {
 				t.Fatalf("got %#v want %#v", gotLog, tc.wantLog)
 			}
 		})
+	}
+}
+
+func TestRepairJSONKeepsValidDuplicateKeyValue(t *testing.T) {
+	// RepairJSON is called on model output that is often already valid. A valid
+	// document must decode to the same value after repair, including when it
+	// repeats a key.
+	inputs := []string{
+		`[{"key":"first","key":"second"}]`,
+		`{"key":"first","key":"second"}`,
+		`{"items":[{"key":"first","key":"second"}]}`,
+	}
+	for _, input := range inputs {
+		repaired, err := RepairJSON(input)
+		if err != nil {
+			t.Fatalf("RepairJSON(%s): %v", input, err)
+		}
+		var got, want any
+		if err := json.Unmarshal([]byte(repaired), &got); err != nil {
+			t.Fatalf("repaired %s is not valid JSON: %v", repaired, err)
+		}
+		if err := json.Unmarshal([]byte(input), &want); err != nil {
+			t.Fatalf("input %s is not valid JSON: %v", input, err)
+		}
+		if !reflect.DeepEqual(got, want) {
+			t.Fatalf("RepairJSON(%s) = %s decodes to %#v, want %#v", input, repaired, got, want)
+		}
 	}
 }
 

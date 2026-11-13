@@ -560,6 +560,26 @@ func hasNumericSeparator(numberStr string) bool {
 	return false
 }
 
+// isPlainDuplicateKey reports whether the key starting at keyStart is a plain
+// repeat of an earlier key in the same object: it is followed by ':' and
+// preceded by a comma. That is the shape a model writes when it repeats a field,
+// so the last value wins as it does outside an array. A key with no value (a
+// truncated document) or one preceded by stray text still goes through the
+// missing-brace recovery.
+func (p *parser) isPlainDuplicateKey(keyStart int) bool {
+	p.skipWhitespaces()
+	if char, ok := p.getCharAt(0); !ok || char != ':' {
+		return false
+	}
+	for i := keyStart - 1; i >= 0; i-- {
+		if unicode.IsSpace(p.jsonStr[i]) {
+			continue
+		}
+		return p.jsonStr[i] == ','
+	}
+	return false
+}
+
 func (p *parser) parseObject() (any, error) {
 	obj := newOrderedObject()
 	startIndex := p.index
@@ -691,10 +711,17 @@ func (p *parser) parseObject() (any, error) {
 				p.log("Duplicate key found in strict mode while parsing object, raising an error")
 				return nil, errors.New("duplicate key found in strict mode while parsing object")
 			}
-			p.log("While parsing an object we found a duplicate key, closing the object here and rolling back the index")
-			p.index = rollbackIndex - 1
-			p.insertRune(p.index+1, '{')
-			break
+			if p.isPlainDuplicateKey(rollbackIndex) {
+				// The model wrote the same key twice in one object, as it may do
+				// outside an array. Keep the object and let the later value replace
+				// the earlier one instead of reading the repeat as a missing brace.
+				p.log("While parsing an object we found a duplicate key, keeping the last value")
+			} else {
+				p.log("While parsing an object we found a duplicate key, closing the object here and rolling back the index")
+				p.index = rollbackIndex - 1
+				p.insertRune(p.index+1, '{')
+				break
+			}
 		}
 		p.skipWhitespaces()
 		if current, ok := p.getCharAt(0); !ok || current == '}' {

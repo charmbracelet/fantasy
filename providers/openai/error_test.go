@@ -251,3 +251,28 @@ func TestToProviderErr_CarriesTheErrorType(t *testing.T) {
 		}
 	})
 }
+
+func TestToHeaderMap_PreservesLowercasedKeys(t *testing.T) {
+	t.Parallel()
+
+	for i := 0; i < 200; i++ {
+		h := http.Header{
+			"Retry-After":     []string{"10"},
+			"Retry-After-Ms":  []string{"1500"},
+			"X-Custom-Header": []string{"foo"},
+		}
+		got := toHeaderMap(h)
+		if got["retry-after"] != "10" {
+			t.Fatalf("iteration %d: got retry-after %q, want %q", i, got["retry-after"], "10")
+		}
+		if got["retry-after-ms"] != "1500" {
+			t.Fatalf("iteration %d: got retry-after-ms %q, want %q", i, got["retry-after-ms"], "1500")
+		}
+		if got["x-custom-header"] != "foo" {
+			t.Fatalf("iteration %d: got x-custom-header %q, want %q", i, got["x-custom-header"], "foo")
+		}
+		if got["Retry-After"] != "10" {
+			t.Fatalf("iteration %d: got Retry-After %q, want %q", i, got["Retry-After"], "10")
+		}
+	}
+}

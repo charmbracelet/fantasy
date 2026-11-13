@@ -80,18 +80,31 @@ func (o responsesLanguageModel) Provider() string {
 }
 
 type responsesModelConfig struct {
-	isReasoningModel  bool
-	systemMessageMode string
+	// isReasoningModel reports whether the OpenAI reasoning-model rules
+	// apply: the system prompt goes in the developer role, and temperature
+	// and topP are dropped. Only known OpenAI reasoning families qualify.
+	isReasoningModel bool
+	// acceptsReasoningOptions reports whether an explicit reasoning effort
+	// or summary from the caller is sent. It is true for every id outside
+	// the known non-reasoning families, so an id that fantasy does not know
+	// (such as an xAI grok model on the Responses API) keeps a requested
+	// effort without the OpenAI-only parameter rules.
+	acceptsReasoningOptions bool
+	systemMessageMode       string
 }
 
 func getResponsesModelConfig(modelID string) responsesModelConfig {
-	if !isResponsesReasoningModel(modelID) {
+	switch {
+	case isReasoningModel(modelID) || IsResponsesReasoningModel(modelID):
+		if strings.Contains(modelID, "o1-mini") || strings.Contains(modelID, "o1-preview") {
+			return responsesModelConfig{isReasoningModel: true, acceptsReasoningOptions: true, systemMessageMode: "remove"}
+		}
+		return responsesModelConfig{isReasoningModel: true, acceptsReasoningOptions: true, systemMessageMode: "developer"}
+	case isResponsesReasoningModel(modelID):
+		return responsesModelConfig{acceptsReasoningOptions: true, systemMessageMode: "system"}
+	default:
 		return responsesModelConfig{systemMessageMode: "system"}
 	}
-	if strings.Contains(modelID, "o1-mini") || strings.Contains(modelID, "o1-preview") {
-		return responsesModelConfig{isReasoningModel: true, systemMessageMode: "remove"}
-	}
-	return responsesModelConfig{isReasoningModel: true, systemMessageMode: "developer"}
 }
 
 const (
@@ -231,7 +244,7 @@ func (o responsesLanguageModel) prepareParams(call fantasy.Call) (*responses.Res
 			include = append(include, openaiOptions.Include...)
 		}
 
-		if modelConfig.isReasoningModel && (openaiOptions.ReasoningEffort != nil || openaiOptions.ReasoningSummary != nil) {
+		if modelConfig.acceptsReasoningOptions && (openaiOptions.ReasoningEffort != nil || openaiOptions.ReasoningSummary != nil) {
 			reasoning := shared.ReasoningParam{}
 			if openaiOptions.ReasoningEffort != nil {
 				reasoning.Effort = shared.ReasoningEffort(*openaiOptions.ReasoningEffort)
@@ -269,7 +282,7 @@ func (o responsesLanguageModel) prepareParams(call fantasy.Call) (*responses.Res
 				Details: "topP is not supported for reasoning models",
 			})
 		}
-	} else {
+	} else if !modelConfig.acceptsReasoningOptions {
 		if openaiOptions != nil {
 			if openaiOptions.ReasoningEffort != nil {
 				warnings = append(warnings, fantasy.CallWarning{

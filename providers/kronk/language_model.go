@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"time"
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/object"
@@ -251,6 +252,12 @@ func (l *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 	var finishReason string
 
 	return func(yield func(fantasy.StreamPart) bool) {
+		var receivedAt time.Time
+		emit := yield
+		yield = func(part fantasy.StreamPart) bool {
+			part.ReceivedAt = receivedAt
+			return emit(part)
+		}
 		if len(warnings) > 0 {
 			if !yield(fantasy.StreamPart{
 				Type:     fantasy.StreamPartTypeWarnings,
@@ -261,6 +268,9 @@ func (l *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 		}
 
 		for resp := range ch {
+			if receivedAt.IsZero() {
+				receivedAt = time.Now()
+			}
 			metadata.update(resp)
 
 			if resp.Usage != nil {

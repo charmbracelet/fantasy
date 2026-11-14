@@ -831,6 +831,16 @@ func (p *parser) parseString() (any, error) {
 		return p.parseComment()
 	}
 	for ok && !isStringDelimiter(char) && !isAlphaNum(char) {
+		if char == '-' {
+			if next, nextOK := p.getCharAt(1); nextOK && unicode.IsLetter(next) {
+				// A signed literal such as -Infinity is unquoted text, not a
+				// stray leading dash: keep the sign instead of starting the
+				// string at the first letter.
+				p.log("While parsing a string, we found a signed literal instead of a quote")
+				missingQuotes = true
+				break
+			}
+		}
 		p.index++
 		char, ok = p.getCharAt(0)
 	}

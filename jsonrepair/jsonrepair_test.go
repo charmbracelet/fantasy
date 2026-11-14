@@ -65,6 +65,22 @@ func TestRepairJSON(t *testing.T) {
 			want:  "{\"key\": \"value\\nvalue\"}",
 		},
 		{
+			// A signed bare literal is text, not a stray dash: preserve the sign.
+			name:  "negative_infinity_value",
+			input: "{\"a\": -Infinity}",
+			want:  "{\"a\": \"-Infinity\"}",
+		},
+		{
+			name:  "negative_infinity_top_level",
+			input: "-Infinity",
+			want:  "\"-Infinity\"",
+		},
+		{
+			name:  "positive_infinity_value",
+			input: "{\"a\": Infinity}",
+			want:  "{\"a\": \"Infinity\"}",
+		},
+		{
 			// A repeated key is valid JSON and must keep the last value, not
 			// split into a second array element as a missing-brace repair would.
 			name:  "duplicate_key_in_array_object",

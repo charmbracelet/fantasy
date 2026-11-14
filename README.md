@@ -64,6 +64,49 @@ fmt.Println(result.Response.Content.Text())
 
 Yeah! Fantasy is designed to support a wide variety of providers and models under a single API. While many providers such as Microsoft Azure, Amazon Bedrock, and OpenRouter have dedicated packages in Fantasy, many others work just fine with `openaicompat`, the generic OpenAI-compatible layer. That said, if you find a provider that’s not compatible and needs special treatment, please let us know in an issue (or open a PR).
 
+## OpenTelemetry
+
+Pass your application's OpenTelemetry providers when creating an agent:
+
+```go
+agent := fantasy.NewAgent(model,
+    fantasy.WithTracerProvider(tracerProvider),
+    fantasy.WithMeterProvider(meterProvider),
+    fantasy.WithTools(myTools...),
+)
+```
+
+Both options are optional and disabled by default, including when global
+OpenTelemetry providers are registered. The application configures exporters
+(such as OTLP) and owns provider shutdown.
+
+Traces contain an `invoke_agent` span with an `agent.step` child for each step.
+Each step contains a `chat {model}` client span per model-call attempt and
+`execute_tool {name}` spans for tools executed by Fantasy. Context reaches model
+and tool implementations, so their own instrumentation can create child spans.
+Models selected by `PrepareStep` or `ModelProvider` are also instrumented.
+Provider-executed tools are represented by the provider's model call.
+
+Instrumentation uses the GenAI conventions from the OpenTelemetry Go
+`semconv/v1.39.0` schema. Model spans include `gen_ai.operation.name`,
+`gen_ai.provider.name`, `gen_ai.request.model`, `gen_ai.response.finish_reasons`,
+and input/output token usage when available. Finish reasons use Fantasy's
+normalized values. Metrics include `gen_ai.client.operation.duration` (seconds)
+and `gen_ai.client.token.usage` (tokens, separated by input/output). Usage is
+copied from the provider response; retries record each attempt independently.
+
+For direct model calls, including structured output, wrap the model instead:
+
+```go
+model = fantasy.InstrumentModel(model, tracerProvider, meterProvider)
+```
+
+Use either agent options or a model wrapper to avoid recording model calls twice.
+Consume streaming iterators to completion or stop iteration early to close their
+spans. Stream spans cover consumption, including errors and cancellation.
+Prompts, responses, tool arguments, and tool results are never captured. Error
+spans record the error type and status without error messages.
+
 ## Work in Progress
 
 We built Fantasy to power [Crush](https://github.com/charmbracelet/crush), a hot coding agent for glamourously invincible development. Given that, Fantasy does not yet support things like:

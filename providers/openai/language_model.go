@@ -135,10 +135,41 @@ func newLanguageModel(modelID string, provider string, client openai.Client, opt
 }
 
 type streamToolCall struct {
-	id          string
-	name        string
-	arguments   string
-	hasFinished bool
+	id           string
+	name         string
+	arguments    string
+	extraContent json.RawMessage
+	hasFinished  bool
+}
+
+// toolCallExtraContent extracts the provider-specific extra_content object
+// attached to a tool call (e.g. Gemini's thought_signature). Gemini requires
+// it to be replayed verbatim on the same tool call in later requests; a turn
+// that drops it is rejected with "Function call is missing a
+// thought_signature".
+func toolCallExtraContent(rawJSON string) json.RawMessage {
+	var wrapper struct {
+		ExtraContent json.RawMessage `json:"extra_content"`
+	}
+	if err := json.Unmarshal([]byte(rawJSON), &wrapper); err != nil {
+		return nil
+	}
+	if len(wrapper.ExtraContent) == 0 || string(wrapper.ExtraContent) == "null" {
+		return nil
+	}
+	return wrapper.ExtraContent
+}
+
+// toolCallProviderMetadata wraps a tool call's extra_content in provider
+// metadata so agents can persist and replay it on later requests.
+func toolCallProviderMetadata(rawJSON string) fantasy.ProviderMetadata {
+	extra := toolCallExtraContent(rawJSON)
+	if extra == nil {
+		return nil
+	}
+	return fantasy.ProviderMetadata{
+		Name: &ToolCallExtraContent{ExtraContent: extra},
+	}
 }
 
 // responseCapture holds the raw HTTP response of a call so response headers
@@ -426,6 +457,7 @@ func (o languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantas
 				ToolCallID:       toolCallID,
 				ToolName:         tc.Function.Name,
 				Input:            tc.Function.Arguments,
+				ProviderMetadata: toolCallProviderMetadata(tc.RawJSON()),
 			})
 		}
 	}
@@ -548,6 +580,9 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 
 					for _, toolCallDelta := range choice.Delta.ToolCalls {
 						if existingToolCall, ok := toolCalls[toolCallDelta.Index]; ok {
+							if existingToolCall.extraContent == nil {
+								existingToolCall.extraContent = toolCallExtraContent(toolCallDelta.RawJSON())
+							}
 							if toolCallDelta.Function.Arguments != "" {
 								existingToolCall.arguments += toolCallDelta.Function.Arguments
 								if !yield(fantasy.StreamPart{
@@ -584,9 +619,10 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 								return
 							}
 							toolCalls[toolCallDelta.Index] = streamToolCall{
-								id:        toolCallDelta.ID,
-								name:      toolCallDelta.Function.Name,
-								arguments: toolCallDelta.Function.Arguments,
+								id:           toolCallDelta.ID,
+								name:         toolCallDelta.Function.Name,
+								arguments:    toolCallDelta.Function.Arguments,
+								extraContent: toolCallExtraContent(toolCallDelta.RawJSON()),
 							}
 
 							if toolCallDelta.Function.Arguments != "" {
@@ -707,7 +743,11 @@ func (o languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 					}
 				}
 				if !suppressedWithToolCalls {
-					if !yield(fantasy.StreamPart{Type: fantasy.StreamPartTypeToolCall, ID: tc.id, ToolCallName: tc.name, ToolCallInput: tc.arguments}) {
+					part := fantasy.StreamPart{Type: fantasy.StreamPartTypeToolCall, ID: tc.id, ToolCallName: tc.name, ToolCallInput: tc.arguments}
+					if tc.extraContent != nil {
+						part.ProviderMetadata = fantasy.ProviderMetadata{Name: &ToolCallExtraContent{ExtraContent: tc.extraContent}}
+					}
+					if !yield(part) {
 						return
 					}
 				}

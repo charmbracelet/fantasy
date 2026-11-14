@@ -553,17 +553,19 @@ func DefaultToPrompt(prompt fantasy.Prompt, _, _ string) ([]openai.ChatCompletio
 						})
 						continue
 					}
+					toolCallParam := &openai.ChatCompletionMessageFunctionToolCallParam{
+						ID:   toolCallPart.ToolCallID,
+						Type: "function",
+						Function: openai.ChatCompletionMessageFunctionToolCallFunctionParam{
+							Name:      toolCallPart.ToolName,
+							Arguments: toolCallPart.Input,
+						},
+					}
+					if fields := ToolCallExtraFields(toolCallPart.Options()); fields != nil {
+						toolCallParam.SetExtraFields(fields)
+					}
 					assistantMsg.ToolCalls = append(assistantMsg.ToolCalls,
-						openai.ChatCompletionMessageToolCallUnionParam{
-							OfFunction: &openai.ChatCompletionMessageFunctionToolCallParam{
-								ID:   toolCallPart.ToolCallID,
-								Type: "function",
-								Function: openai.ChatCompletionMessageFunctionToolCallFunctionParam{
-									Name:      toolCallPart.ToolName,
-									Arguments: toolCallPart.Input,
-								},
-							},
-						})
+						openai.ChatCompletionMessageToolCallUnionParam{OfFunction: toolCallParam})
 				}
 			}
 			if !HasVisibleAssistantContent(&assistantMsg) {

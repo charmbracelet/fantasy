@@ -206,6 +206,23 @@ func (p *parser) parse() (any, []LogEntry, error) {
 	return jsonValue, p.logger, nil
 }
 
+// parsePositiveSignedLiteral consumes a leading '+' plus the following word
+// and returns it as an unquoted string. Without this, parseString treats the
+// '+' as punctuation and starts the string at the first letter, silently
+// dropping the sign from literals such as +Infinity.
+func (p *parser) parsePositiveSignedLiteral() (any, error) {
+	p.index++ // '+'
+	start := p.index
+	for {
+		char, ok := p.getCharAt(0)
+		if !ok || !unicode.IsLetter(char) {
+			break
+		}
+		p.index++
+	}
+	return "+" + string(p.jsonStr[start:p.index]), nil
+}
+
 func (p *parser) parseJSON() (any, error) {
 	for {
 		char, ok := p.getCharAt(0)
@@ -219,6 +236,11 @@ func (p *parser) parseJSON() (any, error) {
 		if char == '[' {
 			p.index++
 			return p.parseArray()
+		}
+		if char == '+' {
+			if next, nextOK := p.getCharAt(1); nextOK && unicode.IsLetter(next) {
+				return p.parsePositiveSignedLiteral()
+			}
 		}
 		if !p.context.empty && (isStringDelimiter(char) || unicode.IsLetter(char)) {
 			return p.parseString()

@@ -39,6 +39,7 @@ func toProviderErr(err error) error {
 			ResponseHeaders: toHeaderMap(apiErr.Response.Header),
 			ResponseBody:    apiErr.DumpResponse(true),
 			ErrorType:       cmp.Or(apiErr.Type, apiErr.Code),
+			RetryPolicy:     classifyRetryPolicy(apiErr),
 		}
 
 		parseContextTooLargeError(message, providerErr)
@@ -54,6 +55,21 @@ func toProviderErr(err error) error {
 
 	// Wrap transient transport failures so `.IsRetryable()` works.
 	return fantasy.WrapTransportError(err)
+}
+
+// classifyRetryPolicy distinguishes Z.AI account errors from temporary 429s.
+func classifyRetryPolicy(err *openai.Error) fantasy.RetryPolicy {
+	if err.StatusCode != http.StatusTooManyRequests || !strings.EqualFold(err.Request.URL.Hostname(), "api.z.ai") {
+		return fantasy.RetryDefault
+	}
+	switch err.Code {
+	case "1113", "1309":
+		return fantasy.RetryNever
+	case "1308", "1310":
+		return fantasy.RetryWithHint
+	default:
+		return fantasy.RetryDefault
+	}
 }
 
 // streamErrorEnvelope mirrors the OpenAI-standard error envelope

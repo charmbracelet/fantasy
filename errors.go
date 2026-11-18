@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"strconv"
 	"strings"
 
@@ -30,6 +29,18 @@ func (err *Error) Error() string {
 func (err Error) Unwrap() error {
 	return err.Cause
 }
+
+// RetryPolicy describes when a provider error may be retried.
+type RetryPolicy uint8
+
+const (
+	// RetryDefault uses the standard status, header, and transport checks.
+	RetryDefault RetryPolicy = iota
+	// RetryNever marks a failure that another request cannot resolve.
+	RetryNever
+	// RetryWithHint requires a retry delay accepted by the retry policy.
+	RetryWithHint
+)
 
 // ProviderError represents an error returned by an external provider.
 type ProviderError struct {
@@ -59,6 +70,10 @@ type ProviderError struct {
 	// code alone cannot signal that a retry may succeed.
 	TransientError bool
 
+	// RetryPolicy overrides the default checks when the provider knows
+	// whether another attempt can succeed.
+	RetryPolicy RetryPolicy
+
 	// ErrorType is the provider's own name for the failure, e.g.
 	// "overloaded_error", "rate_limit_exceeded", "RESOURCE_EXHAUSTED".
 	// Providers already parse it to classify transient failures, so carrying
@@ -86,14 +101,17 @@ func (m *ProviderError) Unwrap() error {
 }
 
 // IsRetryable reports whether the error should be retried.
-// It returns true if the error is flagged as transient, if the underlying
+// With the default policy it returns true if the error is flagged as transient, if the underlying
 // cause is io.ErrUnexpectedEOF, if the "x-should-retry" response header
 // evaluates to true, if the HTTP status code indicates a retryable
 // condition (408, 409, 429, or any 5xx), or if the cause is a transient
-// HTTP/2 transport error. Known Z.AI account limits are checked first.
+// HTTP/2 transport error.
 func (m *ProviderError) IsRetryable() bool {
-	if m.isZAINonRetryableAccountError() {
+	switch m.RetryPolicy {
+	case RetryNever:
 		return false
+	case RetryWithHint:
+		return getRetryDelayInMs(m, 0) > 0
 	}
 	if m.TransientError {
 		return true
@@ -113,28 +131,6 @@ func (m *ProviderError) IsRetryable() bool {
 		m.StatusCode == http.StatusConflict ||
 		m.StatusCode == http.StatusTooManyRequests ||
 		m.StatusCode >= http.StatusInternalServerError
-}
-
-// Z.AI uses HTTP 429 for both short throttles and account limits.
-func (m *ProviderError) isZAINonRetryableAccountError() bool {
-	if m.StatusCode != http.StatusTooManyRequests {
-		return false
-	}
-	switch m.ErrorType {
-	case "1113", "1308", "1309", "1310":
-	default:
-		return false
-	}
-	endpoint, err := url.Parse(m.URL)
-	if err != nil || !strings.EqualFold(endpoint.Hostname(), "api.z.ai") {
-		return false
-	}
-	// Quota windows can reset on their own. Retry only when the server
-	// gives a delay the existing retry policy can honor.
-	if m.ErrorType == "1308" || m.ErrorType == "1310" {
-		return getRetryDelayInMs(m, 0) == 0
-	}
-	return true
 }
 
 func (m *ProviderError) shouldRetryHeader() bool {

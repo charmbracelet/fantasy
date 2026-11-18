@@ -32,8 +32,8 @@ func TestToProviderErr_WrapsUnexpectedEOF(t *testing.T) {
 
 			got := toProviderErr(tc.err)
 
-			var providerErr *fantasy.ProviderError
-			if !errors.As(got, &providerErr) {
+			providerErr, ok := errors.AsType[*fantasy.ProviderError](got)
+			if !ok {
 				t.Fatalf("toProviderErr did not wrap %v as *fantasy.ProviderError (got %T)", tc.err, got)
 			}
 			if !errors.Is(providerErr.Cause, io.ErrUnexpectedEOF) {
@@ -60,8 +60,7 @@ func TestToProviderErr_PassesThroughPlainEOF(t *testing.T) {
 	t.Parallel()
 
 	got := toProviderErr(io.EOF)
-	var providerErr *fantasy.ProviderError
-	if errors.As(got, &providerErr) {
+	if _, ok := errors.AsType[*fantasy.ProviderError](got); ok {
 		t.Errorf("toProviderErr wrapped io.EOF as ProviderError; should pass through")
 	}
 }
@@ -80,8 +79,8 @@ func TestToProviderErr_StreamErrorServerErrorIsRetryable(t *testing.T) {
 
 	got := toProviderErr(streamErr)
 
-	var providerErr *fantasy.ProviderError
-	if !errors.As(got, &providerErr) {
+	providerErr, ok := errors.AsType[*fantasy.ProviderError](got)
+	if !ok {
 		t.Fatalf("toProviderErr did not wrap StreamError as *fantasy.ProviderError (got %T)", got)
 	}
 	if !providerErr.IsRetryable() {
@@ -117,8 +116,8 @@ func TestToProviderErr_StreamErrorTransientTypes(t *testing.T) {
 
 			got := toProviderErr(streamErr)
 
-			var providerErr *fantasy.ProviderError
-			if !errors.As(got, &providerErr) {
+			providerErr, ok := errors.AsType[*fantasy.ProviderError](got)
+			if !ok {
 				t.Fatalf("toProviderErr did not wrap StreamError (got %T)", got)
 			}
 			if !providerErr.IsRetryable() {
@@ -140,8 +139,8 @@ func TestToProviderErr_StreamErrorUnknownTypeIsNotRetryable(t *testing.T) {
 
 	got := toProviderErr(streamErr)
 
-	var providerErr *fantasy.ProviderError
-	if !errors.As(got, &providerErr) {
+	providerErr, ok := errors.AsType[*fantasy.ProviderError](got)
+	if !ok {
 		t.Fatalf("toProviderErr did not wrap StreamError as *fantasy.ProviderError (got %T)", got)
 	}
 	if providerErr.IsRetryable() {
@@ -159,8 +158,8 @@ func TestToProviderErr_StreamErrorMalformedBodyFallsBackToRawMessage(t *testing.
 
 	got := toProviderErr(streamErr)
 
-	var providerErr *fantasy.ProviderError
-	if !errors.As(got, &providerErr) {
+	providerErr, ok := errors.AsType[*fantasy.ProviderError](got)
+	if !ok {
 		t.Fatalf("toProviderErr did not wrap StreamError as *fantasy.ProviderError (got %T)", got)
 	}
 	if providerErr.Message != streamErr.Message {
@@ -186,8 +185,8 @@ func TestToProviderErr_CarriesTheErrorType(t *testing.T) {
 			},
 		}
 
-		var providerErr *fantasy.ProviderError
-		if !errors.As(toProviderErr(streamErr), &providerErr) {
+		providerErr, ok := errors.AsType[*fantasy.ProviderError](toProviderErr(streamErr))
+		if !ok {
 			t.Fatalf("toProviderErr did not wrap %v as *fantasy.ProviderError", streamErr)
 		}
 		if providerErr.ErrorType != "server_error" {
@@ -208,8 +207,8 @@ func TestToProviderErr_CarriesTheErrorType(t *testing.T) {
 			},
 		}
 
-		var providerErr *fantasy.ProviderError
-		if !errors.As(toProviderErr(streamErr), &providerErr) {
+		providerErr, ok := errors.AsType[*fantasy.ProviderError](toProviderErr(streamErr))
+		if !ok {
 			t.Fatalf("toProviderErr did not wrap %v as *fantasy.ProviderError", streamErr)
 		}
 		if providerErr.ErrorType != "rate_limit_exceeded" {
@@ -243,12 +242,37 @@ func TestToProviderErr_CarriesTheErrorType(t *testing.T) {
 			t.Fatal("the request was meant to be rejected")
 		}
 
-		var providerErr *fantasy.ProviderError
-		if !errors.As(err, &providerErr) {
+		providerErr, ok := errors.AsType[*fantasy.ProviderError](err)
+		if !ok {
 			t.Fatalf("error is %T, want *fantasy.ProviderError", err)
 		}
 		if providerErr.ErrorType != "tokens" {
 			t.Errorf("ErrorType = %q, want %q", providerErr.ErrorType, "tokens")
 		}
 	})
+}
+
+func TestToHeaderMap_PreservesLowercasedKeys(t *testing.T) {
+	t.Parallel()
+
+	for i := 0; i < 200; i++ {
+		h := http.Header{
+			"Retry-After":     []string{"10"},
+			"Retry-After-Ms":  []string{"1500"},
+			"X-Custom-Header": []string{"foo"},
+		}
+		got := toHeaderMap(h)
+		if got["retry-after"] != "10" {
+			t.Fatalf("iteration %d: got retry-after %q, want %q", i, got["retry-after"], "10")
+		}
+		if got["retry-after-ms"] != "1500" {
+			t.Fatalf("iteration %d: got retry-after-ms %q, want %q", i, got["retry-after-ms"], "1500")
+		}
+		if got["x-custom-header"] != "foo" {
+			t.Fatalf("iteration %d: got x-custom-header %q, want %q", i, got["x-custom-header"], "foo")
+		}
+		if got["Retry-After"] != "10" {
+			t.Fatalf("iteration %d: got Retry-After %q, want %q", i, got["Retry-After"], "10")
+		}
+	}
 }

@@ -107,9 +107,8 @@ func TestStreamObjectWithoutFinishReasonIsIncomplete(t *testing.T) {
 	require.Len(t, errorParts, 1, "a stream with no candidate.finishReason must report an error")
 	assert.Empty(t, finishes, "a stream with no candidate.finishReason must not report finish")
 
-	var providerErr *fantasy.ProviderError
-	require.True(t, errors.As(errorParts[0].Error, &providerErr),
-		"want a *fantasy.ProviderError, got %T", errorParts[0].Error)
+	providerErr, ok := errors.AsType[*fantasy.ProviderError](errorParts[0].Error)
+	require.True(t, ok, "want a *fantasy.ProviderError, got %T", errorParts[0].Error)
 	assert.True(t, providerErr.IsRetryable(), "the incomplete-stream error must be retryable")
 }
 

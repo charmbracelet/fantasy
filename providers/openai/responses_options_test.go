@@ -49,7 +49,8 @@ func TestIsResponsesReasoningModel(t *testing.T) {
 		{"o4-mini", true},
 		{"gpt-oss-120b", true},
 
-		{"gpt-4.1-mini", true}, // gpt-4 matches, as before
+		{"gpt-4.1-mini", false},
+		{"gpt-5-chat-latest", false},
 		{"gpt-3-turbo-instruct", false},
 		{"some-custom-model", false},
 	}

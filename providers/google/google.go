@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"reflect"
 	"strings"
+	"time"
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/object"
@@ -616,6 +617,12 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 	}
 
 	return func(yield func(fantasy.StreamPart) bool) {
+		var receivedAt time.Time
+		emit := yield
+		yield = func(part fantasy.StreamPart) bool {
+			part.ReceivedAt = receivedAt
+			return emit(part)
+		}
 		if len(warnings) > 0 {
 			if !yield(fantasy.StreamPart{
 				Type:     fantasy.StreamPartTypeWarnings,
@@ -636,6 +643,9 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 		var lastFinishReason fantasy.FinishReason
 
 		for resp, err := range chat.SendMessageStream(ctx, depointerSlice(lastMessage.Parts)...) {
+			if receivedAt.IsZero() {
+				receivedAt = time.Now()
+			}
 			if err != nil {
 				yield(fantasy.StreamPart{
 					Type:  fantasy.StreamPartTypeError,
@@ -847,15 +857,10 @@ func (g *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 
 			// we need to make sure that there is actual tokendata
 			if resp.UsageMetadata != nil && resp.UsageMetadata.TotalTokenCount != 0 {
+				// usageMetadata is cumulative: each chunk repeats the running
+				// totals, so the latest chunk holds the final count.
 				currentUsage := g.mapUsage(resp.UsageMetadata)
-				// if first usage chunk
-				if usage == nil {
-					usage = &currentUsage
-				} else {
-					usage.OutputTokens += currentUsage.OutputTokens
-					usage.ReasoningTokens += currentUsage.ReasoningTokens
-					usage.CacheReadTokens += currentUsage.CacheReadTokens
-				}
+				usage = &currentUsage
 			}
 
 			if len(resp.Candidates) > 0 && resp.Candidates[0].FinishReason != "" {
@@ -1126,13 +1131,7 @@ func (g *languageModel) streamObjectWithJSONMode(ctx context.Context, call fanta
 			// we need to make sure that there is actual tokendata
 			if resp.UsageMetadata != nil && resp.UsageMetadata.TotalTokenCount != 0 {
 				currentUsage := g.mapUsage(resp.UsageMetadata)
-				if usage == nil {
-					usage = &currentUsage
-				} else {
-					usage.OutputTokens += currentUsage.OutputTokens
-					usage.ReasoningTokens += currentUsage.ReasoningTokens
-					usage.CacheReadTokens += currentUsage.CacheReadTokens
-				}
+				usage = &currentUsage
 			}
 
 			if len(resp.Candidates) > 0 && resp.Candidates[0].FinishReason != "" {

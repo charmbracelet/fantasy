@@ -430,7 +430,9 @@ func StreamWithTool(
 				finishReason = part.FinishReason
 
 			case fantasy.StreamPartTypeWarnings:
-				warnings = part.Warnings
+				// Multiple Warnings parts can arrive in one stream (e.g. one
+				// per provider retry); keep them all.
+				warnings = append(warnings, part.Warnings...)
 			}
 
 			if len(part.ProviderMetadata) > 0 {
@@ -580,7 +582,9 @@ func StreamWithText(
 				finishReason = part.FinishReason
 
 			case fantasy.StreamPartTypeWarnings:
-				warnings = part.Warnings
+				// Multiple Warnings parts can arrive in one stream (e.g. one
+				// per provider retry); keep them all.
+				warnings = append(warnings, part.Warnings...)
 			}
 
 			if len(part.ProviderMetadata) > 0 {

@@ -14,6 +14,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/object"
@@ -1467,6 +1468,12 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 	stream := a.client.Messages.NewStreaming(ctx, *params, reqOpts...)
 	acc := anthropic.Message{}
 	return func(yield func(fantasy.StreamPart) bool) {
+		var receivedAt time.Time
+		emit := yield
+		yield = func(part fantasy.StreamPart) bool {
+			part.ReceivedAt = receivedAt
+			return emit(part)
+		}
 		if len(warnings) > 0 {
 			if !yield(fantasy.StreamPart{
 				Type:     fantasy.StreamPartTypeWarnings,
@@ -1484,6 +1491,9 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 		openToolBlocks := map[int64]*openToolBlock{}
 
 		for stream.Next() {
+			if receivedAt.IsZero() {
+				receivedAt = time.Now()
+			}
 			chunk := stream.Current()
 			_ = acc.Accumulate(chunk)
 			switch chunk.Type {

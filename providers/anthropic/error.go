@@ -22,8 +22,7 @@ var anthropicContextPattern = regexp.MustCompile(`prompt is too long:\s*(\d+)\s*
 const awsCredentialErrorFragment = "failed to refresh cached credentials" //nolint:gosec // false positive: error message fragment, not a credential
 
 func toProviderErr(err error) error {
-	var apiErr *anthropic.Error
-	if errors.As(err, &apiErr) {
+	if apiErr, ok := errors.AsType[*anthropic.Error](err); ok {
 		providerErr := &fantasy.ProviderError{
 			Title:           apiErrorTitle(apiErr),
 			Message:         apiErr.Error(),
@@ -150,11 +149,11 @@ func parseContextTooLargeError(message string, providerErr *fantasy.ProviderErro
 }
 
 func toHeaderMap(in http.Header) (out map[string]string) {
-	out = make(map[string]string, len(in))
+	out = make(map[string]string, len(in)*2)
 	for k, v := range in {
 		if l := len(v); l > 0 {
 			out[k] = v[l-1]
-			in[strings.ToLower(k)] = v
+			out[strings.ToLower(k)] = v[l-1]
 		}
 	}
 	return out

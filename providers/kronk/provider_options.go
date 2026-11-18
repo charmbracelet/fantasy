@@ -57,7 +57,7 @@ func newProviderMetadata(info model.ModelInfo) *ProviderMetadata {
 	return &ProviderMetadata{
 		Model:            info.ID,
 		ModelDescription: info.Desc,
-		ModelType:        info.Type.String(),
+		ModelType:        info.Type,
 		HasProjection:    info.HasProjection,
 		ModelSizeBytes:   info.Size,
 		VRAMBytes:        info.VRAMTotal,

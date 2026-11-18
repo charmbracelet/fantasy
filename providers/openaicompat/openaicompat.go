@@ -91,6 +91,27 @@ func WithHTTPClient(client option.HTTPClient) Option {
 	}
 }
 
+// RequestEncoding identifies a Content-Encoding the compressor can put on a
+// JSON request body. See [openai.RequestEncoding].
+type RequestEncoding = openai.RequestEncoding
+
+// The encodings [WithRequestCompression] accepts.
+const (
+	EncodingGzip   = openai.EncodingGzip
+	EncodingBrotli = openai.EncodingBrotli
+)
+
+// WithRequestCompression compresses JSON request bodies, for
+// OpenAI-compatible servers that accept a Content-Encoding, using the
+// encodings given, most preferred first. Off by default; see
+// [openai.WithRequestCompression] for the fallback that keeps an
+// uncompressed request working either way.
+func WithRequestCompression(encodings ...RequestEncoding) Option {
+	return func(o *options) {
+		o.openaiOptions = append(o.openaiOptions, openai.WithRequestCompression(encodings...))
+	}
+}
+
 // WithSDKOptions sets the SDK options for the OpenAI-compatible provider.
 func WithSDKOptions(opts ...option.RequestOption) Option {
 	return func(o *options) {

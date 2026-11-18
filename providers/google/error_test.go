@@ -29,8 +29,8 @@ func TestToProviderErr_WrapsUnexpectedEOF(t *testing.T) {
 
 			got := toProviderErr(tc.err)
 
-			var providerErr *fantasy.ProviderError
-			if !errors.As(got, &providerErr) {
+			providerErr, ok := errors.AsType[*fantasy.ProviderError](got)
+			if !ok {
 				t.Fatalf("toProviderErr did not wrap %v as *fantasy.ProviderError (got %T)", tc.err, got)
 			}
 			if !errors.Is(providerErr.Cause, io.ErrUnexpectedEOF) {
@@ -57,8 +57,7 @@ func TestToProviderErr_PassesThroughPlainEOF(t *testing.T) {
 	t.Parallel()
 
 	got := toProviderErr(io.EOF)
-	var providerErr *fantasy.ProviderError
-	if errors.As(got, &providerErr) {
+	if _, ok := errors.AsType[*fantasy.ProviderError](got); ok {
 		t.Errorf("toProviderErr wrapped io.EOF as ProviderError; should pass through")
 	}
 }
@@ -74,8 +73,8 @@ func TestToProviderErr_CarriesTheErrorType(t *testing.T) {
 		Message: "Resource has been exhausted",
 	}
 
-	var providerErr *fantasy.ProviderError
-	if !errors.As(toProviderErr(apiErr), &providerErr) {
+	providerErr, ok := errors.AsType[*fantasy.ProviderError](toProviderErr(apiErr))
+	if !ok {
 		t.Fatalf("toProviderErr did not wrap %v as *fantasy.ProviderError", apiErr)
 	}
 	if providerErr.ErrorType != "RESOURCE_EXHAUSTED" {

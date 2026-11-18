@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"charm.land/fantasy"
+	"github.com/ardanlabs/kronk/sdk/kronk/applog"
 	"github.com/ardanlabs/kronk/sdk/kronk/model"
 )
 
@@ -128,7 +129,7 @@ func WithLoadMode(v model.LoadMode) Option {
 }
 
 // WithLog configures the logger used by model operations.
-func WithLog(v model.Logger) Option {
+func WithLog(v applog.Logger) Option {
 	return withModelOption(model.WithLog(v))
 }
 
@@ -169,7 +170,7 @@ func WithNThreadsBatch(v int) Option {
 }
 
 // WithNUMA configures the NUMA strategy.
-func WithNUMA(v string) Option {
+func WithNUMA(v model.NUMAStrategy) Option {
 	return withModelOption(model.WithNUMA(v))
 }
 
@@ -181,11 +182,6 @@ func WithOffloadKQV(v bool) Option {
 // WithOpOffload configures host tensor operation offloading.
 func WithOpOffload(v bool) Option {
 	return withModelOption(model.WithOpOffload(v))
-}
-
-// WithOpOffloadMinBatch configures the minimum batch size for operation offloading.
-func WithOpOffloadMinBatch(v int) Option {
-	return withModelOption(model.WithOpOffloadMinBatch(v))
 }
 
 // WithPrefillBatchSize configures the maximum number of prompt tokens processed per decode iteration.
@@ -271,11 +267,6 @@ func WithYarnOrigCtx(v int) Option {
 // WithQueueDepth configures the model admission queue depth.
 func WithQueueDepth(v int) Option {
 	return withModelOption(model.WithQueueDepth(v))
-}
-
-// WithSessionStoreFactory configures the model session store factory.
-func WithSessionStoreFactory(v model.SessionStoreFactory) Option {
-	return withModelOption(model.WithSessionStoreFactory(v))
 }
 
 func withModelOption(opt model.Option) Option {

@@ -60,8 +60,7 @@ func toProviderErr(err error) error {
 
 func toOperationErr(title string, err error) error {
 	mappedErr := toProviderErr(err)
-	var providerErr *fantasy.ProviderError
-	if errors.As(mappedErr, &providerErr) && providerErr.Title == "kronk request failed" {
+	if providerErr, ok := errors.AsType[*fantasy.ProviderError](mappedErr); ok && providerErr.Title == "kronk request failed" {
 		providerErr.Title = title
 	}
 	return mappedErr

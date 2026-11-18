@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"time"
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/object"
@@ -205,18 +206,7 @@ func (l *languageModel) Generate(ctx context.Context, call fantasy.Call) (*fanta
 
 	usage := fantasy.Usage{}
 	if response.Usage != nil {
-		outputTokens, totalTokens := openai.FoldDisjointReasoning(
-			int64(response.Usage.CompletionTokens),
-			int64(response.Usage.CompletionTokensDetails.ReasoningTokens),
-			int64(response.Usage.PromptTokens+response.Usage.CompletionTokens),
-		)
-		usage = fantasy.Usage{
-			InputTokens:     int64(response.Usage.PromptTokens),
-			OutputTokens:    outputTokens,
-			TotalTokens:     totalTokens,
-			ReasoningTokens: int64(response.Usage.CompletionTokensDetails.ReasoningTokens),
-			CacheReadTokens: int64(response.Usage.PromptTokensDetails.CachedTokens),
-		}
+		usage = toUsage(response.Usage)
 	}
 
 	mappedFinishReason := l.mapFinishReasonFunc(choice.FinishReason())
@@ -262,6 +252,12 @@ func (l *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 	var finishReason string
 
 	return func(yield func(fantasy.StreamPart) bool) {
+		var receivedAt time.Time
+		emit := yield
+		yield = func(part fantasy.StreamPart) bool {
+			part.ReceivedAt = receivedAt
+			return emit(part)
+		}
 		if len(warnings) > 0 {
 			if !yield(fantasy.StreamPart{
 				Type:     fantasy.StreamPartTypeWarnings,
@@ -272,21 +268,13 @@ func (l *languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.
 		}
 
 		for resp := range ch {
+			if receivedAt.IsZero() {
+				receivedAt = time.Now()
+			}
 			metadata.update(resp)
 
 			if resp.Usage != nil {
-				outputTokens, totalTokens := openai.FoldDisjointReasoning(
-					int64(resp.Usage.CompletionTokens),
-					int64(resp.Usage.CompletionTokensDetails.ReasoningTokens),
-					int64(resp.Usage.PromptTokens+resp.Usage.CompletionTokens),
-				)
-				usage = fantasy.Usage{
-					InputTokens:     int64(resp.Usage.PromptTokens),
-					OutputTokens:    outputTokens,
-					TotalTokens:     totalTokens,
-					ReasoningTokens: int64(resp.Usage.CompletionTokensDetails.ReasoningTokens),
-					CacheReadTokens: int64(resp.Usage.PromptTokensDetails.CachedTokens),
-				}
+				usage = toUsage(resp.Usage)
 			}
 
 			if len(resp.Choices) == 0 {
@@ -536,6 +524,24 @@ func (l *languageModel) StreamObject(ctx context.Context, call fantasy.ObjectCal
 
 	default:
 		return object.StreamWithTool(ctx, l, call)
+	}
+}
+
+func toUsage(u *model.Usage) fantasy.Usage {
+	cached := int64(u.PromptTokensDetails.CachedTokens)
+	reasoning := int64(u.CompletionTokensDetails.ReasoningTokens)
+	output, total := openai.FoldDisjointReasoning(
+		int64(u.CompletionTokens),
+		reasoning,
+		int64(u.PromptTokens+u.CompletionTokens),
+	)
+	return fantasy.Usage{
+		// prompt_tokens includes cached tokens; subtract to avoid double counting.
+		InputTokens:     max(int64(u.PromptTokens)-cached, 0),
+		OutputTokens:    output,
+		TotalTokens:     total,
+		ReasoningTokens: reasoning,
+		CacheReadTokens: cached,
 	}
 }
 

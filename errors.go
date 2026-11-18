@@ -101,11 +101,9 @@ func (m *ProviderError) Unwrap() error {
 }
 
 // IsRetryable reports whether the error should be retried.
-// With the default policy it returns true if the error is flagged as transient, if the underlying
-// cause is io.ErrUnexpectedEOF, if the "x-should-retry" response header
-// evaluates to true, if the HTTP status code indicates a retryable
-// condition (408, 409, 429, or any 5xx), or if the cause is a transient
-// HTTP/2 transport error.
+// With the default policy, it retries transient errors, unexpected EOFs,
+// transient HTTP/2 transport errors, and responses with a true
+// "x-should-retry" header or a retryable HTTP status (408, 409, 429, or 5xx).
 func (m *ProviderError) IsRetryable() bool {
 	switch m.RetryPolicy {
 	case RetryNever:

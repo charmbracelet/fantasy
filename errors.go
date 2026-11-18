@@ -38,7 +38,9 @@ const (
 	RetryDefault RetryPolicy = iota
 	// RetryNever marks a failure that another request cannot resolve.
 	RetryNever
-	// RetryWithHint requires a retry delay accepted by the retry policy.
+	// RetryWithHint requires a provider-supplied delay greater than zero
+	// and strictly less than 60 seconds. Exponential backoff cannot substitute
+	// for a missing or unusable hint.
 	RetryWithHint
 )
 
@@ -101,15 +103,16 @@ func (m *ProviderError) Unwrap() error {
 }
 
 // IsRetryable reports whether the error should be retried.
-// With the default policy, it retries transient errors, unexpected EOFs,
-// transient HTTP/2 transport errors, and responses with a true
-// "x-should-retry" header or a retryable HTTP status (408, 409, 429, or 5xx).
+// An explicit RetryPolicy takes precedence. The default policy allows
+// transient errors, unexpected EOFs, transient HTTP/2 transport errors, and
+// responses with a true "x-should-retry" header or a retryable HTTP status
+// (408, 409, 429, or 5xx).
 func (m *ProviderError) IsRetryable() bool {
 	switch m.RetryPolicy {
 	case RetryNever:
 		return false
 	case RetryWithHint:
-		return getRetryDelayInMs(m, 0) > 0
+		return shortRetryHint(m.ResponseHeaders) > 0
 	}
 	if m.TransientError {
 		return true

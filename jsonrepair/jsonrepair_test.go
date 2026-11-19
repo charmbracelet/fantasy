@@ -60,6 +60,22 @@ func TestRepairJSON(t *testing.T) {
 			want:  "{\"key\": \"value\\u263a\"}",
 		},
 		{
+			// A leading '+' on an unquoted literal must not be dropped.
+			name:  "positive_infinity_value",
+			input: "{\"a\": +Infinity}",
+			want:  "{\"a\": \"+Infinity\"}",
+		},
+		{
+			name:  "positive_infinity_top_level",
+			input: "+Infinity",
+			want:  "\"+Infinity\"",
+		},
+		{
+			name:  "positive_nan_value",
+			input: "{\"a\": +NaN}",
+			want:  "{\"a\": \"+NaN\"}",
+		},
+		{
 			name:  "escaped_newline",
 			input: "{\"key\": \"value\\nvalue\"}",
 			want:  "{\"key\": \"value\\nvalue\"}",

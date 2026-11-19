@@ -25,16 +25,13 @@ const (
 	// request.
 	requestCompressionMinBytes = 1024
 
-	// requestCompressionGzipLevel is gzip.BestSpeed: a third of the CPU of
-	// the default level for a ratio close to the best deflate reaches on
-	// real conversation JSON, on the critical path of every request.
-	requestCompressionGzipLevel = gzip.BestSpeed
+	// requestCompressionGzipLevel balances compression ratio against CPU on
+	// the critical path of every request.
+	requestCompressionGzipLevel = 6
 
-	// requestCompressionBrotliLevel is quality 1, the two-pass fast
-	// encoder: the speed-matched answer to gzip's BestSpeed while still
-	// beating its ratio on conversation JSON. Higher levels buy ratio with
-	// latency, which is the wrong trade on a request's critical path.
-	requestCompressionBrotliLevel = 1
+	// requestCompressionBrotliLevel balances compression ratio against latency
+	// on the critical path of every request.
+	requestCompressionBrotliLevel = 4
 
 	// sdkDefaultResponseHeaderTimeout mirrors the SDK's own default client
 	// (openai-go default_http_client.go) so that enabling compression

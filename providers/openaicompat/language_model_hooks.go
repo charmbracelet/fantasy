@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"maps"
 	"strings"
 
 	"charm.land/fantasy"
@@ -69,8 +70,20 @@ func PrepareCallFunc(model fantasy.LanguageModel, params *openaisdk.ChatCompleti
 	if providerOptions.User != nil {
 		params.User = param.NewOpt(*providerOptions.User)
 	}
-	if len(providerOptions.ExtraBody) > 0 {
-		params.SetExtraFields(providerOptions.ExtraBody)
+	extraBody := providerOptions.ExtraBody
+	// OpenAI-compatible hosts accept top_k, which the OpenAI request struct has
+	// no field for. Copy before writing: ExtraBody belongs to the caller and is
+	// reused across calls. An explicit extra_body entry wins.
+	if call.TopK != nil {
+		if _, ok := extraBody["top_k"]; !ok {
+			merged := make(map[string]any, len(extraBody)+1)
+			maps.Copy(merged, extraBody)
+			merged["top_k"] = *call.TopK
+			extraBody = merged
+		}
+	}
+	if len(extraBody) > 0 {
+		params.SetExtraFields(extraBody)
 	}
 	return nil, nil
 }

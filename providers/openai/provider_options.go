@@ -31,9 +31,10 @@ const (
 
 // Global type identifiers for OpenAI-specific provider data.
 const (
-	TypeProviderOptions     = Name + ".options"
-	TypeProviderFileOptions = Name + ".file_options"
-	TypeProviderMetadata    = Name + ".metadata"
+	TypeProviderOptions      = Name + ".options"
+	TypeProviderFileOptions  = Name + ".file_options"
+	TypeProviderMetadata     = Name + ".metadata"
+	TypeToolCallExtraContent = Name + ".tool_call_extra_content"
 )
 
 // Register OpenAI provider-specific types with the global registry.
@@ -54,6 +55,13 @@ func init() {
 	})
 	fantasy.RegisterProviderType(TypeProviderMetadata, func(data []byte) (fantasy.ProviderOptionsData, error) {
 		var v ProviderMetadata
+		if err := json.Unmarshal(data, &v); err != nil {
+			return nil, err
+		}
+		return &v, nil
+	})
+	fantasy.RegisterProviderType(TypeToolCallExtraContent, func(data []byte) (fantasy.ProviderOptionsData, error) {
+		var v ToolCallExtraContent
 		if err := json.Unmarshal(data, &v); err != nil {
 			return nil, err
 		}
@@ -120,6 +128,48 @@ func (m *ProviderMetadata) UnmarshalJSON(data []byte) error {
 	}
 	*m = ProviderMetadata(p)
 	return nil
+}
+
+// ToolCallExtraContent carries the provider-specific extra_content object
+// attached to an assistant tool call. Gemini 3 models put a thought_signature
+// there and require it to be replayed verbatim on the same tool call in later
+// requests; dropping it makes the follow-up turn fail with "Function call is
+// missing a thought_signature". It is opaque to fantasy, so keep it as raw
+// JSON.
+type ToolCallExtraContent struct {
+	ExtraContent json.RawMessage `json:"extra_content,omitempty"`
+}
+
+// Options implements the ProviderOptionsData interface.
+func (*ToolCallExtraContent) Options() {}
+
+// MarshalJSON implements custom JSON marshaling with type info for ToolCallExtraContent.
+func (m ToolCallExtraContent) MarshalJSON() ([]byte, error) {
+	type plain ToolCallExtraContent
+	return fantasy.MarshalProviderType(TypeToolCallExtraContent, plain(m))
+}
+
+// UnmarshalJSON implements custom JSON unmarshaling with type info for ToolCallExtraContent.
+func (m *ToolCallExtraContent) UnmarshalJSON(data []byte) error {
+	type plain ToolCallExtraContent
+	var p plain
+	if err := fantasy.UnmarshalProviderType(data, &p); err != nil {
+		return err
+	}
+	*m = ToolCallExtraContent(p)
+	return nil
+}
+
+// ToolCallExtraFields returns the provider-specific extra fields to attach to
+// a replayed tool call param, or nil when the part carries no extra_content.
+// Gemini 3 models reject the follow-up turn unless the thought_signature that
+// arrived with the tool call is echoed back on that exact call.
+func ToolCallExtraFields(options fantasy.ProviderOptions) map[string]any {
+	extra, ok := options[Name].(*ToolCallExtraContent)
+	if !ok || len(extra.ExtraContent) == 0 {
+		return nil
+	}
+	return map[string]any{"extra_content": extra.ExtraContent}
 }
 
 // ProviderOptions represents additional options for OpenAI provider.

@@ -449,17 +449,19 @@ func ToPromptFunc(prompt fantasy.Prompt, _, _ string) ([]openaisdk.ChatCompletio
 						})
 						continue
 					}
+					toolCallParam := &openaisdk.ChatCompletionMessageFunctionToolCallParam{
+						ID:   toolCallPart.ToolCallID,
+						Type: "function",
+						Function: openaisdk.ChatCompletionMessageFunctionToolCallFunctionParam{
+							Name:      toolCallPart.ToolName,
+							Arguments: toolCallPart.Input,
+						},
+					}
+					if fields := openai.ToolCallExtraFields(toolCallPart.Options()); fields != nil {
+						toolCallParam.SetExtraFields(fields)
+					}
 					assistantMsg.ToolCalls = append(assistantMsg.ToolCalls,
-						openaisdk.ChatCompletionMessageToolCallUnionParam{
-							OfFunction: &openaisdk.ChatCompletionMessageFunctionToolCallParam{
-								ID:   toolCallPart.ToolCallID,
-								Type: "function",
-								Function: openaisdk.ChatCompletionMessageFunctionToolCallFunctionParam{
-									Name:      toolCallPart.ToolName,
-									Arguments: toolCallPart.Input,
-								},
-							},
-						})
+						openaisdk.ChatCompletionMessageToolCallUnionParam{OfFunction: toolCallParam})
 				}
 			}
 			// Text: when no segment carries extra fields, join into the string

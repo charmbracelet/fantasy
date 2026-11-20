@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -15,42 +16,72 @@ type RetryFn[T any] func() (T, error)
 // RetryFunction is a function that retries another function.
 type RetryFunction[T any] func(ctx context.Context, fn RetryFn[T]) (T, error)
 
-// getRetryDelayInMs calculates the retry delay based on error headers and exponential backoff.
-func getRetryDelayInMs(err error, exponentialBackoffDelay time.Duration) time.Duration {
-	providerErr, ok := errors.AsType[*ProviderError](err)
-	if !ok || providerErr.ResponseHeaders == nil {
-		return exponentialBackoffDelay
-	}
+const maxShortRetryHint = 60 * time.Second
 
-	headers := providerErr.ResponseHeaders
-	var ms time.Duration
-
-	// retry-ms is more precise than retry-after and used by e.g. OpenAI
-	if retryAfterMs, exists := headers["retry-after-ms"]; exists {
-		if timeoutMs, err := strconv.ParseFloat(retryAfterMs, 64); err == nil {
-			ms = time.Duration(timeoutMs * float64(time.Millisecond))
-		}
-	}
-
-	// About the Retry-After header: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After
-	if retryAfter, exists := headers["retry-after"]; exists && ms == 0 {
-		if timeoutSeconds, err := strconv.ParseFloat(retryAfter, 64); err == nil {
-			ms = time.Duration(timeoutSeconds * float64(time.Second))
-		} else {
-			// Try parsing as HTTP date
-			if t, err := time.Parse(time.RFC1123, retryAfter); err == nil {
-				ms = time.Until(t)
+// retryHint parses the provider's retry headers without applying backoff.
+func retryHint(headers map[string]string) time.Duration {
+	// Millisecond hints take precedence over Retry-After.
+	if value := retryHeader(headers, "retry-after-ms"); value != "" {
+		if ms, err := strconv.ParseFloat(value, 64); err == nil {
+			if delay := time.Duration(ms * float64(time.Millisecond)); delay != 0 {
+				return delay
 			}
 		}
 	}
-
-	// Check that the delay is reasonable:
-	// 0 <= ms < 60 seconds or ms < exponentialBackoffDelay
-	if ms > 0 && (ms < 60*time.Second || ms < exponentialBackoffDelay) {
-		return ms
+	if value := retryHeader(headers, "retry-after"); value != "" {
+		if seconds, err := strconv.ParseFloat(value, 64); err == nil {
+			return time.Duration(seconds * float64(time.Second))
+		}
+		if at, err := time.Parse(time.RFC1123, value); err == nil {
+			return time.Until(at)
+		}
 	}
+	return 0
+}
 
-	return exponentialBackoffDelay
+func retryHeader(headers map[string]string, name string) string {
+	if value, ok := headers[name]; ok {
+		return value
+	}
+	for key, value := range headers {
+		if strings.EqualFold(key, name) {
+			return value
+		}
+	}
+	return ""
+}
+
+// getRetryDelayInMs selects a delay for an error using the default retry policy.
+func getRetryDelayInMs(err error, backoff time.Duration) time.Duration {
+	if providerErr, ok := errors.AsType[*ProviderError](err); ok {
+		if delay := retryHint(providerErr.ResponseHeaders); delay > 0 && (delay < maxShortRetryHint || delay < backoff) {
+			return delay
+		}
+	}
+	return backoff
+}
+
+func shortRetryHint(headers map[string]string) time.Duration {
+	delay := retryHint(headers)
+	if delay > 0 && delay < maxShortRetryHint {
+		return delay
+	}
+	return 0
+}
+
+func retryDelay(err error, backoff time.Duration) (time.Duration, bool) {
+	// Use the first RetryableError, just as isRetryableError does, so a
+	// wrapper can still override the provider's policy.
+	if decision, ok := errors.AsType[RetryableError](err); ok {
+		if providerErr, ok := decision.(*ProviderError); ok && providerErr.RetryPolicy == RetryWithHint {
+			delay := shortRetryHint(providerErr.ResponseHeaders)
+			return delay, delay > 0
+		}
+	}
+	if !isRetryableError(err) {
+		return 0, false
+	}
+	return getRetryDelayInMs(err, backoff), true
 }
 
 // RetryWithExponentialBackoffRespectingRetryHeaders creates a retry function that retries
@@ -141,11 +172,9 @@ func retryWithExponentialBackoff[T any](ctx context.Context, fn RetryFn[T], opti
 		return zero, &RetryError{newErrors}
 	}
 
-	var providerErr *ProviderError
-	if isRetryableError(err) && tryNumber <= options.MaxRetries {
-		delay := getRetryDelayInMs(err, options.InitialDelayIn)
+	if delay, retry := retryDelay(err, options.InitialDelayIn); retry {
 		if options.OnRetry != nil {
-			providerErr, _ = errors.AsType[*ProviderError](err)
+			providerErr, _ := errors.AsType[*ProviderError](err)
 			options.OnRetry(providerErr, delay)
 		}
 

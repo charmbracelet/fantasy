@@ -30,6 +30,20 @@ func (err Error) Unwrap() error {
 	return err.Cause
 }
 
+// RetryPolicy describes when a provider error may be retried.
+type RetryPolicy uint8
+
+const (
+	// RetryDefault uses the standard status, header, and transport checks.
+	RetryDefault RetryPolicy = iota
+	// RetryNever marks a failure that another request cannot resolve.
+	RetryNever
+	// RetryWithHint requires a provider-supplied delay greater than zero
+	// and strictly less than 60 seconds. Exponential backoff cannot substitute
+	// for a missing or unusable hint.
+	RetryWithHint
+)
+
 // ProviderError represents an error returned by an external provider.
 type ProviderError struct {
 	Message string
@@ -58,6 +72,10 @@ type ProviderError struct {
 	// code alone cannot signal that a retry may succeed.
 	TransientError bool
 
+	// RetryPolicy overrides the default checks when the provider knows
+	// whether another attempt can succeed.
+	RetryPolicy RetryPolicy
+
 	// ErrorType is the provider's own name for the failure, e.g.
 	// "overloaded_error", "rate_limit_exceeded", "RESOURCE_EXHAUSTED".
 	// Providers already parse it to classify transient failures, so carrying
@@ -85,12 +103,17 @@ func (m *ProviderError) Unwrap() error {
 }
 
 // IsRetryable reports whether the error should be retried.
-// It returns true if the error is flagged as transient, if the underlying
-// cause is io.ErrUnexpectedEOF, if the "x-should-retry" response header
-// evaluates to true, if the HTTP status code indicates a retryable
-// condition (408, 409, 429, or any 5xx), or if the cause is a transient
-// HTTP/2 transport error.
+// An explicit RetryPolicy takes precedence. The default policy allows
+// transient errors, unexpected EOFs, transient HTTP/2 transport errors, and
+// responses with a true "x-should-retry" header or a retryable HTTP status
+// (408, 409, 429, or 5xx).
 func (m *ProviderError) IsRetryable() bool {
+	switch m.RetryPolicy {
+	case RetryNever:
+		return false
+	case RetryWithHint:
+		return shortRetryHint(m.ResponseHeaders) > 0
+	}
 	if m.TransientError {
 		return true
 	}

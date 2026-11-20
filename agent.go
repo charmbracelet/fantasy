@@ -16,6 +16,8 @@ import (
 	"charm.land/fantasy/jsonrepair"
 	"charm.land/fantasy/schema"
 	"github.com/charmbracelet/x/exp/slice"
+	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // StepResult represents the result of a single step in an agent execution.
@@ -152,7 +154,9 @@ type agentSettings struct {
 	toolChoice              *ToolChoice
 	maxRetries              *int
 
-	model LanguageModel
+	model          LanguageModel
+	tracerProvider trace.TracerProvider
+	meterProvider  metric.MeterProvider
 
 	stopWhen       []StopCondition
 	prepareStep    PrepareStepFunction
@@ -375,7 +379,8 @@ type Agent interface {
 type AgentOption = func(*agentSettings)
 
 type agent struct {
-	settings agentSettings
+	settings  agentSettings
+	telemetry *telemetry
 }
 
 // NewAgent creates a new agent with the given language model and options.
@@ -387,7 +392,8 @@ func NewAgent(model LanguageModel, opts ...AgentOption) Agent {
 		o(&settings)
 	}
 	return &agent{
-		settings: settings,
+		settings:  settings,
+		telemetry: newTelemetry(settings.tracerProvider, settings.meterProvider),
 	}
 }
 
@@ -437,7 +443,9 @@ func (a *agent) prepareCall(call AgentCall) AgentCall {
 }
 
 // Generate implements Agent.
-func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, error) {
+func (a *agent) Generate(ctx context.Context, opts AgentCall) (finalResult *AgentResult, err error) {
+	ctx, observation := a.telemetry.startAgent(ctx)
+	defer func() { observation.end(err) }()
 	opts = a.prepareCall(opts)
 	initialPrompt, err := a.createPrompt(a.settings.systemPrompt, opts.Prompt, opts.Messages, opts.Files...)
 	if err != nil {
@@ -510,6 +518,7 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 		// step level, consistent with how stepTools (AgentTools)
 		// are scoped before being passed to inner functions.
 		stepExecProviderTools := a.filterExecProviderTools(stepActiveTools)
+		stepCtx := observation.startStep(ctx)
 
 		retryOptions := DefaultRetryOptions()
 		if opts.MaxRetries != nil {
@@ -518,7 +527,7 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 		retryOptions.OnRetry = opts.OnRetry
 		retryOptions.OnAuthRefresh = opts.OnAuthRefresh
 		retry := RetryWithExponentialBackoffRespectingRetryHeaders[*Response](retryOptions)
-		result, err := retry(ctx, func() (*Response, error) {
+		result, err := retry(stepCtx, func() (*Response, error) {
 			// Re-read the model on each retry attempt so that
 			// OnAuthRefresh can swap in a model with fresh credentials.
 			retryModel := stepModel
@@ -526,7 +535,7 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 				retryModel = opts.ModelProvider()
 			}
 
-			return retryModel.Generate(ctx, Call{
+			return a.telemetry.instrument(retryModel).Generate(stepCtx, Call{
 				Prompt:           stepInputMessages,
 				MaxOutputTokens:  opts.MaxOutputTokens,
 				Temperature:      opts.Temperature,
@@ -577,14 +586,14 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 					continue
 				}
 				// Validate and potentially repair the tool call
-				validatedToolCall := a.validateAndRepairToolCall(ctx, toolCall, stepTools, stepExecProviderTools, stepSystemPrompt, stepInputMessages, a.settings.repairToolCall)
+				validatedToolCall := a.validateAndRepairToolCall(stepCtx, toolCall, stepTools, stepExecProviderTools, stepSystemPrompt, stepInputMessages, a.settings.repairToolCall)
 				stepToolCalls = append(stepToolCalls, validatedToolCall)
 			}
 		}
 
 		var toolResults []ToolResultContent
 		if !suppressed {
-			toolResults = a.executeTools(ctx, stepTools, stepExecProviderTools, stepToolCalls, nil)
+			toolResults = a.executeTools(stepCtx, stepTools, stepExecProviderTools, stepToolCalls, nil)
 		}
 
 		// Stop a canceled run rather than looping back to the model.
@@ -632,6 +641,7 @@ func (a *agent) Generate(ctx context.Context, opts AgentCall) (*AgentResult, err
 			},
 			Messages: currentStepMessages,
 		}
+		observation.endStep(nil)
 		steps = append(steps, stepResult)
 		shouldStop := isStopConditionMet(opts.StopWhen, steps)
 
@@ -800,6 +810,14 @@ func (a *agent) executeTools(ctx context.Context, allTools []AgentTool, execProv
 // executeSingleTool runs one tool call. A tool that fails, by any means,
 // produces an error result the model can act on.
 func (a *agent) executeSingleTool(ctx context.Context, toolMap map[string]AgentTool, execProviderToolMap map[string]ExecutableProviderTool, toolCall ToolCallContent, toolResultCallback func(result ToolResultContent) error) (result ToolResultContent) {
+	ctx, span := a.telemetry.startTool(ctx, toolCall)
+	defer func() {
+		var err error
+		if output, ok := result.Result.(ToolResultOutputContentError); ok {
+			err = output.Error
+		}
+		endTelemetrySpan(span, err)
+	}()
 	result = ToolResultContent{
 		ToolCallID:       toolCall.ToolCallID,
 		ToolName:         toolCall.ToolName,
@@ -871,7 +889,9 @@ func runToolSafely(ctx context.Context, runTool func(ctx context.Context, call T
 }
 
 // Stream implements Agent.
-func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult, error) {
+func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (finalResult *AgentResult, err error) {
+	ctx, observation := a.telemetry.startAgent(ctx)
+	defer func() { observation.end(err) }()
 	// Convert AgentStreamCall to AgentCall for preparation
 	call := AgentCall{
 		Prompt:           opts.Prompt,
@@ -975,6 +995,7 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 		// step level, consistent with how stepTools (AgentTools)
 		// are scoped before being passed to inner functions.
 		stepExecProviderTools := a.filterExecProviderTools(stepActiveTools)
+		stepCtx := observation.startStep(ctx)
 
 		// Start step stream
 		if opts.OnStepStart != nil {
@@ -1005,7 +1026,7 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 		retryOptions.OnAuthRefresh = call.OnAuthRefresh
 		retry := RetryWithExponentialBackoffRespectingRetryHeaders[stepExecutionResult](retryOptions)
 
-		result, err := retry(ctx, func() (stepExecutionResult, error) {
+		result, err := retry(stepCtx, func() (stepExecutionResult, error) {
 			// Re-read the model on each retry attempt so that
 			// OnAuthRefresh can swap in a model with fresh credentials.
 			retryModel := stepModel
@@ -1014,13 +1035,13 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 			}
 
 			// Create the stream
-			stream, err := retryModel.Stream(ctx, streamCall)
+			stream, err := a.telemetry.instrument(retryModel).Stream(stepCtx, streamCall)
 			if err != nil {
 				return stepExecutionResult{}, err
 			}
 
 			// Process the stream
-			result, err := a.processStepStream(ctx, stream, opts, steps, stepTools, stepExecProviderTools, stepInputMessages)
+			result, err := a.processStepStream(stepCtx, stream, opts, steps, stepTools, stepExecProviderTools, stepInputMessages)
 			if err != nil {
 				return stepExecutionResult{}, err
 			}
@@ -1033,6 +1054,7 @@ func (a *agent) Stream(ctx context.Context, opts AgentStreamCall) (*AgentResult,
 			return nil, err
 		}
 
+		observation.endStep(nil)
 		steps = append(steps, result.StepResult)
 		totalUsage = addUsage(totalUsage, result.StepResult.Usage)
 

@@ -1,0 +1,55 @@
+---
+version: 2
+interactions:
+- id: 0
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 438
+    host: ollama.com
+    body: '{"max_tokens":4000,"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"}],"model":"gpt-oss:20b-cloud","stream":false,"tools":[{"function":{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Content-Type:
+      - application/json
+    url: https://ollama.com/api/chat
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: 431
+    body: |
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:38.675183931Z","message":{"role":"assistant","content":"","thinking":"We need to call functions.weather with location=\"Florence, Italy\". Then respond.","tool_calls":[{"id":"call_vblib9b3","function":{"index":0,"name":"weather","arguments":{"location":"Florence, Italy"}}}]},"done":true,"done_reason":"stop","total_duration":807777850,"prompt_eval_count":142,"eval_count":43}
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 1.052603666s
+- id: 1
+  request:
+    proto: HTTP/1.1
+    proto_major: 1
+    proto_minor: 1
+    content_length: 745
+    host: ollama.com
+    body: '{"max_tokens":4000,"messages":[{"content":"You are a helpful assistant","role":"system"},{"content":"What''s the weather in Florence,Italy?","role":"user"},{"content":"We need to call functions.weather with location=\"Florence, Italy\". Then respond.","role":"assistant","tool_calls":[{"function":{"arguments":{"location":"Florence, Italy"},"name":"weather"},"id":"0","type":"function"}]},{"content":"40 C","role":"tool","tool_call_id":"0","tool_name":"weather"}],"model":"gpt-oss:20b-cloud","stream":false,"tools":[{"function":{"description":"Get weather information for a location","name":"weather","parameters":{"properties":{"location":{"description":"the city","type":"string"}},"required":["location"],"type":"object"}},"type":"function"}]}'
+    headers:
+      Content-Type:
+      - application/json
+    url: https://ollama.com/api/chat
+    method: POST
+  response:
+    proto: HTTP/2.0
+    proto_major: 2
+    proto_minor: 0
+    content_length: 336
+    body: |
+      {"model":"gpt-oss:20b","created_at":"2026-01-05T11:27:39.477880537Z","message":{"role":"assistant","content":"It’s a scorching day in Florence—currently about **40 °C (104 °F)**!","thinking":"Weather 40°C. Provide answer."},"done":true,"done_reason":"stop","total_duration":554705549,"prompt_eval_count":197,"eval_count":38}
+    headers:
+      Content-Type:
+      - application/json
+    status: 200 OK
+    code: 200
+    duration: 803.287208ms

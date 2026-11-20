@@ -5,6 +5,7 @@ package object
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"reflect"
 
@@ -148,9 +149,15 @@ func GenerateWithTool(
 	}
 
 	if err != nil {
-		if nogErr, ok := err.(*fantasy.NoObjectGeneratedError); ok {
-			nogErr.Usage = resp.Usage
-			nogErr.FinishReason = resp.FinishReason
+		var parseErr *schema.ParseError
+		if errors.As(err, &parseErr) {
+			return nil, &fantasy.NoObjectGeneratedError{
+				RawText:         parseErr.RawText,
+				ParseError:      parseErr.ParseError,
+				ValidationError: parseErr.ValidationError,
+				Usage:           resp.Usage,
+				FinishReason:    resp.FinishReason,
+			}
 		}
 		return nil, err
 	}
@@ -240,11 +247,12 @@ func GenerateWithText(
 	}
 
 	if err != nil {
-		if nogErr, ok := err.(*schema.ParseError); ok {
+		var parseErr *schema.ParseError
+		if errors.As(err, &parseErr) {
 			return nil, &fantasy.NoObjectGeneratedError{
-				RawText:         nogErr.RawText,
-				ParseError:      nogErr.ParseError,
-				ValidationError: nogErr.ValidationError,
+				RawText:         parseErr.RawText,
+				ParseError:      parseErr.ParseError,
+				ValidationError: parseErr.ValidationError,
 				Usage:           resp.Usage,
 				FinishReason:    resp.FinishReason,
 			}

@@ -1446,7 +1446,7 @@ func (a languageModel) Generate(ctx context.Context, call fantasy.Call) (*fantas
 		Usage: fantasy.Usage{
 			InputTokens:         response.Usage.InputTokens,
 			OutputTokens:        response.Usage.OutputTokens,
-			TotalTokens:         response.Usage.InputTokens + response.Usage.OutputTokens,
+			TotalTokens:         response.Usage.InputTokens + response.Usage.OutputTokens + response.Usage.CacheCreationInputTokens + response.Usage.CacheReadInputTokens,
 			CacheCreationTokens: response.Usage.CacheCreationInputTokens,
 			CacheReadTokens:     response.Usage.CacheReadInputTokens,
 		},
@@ -1740,7 +1740,7 @@ func (a languageModel) Stream(ctx context.Context, call fantasy.Call) (fantasy.S
 			Usage: fantasy.Usage{
 				InputTokens:         acc.Usage.InputTokens,
 				OutputTokens:        acc.Usage.OutputTokens,
-				TotalTokens:         acc.Usage.InputTokens + acc.Usage.OutputTokens,
+				TotalTokens:         acc.Usage.InputTokens + acc.Usage.OutputTokens + acc.Usage.CacheCreationInputTokens + acc.Usage.CacheReadInputTokens,
 				CacheCreationTokens: acc.Usage.CacheCreationInputTokens,
 				CacheReadTokens:     acc.Usage.CacheReadInputTokens,
 			},

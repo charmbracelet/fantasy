@@ -41,10 +41,14 @@ type ProviderOptions struct {
 }
 
 // ReasoningData represents reasoning data for OpenAI-compatible provider.
-// Some providers use "reasoning_content" (e.g. Avian), others use "reasoning" (e.g. Moonshot AI/Kimi).
+// Some providers use "reasoning_content" (e.g. Avian), others use "reasoning" (e.g. Moonshot AI/Kimi)
+// and GitHub Copilot streams Claude reasoning in "reasoning_text". Copilot also
+// sends an encrypted "reasoning_opaque" blob. It is deliberately not read:
+// Copilot accepts requests without it and ignores replayed reasoning text.
 type ReasoningData struct {
 	ReasoningContent string `json:"reasoning_content"`
 	Reasoning        string `json:"reasoning"`
+	ReasoningText    string `json:"reasoning_text"`
 }
 
 // GetReasoningContent returns the reasoning text from whichever field is populated.
@@ -52,11 +56,14 @@ func (r ReasoningData) GetReasoningContent() string {
 	if r.ReasoningContent != "" {
 		return r.ReasoningContent
 	}
-	return r.Reasoning
+	if r.Reasoning != "" {
+		return r.Reasoning
+	}
+	return r.ReasoningText
 }
 
 // hasReasoningField reports whether raw JSON contains a reasoning field
-// ("reasoning_content" or "reasoning") whose value is a JSON string,
+// ("reasoning_content", "reasoning" or "reasoning_text") whose value is a JSON string,
 // including the empty string. A null value means "no reasoning in this
 // delta": DeepSeek, vLLM and SGLang put "reasoning_content": null on every
 // content/tool-call/finish chunk, and counting that as reasoning keeps the
@@ -66,7 +73,7 @@ func hasReasoningField(rawJSON string) bool {
 	if err := json.Unmarshal([]byte(rawJSON), &fields); err != nil {
 		return false
 	}
-	for _, key := range []string{"reasoning_content", "reasoning"} {
+	for _, key := range []string{"reasoning_content", "reasoning", "reasoning_text"} {
 		if v, ok := fields[key]; ok && !bytes.Equal(bytes.TrimSpace(v), []byte("null")) {
 			return true
 		}

@@ -14,9 +14,9 @@ import (
 
 	"charm.land/fantasy"
 	"charm.land/fantasy/providers/anthropic"
-	"github.com/charmbracelet/lipgloss/v2"
-	"github.com/charmbracelet/lipgloss/v2/table"
-	"github.com/charmbracelet/log/v2"
+	"charm.land/lipgloss/v2"
+	"charm.land/lipgloss/v2/table"
+	"charm.land/log/v2"
 	"github.com/charmbracelet/x/term"
 )
 

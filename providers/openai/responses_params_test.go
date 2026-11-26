@@ -316,3 +316,161 @@ func testToolResultMessage(text string) fantasy.Message {
 		},
 	}
 }
+
+func TestGetResponsesModelConfig_ReasoningOptions(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		modelID        string
+		wantReasoning  bool
+		wantOptions    bool
+		wantSystemMode string
+	}{
+		{"gpt-5", true, true, "developer"},
+		{"gpt-5.4-mini", true, true, "developer"},
+		{"o3", true, true, "developer"},
+		{"o1-mini", true, true, "remove"},
+		{"gpt-6-sol", true, true, "developer"},
+		{"gpt-6.1-sol", true, true, "developer"},
+		{"grok-4.7", false, true, "system"},
+		{"grok-4.3", false, true, "system"},
+		{"some-new-model", false, true, "system"},
+		{"gpt-4o", false, false, "system"},
+		{"gpt-4.1-mini", false, false, "system"},
+		{"gpt-5-chat-latest", false, false, "system"},
+		{"gpt-3.5-turbo", false, false, "system"},
+		{"chatgpt-4o-latest", false, false, "system"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.modelID, func(t *testing.T) {
+			t.Parallel()
+
+			cfg := getResponsesModelConfig(tt.modelID)
+			require.Equal(t, tt.wantReasoning, cfg.isReasoningModel)
+			require.Equal(t, tt.wantOptions, cfg.acceptsReasoningOptions)
+			require.Equal(t, tt.wantSystemMode, cfg.systemMessageMode)
+		})
+	}
+}
+
+func TestPrepareParams_ReasoningEffortByModelID(t *testing.T) {
+	t.Parallel()
+
+	prompt := fantasy.Prompt{testTextMessage(fantasy.MessageRoleUser, "hello")}
+	opts := &ResponsesProviderOptions{
+		ReasoningEffort:  new(ReasoningEffortHigh),
+		ReasoningSummary: new("auto"),
+	}
+
+	for _, modelID := range []string{"gpt-6-sol", "gpt-6.1-sol", "grok-4.7", "grok-4.3", "gpt-5.4", "o3"} {
+		t.Run(modelID, func(t *testing.T) {
+			t.Parallel()
+
+			lm := responsesLanguageModel{provider: Name, modelID: modelID}
+			params, warnings, err := lm.prepareParams(testCall(prompt, opts))
+			require.NoError(t, err)
+			require.Empty(t, warnings)
+
+			body, err := json.Marshal(params)
+			require.NoError(t, err)
+			var got struct {
+				Reasoning struct {
+					Effort  string `json:"effort"`
+					Summary string `json:"summary"`
+				} `json:"reasoning"`
+			}
+			require.NoError(t, json.Unmarshal(body, &got))
+			require.Equal(t, "high", got.Reasoning.Effort)
+			require.Equal(t, "auto", got.Reasoning.Summary)
+		})
+	}
+
+	t.Run("gpt-4o warns and omits", func(t *testing.T) {
+		t.Parallel()
+
+		lm := testResponsesLM()
+		params, warnings, err := lm.prepareParams(testCall(prompt, opts))
+		require.NoError(t, err)
+		require.Len(t, warnings, 2)
+		require.Equal(t, "reasoningEffort", warnings[0].Setting)
+		require.Equal(t, "reasoningSummary", warnings[1].Setting)
+
+		body, err := json.Marshal(params)
+		require.NoError(t, err)
+		require.NotContains(t, string(body), `"reasoning"`)
+	})
+}
+
+func TestPrepareParams_SamplingAndRoleByModelID(t *testing.T) {
+	t.Parallel()
+
+	prompt := fantasy.Prompt{
+		testTextMessage(fantasy.MessageRoleSystem, "be brief"),
+		testTextMessage(fantasy.MessageRoleUser, "hello"),
+	}
+	opts := &ResponsesProviderOptions{ReasoningEffort: new(ReasoningEffortHigh)}
+
+	type body struct {
+		Temperature *float64 `json:"temperature"`
+		TopP        *float64 `json:"top_p"`
+		Reasoning   struct {
+			Effort string `json:"effort"`
+		} `json:"reasoning"`
+		Input []struct {
+			Role string `json:"role"`
+		} `json:"input"`
+	}
+
+	prepare := func(t *testing.T, modelID string) (body, []fantasy.CallWarning) {
+		t.Helper()
+
+		call := testCall(prompt, opts)
+		call.Temperature = new(0.3)
+		call.TopP = new(0.9)
+
+		lm := responsesLanguageModel{provider: Name, modelID: modelID}
+		params, warnings, err := lm.prepareParams(call)
+		require.NoError(t, err)
+
+		raw, err := json.Marshal(params)
+		require.NoError(t, err)
+		var got body
+		require.NoError(t, json.Unmarshal(raw, &got))
+		return got, warnings
+	}
+
+	// xAI accepts temperature and top_p together with a reasoning effort, and
+	// accepts the system role, so ids outside the OpenAI families keep them.
+	for _, modelID := range []string{"grok-4.7", "some-new-model"} {
+		t.Run(modelID+" keeps sampling and system role", func(t *testing.T) {
+			t.Parallel()
+
+			got, warnings := prepare(t, modelID)
+			require.Empty(t, warnings)
+			require.NotNil(t, got.Temperature)
+			require.Equal(t, 0.3, *got.Temperature)
+			require.NotNil(t, got.TopP)
+			require.Equal(t, 0.9, *got.TopP)
+			require.Equal(t, "high", got.Reasoning.Effort)
+			require.NotEmpty(t, got.Input)
+			require.Equal(t, "system", got.Input[0].Role)
+		})
+	}
+
+	for _, modelID := range []string{"gpt-5", "gpt-6-sol", "o3"} {
+		t.Run(modelID+" drops sampling and uses developer role", func(t *testing.T) {
+			t.Parallel()
+
+			got, warnings := prepare(t, modelID)
+			require.Len(t, warnings, 2)
+			require.Equal(t, "temperature", warnings[0].Setting)
+			require.Equal(t, "topP", warnings[1].Setting)
+			require.Nil(t, got.Temperature)
+			require.Nil(t, got.TopP)
+			require.Equal(t, "high", got.Reasoning.Effort)
+			require.NotEmpty(t, got.Input)
+			require.Equal(t, "developer", got.Input[0].Role)
+		})
+	}
+}

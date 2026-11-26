@@ -38,11 +38,15 @@ func TestReasoningModelDetection(t *testing.T) {
 		{"gpt-3.5-turbo", false, false},
 		{"gpt-35-turbo", false, false}, // Azure's name for gpt-3.5-turbo
 
-		// Unknown models: Chat Completions serves any compatible model so it
-		// only trusts known families, Responses assumes a current OpenAI model.
+		// A newer OpenAI generation: Chat Completions only trusts known
+		// families, Responses treats it as a current OpenAI model.
 		{"gpt-10-turbo", false, true},
-		{"some-custom-model", false, true},
-		{"llama-3.3-70b", false, true},
+
+		// Ids outside the OpenAI families, such as xAI grok models on the
+		// Responses API, do not get the OpenAI reasoning-model rules.
+		{"grok-4.7", false, false},
+		{"some-custom-model", false, false},
+		{"llama-3.3-70b", false, false},
 	}
 
 	for _, tt := range tests {
@@ -58,6 +62,7 @@ func TestResponsesSystemMessageMode(t *testing.T) {
 		"o3":          "developer",
 		"o1-mini":     "remove",
 		"o1-preview":  "remove",
+		"grok-4.7":    "system",
 	}
 
 	for modelID, want := range tests {

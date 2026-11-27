@@ -23,9 +23,11 @@ const awsCredentialErrorFragment = "failed to refresh cached credentials" //noli
 
 func toProviderErr(err error) error {
 	if apiErr, ok := errors.AsType[*anthropic.Error](err); ok {
+		var envelope errorEnvelope
+		_ = json.Unmarshal([]byte(apiErr.RawJSON()), &envelope) // A foreign body keeps the SDK's message.
 		providerErr := &fantasy.ProviderError{
 			Title:           apiErrorTitle(apiErr),
-			Message:         apiErr.Error(),
+			Message:         cmp.Or(envelope.Error.Message, apiErr.Error()),
 			Cause:           apiErr,
 			URL:             apiErr.Request.URL.String(),
 			StatusCode:      apiErr.StatusCode,
@@ -33,6 +35,7 @@ func toProviderErr(err error) error {
 			ResponseHeaders: toHeaderMap(apiErr.Response.Header),
 			ResponseBody:    apiErr.DumpResponse(true),
 			ErrorType:       string(apiErr.Type()),
+			RequestID:       cmp.Or(apiErr.RequestID, envelope.RequestID),
 			TransientError:  fantasy.TransientStreamErrorTypes[string(apiErr.Type())],
 		}
 
@@ -83,14 +86,14 @@ func apiErrorTitle(apiErr *anthropic.Error) string {
 // exported type, so we match the prefix and parse the payload ourselves.
 const streamErrorPrefix = "received error while streaming:"
 
-// streamErrorEnvelope is the payload of an SSE `error` event. Anthropic
-// nests the useful detail under "error"; the outer "type" is always the
-// literal "error" and carries no classification value.
-type streamErrorEnvelope struct {
-	Error *struct {
+// errorEnvelope is the body of an Anthropic error, whether an HTTP response
+// or an SSE `error` event. The outer "type" is always the literal "error".
+type errorEnvelope struct {
+	Error struct {
 		Type    string `json:"type"`
 		Message string `json:"message"`
 	} `json:"error"`
+	RequestID string `json:"request_id"`
 }
 
 // wrapStreamError classifies a mid-stream SSE error event as a
@@ -103,23 +106,21 @@ func wrapStreamError(err error) *fantasy.ProviderError {
 	}
 	payload = strings.TrimSpace(payload)
 
-	var envelope streamErrorEnvelope
-	errType, message := "", ""
-	if json.Unmarshal([]byte(payload), &envelope) == nil && envelope.Error != nil {
-		errType = envelope.Error.Type
-		message = envelope.Error.Message
-	}
-	if errType == "" && message == "" {
+	var envelope errorEnvelope
+	_ = json.Unmarshal([]byte(payload), &envelope) // A payload that does not parse names nothing.
+	if envelope.Error.Type == "" && envelope.Error.Message == "" {
 		// Nothing recognizable: let it fall through to transport handling.
 		return nil
 	}
 
+	errType := envelope.Error.Type
 	return &fantasy.ProviderError{
 		Title:          streamErrorTitle(errType),
-		Message:        cmp.Or(message, payload),
+		Message:        cmp.Or(envelope.Error.Message, payload),
 		Cause:          err,
 		ResponseBody:   []byte(payload),
 		ErrorType:      errType,
+		RequestID:      envelope.RequestID,
 		TransientError: fantasy.TransientStreamErrorTypes[errType],
 	}
 }

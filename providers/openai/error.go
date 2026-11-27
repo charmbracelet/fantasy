@@ -39,6 +39,7 @@ func toProviderErr(err error) error {
 			ResponseHeaders: toHeaderMap(apiErr.Response.Header),
 			ResponseBody:    apiErr.DumpResponse(true),
 			ErrorType:       cmp.Or(apiErr.Type, apiErr.Code),
+			RequestID:       apiErr.Response.Header.Get("x-request-id"),
 		}
 
 		parseContextTooLargeError(message, providerErr)

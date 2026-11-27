@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"charm.land/fantasy"
@@ -366,6 +368,82 @@ func streamProviderError(t *testing.T, url string) *fantasy.ProviderError {
 	providerErr, ok := errors.AsType[*fantasy.ProviderError](streamErr)
 	if !ok {
 		t.Fatalf("stream error is %T, want *fantasy.ProviderError", streamErr)
+	}
+	return providerErr
+}
+
+// Message is Anthropic's sentence, not the SDK's request line and raw body.
+func TestToProviderErr_MessageIsTheReadableSentence(t *testing.T) {
+	t.Parallel()
+
+	providerErr := rejectedProviderError(t, `{"type":"error","error":{"type":"invalid_request_error","message":"max_tokens: must be positive"},"request_id":"req_body"}`)
+	if providerErr.Message != "max_tokens: must be positive" {
+		t.Errorf("Message = %q, want %q", providerErr.Message, "max_tokens: must be positive")
+	}
+	if providerErr.RequestID != "req_header" {
+		t.Errorf("RequestID = %q, want the header's %q", providerErr.RequestID, "req_header")
+	}
+}
+
+// A body the SDK cannot read, like Bedrock's, keeps the SDK's full message.
+func TestToProviderErr_ForeignBodyKeepsTheSDKMessage(t *testing.T) {
+	t.Parallel()
+
+	const body = `{"message":"The provided request is not valid"}`
+	providerErr := rejectedProviderError(t, body)
+	if !strings.HasPrefix(providerErr.Message, "POST ") || !strings.HasSuffix(providerErr.Message, body) {
+		t.Errorf("Message = %q, want the SDK's full message ending in %s", providerErr.Message, body)
+	}
+}
+
+// Context-length parsing reads the SDK's message, not Message.
+func TestToProviderErr_StillDetectsContextTooLarge(t *testing.T) {
+	t.Parallel()
+
+	providerErr := rejectedProviderError(t, `{"type":"error","error":{"type":"invalid_request_error","message":"prompt is too long: 210000 tokens > 200000 maximum"}}`)
+	if !providerErr.ContextTooLargeErr || providerErr.ContextUsedTokens != 210000 || providerErr.ContextMaxTokens != 200000 {
+		t.Errorf("context fields = %v %d/%d, want true 210000/200000",
+			providerErr.ContextTooLargeErr, providerErr.ContextUsedTokens, providerErr.ContextMaxTokens)
+	}
+}
+
+func TestToProviderErr_StreamErrorCarriesTheRequestID(t *testing.T) {
+	t.Parallel()
+
+	err := errors.New(streamErrorPrefix + ` {"type":"error","error":{"type":"overloaded_error","message":"Overloaded"},"request_id":"req_stream"}`)
+	providerErr, ok := errors.AsType[*fantasy.ProviderError](toProviderErr(err))
+	if !ok {
+		t.Fatalf("toProviderErr did not wrap %v as *fantasy.ProviderError", err)
+	}
+	if providerErr.RequestID != "req_stream" {
+		t.Errorf("RequestID = %q, want %q", providerErr.RequestID, "req_stream")
+	}
+}
+
+// rejectedProviderError returns the error from one request answered 400 with body.
+func rejectedProviderError(t *testing.T, body string) *fantasy.ProviderError {
+	t.Helper()
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Request-Id", "req_header")
+		w.WriteHeader(http.StatusBadRequest)
+		_, _ = w.Write([]byte(body))
+	}))
+	defer server.Close()
+
+	provider, err := New(WithAPIKey("test-api-key"), WithBaseURL(server.URL))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	model, err := provider.LanguageModel(context.Background(), "claude-sonnet-4-20250514")
+	if err != nil {
+		t.Fatalf("LanguageModel: %v", err)
+	}
+	_, err = model.Generate(context.Background(), fantasy.Call{Prompt: testPrompt()})
+	providerErr, ok := errors.AsType[*fantasy.ProviderError](err)
+	if !ok {
+		t.Fatalf("error is %T, want *fantasy.ProviderError", err)
 	}
 	return providerErr
 }

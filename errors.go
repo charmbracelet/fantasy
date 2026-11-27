@@ -69,6 +69,9 @@ type ProviderError struct {
 	// payload. Treat it as a hint worth acting on when present rather than a
 	// field every error carries.
 	ErrorType string
+
+	// RequestID is the provider's ID for the failed request, when it sent one.
+	RequestID string
 }
 
 func (m *ProviderError) Error() string {

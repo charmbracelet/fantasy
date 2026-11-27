@@ -3,6 +3,7 @@ package google
 import (
 	"cmp"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -349,7 +350,7 @@ func (g languageModel) prepareParams(call fantasy.Call) (*genai.GenerateContentC
 	return config, content, warnings, nil
 }
 
-func toGooglePrompt(prompt fantasy.Prompt, isVertexAI bool) (*genai.Content, []*genai.Content, []fantasy.CallWarning) { //nolint: unparam
+func toGooglePrompt(prompt fantasy.Prompt, isVertexAI bool) (*genai.Content, []*genai.Content, []fantasy.CallWarning) {
 	var systemInstructions *genai.Content
 	var content []*genai.Content
 	var warnings []fantasy.CallWarning
@@ -483,7 +484,7 @@ func toGooglePrompt(prompt fantasy.Prompt, isVertexAI bool) (*genai.Content, []*
 				})
 			}
 		case fantasy.MessageRoleTool:
-			var parts []*genai.Part
+			var parts, mediaParts []*genai.Part
 			for _, part := range msg.Content {
 				switch part.GetType() {
 				case fantasy.ContentTypeToolResult:
@@ -546,9 +547,44 @@ func toGooglePrompt(prompt fantasy.Prompt, isVertexAI bool) (*genai.Content, []*
 						parts = append(parts, &genai.Part{
 							FunctionResponse: functionResponse,
 						})
+
+					case fantasy.ToolResultContentTypeMedia:
+						content, ok := fantasy.AsToolResultOutputType[fantasy.ToolResultOutputContentMedia](result.Output)
+						if !ok {
+							continue
+						}
+						text := content.Text
+						blob, err := toolResultBlob(content)
+						if err != nil {
+							warnings = append(warnings, fantasy.CallWarning{
+								Type:    fantasy.CallWarningTypeOther,
+								Message: err.Error(),
+							})
+							text = cmp.Or(text, fmt.Sprintf("The tool returned %s content that could not be attached.", content.MediaType))
+						} else {
+							text = cmp.Or(text, fmt.Sprintf("The tool returned %s content, attached after the tool results.", content.MediaType))
+							mediaParts = append(mediaParts, &genai.Part{InlineData: blob})
+						}
+						functionResponse := &genai.FunctionResponse{
+							ID:       result.ToolCallID,
+							Response: map[string]any{"result": text},
+							Name:     toolCall.ToolName,
+						}
+
+						// Vertex breaks with a 400 if this field be present.
+						if isVertexAI {
+							functionResponse.ID = ""
+						}
+						parts = append(parts, &genai.Part{
+							FunctionResponse: functionResponse,
+						})
 					}
 				}
 			}
+			// Media goes after every function response, as sibling parts:
+			// nesting it in FunctionResponse.Parts is rejected by models
+			// older than Gemini 3.
+			parts = append(parts, mediaParts...)
 			if len(parts) > 0 {
 				content = append(content, &genai.Content{
 					Role:  genai.RoleUser,
@@ -560,6 +596,21 @@ func toGooglePrompt(prompt fantasy.Prompt, isVertexAI bool) (*genai.Content, []*
 		}
 	}
 	return systemInstructions, content, warnings
+}
+
+// toolResultBlob decodes the media of a tool result into an inline blob.
+func toolResultBlob(media fantasy.ToolResultOutputContentMedia) (*genai.Blob, error) {
+	kind, _, _ := strings.Cut(media.MediaType, "/")
+	switch {
+	case kind == "image", kind == "audio", kind == "video", media.MediaType == "application/pdf":
+	default:
+		return nil, fmt.Errorf("tool result media type %q not supported, sending text only", media.MediaType)
+	}
+	data, err := base64.StdEncoding.DecodeString(media.Data)
+	if err != nil {
+		return nil, fmt.Errorf("tool result media is not valid base64: %w", err)
+	}
+	return &genai.Blob{Data: data, MIMEType: media.MediaType}, nil
 }
 
 // Generate implements fantasy.LanguageModel.

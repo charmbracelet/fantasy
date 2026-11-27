@@ -10,6 +10,7 @@ import (
 	"maps"
 	"net/http"
 	"reflect"
+	"slices"
 	"strings"
 	"time"
 
@@ -1249,9 +1250,7 @@ func toGoogleTools(tools []fantasy.Tool, toolChoice *fantasy.ToolChoice) (google
 				properties, _ = props.(map[string]any)
 			}
 			if req, ok := ft.InputSchema["required"]; ok {
-				if reqArr, ok := req.([]string); ok {
-					required = reqArr
-				}
+				required, _ = toStringSlice(req)
 			}
 			declaration := &genai.FunctionDeclaration{
 				Name:        ft.Name,
@@ -1342,15 +1341,48 @@ func convertToSchema(param any) *genai.Schema {
 	schema.Type = mapJSONTypeToGoogle(typeStr)
 
 	switch typeStr {
+	case "string":
+		// Gemini only supports enum on strings and rejects empty values.
+		if enum, ok := toStringSlice(paramMap["enum"]); ok && !slices.Contains(enum, "") {
+			schema.Enum = enum
+		}
 	case "array":
 		schema.Items = processArrayItems(paramMap)
 	case "object":
 		if props, ok := paramMap["properties"].(map[string]any); ok {
 			schema.Properties = convertSchemaProperties(props)
+			// Gemini rejects required names that have no matching property.
+			required, _ := toStringSlice(paramMap["required"])
+			for _, name := range required {
+				if _, ok := schema.Properties[name]; ok {
+					schema.Required = append(schema.Required, name)
+				}
+			}
 		}
 	}
 
 	return schema
+}
+
+// toStringSlice accepts both []string and the []any produced by JSON decoding.
+// It reports false if the value is not a list made only of strings.
+func toStringSlice(value any) ([]string, bool) {
+	switch list := value.(type) {
+	case []string:
+		return list, true
+	case []any:
+		result := make([]string, 0, len(list))
+		for _, item := range list {
+			str, ok := item.(string)
+			if !ok {
+				return nil, false
+			}
+			result = append(result, str)
+		}
+		return result, true
+	default:
+		return nil, false
+	}
 }
 
 func processArrayItems(paramMap map[string]any) *genai.Schema {

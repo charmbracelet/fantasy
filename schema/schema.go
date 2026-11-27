@@ -435,6 +435,10 @@ func Normalize(node map[string]any) {
 		if t == "array" {
 			variant["items"] = map[string]any{}
 		}
+		// The type union and an existing anyOf must both match.
+		if alternatives, ok := node["anyOf"]; ok {
+			variant["anyOf"] = alternatives
+		}
 		anyOf = append(anyOf, variant)
 	}
 	delete(node, "type")

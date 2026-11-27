@@ -32,7 +32,7 @@ func main() {
 	switch {
 	case os.Getenv("ANTHROPIC_API_KEY") != "":
 		p, _ := anthropic.New(anthropic.WithAPIKey(os.Getenv("ANTHROPIC_API_KEY")))
-		model, err = p.LanguageModel(ctx, "claude-sonnet-4-20250514")
+		model, err = p.LanguageModel(ctx, "claude-sonnet-5-5")
 		webSearch = anthropic.WebSearchTool(nil)
 
 	case os.Getenv("OPENAI_API_KEY") != "":

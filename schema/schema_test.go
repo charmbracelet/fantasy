@@ -1,9 +1,11 @@
 package schema
 
 import (
+	"encoding/json"
 	"reflect"
 	"testing"
 
+	"github.com/kaptinlin/jsonschema"
 	"github.com/stretchr/testify/require"
 )
 
@@ -636,4 +638,34 @@ func TestNormalize_NestedProperties(t *testing.T) {
 	val := node["properties"].(map[string]any)["config"].(map[string]any)["properties"].(map[string]any)["val"].(map[string]any)
 	require.Nil(t, val["type"])
 	require.NotNil(t, val["anyOf"])
+}
+
+func TestNormalizePreservesAnyOfAlongsideTypeArray(t *testing.T) {
+	t.Parallel()
+
+	node := map[string]any{
+		"type": []any{"string", "integer"},
+		"anyOf": []any{
+			map[string]any{"const": "auto"},
+			map[string]any{"type": "number", "minimum": 5},
+		},
+	}
+	for _, stage := range []string{"original", "normalized"} {
+		if stage == "normalized" {
+			Normalize(node)
+			require.NotContains(t, node, "type")
+		}
+		data, err := json.Marshal(node)
+		require.NoError(t, err)
+		validator, err := jsonschema.NewCompiler().Compile(data)
+		require.NoError(t, err)
+		for _, tc := range []struct {
+			value any
+			valid bool
+		}{
+			{"auto", true}, {7.0, true}, {"manual", false}, {2.0, false}, {5.5, false},
+		} {
+			require.Equal(t, tc.valid, validator.Validate(tc.value).IsValid(), "%s: %v", stage, tc.value)
+		}
+	}
 }

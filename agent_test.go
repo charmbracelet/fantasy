@@ -68,6 +68,94 @@ func (m *mockLanguageModel) Generate(ctx context.Context, call Call) (*Response,
 	}, nil
 }
 
+func TestValidateToolCallParameters(t *testing.T) {
+	t.Parallel()
+
+	tool := &mockTool{
+		name: "edit",
+		parameters: map[string]any{
+			"old_string": map[string]any{"type": "string"},
+		},
+		required: []string{"old_string"},
+	}
+	a := &agent{}
+
+	tests := []struct {
+		name  string
+		input string
+		err   string
+	}{
+		{
+			name:  "valid",
+			input: `{"old_string":"before"}`,
+		},
+		{
+			name:  "missing required and unknown",
+			input: `{"old-string":"before"}`,
+			err:   "missing required parameter: old_string; unknown additional parameter: old-string",
+		},
+		{
+			name:  "unknown only",
+			input: `{"old_string":"before","extra":true}`,
+			err:   "unknown additional parameter: extra",
+		},
+		{
+			name:  "unknown parameters are sorted",
+			input: `{"old_string":"before","z":1,"a":2}`,
+			err:   "unknown additional parameters: a, z",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			err := a.validateToolCall(ToolCallContent{
+				ToolName: "edit",
+				Input:    tt.input,
+			}, []AgentTool{tool}, nil)
+			if tt.err == "" {
+				require.NoError(t, err)
+				return
+			}
+			require.EqualError(t, err, tt.err)
+		})
+	}
+}
+
+func TestValidateToolCallAllowsOpenParameters(t *testing.T) {
+	t.Parallel()
+
+	dynamicMapTool := NewAgentTool("dynamic", "dynamic input", func(context.Context, map[string]string, ToolCall) (ToolResponse, error) {
+		return NewTextResponse("ok"), nil
+	})
+	tests := []struct {
+		name string
+		tool AgentTool
+	}{
+		{
+			name: "dynamic map parameters",
+			tool: dynamicMapTool,
+		},
+		{
+			name: "unspecified parameters",
+			tool: &mockTool{name: "dynamic"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			err := (&agent{}).validateToolCall(ToolCallContent{
+				ToolName: "dynamic",
+				Input:    `{"arbitrary":"value"}`,
+			}, []AgentTool{tt.tool}, nil)
+			require.NoError(t, err)
+		})
+	}
+}
+
 func (m *mockLanguageModel) Stream(ctx context.Context, call Call) (StreamResponse, error) {
 	if m.streamFunc != nil {
 		return m.streamFunc(ctx, call)

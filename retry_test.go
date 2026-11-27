@@ -424,6 +424,27 @@ func TestIsAuthError(t *testing.T) {
 	}
 }
 
+func TestRetryWithHintUsesOnlyProviderDelay(t *testing.T) {
+	t.Parallel()
+
+	err := &ProviderError{
+		StatusCode:      429,
+		RetryPolicy:     RetryWithHint,
+		ResponseHeaders: map[string]string{"Retry-After": "2"},
+	}
+	if delay, retry := retryDelay(err, time.Minute); !retry || delay != 2*time.Second {
+		t.Fatalf("canonical header: delay = %s, retry = %t", delay, retry)
+	}
+	if !err.IsRetryable() {
+		t.Fatal("IsRetryable rejected the canonical Retry-After header")
+	}
+
+	err.ResponseHeaders["Retry-After"] = "60"
+	if delay, retry := retryDelay(err, 2*time.Minute); retry || delay != 0 {
+		t.Fatalf("cutoff with longer backoff: delay = %s, retry = %t", delay, retry)
+	}
+}
+
 func TestGetRetryDelayInMs(t *testing.T) {
 	t.Parallel()
 	const backoff = 5 * time.Second

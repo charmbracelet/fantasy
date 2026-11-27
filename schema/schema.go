@@ -406,16 +406,31 @@ func toSnakeCase(s string) string {
 // compatible with providers that reject type-arrays (e.g. OpenAI). Type
 // arrays are converted to anyOf and bare "array" types get "items":{}.
 func Normalize(node map[string]any) {
-	for _, child := range node {
-		switch v := child.(type) {
-		case map[string]any:
-			Normalize(v)
-		case []any:
-			for _, item := range v {
-				if m, ok := item.(map[string]any); ok {
-					Normalize(m)
-				}
+	normalizeChild := func(child any) {
+		if sub, ok := child.(map[string]any); ok {
+			Normalize(sub)
+		}
+	}
+	// Only schema-bearing keywords contain subschemas. Objects in enum,
+	// const, default and examples are instance data.
+	for key, child := range node {
+		switch key {
+		case "properties", "patternProperties", "$defs", "definitions", "dependentSchemas", "dependencies":
+			children, _ := child.(map[string]any)
+			for _, sub := range children {
+				normalizeChild(sub)
 			}
+		case "items", "prefixItems", "allOf", "anyOf", "oneOf":
+			if children, ok := child.([]any); ok {
+				for _, sub := range children {
+					normalizeChild(sub)
+				}
+			} else {
+				normalizeChild(child)
+			}
+		case "additionalItems", "additionalProperties", "contains", "propertyNames", "not", "if", "then", "else",
+			"unevaluatedItems", "unevaluatedProperties", "contentSchema":
+			normalizeChild(child)
 		}
 	}
 

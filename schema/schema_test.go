@@ -637,3 +637,43 @@ func TestNormalize_NestedProperties(t *testing.T) {
 	require.Nil(t, val["type"])
 	require.NotNil(t, val["anyOf"])
 }
+
+func TestNormalizePreservesInstanceData(t *testing.T) {
+	t.Parallel()
+
+	// "default" is a property name here. Its schema accepts a literal object
+	// whose "type" field happens to contain a JSON Schema type name.
+	payload := map[string]any{"type": "array"}
+	value := map[string]any{
+		"type":       "object",
+		"properties": map[string]any{"payload": payload},
+		"enum":       []any{map[string]any{"type": "array"}},
+		"default":    map[string]any{"type": "array"},
+		"const":      map[string]any{"type": "array"},
+		"examples":   []any{map[string]any{"type": "array"}},
+	}
+	node := map[string]any{"properties": map[string]any{"default": value}}
+	Normalize(node)
+
+	require.Contains(t, payload, "items")
+	literal := map[string]any{"type": "array"}
+	require.Equal(t, []any{literal}, value["enum"])
+	require.Equal(t, literal, value["default"])
+	require.Equal(t, literal, value["const"])
+	require.Equal(t, []any{literal}, value["examples"])
+}
+
+func TestNormalizeNestedSchemaKeywords(t *testing.T) {
+	t.Parallel()
+
+	item := map[string]any{"type": "array"}
+	node := map[string]any{
+		"$defs": map[string]any{
+			"example": map[string]any{
+				"anyOf": []any{map[string]any{"additionalProperties": item}},
+			},
+		},
+	}
+	Normalize(node)
+	require.Contains(t, item, "items")
+}

@@ -252,6 +252,36 @@ func TestToProviderErr_CarriesTheErrorType(t *testing.T) {
 	})
 }
 
+func TestToProviderErr_CarriesTheRequestID(t *testing.T) {
+	t.Parallel()
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("X-Request-Id", "req_openai123")
+		w.WriteHeader(http.StatusBadRequest)
+		_, _ = w.Write([]byte(`{"error":{"message":"Invalid model","type":"invalid_request_error"}}`))
+	}))
+	defer server.Close()
+
+	provider, err := New(WithAPIKey("test-api-key"), WithBaseURL(server.URL))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	model, err := provider.LanguageModel(context.Background(), "gpt-4")
+	if err != nil {
+		t.Fatalf("LanguageModel: %v", err)
+	}
+	_, err = model.Generate(context.Background(), fantasy.Call{Prompt: testPrompt})
+
+	providerErr, ok := errors.AsType[*fantasy.ProviderError](err)
+	if !ok {
+		t.Fatalf("error is %T, want *fantasy.ProviderError", err)
+	}
+	if providerErr.RequestID != "req_openai123" {
+		t.Errorf("RequestID = %q, want %q", providerErr.RequestID, "req_openai123")
+	}
+}
+
 func TestToHeaderMap_PreservesLowercasedKeys(t *testing.T) {
 	t.Parallel()
 

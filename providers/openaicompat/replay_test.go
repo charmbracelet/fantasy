@@ -794,3 +794,121 @@ func TestReplay_DoneWithoutFinishReason_NoFabricatedEnd(t *testing.T) {
 	}
 	require.True(t, sawError, "types: %v", partTypes(parts))
 }
+
+// GitHub Copilot (Claude) shape, captured live and sanitized. Reasoning
+// streams in "reasoning_text" with "content": null; one "reasoning_opaque"
+// blob rides on the first content chunk, which has no reasoning_text key.
+const copilotReasoningTextSSE = `{"choices":[{"index":0,"delta":{"content":null,"role":"assistant","reasoning_text":"Counting"}}],"id":"msg_1","model":"claude-opus-5.5"}
+{"choices":[{"index":0,"delta":{"content":null,"role":"assistant","reasoning_text":" primes."}}],"id":"msg_1","model":"claude-opus-5.5"}
+{"choices":[{"index":0,"delta":{"content":"There are","role":"assistant","reasoning_opaque":"OPAQUE-BLOB"}}],"id":"msg_1","model":"claude-opus-5.5"}
+{"choices":[{"index":0,"delta":{"content":" 25.","role":"assistant"}}],"id":"msg_1","model":"claude-opus-5.5"}
+{"choices":[{"index":0,"delta":{"content":null},"finish_reason":"stop"}],"id":"msg_1","model":"claude-opus-5.5"}`
+
+func TestReplay_CopilotReasoningText(t *testing.T) {
+	srv, _ := serveSSE(t, copilotReasoningTextSSE)
+	provider, err := New(WithBaseURL(srv.URL), WithAPIKey("x"))
+	require.NoError(t, err)
+	lm, err := provider.LanguageModel(context.Background(), "claude-opus-5.5")
+	require.NoError(t, err)
+
+	parts := streamParts(t, lm, fantasy.Prompt{
+		{Role: fantasy.MessageRoleUser, Content: []fantasy.MessagePart{fantasy.TextPart{Text: "hi"}}},
+	})
+	require.Equal(t, "Counting primes.", reasoningText(parts))
+	require.Equal(t, 1, countType(parts, fantasy.StreamPartTypeReasoningStart), "types: %v", partTypes(parts))
+	require.Equal(t, 1, countType(parts, fantasy.StreamPartTypeReasoningEnd), "types: %v", partTypes(parts))
+
+	// The block must close before the answer starts.
+	end, text := -1, -1
+	for i, p := range parts {
+		switch p.Type {
+		case fantasy.StreamPartTypeReasoningEnd:
+			end = i
+		case fantasy.StreamPartTypeTextDelta:
+			if text < 0 {
+				text = i
+			}
+		}
+	}
+	require.Greater(t, text, end, "types: %v", partTypes(parts))
+	for _, p := range parts {
+		if p.Type == fantasy.StreamPartTypeReasoningDelta {
+			require.NotEmpty(t, p.Delta)
+		}
+	}
+}
+
+// Copilot tool turn: the opaque chunk carries "content": "" and the block
+// closes on the tool-call chunk.
+const copilotReasoningToolCallSSE = `{"choices":[{"index":0,"delta":{"content":null,"role":"assistant","reasoning_text":"Need the date."}}],"id":"msg_2","model":"claude-opus-5.5"}
+{"choices":[{"index":0,"delta":{"content":"","role":"assistant","reasoning_opaque":"OPAQUE-BLOB"}}],"id":"msg_2","model":"claude-opus-5.5"}
+{"choices":[{"index":0,"delta":{"content":null,"tool_calls":[{"index":0,"id":"call_1","type":"function","function":{"name":"get_date","arguments":"{}"}}]}}],"id":"msg_2","model":"claude-opus-5.5"}
+{"choices":[{"index":0,"delta":{"content":null},"finish_reason":"tool_calls"}],"id":"msg_2","model":"claude-opus-5.5"}`
+
+func TestReplay_CopilotAgentToolContinuation(t *testing.T) {
+	srv, bodies := serveSSE(t, copilotReasoningToolCallSSE, cannedStopReplySSE)
+	provider, err := New(WithBaseURL(srv.URL), WithAPIKey("x"))
+	require.NoError(t, err)
+	lm, err := provider.LanguageModel(context.Background(), "claude-opus-5.5")
+	require.NoError(t, err)
+
+	getDate := fantasy.NewAgentTool(
+		"get_date",
+		"Get the current date.",
+		func(_ context.Context, _ struct{}, _ fantasy.ToolCall) (fantasy.ToolResponse, error) {
+			return fantasy.NewTextResponse("2026-08-28"), nil
+		},
+	)
+	var reasoning string
+	agent := fantasy.NewAgent(lm, fantasy.WithTools(getDate))
+	_, err = agent.Stream(context.Background(), fantasy.AgentStreamCall{
+		Prompt: "what's the date?",
+		OnReasoningDelta: func(_ string, text string) error {
+			reasoning += text
+			return nil
+		},
+	})
+	require.NoError(t, err)
+	require.Equal(t, "Need the date.", reasoning)
+
+	// The continuation replays the reasoning like any other dialect, and
+	// never leaks Copilot's opaque blob.
+	require.Len(t, *bodies, 2)
+	require.Contains(t, string((*bodies)[1]), `"reasoning_content":"Need the date."`)
+	require.NotContains(t, string((*bodies)[1]), "OPAQUE-BLOB")
+}
+
+func TestCopilotReasoningText_NonStreaming(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = fmt.Fprint(w, `{"id":"msg_3","created":1,"model":"claude-opus-5.5","object":"chat.completion","choices":[{"index":0,"message":{"role":"assistant","content":"25","reasoning_text":"Counting primes.","reasoning_opaque":"OPAQUE-BLOB"},"finish_reason":"stop"}],"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}`)
+	}))
+	t.Cleanup(srv.Close)
+	provider, err := New(WithBaseURL(srv.URL), WithAPIKey("x"))
+	require.NoError(t, err)
+	lm, err := provider.LanguageModel(context.Background(), "claude-opus-5.5")
+	require.NoError(t, err)
+
+	resp, err := lm.Generate(context.Background(), fantasy.Call{Prompt: fantasy.Prompt{
+		{Role: fantasy.MessageRoleUser, Content: []fantasy.MessagePart{fantasy.TextPart{Text: "hi"}}},
+	}})
+	require.NoError(t, err)
+	var got string
+	for _, c := range resp.Content {
+		if r, ok := fantasy.AsContentType[fantasy.ReasoningContent](c); ok {
+			got = r.Text
+		}
+	}
+	require.Equal(t, "Counting primes.", got)
+}
+
+// Existing dialects keep their precedence over reasoning_text, and a null
+// reasoning_text is not a reasoning field.
+func TestReasoningData_ReasoningTextPrecedence(t *testing.T) {
+	require.Equal(t, "a", ReasoningData{ReasoningContent: "a", Reasoning: "b", ReasoningText: "c"}.GetReasoningContent())
+	require.Equal(t, "b", ReasoningData{Reasoning: "b", ReasoningText: "c"}.GetReasoningContent())
+	require.Equal(t, "c", ReasoningData{ReasoningText: "c"}.GetReasoningContent())
+	require.True(t, hasReasoningField(`{"reasoning_text":""}`))
+	require.False(t, hasReasoningField(`{"content":"x","reasoning_text":null}`))
+	require.False(t, hasReasoningField(`{"content":"x","reasoning_opaque":"OPAQUE-BLOB"}`))
+}

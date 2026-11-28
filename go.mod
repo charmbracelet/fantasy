@@ -14,6 +14,7 @@ require (
 	github.com/charmbracelet/x/exp/slice v0.1.0
 	github.com/charmbracelet/x/exp/strings v0.1.0
 	github.com/charmbracelet/x/json v0.2.0
+	github.com/gatewaytofredom/pjson v0.3.0
 	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1

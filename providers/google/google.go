@@ -1116,7 +1116,7 @@ func (g *languageModel) streamObjectWithJSONMode(ctx context.Context, call fanta
 			}
 		}
 
-		var accumulated string
+		parser := schema.NewStreamParser()
 		var lastParsedObject any
 		var usage *fantasy.Usage
 		var lastFinishReason fantasy.FinishReason
@@ -1135,10 +1135,8 @@ func (g *languageModel) streamObjectWithJSONMode(ctx context.Context, call fanta
 			if len(resp.Candidates) > 0 && resp.Candidates[0].Content != nil {
 				for _, part := range resp.Candidates[0].Content.Parts {
 					if part.Text != "" && !part.Thought {
-						accumulated += part.Text
-
-						// Try to parse the accumulated text
-						obj, state, parseErr := schema.ParsePartialJSON(accumulated)
+						// Try to parse the accumulated text incrementally
+						obj, state, parseErr := parser.Feed(part.Text)
 
 						// If we successfully parsed, validate and emit
 						if state == schema.ParseStateSuccessful || state == schema.ParseStateRepaired {
@@ -1158,7 +1156,7 @@ func (g *languageModel) streamObjectWithJSONMode(ctx context.Context, call fanta
 
 						// If parsing failed and we have a repair function, try it
 						if state == schema.ParseStateFailed && call.RepairText != nil {
-							repairedText, repairErr := call.RepairText(ctx, accumulated, parseErr)
+							repairedText, repairErr := call.RepairText(ctx, parser.Raw(), parseErr)
 							if repairErr == nil {
 								obj2, state2, _ := schema.ParsePartialJSON(repairedText)
 								if (state2 == schema.ParseStateSuccessful || state2 == schema.ParseStateRepaired) &&
@@ -1225,7 +1223,7 @@ func (g *languageModel) streamObjectWithJSONMode(ctx context.Context, call fanta
 			yield(fantasy.ObjectStreamPart{
 				Type: fantasy.ObjectStreamPartTypeError,
 				Error: &fantasy.NoObjectGeneratedError{
-					RawText:      accumulated,
+					RawText:      parser.Raw(),
 					ParseError:   fmt.Errorf("no valid object generated in stream"),
 					Usage:        finalUsage,
 					FinishReason: lastFinishReason,

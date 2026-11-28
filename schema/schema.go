@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"charm.land/fantasy/jsonrepair"
+	"github.com/gatewaytofredom/pjson"
 	"github.com/kaptinlin/jsonschema"
 )
 
@@ -258,11 +259,25 @@ func ParsePartialJSON(text string) (any, ParseState, error) {
 		return nil, ParseStateUndefined, nil
 	}
 
-	var result any
-	if err := json.Unmarshal([]byte(text), &result); err == nil {
-		return result, ParseStateSuccessful, nil
+	p := pjson.New(
+		pjson.WithMarkdownFence(),
+		pjson.WithCompleteLiterals(),
+		pjson.WithTrailingCommas(),
+	)
+	if _, err := p.WriteString(text); err == nil {
+		healed := p.CompleteJSON()
+		if len(healed) > 0 {
+			var result any
+			if err := json.Unmarshal(healed, &result); err == nil {
+				if p.Done() && len(healed) == len(strings.TrimSpace(text)) {
+					return result, ParseStateSuccessful, nil
+				}
+				return result, ParseStateRepaired, nil
+			}
+		}
 	}
 
+	var result any
 	repaired, err := jsonrepair.RepairJSON(text)
 	if err != nil {
 		return nil, ParseStateFailed, fmt.Errorf("json repair failed: %w", err)

@@ -308,7 +308,7 @@ func StreamWithTool(
 
 	// Convert the text stream to object stream parts
 	return func(yield func(fantasy.ObjectStreamPart) bool) {
-		var accumulated string
+		parser := schema.NewStreamParser()
 		var lastParsedObject any
 		var usage fantasy.Usage
 		var finishReason fantasy.FinishReason
@@ -319,9 +319,7 @@ func StreamWithTool(
 		for part := range stream {
 			switch part.Type {
 			case fantasy.StreamPartTypeTextDelta:
-				accumulated += part.Delta
-
-				obj, state, parseErr := schema.ParsePartialJSON(accumulated)
+				obj, state, parseErr := parser.Feed(part.Delta)
 
 				if state == schema.ParseStateSuccessful || state == schema.ParseStateRepaired {
 					if err := schema.ValidateAgainstSchema(obj, call.Schema); err == nil {
@@ -338,7 +336,7 @@ func StreamWithTool(
 				}
 
 				if state == schema.ParseStateFailed && call.RepairText != nil {
-					repairedText, repairErr := call.RepairText(ctx, accumulated, parseErr)
+					repairedText, repairErr := call.RepairText(ctx, parser.Raw(), parseErr)
 					if repairErr == nil {
 						obj2, state2, _ := schema.ParsePartialJSON(repairedText)
 						if (state2 == schema.ParseStateSuccessful || state2 == schema.ParseStateRepaired) &&
@@ -357,9 +355,7 @@ func StreamWithTool(
 				}
 
 			case fantasy.StreamPartTypeToolInputDelta:
-				accumulated += part.Delta
-
-				obj, state, parseErr := schema.ParsePartialJSON(accumulated)
+				obj, state, parseErr := parser.Feed(part.Delta)
 				if state == schema.ParseStateSuccessful || state == schema.ParseStateRepaired {
 					if err := schema.ValidateAgainstSchema(obj, call.Schema); err == nil {
 						if !reflect.DeepEqual(obj, lastParsedObject) {
@@ -375,7 +371,7 @@ func StreamWithTool(
 				}
 
 				if state == schema.ParseStateFailed && call.RepairText != nil {
-					repairedText, repairErr := call.RepairText(ctx, accumulated, parseErr)
+					repairedText, repairErr := call.RepairText(ctx, parser.Raw(), parseErr)
 					if repairErr == nil {
 						obj2, state2, _ := schema.ParsePartialJSON(repairedText)
 						if (state2 == schema.ParseStateSuccessful || state2 == schema.ParseStateRepaired) &&
@@ -452,7 +448,7 @@ func StreamWithTool(
 			yield(fantasy.ObjectStreamPart{
 				Type: fantasy.ObjectStreamPartTypeError,
 				Error: &fantasy.NoObjectGeneratedError{
-					RawText:      accumulated,
+					RawText:      parser.Raw(),
 					ParseError:   fmt.Errorf("no valid object generated in stream"),
 					Usage:        usage,
 					FinishReason: finishReason,
@@ -520,7 +516,7 @@ func StreamWithText(
 	}
 
 	return func(yield func(fantasy.ObjectStreamPart) bool) {
-		var accumulated string
+		parser := schema.NewStreamParser()
 		var lastParsedObject any
 		var usage fantasy.Usage
 		var finishReason fantasy.FinishReason
@@ -531,9 +527,7 @@ func StreamWithText(
 		for part := range stream {
 			switch part.Type {
 			case fantasy.StreamPartTypeTextDelta:
-				accumulated += part.Delta
-
-				obj, state, parseErr := schema.ParsePartialJSON(accumulated)
+				obj, state, parseErr := parser.Feed(part.Delta)
 
 				if state == schema.ParseStateSuccessful || state == schema.ParseStateRepaired {
 					if err := schema.ValidateAgainstSchema(obj, call.Schema); err == nil {
@@ -550,7 +544,7 @@ func StreamWithText(
 				}
 
 				if state == schema.ParseStateFailed && call.RepairText != nil {
-					repairedText, repairErr := call.RepairText(ctx, accumulated, parseErr)
+					repairedText, repairErr := call.RepairText(ctx, parser.Raw(), parseErr)
 					if repairErr == nil {
 						obj2, state2, _ := schema.ParsePartialJSON(repairedText)
 						if (state2 == schema.ParseStateSuccessful || state2 == schema.ParseStateRepaired) &&
@@ -604,7 +598,7 @@ func StreamWithText(
 			yield(fantasy.ObjectStreamPart{
 				Type: fantasy.ObjectStreamPartTypeError,
 				Error: &fantasy.NoObjectGeneratedError{
-					RawText:      accumulated,
+					RawText:      parser.Raw(),
 					ParseError:   fmt.Errorf("no valid object generated in stream"),
 					Usage:        usage,
 					FinishReason: finishReason,
